@@ -1,0 +1,23 @@
+# OpenFang Agent Registry
+# Dynamically loaded by agent_loader.rs
+
+[[agents]]
+id = "orchestrator"
+name = "orchestrator"
+path = "agents/orchestrator"
+enabled = true
+priority = 1
+
+[[agents]]
+id = "hello-world"
+name = "hello-world"
+path = "agents/hello-world"
+enabled = true
+priority = 5
+
+[[agents]]
+id = "hal-substrate"
+name = "hal-substrate"
+path = "agents/hal-substrate"
+enabled = true
+priority = 10

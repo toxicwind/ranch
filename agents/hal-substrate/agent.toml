@@ -1,0 +1,31 @@
+name = "hal-substrate"
+description = "Autonomous agent inference engine. Routes through llama-swap AST matrix with sigil-driven control. First-class sovereign service."
+version = "3.1.0"
+
+[model]
+# Uses llama-swap AST matrix — model aliases resolved dynamically
+alias = "kimi-auto"
+# Fallback chain: kimi-auto → local-fast → free (zero-cost providers)
+fallback = ["local-fast", "free"]
+
+[capabilities]
+autonomous = true
+sigil_control = true
+persistent_memory = true
+slot_save = true
+metrics = true
+
+[routing]
+# Binds to HAL_SUBSTRATE_PORT=25143
+port = 25143
+health_path = "/health"
+task_path = "/task"
+stop_path = "/stop"
+
+[channels]
+# Accepts tasks from any channel via OpenFang router
+supported = ["CLI", "WebChat", "MQTT", "Custom"]
+
+[skills]
+# Inherits all skills available to OpenFang kernel
+# Plus HAL-specific: roadmap parsing, sigil detection, tab-lock
