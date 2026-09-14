@@ -1,5 +1,6 @@
 # OpenFang Agent Registry
-# Dynamically loaded by agent_loader.rs
+# Dynamically loaded by agent_loader.rs — agents listed here are active.
+# To disable an agent, set enabled = false (keeps manifest on disk).
 
 [[agents]]
 id = "orchestrator"
@@ -16,8 +17,8 @@ enabled = true
 priority = 5
 
 [[agents]]
-id = "hal-substrate"
-name = "hal-substrate"
-path = "agents/hal-substrate"
+id = "coyote"
+name = "coyote"
+path = "agents/coyote"
 enabled = true
 priority = 10

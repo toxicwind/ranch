@@ -6,7 +6,7 @@
 <h3 align="center">The Agent Operating System</h3>
 
 <p align="center">
-  Open-source Agent OS built in Rust. 137K LOC. 14 crates. 1,767+ tests. Zero clippy warnings.<br/>
+  Open-source Agent OS built in Rust. 160K+ lines of Rust. 14 crates. 2,696+ tests. Zero clippy warnings (CI-enforced).<br/>
   <strong>One binary. Battle-tested. Agents that actually work for you.</strong>
 </p>
 
@@ -39,7 +39,7 @@ OpenFang is an **open-source Agent Operating System**. Not a chatbot framework. 
 
 Traditional agent frameworks wait for you to type something. OpenFang runs **autonomous agents that work for you**: on schedules, 24/7, building knowledge graphs, monitoring targets, generating leads, managing your social media, and reporting results to your dashboard.
 
-The entire system compiles to a **single ~32MB binary**. One install, one command, your agents are live.
+The entire system compiles to a **single binary**. One install, one command, your agents are live.
 
 ```bash
 curl -fsSL https://openfang.sh/install | sh
@@ -75,7 +75,7 @@ Each Hand bundles:
 
 All compiled into the binary. No downloading, no pip install, no Docker pull.
 
-### The 7 Bundled Hands
+### The 9 Bundled Hands
 
 | Hand | What It Actually Does |
 |------|----------------------|
@@ -86,6 +86,8 @@ All compiled into the binary. No downloading, no pip install, no Docker pull.
 | **Researcher** | Deep autonomous researcher. Cross-references multiple sources, evaluates credibility using CRAAP criteria (Currency, Relevance, Authority, Accuracy, Purpose), generates cited reports with APA formatting, supports multiple languages. |
 | **Twitter** | Autonomous Twitter/X account manager. Creates content in 7 rotating formats, schedules posts for optimal engagement, responds to mentions, tracks performance metrics. Has an approval queue, so nothing posts without your OK. |
 | **Browser** | Web automation agent. Navigates sites, fills forms, clicks buttons, handles multi-step workflows. Uses Playwright bridge with session persistence. **Mandatory purchase approval gate**: it will never spend your money without explicit confirmation. |
+| **Infisical Sync** | Autonomous secrets synchronisation between a self-hosted Infisical instance and the agent's local credential vault. Keeps agents in sync with a shared Infisical instance as the single source of truth, and lets agents push new secrets back to Infisical. Requires `INFISICAL_URL` plus machine-identity credentials. |
+| **Trader** | Autonomous market intelligence and trading engine. Multi-signal analysis, adversarial bull/bear reasoning, calibrated confidence scoring, strict risk management, and portfolio-level analytics. Analysis-only, paper trading, or live via Alpaca — approval gate on by default. |
 
 ```bash
 # Activate the Researcher Hand. It starts working immediately.
@@ -198,7 +200,7 @@ AutoGen    ███████████░░░░░░░░░░░░
 | **Desktop App** | **Tauri 2.0** | None | None | None | Studio | None |
 | **Audit Trail** | **Merkle hash-chain** | Logs | Logs | Tracing | Logs | Checkpoints |
 | **Cold Start** | **<200ms** | ~6s | ~10ms | ~3s | ~4s | ~2.5s |
-| **Install Size** | **~32 MB** | ~500 MB | ~8.8 MB | ~100 MB | ~200 MB | ~150 MB |
+| **Install Size** | **Single binary** | ~500 MB | ~8.8 MB | ~100 MB | ~200 MB | ~150 MB |
 | **License** | MIT | MIT | MIT | MIT | Apache 2.0 | MIT |
 
 ---
@@ -230,7 +232,7 @@ OpenFang doesn't bolt security on after the fact. Every layer is independently t
 
 ## Architecture
 
-14 Rust crates. 137,728 lines of code. Modular kernel design.
+14 Rust crates. 160K+ lines of Rust. Modular kernel design.
 
 ```
 openfang-kernel      Orchestration, workflows, metering, RBAC, scheduler, budget tracking
@@ -240,7 +242,7 @@ openfang-channels    40 messaging adapters with rate limiting, DM/group policies
 openfang-memory      SQLite persistence, vector embeddings, canonical sessions, compaction
 openfang-types       Core types, taint tracking, Ed25519 manifest signing, model catalog
 openfang-skills      60 bundled skills, SKILL.md parser, FangHub marketplace
-openfang-hands       7 autonomous Hands, HAND.toml parser, lifecycle management
+openfang-hands       9 autonomous Hands, HAND.toml parser, lifecycle management
 openfang-extensions  25 MCP templates, AES-256-GCM credential vault, OAuth2 PKCE
 openfang-wire        OFP P2P protocol with HMAC-SHA256 mutual authentication
 openfang-cli         CLI with daemon management, TUI dashboard, MCP server mode
@@ -351,17 +353,17 @@ Once scanned, the status changes to `connected` and incoming messages are routed
 
 ### Alternative: WhatsApp Cloud API
 
-For production workloads, use the [WhatsApp Cloud API](https://developers.facebook.com/docs/whatsapp/cloud-api) with a Meta Business account. See the [Cloud API configuration docs](https://openfang.sh/docs/channels/whatsapp).
+For production workloads, use the [WhatsApp Cloud API](https://developers.facebook.com/docs/whatsapp/cloud-api) with a Meta Business account. See the [Cloud API configuration docs](https://openfang.sh/docs/channel-adapters#whatsapp).
 
 
 
 ---
 
-## 27 LLM Providers, 123+ Models
+## 38 LLM Providers, 200+ Models
 
-3 native drivers (Anthropic, Gemini, OpenAI-compatible) route to 27 providers:
+Native drivers (Anthropic, Gemini, OpenAI-compatible, Bedrock, Vertex, and more) route to 38 providers with 200+ models in the built-in catalog:
 
-Anthropic, Gemini, OpenAI, Groq, DeepSeek, OpenRouter, Together, Mistral, Fireworks, Cohere, Perplexity, xAI, AI21, Cerebras, SambaNova, HuggingFace, Replicate, Ollama, vLLM, LM Studio, Qwen, MiniMax, Zhipu, Moonshot, Qianfan, Bedrock, and more.
+Anthropic, Gemini, OpenAI, Groq, DeepSeek, OpenRouter, Together, Mistral, Fireworks, Cohere, Perplexity, xAI, AI21, Cerebras, SambaNova, HuggingFace, Replicate, Ollama, vLLM, LM Studio, Qwen, Qwen Code, MiniMax, Zhipu, Z.AI, Moonshot, Qianfan, Bedrock, Azure, Venice, NVIDIA, GitHub Copilot, Claude Code, Codex, VolcEngine, Requesty, Chutes, and Lemonade.
 
 Intelligent routing with task complexity scoring, automatic fallback, cost tracking, and per-model pricing.
 
@@ -448,7 +450,7 @@ openfang start
 # Build the workspace
 cargo build --workspace --lib
 
-# Run all tests (1,767+)
+# Run all tests (2,696+)
 cargo test --workspace
 
 # Lint (must be 0 warnings)
@@ -460,9 +462,37 @@ cargo fmt --all -- --check
 
 ---
 
+## Coyote: Sovereign Dynamic Agent
+
+> Downstream addition — ships in this mirror, not in upstream OpenFang.
+
+**Coyote** is a first-class dynamic agent registered in `agents/registry.toml`.
+It was renamed from `hal-substrate` so the agent name matches what the rest of
+the Sovereign stack already addresses: route chains and bridges request model
+`openfang:coyote`, and `resolve_agent()` in `openfang-api` looks agents up by
+name — so the manifest now lives at `agents/coyote/agent.toml`, exactly where
+the router expects it.
+
+- **Manifest** (`agents/coyote/agent.toml`, v3.1.0) — "autonomous agent
+  inference engine" with sigil-driven control, persistent memory, slot-save,
+  and metrics capabilities.
+- **Model routing** — primary alias `kimi-auto`, fallback chain
+  `local-fast` → `free` (zero-cost providers).
+- **Service surface** — binds `COYOTE_PORT` (25143) with `/health`, `/task`,
+  and `/stop` endpoints; accepts tasks from CLI, WebChat, MQTT, and custom
+  channels through the OpenFang router.
+- **System prompt** (`agents/coyote/system.md`) — operating rules plus
+  control-plane integration: Yote voice layer (:25102), OpenFang mesh hub
+  (:25103), MCP proxy (:25109), GHAS GPU telemetry (:25112–25114).
+
+To disable it without deleting anything, set `enabled = false` for coyote in
+`agents/registry.toml`.
+
+---
+
 ## Stability Notice
 
-OpenFang v0.5.10 is pre-1.0. The architecture is solid, the test suite is comprehensive, and the security model is deep. That said:
+OpenFang v0.6.9 is pre-1.0. The architecture is solid, the test suite is comprehensive, and the security model is deep. That said:
 
 - **Breaking changes** may occur between minor versions until v1.0.
 - **Some Hands** are more mature than others. Browser and Researcher are the most battle tested.
