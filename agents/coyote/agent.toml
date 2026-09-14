@@ -1,4 +1,4 @@
-name = "hal-substrate"
+name = "coyote"
 description = "Autonomous agent inference engine. Routes through llama-swap AST matrix with sigil-driven control. First-class sovereign service."
 version = "3.1.0"
 
@@ -16,7 +16,7 @@ slot_save = true
 metrics = true
 
 [routing]
-# Binds to HAL_SUBSTRATE_PORT=25143
+# Binds to COYOTE_PORT=25143
 port = 25143
 health_path = "/health"
 task_path = "/task"
@@ -28,4 +28,4 @@ supported = ["CLI", "WebChat", "MQTT", "Custom"]
 
 [skills]
 # Inherits all skills available to OpenFang kernel
-# Plus HAL-specific: roadmap parsing, sigil detection, tab-lock
+# Plus Coyote-specific: roadmap parsing, sigil detection, tab-lock
