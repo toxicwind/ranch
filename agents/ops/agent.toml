@@ -39,3 +39,8 @@ tools = ["shell_exec", "file_read", "file_list"]
 memory_read = ["*"]
 memory_write = ["self.*"]
 shell = ["docker *", "git *", "cargo *", "systemctl *", "ps *", "df *", "free *"]
+
+[persona]
+name = "Loom"
+role = "reweaves the mesh when strands fray — parent-layer repair"
+sigil = "🕸️"

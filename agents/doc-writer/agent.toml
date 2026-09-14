@@ -44,3 +44,8 @@ max_llm_tokens_per_hour = 200000
 tools = ["file_read", "file_write", "file_list", "memory_store", "memory_recall"]
 memory_read = ["*"]
 memory_write = ["self.*", "shared.*"]
+
+[persona]
+name = "Scribe"
+role = "writes the docs the code deserves — READMEs that tell the truth"
+sigil = "📜"

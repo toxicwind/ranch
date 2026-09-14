@@ -1746,9 +1746,11 @@ fn cmd_agent_spawn(config: Option<PathBuf>, manifest_path: PathBuf) {
                 .send(),
         );
         if body.get("agent_id").is_some() {
-            println!("Agent spawned successfully!");
+            let name = body["name"].as_str().unwrap_or("?");
+            let persona = body["persona"].as_str().unwrap_or(name);
+            println!("{persona} spawned successfully!");
             println!("  ID:   {}", body["agent_id"].as_str().unwrap_or("?"));
-            println!("  Name: {}", body["name"].as_str().unwrap_or("?"));
+            println!("  Name: {name}");
         } else {
             eprintln!(
                 "Failed to spawn agent: {}",
@@ -1762,9 +1764,10 @@ fn cmd_agent_spawn(config: Option<PathBuf>, manifest_path: PathBuf) {
             std::process::exit(1);
         });
         let kernel = boot_kernel(config);
+        let persona = manifest.persona.display(&manifest.name);
         match kernel.spawn_agent(manifest) {
             Ok(id) => {
-                println!("Agent spawned (in-process mode).");
+                println!("{persona} spawned (in-process mode).");
                 println!("  ID: {id}");
                 println!("\n  Note: Agent will be lost when this process exits.");
                 println!("  For persistent agents, use `openfang start` first.");
@@ -1796,15 +1799,16 @@ fn cmd_agent_list(config: Option<PathBuf>, json: bool) {
             Some(agents) if agents.is_empty() => println!("No agents running."),
             Some(agents) => {
                 println!(
-                    "{:<38} {:<16} {:<10} {:<12} MODEL",
-                    "ID", "NAME", "STATE", "PROVIDER"
+                    "{:<38} {:<16} {:<20} {:<10} {:<12} MODEL",
+                    "ID", "NAME", "PERSONA", "STATE", "PROVIDER"
                 );
-                println!("{}", "-".repeat(95));
+                println!("{}", "-".repeat(117));
                 for a in agents {
                     println!(
-                        "{:<38} {:<16} {:<10} {:<12} {}",
+                        "{:<38} {:<16} {:<20} {:<10} {:<12} {}",
                         a["id"].as_str().unwrap_or("?"),
                         a["name"].as_str().unwrap_or("?"),
+                        a["persona"].as_str().unwrap_or("?"),
                         a["state"].as_str().unwrap_or("?"),
                         a["model_provider"].as_str().unwrap_or("?"),
                         a["model_name"].as_str().unwrap_or("?"),
@@ -1841,13 +1845,17 @@ fn cmd_agent_list(config: Option<PathBuf>, json: bool) {
             return;
         }
 
-        println!("{:<38} {:<20} {:<12} CREATED", "ID", "NAME", "STATE");
-        println!("{}", "-".repeat(85));
+        println!(
+            "{:<38} {:<20} {:<20} {:<12} CREATED",
+            "ID", "NAME", "PERSONA", "STATE"
+        );
+        println!("{}", "-".repeat(107));
         for entry in agents {
             println!(
-                "{:<38} {:<20} {:<12} {}",
+                "{:<38} {:<20} {:<20} {:<12} {}",
                 entry.id,
                 entry.name,
+                entry.manifest.persona.display(&entry.name),
                 format!("{:?}", entry.state),
                 entry.created_at.format("%Y-%m-%d %H:%M")
             );
@@ -1993,7 +2001,8 @@ fn spawn_template_agent(config: Option<PathBuf>, template: &templates::AgentTemp
         );
         if let Some(id) = body["agent_id"].as_str() {
             ui::blank();
-            ui::success(&format!("Agent '{}' spawned", template.name));
+            let persona = body["persona"].as_str().unwrap_or(&template.name);
+            ui::success(&format!("{persona} spawned"));
             ui::kv("ID", id);
             if let Some(model) = body["model_name"].as_str() {
                 let provider = body["model_provider"].as_str().unwrap_or("?");
@@ -2017,10 +2026,11 @@ fn spawn_template_agent(config: Option<PathBuf>, template: &templates::AgentTemp
             std::process::exit(1);
         });
         let kernel = boot_kernel(config);
+        let persona = manifest.persona.display(&manifest.name);
         match kernel.spawn_agent(manifest) {
             Ok(id) => {
                 ui::blank();
-                ui::success(&format!("Agent '{}' spawned (in-process)", template.name));
+                ui::success(&format!("{persona} spawned (in-process)"));
                 ui::kv("ID", &id.to_string());
                 ui::blank();
                 ui::hint(&format!("Chat: openfang chat {}", template.name));

@@ -48,3 +48,8 @@ memory_read = ["*"]
 memory_write = ["self.*", "shared.*"]
 agent_message = ["*"]
 shell = ["docker *", "git *", "cargo *", "kubectl *"]
+
+[persona]
+name = "Rivet"
+role = "keeps the pipeline green and the builds honest"
+sigil = "🔩"

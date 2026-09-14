@@ -146,6 +146,7 @@ pub async fn spawn_agent(
     };
 
     let name = manifest.name.clone();
+    let persona = manifest.persona.display(&manifest.name);
     match state.kernel.spawn_agent(manifest) {
         Ok(id) => {
             // Register in channel router so binding resolution finds the new agent
@@ -157,6 +158,7 @@ pub async fn spawn_agent(
                 Json(serde_json::json!(SpawnResponse {
                     agent_id: id.to_string(),
                     name,
+                    persona,
                 })),
             )
         }
@@ -235,6 +237,8 @@ pub async fn list_agents(State(state): State<Arc<AppState>>) -> impl IntoRespons
                 "ready": ready,
                 "is_inferencing": is_inferencing,
                 "profile": e.manifest.profile,
+                "persona": e.manifest.persona.display(&e.name),
+                "persona_role": e.manifest.persona.role.clone(),
                 "identity": {
                     "emoji": e.identity.emoji,
                     "avatar_url": e.identity.avatar_url,

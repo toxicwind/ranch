@@ -391,19 +391,21 @@ fn generate_identity_files(workspace: &Path, manifest: &AgentManifest) {
         name = manifest.name
     );
 
+    let persona_name = manifest.persona.name.as_deref().unwrap_or(&manifest.name);
+    let persona_vibe = manifest.persona.role.as_deref().unwrap_or("helpful");
+    let persona_emoji = manifest.persona.sigil.as_deref().unwrap_or("");
     let identity_content = format!(
         "---\n\
-         name: {name}\n\
+         name: {persona_name}\n\
          archetype: assistant\n\
-         vibe: helpful\n\
-         emoji:\n\
+         vibe: {persona_vibe}\n\
+         emoji: {persona_emoji}\n\
          avatar_url:\n\
          greeting_style: warm\n\
          color:\n\
          ---\n\
          # Identity\n\
          <!-- Visual identity and personality at a glance. Edit these fields freely. -->\n",
-        name = manifest.name
     );
 
     let files: &[(&str, &str)] = &[
@@ -1550,6 +1552,7 @@ impl OpenFangKernel {
             info!("No agents found — spawning default assistant");
             let dm = &kernel.config.default_model;
             let manifest = AgentManifest {
+                persona: Default::default(),
                 name: "assistant".to_string(),
                 description: "General-purpose assistant".to_string(),
                 model: openfang_types::agent::ModelConfig {
@@ -1606,8 +1609,9 @@ impl OpenFangKernel {
     ) -> KernelResult<AgentId> {
         let agent_id = fixed_id.unwrap_or_default();
         let name = manifest.name.clone();
+        let persona_label = manifest.persona.display(&name);
 
-        info!(agent = %name, id = %agent_id, parent = ?parent, "Spawning agent");
+        info!(agent = %name, id = %agent_id, parent = ?parent, persona = %persona_label, "Spawning agent");
 
         // Create session — use the returned session_id so the registry
         // and database are in sync (fixes duplicate session bug #651).
@@ -1724,6 +1728,9 @@ impl OpenFangKernel {
 
         // Create registry entry
         let tags = manifest.tags.clone();
+        // Persona seeds the visual identity so dashboards and logs show the
+        // agent's name, role, and sigil from the moment it spawns.
+        let persona_identity = manifest.persona.to_identity();
         let entry = AgentEntry {
             id: agent_id,
             name: manifest.name.clone(),
@@ -1736,7 +1743,7 @@ impl OpenFangKernel {
             children: vec![],
             session_id,
             tags,
-            identity: Default::default(),
+            identity: persona_identity,
             onboarding_completed: false,
             onboarding_completed_at: None,
         };
@@ -1754,7 +1761,7 @@ impl OpenFangKernel {
             .save_agent(&entry)
             .map_err(KernelError::OpenFang)?;
 
-        info!(agent = %name, id = %agent_id, "Agent spawned");
+        info!(agent = %name, id = %agent_id, persona = %persona_label, "Agent spawned");
 
         // SECURITY: Record agent spawn in audit trail
         self.audit_log.record(
@@ -3801,6 +3808,7 @@ impl OpenFangKernel {
             .unwrap_or_else(|| def.agent.name.clone());
 
         let mut manifest = AgentManifest {
+            persona: Default::default(),
             name: agent_name.clone(),
             description: def.agent.description.clone(),
             module: def.agent.module.clone(),
@@ -7942,6 +7950,7 @@ mod tests {
     #[test]
     fn test_manifest_to_capabilities() {
         let mut manifest = AgentManifest {
+            persona: Default::default(),
             name: "test".to_string(),
             version: "0.1.0".to_string(),
             description: "test".to_string(),
@@ -7986,6 +7995,7 @@ mod tests {
     #[test]
     fn test_merge_preserves_workspace_when_disk_omits_it() {
         let entry = AgentManifest {
+            persona: Default::default(),
             name: "demo".to_string(),
             version: "0.1.0".to_string(),
             description: "old".to_string(),
@@ -8037,6 +8047,7 @@ mod tests {
     #[test]
     fn test_merge_respects_explicit_disk_workspace() {
         let entry = AgentManifest {
+            persona: Default::default(),
             name: "demo".to_string(),
             version: "0.1.0".to_string(),
             description: "x".to_string(),
@@ -8094,6 +8105,7 @@ mod tests {
             ..Default::default()
         };
         let mut restored_manifest = AgentManifest {
+            persona: Default::default(),
             name: "demo".to_string(),
             version: "0.1.0".to_string(),
             description: "x".to_string(),
@@ -8208,6 +8220,7 @@ mod tests {
 
     fn test_manifest(name: &str, description: &str, tags: Vec<String>) -> AgentManifest {
         AgentManifest {
+            persona: Default::default(),
             name: name.to_string(),
             version: "0.1.0".to_string(),
             description: description.to_string(),
@@ -8345,6 +8358,7 @@ mod tests {
     fn test_manifest_to_capabilities_with_profile() {
         use openfang_types::agent::ToolProfile;
         let manifest = AgentManifest {
+            persona: Default::default(),
             profile: Some(ToolProfile::Coding),
             ..Default::default()
         };
@@ -8364,6 +8378,7 @@ mod tests {
     fn test_manifest_to_capabilities_profile_overridden_by_explicit_tools() {
         use openfang_types::agent::ToolProfile;
         let mut manifest = AgentManifest {
+            persona: Default::default(),
             profile: Some(ToolProfile::Coding),
             ..Default::default()
         };
@@ -9358,6 +9373,7 @@ system_prompt = "You are a test agent."
             .expect("write pre-existing file");
 
         let manifest = AgentManifest {
+            persona: Default::default(),
             name: "ws-test".to_string(),
             description: "x".to_string(),
             ..AgentManifest::default()

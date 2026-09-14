@@ -45,3 +45,8 @@ network = ["*"]
 memory_read = ["*"]
 memory_write = ["self.*"]
 shell = ["cargo *", "rustc *", "git *", "npm *", "python *"]
+
+[persona]
+name = "Furnace"
+role = "keeps the Tau engine hot — entrypoints, providers, builds"
+sigil = "🔥"

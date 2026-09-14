@@ -23,6 +23,7 @@ pub struct SpawnRequest {
 pub struct SpawnResponse {
     pub agent_id: String,
     pub name: String,
+    pub persona: String,
 }
 
 /// A file attachment reference (from a prior upload).

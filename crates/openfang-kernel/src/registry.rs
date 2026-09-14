@@ -387,6 +387,7 @@ mod tests {
             id: AgentId::new(),
             name: name.to_string(),
             manifest: AgentManifest {
+                persona: Default::default(),
                 name: name.to_string(),
                 version: "0.1.0".to_string(),
                 description: "test".to_string(),

@@ -47,3 +47,8 @@ network = ["*"]
 memory_read = ["*"]
 memory_write = ["self.*", "shared.*"]
 shell = ["python *", "cargo *"]
+
+[persona]
+name = "Calipers"
+role = "measures every model against reality — keeps the fast ones honest"
+sigil = "📏"

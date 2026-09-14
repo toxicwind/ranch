@@ -61,3 +61,8 @@ memory_read = ["*"]
 memory_write = ["*"]
 agent_spawn = true
 agent_message = ["*"]
+
+[persona]
+name = "Drover"
+role = "drives scattered branches into one herd — maximal merges, no strays"
+sigil = "🐄"

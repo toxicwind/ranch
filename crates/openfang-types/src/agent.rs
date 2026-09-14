@@ -516,6 +516,10 @@ pub struct AgentManifest {
     /// `agent_send` results stay focused. See issue #871.
     #[serde(default)]
     pub max_history_messages: Option<usize>,
+    /// Persona/identity layer — memorable name, role/vibe, sigil.
+    /// Declared in agent.toml as `[persona]`. All fields optional.
+    #[serde(default)]
+    pub persona: AgentPersona,
 }
 
 /// Runtime default for `AgentManifest::max_history_messages` when the agent
@@ -569,6 +573,7 @@ impl Default for AgentManifest {
             tool_blocklist: Vec::new(),
             cache_context: false,
             max_history_messages: None,
+            persona: AgentPersona::default(),
         }
     }
 }
@@ -657,6 +662,47 @@ pub struct AgentIdentity {
     pub vibe: Option<String>,
     /// Greeting style: "warm", "formal", "playful", "brief".
     pub greeting_style: Option<String>,
+}
+
+/// Persona — an agent's persistent identity: memorable name, role/vibe, sigil.
+///
+/// Declared in `agent.toml` under `[persona]` and surfaced in launch banners,
+/// log lines, and status/digest surfaces. All fields optional; when unset the
+/// manifest `name` is used for display.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default)]
+pub struct AgentPersona {
+    /// Memorable display name, e.g. "Shingle". Falls back to manifest name.
+    pub name: Option<String>,
+    /// One-line role/vibe, e.g. "reweaves the mesh when strands fray".
+    pub role: Option<String>,
+    /// Sigil/emoji for quick visual identification, e.g. the ice cube.
+    pub sigil: Option<String>,
+}
+
+impl AgentPersona {
+    /// True when no persona fields are set.
+    pub fn is_empty(&self) -> bool {
+        self.name.is_none() && self.role.is_none() && self.sigil.is_none()
+    }
+
+    /// Display string: sigil + name, name alone, or the fallback name.
+    pub fn display(&self, fallback: &str) -> String {
+        let name = self.name.as_deref().unwrap_or(fallback);
+        match &self.sigil {
+            Some(s) if !s.is_empty() => format!("{s} {name}"),
+            _ => name.to_string(),
+        }
+    }
+
+    /// Fold into the visual-identity struct consumed by dashboards.
+    pub fn to_identity(&self) -> AgentIdentity {
+        AgentIdentity {
+            emoji: self.sigil.clone(),
+            vibe: self.role.clone(),
+            ..Default::default()
+        }
+    }
 }
 
 /// A registered agent entry in the kernel's registry.
@@ -829,6 +875,7 @@ mod tests {
             tool_blocklist: Vec::new(),
             cache_context: false,
             max_history_messages: None,
+            persona: AgentPersona::default(),
         };
         let json = serde_json::to_string(&manifest).unwrap();
         let deserialized: AgentManifest = serde_json::from_str(&json).unwrap();
@@ -1346,5 +1393,56 @@ memory_write = ["self.*"]
             manifest.capabilities.memory_write,
             vec!["self.*".to_string()]
         );
+    }
+
+    #[test]
+    fn test_persona_display() {
+        let p = AgentPersona {
+            name: Some("Shingle".to_string()),
+            role: Some("keeps the roof on".to_string()),
+            sigil: Some("ICE".to_string()),
+        };
+        assert!(!p.is_empty());
+        assert_eq!(p.display("fallback"), "ICE Shingle");
+        let no_sigil = AgentPersona {
+            name: Some("Plain".to_string()),
+            ..Default::default()
+        };
+        assert_eq!(no_sigil.display("fallback"), "Plain");
+        let empty = AgentPersona::default();
+        assert!(empty.is_empty());
+        assert_eq!(empty.display("fallback"), "fallback");
+    }
+
+    #[test]
+    fn test_persona_manifest_roundtrip() {
+        let toml_str = r#"name = "ops"
+version = "0.1.0"
+
+[persona]
+name = "Loom"
+role = "reweaves the mesh when strands fray"
+sigil = "WEB"
+"#;
+        let m: AgentManifest = toml::from_str(toml_str).unwrap();
+        assert_eq!(m.persona.name.as_deref(), Some("Loom"));
+        assert_eq!(
+            m.persona.role.as_deref(),
+            Some("reweaves the mesh when strands fray")
+        );
+        assert_eq!(m.persona.display(&m.name), "WEB Loom");
+        let ident = m.persona.to_identity();
+        assert_eq!(ident.emoji.as_deref(), Some("WEB"));
+        assert_eq!(
+            ident.vibe.as_deref(),
+            Some("reweaves the mesh when strands fray")
+        );
+        // Manifests without [persona] keep working unchanged.
+        let bare = r#"name = "x"
+version = "0.1.0"
+"#;
+        let m2: AgentManifest = toml::from_str(bare).unwrap();
+        assert!(m2.persona.is_empty());
+        assert_eq!(m2.persona.display(&m2.name), "x");
     }
 }

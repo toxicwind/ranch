@@ -149,6 +149,7 @@ impl SetupWizard {
         );
 
         let manifest = AgentManifest {
+            persona: Default::default(),
             name: intent.name.clone(),
             version: "0.1.0".to_string(),
             description: intent.description.clone(),

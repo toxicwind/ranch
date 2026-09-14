@@ -105,6 +105,8 @@ pub struct DaemonAgent {
     pub state: String,
     pub provider: String,
     pub model: String,
+    pub persona: String,
+    pub persona_role: String,
 }
 
 #[derive(Clone)]
@@ -114,12 +116,16 @@ pub struct InProcessAgent {
     pub state: String,
     pub provider: String,
     pub model: String,
+    pub persona: String,
+    pub persona_role: String,
 }
 
 #[derive(Clone, Default)]
 pub struct AgentDetail {
     pub id: String,
     pub name: String,
+    pub persona: String,
+    pub persona_role: String,
     pub state: String,
     pub model: String,
     pub provider: String,
@@ -215,12 +221,19 @@ impl AgentSelectState {
                 self.daemon_agents.clear();
                 if let Some(arr) = body.as_array() {
                     for a in arr {
+                        let agent_name = a["name"].as_str().unwrap_or("?");
                         self.daemon_agents.push(DaemonAgent {
                             id: a["id"].as_str().unwrap_or("?").to_string(),
-                            name: a["name"].as_str().unwrap_or("?").to_string(),
+                            name: agent_name.to_string(),
                             state: a["state"].as_str().unwrap_or("?").to_string(),
                             provider: a["model_provider"].as_str().unwrap_or("?").to_string(),
                             model: a["model_name"].as_str().unwrap_or("?").to_string(),
+                            persona: a["persona"]
+                                .as_str()
+                                .filter(|s| !s.is_empty())
+                                .unwrap_or(agent_name)
+                                .to_string(),
+                            persona_role: a["persona_role"].as_str().unwrap_or("").to_string(),
                         });
                     }
                 }
@@ -240,6 +253,8 @@ impl AgentSelectState {
                 state: format!("{:?}", entry.state),
                 provider: entry.manifest.model.provider.clone(),
                 model: entry.manifest.model.model.clone(),
+                persona: entry.manifest.persona.display(&entry.name),
+                persona_role: entry.manifest.persona.role.clone().unwrap_or_default(),
             });
         }
         self.rebuild_filter();
@@ -330,6 +345,8 @@ impl AgentSelectState {
         AgentDetail {
             id: a.id.clone(),
             name: a.name.clone(),
+            persona: a.persona.clone(),
+            persona_role: a.persona_role.clone(),
             state: a.state.clone(),
             model: a.model.clone(),
             provider: a.provider.clone(),
@@ -343,6 +360,8 @@ impl AgentSelectState {
         AgentDetail {
             id: format!("{}", a.id),
             name: a.name.clone(),
+            persona: a.persona.clone(),
+            persona_role: a.persona_role.clone(),
             state: a.state.clone(),
             model: a.model.clone(),
             provider: a.provider.clone(),
@@ -1010,7 +1029,7 @@ fn draw_agent_list_full(f: &mut Frame, area: Rect, state: &mut AgentSelectState)
                 ListItem::new(Line::from(vec![
                     Span::styled(format!("  {:<5}", badge), badge_style),
                     Span::styled(
-                        format!(" {:<18}", truncate(&a.name, 17)),
+                        format!(" {:<18}", truncate(&a.persona, 17)),
                         Style::default().fg(theme::CYAN),
                     ),
                     Span::styled(
@@ -1029,7 +1048,7 @@ fn draw_agent_list_full(f: &mut Frame, area: Rect, state: &mut AgentSelectState)
                 ListItem::new(Line::from(vec![
                     Span::styled(format!("  {:<5}", badge), badge_style),
                     Span::styled(
-                        format!(" {:<18}", truncate(&a.name, 17)),
+                        format!(" {:<18}", truncate(&a.persona, 17)),
                         Style::default().fg(theme::CYAN),
                     ),
                     Span::styled(
@@ -1129,6 +1148,15 @@ fn draw_detail(f: &mut Frame, area: Rect, state: &AgentSelectState) {
                     ),
                 ]),
                 Line::from(vec![
+                    Span::raw("  Persona:  "),
+                    Span::styled(
+                        &detail.persona,
+                        Style::default()
+                            .fg(theme::PURPLE)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                ]),
+                Line::from(vec![
                     Span::raw("  State:    "),
                     Span::styled(badge, badge_style),
                     Span::styled(format!(" ({})", detail.state), theme::dim_style()),
@@ -1143,6 +1171,12 @@ fn draw_detail(f: &mut Frame, area: Rect, state: &AgentSelectState) {
                 ]),
             ];
 
+            if !detail.persona_role.is_empty() {
+                lines.push(Line::from(vec![
+                    Span::raw("  Role:     "),
+                    Span::styled(&detail.persona_role, theme::dim_style()),
+                ]));
+            }
             if !detail.created.is_empty() {
                 lines.push(Line::from(vec![
                     Span::raw("  Created:  "),
