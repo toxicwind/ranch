@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# OpenFang installer — works on Linux, macOS, WSL
+# Rig installer (fork of OpenFang) — works on Linux, macOS, WSL
+# Fork note: upstream installer would fetch RightNow-AI/openfang binaries.
+# This fork currently ships via `cargo build`; release binaries pending.
 # Usage: curl -sSf https://openfang.sh | sh
 #
 # Environment variables:
@@ -8,7 +10,7 @@
 
 set -euo pipefail
 
-REPO="RightNow-AI/openfang"
+REPO="toxicwind/rig"
 INSTALL_DIR="${OPENFANG_INSTALL_DIR:-$HOME/.openfang/bin}"
 
 detect_platform() {

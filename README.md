@@ -27,9 +27,13 @@
 
 ---
 
+> **Rig** — this is Chris's fork of OpenFang ([upstream](https://github.com/RightNow-AI/openfang)). Fork home: [toxicwind/rig](https://github.com/toxicwind/rig).
+>
+> Binary, crate, config-path and env-var names still say `openfang` for ecosystem compatibility; the full product rename is tracked separately.
+
 > **v0.5.10 (April 2026)**
 >
-> OpenFang is feature complete but still pre-1.0. Expect rough edges and breaking changes between minor versions. We ship fast and fix fast. Pin to a specific commit for production use until v1.0. [Report issues here.](https://github.com/RightNow-AI/openfang/issues)
+> OpenFang is feature complete but still pre-1.0. Expect rough edges and breaking changes between minor versions. We ship fast and fix fast. Pin to a specific commit for production use until v1.0. [Report issues here.](https://github.com/toxicwind/rig/issues)
 
 ---
 
@@ -496,7 +500,7 @@ OpenFang v0.6.9 is pre-1.0. The architecture is solid, the test suite is compreh
 
 - **Breaking changes** may occur between minor versions until v1.0.
 - **Some Hands** are more mature than others. Browser and Researcher are the most battle tested.
-- **Edge cases** exist. If you find one, [open an issue](https://github.com/RightNow-AI/openfang/issues).
+- **Edge cases** exist. If you find one, [open an issue](https://github.com/toxicwind/rig/issues).
 - **Pin to a specific commit** for production deployments until v1.0.
 
 We ship fast and fix fast. The goal is a rock solid v1.0 by mid 2026.
@@ -519,7 +523,7 @@ MIT. Use it however you want.
 
 - [Website & Documentation](https://openfang.sh)
 - [Quick Start Guide](https://openfang.sh/docs/getting-started)
-- [GitHub](https://github.com/RightNow-AI/openfang)
+- [GitHub](https://github.com/toxicwind/rig)
 - [Discord](https://discord.gg/sSJqgNnq6X)
 - [Twitter / X](https://x.com/openfangg)
 

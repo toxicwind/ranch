@@ -1358,7 +1358,7 @@ complex_threshold = 500
 
     let config = format!(
         r#"# OpenFang Agent OS configuration
-# See https://github.com/RightNow-AI/openfang for documentation
+# See https://github.com/toxicwind/rig for documentation
 
 api_listen = "127.0.0.1:4200"
 
