@@ -198,6 +198,27 @@ pub async fn probe_provider(provider: &str, base_url: &str) -> ProbeResult {
     }
 }
 
+/// Probe several providers concurrently — HFT-style racing, not queueing.
+///
+/// Every probe runs under its own fail-fast ceiling
+/// ([`PROBE_CONNECT_TIMEOUT_SECS`]/[`PROBE_TIMEOUT_SECS`]); the batch resolves
+/// when the slowest probe finishes or times out, instead of summing every
+/// dead provider's timeout sequentially. Results come back in completion
+/// order (fastest first) — winner-ledger ordering falls out for free.
+pub async fn probe_providers_concurrent(
+    providers: &[(String, String)],
+) -> Vec<(String, ProbeResult)> {
+    let futures = providers.iter().map(|(id, base_url)| {
+        let id = id.clone();
+        let base_url = base_url.clone();
+        async move {
+            let result = probe_provider(&id, &base_url).await;
+            (id, result)
+        }
+    });
+    futures::future::join_all(futures).await
+}
+
 /// Probe a provider, returning a cached result when available.
 ///
 /// If the cache contains a non-expired entry the HTTP request is skipped
@@ -363,5 +384,42 @@ mod tests {
         let cache = ProbeCache::default();
         assert!(cache.get("anything").is_none());
         assert_eq!(cache.ttl, Duration::from_secs(PROBE_CACHE_TTL_SECS));
+    }
+
+    #[test]
+    fn test_is_local_provider_covers_all_local_backends() {
+        for p in ["ollama", "vllm", "lmstudio", "lemonade", "llama-swap"] {
+            assert!(is_local_provider(p), "{p} must be a local provider");
+        }
+        for p in ["openai", "anthropic", "groq"] {
+            assert!(!is_local_provider(p));
+        }
+    }
+
+    #[tokio::test]
+    async fn test_probe_providers_concurrent_empty() {
+        let results = probe_providers_concurrent(&[]).await;
+        assert!(results.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_probe_providers_concurrent_races_not_queues() {
+        // HFT rule: race, don't queue. Two dead providers must resolve in
+        // ~one fail-fast ceiling, not the sum of two sequential timeouts.
+        // Port 9 (discard) refuses fast, so elapsed is dominated by the
+        // slowest single probe, never 2x the ceiling.
+        let providers = vec![
+            ("dead-a".to_string(), "http://127.0.0.1:9/v1".to_string()),
+            ("dead-b".to_string(), "http://127.0.0.1:9/v1".to_string()),
+        ];
+        let start = Instant::now();
+        let results = probe_providers_concurrent(&providers).await;
+        let elapsed = start.elapsed();
+        assert_eq!(results.len(), 2);
+        assert!(results.iter().all(|(_, r)| !r.reachable));
+        assert!(
+            elapsed < Duration::from_secs(PROBE_TIMEOUT_SECS * 2),
+            "concurrent probes took {elapsed:?}; sequential would take >= 2 ceilings"
+        );
     }
 }

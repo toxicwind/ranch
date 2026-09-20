@@ -3344,6 +3344,38 @@ impl OpenFangKernel {
                 catalog.find_model(model).cloned()
             }
         });
+        // Guided validation (Kini 2026): an explicit provider we have catalog
+        // knowledge of + an unresolvable model = guided Class-B failure, not a
+        // silent Class-C misroute that blows up later at inference time.
+        // Providers with no catalog models are left alone: with no positive
+        // knowledge we claim none and let the custom-endpoint path proceed.
+        if let Some(ep) = explicit_provider {
+            let (valid, known_ids): (bool, Vec<String>) = self
+                .model_catalog
+                .read()
+                .ok()
+                .map(|catalog| {
+                    (
+                        catalog.has_model_for_provider(ep, model),
+                        catalog
+                            .models_by_provider(ep)
+                            .iter()
+                            .take(12)
+                            .map(|m| m.id.clone())
+                            .collect(),
+                    )
+                })
+                .unwrap_or((true, Vec::new()));
+            if !valid && !known_ids.is_empty() {
+                return Err(KernelError::OpenFang(OpenFangError::InvalidInput(
+                    format!(
+                        "Unknown model '{model}' for provider '{ep}'. Known {ep} models: {list}. Use one of these, or drop --provider and let the daemon resolve the model.",
+                        list = known_ids.join(", ")
+                    ),
+                )));
+            }
+        }
+
         let provider = if let Some(ep) = explicit_provider {
             // User explicitly set the provider — use it as-is
             Some(ep.to_string())
@@ -4546,10 +4578,14 @@ impl OpenFangKernel {
                     return;
                 }
 
-                for (provider_id, base_url) in &local_providers {
-                    let result =
-                        openfang_runtime::provider_health::probe_provider(provider_id, base_url)
-                            .await;
+                // HFT-style: race all local provider probes concurrently under
+                // per-probe fail-fast ceilings. Sequential probing let one dead
+                // provider's 2s timeout stall every provider behind it; the
+                // batch now resolves as fast as the slowest live probe.
+                let results =
+                    openfang_runtime::provider_health::probe_providers_concurrent(&local_providers)
+                        .await;
+                for (provider_id, result) in &results {
                     if result.reachable {
                         info!(
                             provider = %provider_id,
@@ -9153,7 +9189,14 @@ mod tests {
 
         // The local providers the user did NOT configure must NOT show up.
         // This is what makes the issue #1031 probe noise go away.
-        for unwanted in &["vllm", "lmstudio", "lemonade", "claude-code", "qwen-code"] {
+        for unwanted in &[
+            "vllm",
+            "lmstudio",
+            "lemonade",
+            "llama-swap",
+            "claude-code",
+            "qwen-code",
+        ] {
             assert!(
                 !referenced.contains(*unwanted),
                 "unconfigured local provider {unwanted:?} must NOT be in the referenced set ({referenced:?})"
