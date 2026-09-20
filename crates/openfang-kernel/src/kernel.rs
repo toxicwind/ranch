@@ -3363,7 +3363,25 @@ impl OpenFangKernel {
             } else {
                 // No custom base_url: safe to auto-detect from catalog / model name
                 let resolved_provider = catalog_entry.as_ref().map(|entry| entry.provider.clone());
-                resolved_provider.or_else(|| infer_provider_from_model(model))
+                resolved_provider
+                    .or_else(|| explicit_provider_prefix(model))
+                    .or_else(|| {
+                        // Generic fallback: any registered provider ID used as
+                        // a `provider/model` or `provider:model` prefix wins
+                        // over name-pattern guessing, so newly added providers
+                        // resolve here with no code changes.
+                        let lower = model.to_lowercase();
+                        let idx = lower.find(['/', ':'])?;
+                        let prefix = &lower[..idx];
+                        self.model_catalog.read().ok().and_then(|catalog| {
+                            catalog
+                                .list_providers()
+                                .iter()
+                                .any(|p| p.id == prefix)
+                                .then(|| prefix.to_string())
+                        })
+                    })
+                    .or_else(|| infer_provider_from_model(model))
             }
         };
 
@@ -6881,6 +6899,71 @@ fn default_embedding_model_for_provider(provider: &str) -> &'static str {
 ///
 /// Uses well-known model name prefixes to map to the correct provider.
 /// This is a defense-in-depth fallback — models should ideally be in the catalog.
+/// True when `prefix` is a registered provider ID usable as an explicit
+/// model-ID prefix (`"provider/model"` or `"provider:model"`).
+///
+/// Kept next to [`infer_provider_from_model`] so the two can never drift:
+/// inference of a *bare* model name must stay conservative, while an
+/// *explicit* prefix is authoritative.
+fn is_known_provider_prefix(prefix: &str) -> bool {
+    matches!(
+        prefix,
+        "minimax"
+            | "gemini"
+            | "anthropic"
+            | "openai"
+            | "groq"
+            | "deepseek"
+            | "mistral"
+            | "cohere"
+            | "xai"
+            | "ollama"
+            | "lmstudio"
+            | "vllm"
+            | "lemonade"
+            | "llama-swap"
+            | "together"
+            | "fireworks"
+            | "perplexity"
+            | "cerebras"
+            | "sambanova"
+            | "replicate"
+            | "huggingface"
+            | "ai21"
+            | "codex"
+            | "claude-code"
+            | "copilot"
+            | "github-copilot"
+            | "qwen"
+            | "zhipu"
+            | "zai"
+            | "moonshot"
+            | "openrouter"
+            | "volcengine"
+            | "doubao"
+            | "dashscope"
+    )
+}
+
+/// Extract an explicit provider prefix from a model ID such as
+/// `"llama-swap/fast"`, `"openrouter/deepseek/deepseek-chat"` or
+/// `"qwen:qwen-plus"`.
+///
+/// Returns `Some(provider_id)` only when the text before the first `/` or
+/// `:` is a known provider — never a guess from the model name itself, so
+/// `"exaone-4-0-1-2b-iq4xs"` (no delimiter, unknown prefix) yields `None`
+/// instead of a mis-inferred provider.
+fn explicit_provider_prefix(model: &str) -> Option<String> {
+    let lower = model.to_lowercase();
+    let idx = lower.find(['/', ':'])?;
+    let prefix = &lower[..idx];
+    if is_known_provider_prefix(prefix) {
+        Some(prefix.to_string())
+    } else {
+        None
+    }
+}
+
 fn infer_provider_from_model(model: &str) -> Option<String> {
     let lower = model.to_lowercase();
     // Check for explicit provider prefix with / or : delimiter
@@ -6899,19 +6982,12 @@ fn infer_provider_from_model(model: &str) -> Option<String> {
         if lower.chars().filter(|&c| c == '/').count() >= 2 {
             return Some(prefix.to_string());
         }
-        match prefix {
-            "minimax" | "gemini" | "anthropic" | "openai" | "groq" | "deepseek" | "mistral"
-            | "cohere" | "xai" | "ollama" | "together" | "fireworks" | "perplexity"
-            | "cerebras" | "sambanova" | "replicate" | "huggingface" | "ai21" | "codex"
-            | "claude-code" | "copilot" | "github-copilot" | "qwen" | "zhipu" | "zai"
-            | "moonshot" | "openrouter" | "volcengine" | "doubao" | "dashscope" => {
-                return Some(prefix.to_string());
-            }
-            // "kimi" is a brand alias for moonshot
-            "kimi" => {
-                return Some("moonshot".to_string());
-            }
-            _ => {}
+        // "kimi" is a brand alias for moonshot
+        if prefix == "kimi" {
+            return Some("moonshot".to_string());
+        }
+        if is_known_provider_prefix(prefix) {
+            return Some(prefix.to_string());
         }
     }
     // Infer from well-known model name patterns
@@ -9427,5 +9503,35 @@ system_prompt = "You are a test agent."
         let contents = std::fs::read_to_string(user_workspace.path().join("pre-existing.txt"))
             .expect("read pre-existing");
         assert_eq!(contents, "hello", "must not overwrite user files");
+    }
+
+    // -- agent-set provider/model parsing: explicit llama-swap prefix --
+
+    #[test]
+    fn test_infer_provider_llama_swap_explicit_prefix() {
+        // `openfang agent set <id> model llama-swap/fast` must resolve the
+        // provider from the explicit prefix (reported provider-parsing bug:
+        // the unlisted prefix fell through and the agent kept its old provider).
+        assert_eq!(
+            infer_provider_from_model("llama-swap/fast"),
+            Some("llama-swap".to_string())
+        );
+        assert_eq!(
+            infer_provider_from_model("llama-swap/beellama/exaone-4-0-1-2b-iq4xs"),
+            Some("llama-swap".to_string())
+        );
+    }
+
+    #[test]
+    fn test_explicit_provider_prefix_extraction() {
+        let p = |m: &str| explicit_provider_prefix(m);
+        assert_eq!(p("llama-swap/fast").as_deref(), Some("llama-swap"));
+        assert_eq!(
+            p("openrouter/deepseek/deepseek-chat").as_deref(),
+            Some("openrouter")
+        );
+        assert_eq!(p("qwen:qwen-plus").as_deref(), Some("qwen"));
+        assert_eq!(p("llama-3.1-8b").as_deref(), None);
+        assert_eq!(p("").as_deref(), None);
     }
 }

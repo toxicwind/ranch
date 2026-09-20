@@ -3,6 +3,7 @@
 //! When a daemon is running (`openfang start`), the CLI talks to it over HTTP.
 //! Otherwise, commands boot an in-process kernel (single-shot mode).
 
+mod agent_set;
 mod bundled_agents;
 mod dotenv;
 mod launcher;
@@ -81,7 +82,7 @@ const AFTER_HELP: &str = "\
   3. openfang chat              Start chatting!
 
 \x1b[1;36mMore:\x1b[0m
-  Docs:       https://github.com/RightNow-AI/openfang
+  Docs:       https://github.com/toxicwind/rig
   Dashboard:  http://127.0.0.1:4200/ (when daemon is running)";
 
 /// OpenFang — the open-source Agent Operating System.
@@ -535,10 +536,19 @@ enum AgentCommands {
     Set {
         /// Agent ID (UUID).
         agent_id: String,
-        /// Field to set (model).
-        field: String,
-        /// New value.
-        value: String,
+        /// Field to set (model). Optional when --model is given.
+        field: Option<String>,
+        /// New value. Optional when --model is given.
+        value: Option<String>,
+        /// Provider for the model (e.g. llama-swap). Forwarded to the daemon;
+        /// implies field=model when no positional field is given.
+        #[arg(long)]
+        provider: Option<String>,
+        /// Model to set, as an alternative to positional `model <value>`.
+        /// Accepts `provider/model`, `provider:model`, or bare model IDs —
+        /// tricky IDs are passed through verbatim for daemon-side parsing.
+        #[arg(long)]
+        model: Option<String>,
     },
 }
 
@@ -983,7 +993,9 @@ fn main() {
                 agent_id,
                 field,
                 value,
-            } => cmd_agent_set(&agent_id, &field, &value),
+                provider,
+                model,
+            } => cmd_agent_set(&agent_id, field, value, provider, model),
         },
         Some(Commands::Workflow(sub)) => match sub {
             WorkflowCommands::List => cmd_workflow_list(),
@@ -1523,7 +1535,7 @@ fn write_config_if_missing(
     } else {
         let default_config = format!(
             r#"# OpenFang Agent OS configuration
-# See https://github.com/RightNow-AI/openfang for documentation
+# See https://github.com/toxicwind/rig for documentation
 
 # For Docker, change to "0.0.0.0:4200" or set OPENFANG_LISTEN env var.
 api_listen = "127.0.0.1:4200"
@@ -1901,19 +1913,42 @@ fn cmd_agent_kill(config: Option<PathBuf>, agent_id_str: &str) {
     }
 }
 
-fn cmd_agent_set(agent_id_str: &str, field: &str, value: &str) {
-    match field {
+fn cmd_agent_set(
+    agent_id_str: &str,
+    field: Option<String>,
+    value: Option<String>,
+    provider: Option<String>,
+    model: Option<String>,
+) {
+    let (field, value, provider) = match agent_set::resolve_agent_set(field, value, provider, model)
+    {
+        Ok(resolved) => resolved,
+        Err(e) => {
+            eprintln!("{e}");
+            std::process::exit(1);
+        }
+    };
+    match field.as_str() {
         "model" => {
             if let Some(base) = find_daemon() {
                 let client = daemon_client();
+                let mut payload = serde_json::json!({"model": value});
+                if let Some(p) = provider.as_deref() {
+                    payload["provider"] = serde_json::json!(p);
+                }
                 let body = daemon_json(
                     client
                         .put(format!("{base}/api/agents/{agent_id_str}/model"))
-                        .json(&serde_json::json!({"model": value}))
+                        .json(&payload)
                         .send(),
                 );
                 if body.get("status").is_some() {
-                    println!("Agent {agent_id_str} model set to {value}.");
+                    match provider {
+                        Some(p) => {
+                            println!("Agent {agent_id_str} model set to {value} (provider {p}).")
+                        }
+                        None => println!("Agent {agent_id_str} model set to {value}."),
+                    }
                 } else {
                     eprintln!(
                         "Failed to set model: {}",
@@ -2261,7 +2296,7 @@ fn cmd_doctor(json: bool, repair: bool) {
                 let (provider, api_key_env, model) = detect_best_provider();
                 let default_config = format!(
                     r#"# OpenFang Agent OS configuration
-# See https://github.com/RightNow-AI/openfang for documentation
+# See https://github.com/toxicwind/rig for documentation
 
 # For Docker, change to "0.0.0.0:4200" or set OPENFANG_LISTEN env var.
 api_listen = "127.0.0.1:4200"
