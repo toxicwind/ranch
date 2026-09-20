@@ -108,7 +108,7 @@ jobs:
           releaseBody: |
             ## What's New
 
-            See the [CHANGELOG](https://github.com/RightNow-AI/openfang/blob/main/CHANGELOG.md) for full details.
+            See the [CHANGELOG](https://github.com/toxicwind/rig/blob/main/CHANGELOG.md) for full details.
 
             ## Installation
 
@@ -237,11 +237,11 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/rightnow-ai/openfang:latest
-            ghcr.io/rightnow-ai/openfang:${{ steps.version.outputs.version }}
+            ghcr.io/toxicwind/rig:${{ steps.version.outputs.version }}
           labels: |
-            org.opencontainers.image.source=https://github.com/RightNow-AI/openfang
+            org.opencontainers.image.source=https://github.com/toxicwind/rig
             org.opencontainers.image.licenses=MIT
-            org.opencontainers.image.description=OpenFang Agent OS — single-binary Rust agent framework
+            org.opencontainers.image.description=Rig Agent OS — single-binary Rust agent framework (fork of OpenFang)
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Set GHCR package visibility to public
@@ -250,5 +250,5 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/orgs/RightNow-AI/packages/container/openfang \
+            https://api.github.com/orgs/toxicwind/packages/container/rig \
             -d '{"visibility":"public"}'

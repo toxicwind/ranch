@@ -85,13 +85,13 @@ const AFTER_HELP: &str = "\
   Docs:       https://github.com/toxicwind/rig
   Dashboard:  http://127.0.0.1:4200/ (when daemon is running)";
 
-/// OpenFang — the open-source Agent Operating System.
+/// Rig — the open-source Agent Operating System (fork of OpenFang).
 #[derive(Parser)]
 #[command(
     name = "openfang",
     version,
-    about = "\u{1F40D} OpenFang \u{2014} Open-source Agent Operating System",
-    long_about = "\u{1F40D} OpenFang \u{2014} Open-source Agent Operating System\n\n\
+    about = "\u{1F40D} Rig \u{2014} Open-source Agent Operating System",
+    long_about = "\u{1F40D} Rig \u{2014} Open-source Agent Operating System (fork of OpenFang)\n\n\
                   Deploy, manage, and orchestrate AI agents from your terminal.\n\
                   40 channels \u{00b7} 60 skills \u{00b7} 50+ models \u{00b7} infinite possibilities.",
     after_help = AFTER_HELP,
