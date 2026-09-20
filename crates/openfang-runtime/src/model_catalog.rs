@@ -7,12 +7,12 @@ use openfang_types::model_catalog::{
     AuthStatus, ModelCatalogEntry, ModelTier, ProviderInfo, AI21_BASE_URL, ANTHROPIC_BASE_URL,
     AZURE_OPENAI_BASE_URL, BEDROCK_BASE_URL, CEREBRAS_BASE_URL, CHUTES_BASE_URL, COHERE_BASE_URL,
     DEEPSEEK_BASE_URL, FIREWORKS_BASE_URL, GEMINI_BASE_URL, GITHUB_COPILOT_BASE_URL, GROQ_BASE_URL,
-    HUGGINGFACE_BASE_URL, KIMI_CODING_BASE_URL, LEMONADE_BASE_URL, LMSTUDIO_BASE_URL,
-    MINIMAX_BASE_URL, MISTRAL_BASE_URL, MOONSHOT_BASE_URL, NVIDIA_NIM_BASE_URL, OLLAMA_BASE_URL,
-    OPENAI_BASE_URL, OPENROUTER_BASE_URL, PERPLEXITY_BASE_URL, QIANFAN_BASE_URL, QWEN_BASE_URL,
-    REPLICATE_BASE_URL, REQUESTY_BASE_URL, SAMBANOVA_BASE_URL, TOGETHER_BASE_URL, VENICE_BASE_URL,
-    VLLM_BASE_URL, VOLCENGINE_BASE_URL, VOLCENGINE_CODING_BASE_URL, XAI_BASE_URL, ZAI_BASE_URL,
-    ZAI_CODING_BASE_URL, ZHIPU_BASE_URL, ZHIPU_CODING_BASE_URL,
+    HUGGINGFACE_BASE_URL, KIMI_CODING_BASE_URL, LEMONADE_BASE_URL, LLAMA_SWAP_BASE_URL,
+    LMSTUDIO_BASE_URL, MINIMAX_BASE_URL, MISTRAL_BASE_URL, MOONSHOT_BASE_URL, NVIDIA_NIM_BASE_URL,
+    OLLAMA_BASE_URL, OPENAI_BASE_URL, OPENROUTER_BASE_URL, PERPLEXITY_BASE_URL, QIANFAN_BASE_URL,
+    QWEN_BASE_URL, REPLICATE_BASE_URL, REQUESTY_BASE_URL, SAMBANOVA_BASE_URL, TOGETHER_BASE_URL,
+    VENICE_BASE_URL, VLLM_BASE_URL, VOLCENGINE_BASE_URL, VOLCENGINE_CODING_BASE_URL, XAI_BASE_URL,
+    ZAI_BASE_URL, ZAI_CODING_BASE_URL, ZHIPU_BASE_URL, ZHIPU_CODING_BASE_URL,
 };
 use std::collections::HashMap;
 
@@ -349,7 +349,7 @@ impl ModelCatalog {
     /// without requiring users to edit `config.toml` for remote local-LLM hosts
     /// (VPS, LXC, LAN). See issue #1154.
     pub fn apply_local_env_overrides(&mut self) {
-        for provider in ["ollama", "lmstudio", "vllm", "lemonade"] {
+        for provider in ["ollama", "lmstudio", "vllm", "lemonade", "llama-swap"] {
             if let Some(url) = crate::drivers::local_provider_url_from_env(provider) {
                 if let Some(p) = self.providers.iter_mut().find(|p| p.id == provider) {
                     p.base_url = url;
@@ -693,6 +693,16 @@ fn builtin_providers() -> Vec<ProviderInfo> {
             display_name: "Lemonade".into(),
             api_key_env: "LEMONADE_API_KEY".into(),
             base_url: LEMONADE_BASE_URL.into(),
+            key_required: false,
+            auth_status: AuthStatus::NotRequired,
+            model_count: 0,
+        },
+        // ── LlamaSwap: local model multiplexer (OpenAI-compatible /v1) ──
+        ProviderInfo {
+            id: "llama-swap".into(),
+            display_name: "LlamaSwap".into(),
+            api_key_env: "LLAMA_SWAP_API_KEY".into(),
+            base_url: LLAMA_SWAP_BASE_URL.into(),
             key_required: false,
             auth_status: AuthStatus::NotRequired,
             model_count: 0,
@@ -2623,6 +2633,69 @@ fn builtin_models() -> Vec<ModelCatalogEntry> {
             aliases: vec![],
         },
         // ══════════════════════════════════════════════════════════════
+        // LlamaSwap (4) — local model multiplexer + dynamic discovery.
+        // Context windows verified live against the herd llama-swap
+        // (127.0.0.1:25100/v1/models). supports_tools is conservative:
+        // the 1.2B EXAONE cannot tool-call (verified); qwen/gemma entries
+        // stay false until a live tool-call probe says otherwise.
+        // ══════════════════════════════════════════════════════════════
+        ModelCatalogEntry {
+            id: "exaone-4-0-1-2b-iq4xs".into(),
+            display_name: "EXAONE 4.0 1.2B IQ4_XS (LlamaSwap)".into(),
+            provider: "llama-swap".into(),
+            tier: ModelTier::Local,
+            context_window: 32_768,
+            max_output_tokens: 4_096,
+            input_cost_per_m: 0.0,
+            output_cost_per_m: 0.0,
+            supports_tools: false,
+            supports_vision: false,
+            supports_streaming: true,
+            aliases: vec!["fast".into(), "tiny".into(), "exaone-iq4xs".into()],
+        },
+        ModelCatalogEntry {
+            id: "exaone-4-0-1-2b-q4km".into(),
+            display_name: "EXAONE 4.0 1.2B Q4_K_M (LlamaSwap)".into(),
+            provider: "llama-swap".into(),
+            tier: ModelTier::Local,
+            context_window: 32_768,
+            max_output_tokens: 4_096,
+            input_cost_per_m: 0.0,
+            output_cost_per_m: 0.0,
+            supports_tools: false,
+            supports_vision: false,
+            supports_streaming: true,
+            aliases: vec!["exaone-q4km".into()],
+        },
+        ModelCatalogEntry {
+            id: "qwen-flash-256k".into(),
+            display_name: "Qwen Flash 256K (LlamaSwap)".into(),
+            provider: "llama-swap".into(),
+            tier: ModelTier::Local,
+            context_window: 262_144,
+            max_output_tokens: 8_192,
+            input_cost_per_m: 0.0,
+            output_cost_per_m: 0.0,
+            supports_tools: false,
+            supports_vision: false,
+            supports_streaming: true,
+            aliases: vec!["long".into()],
+        },
+        ModelCatalogEntry {
+            id: "gemma-128k".into(),
+            display_name: "Gemma 128K (LlamaSwap)".into(),
+            provider: "llama-swap".into(),
+            tier: ModelTier::Local,
+            context_window: 131_072,
+            max_output_tokens: 8_192,
+            input_cost_per_m: 0.0,
+            output_cost_per_m: 0.0,
+            supports_tools: false,
+            supports_vision: false,
+            supports_streaming: true,
+            aliases: vec![],
+        },
+        // ══════════════════════════════════════════════════════════════
         // Perplexity (4)
         // ══════════════════════════════════════════════════════════════
         ModelCatalogEntry {
@@ -4083,7 +4156,7 @@ mod tests {
     #[test]
     fn test_catalog_has_providers() {
         let catalog = ModelCatalog::new();
-        assert_eq!(catalog.list_providers().len(), 42);
+        assert_eq!(catalog.list_providers().len(), 43);
     }
 
     #[test]
@@ -4862,5 +4935,40 @@ mod tests {
         } else {
             std::env::remove_var("OLLAMA_HOST");
         }
+    }
+
+    // ── llama-swap: first-class local provider ──
+
+    #[test]
+    fn test_llama_swap_provider_registered() {
+        let catalog = ModelCatalog::new();
+        let p = catalog
+            .get_provider("llama-swap")
+            .expect("llama-swap must be a first-class catalog provider");
+        assert_eq!(p.display_name, "LlamaSwap");
+        assert_eq!(p.api_key_env, "LLAMA_SWAP_API_KEY");
+        assert_eq!(p.base_url, "http://localhost:8080/v1");
+        assert!(!p.key_required, "llama-swap is local: no key required");
+        assert_eq!(p.auth_status, AuthStatus::NotRequired);
+    }
+
+    #[test]
+    fn test_llama_swap_fast_alias_resolves() {
+        let catalog = ModelCatalog::new();
+        let entry = catalog
+            .find_model("fast")
+            .expect("alias 'fast' must resolve to a llama-swap model");
+        assert_eq!(entry.provider, "llama-swap");
+        assert_eq!(entry.tier, ModelTier::Local);
+    }
+
+    #[test]
+    fn test_llama_swap_models_listed_by_provider() {
+        let catalog = ModelCatalog::new();
+        let models = catalog.models_by_provider("llama-swap");
+        assert!(
+            !models.is_empty(),
+            "llama-swap must ship builtin models like other local providers"
+        );
     }
 }

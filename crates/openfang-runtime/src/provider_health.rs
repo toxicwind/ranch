@@ -25,11 +25,12 @@ pub struct ProbeResult {
 
 /// Check if a provider is a local provider (no key required, localhost URL).
 ///
-/// Returns true for `"ollama"`, `"vllm"`, `"lmstudio"`.
+/// Returns true for `"ollama"`, `"vllm"`, `"lmstudio"`, `"lemonade"`,
+/// `"llama-swap"`.
 pub fn is_local_provider(provider: &str) -> bool {
     matches!(
         provider.to_lowercase().as_str(),
-        "ollama" | "vllm" | "lmstudio"
+        "ollama" | "vllm" | "lmstudio" | "lemonade" | "llama-swap"
     )
 }
 

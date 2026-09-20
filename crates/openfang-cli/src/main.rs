@@ -1477,6 +1477,7 @@ fn provider_list() -> Vec<(&'static str, &'static str, &'static str, &'static st
             "OpenRouter",
         ),
         ("minimax", "MINIMAX_API_KEY", "MiniMax-M2.7", "MiniMax"),
+        ("llama-swap", "LLAMA_SWAP_API_KEY", "fast", "LlamaSwap"),
     ]
 }
 
