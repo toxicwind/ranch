@@ -253,6 +253,35 @@ impl ModelCatalog {
         self.find_model(id_or_alias)
     }
 
+    /// Strict provider-scoped model check: true when `id_or_alias` matches a
+    /// model ID or alias served by `provider` (case-insensitive).
+    ///
+    /// Unlike [`find_model_for_provider`](Self::find_model_for_provider), this
+    /// does NOT fall back to cross-provider resolution — it answers exactly
+    /// "does this provider serve this model?". Used to validate explicit
+    /// `--provider` selections with a guided error instead of a silent
+    /// misroute (agent-friendly CLI: fail guided, Class B — never silent,
+    /// Class C; Kini 2026).
+    pub fn has_model_for_provider(&self, provider: &str, id_or_alias: &str) -> bool {
+        let lower = id_or_alias.to_lowercase();
+        // Direct: model id or entry alias on this provider.
+        if self.models.iter().any(|m| {
+            m.provider == provider
+                && (m.id.to_lowercase() == lower
+                    || m.aliases.iter().any(|a| a.to_lowercase() == lower))
+        }) {
+            return true;
+        }
+        // Global alias map: resolve, then check the canonical entry's provider.
+        if let Some(canonical) = self.aliases.get(&lower) {
+            return self
+                .models
+                .iter()
+                .any(|m| m.id == *canonical && m.provider == provider);
+        }
+        false
+    }
+
     /// Resolve an alias to a canonical model ID, or None if not an alias.
     pub fn resolve_alias(&self, alias: &str) -> Option<&str> {
         self.aliases.get(&alias.to_lowercase()).map(|s| s.as_str())
@@ -2696,6 +2725,26 @@ fn builtin_models() -> Vec<ModelCatalogEntry> {
             aliases: vec![],
         },
         // ══════════════════════════════════════════════════════════════
+        // -- toolcall-local: live-verified tool-capable local model --
+        // Served by the toolcall-llm pitchfork daemon (llama-server b11059
+        // CUDA, qwen3.5-9b-dflash-Q5_K_M, ngl 99, ctx 32k) and fronted by the
+        // herd llama-swap :25100 as `toolcall-local/qwen3.5-9b-tool`.
+        // Tool loop verified live 2026-09-20: sysinfo(gpu) -> calculator ->
+        // correct answer in 3.6s (Agent2 pilot routing target).
+        ModelCatalogEntry {
+            id: "toolcall-local/qwen3.5-9b-tool".into(),
+            display_name: "Qwen3.5 9B Tool (LlamaSwap)".into(),
+            provider: "llama-swap".into(),
+            tier: ModelTier::Local,
+            context_window: 32_768,
+            max_output_tokens: 8_192,
+            input_cost_per_m: 0.0,
+            output_cost_per_m: 0.0,
+            supports_tools: true,
+            supports_vision: false,
+            supports_streaming: true,
+            aliases: vec!["qwen3.5-9b-tool".into(), "tool-local".into()],
+        },
         // Perplexity (4)
         // ══════════════════════════════════════════════════════════════
         ModelCatalogEntry {
@@ -4950,6 +4999,37 @@ mod tests {
         assert_eq!(p.base_url, "http://localhost:8080/v1");
         assert!(!p.key_required, "llama-swap is local: no key required");
         assert_eq!(p.auth_status, AuthStatus::NotRequired);
+    }
+
+    #[test]
+    fn test_has_model_for_provider_strict() {
+        let catalog = ModelCatalog::new();
+        // Positive: id, alias, and full peer id on the right provider.
+        assert!(catalog.has_model_for_provider("llama-swap", "fast"));
+        assert!(catalog.has_model_for_provider("llama-swap", "qwen3.5-9b-tool"));
+        assert!(catalog.has_model_for_provider("llama-swap", "toolcall-local/qwen3.5-9b-tool"));
+        // Negative: valid model, wrong provider (no cross-provider fallback).
+        assert!(!catalog.has_model_for_provider("llama-swap", "gpt-4o"));
+        assert!(!catalog.has_model_for_provider("openai", "fast"));
+        // Negative: unknown model entirely.
+        assert!(!catalog.has_model_for_provider("llama-swap", "no-such-model"));
+    }
+
+    #[test]
+    fn test_llama_swap_toolcall_local_resolves() {
+        let catalog = ModelCatalog::new();
+        // Full llama-swap peer id (what the driver sends to :25100)
+        let entry = catalog
+            .find_model_for_provider("toolcall-local/qwen3.5-9b-tool", "llama-swap")
+            .expect("toolcall-local peer must resolve on llama-swap");
+        assert_eq!(entry.id, "toolcall-local/qwen3.5-9b-tool");
+        assert!(
+            entry.supports_tools,
+            "toolcall-local is the tool-capable pilot model"
+        );
+        assert_eq!(entry.context_window, 32_768);
+        // Bare id also resolves via the same entry
+        assert!(catalog.find_model("qwen3.5-9b-tool").is_some());
     }
 
     #[test]
