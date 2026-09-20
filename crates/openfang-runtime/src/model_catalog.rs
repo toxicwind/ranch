@@ -4996,7 +4996,7 @@ mod tests {
             .expect("llama-swap must be a first-class catalog provider");
         assert_eq!(p.display_name, "LlamaSwap");
         assert_eq!(p.api_key_env, "LLAMA_SWAP_API_KEY");
-        assert_eq!(p.base_url, "http://localhost:8080/v1");
+        assert_eq!(p.base_url, "http://localhost:25100/v1");
         assert!(!p.key_required, "llama-swap is local: no key required");
         assert_eq!(p.auth_status, AuthStatus::NotRequired);
     }

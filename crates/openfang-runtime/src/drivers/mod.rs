@@ -1332,7 +1332,7 @@ mod tests {
     #[test]
     fn test_provider_defaults_llama_swap() {
         let d = provider_defaults("llama-swap").unwrap();
-        assert_eq!(d.base_url, "http://localhost:8080/v1");
+        assert_eq!(d.base_url, "http://localhost:25100/v1");
         assert_eq!(d.api_key_env, "LLAMA_SWAP_API_KEY");
         assert!(!d.key_required);
     }
