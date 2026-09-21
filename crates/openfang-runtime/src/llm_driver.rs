@@ -48,6 +48,36 @@ pub enum LlmError {
     ModelNotFound(String),
 }
 
+/// Classify an HTTP 404 response body from a provider endpoint.
+///
+/// Returns `ModelNotFound` ONLY when the body actually says the model is
+/// unknown/retired. Any other 404 (wrong path composition, HTML error page,
+/// empty body, proxy 404) is a request/config error and stays
+/// `Api { status: 404 }` — it must NOT trigger cross-provider model
+/// fallback, because the URL is broken for every provider and failing over
+/// would mask the misconfiguration.
+pub fn classify_http_404(body: &str, message: String) -> LlmError {
+    let lower = body.to_lowercase();
+    // NOTE: plain "not found" is deliberately NOT a signal -- it appears in
+    // generic HTML 404 pages and path errors. Only model-specific phrasing
+    // (Google's NOT_FOUND status, "is not found for API version", unknown /
+    // no-such-model, does-not-exist) counts as a missing model.
+    let model_missing = lower.contains("not_found")
+        || lower.contains("model_not_supported")
+        || lower.contains("unknown model")
+        || lower.contains("no such model")
+        || lower.contains("is not found for")
+        || lower.contains("does not exist");
+    if model_missing {
+        LlmError::ModelNotFound(message)
+    } else {
+        LlmError::Api {
+            status: 404,
+            message,
+        }
+    }
+}
+
 /// A request to an LLM for completion.
 #[derive(Debug, Clone)]
 pub struct CompletionRequest {
@@ -345,5 +375,37 @@ mod tests {
                 ..
             }
         ));
+    }
+
+    // --- classify_http_404 regression tests ---
+    #[test]
+    fn test_classify_404_model_not_found_body() {
+        // Genuine retired-model 404 from Gemini: eligible for fallback.
+        let body = r#"{"error":{"code":404,"message":"models/gemini-2.5-flash is not found for API version v1beta","status":"NOT_FOUND"}}"#;
+        let err = classify_http_404(
+            body,
+            "NOT_FOUND: models/gemini-2.5-flash is not found".to_string(),
+        );
+        assert!(matches!(err, LlmError::ModelNotFound(_)));
+    }
+
+    #[test]
+    fn test_classify_404_path_error_stays_api() {
+        // Path-composition 404 (HTML error page): must NOT become ModelNotFound.
+        let body = "<html><head><title>404 Not Found</title></head><body>Not Found</body></html>";
+        let err = classify_http_404(body, "Google API returned an HTML error page".to_string());
+        match err {
+            LlmError::Api { status, .. } => assert_eq!(status, 404),
+            other => panic!("expected Api{{404}}, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_classify_404_empty_body_stays_api() {
+        let err = classify_http_404("", "empty".to_string());
+        match err {
+            LlmError::Api { status, .. } => assert_eq!(status, 404),
+            other => panic!("expected Api{{404}}, got {other:?}"),
+        }
     }
 }

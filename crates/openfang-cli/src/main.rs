@@ -1575,6 +1575,9 @@ fn cmd_start(config: Option<PathBuf>, yolo: bool) {
     let rt = tokio::runtime::Runtime::new().unwrap();
     rt.block_on(async {
         let mut kernel_config = openfang_kernel::config::load_config(config.as_deref());
+        // Record the boot config path so /api/config/reload re-reads this
+        // same file instead of home_dir/config.toml.
+        kernel_config.config_path = config.clone();
         if yolo {
             kernel_config.approval.auto_approve = true;
             kernel_config.approval.apply_shorthands();

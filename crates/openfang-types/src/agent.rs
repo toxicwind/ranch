@@ -39,7 +39,7 @@ impl std::str::FromStr for UserId {
 }
 
 /// Model routing configuration — auto-selects cheap/mid/expensive models by complexity.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
 pub struct ModelRoutingConfig {
     /// Model to use for simple queries.
@@ -368,7 +368,7 @@ impl ToolProfile {
 }
 
 /// LLM model configuration for an agent.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
 pub struct ModelConfig {
     /// LLM provider name.
@@ -403,7 +403,7 @@ impl Default for ModelConfig {
 }
 
 /// A fallback model entry in a chain.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct FallbackModel {
     pub provider: String,
     pub model: String,
@@ -414,14 +414,14 @@ pub struct FallbackModel {
 }
 
 /// Tool configuration within an agent manifest.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ToolConfig {
     /// Tool-specific configuration parameters.
     pub params: HashMap<String, serde_json::Value>,
 }
 
 /// Complete agent manifest — defines everything about an agent.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
 pub struct AgentManifest {
     /// Human-readable agent name.
@@ -579,7 +579,7 @@ impl Default for AgentManifest {
 }
 
 /// Capability declarations in a manifest (human-readable TOML format).
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
 pub struct ManifestCapabilities {
     /// Allowed network hosts (e.g., ["api.anthropic.com:443"]).
@@ -669,7 +669,7 @@ pub struct AgentIdentity {
 /// Declared in `agent.toml` under `[persona]` and surfaced in launch banners,
 /// log lines, and status/digest surfaces. All fields optional; when unset the
 /// manifest `name` is used for display.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
 pub struct AgentPersona {
     /// Memorable display name, e.g. "Shingle". Falls back to manifest name.

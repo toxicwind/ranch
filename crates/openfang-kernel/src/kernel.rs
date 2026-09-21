@@ -551,8 +551,21 @@ fn gethostname() -> Option<String> {
 impl OpenFangKernel {
     /// Boot the kernel with configuration from the given path.
     pub fn boot(config_path: Option<&Path>) -> KernelResult<Self> {
-        let config = load_config(config_path);
+        let mut config = load_config(config_path);
+        // Record the boot config path so `POST /api/config/reload` re-reads
+        // this same file instead of `home_dir/config.toml`.
+        config.config_path = config_path.map(|p| p.to_path_buf());
         Self::boot_with_config(config)
+    }
+
+    /// Resolve which config file a reload should re-read: the file the
+    /// kernel booted with when recorded, else the legacy
+    /// `home_dir/config.toml`.
+    pub(crate) fn resolve_reload_config_path(config: &KernelConfig) -> std::path::PathBuf {
+        config
+            .config_path
+            .clone()
+            .unwrap_or_else(|| config.home_dir.join("config.toml"))
     }
 
     /// Fetch live Copilot models by exchanging the persisted token and querying the API.
@@ -1297,41 +1310,16 @@ impl OpenFangKernel {
                                         if disk_manifest.exec_policy.is_some() {
                                             disk_has_exec_policy_override = true;
                                         }
-                                        // Compare key fields to detect changes.
-                                        // IMPORTANT: keep this list in sync with AgentManifest
-                                        // fields that users may legitimately edit in agent.toml.
-                                        // Missing a field here means changes to it are silently
-                                        // ignored until the agent is deleted and recreated.
-                                        let changed = disk_manifest.name != entry.manifest.name
-                                            || disk_manifest.description
-                                                != entry.manifest.description
-                                            || disk_manifest.model.system_prompt
-                                                != entry.manifest.model.system_prompt
-                                            || disk_manifest.model.provider
-                                                != entry.manifest.model.provider
-                                            || disk_manifest.model.model
-                                                != entry.manifest.model.model
-                                            || disk_manifest.capabilities.tools
-                                                != entry.manifest.capabilities.tools
-                                            || disk_manifest.tool_allowlist
-                                                != entry.manifest.tool_allowlist
-                                            || disk_manifest.tool_blocklist
-                                                != entry.manifest.tool_blocklist
-                                            || disk_manifest.skills != entry.manifest.skills
-                                            || disk_manifest.mcp_servers
-                                                != entry.manifest.mcp_servers
-                                            // Fields previously missing from this check (#1087):
-                                            // Only compare workspace when the TOML explicitly sets
-                                            // one, so the kernel-assigned default path in the DB
-                                            // is not overwritten for agents that omit the field.
-                                            || disk_manifest.workspace.as_ref().is_some_and(
-                                                |w| Some(w) != entry.manifest.workspace.as_ref(),
-                                            )
-                                            || disk_manifest.schedule != entry.manifest.schedule
-                                            || disk_manifest.autonomous != entry.manifest.autonomous
-                                            || disk_manifest.resources != entry.manifest.resources
-                                            || disk_manifest.exec_policy
-                                                != entry.manifest.exec_policy;
+                                        // Whole-manifest comparison: every AgentManifest
+                                        // field participates (see disk_manifest_differs),
+                                        // so edits to fields like model.base_url or
+                                        // model.api_key_env are no longer silently
+                                        // ignored until the agent is deleted and
+                                        // recreated. Kernel-derived fields the TOML
+                                        // legitimately omits (workspace, state_dir)
+                                        // are normalized from the DB row (#1097).
+                                        let changed =
+                                            disk_manifest_differs(&disk_manifest, &entry.manifest);
                                         if changed {
                                             info!(
                                                 agent = %name,
@@ -1547,28 +1535,34 @@ impl OpenFangKernel {
             }
         }
 
-        // If no agents exist (fresh install), spawn a default assistant
+        // If no agents exist (fresh install), spawn a default assistant.
+        // Prefer the disk agent.toml when one exists so a wiped or fresh
+        // DB comes back with the operator's configured model route instead
+        // of the hardcoded built-in default (which previously left the
+        // assistant stranded on the wrong provider after a DB reset).
         if kernel.registry.list().is_empty() {
             info!("No agents found — spawning default assistant");
             let dm = &kernel.config.default_model;
-            let manifest = AgentManifest {
-                persona: Default::default(),
-                name: "assistant".to_string(),
-                description: "General-purpose assistant".to_string(),
-                model: openfang_types::agent::ModelConfig {
-                    provider: dm.provider.clone(),
-                    model: dm.model.clone(),
-                    system_prompt: "You are a helpful AI assistant.".to_string(),
-                    api_key_env: if dm.api_key_env.is_empty() {
-                        None
-                    } else {
-                        Some(dm.api_key_env.clone())
-                    },
-                    base_url: dm.base_url.clone(),
-                    ..Default::default()
-                },
-                ..Default::default()
-            };
+            let manifest =
+                seed_manifest_from_disk(&kernel.config.home_dir.join("agents"), "assistant", dm)
+                    .unwrap_or_else(|| AgentManifest {
+                        persona: Default::default(),
+                        name: "assistant".to_string(),
+                        description: "General-purpose assistant".to_string(),
+                        model: openfang_types::agent::ModelConfig {
+                            provider: dm.provider.clone(),
+                            model: dm.model.clone(),
+                            system_prompt: "You are a helpful AI assistant.".to_string(),
+                            api_key_env: if dm.api_key_env.is_empty() {
+                                None
+                            } else {
+                                Some(dm.api_key_env.clone())
+                            },
+                            base_url: dm.base_url.clone(),
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    });
             match kernel.spawn_agent(manifest) {
                 Ok(id) => info!(id = %id, "Default assistant spawned"),
                 Err(e) => warn!("Failed to spawn default assistant: {e}"),
@@ -4164,8 +4158,10 @@ impl OpenFangKernel {
             build_reload_plan, should_apply_hot, validate_config_for_reload,
         };
 
-        // Read and parse config file (using load_config to process $include directives)
-        let config_path = self.config.home_dir.join("config.toml");
+        // Read and parse config file (using load_config to process $include directives).
+        // Re-read the SAME file the kernel booted with -- not
+        // `home_dir/config.toml`, which may be a different/stale file.
+        let config_path = Self::resolve_reload_config_path(&self.config);
         let new_config = if config_path.exists() {
             crate::config::load_config(Some(&config_path))
         } else {
@@ -5786,14 +5782,19 @@ impl OpenFangKernel {
             // model to dm; inherit dm's timeout in that case. Custom-provider
             // manifest fallbacks have no per-provider config, so leave unset.
             let resolved_to_default = fb.provider.is_empty() || fb.provider == "default";
+            // Provider-scoped URL resolution: a fallback on a different
+            // provider must never inherit default_model.base_url.
+            let fb_base_url = resolve_fallback_base_url(
+                fb.base_url.clone(),
+                &fb_provider,
+                dm,
+                resolved_to_default,
+                |provider| self.lookup_provider_url(provider),
+            );
             let config = DriverConfig {
                 provider: fb_provider.clone(),
                 api_key: fb_api_key,
-                base_url: fb
-                    .base_url
-                    .clone()
-                    .or_else(|| dm.base_url.clone())
-                    .or_else(|| self.lookup_provider_url(&fb_provider)),
+                base_url: fb_base_url,
                 skip_permissions: true,
                 subprocess_timeout_secs: if resolved_to_default {
                     dm.subprocess_timeout_secs
@@ -6810,10 +6811,122 @@ pub(crate) fn merge_disk_manifest_preserving_kernel_defaults(
     if disk.workspace.is_none() && entry.workspace.is_some() {
         disk.workspace = entry.workspace.clone();
     }
+    if disk.state_dir.is_none() && entry.state_dir.is_some() {
+        disk.state_dir = entry.state_dir.clone();
+    }
     if disk.exec_policy.is_none() && entry.exec_policy.is_some() {
         disk.exec_policy = entry.exec_policy.clone();
     }
     disk
+}
+
+/// Whole-manifest disk-vs-DB comparison for the boot sync.
+///
+/// Compares every `AgentManifest` field (derived `PartialEq`), so newly
+/// added fields are covered automatically — the previous hand-maintained
+/// field list silently ignored edits to fields like
+/// `model.base_url` / `model.api_key_env` until the agent was deleted and
+/// recreated. Kernel-derived fields the disk TOML legitimately omits
+/// (`workspace`, `state_dir`) are normalized from the DB row before
+/// comparing, preserving the #1097 semantics.
+pub(crate) fn disk_manifest_differs(
+    disk_manifest: &AgentManifest,
+    db_manifest: &AgentManifest,
+) -> bool {
+    let mut disk = disk_manifest.clone();
+    if disk.workspace.is_none() {
+        disk.workspace = db_manifest.workspace.clone();
+    }
+    if disk.state_dir.is_none() {
+        disk.state_dir = db_manifest.state_dir.clone();
+    }
+    disk != *db_manifest
+}
+
+/// Load an agent manifest from a disk `agent.toml`, returning `None` when
+/// the file is absent or fails to parse.
+pub(crate) fn load_disk_manifest(path: &std::path::Path) -> Option<AgentManifest> {
+    let toml_str = std::fs::read_to_string(path).ok()?;
+    toml::from_str::<AgentManifest>(&toml_str).ok()
+}
+
+/// Overlay the daemon's default model onto manifest fields the disk TOML
+/// leaves empty, so a partial or stale TOML still yields a working route.
+/// Fields the TOML sets explicitly always win — the overlay only fills gaps.
+pub(crate) fn apply_default_model_overlay(
+    manifest: &mut AgentManifest,
+    dm: &openfang_types::config::DefaultModelConfig,
+) {
+    if manifest.name.is_empty() {
+        manifest.name = "assistant".to_string();
+    }
+    if manifest.model == ModelConfig::default() {
+        // No [model] section in the TOML: it deserialized to the hardcoded
+        // ModelConfig::default() (anthropic). Treat that as "unspecified"
+        // and take the daemon default wholesale -- otherwise a wiped DB
+        // re-seeds the assistant onto the wrong provider.
+        manifest.model.provider = dm.provider.clone();
+        manifest.model.model = dm.model.clone();
+        manifest.model.api_key_env = if dm.api_key_env.is_empty() {
+            None
+        } else {
+            Some(dm.api_key_env.clone())
+        };
+        manifest.model.base_url = dm.base_url.clone();
+        return;
+    }
+    if manifest.model.provider.is_empty() {
+        manifest.model.provider = dm.provider.clone();
+    }
+    if manifest.model.model.is_empty() {
+        manifest.model.model = dm.model.clone();
+    }
+    if manifest.model.api_key_env.is_none() && !dm.api_key_env.is_empty() {
+        manifest.model.api_key_env = Some(dm.api_key_env.clone());
+    }
+    if manifest.model.base_url.is_none() {
+        manifest.model.base_url = dm.base_url.clone();
+    }
+}
+
+/// Seed manifest for an agent name: prefer the disk `agent.toml` over the
+/// hardcoded built-in, with the default-model overlay filling any gaps.
+/// Returns `None` when no usable disk TOML exists (caller falls back to the
+/// built-in default).
+/// Resolve the base URL for a manifest-declared fallback model.
+///
+/// Provider-scoped: the fallback inherits the default model's `base_url`
+/// ONLY when it actually resolved to the default provider. A fallback on a
+/// different provider uses its own explicit URL, or that provider's
+/// configured URL -- never the default provider's URL. (Previously every
+/// fallback inherited `default_model.base_url` regardless of provider,
+/// sending e.g. an Anthropic fallback at the Gemini endpoint.)
+pub(crate) fn resolve_fallback_base_url(
+    fb_base_url: Option<String>,
+    fb_provider: &str,
+    dm: &openfang_types::config::DefaultModelConfig,
+    resolved_to_default: bool,
+    lookup_provider_url: impl Fn(&str) -> Option<String>,
+) -> Option<String> {
+    fb_base_url.or_else(|| {
+        if resolved_to_default || fb_provider == dm.provider {
+            dm.base_url
+                .clone()
+                .or_else(|| lookup_provider_url(fb_provider))
+        } else {
+            lookup_provider_url(fb_provider)
+        }
+    })
+}
+
+pub(crate) fn seed_manifest_from_disk(
+    agents_dir: &std::path::Path,
+    name: &str,
+    default_overlay: &openfang_types::config::DefaultModelConfig,
+) -> Option<AgentManifest> {
+    let mut manifest = load_disk_manifest(&agents_dir.join(name).join("agent.toml"))?;
+    apply_default_model_overlay(&mut manifest, default_overlay);
+    Some(manifest)
 }
 
 fn manifest_to_capabilities(manifest: &AgentManifest) -> Vec<Capability> {
@@ -9576,5 +9689,238 @@ system_prompt = "You are a test agent."
         assert_eq!(p("qwen:qwen-plus").as_deref(), Some("qwen"));
         assert_eq!(p("llama-3.1-8b").as_deref(), None);
         assert_eq!(p("").as_deref(), None);
+    }
+
+    // --- disk-manifest reconciliation regression tests ---
+    use openfang_types::config::DefaultModelConfig;
+
+    fn base_test_manifest() -> AgentManifest {
+        AgentManifest {
+            persona: Default::default(),
+            name: "test-agent".to_string(),
+            version: "1.0.0".to_string(),
+            description: "test".to_string(),
+            author: "test".to_string(),
+            module: "builtin:chat".to_string(),
+            schedule: ScheduleMode::default(),
+            model: ModelConfig {
+                provider: "gemini".to_string(),
+                model: "gemini-3-flash-preview".to_string(),
+                max_tokens: 4096,
+                temperature: 0.7,
+                system_prompt: "prompt".to_string(),
+                api_key_env: Some("GEMINI_API_KEY".to_string()),
+                base_url: Some("http://127.0.0.1:25100/v1".to_string()),
+            },
+            fallback_models: vec![],
+            resources: ResourceQuota::default(),
+            priority: Priority::default(),
+            capabilities: ManifestCapabilities::default(),
+            profile: None,
+            tools: HashMap::new(),
+            skills: vec![],
+            mcp_servers: vec![],
+            metadata: HashMap::new(),
+            tags: vec![],
+            routing: None,
+            autonomous: None,
+            pinned_model: None,
+            workspace: None,
+            state_dir: None,
+            generate_identity_files: true,
+            exec_policy: None,
+            tool_allowlist: vec![],
+            tool_blocklist: vec![],
+            cache_context: false,
+            max_history_messages: Some(100),
+        }
+    }
+
+    fn test_dm() -> DefaultModelConfig {
+        DefaultModelConfig {
+            provider: "gemini".to_string(),
+            model: "gemini-3-flash-preview".to_string(),
+            api_key_env: "GEMINI_API_KEY".to_string(),
+            base_url: Some("http://127.0.0.1:25100/v1".to_string()),
+            subprocess_timeout_secs: None,
+        }
+    }
+
+    #[test]
+    fn test_disk_manifest_differs_catches_base_url_change() {
+        let db = base_test_manifest();
+        let mut disk = db.clone();
+        disk.model.base_url = Some("http://127.0.0.1:25203/v1".to_string());
+        assert!(disk_manifest_differs(&disk, &db));
+    }
+
+    #[test]
+    fn test_disk_manifest_differs_catches_api_key_env_change() {
+        let db = base_test_manifest();
+        let mut disk = db.clone();
+        disk.model.api_key_env = Some("OTHER_API_KEY".to_string());
+        assert!(disk_manifest_differs(&disk, &db));
+    }
+
+    #[test]
+    fn test_disk_manifest_differs_catches_max_tokens_change() {
+        let db = base_test_manifest();
+        let mut disk = db.clone();
+        disk.model.max_tokens = 8192;
+        assert!(disk_manifest_differs(&disk, &db));
+    }
+
+    #[test]
+    fn test_disk_manifest_differs_catches_fallback_models_change() {
+        let db = base_test_manifest();
+        let mut disk = db.clone();
+        disk.fallback_models = vec![FallbackModel {
+            provider: "anthropic".to_string(),
+            model: "claude-x".to_string(),
+            api_key_env: None,
+            base_url: None,
+        }];
+        assert!(disk_manifest_differs(&disk, &db));
+    }
+
+    #[test]
+    fn test_disk_manifest_differs_ignores_omitted_workspace() {
+        // Disk TOML legitimately omits workspace; the DB row carries the
+        // kernel-assigned default. That is not a change (#1097).
+        let mut db = base_test_manifest();
+        db.workspace = Some(std::path::PathBuf::from(
+            "/home/toxic/.openfang/agents/test-agent",
+        ));
+        let disk = base_test_manifest();
+        assert!(!disk_manifest_differs(&disk, &db));
+    }
+
+    #[test]
+    fn test_disk_manifest_differs_detects_explicit_workspace_change() {
+        let mut db = base_test_manifest();
+        db.workspace = Some(std::path::PathBuf::from("/a"));
+        let mut disk = base_test_manifest();
+        disk.workspace = Some(std::path::PathBuf::from("/b"));
+        assert!(disk_manifest_differs(&disk, &db));
+    }
+
+    #[test]
+    fn test_merge_preserves_state_dir() {
+        let mut db = base_test_manifest();
+        db.state_dir = Some(std::path::PathBuf::from(
+            "/home/toxic/.openfang/agents/test-agent/state",
+        ));
+        let disk = base_test_manifest();
+        let merged = merge_disk_manifest_preserving_kernel_defaults(disk, &db);
+        assert_eq!(merged.state_dir, db.state_dir);
+    }
+
+    fn write_agent_toml(dir: &std::path::Path, name: &str, body: &str) {
+        let agent_dir = dir.join(name);
+        std::fs::create_dir_all(&agent_dir).unwrap();
+        std::fs::write(agent_dir.join("agent.toml"), body).unwrap();
+    }
+
+    fn temp_agents_dir(tag: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("of-seed-test-{}-{}", std::process::id(), tag));
+        std::fs::create_dir_all(dir.join("agents")).unwrap();
+        dir.join("agents")
+    }
+
+    #[test]
+    fn test_seed_manifest_from_disk_prefers_toml() {
+        let agents = temp_agents_dir("prefer");
+        write_agent_toml(
+            &agents,
+            "assistant",
+            "name = \"assistant\"\ndescription = \"disk assistant\"\n[model]\nprovider = \"llama-swap\"\nmodel = \"nex-agi/nex-n2.5-mini:free\"\nbase_url = \"http://127.0.0.1:25100/v1\"\n",
+        );
+        let dm = test_dm();
+        let m = seed_manifest_from_disk(&agents, "assistant", &dm).expect("disk TOML should seed");
+        assert_eq!(m.model.provider, "llama-swap");
+        assert_eq!(m.model.model, "nex-agi/nex-n2.5-mini:free");
+        assert_eq!(
+            m.model.base_url.as_deref(),
+            Some("http://127.0.0.1:25100/v1")
+        );
+        std::fs::remove_dir_all(agents.parent().unwrap()).ok();
+    }
+
+    #[test]
+    fn test_seed_manifest_from_disk_overlay_fills_gaps() {
+        // TOML names the agent but leaves the model empty: the daemon
+        // default fills the gaps, the disk name wins.
+        let agents = temp_agents_dir("gaps");
+        write_agent_toml(&agents, "assistant", "name = \"assistant\"\n");
+        let dm = test_dm();
+        let m = seed_manifest_from_disk(&agents, "assistant", &dm).expect("disk TOML should seed");
+        assert_eq!(m.name, "assistant");
+        assert_eq!(m.model.provider, "gemini");
+        assert_eq!(m.model.model, "gemini-3-flash-preview");
+        assert_eq!(m.model.api_key_env.as_deref(), Some("GEMINI_API_KEY"));
+        std::fs::remove_dir_all(agents.parent().unwrap()).ok();
+    }
+
+    #[test]
+    fn test_seed_manifest_from_disk_missing_returns_none() {
+        let dm = test_dm();
+        assert!(seed_manifest_from_disk(
+            std::path::Path::new("/nonexistent-openfang-agents"),
+            "assistant",
+            &dm
+        )
+        .is_none());
+    }
+
+    #[test]
+    fn test_resolve_fallback_base_url_isolates_providers() {
+        let dm = test_dm();
+        // Different provider, no explicit URL: must use the provider's own
+        // URL -- never inherit default_model.base_url.
+        let url = resolve_fallback_base_url(None, "anthropic", &dm, false, |_| {
+            Some("https://api.anthropic.com".to_string())
+        });
+        assert_eq!(url.as_deref(), Some("https://api.anthropic.com"));
+    }
+
+    #[test]
+    fn test_resolve_fallback_base_url_inherits_for_default() {
+        let dm = test_dm();
+        let url = resolve_fallback_base_url(None, "gemini", &dm, true, |_| None);
+        assert_eq!(url.as_deref(), Some("http://127.0.0.1:25100/v1"));
+    }
+
+    #[test]
+    fn test_resolve_fallback_base_url_explicit_wins() {
+        let dm = test_dm();
+        let url = resolve_fallback_base_url(
+            Some("https://custom.example/v1".to_string()),
+            "anthropic",
+            &dm,
+            false,
+            |_| Some("https://api.anthropic.com".to_string()),
+        );
+        assert_eq!(url.as_deref(), Some("https://custom.example/v1"));
+    }
+
+    #[test]
+    fn test_resolve_reload_config_path_prefers_boot_path() {
+        let mut cfg = KernelConfig::default();
+        cfg.config_path = Some(std::path::PathBuf::from(
+            "/home/toxic/sovereign/config/openfang-25196.toml",
+        ));
+        assert_eq!(
+            OpenFangKernel::resolve_reload_config_path(&cfg),
+            std::path::PathBuf::from("/home/toxic/sovereign/config/openfang-25196.toml")
+        );
+    }
+
+    #[test]
+    fn test_resolve_reload_config_path_falls_back_to_home_dir() {
+        let cfg = KernelConfig::default();
+        assert_eq!(
+            OpenFangKernel::resolve_reload_config_path(&cfg),
+            cfg.home_dir.join("config.toml")
+        );
     }
 }

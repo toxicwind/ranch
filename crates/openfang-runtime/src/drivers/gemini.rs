@@ -725,7 +725,12 @@ impl LlmDriver for GeminiDriver {
                     return Err(LlmError::AuthenticationFailed(message));
                 }
                 if status == 404 {
-                    return Err(LlmError::ModelNotFound(message));
+                    // Body-aware: only a body that says the model is
+                    // unknown becomes ModelNotFound (eligible for
+                    // cross-provider fallback). A path/composition 404
+                    // stays Api{404} so it fails fast instead of
+                    // masking a broken URL behind fallback.
+                    return Err(crate::llm_driver::classify_http_404(&body, message));
                 }
                 return Err(LlmError::Api { status, message });
             }
@@ -814,7 +819,12 @@ impl LlmDriver for GeminiDriver {
                     return Err(LlmError::AuthenticationFailed(message));
                 }
                 if status == 404 {
-                    return Err(LlmError::ModelNotFound(message));
+                    // Body-aware: only a body that says the model is
+                    // unknown becomes ModelNotFound (eligible for
+                    // cross-provider fallback). A path/composition 404
+                    // stays Api{404} so it fails fast instead of
+                    // masking a broken URL behind fallback.
+                    return Err(crate::llm_driver::classify_http_404(&body, message));
                 }
                 return Err(LlmError::Api { status, message });
             }
