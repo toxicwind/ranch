@@ -520,7 +520,7 @@
       "updated": "2026-09-19T02:32:49.225455345-06:00"
     },
     {
-      "command": "/home/toxic/sovereign/projects/mesh/bin/openfang-mcp-shim.py",
+      "command": "/home/toxic/sovereign/projects/range/bin/openfang-mcp-shim.py",
       "created": "2026-09-19T02:46:46.338368942-06:00",
       "enabled": true,
       "name": "openfang",

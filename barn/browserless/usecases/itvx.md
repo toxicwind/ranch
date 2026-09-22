@@ -12,7 +12,7 @@ browserless (:25130).
 ## Running this use case against the generic service
 
 - Live endpoint: http://127.0.0.1:25130 (token from 0600 /home/toxic/.browserless/.env, never committed)
-- MCP server: projects/mesh/browserless (initialize_browserless defaults to 127.0.0.1:25130)
+- MCP server: projects/range/ranch/barn/browserless (initialize_browserless defaults to 127.0.0.1:25130)
 - Working endpoints: /content (extraction), /pdf (generation). /screenshot timed
   out under test load; /function needs a different payload format. See TEST_RESULTS.md.
 

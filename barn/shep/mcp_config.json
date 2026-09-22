@@ -147,7 +147,7 @@
    },
    "health_check_interval": "15s",
    "tool_discovery_interval": "2m0s",
-   "quarantine_reason": "uvx agent-mcp-gateway exits: config file /home/toxic/sovereign/projects/mesh/gateway/config/.mcp.json not found; shep now reports ENDPOINT DEPRECATED. Quarantined 2026-09-20 by yote-surgeon.",
+   "quarantine_reason": "uvx agent-mcp-gateway exits: config file /home/toxic/sovereign/projects/range/ranch/barn/shep/config/.mcp.json not found; shep now reports ENDPOINT DEPRECATED. Quarantined 2026-09-20 by yote-surgeon.",
    "quarantined_at": "2026-09-20T16:29:36.689341-06:00",
    "quarantined_by": "yote-surgeon"
   },
@@ -537,7 +537,7 @@
   {
    "name": "openfang",
    "protocol": "stdio",
-   "command": "/home/toxic/sovereign/projects/mesh/bin/openfang-mcp-shim.py",
+   "command": "/home/toxic/sovereign/projects/range/bin/openfang-mcp-shim.py",
    "oauth": null,
    "enabled": true,
    "quarantined": false,

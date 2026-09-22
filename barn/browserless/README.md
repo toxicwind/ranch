@@ -2,7 +2,7 @@
 
 Browser automation for the fleet: the **browserless.io MCP server** plus the
 **native-launcher deployment** of the browserless server itself, unified
-in one mesh project at `projects/mesh/browserless/` (visible as `mesh/browserless/`).
+under the ranch monorepo at `projects/range/ranch/barn/browserless/`.
 
 ## Topology (the real serve path)
 
@@ -59,7 +59,7 @@ It is sourced at launch, never printed, never logged, never committed.
 ## Layout
 
 ```text
-projects/mesh/browserless/
+projects/range/ranch/barn/browserless/
 ├── src/                    # MCP server (index.ts, client.ts, simple-server.ts, types.ts)
 ├── server/
 │   ├── run.sh              # native launcher (pitchfork runs this)
@@ -89,7 +89,7 @@ curl -s -o /dev/null -w '%{http_code}\n' "http://127.0.0.1:25130/pressure?token=
 ## Running the MCP server
 
 ```bash
-cd projects/mesh/browserless
+cd projects/range/ranch/barn/browserless
 npm ci            # or npm install
 npm run build     # tsc -> dist/
 # stdio MCP server, talks to the live 127.0.0.1:25130 by default
@@ -110,7 +110,7 @@ Registered in the mesh MCP registry
 `dist/` and `node_modules/` are gitignored build artifacts — rebuild them:
 
 ```bash
-cd projects/mesh/browserless
+cd projects/range/ranch/barn/browserless
 /usr/bin/node --version   # want v24.x; the mise node 22.12.0 npm is BROKEN
                           # on yote (missing nopt module) — never use bare
                           # `npm` under mise node 22

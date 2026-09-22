@@ -13,7 +13,7 @@
                 Layout.alignment: Qt.AlignVCenter
                 toolTipText: Translation.tr("Show/hide keeper browser")
                 onClicked: {
-                    Quickshell.execDetached(["/home/toxic/sovereign/projects/mesh/browserless/keeper/browser-toggle.sh"]);
+                    Quickshell.execDetached(["/home/toxic/sovereign/projects/range/ranch/barn/browserless/keeper/browser-toggle.sh"]);
                 }
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter

@@ -50,7 +50,7 @@ The repo MCP server is a **stdio** server — no port, no daemon. Build once,
 launch per client session:
 
 ```bash
-cd projects/mesh/browserless
+cd projects/range/ranch/barn/browserless
 npm install && npm run build   # tsc -> dist/ (dist/ and node_modules/ are gitignored build artifacts)
 ./mcp.sh                        # exec node dist/index.js on stdio
 ```
@@ -58,7 +58,7 @@ npm install && npm run build   # tsc -> dist/ (dist/ and node_modules/ are gitig
 Registered in the mesh MCP registry
 (`/home/toxic/projects/my-ai-tools/configs/mcp-registry.json`) as
 `browserless-mcp` -> command
-`/home/toxic/sovereign/projects/mesh/browserless/mcp.sh`.
+`/home/toxic/sovereign/projects/range/ranch/barn/browserless/mcp.sh`.
 The `persistent_*` tools attach to the keeper CDP at `127.0.0.1:9223`
 (override: `BROWSER_KEEPER_CDP`); keeper state file
 `/home/toxic/.browserless/keeper/status.json` (override:

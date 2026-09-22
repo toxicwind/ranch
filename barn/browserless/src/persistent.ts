@@ -1,6 +1,6 @@
 // Production-grade client for the browser-keeper persistent Chromium.
 //
-// The keeper (projects/mesh/browserless/keeper) owns ONE headed Chromium on
+// The keeper (projects/range/ranch/barn/browserless/keeper) owns ONE headed Chromium on
 // the nv-audit profile and exposes CDP on 127.0.0.1:9223. These tools attach
 // to THAT browser via chromium.connectOverCDP instead of spawning ephemeral
 // sessions, so logins, tabs and state survive across tasks. No
