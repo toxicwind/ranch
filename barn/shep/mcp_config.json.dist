@@ -394,7 +394,7 @@
     },
     {
       "auto_approve_tool_changes": true,
-      "command": "/home/toxic/sovereign/mesh/gateway/bin/github-mcp.sh",
+      "command": "/home/toxic/sovereign/projects/range/ranch/barn/shep/bin/github-mcp.sh",
       "created": "2026-09-19T00:28:53.936591-06:00",
       "enabled": true,
       "health_check_interval": "15s",

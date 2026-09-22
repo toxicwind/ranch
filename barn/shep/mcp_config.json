@@ -410,7 +410,7 @@
   {
    "name": "github",
    "protocol": "stdio",
-   "command": "/home/toxic/sovereign/mesh/gateway/bin/github-mcp.sh",
+   "command": "/home/toxic/sovereign/projects/range/ranch/barn/shep/bin/github-mcp.sh",
    "oauth": null,
    "enabled": true,
    "quarantined": false,
