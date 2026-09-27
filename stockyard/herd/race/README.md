@@ -49,7 +49,7 @@ client -> :25100 (herd) -> peer herd-race -> :25161 (this service)
   Observed 2026-09-20: Kimi's 401 route parked itself after 3 races.
 - Persistent HTTP/2 transports, tuned pools; microsecond/monotonic timing
   on every attempt.
-- JSONL winner history: `~/.cache/shingle/hft_race_winners.jsonl` (tag
+- JSONL winner history: `~/.cache/fleet-bus/hft_race_winners.jsonl` (tag
   `herd/race`); startup seeds latency/wins from it so the racer leads with
   historical winners.
 - Telemetry: `X-Race-Winner`, `X-Race-Attempts` (per-contestant ms),

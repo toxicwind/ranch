@@ -1,24 +1,71 @@
-# UI consolidation — handoff
+# UI consolidation
 
-**Status: in progress. `ui/` at the range level is the master. The work below is
-what is left.**
+**Status: the fork reconciliation is DONE (commit `368bdf6`). The master is
+`ui/` at the range level. The duplicate dashboards are gone. What remains is
+wiring, listed at the end.**
 
-Read this before touching `ui/`. It records what the consolidation is for, what
-is already committed, and exactly which fork regression still has to be
-reconciled.
+## Correction: upstream, not `herd/ui`, is the donor
+
+An earlier version of this document said to port the dropped capability out of
+`herd/ui` by hand. That was wrong, and acting on it would have re-derived work
+upstream had already done.
+
+The real upstream is **`mostlygeek/llama-swap`** (5.7k stars, pushed daily). Its
+`ui/` typechecks at **0 errors**; our fork carried **126**. Our fork was not
+"missing capability that `herd/ui` still had" — it had been edited *downward*
+after `d39a6f8` while upstream moved on. `ModelsDash.svelte` went from 297 lines
+to a 13-line stub; `types.ts` lost `ToolCall`, `PhaseStats`, `GenerationStats`
+and `isToolCallOnlyTurn`, which the rest of the fork still imported. Every one
+of the 126 errors was a symptom of those deletions.
+
+So the fix was a real 3-way merge against upstream's last pre-fork state
+(`40b36d9`, 2026-09-16), not a port. Note that `git merge-file` preserves
+deletions, so a "clean" merge still lost upstream's code — the regression had to
+be classified file by file:
+
+- 22 files whose export surface was a strict subset of upstream's, with no local
+  exports: taken verbatim. A fork-only edit there is a deletion by definition.
+- 11 more resolved the same way once the 3-way merge came back clean.
+- `stores/api.ts`: upstream had already moved the log streams into
+  `stores/logs.ts` and replaced the shell helpers, so the fork's
+  `loadPlaygroundModels`/`listModels` were unreferenced outside the file and
+  `proxyLogs`/`upstreamLogs` had already moved. Taken upstream.
+- `ActivityTable.svelte`: upstream is a superset, and its drag reorder uses
+  midpoint hysteresis the fork's version lacked. Taken upstream.
+- Kept locally: `ExpandableTextarea`'s IME guard, `AudioInterface`'s
+  `MAX_FILE_SIZE`, `ModelDetailsTab`'s `capabilityLabels`, plus `apiBase.ts`,
+  `surfaces.ts`, `ModelCard.svelte`, `PlaygroundStub.svelte`. `apiBase` was
+  re-applied by codemod to the 7 files upstream returned to bare `fetch()`.
+- Restored from upstream, which the fork had lost: `CopyableId`,
+  `MiddleTruncate`, `middleTruncate` + test, `stores/logs` + test.
+
+Verified at `368bdf6`: `bun run check` 0 errors 0 warnings, `bun run test` 433
+passed in 29 files, `bun run build` succeeds.
+
+## The duplicates are gone
+
+`stockyard/herd/ui`, `stockyard/herd/ui-svelte` and
+`stockyard/herd/mesh/ui-svelte` (747 tracked files) were removed. The last two
+were byte-identical, and the first had no consumer at all. `herd/mise.toml`
+wired `ui`/`ui:build` at `ui-svelte`; both now point at `../../ui`.
+
+`stockyard/tau/package.json` had 5 of 102 scripts copy-pasted from llama-swap
+referencing a `herd/` Go binary and a `ui-svelte/` that tau never had; they are
+repointed at tau's own `test:ts`/`test:rs`/`test:py` and `lint:ts`/`lint:rs`.
 
 ## Why this exists
 
 `herd/ui` was meant to become the master UI for the whole stack. It got forked
-into `ui/` at commit `d39a6f8` ("ranch: adopt herd UI as the ranch dashboard
-(apiBase-configurable, vite outDir dist)"), and the fork silently dropped a
-large slice of capability. The stack then grew six more front-ends
-independently, none of which the master knows about.
+into `ui/` at commit `d39a6f8`, and the stack then grew six more front-ends
+independently, none of which the master knows about. Two jobs: reconcile the
+fork (done) and make the master the master (the tab host — below).
 
-Two separate jobs, both unfinished:
+## The rest of this document is history
 
-1. Reconcile the fork — port the dropped capability out of `herd/ui`.
-2. Make the master the master — every sovereign surface as a tab.
+What follows is the pre-rebase investigation, kept because it records why the
+merge went the way it did. The 126-error map, the per-file port table, and the
+"port the dropped capability out of `herd/ui`" instruction are all superseded —
+see the correction at the top. Do not work from the port table.
 
 ## Do not restart the investigation
 
