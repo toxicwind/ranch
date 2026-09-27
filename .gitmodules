@@ -1,0 +1,25 @@
+# Submodules tracked by this repository.
+#
+# Every path listed here is recorded in the index as a gitlink (mode 160000).
+# Each needs a `url`, because `git submodule update --init` -- which is what
+# `git clone --recursive` runs -- has no way to obtain a gitlink's contents
+# without one. A gitlink with no entry here makes `git submodule status`
+# abort with:
+#
+#     fatal: no submodule mapping found in .gitmodules for path '<path>'
+#
+# and makes `git clone --recursive` fail outright after checkout.
+#
+# URLs are each checkout's own `origin`, verified with
+# `git remote get-url origin` from inside the submodule.
+#
+# NOTE: the four nested checkouts ignored in .gitignore
+# (/stockyard/vansrouter/, /stockyard/tau/, /stockyard/boundless/,
+# /barn/woodpecker/) are deliberately NOT listed here. They are ignored
+# rather than tracked, so they contribute no gitlinks and need no entry.
+[submodule "corral"]
+	path = corral
+	url = https://github.com/toxicwind/super-ralph.git
+[submodule "stockyard/paddock"]
+	path = stockyard/paddock
+	url = https://github.com/toxicwind/VansRouter.git

@@ -67,8 +67,9 @@ __pycache__/
 /stockyard/boundless/
 /barn/woodpecker/
 
-# NOTE: this repo has no .gitmodules at all. `corral` and `stockyard/paddock`
-# ARE registered as gitlinks (mode 160000) with no URL entry, so they -- not the
-# four paths above -- are what actually break `git clone --recursive`. They are
-# tracked on purpose, so they are deliberately NOT ignored here; the fix is to
-# add a .gitmodules, which is out of scope for this change.
+# `corral` and `stockyard/paddock` are ALSO nested checkouts, but unlike the
+# four paths above they are tracked on purpose: each is a gitlink (mode
+# 160000) with a path and url declared in .gitmodules, so `git clone
+# --recursive` can resolve them. Do not add them here -- an ignore rule does
+# not apply to a tracked gitlink, and removing their .gitmodules entries
+# would reintroduce `fatal: no submodule mapping found in .gitmodules`.
