@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "ui-svelte",
+      "name": "ranch-dashboard",
       "dependencies": {
         "@tanstack/table-core": "^8.21.3",
         "chart.js": "4.5.1",
