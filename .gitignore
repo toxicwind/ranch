@@ -30,3 +30,24 @@ id_ed25519*
 .aws/
 .gnupg/
 **/secrets/**
+
+# Sovereign standard sensitive & ephemeral patterns added by auditor
+.secrets
+*.env.local
+*.jsonl
+*.sqlite
+*.sqlite3
+*.sock
+*.pcap
+target/
+.cache/
+.bun/
+
+# Broken nested clone of smithersai/smithers. Its .git has no HEAD file, so
+# every `git -C smithers ...` silently resolves to THIS repo instead, and its
+# src/ tree is empty (0 files). It is never reached at runtime: the smithers
+# CLI is resolved from node_modules/smithers-orchestrator first (see
+# src/cli/index.ts findSmithersCliPath). Kept on disk only so the ~/smithers
+# and ~/sovereign/projects/smithers symlinks do not dangle. Handle via the
+# broken-.git cleanup, not via a commit.
+/smithers/

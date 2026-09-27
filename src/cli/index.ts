@@ -37,13 +37,13 @@ type ParsedArgs = {
 };
 
 function printHelp() {
-  console.log(`Sovereign Corral (corral / ralph) — Multi-Agent Engineering & Ticket Orchestration
+  console.log(`Sovereign Corral (corral / ralph / hyper / super-ralph / taskforge) — Multi-Agent Engineering & Ticket Orchestration
 
 Usage:
   corral "prompt text"
-  corral ./PROMPT.md
   ralph ./specs/feature.md --max-concurrency 8
-
+  hyper ./PROMPT.md
+  super-ralph ./PROMPT.md
 Options:
   --cwd <path>                    Repo root (default: current directory)
   --max-concurrency <n>           Workflow max concurrency override
