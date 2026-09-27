@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { formatDuration, formatSpeed, formatFileSize, formatRelativeTime } from "./format";
+import {
+  formatDuration,
+  formatSpeed,
+  formatFileSize,
+  formatCapacity,
+  formatRelativeTime,
+  formatAbsoluteTime,
+  formatUptime,
+} from "./format";
 
 describe("formatDuration", () => {
   it("defaults to seconds with 2 decimals", () => {
@@ -44,6 +52,17 @@ describe("formatFileSize", () => {
   });
 });
 
+describe("formatCapacity", () => {
+  it("formats binary hardware capacities", () => {
+    expect(formatCapacity(24 * 1024 ** 3)).toBe("24.0 GiB");
+    expect(formatCapacity(1.5 * 1024 ** 4)).toBe("1.50 TiB");
+  });
+
+  it("handles unavailable capacities", () => {
+    expect(formatCapacity(0)).toBe("Not detected");
+  });
+});
+
 describe("formatRelativeTime", () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -60,5 +79,36 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime("2026-06-28T09:00:00Z")).toBe("3h ago");
     const olderThanOneDay = new Date(2026, 5, 25, 12, 34, 56);
     expect(formatRelativeTime(olderThanOneDay.toISOString())).toBe("2026-06-25 12:34:56");
+  });
+});
+
+describe("formatAbsoluteTime", () => {
+  it("formats a timestamp in local time", () => {
+    expect(formatAbsoluteTime(new Date(2026, 0, 2, 3, 4, 5).toISOString())).toBe(
+      "2026-01-02 03:04:05"
+    );
+  });
+
+  it("is unaffected by how recent the timestamp is", () => {
+    expect(formatAbsoluteTime(new Date(2026, 11, 31, 23, 59, 59).toISOString())).toBe(
+      "2026-12-31 23:59:59"
+    );
+  });
+});
+
+describe("formatUptime", () => {
+  it("shows seconds under a minute", () => {
+    expect(formatUptime(0)).toBe("0s");
+    expect(formatUptime(42_900)).toBe("42s");
+  });
+
+  it("shows the two largest units", () => {
+    expect(formatUptime((5 * 60 + 12) * 1000)).toBe("5m 12s");
+    expect(formatUptime((2 * 3600 + 5 * 60 + 30) * 1000)).toBe("2h 5m");
+    expect(formatUptime((3 * 86400 + 4 * 3600 + 59 * 60) * 1000)).toBe("3d 4h");
+  });
+
+  it("clamps negative durations from clock skew to 0s", () => {
+    expect(formatUptime(-5000)).toBe("0s");
   });
 });

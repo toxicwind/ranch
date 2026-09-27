@@ -1,6 +1,6 @@
-import { api } from "./apiBase";
 import type { SpeechGenerationRequest } from "./types";
 import { playgroundSessionHeaders } from "./playgroundSession";
+import { api } from "./apiBase";
 
 export async function generateSpeech(
   model: string,

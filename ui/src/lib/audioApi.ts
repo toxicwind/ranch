@@ -1,6 +1,6 @@
-import { api } from "./apiBase";
 import type { AudioTranscriptionResponse } from "./types";
 import { playgroundSessionHeaders } from "./playgroundSession";
+import { api } from "./apiBase";
 
 export async function transcribeAudio(
   model: string,

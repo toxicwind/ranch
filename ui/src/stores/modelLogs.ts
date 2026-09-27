@@ -1,5 +1,5 @@
-import { api } from "../lib/apiBase";
 import { writable, type Readable } from "svelte/store";
+import { api } from "../lib/apiBase";
 
 const LOG_LENGTH_LIMIT = 1024 * 100; /* 100KB of log data */
 

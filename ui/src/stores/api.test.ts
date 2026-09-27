@@ -5,16 +5,20 @@ import {
   activityRevision,
   fetchPlaygroundModels,
   fetchProfiles,
+  fetchTailcatStatus,
+  getActivity,
+  getHardware,
   handleAPIEventMessage,
   hasListedModels,
   inFlightRequests,
   inflightRequestEntries,
-  loadPlaygroundModels,
   models,
   playgroundModels,
   profileModels,
   profiles,
+  selectorModels,
   setActiveProfile,
+  tailcatStatus,
   uiConfig,
 } from "./api";
 
@@ -24,9 +28,78 @@ afterEach(() => {
   playgroundModels.set([]);
   profiles.set([]);
   activeProfile.set(null);
+  tailcatStatus.set({ enabled: false, address: "", models: [] });
+});
+
+describe("tailcat api", () => {
+  it("fetches status and publishes it for conditional navigation", async () => {
+    const status = { enabled: true, address: "tcCaseSensitiveToken", models: ["chat"] };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => status }));
+
+    await expect(fetchTailcatStatus()).resolves.toEqual(status);
+    expect(fetch).toHaveBeenCalledWith("/api/tailcat");
+    expect(get(tailcatStatus)).toEqual(status);
+  });
+
+  it("requests literal Tailcat source-prefix pagination", async () => {
+    const page = { data: [], page: 2, limit: 10, total: 0, total_pages: 0 };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => page }));
+
+    await getActivity({ srcPrefix: "tc:", page: 2, limit: 10, sort: "src", order: "asc" });
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/metrics/activity?page=2&limit=10&sort=src&order=asc&src_prefix=tc%3A"
+    );
+  });
+});
+
+describe("hardware api", () => {
+  it("fetches the hardware snapshot", async () => {
+    const snapshot = {
+      schema_version: 1,
+      captured_at: "2026-08-03T12:00:00Z",
+      capture: { scope: "inference_host", method: "detected", detector: { name: "llama-swap", version: "246" } },
+      architecture: { name: "x86_64" },
+      operating_system: { family: "linux", name: "Ubuntu", version: "24.04", kernel: "6.8" },
+      environment: { kind: "native", name: null, version: null },
+      cpu: { vendor: "AMD", model: "Ryzen", socket_count: 1, physical_core_count: 16, logical_thread_count: 32 },
+      memory: { capacity_bytes: 1024 },
+      accelerators: [],
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => snapshot }));
+    await expect(getHardware()).resolves.toEqual(snapshot);
+    expect(fetch).toHaveBeenCalledWith("/api/hardware");
+  });
+
+  it("rejects unavailable hardware", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 503 }));
+    await expect(getHardware()).rejects.toThrow("Failed to fetch hardware: 503");
+  });
 });
 
 describe("api store event handling", () => {
+  it("anchors model uptime to the browser clock on receipt", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-26T12:00:00Z"));
+    try {
+      handleAPIEventMessage(
+        JSON.stringify({
+          type: "modelStatus",
+          data: JSON.stringify([
+            // readySince is an hour in the future, as a server clock that runs
+            // ahead would report it; uptimeMs is what the UI counts from.
+            { id: "ready", state: "ready", readySince: "2026-09-26T13:00:00Z", uptimeMs: 90_000 },
+            { id: "stopped", state: "stopped" },
+          ]),
+        })
+      );
+      const byId = Object.fromEntries(get(models).map((m) => [m.id, m]));
+      expect(byId.ready.readyAt).toBe(Date.parse("2026-09-26T12:00:00Z") - 90_000);
+      expect(byId.stopped.readyAt).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("parses inflight request entries", () => {
     inFlightRequests.set(0);
     inflightRequestEntries.set([]);
@@ -162,95 +235,80 @@ describe("api store event handling", () => {
     }));
   });
 
-  it("exposes active profile pins as Playground models", () => {
-    models.set([
-      {
-        id: "real",
-        state: "ready",
-        name: "Real",
-        description: "",
-        unlisted: true,
-        peerID: "",
-        aliases: ["variant"],
-        capabilities: { vision: true },
-      },
-      {
-        id: "peer-model",
-        state: "stopped",
-        name: "",
-        description: "",
-        unlisted: true,
-        peerID: "remote",
-      },
-    ]);
-    profiles.set([{
-      id: "coding",
-      description: "",
-      pins: {
-        public: "variant",
-        "remote-pin": "peer-model",
-        disabled: "",
-        real: "peer-model",
-        variant: "peer-model",
-      },
-    }]);
-    activeProfile.set("coding");
-
-    expect(get(profileModels).map((model) => model.id)).toEqual(["public", "remote-pin"]);
-    expect(get(profileModels)[0]).toMatchObject({
-      id: "public",
-      state: "ready",
-      unlisted: false,
-      capabilities: { vision: true },
-    });
-    expect(get(profileModels)[1]).toMatchObject({
-      id: "remote-pin",
-      peerID: "remote",
-      unlisted: false,
-    });
-    expect(get(hasListedModels)).toBe(true);
-
-    activeProfile.set(null);
-    expect(get(profileModels)).toEqual([]);
-    expect(get(hasListedModels)).toBe(false);
-  });
-
-  it("loads Playground models from /v1/models and populates playgroundModels store", async () => {
+  it("loads Playground models and virtual model types from v1/models", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
         data: [
           {
-            id: "model-1",
-            name: "Model One",
-            context_length: 4096,
+            id: "real",
+            name: "Real",
             capabilities: { vision: true },
-            meta: { llamaswap: { type: "model", aliases: ["alias-1"] } },
+            architecture: { input_modalities: ["text", "image"], output_modalities: ["text"] },
+            meta: { llamaswap: { type: "model", aliases: ["variant", "alternate"] } },
           },
           {
-            id: "alias-1",
-            meta: { llamaswap: { type: "alias", modelID: "model-1" } },
+            id: "variant",
+            meta: { llamaswap: { type: "alias", modelID: "real" } },
+          },
+          {
+            id: "remote/remote-model",
+            meta: { llamaswap: { type: "peer", peerID: "remote" } },
+          },
+          {
+            id: "pool",
+            meta: {
+              llamaswap: {
+                type: "selector",
+                strategy: "spillover",
+                targets: ["real", "remote/remote-model"],
+                spillover: 4,
+              },
+            },
+          },
+          {
+            id: "public",
+            meta: { llamaswap: { type: "profile" } },
           },
         ],
       }),
     });
     vi.stubGlobal("fetch", mockFetch);
 
-    const result = await loadPlaygroundModels();
+    await fetchPlaygroundModels();
+
     expect(mockFetch).toHaveBeenCalledWith("/v1/models");
-    expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({
-      id: "model-1",
-      name: "Model One",
-      context_length: 4096,
-      aliases: ["alias-1"],
+    expect(get(playgroundModels).map((model) => model.id)).not.toContain("variant");
+    expect(get(playgroundModels).find((model) => model.id === "real")).toMatchObject({
+      aliases: ["variant", "alternate"],
       capabilities: { vision: true },
+      modalities: { in: ["text", "image"], out: ["text"] },
       playgroundType: "model",
     });
-    expect(get(playgroundModels)).toEqual(result);
+    // Models without an architecture block report no modalities at all.
+    expect(get(playgroundModels).find((model) => model.id === "remote/remote-model")).toMatchObject({
+      modalities: { in: [], out: [] },
+    });
+    expect(get(playgroundModels).find((model) => model.id === "remote/remote-model")).toMatchObject({
+      peerID: "remote",
+      playgroundType: "peer",
+    });
+    expect(get(selectorModels).map((model) => model.id)).toEqual(["pool"]);
+    expect(get(selectorModels)[0]).toMatchObject({
+      strategy: "spillover",
+      targets: ["real", "remote/remote-model"],
+      spillover: 4,
+    });
+    expect(get(profileModels).map((model) => model.id)).toEqual(["public"]);
+    expect(get(hasListedModels)).toBe(true);
+
+    playgroundModels.set([]);
+    expect(get(selectorModels)).toEqual([]);
+    expect(get(profileModels)).toEqual([]);
+    expect(get(hasListedModels)).toBe(false);
   });
 
-  it("coalesces overlapping fetchPlaygroundModels calls", async () => {
+  it("coalesces overlapping Playground model refreshes", async () => {
     type ModelResponse = {
       ok: boolean;
       json: () => Promise<{ data: [] }>;

@@ -1,17 +1,19 @@
 <script lang="ts">
   import { link } from "svelte-spa-router";
-  import { FerrisWheel, Boxes, Activity, ScrollText, Gauge, Sun, Moon, Monitor, ChevronRight, Settings } from "@lucide/svelte";
+  import { FerrisWheel, Boxes, Activity, Cat, ScrollText, Gauge, Cpu, Sun, Moon, Monitor, ChevronRight, Settings, CircleQuestionMark } from "@lucide/svelte";
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import * as Collapsible from "$lib/components/ui/collapsible/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { toggleTheme, themeMode, appTitle } from "../stores/theme";
   import { currentRoute } from "../stores/route";
-  import { playgroundActivity } from "../stores/playgroundActivity";
-  import { performanceEnabled, models } from "../stores/api";
+  import { playgroundActivity, docsAgentStreaming } from "../stores/playgroundActivity";
+  import { performanceEnabled, models, tailcatStatus } from "../stores/api";
   import { showUnlistedModels } from "../stores/modelDisplay";
   import { modelsMenuOpen } from "../stores/sidebar";
   import type { Model } from "../lib/types";
+  import { isComposingKey } from "../lib/ime";
   import ConnectionStatus from "./ConnectionStatus.svelte";
+  import MiddleTruncate from "./MiddleTruncate.svelte";
 
   function handleTitleChange(newTitle: string): void {
     const sanitized = newTitle.replace(/\n/g, "").trim().substring(0, 64) || "llama-swap";
@@ -19,7 +21,7 @@
   }
 
   function handleKeyDown(e: KeyboardEvent): void {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !isComposingKey(e)) {
       e.preventDefault();
       const target = e.currentTarget as HTMLElement;
       handleTitleChange(target.textContent || "(set title)");
@@ -36,8 +38,11 @@
     return path === "/" ? current === "/" : current.startsWith(path);
   }
 
-  let visibleModels = $derived(
-    $showUnlistedModels ? $models : $models.filter((m) => !m.unlisted),
+  let visibleLocalModels = $derived(
+    $models.filter((model) => !model.peerID && ($showUnlistedModels || !model.unlisted)),
+  );
+  let visiblePeerModels = $derived(
+    $models.filter((model) => model.peerID && ($showUnlistedModels || !model.unlisted)),
   );
 
   type DotColor = "grey" | "yellow" | "green";
@@ -53,6 +58,21 @@
     green: "bg-success",
   };
 </script>
+
+{#snippet modelMenuItem(model: Model)}
+  <Sidebar.MenuSubItem>
+    <Sidebar.MenuSubButton
+      isActive={$currentRoute === `/models/${encodeURIComponent(model.id)}`}
+    >
+      {#snippet child({ props })}
+        <a href="/models/{encodeURIComponent(model.id)}" use:link {...props}>
+          <span class={`size-2 shrink-0 rounded-full ${dotClass[statusDotColor(model)]}`}></span>
+          <MiddleTruncate text={model.id} class="flex-1" />
+        </a>
+      {/snippet}
+    </Sidebar.MenuSubButton>
+  </Sidebar.MenuSubItem>
+{/snippet}
 
 <Sidebar.Root collapsible="icon">
   <Sidebar.Header>
@@ -85,6 +105,19 @@
               {/snippet}
             </Sidebar.MenuButton>
           </Sidebar.MenuItem>
+
+          {#if $tailcatStatus.enabled}
+            <Sidebar.MenuItem>
+              <Sidebar.MenuButton isActive={isActive("/tailcat", $currentRoute)} tooltipContent="Tailcat">
+                {#snippet child({ props })}
+                  <a href="/tailcat" use:link {...props}>
+                    <Cat />
+                    <span>Tailcat</span>
+                  </a>
+                {/snippet}
+              </Sidebar.MenuButton>
+            </Sidebar.MenuItem>
+          {/if}
 
           <Sidebar.MenuItem>
             <Sidebar.MenuButton isActive={isActive("/playground", $currentRoute)} tooltipContent="Playground">
@@ -136,20 +169,17 @@
               </Sidebar.MenuButton>
               <Collapsible.Content>
                 <Sidebar.MenuSub>
-                  {#each visibleModels as model (model.id)}
-                    <Sidebar.MenuSubItem>
-                      <Sidebar.MenuSubButton
-                        isActive={$currentRoute === `/models/${encodeURIComponent(model.id)}`}
-                      >
-                        {#snippet child({ props })}
-                          <a href="/models/{encodeURIComponent(model.id)}" use:link {...props}>
-                            <span class={`size-2 shrink-0 rounded-full ${dotClass[statusDotColor(model)]}`}></span>
-                            <span class="flex-1 truncate">{model.id}</span>
-                          </a>
-                        {/snippet}
-                      </Sidebar.MenuSubButton>
-                    </Sidebar.MenuSubItem>
+                  {#each visibleLocalModels as model (model.id)}
+                    {@render modelMenuItem(model)}
                   {/each}
+                  {#if visiblePeerModels.length > 0}
+                    <li class="text-sidebar-foreground/70 px-2 pt-2 pb-1 text-xs font-medium">
+                      Peers
+                    </li>
+                    {#each visiblePeerModels as model (model.id)}
+                      {@render modelMenuItem(model)}
+                    {/each}
+                  {/if}
                 </Sidebar.MenuSub>
               </Collapsible.Content>
             </Collapsible.Root>
@@ -178,14 +208,38 @@
               </Sidebar.MenuButton>
             </Sidebar.MenuItem>
           {/if}
+
+          <Sidebar.MenuItem>
+            <Sidebar.MenuButton isActive={isActive("/hardware", $currentRoute)} tooltipContent="Hardware">
+              {#snippet child({ props })}
+                <a href="/hardware" use:link {...props}>
+                  <Cpu />
+                  <span>Hardware</span>
+                </a>
+              {/snippet}
+            </Sidebar.MenuButton>
+          </Sidebar.MenuItem>
         </Sidebar.Menu>
       </Sidebar.GroupContent>
     </Sidebar.Group>
   </Sidebar.Content>
 
   <Sidebar.Footer>
+    <Sidebar.Menu>
+      <Sidebar.MenuItem>
+        <Sidebar.MenuButton isActive={isActive("/help", $currentRoute)} tooltipContent="Help">
+          {#snippet child({ props })}
+            <a href="/help" use:link {...props}>
+              <CircleQuestionMark />
+              <span class={$docsAgentStreaming ? "activity-link" : ""}>Help</span>
+            </a>
+          {/snippet}
+        </Sidebar.MenuButton>
+      </Sidebar.MenuItem>
+    </Sidebar.Menu>
+
     <div
-      class="flex items-center justify-between gap-2 px-1 group-data-[collapsible=icon]:flex-col-reverse"
+      class="flex items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col-reverse"
     >
       <Sidebar.MenuButton
         isActive={isActive("/settings", $currentRoute)}

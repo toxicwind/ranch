@@ -2,6 +2,7 @@
   import { hasListedModels } from "../../stores/api";
   import { createPlaygroundInterface } from "../../lib/playgroundInterface";
   import { rerank } from "../../lib/rerankApi";
+  import { isSubmitEnter } from "../../lib/ime";
   import { playgroundStores } from "../../stores/playgroundActivity";
   import ModelSelector from "./ModelSelector.svelte";
   import EmptyState from "../EmptyState.svelte";
@@ -232,7 +233,7 @@
   }
 
   function handleKeyDown(e: KeyboardEvent) {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (isSubmitEnter(e)) {
       e.preventDefault();
       submit();
     }
@@ -251,7 +252,12 @@
 <div class="flex flex-col h-full">
   <!-- Top bar: model selector + query input (table mode) + mode toggle -->
   <div class="shrink-0 flex flex-wrap gap-2 mb-4">
-    <ModelSelector bind:value={$selectedModelStore} placeholder="Select a rerank model..." disabled={isLoading} capabilities={["reranker"]} />
+    <ModelSelector
+      bind:value={$selectedModelStore}
+      placeholder="Select a rerank model..."
+      disabled={isLoading}
+      match={{ capabilities: ["reranker"] }}
+    />
     {#if editorMode === "table"}
       <Input
         type="text"

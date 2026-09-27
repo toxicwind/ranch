@@ -9,6 +9,7 @@
   import ExpandableTextarea from "./ExpandableTextarea.svelte";
   import EmptyState from "../EmptyState.svelte";
   import type { ImageApiMode, SdApiLora, SdApiLoraRef } from "../../lib/types";
+  import { isSubmitEnter } from "../../lib/ime";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
   import { Textarea } from "$lib/components/ui/textarea/index.js";
@@ -161,7 +162,7 @@
   }
 
   function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (isSubmitEnter(event)) {
       event.preventDefault();
       generate();
     }
@@ -171,7 +172,12 @@
 <div class="flex flex-col h-full">
   <!-- Model selector and mode toggle -->
   <div class="shrink-0 flex flex-wrap gap-2 mb-4">
-    <ModelSelector bind:value={$selectedModelStore} placeholder="Select an image model..." disabled={isGenerating} capabilities={["image_generation", "image_to_image"]} matchAny={true} />
+    <ModelSelector
+      bind:value={$selectedModelStore}
+      placeholder="Select an image model..."
+      disabled={isGenerating}
+      match={{ outputModalities: ["image"] }}
+    />
 
     <Select.Root
       type="single"

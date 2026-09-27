@@ -28,28 +28,6 @@ export function formatFileSize(bytes: number): string {
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
 
-/** Format a timestamp as a relative time or local timestamp when older than a day. */
-export function formatRelativeTime(timestamp: string): string {
-  const now = new Date();
-  const date = new Date(timestamp);
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (diffInSeconds < 5) return "now";
-  if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours}h ago`;
-  const datePart = [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, "0"),
-    String(date.getDate()).padStart(2, "0"),
-  ].join("-");
-  const timePart = [date.getHours(), date.getMinutes(), date.getSeconds()]
-    .map((value) => String(value).padStart(2, "0"))
-    .join(":");
-  return `${datePart} ${timePart}`;
-}
-
 /** Format a hardware capacity using binary units through TiB. */
 export function formatCapacity(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return "Not detected";
@@ -62,4 +40,47 @@ export function formatCapacity(bytes: number): string {
   }
   const precision = unit < 2 || value >= 100 ? 0 : value >= 10 ? 1 : 2;
   return `${value.toFixed(precision)} ${units[unit]}`;
+}
+
+/** Format a timestamp as a local "YYYY-MM-DD HH:mm:ss" string. */
+export function formatAbsoluteTime(timestamp: string): string {
+  const date = new Date(timestamp);
+  const datePart = [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-");
+  const timePart = [date.getHours(), date.getMinutes(), date.getSeconds()]
+    .map((value) => String(value).padStart(2, "0"))
+    .join(":");
+  return `${datePart} ${timePart}`;
+}
+
+/** Format a timestamp as a relative time or local timestamp when older than a day. */
+export function formatRelativeTime(timestamp: string): string {
+  const now = new Date();
+  const date = new Date(timestamp);
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (diffInSeconds < 5) return "now";
+  if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+  return formatAbsoluteTime(timestamp);
+}
+
+/**
+ * Format an elapsed duration in ms as a compact uptime using the same unit
+ * suffixes as formatRelativeTime, showing the two largest units:
+ * "42s", "5m 12s", "2h 5m", "3d 4h".
+ */
+export function formatUptime(ms: number): string {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  if (totalMinutes < 60) return `${totalMinutes}m ${totalSeconds % 60}s`;
+  const totalHours = Math.floor(totalMinutes / 60);
+  if (totalHours < 24) return `${totalHours}h ${totalMinutes % 60}m`;
+  return `${Math.floor(totalHours / 24)}d ${totalHours % 24}h`;
 }

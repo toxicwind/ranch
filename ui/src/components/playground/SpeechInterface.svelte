@@ -1,5 +1,4 @@
 <script lang="ts">
-import { api } from "../../lib/apiBase";
   import { hasListedModels } from "../../stores/api";
   import { persistentStore } from "../../stores/persistent";
   import { createPlaygroundInterface } from "../../lib/playgroundInterface";
@@ -12,6 +11,8 @@ import { api } from "../../lib/apiBase";
   import * as Select from "$lib/components/ui/select/index.js";
   import { RefreshCw, Download } from "@lucide/svelte";
   import { playgroundSessionHeaders } from "../../lib/playgroundSession";
+  import { isSubmitEnter } from "../../lib/ime";
+import { api } from "../../lib/apiBase";
 
   const iface = createPlaygroundInterface("playground-speech-model", playgroundStores.speechGenerating);
   const selectedModelStore = iface.selectedModel;
@@ -212,7 +213,7 @@ import { api } from "../../lib/apiBase";
   }
 
   function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (isSubmitEnter(event)) {
       event.preventDefault();
       generate();
     }
@@ -222,7 +223,12 @@ import { api } from "../../lib/apiBase";
 <div class="flex flex-col h-full">
   <!-- Model and voice selectors -->
   <div class="shrink-0 flex gap-2 mb-4">
-    <ModelSelector bind:value={$selectedModelStore} placeholder="Select a speech model..." disabled={isGenerating} capabilities={["audio_speech"]} />
+    <ModelSelector
+      bind:value={$selectedModelStore}
+      placeholder="Select a speech model..."
+      disabled={isGenerating}
+      match={{ inputModalities: ["text"], outputModalities: ["audio"] }}
+    />
     <div class="flex gap-2">
       <Select.Root
         type="single"

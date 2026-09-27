@@ -1,5 +1,5 @@
-import { api } from "./apiBase";
 import { playgroundSessionHeaders } from "./playgroundSession";
+import { api } from "./apiBase";
 
 export interface RerankResult {
   index: number;

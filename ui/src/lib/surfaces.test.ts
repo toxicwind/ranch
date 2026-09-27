@@ -13,6 +13,18 @@ import {
 // no origin (which would render an empty frame), or an id that does not match
 // the label. These assert the invariants that make the tab strip usable.
 
+// A required field the assertions never read is one more thing to update when
+// Surface grows, so the fixtures build through a factory instead of repeating
+// the whole shape.
+const surface = (overrides: Partial<Surface> & Pick<Surface, "id">): Surface => ({
+	label: overrides.id.toUpperCase(),
+	group: "Ops",
+	origin: "",
+	kind: "api",
+	description: "test surface",
+	...overrides,
+});
+
 describe("surface registry", () => {
 	it("has unique ids", () => {
 		const ids = SURFACES.map((surface) => surface.id);
@@ -62,22 +74,13 @@ describe("surface registry", () => {
 	});
 
 	it("keeps surfaces in registry order when probing", async () => {
-		const surfaces: Surface[] = [
-			{ id: "a", label: "A", group: "Ops", origin: "", kind: "api" },
-			{ id: "b", label: "B", group: "Ops", origin: "", kind: "api" },
-		];
+		const surfaces: Surface[] = [surface({ id: "a" }), surface({ id: "b" })];
 		const health = await probeAllSurfaces(surfaces);
 		expect([...health.keys()]).toEqual(["a", "b"]);
 	});
 
 	it("reports a same-origin surface as up without a request", async () => {
-		const health = await probeSurface({
-			id: "a",
-			label: "A",
-			group: "Ops",
-			origin: "",
-			kind: "api",
-		});
+		const health = await probeSurface(surface({ id: "a" }));
 		expect(health.status).toBe("up");
 	});
 });

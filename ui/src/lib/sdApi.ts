@@ -1,6 +1,6 @@
-import { api } from "./apiBase";
 import type { SdApiTxt2ImgRequest, SdApiResponse, SdApiLora } from "./types";
 import { playgroundSessionHeaders } from "./playgroundSession";
+import { api } from "./apiBase";
 
 export async function generateSdImage(
   request: SdApiTxt2ImgRequest,
