@@ -22,17 +22,29 @@ import os
 import socket
 import struct
 import time
+from pathlib import Path
+
+
+# ---------------------------------------------------------------------------
+# State dir resolution (was hardcoded to /home/toxic/squawk-ws).
+# Default: directory containing this script.
+# Override: SQUAWK_WS_CLIENT_STATE_DIR=/path/to/dir
+# ---------------------------------------------------------------------------
+_HERE = Path(__file__).resolve().parent
+STATE_DIR = Path(os.environ.get("SQUAWK_WS_CLIENT_STATE_DIR", str(_HERE)))
+STATE_DIR.mkdir(parents=True, exist_ok=True)
+
 
 HOST = os.environ.get("SQUAWK_WS_HOST", "127.0.0.1")
 PORT = int(os.environ.get("SQUAWK_WS_PORT", "25147"))
 WS_PATH = "/squawk-ws"
 TOKEN_FILE = os.environ.get("SQUAWK_WS_TOKEN_FILE", "/home/toxic/.squawk-ws-token")
 SPOOL = os.environ.get("SQUAWK_WS_CLIENT_SPOOL",
-                       "/home/toxic/squawk-ws/client-spool.jsonl")
+                       str(STATE_DIR / "client-spool.jsonl"))
 CURSOR = os.environ.get("SQUAWK_WS_CLIENT_CURSOR",
-                        "/home/toxic/squawk-ws/client-cursor.json")
+                        str(STATE_DIR / "client-cursor.json"))
 HEARTBEAT = os.environ.get("SQUAWK_WS_CLIENT_HEARTBEAT",
-                           "/home/toxic/squawk-ws/client-heartbeat")
+                           str(STATE_DIR / "client-heartbeat"))
 CHANNELS = [c for c in os.environ.get("SQUAWK_WS_CHANNELS", "fleet,leads").split(",") if c]
 PING_EVERY = 20
 STALE_AFTER = 60

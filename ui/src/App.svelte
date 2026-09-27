@@ -39,6 +39,9 @@
     "/activity": wrap({ asyncComponent: () => import("./routes/Activity.svelte"), loadingComponent: RouteLoading }),
     "/settings": wrap({ asyncComponent: () => import("./routes/Settings.svelte"), loadingComponent: RouteLoading }),
     "/performance": wrap({ asyncComponent: () => import("./routes/Performance.svelte"), loadingComponent: RouteLoading }),
+    "/tailcat": wrap({ asyncComponent: () => import("./routes/Tailcat.svelte"), loadingComponent: RouteLoading }),
+    "/hardware": wrap({ asyncComponent: () => import("./routes/Hardware.svelte"), loadingComponent: RouteLoading }),
+    "/help": wrap({ asyncComponent: () => import("./routes/Help.svelte"), loadingComponent: RouteLoading }),
     "*": wrap({ asyncComponent: () => import("./routes/Activity.svelte"), loadingComponent: RouteLoading }),
   };
 
@@ -50,8 +53,10 @@
     "/logs": "Logs",
     "/settings": "Settings",
     "/performance": "Performance",
+    "/tailcat": "Tailcat",
+    "/hardware": "Hardware",
+    "/help": "Help",
   };
-
   let sectionTitle = $derived.by(() => {
     if ($currentRoute === "/playground") {
       const tab = playgroundTabs.find((t) => t.id === $selectedPlaygroundTab);

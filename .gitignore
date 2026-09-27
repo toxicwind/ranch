@@ -1,0 +1,42 @@
+# Sovereign standard sensitive & ephemeral patterns added by auditor
+.secrets
+*.key
+*.pat
+github_*_pat.json
+*.env.local
+*.jsonl
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.sock
+*.log
+*.pcap
+node_modules/
+target/
+dist/
+.cache/
+.bun/
+
+# mcpproxy-go (barn/gatehouse) rewrites its EFFECTIVE config on every start,
+# re-materializing the live api_key and per-server env into the file. Only the
+# scrubbed .dist template is tracked; this was committed once by mistake and is
+# the reason the key leaked to a public repo.
+**/mcp_config.json
+**/mcp_config.json.bak*
+**/mcp_config.example.json
+
+# ffs index cache (30MB+ of generated symbol index)
+.ffs/
+
+# editor/agent scratch backups
+*.bak.[0-9]*
+
+# Nested checkouts that carry their own .git but are NOT registered in
+# .gitmodules. Committing them would add gitlinks with no URL entry, which
+# breaks `git clone --recursive`. They are managed as independent repos.
+/stockyard/vansrouter/
+/stockyard/tau/
+/stockyard/boundless/
+/barn/woodpecker/

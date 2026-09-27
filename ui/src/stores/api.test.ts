@@ -3,12 +3,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   activeProfile,
   activityRevision,
+  fetchPlaygroundModels,
   fetchProfiles,
   handleAPIEventMessage,
   hasListedModels,
   inFlightRequests,
   inflightRequestEntries,
+  loadPlaygroundModels,
   models,
+  playgroundModels,
   profileModels,
   profiles,
   setActiveProfile,
@@ -18,6 +21,7 @@ import {
 afterEach(() => {
   vi.unstubAllGlobals();
   models.set([]);
+  playgroundModels.set([]);
   profiles.set([]);
   activeProfile.set(null);
 });
@@ -209,5 +213,72 @@ describe("api store event handling", () => {
     activeProfile.set(null);
     expect(get(profileModels)).toEqual([]);
     expect(get(hasListedModels)).toBe(false);
+  });
+
+  it("loads Playground models from /v1/models and populates playgroundModels store", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            id: "model-1",
+            name: "Model One",
+            context_length: 4096,
+            capabilities: { vision: true },
+            meta: { llamaswap: { type: "model", aliases: ["alias-1"] } },
+          },
+          {
+            id: "alias-1",
+            meta: { llamaswap: { type: "alias", modelID: "model-1" } },
+          },
+        ],
+      }),
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    const result = await loadPlaygroundModels();
+    expect(mockFetch).toHaveBeenCalledWith("/v1/models");
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      id: "model-1",
+      name: "Model One",
+      context_length: 4096,
+      aliases: ["alias-1"],
+      capabilities: { vision: true },
+      playgroundType: "model",
+    });
+    expect(get(playgroundModels)).toEqual(result);
+  });
+
+  it("coalesces overlapping fetchPlaygroundModels calls", async () => {
+    type ModelResponse = {
+      ok: boolean;
+      json: () => Promise<{ data: [] }>;
+    };
+    let resolveFirst!: (response: ModelResponse) => void;
+    const firstResponse = new Promise<ModelResponse>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const mockFetch = vi.fn()
+      .mockReturnValueOnce(firstResponse)
+      .mockResolvedValue({
+        ok: true,
+        json: async () => ({ data: [] }),
+      });
+    vi.stubGlobal("fetch", mockFetch);
+
+    const first = fetchPlaygroundModels();
+    const overlapping = fetchPlaygroundModels();
+
+    expect(overlapping).toBe(first);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    resolveFirst({
+      ok: true,
+      json: async () => ({ data: [] }),
+    });
+    await first;
+
+    await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
   });
 });

@@ -1,0 +1,11 @@
+{
+  "name": "@sovereign/stream-broker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "@sovereign/utils": "workspace:*"
+  }
+}

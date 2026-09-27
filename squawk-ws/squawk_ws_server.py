@@ -139,6 +139,9 @@ def load_token():
 
 
 # ---------------- shared state ----------------
+import threading
+_scan_lock = threading.Lock()
+
 gseq = 0
 chan_last = {}          # channel -> last msg_seq seen
 vault_last = 0          # last vault alias seq seen
@@ -198,6 +201,15 @@ def publish(channel, sender, text, ts, sealed):
 
 # ---------------- source scanning ----------------
 def scan_channels(initial=False):
+    if not _scan_lock.acquire(blocking=False):
+        return
+    try:
+        _scan_channels_locked(initial)
+    finally:
+        _scan_lock.release()
+
+
+def _scan_channels_locked(initial=False):
     for ch in CHANNELS:
         d = CHAT_ROOT / ch
         if not d.is_dir():
@@ -215,6 +227,11 @@ def scan_channels(initial=False):
                 continue
             newest = max(newest, parsed["msg_seq"])
             if not initial:
+                # Advance the in-memory cursor BEFORE publishing so a
+                # concurrent or repeated scan of the same directory sees
+                # the updated floor and skips the file. publish() persists
+                # state, so chan_last is durable as soon as this line runs.
+                chan_last[ch] = newest
                 publish(parsed["channel"], parsed["sender"], parsed["text"],
                         parsed["ts"], parsed["sealed"])
         if initial or newest != last:
@@ -235,6 +252,16 @@ def scan_channels(initial=False):
 
 
 def scan_vault(initial=False):
+    global vault_last
+    if not _scan_lock.acquire(blocking=False):
+        return
+    try:
+        _scan_vault_locked(initial)
+    finally:
+        _scan_lock.release()
+
+
+def _scan_vault_locked(initial=False):
     global vault_last
     if not VAULT_ZIP.is_file():
         return
@@ -455,9 +482,13 @@ _rescan_scheduled = False
 
 async def rescan():
     global _rescan_scheduled
-    _rescan_scheduled = False
-    await asyncio.sleep(0.3)  # coalesce bursts
-    await asyncio.get_running_loop().run_in_executor(None, do_rescan)
+    try:
+        await asyncio.sleep(0.3)  # coalesce bursts
+        await asyncio.get_running_loop().run_in_executor(None, do_rescan)
+    finally:
+        # Clear only after the scan completes, so events arriving during
+        # the sleep or the executor call do not schedule concurrent rescans.
+        _rescan_scheduled = False
 
 
 def do_rescan():

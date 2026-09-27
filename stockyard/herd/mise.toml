@@ -1,0 +1,16 @@
+# Herd — Go inference backplane & Llama-Swap fork
+[tools]
+go = "1.23.1"
+bun = "1.4.2"
+
+[env]
+_.file = "../../config/ports.env"
+
+[tasks]
+build = "go build -o build/llama-swap ./cmd/main.go"
+dev = "go run ./cmd/main.go"
+test = "go test ./..."
+health = "curl -sf http://127.0.0.1:25100/health"
+models = "curl -sf http://127.0.0.1:25100/v1/models | python3 -c 'import sys,json; data=json.load(sys.stdin); print(len(data.get(\"data\",[])), \"models active\")'"
+ui = "cd ui-svelte && bun run dev"
+"ui:build" = "cd ui-svelte && bun run build"

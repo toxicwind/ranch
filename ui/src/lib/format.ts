@@ -49,3 +49,17 @@ export function formatRelativeTime(timestamp: string): string {
     .join(":");
   return `${datePart} ${timePart}`;
 }
+
+/** Format a hardware capacity using binary units through TiB. */
+export function formatCapacity(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "Not detected";
+  const units = ["B", "KiB", "MiB", "GiB", "TiB"];
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  const precision = unit < 2 || value >= 100 ? 0 : value >= 10 ? 1 : 2;
+  return `${value.toFixed(precision)} ${units[unit]}`;
+}

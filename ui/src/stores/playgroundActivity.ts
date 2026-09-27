@@ -6,6 +6,8 @@ const speechGenerating = writable(false);
 const audioTranscribing = writable(false);
 const rerankLoading = writable(false);
 
+export const docsAgentStreaming = writable(false);
+
 export const playgroundActivity = derived(
   [chatStreaming, imageGenerating, speechGenerating, audioTranscribing, rerankLoading],
   ([$chat, $image, $speech, $audio, $rerank]) => $chat || $image || $speech || $audio || $rerank

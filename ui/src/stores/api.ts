@@ -14,6 +14,9 @@ import type {
   UIConfig,
   Profile,
   ProfileState,
+  TailcatStatus,
+  HardwareSnapshot,
+  PlaygroundModelType,
 } from "../lib/types";
 import { connectionState } from "./theme";
 
@@ -21,9 +24,10 @@ const LOG_LENGTH_LIMIT = 1024 * 100; /* 100KB of log data */
 
 // Stores
 export const models = writable<Model[]>([]);
+export const playgroundModels = writable<Model[]>([]);
+export const tailcatStatus = writable<TailcatStatus>({ enabled: false, address: "", models: [] });
 export const profiles = writable<Profile[]>([]);
 export const activeProfile = writable<string | null>(null);
-
 // Active profile pins exposed as virtual models for Playground selectors.
 // Concrete model management continues to use `models`.
 export const profileModels = derived(
@@ -84,7 +88,9 @@ export const versionInfo = writable<VersionInfo>({
 
 let apiEventSource: EventSource | null = null;
 let profileRevision = 0;
-
+let playgroundModelsRequest = 0;
+let playgroundModelsFetch: Promise<Model[]> | null = null;
+let playgroundModelsRefreshQueued = false;
 function appendLog(newData: string, store: typeof proxyLogs | typeof upstreamLogs): void {
   store.update((prev) => {
     const updatedLog = prev + newData;
@@ -100,10 +106,12 @@ export function enableAPIEvents(enabled: boolean): void {
     inFlightRequests.set(0);
     inflightRequestEntries.set([]);
     uiConfig.set(defaultUIConfig());
+    playgroundModelsRequest++;
+    playgroundModelsRefreshQueued = false;
+    playgroundModels.set([]);
     profiles.set([]);
     activeProfile.set(null);
     profileRevision++;
-    return;
   }
 
   let retryCount = 0;
@@ -124,10 +132,12 @@ export function enableAPIEvents(enabled: boolean): void {
       inflightRequestEntries.set([]);
       uiConfig.set(defaultUIConfig());
       models.set([]);
+      playgroundModelsRequest++;
+      playgroundModelsRefreshQueued = false;
+      playgroundModels.set([]);
       profiles.set([]);
       activeProfile.set(null);
       profileRevision++;
-      retryCount = 0;
       connectionState.set("connected");
       void fetchProfiles().catch((error) => console.error(error));
     };
@@ -273,6 +283,99 @@ connectionState.subscribe(async (status) => {
     }
   }
 });
+
+interface ModelListRecord {
+  id: string;
+  name?: string;
+  description?: string;
+  context_length?: number;
+  capabilities?: Model["capabilities"];
+  meta?: {
+    llamaswap?: {
+      type?: PlaygroundModelType | "alias";
+      aliases?: string[];
+      modelID?: string;
+      peerID?: string;
+      strategy?: string;
+      targets?: string[];
+      spillover?: number;
+    };
+  };
+}
+
+export async function loadPlaygroundModels(request: number = ++playgroundModelsRequest): Promise<Model[]> {
+  try {
+    const response = await fetch(api("/v1/models"));
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const responseData = await response.json() as { data?: ModelListRecord[] };
+    const records = responseData.data ?? [];
+    const aliasesByModel = new Map<string, Set<string>>();
+    for (const record of records) {
+      const metadata = record.meta?.llamaswap;
+      if (metadata?.aliases) {
+        aliasesByModel.set(record.id, new Set(metadata.aliases));
+      }
+      if (metadata?.type === "alias" && metadata.modelID) {
+        const aliases = aliasesByModel.get(metadata.modelID) ?? new Set<string>();
+        aliases.add(record.id);
+        aliasesByModel.set(metadata.modelID, aliases);
+      }
+    }
+    const newModels = records
+      .filter((record) => record.meta?.llamaswap?.type !== "alias")
+      .map((record): Model => {
+        const metadata = record.meta?.llamaswap;
+        const metadataType = metadata?.type;
+        const playgroundType: PlaygroundModelType = metadataType && metadataType !== "alias"
+          ? metadataType
+          : "model";
+        return {
+          id: record.id,
+          state: "unknown",
+          name: record.name ?? "",
+          description: record.description ?? "",
+          unlisted: false,
+          peerID: metadata?.peerID ?? "",
+          playgroundType,
+          aliases: [...(aliasesByModel.get(record.id) ?? [])],
+          capabilities: record.capabilities,
+          context_length: record.context_length,
+          strategy: metadata?.strategy,
+          targets: metadata?.targets ?? [],
+          spillover: metadata?.spillover,
+        };
+      });
+    newModels.sort((a, b) => {
+      return (a.name + a.id).localeCompare(b.name + b.id, undefined, { numeric: true });
+    });
+    if (request === playgroundModelsRequest) playgroundModels.set(newModels);
+    return newModels;
+  } catch (error) {
+    console.error("Failed to fetch Playground models:", error);
+    return [];
+  }
+}
+
+export function fetchPlaygroundModels(): Promise<Model[]> {
+  if (playgroundModelsFetch) {
+    playgroundModelsRefreshQueued = true;
+    return playgroundModelsFetch;
+  }
+
+  const request = ++playgroundModelsRequest;
+  const currentFetch = loadPlaygroundModels(request).finally(() => {
+    if (playgroundModelsFetch !== currentFetch) return;
+    playgroundModelsFetch = null;
+    if (playgroundModelsRefreshQueued) {
+      playgroundModelsRefreshQueued = false;
+      void fetchPlaygroundModels();
+    }
+  });
+  playgroundModelsFetch = currentFetch;
+  return currentFetch;
+}
 
 export async function listModels(): Promise<Model[]> {
   try {
@@ -424,4 +527,12 @@ export async function fetchPerformance(after?: string): Promise<PerformanceRespo
     console.error("Failed to fetch performance data:", error);
     return null;
   }
+}
+
+export async function getHardware(): Promise<HardwareSnapshot> {
+  const response = await fetch(api("/api/hardware"));
+  if (!response.ok) {
+    throw new Error(`Failed to fetch hardware: ${response.status}`);
+  }
+  return await response.json() as HardwareSnapshot;
 }

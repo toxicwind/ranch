@@ -55,7 +55,7 @@ stray checkouts.
 
 ## Not the holder
 
-[shep](https://github.com/toxicwind/sovereign-projects/tree/main/projects/range/ranch/barn/shep) is the
+[wrangler](https://github.com/toxicwind/sovereign-projects/tree/main/projects/range/ranch/barn/wrangler) is the
 MCP gateway (tool serving) — a peer of the ranch animals, not their parent.
 The ranch is held together by **pitchfork** (supervision), this repo (the map),
 and sovereign config (the wiring).
