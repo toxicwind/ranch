@@ -21,11 +21,37 @@ dist/
 
 # mcpproxy-go (barn/gatehouse) rewrites its EFFECTIVE config on every start,
 # re-materializing the live api_key and per-server env into the file. Only the
-# scrubbed .dist template is tracked; this was committed once by mistake and is
-# the reason the key leaked to a public repo.
+# scrubbed .dist template is meant to be tracked; this was committed once by
+# mistake and is the reason the key leaked to a public repo.
 **/mcp_config.json
 **/mcp_config.json.bak*
 **/mcp_config.example.json
+
+# CAUTION -- the three rules above are INERT for any path already in the index.
+# A tracked file is never ignored, which is precisely how the live key got in.
+# `mcp_config.example.json` is scrubbed and intentionally tracked (its rule only
+# blocks new siblings). The other five tracked paths under barn/ were not, and
+# must be `git rm --cached`'d before barn/ is first pushed -- that stages a
+# tip-level deletion, which is why it is worth doing while barn/ is unpushed.
+#
+# Compiled gateway binaries. These are in-tree `make build` products; the
+# deployed build is projects/range/bin/gatehouse, owned and ignored by the
+# sovereign monorepo. mcpproxy-go alone was 49.5 MiB of build output.
+/barn/gatehouse/mcpproxy-go
+/barn/gatehouse/mcpproxy
+/barn/gatehouse/mcpproxy-tray
+/barn/gatehouse/mcpproxy-server
+/barn/gatehouse/mcpproxy-dev
+
+# Generated symbol/search indexes -- same class as the .ffs/ cache below.
+# .project_map.json carries a "generatedAt" stamp; index.bleve/store/root.bolt
+# is a bbolt database. Both are rebuilt from source on demand.
+**/index.bleve/
+**/.project_map.json
+
+# Python bytecode
+__pycache__/
+*.py[cod]
 
 # ffs index cache (30MB+ of generated symbol index)
 .ffs/
@@ -40,3 +66,9 @@ dist/
 /stockyard/tau/
 /stockyard/boundless/
 /barn/woodpecker/
+
+# NOTE: this repo has no .gitmodules at all. `corral` and `stockyard/paddock`
+# ARE registered as gitlinks (mode 160000) with no URL entry, so they -- not the
+# four paths above -- are what actually break `git clone --recursive`. They are
+# tracked on purpose, so they are deliberately NOT ignored here; the fix is to
+# add a .gitmodules, which is out of scope for this change.
