@@ -28,6 +28,12 @@ export interface Surface {
 	daemon?: string;
 	/** Path probed for health. Defaults to "/". */
 	healthPath?: string;
+	/**
+	 * Path embedded in the tab's iframe. Distinct from `healthPath`: a service
+	 * is usually healthy at `/health` but serves its page at `/`, and framing
+	 * the health endpoint shows raw JSON instead of the app. Defaults to "/".
+	 */
+	pagePath?: string;
 	/** Shown in the tab's tooltip and in the service detail. */
 	description: string;
 }
