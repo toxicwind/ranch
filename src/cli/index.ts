@@ -21,6 +21,48 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
+const PACKAGE_CANDIDATES = ["smthrs", "smithers-orchestrator"] as const;
+const PACKAGE_ROOTS = PACKAGE_CANDIDATES.map(n => require("node:path").join(__dirname, "..", "..", "node_modules", n));
+function parseFinite(value: string | number | undefined, fallback: number): number { if (value === undefined) return fallback; const n = typeof value === "number" ? value : Number(value); return Number.isFinite(n) ? n : fallback; }
+const CHECK_ENV_KEYS = ["ANTHROPIC_API_KEY","ANTHROPIC_BASE_URL","ANTHROPIC_DEFAULT_OPUS_MODEL","SOVEREIGN_ROUTER_URL","SOVEREIGN_ROUTER_PORT","NIM_PROXY_BASE_URL","NIM_PROXY_API_KEY","NIM_PROXY_BYPASS","FLOCK_API_KEY","FLOCK_BASE_URL","FLOCK_BYPASS","FLOCK_MODEL","NVIDIA_API_KEY","WORKFLOW_MAX_CONCURRENCY"] as const;
+function redact(v?: string){ return !v?"(unset)":v.length<=8?"***":`${v.slice(0,4)}...${v.slice(-4)} len=${v.length}`; }
+function loadSecrets(){ try{ const fs=require("node:fs"); const path="/home/toxic/.secrets"; if(fs.existsSync(path)){ for(const line of fs.readFileSync(path,"utf8").split("\n")){ const m=line.match(/^\s*([A-Z_][A-Z0-9_]*)=(.*)$/); if(m && !process.env[m[1]]) process.env[m[1]]=m[2].replace(/^["']|["']$/g,""); } } }catch{} }
+export function dumpCheckEnv(){ loadSecrets(); const env: Record<string,string> = {}; for(const k of CHECK_ENV_KEYS){ const val=process.env[k]; env[k]=k.includes("KEY")?redact(val):(val??"(unset)"); } const routerUrl=process.env.SOVEREIGN_ROUTER_URL??"http://127.0.0.1"; const routerPort=process.env.SOVEREIGN_ROUTER_PORT??"20128"; console.log(JSON.stringify({env, resolved:{router: `${routerUrl}:${routerPort}`, baseUrl: process.env.ANTHROPIC_BASE_URL??`${routerUrl}:${routerPort}/v1`}, cwd: process.cwd()}, null, 2)); process.exit(0); }
+export async function ensureWorkspace(requestedCwd: string, promptSourcePath: string | null): Promise<string>{
+  const cp = require("node:child_process");
+  const fs = require("node:fs");
+  const path = require("node:path");
+  try { cp.execSync("jj --version", { stdio: "ignore" }); }
+  catch { throw new Error("jj binary not found — install https://github.com/martinvonz/jj"); }
+  const hasJj = fs.existsSync(path.join(requestedCwd, ".jj"));
+  const hasGit = fs.existsSync(path.join(requestedCwd, ".git"));
+  if (hasJj && hasGit) return requestedCwd;
+  const initColocated = (dir: string) => {
+    try { cp.execSync("jj git init --colocate", { cwd: dir, stdio: "pipe" }); }
+    catch (e: any) { throw new Error(`jj git init --colocate failed in ${dir}: ${e?.message ?? e}`); }
+  };
+  if (hasGit && !hasJj) {
+    // Adopt the existing git repo non-destructively (imports history, keeps .git).
+    initColocated(requestedCwd);
+    console.error(`corral: adopted ${requestedCwd} as a colocated jj repo (jj git init --colocate).`);
+    return requestedCwd;
+  }
+  // Not a usable repo (bare dir, or stray .jj without colocated .git): provision an
+  // isolated workspace under ~/.corral/runs instead of turning the caller's
+  // directory (e.g. $HOME) into a repository.
+  const base = promptSourcePath ? path.basename(promptSourcePath).replace(/\.[^.]+$/, "") : "prompt";
+  const slug = base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "run";
+  const stamp = new Date().toISOString().replace(/[-:.]/g, "").replace("T", "-").slice(0, 15);
+  const uniq = randomUUID().slice(0, 8);
+  const workspace = path.join(process.env.HOME || "/tmp", ".corral", "runs", `${stamp}-${slug}-${uniq}`);
+  fs.mkdirSync(workspace, { recursive: true });
+  initColocated(workspace);
+  console.error(`corral: ${requestedCwd} is not a colocated jj repo — provisioned isolated workspace ${workspace}`);
+  return workspace;
+}
+// Back-compat alias for the previous hard-error gate (now auto-provisions).
+export async function ensureJjAvailable(cwd: string = process.cwd()){ await ensureWorkspace(cwd, null); }
+
 import { getClarificationQuestions } from "./clarifications.ts";
 import {
   resolveProxyConfig,
@@ -60,7 +102,7 @@ Examples:
 `);
 }
 
-const BOOLEAN_FLAGS = new Set(["help", "dry-run", "skip-questions"]);
+const BOOLEAN_FLAGS = new Set(["help", "dry-run", "skip-questions", "check-env"]);
 
 function parseArgs(argv: string[]): ParsedArgs {
   const positional: string[] = [];
@@ -218,7 +260,7 @@ function buildFallbackConfig(repoRoot: string, promptSpecPath: string, packageSc
   const chosenSpecs = specsPathCandidates.find((candidate) => existsSync(candidate)) ?? promptSpecPath;
 
   const projectName = basename(repoRoot);
-  const maxConcurrency = Math.min(Math.max(Number(process.env.WORKFLOW_MAX_CONCURRENCY ?? "6") || 6, 1), 32);
+  const maxConcurrency = Math.min(Math.max(parseFinite(process.env.WORKFLOW_MAX_CONCURRENCY, 6), 1), 32);
 
   return {
     projectName,
@@ -259,7 +301,9 @@ interface SmithersCliResolution {
 function findSmithersCliPath(repoRoot: string): SmithersCliResolution | null {
   const packageRoots = [
     join(repoRoot, "node_modules/smithers-orchestrator"),
+    join(repoRoot, "node_modules/smthrs"),
     resolve(dirname(import.meta.path), "../../node_modules/smithers-orchestrator"),
+    resolve(dirname(import.meta.path), "../../node_modules/smthrs"),
     join(process.env.HOME || "", "smithers"),
   ];
 
@@ -295,31 +339,67 @@ function findSmithersCliPath(repoRoot: string): SmithersCliResolution | null {
   return null;
 }
 
-async function ensureJjAvailable(repoRoot: string) {
-  const ok = await commandExists("jj", repoRoot);
-  if (ok) return;
 
-  const message = [
-    "jj is required before super-ralph can run.",
-    "Install jj, then rerun this command.",
-    "",
-    "Install options:",
-    "- macOS: brew install jj",
-    "- Linux (cargo): cargo install --locked jj-cli",
-    "- Verify: jj --version",
-    "",
-    "If this repo is not jj-colocated yet:",
-    "- jj git init --colocate",
-  ].join("\n");
-
-  throw new Error(message);
-}
 
 // Check if we're running from super-ralph source (CLI location)
 // These need to be at module level so they're accessible in both renderWorkflowFile and main execution
 const cliDir = import.meta.dir || dirname(fileURLToPath(import.meta.url));
 const superRalphSourceRoot = dirname(dirname(cliDir));
 const runningFromSource = existsSync(join(superRalphSourceRoot, 'src/components/SuperRalph.tsx'));
+
+
+// Generated preload for installed (non-source) runs. Mirrors <repo>/preload.ts:
+// registers the mdx plugin and shims the "effect/unstable/*" subpaths that
+// @smithers-orchestrator/*@0.32.0 still imports (effect >= 4.0.0-rc.115 promoted
+// those modules to stable subpaths and removed the unstable prefix). The
+// generated dir symlinks node_modules, so the bare "effect/*" specifiers
+// resolve from the generated preload.
+const GENERATED_PRELOAD_SOURCE = `import { mdxPlugin } from "smthrs/mdx-plugin";
+
+mdxPlugin();
+
+import { plugin } from "bun";
+
+const UNSTABLE_PREFIX = "effect/unstable/";
+const UNSTABLE_SHIMS = [
+  "cluster",
+  "cluster/Entity",
+  "cluster/MessageStorage",
+  "cluster/RunnerHealth",
+  "cluster/Runners",
+  "cluster/RunnerStorage",
+  "cluster/Sharding",
+  "cluster/ShardingConfig",
+  "cluster/SingleRunner",
+  "http/FetchHttpClient",
+  "observability/Otlp",
+  "process/ChildProcess",
+  "process/ChildProcessSpawner",
+  "reactivity/Reactivity",
+  "rpc/Rpc",
+  "rpc/RpcGroup",
+  "sql/SqlClient",
+  "sql/SqlError",
+  "sql/Statement",
+  "workflow",
+  "workflow/Activity",
+  "workflow/DurableDeferred",
+  "workflow/Workflow",
+  "workflow/WorkflowEngine",
+];
+
+plugin({
+  name: "effect-unstable-compat",
+  setup(build) {
+    for (const rest of UNSTABLE_SHIMS) {
+      build.module(UNSTABLE_PREFIX + rest, async () => {
+        const mod = await import("effect/" + rest);
+        return { loader: "object", exports: { ...mod } };
+      });
+    }
+  },
+});
+`;
 
 function renderWorkflowFile(params: {
   promptText: string;
@@ -354,7 +434,7 @@ function renderWorkflowFile(params: {
   }
 
   return `import React from "react";
-import { createSmithers, ClaudeCodeAgent, CodexAgent, Sequence, Ralph } from "smithers-orchestrator";
+import { createSmithers, ClaudeCodeAgent, CodexAgent, Sequence, Ralph } from "smthrs";
 import { SuperRalph } from "${importPrefix}";
 import { InterpretConfig, FinalReport, CompletionValidator } from "${importPrefix}/components";
 import { ralphOutputSchemas } from "${importPrefix}";
@@ -385,13 +465,18 @@ const { smithers, outputs, Workflow } = createSmithers(
 // file; keys travel in process env only.
 function createClaude(systemPrompt: string) {
   return new ClaudeCodeAgent({
-    model: "claude-sonnet-4-6",
+    // Use the proxy-routed model from env (NIM_MODEL), not a hardcoded
+    // provider model: the nim-proxy only serves the configured model.
+    model: process.env.NIM_MODEL || "claude-sonnet-4-6",
     systemPrompt,
     cwd: REPO_ROOT,
     dangerouslySkipPermissions: true,
     timeoutMs: 60 * 60 * 1000,
   });
 }
+// Note: smithers preflight (claude auth status) is satisfied by the
+// nim-proxy shim wrapper (/home/toxic/.local/bin/claude), which returns
+// loggedIn:true JSON. Proxy routing is validated by corral at startup.
 
 function createCodex(systemPrompt: string) {
   return new CodexAgent({
@@ -595,7 +680,7 @@ Return ONLY valid JSON (no markdown fences, no commentary):
       } catch (apiErr: any) {
         clearInterval(spinInterval);
         process.stdout.write("\r\x1b[K");
-        throw apiErr;
+        console.error("[warn] API failed, trying fallback:", (apiErr as any)?.message ?? apiErr); claudeResult = "";
       }
     } else if (apiKey) {
       // Direct Anthropic API
@@ -622,7 +707,7 @@ Return ONLY valid JSON (no markdown fences, no commentary):
       } catch (apiErr: any) {
         clearInterval(spinInterval);
         process.stdout.write("\r\x1b[K");
-        throw apiErr;
+        console.error("[warn] API failed, trying fallback:", (apiErr as any)?.message ?? apiErr); claudeResult = "";
       }
     }
 
@@ -715,12 +800,17 @@ Return ONLY valid JSON (no markdown fences, no commentary):
 }
 
 async function main() {
+  loadSecrets(); // ~/.secrets -> env (estate keys) before any routing decision
   const parsed = parseArgs(process.argv.slice(2));
+
+  if ((parsed.flags as any)["check-env"]) { dumpCheckEnv(); }
 
   if (parsed.flags.help || parsed.positional.length === 0) {
     printHelp();
     process.exit(parsed.flags.help ? 0 : 1);
   }
+
+  if ((parsed.flags as any)["check-env"]) { dumpCheckEnv(); return; }
 
   // -- nim-proxy: route every model call through the proxy by default --
   // The CLI resolves the proxy key once here and injects NIM_BASE_URL /
@@ -731,9 +821,6 @@ async function main() {
   const headless = process.stdout.isTTY !== true; // headless: stdout reserved for exact final reply; diagnostics -> stderr
   let proxyConfig: ProxyConfig | null = null;
   if (!isProxyBypassed() && !isDryRun) {
-    if (!process.env.FLOCK_API_KEY && !process.env.NIM_PROXY_API_KEY && !process.env.ANTHROPIC_API_KEY && !process.env.NVIDIA_API_KEY) {
-      process.env.FLOCK_API_KEY = "sovereign-free";
-    }
     // Throws NimProxyConfigError with an actionable message when no key is set.
     proxyConfig = resolveProxyConfig();
     const proxyEnv = proxyEnvOverrides(proxyConfig);
@@ -751,12 +838,12 @@ async function main() {
     else console.log("nim-proxy: bypassed via NIM_PROXY_BYPASS=1 (direct provider behavior)");
   }
 
-  const repoRoot = resolve(
+  const requestedCwd = resolve(
     typeof parsed.flags.cwd === "string" ? parsed.flags.cwd : process.cwd(),
   );
 
   const rawPromptInput = parsed.positional.join(" ").trim();
-  const { promptText, promptSourcePath } = await readPromptInput(rawPromptInput, repoRoot);
+  const { promptText, promptSourcePath } = await readPromptInput(rawPromptInput, requestedCwd);
 
   if (!promptText) {
     throw new Error("Prompt input is empty.");
@@ -765,7 +852,11 @@ async function main() {
   // Headless (non-TTY stdout): exact-output mode - no banners, no chatter.
   if (!headless) console.log("🚀 Super Ralph - Smithers Workflow Edition\n");
 
-  await ensureJjAvailable(repoRoot);
+  // Workspace gate (auto-provisioning): adopts an existing git repo via
+  // `jj git init --colocate`, or provisions an isolated ~/.corral/runs/<id>
+  // workspace when the target dir is not a repo. Never hard-errors, and never
+  // turns the caller's directory (e.g. $HOME) into a repository.
+  const repoRoot = await ensureWorkspace(requestedCwd, promptSourcePath);
 
   const smithers = findSmithersCliPath(repoRoot);
   if (!smithers) {
@@ -806,7 +897,7 @@ async function main() {
   // Finite-by-default: Ralph loop iteration ceiling (backstop; the real exit
   // is the done predicate in SuperRalph).
   const maxIterations = typeof parsed.flags["max-iterations"] === "string"
-    ? Math.max(1, Number(parsed.flags["max-iterations"]) || 25)
+    ? Math.max(1, parseFinite(parsed.flags["max-iterations"], 25))
     : 25;
 
   // Generate workflow file
@@ -847,11 +938,7 @@ async function main() {
   const useSharedPreload = existsSync(superRalphPreload);
 
   if (!useSharedPreload) {
-    await writeFile(
-      preloadPath,
-      `import { mdxPlugin } from "smithers-orchestrator/mdx-plugin";\n\nmdxPlugin();\n`,
-      "utf8",
-    );
+    await writeFile(preloadPath, GENERATED_PRELOAD_SOURCE, "utf8");
   }
 
   await writeFile(bunfigPath, `preload = ["./preload.ts"]\n`, "utf8");
@@ -861,7 +948,7 @@ async function main() {
     : `sr-${Date.now().toString(36)}-${randomUUID().slice(0, 8)}`;
 
   const maxConcurrencyOverride = typeof parsed.flags["max-concurrency"] === "string"
-    ? Math.max(1, Number(parsed.flags["max-concurrency"]) || fallbackConfig.maxConcurrency)
+    ? Math.max(1, parseFinite(parsed.flags["max-concurrency"], fallbackConfig.maxConcurrency))
     : fallbackConfig.maxConcurrency;
 
   if (!headless) {
