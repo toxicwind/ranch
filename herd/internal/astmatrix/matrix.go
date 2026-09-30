@@ -14,6 +14,7 @@ import (
 type Matrix struct {
 	mu               sync.RWMutex
 	providers        map[string]*provider
+	live             *LiveCatalogReader // TS-exported live serving sets (data, not logic)
 	fail             map[string]int     // consecutive failures per provider
 	lastFail         map[string]float64 // last failure timestamp
 	elo              map[string]float64
@@ -30,6 +31,15 @@ func NewMatrix(cfg *AstMatrixConfig) (*Matrix, error) {
 	cfg.Defaults()
 
 	providers := defaultProviders()
+
+	// Provider→models membership comes from the TS package brain. Providers
+	// start on their generated cold-start seeds; the live serving sets are
+	// overlaid from the TS-exported live catalog file when present. This is
+	// a synchronous file read — no discovery, no network, no goroutine, no
+	// race. When the TS side quarantines or re-admits a model it rewrites
+	// the file and the next read picks it up.
+	live := NewLiveCatalogReader("")
+	live.SyncProviderModels(providers)
 
 	// Override provider configs from YAML if provided
 	for name, pcfg := range cfg.Providers {
@@ -71,6 +81,7 @@ func NewMatrix(cfg *AstMatrixConfig) (*Matrix, error) {
 	m := &Matrix{
 		rateLimiter:      NewRateLimiter(),
 		providers:        providers,
+		live:             live,
 		fail:             make(map[string]int),
 		lastFail:         make(map[string]float64),
 		elo:              elo,
@@ -80,6 +91,24 @@ func NewMatrix(cfg *AstMatrixConfig) (*Matrix, error) {
 		config:           cfg,
 	}
 	return m, nil
+}
+
+// SyncLiveCatalog re-reads the TS-exported live catalog file and overlays
+// the serving sets onto the live provider table. Call this from admin
+// handlers or SIGHUP-style triggers — never on a timer. Discovery itself
+// lives in the TS package; this only picks up the new answer.
+func (m *Matrix) SyncLiveCatalog() {
+	if m.live == nil {
+		return
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.live.SyncProviderModels(m.providers)
+}
+
+// LiveCatalog exposes the TS-exported live serving-set reader.
+func (m *Matrix) LiveCatalog() *LiveCatalogReader {
+	return m.live
 }
 
 // Record updates ELO scores and circuit breakers after a request completes.
@@ -179,7 +208,12 @@ func (m *Matrix) Close() error {
 }
 
 // PickWeighted selects up to n providers weighted by ELO + jitter.
+// The live catalog is synced first (request-triggered, not timer-polled):
+// if the TS brain rewrote the serving sets, the next routing decision sees
+// it. The sync is cheap when the file mtime is unchanged, and it runs
+// before the read lock is taken so there is no lock-upgrade deadlock.
 func (m *Matrix) PickWeighted(n int) [][2]string {
+	m.SyncLiveCatalog()
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
