@@ -31,7 +31,7 @@ the coordinator handles the main push after rebase. Never force-push.
 
 ## Hard boundaries (do not cross)
 
-- `projects/range/ranch/guidellm` — separate builder lane. Do not read, write, or execute
+- `projects/range/ranch/roundup` — separate builder lane. Do not read, write, or execute
   anything under it.
 - `config/herd.yaml` peer blocks — the census coordinator's lane. You may read
   it; you may NOT edit peer blocks. Other files are fine.
@@ -44,16 +44,16 @@ the coordinator handles the main push after rebase. Never force-push.
 
 ## Work items (deduplicated, actionable — from sweep-work-items.md)
 
-### 1. GuideLLM-adjacent evals (openrouter-probe lane, NOT the guidellm lane)
+### 1. GuideLLM-adjacent evals (openrouter-probe lane, NOT the roundup lane)
 
 - Run `projects/openrouter-probe/e2e-probe.py` for the remaining 7 re-verified
   models (see `reverify-20260920.jsonl` for the list; nex-n2.5-mini:free is
-  done). Outputs to `projects/range/ranch/guidellm/results/*.json`.
+  done). Outputs to `projects/range/ranch/roundup/results/*.json`.
 - Build the thinking-strip adapter for reasoning models
   (nemotron-3.5-lightning, nemotron-3-nano-omni-30b-a3b-reasoning wrap answers
   in thinking blocks) — required before scores mean anything. Open item in
   `projects/openrouter-probe/GUIDELLM_EVAL_PLAN.md` section 5.
-- Migrate `probe_all.py`, `deep_pass.py`, `guidellm_sweep.sh` from
+- Migrate `probe_all.py`, `deep_pass.py`, `roundup_sweep.sh` from
   `OPENROUTER_API_KEY_1` to `OPENROUTER_API_KEY_FREE` (plan section 5).
 - Reasoning models need generous `max_tokens` in probes (50 truncated cohere
   mid-thought; 300 was clean).
