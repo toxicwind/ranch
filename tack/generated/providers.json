@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-tack/v1",
-  "generatedAt": "2026-09-30T04:10:39.380Z",
+  "generatedAt": "2026-09-30T04:28:17.125Z",
   "generator": "@ranch/tack codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/tack src/data.ts",
   "adapters": [
@@ -82,6 +82,286 @@
       "keyEnv": "MISTRAL_API_KEY",
       "adapter": "mistral",
       "auth": "bearer"
+    },
+    {
+      "name": "openai",
+      "baseUrl": "https://api.openai.com/v1",
+      "keyEnv": "OPENAI_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "anthropic",
+      "baseUrl": "https://api.anthropic.com/v1",
+      "keyEnv": "ANTHROPIC_API_KEY",
+      "adapter": "openai",
+      "auth": "x-api-key",
+      "headerName": "x-api-key"
+    },
+    {
+      "name": "deepseek",
+      "baseUrl": "https://api.deepseek.com",
+      "keyEnv": "DEEPSEEK_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "xai",
+      "baseUrl": "https://api.x.ai/v1",
+      "keyEnv": "XAI_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "together",
+      "baseUrl": "https://api.together.xyz/v1",
+      "keyEnv": "TOGETHER_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "fireworks",
+      "baseUrl": "https://api.fireworks.ai/inference/v1",
+      "keyEnv": "FIREWORKS_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "deepinfra",
+      "baseUrl": "https://api.deepinfra.com/v1/openai",
+      "keyEnv": "DEEPINFRA_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "moonshot",
+      "baseUrl": "https://api.moonshot.ai/v1",
+      "keyEnv": "MOONSHOT_API_KEY",
+      "keyEnvAlt": "KIMI_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "siliconflow",
+      "baseUrl": "https://api.siliconflow.com/v1",
+      "keyEnv": "SILICONFLOW_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "siliconflow-cn",
+      "baseUrl": "https://api.siliconflow.cn/v1",
+      "keyEnv": "SILICONFLOW_CN_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "novita",
+      "baseUrl": "https://api.novita.ai/openai/v1",
+      "keyEnv": "NOVITA_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "venice",
+      "baseUrl": "https://api.venice.ai/api/v1",
+      "keyEnv": "VENICE_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "nanogpt",
+      "baseUrl": "https://nano-gpt.com/api/v1",
+      "keyEnv": "NANO_GPT_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "aimlapi",
+      "baseUrl": "https://api.aimlapi.com/v1",
+      "keyEnv": "AIMLAPI_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "huggingface",
+      "baseUrl": "https://router.huggingface.co/v1",
+      "keyEnv": "HUGGINGFACE_HUB_TOKEN",
+      "keyEnvAlt": "HF_TOKEN",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "baseten",
+      "baseUrl": "https://inference.baseten.co/v1",
+      "keyEnv": "BASETEN_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "coreweave",
+      "baseUrl": "https://api.inference.wandb.ai/v1",
+      "keyEnv": "COREWEAVE_API_KEY",
+      "keyEnvAlt": "WANDB_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "zai",
+      "baseUrl": "https://api.z.ai/api/coding/paas/v4",
+      "keyEnv": "ZAI_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "zenmux",
+      "baseUrl": "https://zenmux.ai/api/v1",
+      "keyEnv": "ZENMUX_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "synthetic",
+      "baseUrl": "https://api.synthetic.new/openai/v1",
+      "keyEnv": "SYNTHETIC_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "typesafe",
+      "baseUrl": "https://api.typesafe.ai",
+      "keyEnv": "TYPESAFE_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "wafer-serverless",
+      "baseUrl": "https://pass.wafer.ai/v1",
+      "keyEnv": "WAFER_SERVERLESS_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "xiaomi",
+      "baseUrl": "https://api.xiaomimimo.com/v1",
+      "keyEnv": "XIAOMI_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "qianfan",
+      "baseUrl": "https://qianfan.baidubce.com/v2",
+      "keyEnv": "QIANFAN_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "minimax",
+      "baseUrl": "https://api.minimax.io/v1",
+      "keyEnv": "MINIMAX_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "gmi-cloud",
+      "baseUrl": "https://api.gmi-serving.com/v1",
+      "keyEnv": "GMI_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "meta",
+      "displayName": "Meta Model API",
+      "baseUrl": "https://api.meta.ai/v1",
+      "keyEnv": "MODEL_API_KEY",
+      "keyEnvAlt": "META_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "sakana",
+      "displayName": "Sakana AI",
+      "baseUrl": "https://api.sakana.ai/v1",
+      "keyEnv": "SAKANA_API_KEY",
+      "keyEnvAlt": "FUGU_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "stepfun",
+      "displayName": "StepFun",
+      "baseUrl": "https://api.stepfun.ai/v1",
+      "keyEnv": "STEPFUN_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "abliteration",
+      "displayName": "Abliteration",
+      "baseUrl": "https://api.abliteration.ai/v1",
+      "keyEnv": "ABLITERATION_API_KEY",
+      "keyEnvAlt": "ABLIT_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "aiand",
+      "displayName": "ai&",
+      "baseUrl": "https://api.aiand.com/v1",
+      "keyEnv": "AIAND_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "cloudflare-ai-gateway",
+      "displayName": "Cloudflare AI Gateway",
+      "baseUrl": "https://gateway.ai.cloudflare.com/v1/<account>/<gateway>",
+      "keyEnv": "CLOUDFLARE_AI_GATEWAY_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "bedrock-mantle",
+      "displayName": "Bedrock Mantle",
+      "baseUrl": "https://bedrock-mantle.{region}.api.aws/openai/v1",
+      "keyEnv": "AWS_BEARER_TOKEN_BEDROCK",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "vercel-ai-gateway",
+      "displayName": "Vercel AI Gateway",
+      "baseUrl": "https://ai-gateway.vercel.sh",
+      "keyEnv": "AI_GATEWAY_API_KEY",
+      "keyEnvAlt": "VERCEL_AI_GATEWAY_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "ollama-cloud",
+      "displayName": "Ollama Cloud",
+      "baseUrl": "https://ollama.com/v1",
+      "keyEnv": "OLLAMA_CLOUD_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "charm-hyper",
+      "displayName": "Charm Hyper",
+      "baseUrl": "https://hyper.charm.land/v1",
+      "keyEnv": "CHARM_HYPER_API_KEY",
+      "keyEnvAlt": "HYPER_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "commandcode",
+      "displayName": "Command Code",
+      "baseUrl": "https://api.commandcode.ai/provider",
+      "keyEnv": "COMMAND_CODE_API_KEY",
+      "keyEnvAlt": "COMMANDCODE_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
     }
   ],
   "seeds": {
@@ -143,6 +423,127 @@
       "codestral-latest",
       "mistral-large-latest",
       "mistral-medium-latest"
+    ],
+    "openai": [
+      "gpt-5.5",
+      "gpt-5.5-mini",
+      "gpt-5.4",
+      "daybreak-blue-latest"
+    ],
+    "anthropic": [
+      "claude-opus-5-5",
+      "claude-sonnet-5",
+      "claude-fable-5"
+    ],
+    "deepseek": [
+      "deepseek-v4-pro",
+      "deepseek-v4-flash"
+    ],
+    "xai": [
+      "grok-4.6",
+      "grok-4.5"
+    ],
+    "together": [
+      "moonshotai/Kimi-K2.7-Code",
+      "deepseek-ai/DeepSeek-V4-Flash"
+    ],
+    "fireworks": [
+      "kimi-k2.7-code",
+      "accounts/fireworks/models/glm-5.2-fast"
+    ],
+    "deepinfra": [
+      "deepseek-ai/DeepSeek-V4-Flash-0731",
+      "deepseek-ai/DeepSeek-V4.1-Flash"
+    ],
+    "moonshot": [
+      "kimi-k2.7-code",
+      "kimi-k2.6"
+    ],
+    "siliconflow": [
+      "zai-org/GLM-5.1",
+      "deepseek-ai/DeepSeek-V4-Flash"
+    ],
+    "siliconflow-cn": [],
+    "novita": [
+      "moonshotai/kimi-k2.7-code"
+    ],
+    "venice": [
+      "llama-3.3-70b"
+    ],
+    "nanogpt": [
+      "openai/gpt-5.5"
+    ],
+    "aimlapi": [
+      "gpt-5.5-2026-04-23"
+    ],
+    "huggingface": [
+      "deepseek-ai/DeepSeek-R1"
+    ],
+    "baseten": [
+      "moonshotai/Kimi-K2.7-Code"
+    ],
+    "coreweave": [
+      "openai/gpt-oss-120b"
+    ],
+    "zai": [
+      "glm-5.3",
+      "glm-5.2"
+    ],
+    "zenmux": [
+      "anthropic/claude-opus-5"
+    ],
+    "synthetic": [
+      "hf:zai-org/GLM-5.3-Flash"
+    ],
+    "typesafe": [
+      "jev-latest"
+    ],
+    "wafer-serverless": [
+      "GLM-5.1"
+    ],
+    "xiaomi": [
+      "mimo-v2.5"
+    ],
+    "qianfan": [
+      "deepseek-v3.2"
+    ],
+    "minimax": [
+      "MiniMax-M3"
+    ],
+    "gmi-cloud": [
+      "deepseek-ai/DeepSeek-V4-Flash"
+    ],
+    "meta": [
+      "muse-spark-1.1"
+    ],
+    "sakana": [
+      "fugu",
+      "fugu-ultra"
+    ],
+    "stepfun": [
+      "step-5-preview"
+    ],
+    "abliteration": [
+      "abliterated-model"
+    ],
+    "aiand": [
+      "moonshotai/kimi-k2.7-code"
+    ],
+    "cloudflare-ai-gateway": [],
+    "bedrock-mantle": [
+      "openai.gpt-5.6-terra"
+    ],
+    "vercel-ai-gateway": [
+      "anthropic/claude-opus-5"
+    ],
+    "ollama-cloud": [
+      "gpt-oss:120b"
+    ],
+    "charm-hyper": [
+      "glm-5.3"
+    ],
+    "commandcode": [
+      "claude-sonnet-5"
     ]
   },
   "seedsContract": "Cold-start only: served while a provider has never had a successful discovery; inert afterwards. Never hand-edit model membership here — discovery owns it.",
