@@ -60,7 +60,9 @@ impl CircuitBreaker {
     /// AstMatrix's defaults: open after 5 failures, 30 s open timeout,
     /// 3 half-open successes to close.
     pub fn astmatrix_defaults() -> Self {
-        Self::new(5, Duration::from_secs(30), 3)
+        // GenPark pattern: 2 consecutive successes close the circuit.
+        // 1 is too twitchy (single lucky success flaps); 3 is sluggish.
+        Self::new(5, Duration::from_secs(30), 2)
     }
 
     pub fn state(&self) -> CircuitState {

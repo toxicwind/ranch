@@ -801,6 +801,13 @@ impl RouterHandle {
                 .health
                 .record_health(&acq.provider, false, now_unix);
         }
+        if status == 404 {
+            // Upstream does not know this model ID: strike it so the
+            // /v1/models advertisement quarantines it (fix C). The circuit
+            // is deliberately untouched — a 404 is a catalog signal, not a
+            // provider-health signal.
+            self.record_empty_strike(&acq.provider, &acq.model);
+        }
         if let Some((label, backoff)) = cooldown {
             counter!("flock_lane_cooldown_total",
                 "lane" => acq.slot.lane.to_string(),
@@ -910,9 +917,35 @@ impl RouterHandle {
         }
     }
 
+    /// How long a probe-refreshed models cache counts as "fresh" for
+    /// advertisement. The probe loop refreshes every `probe_interval`
+    /// (default 30 s); 5 minutes tolerates several missed probes before
+    /// falling back to the Tack seeds.
+    pub const MODELS_CACHE_FRESH_TTL: Duration = Duration::from_secs(300);
+
+    /// Extract model IDs from a cached upstream `/v1/models` response body.
+    fn cached_model_ids(body: &Bytes) -> Vec<String> {
+        serde_json::from_slice::<serde_json::Value>(body)
+            .ok()
+            .and_then(|v| v.get("data").cloned())
+            .and_then(|d| d.as_array().cloned())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|m| m.get("id").and_then(|id| id.as_str()))
+                    .map(|s| s.to_owned())
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
     /// One live metadata record per provider runtime: usability (keys
     /// present), health-probe state, circuit state, ELO, and model list.
     /// Backs the /v1/models live-metadata enrichment.
+    ///
+    /// The model list prefers the probe-refreshed upstream listing (fix B):
+    /// when `models_cache` holds a fresh entry, those live IDs are advertised
+    /// instead of the Tack cold-start seeds. A stale or missing cache falls
+    /// back to the seeds, so advertisement never goes empty on probe trouble.
     pub fn provider_metadata(&self) -> Vec<ProviderMeta> {
         let runtimes = self.inner.runtimes.read().unwrap();
         runtimes
@@ -932,10 +965,24 @@ impl RouterHandle {
                     latency_ms: self.inner.health.latency_ms(&def.name),
                     elo: self.inner.health.get_elo(&def.name),
                     circuit,
-                    models: def.models.clone(),
+                    models: Self::live_model_list(rt, &def),
                 }
             })
             .collect()
+    }
+
+    /// Resolve the advertised model list for one runtime: fresh probe cache
+    /// wins over the Tack seeds (fix B).
+    fn live_model_list(rt: &ProviderRuntime, def: &ProviderDef) -> Vec<String> {
+        if let Some((at, body)) = rt.models_cache.lock().unwrap().as_ref() {
+            if at.elapsed() < Self::MODELS_CACHE_FRESH_TTL {
+                let ids = Self::cached_model_ids(body);
+                if !ids.is_empty() {
+                    return ids;
+                }
+            }
+        }
+        def.models.clone()
     }
 
     pub fn models_snapshot(&self) -> Vec<ProviderModels> {

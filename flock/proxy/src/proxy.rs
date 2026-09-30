@@ -123,8 +123,18 @@ fn label_path(path: &str) -> String {
 }
 
 /// Statuses worth waiting out: rate limit and transient server-side trouble.
+/// Upstream 404 strikes before a model is quarantined out of the
+/// /v1/models advertisement (fix C). Strikes decay via
+/// RouterHandle::EMPTY_STRIKE_DECAY, so a transient 404 wave self-heals.
+const QUARANTINE_STRIKES: u32 = 3;
+
+/// Whether an upstream status should trigger failover to the next
+/// candidate (modelmux Fallbackable semantics):
+/// - 400/422/413: the REQUEST is bad -- failing over won't help, surface it.
+/// - 401/403: the KEY is bad -- another key/provider may work, fall over.
+/// - 429/5xx/timeouts: the PROVIDER is struggling -- fall over.
 fn retryable(status: reqwest::StatusCode) -> bool {
-    matches!(status.as_u16(), 429 | 500 | 502 | 503 | 504)
+    matches!(status.as_u16(), 401 | 403 | 429 | 500 | 502 | 503 | 504)
 }
 
 /// Backoff for a lane in cooldown: honor Retry-After when present.
@@ -1101,6 +1111,15 @@ fn aggregate_models(body: &Bytes, router: &crate::router::RouterHandle) -> Bytes
             entry["flock"] = flock_model_meta(router, nv, &id);
         }
     }
+    // Fix C: quarantine filter. Two layers --
+    //  1. Tack's dead-ID list (static, curated): known-dead IDs never ship.
+    //  2. Live 404 strikes (dynamic): a model the upstream 404'd
+    //     QUARANTINE_STRIKES times stops being advertised until the strikes
+    //     decay (see RouterHandle::EMPTY_STRIKE_DECAY).
+    let dead: std::collections::HashSet<&str> = crate::tack_providers::TACK_DEAD_IDS
+        .iter()
+        .copied()
+        .collect();
     for pm in &metas {
         // Nvidia's ids already came from the authoritative upstream listing
         // above; the merge only adds the other providers' routable models.
@@ -1109,6 +1128,12 @@ fn aggregate_models(body: &Bytes, router: &crate::router::RouterHandle) -> Bytes
         }
         for m in &pm.models {
             if m == "*" {
+                continue;
+            }
+            if dead.contains(m.as_str()) {
+                continue;
+            }
+            if router.empty_strike_count(&pm.provider, m) >= QUARANTINE_STRIKES {
                 continue;
             }
             if seen.insert(m.clone()) {

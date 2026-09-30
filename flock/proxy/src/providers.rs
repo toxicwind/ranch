@@ -441,197 +441,222 @@ impl ProviderSet {
 /// environment variables, model lists, weights, and ELO seeds — exactly as
 /// `providers.go` declares them. Key material is never stored here; each
 /// entry names the env var AstMatrix resolved.
+/// Flock's hand-maintained operational overlay on top of Tack's wire data.
+///
+/// Tack (`crate::tack_providers`) is the authority for wire fields: base URLs,
+/// key env vars, auth schemes, cold-start seeds. This overlay decides WHICH
+/// Tack providers flock serves and carries flock's operational tuning:
+/// ELO/weight seeds, free-tier flags, model maps, RPM defaults, display
+/// names. Values are carried verbatim from the pre-Tack hardcoded defaults;
+/// do not retune here — retuning is a deliberate separate change.
+struct ProviderOverlay {
+    name: &'static str,
+    elo: i32,
+    weight: f64,
+    free_tier: bool,
+    default_rpm: usize,
+    display_name: &'static str,
+    model_map: &'static [(&'static str, &'static str)],
+}
+
+/// The 13 providers flock serves, in registry order. `display_name` is the
+/// bare provider name (verbatim from the old hardcoded defaults).
+const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
+    ProviderOverlay {
+        name: "llama-swap",
+        elo: 1600,
+        weight: 1.0,
+        free_tier: false,
+        default_rpm: 0,
+        display_name: "llama-swap",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "openrouter",
+        elo: 1500,
+        weight: 1.0,
+        free_tier: false,
+        default_rpm: 0,
+        display_name: "openrouter",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "nvidia",
+        elo: 1550,
+        weight: 1.2,
+        free_tier: true,
+        default_rpm: 0,
+        display_name: "nvidia",
+        model_map: &[("free", "nvidia/nemotron-3-ultra-550b-a55b")],
+    },
+    ProviderOverlay {
+        name: "groq",
+        elo: 1580,
+        weight: 1.5,
+        free_tier: true,
+        default_rpm: 0,
+        display_name: "groq",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "together",
+        elo: 1520,
+        weight: 1.0,
+        free_tier: false,
+        default_rpm: 0,
+        display_name: "together",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "cerebras",
+        elo: 1560,
+        weight: 1.3,
+        free_tier: true,
+        default_rpm: 0,
+        display_name: "cerebras",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "fireworks",
+        elo: 1510,
+        weight: 1.0,
+        free_tier: false,
+        default_rpm: 0,
+        display_name: "fireworks",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "hyperbolic",
+        elo: 1490,
+        weight: 1.0,
+        free_tier: true,
+        default_rpm: 0,
+        display_name: "hyperbolic",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "github",
+        elo: 1500,
+        weight: 1.0,
+        free_tier: true,
+        default_rpm: 0,
+        display_name: "github",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "mistral",
+        elo: 1530,
+        weight: 1.0,
+        free_tier: false,
+        default_rpm: 0,
+        display_name: "mistral",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "openai",
+        elo: 1650,
+        weight: 1.0,
+        free_tier: false,
+        default_rpm: 0,
+        display_name: "openai",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "perplexity",
+        elo: 1480,
+        weight: 1.0,
+        free_tier: false,
+        default_rpm: 0,
+        display_name: "perplexity",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "siliconflow",
+        elo: 1470,
+        weight: 1.0,
+        free_tier: true,
+        default_rpm: 0,
+        display_name: "siliconflow",
+        model_map: &[],
+    },
+];
+
+/// Flock's provider registry, built from Tack's wire data merged with the
+/// hand-maintained [`FLOCK_PROVIDER_OVERLAY`].
+///
+/// This is on the live serving path: `config.rs::migrate_v1()` calls it on
+/// every boot (the on-disk config is v1 with no providers field), so what
+/// this returns is what `:25193` advertises and routes after a restart.
+///
+/// Tack contract: `seeds` are cold-start data and may name dead IDs — they
+/// are filtered through `TACK_DEAD_IDS` here, at the single construction
+/// site, so no consumer ever sees a known-dead ID from this registry.
 pub fn default_providers() -> Vec<ProviderDef> {
-    let mut v = Vec::with_capacity(13);
-    let mut p = |name: &str,
-                 base_url: &str,
-                 key_env: &str,
-                 no_auth: bool,
-                 free_tier: bool,
-                 models: &[&str],
-                 weight: f64,
-                 elo: i32| {
+    use crate::tack_providers as tack;
+    let dead: std::collections::HashSet<&str> =
+        tack::TACK_DEAD_IDS.iter().copied().collect();
+    let mut v = Vec::with_capacity(FLOCK_PROVIDER_OVERLAY.len());
+    for ov in FLOCK_PROVIDER_OVERLAY {
+        let t = tack::TACK_PROVIDERS
+            .iter()
+            .find(|p| p.name == ov.name)
+            .unwrap_or_else(|| panic!("overlay references unknown Tack provider: {}", ov.name));
+        assert!(
+            !t.router_local,
+            "flock overlay must not include router-local Tack provider {}",
+            ov.name
+        );
+        assert!(
+            t.enabled,
+            "flock overlay includes disabled Tack provider {}",
+            ov.name
+        );
+        let mut keys = vec![ProviderKey {
+            key_env: t.key_env.to_string(),
+            ..ProviderKey::default()
+        }];
+        if !t.key_env_alt.is_empty() {
+            // Tack's multi-key semantic (e.g. NVIDIA_API_KEYS): the alt var
+            // becomes a second key on the same provider.
+            keys.push(ProviderKey {
+                key_env: t.key_env_alt.to_string(),
+                ..ProviderKey::default()
+            });
+        }
+        let no_auth = t.auth == "none";
         v.push(ProviderDef {
-            name: name.to_string(),
-            base_url: base_url.to_string(),
+            name: t.name.to_string(),
+            base_url: t.base_url.to_string(),
             auth: if no_auth {
                 AuthScheme::None
             } else {
                 AuthScheme::ApiKey
             },
-            keys: if key_env.is_empty() {
-                Vec::new()
-            } else {
-                vec![ProviderKey {
-                    key_env: key_env.to_string(),
-                    ..ProviderKey::default()
-                }]
-            },
+            keys,
             no_auth,
-            free_tier,
-            models: models.iter().map(|s| s.to_string()).collect(),
-            weight,
-            elo,
-            display_name: name.to_string(),
+            free_tier: ov.free_tier,
+            models: t
+                .seeds
+                .iter()
+                .filter(|m| !dead.contains(*m))
+                .map(|s| s.to_string())
+                .collect(),
+            model_map: ov
+                .model_map
+                .iter()
+                .map(|(k, val)| (k.to_string(), val.to_string()))
+                .collect(),
+            weight: ov.weight,
+            elo: ov.elo,
+            default_rpm: ov.default_rpm,
+            display_name: ov.display_name.to_string(),
             enabled: true,
             ..ProviderDef::default()
         });
-    };
-
-    // Canonical defaults, line-for-line from
-    // projects/herd/internal/astmatrix/providers.go (defaultProviders).
-    p(
-        "llama-swap",
-        "http://127.0.0.1:25100/v1",
-        "",
-        true,
-        false,
-        &["local-fast", "local-quality", "local-longctx"],
-        1.0,
-        1600,
-    );
-    p(
-        "openrouter",
-        "https://openrouter.ai/api/v1",
-        "OPENROUTER_API_KEY",
-        false,
-        false,
-        &["openrouter/auto", "openrouter/optimus-alpha"],
-        1.0,
-        1500,
-    );
-    p(
-        "nvidia",
-        "https://integrate.api.nvidia.com/v1",
-        "NVIDIA_API_KEY",
-        false,
-        true,
-        &[
-            // Refreshed 2026-09-30: the astmatrix originals 404 upstream.
-            "nvidia/nemotron-3-ultra-550b-a55b",
-            "nvidia/llama-3.1-nemotron-70b-instruct",
-        ],
-        1.2,
-        1550,
-    );
-    p(
-        "groq",
-        "https://api.groq.com/openai/v1",
-        "GROQ_API_KEY",
-        false,
-        true,
-        &[
-            // Refreshed 2026-09-30: bare upstream IDs; groq/ prefix 404s.
-            "openai/gpt-oss-20b",
-            "openai/gpt-oss-120b",
-        ],
-        1.5,
-        1580,
-    );
-    p(
-        "together",
-        "https://api.together.xyz/v1",
-        "TOGETHER_API_KEY",
-        false,
-        false,
-        &["together/llama-3.1-70b", "together/mixtral-8x22b"],
-        1.0,
-        1520,
-    );
-    p(
-        "cerebras",
-        "https://api.cerebras.ai/v1",
-        "CEREBRAS_API_KEY",
-        false,
-        true,
-        &[
-            // Refreshed 2026-09-30: bare upstream IDs; cerebras/ prefix 404s.
-            "gpt-oss-120b",
-            "qwen-3.8-27b",
-        ],
-        1.3,
-        1560,
-    );
-    p(
-        "fireworks",
-        "https://api.fireworks.ai/inference/v1",
-        "FIREWORKS_API_KEY",
-        false,
-        false,
-        &["fireworks/llama-3.1-70b", "fireworks/mixtral-8x22b"],
-        1.0,
-        1510,
-    );
-    p(
-        "hyperbolic",
-        "https://api.hyperbolic.xyz/v1",
-        "HYPERBOLIC_API_KEY",
-        false,
-        true,
-        &["hyperbolic/llama-3.1-70b"],
-        1.0,
-        1490,
-    );
-    p(
-        "github",
-        "https://models.inference.ai.azure.com",
-        "GITHUB_TOKEN",
-        false,
-        true,
-        &["github/Phi-4", "github/gpt-4o-mini"],
-        1.0,
-        1500,
-    );
-    p(
-        "mistral",
-        "https://api.mistral.ai/v1",
-        "MISTRAL_API_KEY",
-        false,
-        false,
-        &["mistral/mistral-large-2"],
-        1.0,
-        1530,
-    );
-    p(
-        "openai",
-        "https://api.openai.com/v1",
-        "OPENAI_API_KEY",
-        false,
-        false,
-        &["gpt-4o", "gpt-4o-mini", "o1-preview"],
-        1.0,
-        1650,
-    );
-    p(
-        "perplexity",
-        "https://api.perplexity.ai",
-        "PERPLEXITY_API_KEY",
-        false,
-        false,
-        &["perplexity/sonar"],
-        1.0,
-        1480,
-    );
-    p(
-        "siliconflow",
-        "https://api.siliconflow.cn/v1",
-        "SILICONFLOW_API_KEY",
-        false,
-        true,
-        &["siliconflow/deepseek-v2"],
-        1.0,
-        1470,
-    );
-    // The literal "free" routing directive resolves its upstream model via
-    // model_map so a wildcard model list never sends "*" upstream.
-    if let Some(nv) = v.iter_mut().find(|p| p.name == "nvidia") {
-        nv.model_map.insert(
-            "free".to_string(),
-            "nvidia/nemotron-3-ultra-550b-a55b".to_string(),
-        );
     }
     v
 }
+
 
 /// A generation of provider runtimes shared with request handlers.
 pub type SharedSet = Arc<ProviderSet>;
@@ -738,7 +763,7 @@ mod tests {
         let defs = default_providers();
         let set = ProviderSet::new(defs);
         let c: Vec<&str> = set
-            .candidates("openrouter/auto")
+            .candidates("poolside/laguna-xs-2.1:free")
             .iter()
             .map(|p| p.name.as_str())
             .collect();
@@ -766,13 +791,52 @@ mod tests {
     }
 
     #[test]
-    fn builtin_defaults_match_astmatrix() {
-        // Line-for-line against defaultProviders in
-        // projects/herd/internal/astmatrix/providers.go.
+    fn builtin_defaults_match_tack() {
+        // Tack-derived expectations: wire fields (base_url, key_env, seeds)
+        // come from tack/generated/providers.rs; operational tuning
+        // (elo/weight/free_tier) comes from FLOCK_PROVIDER_OVERLAY verbatim.
+        use crate::tack_providers as tack;
         let defs = default_providers();
         let by_name = |n: &str| defs.iter().find(|p| p.name == n).unwrap();
+        let tack_by_name =
+            |n: &str| tack::TACK_PROVIDERS.iter().find(|p| p.name == n).unwrap();
+        let dead: std::collections::HashSet<&str> =
+            tack::TACK_DEAD_IDS.iter().copied().collect();
+
+        // Every overlay entry resolves in Tack, is enabled, and is not
+        // router-local.
+        for ov in FLOCK_PROVIDER_OVERLAY {
+            let t = tack_by_name(ov.name);
+            assert!(t.enabled, "{} disabled in Tack", ov.name);
+            assert!(!t.router_local, "{} is router-local", ov.name);
+        }
+
+        // Wire fields match Tack exactly.
+        for ov in FLOCK_PROVIDER_OVERLAY {
+            let d = by_name(ov.name);
+            let t = tack_by_name(ov.name);
+            assert_eq!(d.base_url, t.base_url, "{} base_url", ov.name);
+            assert_eq!(d.keys[0].key_env, t.key_env, "{} key_env", ov.name);
+            // Seeds are Tack's minus dead IDs (the Tack contract).
+            let want: Vec<String> = t
+                .seeds
+                .iter()
+                .filter(|m| !dead.contains(*m))
+                .map(|s| s.to_string())
+                .collect();
+            assert_eq!(d.models, want, "{} models", ov.name);
+            // No advertised seed is a known-dead ID.
+            for m in &d.models {
+                assert!(!dead.contains(m.as_str()), "{} serves dead {}", ov.name, m);
+            }
+            // Operational tuning is verbatim from the overlay.
+            assert_eq!(d.elo, ov.elo, "{} elo", ov.name);
+            assert_eq!(d.weight, ov.weight, "{} weight", ov.name);
+            assert_eq!(d.free_tier, ov.free_tier, "{} free_tier", ov.name);
+        }
+
+        // Spot checks on values that changed with the Tack migration.
         let ls = by_name("llama-swap");
-        assert_eq!(ls.base_url, "http://127.0.0.1:25100/v1");
         assert!(ls.no_auth);
         assert_eq!(ls.elo, 1600);
         assert_eq!(
@@ -784,22 +848,59 @@ mod tests {
         assert!(nv.free_tier);
         assert_eq!(nv.weight, 1.2);
         assert_eq!(nv.elo, 1550);
-        let or = by_name("openrouter");
-        assert!(!or.free_tier);
-        assert_eq!(or.elo, 1500);
+        // NVIDIA_API_KEYS alt var becomes a second key.
+        assert_eq!(nv.keys.len(), 2);
+        assert_eq!(nv.keys[0].key_env, "NVIDIA_API_KEY");
+        assert_eq!(nv.keys[1].key_env, "NVIDIA_API_KEYS");
         assert_eq!(
-            or.models,
-            vec!["openrouter/auto", "openrouter/optimus-alpha"]
+            nv.model_map.get("free").map(|s| s.as_str()),
+            Some("nvidia/nemotron-3-ultra-550b-a55b")
         );
-        let gh = by_name("github");
-        assert_eq!(gh.base_url, "https://models.inference.ai.azure.com");
-        assert_eq!(gh.models, vec!["github/Phi-4", "github/gpt-4o-mini"]);
-        let oai = by_name("openai");
-        assert_eq!(oai.elo, 1650);
-        assert_eq!(oai.models, vec!["gpt-4o", "gpt-4o-mini", "o1-preview"]);
+        // Tack's nvidia seeds (12) replace the 2 stale hardcoded ones.
+        assert_eq!(nv.models.len(), 12);
+        let mi = by_name("mistral");
+        // Tack authority: no /v1 suffix (the old hardcode was wrong).
+        assert_eq!(mi.base_url, "https://api.mistral.ai");
         let sf = by_name("siliconflow");
+        // Tack authority: .com not .cn.
+        assert_eq!(sf.base_url, "https://api.siliconflow.com/v1");
         assert!(sf.free_tier);
         assert_eq!(sf.elo, 1470);
+        let gq = by_name("groq");
+        assert_eq!(gq.elo, 1580);
+        assert_eq!(gq.weight, 1.5);
+        // Bare gpt-oss-20b survives; only the :free form is dead.
+        assert!(gq.models.contains(&"openai/gpt-oss-20b".to_string()));
+        assert!(!gq
+            .models
+            .iter()
+            .any(|m| m == "openai/gpt-oss-20b:free"));
+    }
+
+    #[test]
+    fn tack_providers_copy_in_sync() {
+        // flock/proxy/src/tack_providers.rs must be byte-identical to
+        // tack/generated/providers.rs modulo the Generated-at stamp.
+        // Regenerate with: bun scripts/sync-tack-providers.ts --write
+        let generated = include_str!("../../../tack/generated/providers.rs");
+        let copy = include_str!("tack_providers.rs");
+        fn normalize(s: &str) -> String {
+            s.lines()
+                .map(|l| {
+                    if l.starts_with("// Generated at:") {
+                        "// Generated at: <normalized>"
+                    } else {
+                        l
+                    }
+                })
+                .collect::<Vec<_>>()
+                .join("\n")
+        }
+        assert_eq!(
+            normalize(copy),
+            normalize(generated),
+            "tack_providers.rs drifted from tack/generated/providers.rs"
+        );
     }
 
     #[test]
