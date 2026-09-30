@@ -251,6 +251,45 @@ pub struct ProviderMeta {
     pub models: Vec<String>,
 }
 
+/// Rough prompt-token estimate from a chat-completions request body (chars/4).
+fn estimate_prompt_tokens(body: &[u8]) -> u64 {
+    let v: serde_json::Value = match serde_json::from_slice(body) {
+        Ok(v) => v,
+        Err(_) => return 0,
+    };
+    let mut chars = 0usize;
+    if let Some(msgs) = v.get("messages").and_then(|m| m.as_array()) {
+        for m in msgs {
+            if let Some(c) = m.get("content") {
+                match c {
+                    serde_json::Value::String(st) => chars += st.len(),
+                    serde_json::Value::Array(parts) => {
+                        for part in parts {
+                            if let Some(t) = part.get("text").and_then(|t| t.as_str()) {
+                                chars += t.len();
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+    (chars / 4) as u64
+}
+
+/// Tokens the request needs: estimated prompt + requested generation.
+pub fn needed_tokens(body: &[u8]) -> u64 {
+    let prompt = estimate_prompt_tokens(body);
+    let v: serde_json::Value = serde_json::from_slice(body).unwrap_or(serde_json::Value::Null);
+    let max_toks = v
+        .get("max_tokens")
+        .and_then(|x| x.as_u64())
+        .or_else(|| v.get("max_completion_tokens").and_then(|x| x.as_u64()))
+        .unwrap_or(0);
+    prompt.saturating_add(max_toks)
+}
+
 impl RouterHandle {
     /// Build the router from a validated store: restore persisted state,
     /// run the one-time AstMatrix import when the state DB is fresh, build
@@ -423,6 +462,20 @@ impl RouterHandle {
         session: &str,
         strategy_override: Option<Strategy>,
     ) -> Vec<RouteCandidate> {
+        self.select_with_budget(model, session, strategy_override, 0)
+    }
+
+    /// select() with a token budget for context-window auto-demotion.
+    /// Borrowed from fastllm-proxy: models whose declared window cannot hold
+    /// `needed` tokens are demoted (not dropped) to the back. Undeclared
+    /// windows are never demoted. needed == 0 disables demotion.
+    pub fn select_with_budget(
+        &self,
+        model: &str,
+        session: &str,
+        strategy_override: Option<Strategy>,
+        needed: u64,
+    ) -> Vec<RouteCandidate> {
         // The literal "free" directive is a routing directive, not a model
         // name: it forces the Free strategy (free-tier providers only,
         // each serving its default free model) regardless of the
@@ -490,7 +543,7 @@ impl RouterHandle {
                 .collect(),
             Strategy::CircuitChain => self.order_hybrid(&rts, model),
         };
-        ordered
+        let collected: Vec<RouteCandidate> = ordered
             .into_iter()
             .map(|rt| {
                 let (provider, m) = {
@@ -516,7 +569,26 @@ impl RouterHandle {
                     strategy,
                 }
             })
-            .collect()
+            .collect();
+        if needed == 0 {
+            return collected;
+        }
+        // Context-window auto-demotion: a candidate whose declared window
+        // provably cannot hold this request goes to the back, not dropped.
+        // Stable sort preserves strategy ordering among candidates that
+        // agree on fit.
+        let mut demoted = collected;
+        demoted.sort_by_key(|c| {
+            self.runtime(&c.provider)
+                .map(|rt| {
+                    let def = rt.def.read().unwrap();
+                    def.context_lengths
+                        .get(&c.model)
+                        .is_some_and(|limit| *limit < needed)
+                })
+                .unwrap_or(false)
+        });
+        demoted
     }
 
     /// A runtime is a selection candidate when its definition is usable, the
@@ -1018,10 +1090,14 @@ impl RouterHandle {
         });
     }
 
-    /// Probe every usable provider's `/v1/models`: success refreshes the
-    /// provider's models cache and records health + latency; failure marks
-    /// the provider unhealthy (but never evicts its models cache — a probe
-    /// failure is not proof the models vanished).
+    /// Probe every usable provider's `/v1/models` concurrently.
+    /// Success refreshes the provider's models cache and records health +
+    /// latency; failure marks the provider unhealthy (but never evicts its
+    /// models cache — a probe failure is not proof the models vanished).
+    ///
+    /// Concurrent with per-provider timeouts: one slow provider (e.g. NVIDIA
+    /// at 36s) no longer stalls the entire health loop. Each probe gets a
+    /// 15s ceiling; slow is a kind of wrong.
     async fn probe_once(&self) {
         let now_unix = unix_now();
         let rts: Vec<Arc<ProviderRuntime>> = {
@@ -1034,36 +1110,56 @@ impl RouterHandle {
                 .cloned()
                 .collect()
         };
-        for rt in rts {
-            let (name, base_url) = {
-                let def = rt.def.read().unwrap();
-                (def.name.clone(), def.base_url.clone())
-            };
-            let url = format!("{}/v1/models", base_url.trim_end_matches('/'));
-            let started = Instant::now();
-            let resp = self.inner.client.get(&url).send().await;
-            match resp {
-                Ok(r) if r.status().is_success() => {
-                    if let Ok(bytes) = r.bytes().await {
-                        *rt.models_cache.lock().unwrap() = Some((Instant::now(), bytes));
+        // Race all probes concurrently; each has a 15s ceiling.
+        let futures: Vec<_> = rts
+            .into_iter()
+            .map(|rt| {
+                let this = self.clone();
+                async move {
+                    let (name, base_url) = {
+                        let def = rt.def.read().unwrap();
+                        (def.name.clone(), def.base_url.clone())
+                    };
+                    let url = format!("{}/v1/models", base_url.trim_end_matches('/'));
+                    let started = Instant::now();
+                    // 15s per-probe ceiling: a hanging provider doesn't stall the loop.
+                    let resp = tokio::time::timeout(
+                        Duration::from_secs(15),
+                        this.inner.client.get(&url).send(),
+                    )
+                    .await;
+                    match resp {
+                        Ok(Ok(r)) if r.status().is_success() => {
+                            if let Ok(bytes) = r.bytes().await {
+                                *rt.models_cache.lock().unwrap() = Some((Instant::now(), bytes));
+                            }
+                            let latency = started.elapsed();
+                            this.inner.health.record_latency(&name, latency);
+                            this.inner.health.record_health(&name, true, now_unix);
+                            gauge!("flock_provider_latency_ms", "provider" => name.clone())
+                                .set(latency.as_secs_f64() * 1000.0);
+                        }
+                        Ok(Ok(r)) => {
+                            this.inner.health.record_health(&name, false, now_unix);
+                            tracing::warn!(provider = %name, status = %r.status(), "provider probe failed");
+                        }
+                        Ok(Err(e)) => {
+                            this.inner.health.record_health(&name, false, now_unix);
+                            tracing::warn!(provider = %name, error = %e, "provider probe error");
+                        }
+                        Err(_) => {
+                            // Timeout: provider is too slow, mark unhealthy but don't evict cache.
+                            this.inner.health.record_health(&name, false, now_unix);
+                            tracing::warn!(provider = %name, "provider probe timed out (15s)");
+                        }
                     }
-                    let latency = started.elapsed();
-                    self.inner.health.record_latency(&name, latency);
-                    self.inner.health.record_health(&name, true, now_unix);
-                    gauge!("flock_provider_latency_ms", "provider" => name.clone())
-                        .set(latency.as_secs_f64() * 1000.0);
                 }
-                Ok(r) => {
-                    self.inner.health.record_health(&name, false, now_unix);
-                    tracing::warn!(provider = %name, status = %r.status(), "provider probe failed");
-                }
-                Err(e) => {
-                    self.inner.health.record_health(&name, false, now_unix);
-                    tracing::warn!(provider = %name, error = %e, "provider probe error");
-                }
-            }
-        }
+            })
+            .collect();
+        // Join all: the loop completes when the slowest probe finishes (or times out).
+        futures_util::future::join_all(futures).await;
     }
+
 
     fn spawn_persist_loop(&self) {
         let this = self.clone();
@@ -1284,7 +1380,11 @@ impl RouterHandle {
             client_gone,
         } = ctx;
         let routing = self.routing_config();
-        let candidates = self.select(&model, session.as_deref().unwrap_or(""), None);
+        // Context-window auto-demotion budget: estimated prompt tokens +
+        // requested max_tokens. Models that provably cannot hold the request
+        // are demoted (not dropped) in the candidate chain.
+        let budget = crate::router::needed_tokens(&body);
+        let candidates = self.select_with_budget(&model, session.as_deref().unwrap_or(""), None, budget);
         if candidates.is_empty() {
             return Err(RouteError::Unavailable(format!(
                 "no provider serves model '{model}'"
@@ -1528,7 +1628,40 @@ impl RouterHandle {
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
+
+    #[tokio::test]
+    async fn context_window_demotion_pushes_undersized_to_back() {
+        use std::collections::BTreeMap;
+        // Two providers serving the same model: "small" declares a 1000-token
+        // window, "big" declares nothing (never demoted).
+        let mut small = test_def("small");
+        let mut small_ctx = BTreeMap::new();
+        small_ctx.insert("tiny-model".to_string(), 1000u64);
+        small.context_lengths = small_ctx;
+        let big = test_def("big");
+        let handle = test_router(vec![small, big]);
+        // Request needs 50000 tokens: "small" declares 1000 -> demoted.
+        let cands = handle.select_with_budget("tiny-model", "", None, 50000);
+        assert_eq!(cands.len(), 2);
+        assert_eq!(cands[0].provider, "big", "undeclared window must not demote");
+        assert_eq!(cands[1].provider, "small", "undersized window must go last");
+        // needed == 0 disables demotion entirely.
+        let cands2 = handle.select("tiny-model", "", None);
+        assert_eq!(cands2.len(), 2);
+    }
+
+    #[test]
+    fn needed_tokens_sums_prompt_and_max() {
+        let body = br#"{"messages":[{"role":"user","content":"hello world, this is a test"}],"max_tokens":500}"#;
+        let n = needed_tokens(body);
+        // "hello world, this is a test" = 27 chars -> 6 tokens (chars/4) + 500
+        assert_eq!(n, 6 + 500);
+        // No max_tokens -> only prompt estimate.
+        let body2 = br#"{"messages":[{"role":"user","content":"hi"}]}"#;
+        assert_eq!(needed_tokens(body2), 0); // "hi" = 2 chars -> 0 tokens
+    }
 
     fn test_def(name: &str) -> ProviderDef {
         ProviderDef {

@@ -103,6 +103,21 @@ export const PROVIDER_DEFS: ProviderDef[] = [
       "cohere/north-mini-code:free",
       "inclusionai/ling-3.0-flash:free",
     ],
+    contextLengths: {
+      "cohere/north-mini-code:free": 128000,
+      "google/gemma-4-26b-a4b-it:free": 1000000,
+      "google/gemma-4-31b-it:free": 1000000,
+      "inclusionai/ling-3.0-flash-fin:free": 256000,
+      "inclusionai/ling-3.0-flash:free": 256000,
+      "nvidia/nemotron-3-nano-30b-a3b:free": 256000,
+      "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free": 256000,
+      "nvidia/nemotron-3-super-120b-a12b:free": 500000,
+      "nvidia/nemotron-3-ultra-550b-a55b:free": 1000000,
+      "nvidia/nemotron-nano-12b-v2-vl:free": 256000,
+      "nvidia/nemotron-nano-9b-v2:free": 256000,
+      "poolside/laguna-s-2.1:free": 256000,
+      "poolside/laguna-xs-2.1:free": 256000
+    },
   },
   {
     name: "nvidia",
@@ -125,6 +140,20 @@ export const PROVIDER_DEFS: ProviderDef[] = [
       "z-ai/glm-5.2",
       "thinkingmachines/inkling",
     ],
+    contextLengths: {
+      "deepseek-ai/deepseek-v4-flash": 256000,
+      "deepseek-ai/deepseek-v4-pro": 256000,
+      "google/gemma-4-31b-it": 1000000,
+      "meta/llama-3.1-70b-instruct": 128000,
+      "mistralai/mistral-large-3-675b-instruct-2512": 256000,
+      "nvidia/nemotron-3-nano-30b-a3b": 256000,
+      "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": 256000,
+      "nvidia/nemotron-3-super-120b-a12b": 500000,
+      "qwen/qwen3.5-122b-a10b": 256000,
+      "qwen/qwen3.5-397b-a17b": 256000,
+      "thinkingmachines/inkling": 256000,
+      "z-ai/glm-5.2": 200000
+    },
   },
   {
     name: "groq",
@@ -140,6 +169,14 @@ export const PROVIDER_DEFS: ProviderDef[] = [
       "openai/gpt-oss-20b",
       "meta-llama/llama-4-scout-17b-16e-instruct",
     ],
+    contextLengths: {
+      "llama-3.3-70b-versatile": 128000,
+      "meta-llama/llama-4-scout-17b-16e-instruct": 1000000,
+      "openai/gpt-oss-120b": 128000,
+      "openai/gpt-oss-20b": 128000,
+      "qwen/qwen3-32b": 128000,
+      "qwen/qwen3.6-27b": 128000
+    },
   },
   {
     name: "cerebras",
@@ -161,6 +198,10 @@ export const PROVIDER_DEFS: ProviderDef[] = [
       "models/gemini-2.0-flash",
       "models/gemma-4-31b-it",
     ],
+    contextLengths: {
+      "models/gemini-2.5-flash": 1000000,
+      "models/gemini-2.5-flash-lite": 1000000
+    },
   },
   {
     name: "mistral",
@@ -174,6 +215,11 @@ export const PROVIDER_DEFS: ProviderDef[] = [
       "mistral-large-latest",
       "mistral-medium-latest",
     ],
+    contextLengths: {
+      "mistral-large-latest": 256000,
+      "mistral-medium-latest": 128000,
+      "mistral-small-latest": 128000
+    },
   },
   {
     name: "openai",
@@ -182,6 +228,12 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["gpt-5.5", "gpt-5.5-mini", "gpt-5.4", "daybreak-blue-latest"],
+    contextLengths: {
+      "daybreak-blue-latest": 400000,
+      "gpt-5.4": 400000,
+      "gpt-5.5": 400000,
+      "gpt-5.5-mini": 400000
+    },
   },
   {
     name: "anthropic",
@@ -191,6 +243,11 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     headerName: "x-api-key",
     adapter: "openai",
     seeds: ["claude-opus-5-5", "claude-sonnet-5", "claude-fable-5"],
+    contextLengths: {
+      "claude-fable-5": 500000,
+      "claude-opus-5-5": 1000000,
+      "claude-sonnet-5": 1000000
+    },
   },
   {
     name: "deepseek",
@@ -199,6 +256,10 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["deepseek-v4-pro", "deepseek-v4-flash"],
+    contextLengths: {
+      "deepseek-v4-flash": 256000,
+      "deepseek-v4-pro": 256000
+    },
   },
   {
     name: "xai",
@@ -207,6 +268,10 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["grok-4.6", "grok-4.5"],
+    contextLengths: {
+      "grok-4.5": 2000000,
+      "grok-4.6": 2000000
+    },
   },
   {
     name: "together",
@@ -215,6 +280,10 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["moonshotai/Kimi-K2.7-Code", "deepseek-ai/DeepSeek-V4-Flash"],
+    contextLengths: {
+      "deepseek-ai/DeepSeek-V4-Flash": 256000,
+      "moonshotai/Kimi-K2.7-Code": 256000
+    },
   },
   {
     name: "fireworks",
@@ -223,6 +292,10 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["kimi-k2.7-code", "accounts/fireworks/models/glm-5.2-fast"],
+    contextLengths: {
+      "accounts/fireworks/models/glm-5.2-fast": 200000,
+      "kimi-k2.7-code": 256000
+    },
   },
   {
     name: "deepinfra",
@@ -231,6 +304,10 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["deepseek-ai/DeepSeek-V4-Flash-0731", "deepseek-ai/DeepSeek-V4.1-Flash"],
+    contextLengths: {
+      "deepseek-ai/DeepSeek-V4-Flash-0731": 256000,
+      "deepseek-ai/DeepSeek-V4.1-Flash": 256000
+    },
   },
   {
     name: "moonshot",
@@ -240,6 +317,10 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["kimi-k2.7-code", "kimi-k2.6"],
+    contextLengths: {
+      "kimi-k2.6": 256000,
+      "kimi-k2.7-code": 256000
+    },
   },
   {
     name: "siliconflow",
@@ -248,6 +329,10 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["zai-org/GLM-5.1", "deepseek-ai/DeepSeek-V4-Flash"],
+    contextLengths: {
+      "deepseek-ai/DeepSeek-V4-Flash": 256000,
+      "zai-org/GLM-5.1": 200000
+    },
   },
   {
     name: "siliconflow-cn",
@@ -527,6 +612,9 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["hyperbolic/llama-3.1-70b"],
+    contextLengths: {
+      "hyperbolic/llama-3.1-70b": 128000
+    },
   },
   {
     name: "github",
@@ -536,6 +624,10 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["github/Phi-4", "github/gpt-4o-mini"],
+    contextLengths: {
+      "github/Phi-4": 128000,
+      "github/gpt-4o-mini": 128000
+    },
   },
   {
     name: "perplexity",
@@ -545,6 +637,9 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["perplexity/sonar"],
+    contextLengths: {
+      "perplexity/sonar": 200000
+    },
   },
 ];
 

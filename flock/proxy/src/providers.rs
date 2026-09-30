@@ -251,6 +251,11 @@ pub struct ProviderDef {
     /// Operational on/off switch independent of key material.
     #[serde(default = "default_true")]
     pub enabled: bool,
+    /// Declared context windows per model ID (tokens), from Roost.
+    /// Absent = undeclared = never demoted by context-window auto-demotion.
+    /// BTreeMap (not HashMap) so config JSON serialization is deterministic.
+    #[serde(default)]
+    pub context_lengths: std::collections::BTreeMap<String, u64>,
 }
 
 fn default_weight() -> f64 {
@@ -263,6 +268,7 @@ fn default_elo() -> i32 {
 impl Default for ProviderDef {
     fn default() -> Self {
         Self {
+            context_lengths: std::collections::BTreeMap::new(),
             name: String::new(),
             base_url: String::new(),
             auth: AuthScheme::ApiKey,
@@ -651,6 +657,11 @@ pub fn default_providers() -> Vec<ProviderDef> {
             default_rpm: ov.default_rpm,
             display_name: ov.display_name.to_string(),
             enabled: true,
+            context_lengths: t
+                .context_lengths
+                .iter()
+                .map(|(k, v)| (k.to_string(), *v))
+                .collect(),
             ..ProviderDef::default()
         });
     }

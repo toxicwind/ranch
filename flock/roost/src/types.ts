@@ -58,6 +58,12 @@ export interface ProviderDef {
    * (herd, TAU, Python) skip these definitions.
    */
   routerLocal?: boolean;
+  /**
+   * Declared context windows per model ID (tokens). Used for context-window
+   * auto-demotion: a model whose window cannot hold the request is demoted
+   * (not dropped) in the routing chain. Absent = undeclared = never demoted.
+   */
+  contextLengths?: Record<string, number>;
 }
 
 export interface DiscoveredModels {

@@ -212,6 +212,14 @@ function rustStrSlice(ids: string[]): string {
  * ROOST_DEAD_IDS, per the catalog contract ("the catalog filters deadIds
  * everywhere (cold start included)").
  */
+/** Render a Record<string, number> as a Rust slice of (&str, u64) tuples. */
+function rustCtxLengths(m: Record<string, number>): string {
+  const entries = Object.keys(m).sort().map(
+    (k) => `(${jsonEscaped(k)}, ${Math.floor(m[k])}u64)`
+  );
+  return `&[${entries.join(", ")}]`;
+}
+
 export function buildProvidersRust(input: CodegenInput): string {
   const generatedAt = new Date().toISOString();
   const provenance = input.provenance ? input.provenance : "unknown";
@@ -233,6 +241,7 @@ export function buildProvidersRust(input: CodegenInput): string {
         `enabled: ${d.enabled === false ? "false" : "true"},`,
         `seeds: ${rustStrSlice(d.seeds)},`,
         `static_models: ${rustStrSlice(d.staticModels ?? [])},`,
+        `context_lengths: ${rustCtxLengths(d.contextLengths ?? {})},`,
       ];
       return `    RoostProvider {\n${fields.map((f) => `        ${f}`).join("\n")}\n    },`;
     })
@@ -288,6 +297,8 @@ pub struct RoostProvider {
     pub seeds: &'static [&'static str],
     /// Adapter "static": the model list, carried in the definition.
     pub static_models: &'static [&'static str],
+    /// Declared context windows per model ID (tokens). Absent = undeclared.
+    pub context_lengths: &'static [(&'static str, u64)],
 }
 
 /// The canonical provider table, generated from the Roost catalog.
