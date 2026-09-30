@@ -184,3 +184,23 @@ production use.
 
 Built by [RightNow](https://github.com/RightNow-AI/openfang) upstream; this
 fork lives at [toxicwind/rig](https://github.com/toxicwind/rig).
+
+
+## Build
+
+The main build entry is `scripts/flicker-build.sh` — it submits the canonical
+build+test as a job to flicker, the estate build-job system, and streams
+the log:
+
+```bash
+cargo build --workspace && cargo test --workspace
+```
+
+Run it via:
+
+```bash
+./scripts/flicker-build.sh
+```
+
+Honors `FLICKER_URL` (default `http://127.0.0.1:25148`). Exit 0 on success
+(or cached identical success), 1 on failure/timeout.
