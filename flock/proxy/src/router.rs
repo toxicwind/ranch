@@ -591,6 +591,77 @@ impl RouterHandle {
         demoted
     }
 
+    /// Select with a full routing decision record (AstrLink pattern).
+    /// Returns candidates plus a RoutingDecision explaining the choice.
+    pub fn select_with_decision(
+        &self,
+        model: &str,
+        session: &str,
+        strategy_override: Option<Strategy>,
+        needed: u64,
+    ) -> (Vec<RouteCandidate>, crate::decision::RoutingDecision) {
+        use crate::decision::{RoutingDecision, SelectionReason, SkipReason};
+        let mut decision = RoutingDecision::new();
+        let candidates = self.select_with_budget(model, session, strategy_override, needed);
+        let selected_names: std::collections::HashSet<&str> =
+            candidates.iter().map(|c| c.provider.as_str()).collect();
+
+        // Record skips for providers not in the candidate list.
+        let runtimes = self.inner.runtimes.read().unwrap();
+        for (name, rt) in runtimes.iter() {
+            if selected_names.contains(name.as_str()) {
+                continue;
+            }
+            let def = rt.def.read().unwrap();
+            let reason = if !def.enabled {
+                Some(SkipReason::Disabled)
+            } else if !def.usable() {
+                Some(SkipReason::NotConnected)
+            } else if !def.serves_model(model) {
+                Some(SkipReason::ModelNotListed)
+            } else {
+                drop(def);
+                if !self.inner.health.is_healthy(name) {
+                    Some(SkipReason::NotConnected)
+                } else if matches!(rt.circuit.lock().unwrap().state(), CircuitState::Open) {
+                    Some(SkipReason::CircuitOpen)
+                } else {
+                    None
+                }
+            };
+            if let Some(r) = reason {
+                decision.push_skip(name.clone(), r);
+            }
+        }
+        drop(runtimes);
+
+        // Selection reason for the top candidate.
+        if let Some(top) = candidates.first() {
+            let reason = if needed > 0 {
+                let demoted = self
+                    .runtime(&top.provider)
+                    .map(|rt| {
+                        rt.def
+                            .read()
+                            .unwrap()
+                            .context_lengths
+                            .get(&top.model)
+                            .is_some_and(|limit| *limit < needed)
+                    })
+                    .unwrap_or(false);
+                if demoted {
+                    SelectionReason::ContextDemoted
+                } else {
+                    SelectionReason::Priority
+                }
+            } else {
+                SelectionReason::Priority
+            };
+            decision.select(reason);
+        }
+        (candidates, decision)
+    }
+
     /// A runtime is a selection candidate when its definition is usable, the
     /// health gate passes, and the circuit isn't open.
     fn candidate_ok(&self, rt: &ProviderRuntime) -> bool {
@@ -1384,7 +1455,20 @@ impl RouterHandle {
         // requested max_tokens. Models that provably cannot hold the request
         // are demoted (not dropped) in the candidate chain.
         let budget = crate::router::needed_tokens(&body);
-        let candidates = self.select_with_budget(&model, session.as_deref().unwrap_or(""), None, budget);
+        let (candidates, decision) = self.select_with_decision(
+            &model,
+            session.as_deref().unwrap_or(""),
+            None,
+            budget,
+        );
+        // Routing decision record (AstrLink pattern): structured observability
+        // for why this provider was chosen and what was skipped.
+        tracing::debug!(
+            decision = ?decision,
+            model = %model,
+            budget,
+            "routing decision"
+        );
         if candidates.is_empty() {
             return Err(RouteError::Unavailable(format!(
                 "no provider serves model '{model}'"

@@ -3,6 +3,7 @@ mod auth;
 mod circuit;
 mod coalescer;
 mod config;
+pub mod decision;
 mod dispatch;
 mod governor;
 mod health;
