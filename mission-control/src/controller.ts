@@ -11,7 +11,7 @@ import { readdir, readFile, writeFile, mkdir, rename, stat } from "node:fs/promi
 import { watch } from "node:fs";
 import { join } from "node:path";
 import { classifyTerminal } from "./classify.ts";
-import type { RelaunchDirective, RunEvidence } from "./types.ts";
+import type { Classification, RelaunchDirective, RunEvidence } from "./types.ts";
 
 export const ROOT = process.env.MISSION_ROOT ?? join(import.meta.dir, "..", "state");
 const OUTBOX = join(ROOT, "outbox");
@@ -34,9 +34,20 @@ export async function processEvent(missionId: string, eventFile: string): Promis
     if ((err as NodeJS.ErrnoException)?.code === "ENOENT") return null;
     throw err;
   }
-  const c = classifyTerminal(evidence);
   const eventsDir = join(ROOT, "missions", missionId, "events");
   const doneDir = join(ROOT, "missions", missionId, "processed");
+  let c: Classification;
+  try {
+    c = classifyTerminal(evidence);
+  } catch (err) {
+    // Poison event: quarantine so one malformed file cannot wedge the
+    // replay loop or the fs.watch handler.
+    const qDir = join(ROOT, "missions", missionId, "quarantine");
+    await ensureDir(qDir);
+    await rename(join(eventsDir, eventFile), join(qDir, eventFile));
+    console.error("quarantined " + missionId + "/" + eventFile + ":", err);
+    return null;
+  }
   await ensureDir(doneDir);
   await rename(join(eventsDir, eventFile), join(doneDir, eventFile));
 

@@ -13,7 +13,20 @@ function isGenericProse(s: string): boolean {
   return !evidence.test(t);
 }
 
-export function classifyTerminal(e: RunEvidence): Classification {
+export function classifyTerminal(raw: RunEvidence): Classification {
+  // Normalize: malformed event files must classify, never crash. Missing
+  // arrays default to [], numbers to 0, booleans to false.
+  const e: RunEvidence = {
+    runId: raw.runId ?? "unknown",
+    status: raw.status ?? "unknown",
+    resultSummary: raw.resultSummary ?? null,
+    logBytes: raw.logBytes ?? 0,
+    artifacts: raw.artifacts ?? [],
+    substantiveMilestones: raw.substantiveMilestones ?? [],
+    askedForInput: raw.askedForInput ?? false,
+    refused: raw.refused ?? false,
+    safetyReviewSkipped: raw.safetyReviewSkipped ?? false,
+  };
   const base = { runId: e.runId } as const;
 
   // 1. Generic refusal: the run declined instead of doing the work.

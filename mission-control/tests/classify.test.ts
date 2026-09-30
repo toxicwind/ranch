@@ -80,3 +80,9 @@ describe("terminal failure classes", () => {
     expect(c.continue).toBe(true);
   });
 });
+
+  test("malformed event (missing arrays) classifies, never crashes", () => {
+    const c = classifyTerminal({ runId: "m2-bad", status: "succeeded", resultSummary: null } as any);
+    expect(c.terminal).toBe("resultless");
+    expect(c.continue).toBe(true);
+  });
