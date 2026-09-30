@@ -33,7 +33,7 @@ calls `due_jobs()` → `cron_run_job()`. Auto-disable after 5 consecutive failur
 - Delivery: `None`, `Channel`, `LastChannel`, `Webhook`, plus fan-out
   `CronDeliveryTarget::{Channel, Webhook, LocalFile { path, append }, Email}`.
   `LocalFile` append is the fleet-channel sink
-  (`/home/toxic/.shingle/directives.md`).
+  (`/home/toxic/.fleet-bus/directives.md`).
 
 Management: `openfang cron list|create|delete|enable|disable`, REST
 `GET/POST /api/cron/jobs`, `DELETE /api/cron/jobs/{id}` on the daemon
@@ -74,7 +74,7 @@ auto-disable the job, and a dead job is worse than the cron.
 - `action`: `{ "kind": "agent_turn", "message": "<snapshot prompt>",
   "timeout_secs": 180 }`
 - `delivery_targets`: `[ { "type": "local_file",
-  "path": "/home/toxic/.shingle/directives.md", "append": true } ]`
+  "path": "/home/toxic/.fleet-bus/directives.md", "append": true } ]`
 
 Snapshot prompt (agent must produce — keep to ~6 lines, prefixed
 `## [snapshot HH:MM MDT]`):
