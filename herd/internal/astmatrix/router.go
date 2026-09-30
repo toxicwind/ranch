@@ -268,6 +268,13 @@ func callOne(ctx context.Context, m *Matrix, provider, model string, body map[st
 		}
 
 		m.Record(model, provider, resp.StatusCode, lat, 0, "", "")
+		if resp.StatusCode == 404 {
+			// Report the 404 to the TS catalog brain (best-effort, async,
+			// never blocks routing). The quarantine decision lives in the TS
+			// package; herd only reports the event. The TS side rewrites the
+			// live catalog file and herd picks it up on its next read.
+			go reportServe404(provider, model)
+		}
 		return RouteResult{Status: resp.StatusCode, Provider: provider, Lat: lat, Err: string(errBody)}
 	}
 

@@ -3,6 +3,7 @@ package astmatrix
 import (
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -15,96 +16,43 @@ type provider struct {
 	models    []string
 }
 
-// defaultProviders returns the built-in sovereign provider registry.
-// It merges the hand-curated core providers with the extended registry
-// from free_providers (only openai-format providers with non-empty BaseURL).
+// defaultProviders builds the provider table from the GENERATED canonical
+// catalog (providers_generated.go — DO NOT EDIT BY HAND; source of truth is
+// packages/providers/src/data.ts in the TS package, which is the brain).
+// No model IDs are hardcoded here.
+//
+// Cold start: providers carry their generated seeds, dead-ID filtered. The
+// Matrix overlays the LIVE serving sets from the TS-exported live catalog
+// file (LiveCatalogReader.SyncProviderModels) — the answer, which is data.
+// No discovery or quarantine logic lives in this binary.
+//
+// The extended registry (registry.go) merges in afterwards in deterministic
+// (sorted) order: core catalog wins on collision, non-openai formats and
+// empty BaseURLs are skipped.
 func defaultProviders() map[string]*provider {
-	providers := map[string]*provider{
-		"llama-swap": {
-			base:   "http://127.0.0.1:25100/v1",
-			noAuth: true,
-			models: []string{"local-fast", "local-quality", "local-longctx"},
-		},
-		"openrouter": {
-			base:   "https://openrouter.ai/api/v1",
-			keyEnv: "OPENROUTER_API_KEY",
-			models: []string{
-				// Verified working 2026-07-28
-				"google/gemma-4-31b-it:free",
-				"google/gemma-4-26b-a4b-it:free",
-				"nvidia/nemotron-3-super-120b-a12b:free",
-				"nvidia/nemotron-3-nano-30b-a3b:free",
-				"nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-				"nvidia/nemotron-nano-12b-v2-vl:free",
-				"nvidia/nemotron-nano-9b-v2:free",
-				"nvidia/nemotron-3-ultra-550b-a55b:free",
-				"poolside/laguna-xs-2.1:free",
-				"poolside/laguna-s-2.1:free",
-				"cohere/north-mini-code:free",
-				"openai/gpt-oss-20b:free",
-				"inclusionai/ling-3.0-flash:free",
-			},
-		},
-		"nvidia": {
-			base:      "https://integrate.api.nvidia.com/v1",
-			keyEnv:    "NVIDIA_API_KEY",
-			keyEnvAlt: "NVIDIA_NIM_API_KEY",
-			models: []string{
-				"nvidia/nemotron-3-super-120b-a12b",
-				"nvidia/nemotron-3-nano-30b-a3b",
-				"meta/llama-3.1-70b-instruct",
-				"meta/llama-3.3-70b-instruct",
-				"qwen/qwen3.5-397b-a17b",
-				"qwen/qwen3.5-122b-a10b",
-				"deepseek-ai/deepseek-v4-flash",
-				"deepseek-ai/deepseek-v4-pro",
-				"mistralai/mistral-large-3-675b-instruct-2512",
-				"google/gemma-4-31b-it",
-				"z-ai/glm-5.2",
-				"thinkingmachines/inkling",
-			},
-		},
-		"groq": {
-			base:   "https://api.groq.com/openai/v1",
-			keyEnv: "GROQ_API_KEY",
-			models: []string{
-				"llama-3.3-70b-versatile",
-				"qwen/qwen3-32b",
-				"qwen/qwen3.6-27b",
-				"openai/gpt-oss-120b",
-				"openai/gpt-oss-20b",
-				"meta-llama/llama-4-scout-17b-16e-instruct",
-			},
-		},
-		"cerebras": {
-			base:   "https://api.cerebras.ai/v1",
-			keyEnv: "CEREBRAS_API_KEY",
-			models: []string{},
-		},
-		"google": {
-			base:   "https://generativelanguage.googleapis.com/v1beta/openai",
-			keyEnv: "GOOGLE_API_KEY",
-			models: []string{
-				"models/gemini-2.5-flash",
-				"models/gemini-2.5-flash-lite",
-				"models/gemini-2.0-flash",
-				"models/gemma-4-31b-it",
-			},
-		},
-		"mistral": {
-			base:   "https://api.mistral.ai/v1",
-			keyEnv: "MISTRAL_API_KEY",
-			models: []string{
-				"mistral-small-latest",
-				"codestral-latest",
-				"mistral-large-latest",
-				"mistral-medium-latest",
-			},
-		},
+	dead := deadIDSet()
+	providers := make(map[string]*provider, len(ProviderCatalogDefs))
+	for _, d := range ProviderCatalogDefs {
+		if !d.Enabled || d.RouterLocal {
+			continue
+		}
+		providers[d.Name] = &provider{
+			base:      d.BaseURL,
+			keyEnv:    d.KeyEnv,
+			keyEnvAlt: d.KeyEnvAlt,
+			noAuth:    d.NoAuth,
+			models:    filterDeadIDs(ProviderCatalogSeeds[d.Name], dead),
+		}
 	}
 
 	// Merge extended providers from registry (skip duplicates, skip non-openai, skip empty BaseURL)
-	for id, reg := range RegistryProviders {
+	ids := make([]string, 0, len(RegistryProviders))
+	for id := range RegistryProviders {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	for _, id := range ids {
+		reg := RegistryProviders[id]
 		if _, exists := providers[id]; exists {
 			continue // core provider takes precedence
 		}
@@ -125,8 +73,66 @@ func defaultProviders() map[string]*provider {
 	return providers
 }
 
+// deadIDSet builds the dead-tier set from the generated list.
+func deadIDSet() map[string]bool {
+	set := make(map[string]bool, len(ProviderCatalogDeadIDs))
+	for _, id := range ProviderCatalogDeadIDs {
+		set[id] = true
+	}
+	return set
+}
+
+// filterDeadIDs removes permanently-dead ids from a seed list.
+func filterDeadIDs(ids []string, dead map[string]bool) []string {
+	out := make([]string, 0, len(ids))
+	for _, id := range ids {
+		if !dead[id] {
+			out = append(out, id)
+		}
+	}
+	return out
+}
+
+// aliasTargetServable reports whether an alias target is currently servable:
+// not on the permanent dead list, and present in the provider's current
+// serving set (which comes from the live catalog file, or generated seeds at
+// cold start). Quarantined models are absent from the serving set, so this
+// single membership check covers both guards. Data check, not logic.
+func aliasTargetServable(providers map[string]*provider, prov, model string) bool {
+	if deadIDSet()[model] {
+		return false
+	}
+	p, ok := providers[prov]
+	if !ok {
+		return false
+	}
+	for _, id := range p.models {
+		if id == model {
+			return true
+		}
+	}
+	return false
+}
+
 // codingAlias maps friendly alias -> [provider, model] or nil for auto/fcm.
-var codingAlias = map[string][2]string{
+// codingAlias is the merged alias table: the canonical generated aliases
+// (ProviderCatalogAliases — source of truth is the TS package) plus
+// herd-local extras. Herd-local wins on key collision.
+var codingAlias = func() map[string][2]string {
+	m := make(map[string][2]string, len(ProviderCatalogAliases)+len(herdLocalAliases))
+	for k, v := range ProviderCatalogAliases {
+		m[k] = v
+	}
+	for k, v := range herdLocalAliases {
+		m[k] = v
+	}
+	return m
+}()
+
+// herdLocalAliases are herd-specific alias extras not in the canonical catalog:
+// strategy directives, local-role shortcuts, and extended-registry aliases
+// (whose providers live in registry.go, not the core catalog).
+var herdLocalAliases = map[string][2]string{
 	// Auto routing (nil means use strategy)
 	"auto": {},
 	"fcm":  {},
@@ -205,10 +211,12 @@ func isLocalSwapModelId(model string) bool {
 
 // resolveModel resolves a model name to (provider, modelID).
 func resolveModel(model string, providers map[string]*provider) (string, string) {
-	// Check coding aliases
+	// Check coding aliases (guarded: dead or non-serving targets refused).
 	if target, ok := codingAlias[model]; ok {
 		if len(target) > 0 && target[0] != "" {
-			return target[0], target[1]
+			if aliasTargetServable(providers, target[0], target[1]) {
+				return target[0], target[1]
+			}
 		}
 	}
 	// Check if it's a local GGUF model ID
