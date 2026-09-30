@@ -22,7 +22,7 @@ If you run models on a box and also call cloud APIs, this is the shape of the an
 | Service | Port | Source | Role |
 |---|---|---|---|
 | **herd** | `25100` | `stockyard/herd` (in-tree) — the llama-swap fork, Go | **LOCAL front door.** Serves on-box GGUFs over llama.cpp engines (`:25001+`). Anything cloud goes to the flock daemon via its `flock:` config key. |
-| **flock** | `25193` | [`toxicwind/flock`](https://github.com/toxicwind/flock) — own repo, checked out outside the ranch; `remuda/flock/` is a pointer README, not the source | **EXTERNAL provider router.** Rust. Strategies, key pools, 429 rotation, circuit breakers, health/Elo. NIM · OpenRouter · Groq · Cerebras · … |
+| **flock** | `25193` | `remuda/flock/` (in-tree) — the Rust provider router; standalone repo [`toxicwind/flock`](https://github.com/toxicwind/flock) | **EXTERNAL provider router.** Rust. Strategies, key pools, 429 rotation, circuit breakers, health/Elo. NIM · OpenRouter · Groq · Cerebras · … |
 | **gatehouse** | `25127` | `barn/gatehouse` (this repo) | **MCP gateway.** Tool serving. A peer of the others, not their parent — see [Not the holder](#not-the-holder). |
 | **chute** | `25111` | `barn/chute` (this repo) | **Tau engine, TCP-exposed.** stdio→TCP ACP passage — the tau coding-agent engine as a daemon on a real port. |
 
@@ -82,7 +82,7 @@ curl -s http://127.0.0.1:25193/v1/chat/completions \
 ### Local vs external
 
 - **herd is LOCAL.** On-box models (GGUFs via llama.cpp engines), served at `:25100`. Lives in the monorepo (`stockyard/herd`); `~/sovereign/projects/herd` is a compat symlink to it. No separate fork repo.
-- **flock is EXTERNAL.** Cloud providers — NVIDIA NIM, OpenRouter, Groq, Cerebras, … — routed at `:25193`. Own repo, own cadence, checked out at `/home/toxic/projects/flock`. This tree holds only a pointer (`remuda/flock/`).
+- **flock is EXTERNAL.** Cloud providers — NVIDIA NIM, OpenRouter, Groq, Cerebras, … — routed at `:25193`. In-tree at `remuda/flock/` (moved 2026-09-30); standalone repo [`toxicwind/flock`](https://github.com/toxicwind/flock) kept.
 - **gatehouse is a peer.** The MCP gateway (`barn/gatehouse`), not the parent of the other three.
 - **chute is the tau engine's doorway.** `barn/chute` turns the tau coding-agent engine's stdio ACP into a TCP daemon at `:25111`, so agents are observable on a real port like everything else.
 
@@ -109,7 +109,7 @@ The ranch is held together by **pitchfork** (supervision), this repo (the map), 
 | Path | What it is |
 |---|---|
 | `stockyard/` | In-tree code: `herd/` (llama-swap fork, Go) + `stream-broker/` — the routers moved out to `remuda/` |
-| `remuda/` | All the routers: `flock/` (pointer → [`toxicwind/flock`](https://github.com/toxicwind/flock)), `router-legacy/`, `paddock/` (VansRouter submodule) |
+| `remuda/` | All the routers: `flock/` (in-tree Rust router), `router-legacy/`, `paddock/` (VansRouter submodule) |
 | `barn/gatehouse` | MCP gateway (`:25127`) — tool serving, peer of the animals |
 | `barn/chute` | TCP ↔ stdio ACP passage: the tau engine as a daemon on `:25111` |
 | `barn/browserless` | Browser automation (`:25130`): browserless.io MCP server + native-launcher deployment |
@@ -154,7 +154,7 @@ This repo is a **map** — the implementations live in their owning repos:
 - flock changes → [`toxicwind/flock`](https://github.com/toxicwind/flock)
 - gatehouse changes → `barn/gatehouse`
 - chute changes → `barn/chute`
-- Map changes (this README, `docs/ARCHITECTURE.md`, `remuda/*` pointers) → here
+- Map changes (this README, `docs/ARCHITECTURE.md`, `remuda/*`) → here
 
 When a subproject's README goes stale, fix it at the source and update the pointer row here. **No monkeypatches** — fixes land in the owning repo, never as local overlays.
 
