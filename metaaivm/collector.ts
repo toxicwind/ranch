@@ -14,7 +14,9 @@
  * Never mark this lane blocked; keep it queued and routing around stalls.
  *
  * Runs on yote via crontab. Auth: `gh` CLI (toxicwind). State: watermark.json
- * in the harvest dir. Dedup keys: repo full_name, issue/PR id, code item sha.
+ * in the harvest dir. Dedup keys: repo full_name, issue/PR id, code item sha,
+ * commit sha, discussion id. Surfaces: repos, code, issues, PRs, commits,
+ * discussions (via GraphQL).
  */
 import { $ } from "bun";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
@@ -25,10 +27,28 @@ const WATERMARK = join(HARVEST, "watermark.json");
 const KEYWORDS = ["metaaivm", "meta-aivm"];
 const DRY = process.argv.includes("--dry-run");
 
-type Watermark = { lastRun: string; seenRepos: string[]; seenIssues: number[]; seenCode: string[] };
+type Watermark = {
+  lastRun: string;
+  seenRepos: string[];
+  seenIssues: number[];
+  seenCode: string[];
+  seenCommits: string[];
+  seenDiscussions: number[];
+};
 function loadWatermark(): Watermark {
-  if (existsSync(WATERMARK)) return JSON.parse(readFileSync(WATERMARK, "utf8"));
-  return { lastRun: "never", seenRepos: [], seenIssues: [], seenCode: [] };
+  if (existsSync(WATERMARK)) {
+    const wm = JSON.parse(readFileSync(WATERMARK, "utf8"));
+    // Backfill new fields for watermarks written before commits/discussions support.
+    return {
+      lastRun: wm.lastRun ?? "never",
+      seenRepos: wm.seenRepos ?? [],
+      seenIssues: wm.seenIssues ?? [],
+      seenCode: wm.seenCode ?? [],
+      seenCommits: wm.seenCommits ?? [],
+      seenDiscussions: wm.seenDiscussions ?? [],
+    };
+  }
+  return { lastRun: "never", seenRepos: [], seenIssues: [], seenCode: [], seenCommits: [], seenDiscussions: [] };
 }
 
 async function ghApi(path: string, params: Record<string, string> = {}): Promise<any> {
@@ -42,15 +62,29 @@ async function ghApi(path: string, params: Record<string, string> = {}): Promise
   }
 }
 
+async function ghGraphql(query: string, variables: Record<string, any> = {}): Promise<any> {
+  try {
+    const out = await $`gh api graphql -f query=${query} ${Object.entries(variables).map(([k, v]) => ["-F", `${k}=${JSON.stringify(v)}`]).flat()}`.text();
+    return JSON.parse(out);
+  } catch (e: any) {
+    console.error(`gh graphql failed — ${String(e).split("\n")[0]}`);
+    return null;
+  }
+}
+
 async function main() {
   mkdirSync(HARVEST, { recursive: true });
   const wm = loadWatermark();
   const seenRepos = new Set(wm.seenRepos);
   const seenIssues = new Set(wm.seenIssues);
   const seenCode = new Set(wm.seenCode);
+  const seenCommits = new Set(wm.seenCommits);
+  const seenDiscussions = new Set(wm.seenDiscussions);
   const newRepos: any[] = [];
   const newIssues: any[] = [];
   const newCode: any[] = [];
+  const newCommits: any[] = [];
+  const newDiscussions: any[] = [];
 
   for (const kw of KEYWORDS) {
     // repos
@@ -71,11 +105,40 @@ async function main() {
         if (!seenIssues.has(it.id)) { seenIssues.add(it.id); newIssues.push(it); }
       }
     }
+    // commits
+    const cm = await ghApi("/search/commits", { q: kw, per_page: "20" });
+    for (const it of cm?.items ?? []) {
+      if (!seenCommits.has(it.sha)) { seenCommits.add(it.sha); newCommits.push(it); }
+    }
+    // discussions (GraphQL search)
+    const dq = `
+      query($q: String!, $first: Int!) {
+        search(query: $q, type: DISCUSSION, first: $first) {
+          nodes {
+            ... on Discussion {
+              id
+              databaseId
+              title
+              url
+              createdAt
+              repository { nameWithOwner }
+            }
+          }
+        }
+      }`;
+    const dd = await ghGraphql(dq, { q: kw, first: 20 });
+    for (const it of dd?.data?.search?.nodes ?? []) {
+      if (it.databaseId && !seenDiscussions.has(it.databaseId)) {
+        seenDiscussions.add(it.databaseId);
+        newDiscussions.push(it);
+      }
+    }
   }
 
   console.log(JSON.stringify({
     at: new Date().toISOString(), keywords: KEYWORDS,
     newRepos: newRepos.length, newIssues: newIssues.length, newCode: newCode.length,
+    newCommits: newCommits.length, newDiscussions: newDiscussions.length,
     dryRun: DRY,
   }));
 
@@ -88,9 +151,12 @@ async function main() {
   merge("collector-repos.json", newRepos);
   merge("collector-issues.json", newIssues);
   merge("collector-code.json", newCode);
+  merge("collector-commits.json", newCommits);
+  merge("collector-discussions.json", newDiscussions);
   writeFileSync(WATERMARK, JSON.stringify({
     lastRun: new Date().toISOString(),
     seenRepos: [...seenRepos], seenIssues: [...seenIssues], seenCode: [...seenCode],
+    seenCommits: [...seenCommits], seenDiscussions: [...seenDiscussions],
   }, null, 1));
   console.log("watermark updated");
 }
