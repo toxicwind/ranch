@@ -65,3 +65,12 @@ bun run src/index.ts             # tend the fire
 - Logging: [`docs/LOGGING.md`](docs/LOGGING.md)
 - Ranch map: [`../README.md`](../README.md)
 - Squawk (the wire): [`../squawk/`](../squawk/)
+
+## Build
+
+The main build entry is `scripts/flicker-build.ts` — it submits the canonical
+build+test (`bun install && bun test`) as a job to the flicker build daemon (HTTP API, http://127.0.0.1:25148) and streams the result:
+
+```sh
+bun scripts/flicker-build.ts
+```

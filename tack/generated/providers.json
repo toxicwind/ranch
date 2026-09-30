@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-tack/v1",
-  "generatedAt": "2026-09-30T06:46:09.277Z",
+  "generatedAt": "2026-09-30T07:30:31.520Z",
   "generator": "@ranch/tack codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/tack src/data.ts",
   "adapters": [

@@ -42,3 +42,15 @@ red). Rebuilt in Bun, zero dependencies.
 - No memory leaks: each probe frees its device allocation, destroys its
   events, and tears down its context (verified: 5 consecutive probes,
   device memory unchanged).
+
+## Build
+
+The main build entry is `scripts/flicker-build.ts` — it submits the canonical
+build as a job to the flicker build daemon (HTTP API, http://127.0.0.1:25148) and streams the
+result:
+
+```sh
+bun scripts/flicker-build.ts
+```
+
+The build is a compile check (`bun build server.ts`); there is no test suite yet.

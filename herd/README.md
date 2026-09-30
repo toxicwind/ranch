@@ -127,6 +127,24 @@ graph TD
 go build -v -ldflags="-s -w" -o llama-swap ./cmd
 ./llama-swap --config /home/toxic/sovereign/config/llama-swap.yaml
 ```
+The main build entry is `scripts/flicker-build.ts` — it submits the canonical
+build+test (`go build ./... && go test -short -count=1 ./internal/...`, matching
+the Makefile `test` target) as a job to the flicker build daemon (HTTP API, http://127.0.0.1:25148) and streams the result:
+
+```sh
+bun scripts/flicker-build.ts
+```
+
+(The `ui/` frontend build, `make ui`, is a separate release step and is not part
+of the wired build.)
+
+Note: run the script with the direct bun binary — `herd/mise.toml` is not
+mise-trusted, and the `bun` mise shim silently no-ops inside `herd/`:
+
+```sh
+/home/toxic/.bun/bin/bun scripts/flicker-build.ts
+```
+
 
 <details>
 <summary>

@@ -109,3 +109,12 @@ bun run build     # regenerate generated/ from src/data.ts
 
 Part of the [ranch](../README.md) monorepo (`toxicwind/ranch`), workspace
 `tack`, package `@ranch/tack`.
+
+## Build
+
+The main build entry is `scripts/flicker-build.ts` — it submits the canonical
+build+test (`bun run build && bun test`) as a job to the flicker build daemon (HTTP API, http://127.0.0.1:25148) and streams the result:
+
+```sh
+bun scripts/flicker-build.ts
+```

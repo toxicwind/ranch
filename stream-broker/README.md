@@ -88,3 +88,17 @@ workspace — do not assume it works.
 
 - [`pitchfork.toml`](/home/toxic/sovereign/pitchfork.toml) — the `sovereign-stream-broker` unit
 - [`../herd/`](../herd/) — the local-model side of the same mesh
+
+## Build
+
+The main build entry is `scripts/flicker-build.ts` — it submits the canonical
+build as a job to the flicker build daemon (HTTP API, http://127.0.0.1:25148) and streams the
+result:
+
+```sh
+bun scripts/flicker-build.ts
+```
+
+The build is a compile check (`bun build src/index.ts`); there is no test suite
+yet, and the declared `@sovereign/utils` workspace dependency does not resolve
+(it is not in the ranch workspace list), so no install step runs.

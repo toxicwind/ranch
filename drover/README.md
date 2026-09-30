@@ -25,6 +25,21 @@ code-insiders --install-extension drover-1.0.0-sovereign.vsix --force
 cd sidecar && node esbuild.js
 ```
 
+The main build entry is `scripts/flicker-build.ts` — it submits the canonical
+build as a job to the flicker build daemon (HTTP API, http://127.0.0.1:25148) and streams the
+result:
+
+```sh
+bun scripts/flicker-build.ts
+```
+
+The build copies the tree to a temp dir first: the ranch root `package.json`
+declares a `corral` workspace with no `package.json` on disk, so `bun install`
+run from `drover/` walks up to the root and fails. The sidecar
+(`sidecar/src/sidecar.ts` → `dist/sidecar.js` via `node esbuild.js`) is the
+actively maintained build; the root `compile` script is unwirable (`src/` was
+removed, see note above).
+
 ## Monorepo
 
 Part of the ranch monorepo. See `../package.json` for workspace config.
