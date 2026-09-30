@@ -17,7 +17,8 @@
  * - `proxyChatCompletions()` performs OpenAI-compatible chat completions
  *   against the proxy with per-key rotation on 429s.
  *
- * Escape hatch: FLOCK_BYPASS=1 (or NIM_PROXY_BYPASS=1) restores the pre-proxy direct behavior.
+ * Bypass removed 2026-09-29: every model call routes through the proxy;
+ * direct-provider mode is no longer supported.
  *
  * Security: key values are NEVER logged, printed, or written to files.
  * Stats and errors use opaque "key#N" labels only.
@@ -38,10 +39,6 @@ export class NimProxyConfigError extends Error {
   }
 }
 
-export function isProxyBypassed(): boolean {
-  return process.env.FLOCK_BYPASS === "1" || process.env.NIM_PROXY_BYPASS === "1";
-}
-
 /**
  * Resolve the proxy API key. Never logs the value.
  * Throws NimProxyConfigError with an actionable message when unset.
@@ -55,8 +52,7 @@ export function resolveProxyApiKey(): string {
   if (!key || !key.trim()) {
     throw new NimProxyConfigError(
       "flock: no API key found. Set FLOCK_API_KEY to your flock client " +
-        "key (comma-separated for multi-key rotation; NIM_PROXY_API_KEY still accepted as a deprecated alias), or set FLOCK_BYPASS=1 " +
-        "to use the previous direct-provider behavior."
+        "key (comma-separated for multi-key rotation; NIM_PROXY_API_KEY still accepted as a deprecated alias)."
     );
   }
   return key.trim();
@@ -66,13 +62,9 @@ export type ProxyConfig = {
   baseUrl: string;
   apiKeys: string[];
   model: string;
-  bypass: boolean;
 };
 
 export function resolveProxyConfig(): ProxyConfig {
-  if (isProxyBypassed()) {
-    return { baseUrl: "", apiKeys: [], model: "", bypass: true };
-  }
   const apiKeys = resolveProxyApiKey()
     .split(",")
     .map((k) => k.trim())
@@ -86,7 +78,7 @@ export function resolveProxyConfig(): ProxyConfig {
     process.env.FLOCK_BASE_URL || process.env.NIM_PROXY_BASE_URL || DEFAULT_PROXY_BASE_URL
   ).replace(/\/+$/, "").replace(/\/v1$/, "");
   const model = process.env.FLOCK_MODEL || process.env.NIM_PROXY_MODEL || DEFAULT_PROXY_MODEL;
-  return { baseUrl, apiKeys, model, bypass: false };
+  return { baseUrl, apiKeys, model };
 }
 
 /**
@@ -99,7 +91,7 @@ export function resolveProxyConfig(): ProxyConfig {
 export function proxyEnvOverrides(
   config: ProxyConfig
 ): Record<string, string> {
-  if (config.bypass || config.apiKeys.length === 0) return {};
+  if (config.apiKeys.length === 0) return {};
   // The claude NIM shim fetches NIM_BASE_URL + "/chat/completions", so the
   // /v1 prefix must be part of NIM_BASE_URL itself. resolveProxyConfig
   // canonicalizes baseUrl to the bare origin (trailing /v1 stripped).
@@ -256,11 +248,6 @@ export async function proxyChatCompletions(
   opts: ProxyChatOptions
 ): Promise<string> {
   const config = opts.config ?? resolveProxyConfig();
-  if (config.bypass) {
-    throw new NimProxyConfigError(
-      "flock: proxyChatCompletions called while FLOCK_BYPASS=1."
-    );
-  }
   const pool = new NimProxyKeyPool(config.apiKeys);
   const url = config.baseUrl + "/v1/chat/completions";
   const model = opts.model || config.model;

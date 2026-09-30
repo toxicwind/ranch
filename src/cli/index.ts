@@ -24,7 +24,7 @@ import { randomUUID } from "node:crypto";
 const PACKAGE_CANDIDATES = ["smthrs", "smithers-orchestrator"] as const;
 const PACKAGE_ROOTS = PACKAGE_CANDIDATES.map(n => require("node:path").join(__dirname, "..", "..", "node_modules", n));
 function parseFinite(value: string | number | undefined, fallback: number): number { if (value === undefined) return fallback; const n = typeof value === "number" ? value : Number(value); return Number.isFinite(n) ? n : fallback; }
-const CHECK_ENV_KEYS = ["ANTHROPIC_API_KEY","ANTHROPIC_BASE_URL","ANTHROPIC_DEFAULT_OPUS_MODEL","SOVEREIGN_ROUTER_URL","SOVEREIGN_ROUTER_PORT","NIM_PROXY_BASE_URL","NIM_PROXY_API_KEY","NIM_PROXY_BYPASS","FLOCK_API_KEY","FLOCK_BASE_URL","FLOCK_BYPASS","FLOCK_MODEL","NVIDIA_API_KEY","WORKFLOW_MAX_CONCURRENCY"] as const;
+const CHECK_ENV_KEYS = ["ANTHROPIC_API_KEY","ANTHROPIC_BASE_URL","ANTHROPIC_DEFAULT_OPUS_MODEL","SOVEREIGN_ROUTER_URL","SOVEREIGN_ROUTER_PORT","NIM_PROXY_BASE_URL","NIM_PROXY_API_KEY","FLOCK_API_KEY","FLOCK_BASE_URL","FLOCK_MODEL","NVIDIA_API_KEY","WORKFLOW_MAX_CONCURRENCY"] as const;
 function redact(v?: string){ return !v?"(unset)":v.length<=8?"***":`${v.slice(0,4)}...${v.slice(-4)} len=${v.length}`; }
 function loadSecrets(){ try{ const fs=require("node:fs"); const path="/home/toxic/.secrets"; if(fs.existsSync(path)){ for(const line of fs.readFileSync(path,"utf8").split("\n")){ const m=line.match(/^\s*([A-Z_][A-Z0-9_]*)=(.*)$/); if(m && !process.env[m[1]]) process.env[m[1]]=m[2].replace(/^["']|["']$/g,""); } } }catch{} }
 export function dumpCheckEnv(){ loadSecrets(); const env: Record<string,string> = {}; for(const k of CHECK_ENV_KEYS){ const val=process.env[k]; env[k]=k.includes("KEY")?redact(val):(val??"(unset)"); } const routerUrl=process.env.SOVEREIGN_ROUTER_URL??"http://127.0.0.1"; const routerPort=process.env.SOVEREIGN_ROUTER_PORT??"20128"; console.log(JSON.stringify({env, resolved:{router: `${routerUrl}:${routerPort}`, baseUrl: process.env.ANTHROPIC_BASE_URL??`${routerUrl}:${routerPort}/v1`}, cwd: process.cwd()}, null, 2)); process.exit(0); }
@@ -91,7 +91,6 @@ import {
   resolveProxyConfig,
   proxyEnvOverrides,
   proxyChatCompletions,
-  isProxyBypassed,
   type ProxyConfig,
 } from "../nimProxy.ts";
 import { detectExactReply, normalizeReply } from "../exactReply.ts";
@@ -656,7 +655,7 @@ Return ONLY valid JSON (no markdown fences, no commentary):
   }, 80);
 
   let claudeResult: string;
-  const useProxy = !!proxyConfig && !proxyConfig.bypass;
+  const useProxy = !!proxyConfig;
 
   if (useProxy) {
     // Maximal nim-proxy path: question generation goes through the proxy
@@ -843,7 +842,7 @@ async function main() {
   const isDryRun = parsed.flags["dry-run"] === true;
   const headless = process.stdout.isTTY !== true; // headless: stdout reserved for exact final reply; diagnostics -> stderr
   let proxyConfig: ProxyConfig | null = null;
-  if (!isProxyBypassed() && !isDryRun) {
+  if (!isDryRun) {
     // Throws NimProxyConfigError with an actionable message when no key is set.
     proxyConfig = resolveProxyConfig();
     const proxyEnv = proxyEnvOverrides(proxyConfig);
@@ -856,9 +855,6 @@ async function main() {
       ")";
     if (headless) console.error(proxyMsg);
     else console.log(proxyMsg);
-  } else if (isProxyBypassed()) {
-    if (headless) console.error("nim-proxy: bypassed via NIM_PROXY_BYPASS=1 (direct provider behavior)");
-    else console.log("nim-proxy: bypassed via NIM_PROXY_BYPASS=1 (direct provider behavior)");
   }
 
   const requestedCwd = resolve(

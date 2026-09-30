@@ -9,7 +9,6 @@ import {
   resolveProxyApiKey,
   proxyEnvOverrides,
   proxyChatCompletions,
-  isProxyBypassed,
   parseRetryAfterMs,
   NimProxyConfigError,
   DEFAULT_PROXY_BASE_URL,
@@ -20,13 +19,11 @@ const ENV_KEYS = [
   "FLOCK_API_KEY",
   "FLOCK_BASE_URL",
   "FLOCK_MODEL",
-  "FLOCK_BYPASS",
   "NIM_PROXY_API_KEY",
   "ANTHROPIC_API_KEY",
   "NVIDIA_API_KEY",
   "NIM_PROXY_BASE_URL",
   "NIM_PROXY_MODEL",
-  "NIM_PROXY_BYPASS",
 ];
 
 let savedEnv: Record<string, string | undefined>;
@@ -50,7 +47,7 @@ afterEach(() => {
 });
 
 function fakeConfig(keys: string[] = ["npk_test_1", "npk_test_2"]): ProxyConfig {
-  return { baseUrl: "http://127.0.0.1:8000", apiKeys: keys, model: "openai/gpt-oss-20b", bypass: false };
+  return { baseUrl: "http://127.0.0.1:8000", apiKeys: keys, model: "openai/gpt-oss-20b" };
 }
 
 function okResponse(text: string) {
@@ -73,7 +70,7 @@ describe("key resolution", () => {
     }
     expect(err).toBeInstanceOf(NimProxyConfigError);
     expect((err as Error).message).toContain("FLOCK_API_KEY");
-    expect((err as Error).message).toContain("FLOCK_BYPASS=1");
+    expect((err as Error).message).not.toContain("BYPASS");
   });
 
   test("prefers FLOCK_API_KEY over NIM_PROXY_API_KEY", () => {
@@ -94,7 +91,6 @@ describe("key resolution", () => {
     const cfg = resolveProxyConfig();
     expect(cfg.apiKeys).toEqual(["npk-a", "npk-b", "npk-a"]);
     expect(cfg.baseUrl).toBe(DEFAULT_PROXY_BASE_URL);
-    expect(cfg.bypass).toBe(false);
   });
 
   test("honors FLOCK_BASE_URL and FLOCK_MODEL overrides (NIM_PROXY_* as fallback)", () => {
@@ -104,23 +100,6 @@ describe("key resolution", () => {
     const cfg = resolveProxyConfig();
     expect(cfg.baseUrl).toBe("http://proxy.local:9000");
     expect(cfg.model).toBe("custom/model");
-  });
-});
-
-describe("bypass", () => {
-  test("isProxyBypassed only on exactly '1'", () => {
-    expect(isProxyBypassed()).toBe(false);
-    process.env.NIM_PROXY_BYPASS = "true";
-    expect(isProxyBypassed()).toBe(false);
-    process.env.NIM_PROXY_BYPASS = "1";
-    expect(isProxyBypassed()).toBe(true);
-  });
-
-  test("resolveProxyConfig returns bypass config", () => {
-    process.env.NIM_PROXY_BYPASS = "1";
-    const cfg = resolveProxyConfig();
-    expect(cfg.bypass).toBe(true);
-    expect(proxyEnvOverrides(cfg)).toEqual({});
   });
 });
 
@@ -260,14 +239,5 @@ describe("proxyChatCompletions", () => {
     await expect(
       proxyChatCompletions({ prompt: "hi", config: fakeConfig(["k1"]) })
     ).rejects.toThrow("nim-proxy HTTP 500");
-  });
-
-  test("refuses to run in bypass mode", async () => {
-    await expect(
-      proxyChatCompletions({
-        prompt: "hi",
-        config: { baseUrl: "", apiKeys: [], model: "", bypass: true },
-      })
-    ).rejects.toBeInstanceOf(NimProxyConfigError);
   });
 });
