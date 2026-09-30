@@ -7401,10 +7401,18 @@ pub async fn set_model(
                 ),
             )
         }
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(serde_json::json!({"error": format!("{e}")})),
-        ),
+        Err(e) => {
+            // Guided validation failures (e.g. unknown model for a known
+            // provider) are the caller's mistake: 400, not 500, so CLI
+            // agents can distinguish "fix your input" from "server broke".
+            let status = match &e {
+                openfang_kernel::error::KernelError::OpenFang(
+                    openfang_types::error::OpenFangError::InvalidInput(_),
+                ) => StatusCode::BAD_REQUEST,
+                _ => StatusCode::INTERNAL_SERVER_ERROR,
+            };
+            (status, Json(serde_json::json!({"error": format!("{e}")})))
+        }
     }
 }
 

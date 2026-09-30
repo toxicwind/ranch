@@ -54,6 +54,19 @@ impl LlmDriver for FallbackDriver {
                     );
                     last_error = Some(e);
                 }
+                // Generic 404 = the request URL itself is wrong (path
+                // miscomposition, stale base_url), not a missing model.
+                // Fail fast with the real error: advancing the chain would
+                // just mask the misconfiguration behind another provider.
+                Err(e @ LlmError::Api { status: 404, .. }) => {
+                    warn!(
+                        driver_index = i,
+                        model = %model_name,
+                        error = %e,
+                        "Driver returned 404 (not ModelNotFound) — failing fast, not advancing fallback chain"
+                    );
+                    return Err(e);
+                }
                 Err(e) => {
                     warn!(
                         driver_index = i,
@@ -94,6 +107,17 @@ impl LlmDriver for FallbackDriver {
                         "Driver rate-limited/overloaded (stream), trying next fallback"
                     );
                     last_error = Some(e);
+                }
+                // Generic 404 = the request URL itself is wrong, not a
+                // missing model. Fail fast; do not mask it with fallback.
+                Err(e @ LlmError::Api { status: 404, .. }) => {
+                    warn!(
+                        driver_index = i,
+                        model = %model_name,
+                        error = %e,
+                        "Driver returned 404 (stream, not ModelNotFound) — failing fast, not advancing fallback chain"
+                    );
+                    return Err(e);
                 }
                 Err(e) => {
                     warn!(
@@ -315,5 +339,54 @@ mod tests {
             result.is_ok(),
             "FallbackDriver::stream should also escalate network errors"
         );
+    }
+
+    struct NotFound404Driver;
+
+    #[async_trait]
+    impl LlmDriver for NotFound404Driver {
+        async fn complete(&self, _req: CompletionRequest) -> Result<CompletionResponse, LlmError> {
+            Err(LlmError::Api {
+                status: 404,
+                message: "path not found".to_string(),
+            })
+        }
+    }
+
+    struct ModelGoneDriver;
+
+    #[async_trait]
+    impl LlmDriver for ModelGoneDriver {
+        async fn complete(&self, _req: CompletionRequest) -> Result<CompletionResponse, LlmError> {
+            Err(LlmError::ModelNotFound("model is not found".to_string()))
+        }
+    }
+
+    #[tokio::test]
+    async fn test_fallback_does_not_advance_on_generic_404() {
+        // A generic 404 is a broken request URL, not a missing model: the
+        // chain must fail fast with the real error instead of masking it
+        // behind the next provider.
+        let driver = FallbackDriver::new(vec![
+            Arc::new(NotFound404Driver) as Arc<dyn LlmDriver>,
+            Arc::new(OkDriver) as Arc<dyn LlmDriver>,
+        ]);
+        let result = driver.complete(test_request()).await;
+        match result {
+            Err(LlmError::Api { status, .. }) => assert_eq!(status, 404),
+            other => panic!("expected fail-fast Api{{404}}, got {other:?}"),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_fallback_advances_on_model_not_found() {
+        // A body-confirmed ModelNotFound still advances the chain.
+        let driver = FallbackDriver::new(vec![
+            Arc::new(ModelGoneDriver) as Arc<dyn LlmDriver>,
+            Arc::new(OkDriver) as Arc<dyn LlmDriver>,
+        ]);
+        let result = driver.complete(test_request()).await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().text(), "OK");
     }
 }

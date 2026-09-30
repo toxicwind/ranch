@@ -18,7 +18,7 @@ This guide walks you through installing OpenFang, configuring your first LLM pro
 
 ### Option 1: Desktop App (Windows / macOS / Linux)
 
-Download the installer for your platform from the [latest release](https://github.com/RightNow-AI/openfang/releases/latest):
+Download the installer for your platform from the [latest release](https://github.com/toxicwind/rig/releases/latest):
 
 | Platform | File |
 |---|---|
@@ -49,13 +49,13 @@ Downloads the latest CLI binary, verifies its SHA256 checksum, and adds it to yo
 Requires Rust 1.75+:
 
 ```bash
-cargo install --git https://github.com/RightNow-AI/openfang openfang-cli
+cargo install --git https://github.com/toxicwind/rig openfang-cli
 ```
 
 Or build from source:
 
 ```bash
-git clone https://github.com/RightNow-AI/openfang.git
+git clone https://github.com/toxicwind/rig.git
 cd openfang
 cargo install --path crates/openfang-cli
 ```
@@ -63,20 +63,20 @@ cargo install --path crates/openfang-cli
 ### Option 5: Docker
 
 ```bash
-docker pull ghcr.io/RightNow-AI/openfang:latest
+docker pull ghcr.io/toxicwind/rig:latest
 
 docker run -d \
   --name openfang \
   -p 4200:4200 \
   -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
   -v openfang-data:/data \
-  ghcr.io/RightNow-AI/openfang:latest
+  ghcr.io/toxicwind/rig:latest
 ```
 
 Or use Docker Compose:
 
 ```bash
-git clone https://github.com/RightNow-AI/openfang.git
+git clone https://github.com/toxicwind/rig.git
 cd openfang
 # Set your API keys in environment or .env file
 docker compose up -d

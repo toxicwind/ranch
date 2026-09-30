@@ -1298,6 +1298,14 @@ pub struct KernelConfig {
     /// ```
     #[serde(default)]
     pub skills: HashMap<String, HashMap<String, String>>,
+    /// Path of the config file this kernel booted from, when booted with an
+    /// explicit `--config` path. Runtime bookkeeping only: never read from a
+    /// config file, never serialized. Recorded so `POST /api/config/reload`
+    /// re-reads the SAME file instead of `home_dir/config.toml` (which may
+    /// be a different/stale file -- this caused reload to claim `api_listen`
+    /// changed 25196 -> 25203 on the pitchfork-supervised instance).
+    #[serde(skip)]
+    pub config_path: Option<PathBuf>,
 }
 
 /// Heartbeat monitor settings exposed in `[heartbeat]` config section.
@@ -1540,6 +1548,7 @@ impl Default for KernelConfig {
             workflows_dir: None,
             heartbeat: HeartbeatSettings::default(),
             skills: HashMap::new(),
+            config_path: None,
         }
     }
 }

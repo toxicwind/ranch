@@ -1,4 +1,6 @@
-# OpenFang — Agent Instructions
+# Rig — Agent Instructions
+
+> Fork of OpenFang (upstream: RightNow-AI/openfang). Repo home: toxicwind/rig. Binary/crate/config names still say `openfang` for ecosystem compatibility.
 
 ## Project Overview
 OpenFang is an open-source Agent Operating System written in Rust (14 crates).
