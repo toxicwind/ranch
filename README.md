@@ -54,6 +54,7 @@ One table, every animal first-class — no "secondary" framing, no pens inside p
 | **barn/woodpecker** | — | `barn/woodpecker` (live checkout, gitignored) | Woodpecker CI source checkout — CI tooling. |
 | **ui** | — | `../ui/` (range level, Svelte) | Ranch control UI — one SPA over herd + flock, held at the range level. |
 | **research** | — | `research/` (in-tree) | Provider/model discovery scripts. |
+| **campfire** | — | `campfire/` (in-tree) | 🔥 The chatty helper system — multi-agent conversation layer. Paper brief + research; builder implementation to follow. |
 | **data** | — | `data/` (in-tree) | Discovery + categorization JSON. |
 | **docs** | — | `docs/` (in-tree) | Architecture docs — the written contract. |
 
