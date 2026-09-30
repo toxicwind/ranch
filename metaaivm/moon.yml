@@ -1,0 +1,13 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+language: 'typescript'
+layer: 'system'
+# Incremental GitHub harvester for metaaivm-related keywords.
+# Writes deduped results into /home/toxic/sovereign/hatch/metaaivm-harvest/.
+# Companion: ranch/metaaivm-profile (agent profile), fork toxicwind/muse-cli.
+tasks:
+  collect:
+    command: 'bun collector.ts'
+    inputs: ['collector.ts']
+  verify:
+    command: 'bun collector.ts --dry-run'
+    inputs: ['collector.ts']
