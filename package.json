@@ -23,6 +23,8 @@
     "stream-broker",
     "switchboard",
     "flock/roost",
-    "windmill"
+    "windmill",
+    "task-launch",
+    "metaaivm-profile"
   ]
 }
