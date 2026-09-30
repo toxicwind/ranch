@@ -35,5 +35,5 @@ export {
   PROVIDER_DEFS,
 } from "./data.ts";
 
-export { buildProvidersGo, buildProvidersJson, emitAll } from "./codegen.ts";
+export { buildProvidersGo, buildProvidersJson, buildProvidersRust, emitAll } from "./codegen.ts";
 export type { CodegenInput } from "./codegen.ts";

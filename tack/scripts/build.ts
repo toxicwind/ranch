@@ -14,7 +14,7 @@ import { DEAD_MODEL_IDS, MODEL_ALIASES, PROVIDER_DEFS } from "../src/data.ts";
 const here = dirname(fileURLToPath(import.meta.url));
 const outDir = join(here, "..", "generated");
 
-const { jsonPath, goPath } = await emitAll(outDir, {
+const { jsonPath, goPath, rustPath } = await emitAll(outDir, {
   defs: PROVIDER_DEFS,
   aliases: MODEL_ALIASES,
   deadIds: DEAD_MODEL_IDS,
@@ -23,3 +23,4 @@ const { jsonPath, goPath } = await emitAll(outDir, {
 
 console.log(`wrote ${jsonPath}`);
 console.log(`wrote ${goPath}`);
+console.log(`wrote ${rustPath}`);
