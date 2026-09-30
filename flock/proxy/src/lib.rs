@@ -31,7 +31,7 @@ pub use config::fuzz as fuzz_config;
 pub use proxy::fuzz as fuzz_proxy;
 
 use std::collections::{BTreeMap, HashMap};
-use std::sync::atomic::{AtomicU64, AtomicUsize};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize};
 use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
 
@@ -126,6 +126,15 @@ pub struct AppState {
     pub router: router::RouterHandle,
     pub http: reqwest::Client,
     pub models_cache: Mutex<Option<(Instant, Bytes)>>,
+    /// Singleflight guard for /v1/models refreshes: stale-while-revalidate.
+    /// Only one refresh runs at a time; concurrent requests serve stale cache
+    /// instead of blocking on the mutex across network I/O (the old behavior
+    /// held models_cache.lock() across a 30s reserve_slot + live NVIDIA fetch).
+    pub models_refresh: Mutex<()>,
+    /// SWR leader-election flag: true while a background /v1/models refresh
+    /// is running. Non-blocking (AtomicBool) so stale-while-revalidate never
+    /// blocks on lock acquisition.
+    pub models_refreshing: AtomicBool,
     /// Models that rejected stream_options injection; never inject for them again.
     pub no_inject: std::sync::Mutex<std::collections::HashSet<String>>,
     /// Distinct sanitized model labels seen (bounds metric cardinality).
@@ -679,6 +688,8 @@ pub async fn run() {
             .build()
             .expect("http client"),
         models_cache: Mutex::new(None),
+        models_refresh: Mutex::new(()),
+        models_refreshing: AtomicBool::new(false),
         no_inject: std::sync::Mutex::new(std::collections::HashSet::new()),
         model_labels: std::sync::Mutex::new(std::collections::HashSet::new()),
         admin: Admin::new(trust_proxy),

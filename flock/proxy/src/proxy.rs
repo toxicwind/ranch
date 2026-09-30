@@ -1151,14 +1151,73 @@ fn aggregate_models(body: &Bytes, router: &crate::router::RouterHandle) -> Bytes
         .unwrap_or_else(|_| body.clone())
 }
 
+/// Refresh the /v1/models cache from upstream. Called with the
+/// `models_refresh` singleflight guard held — only one refresh runs at a time.
+async fn refresh_models_cache(state: &Arc<AppState>, cfg: &Arc<Config>) {
+    let deadline = Instant::now() + Duration::from_secs(30);
+    let Some(slot) = reserve_slot(state, cfg.heartbeat, deadline, None, || true).await else {
+        tracing::warn!("models refresh: no slot available");
+        return;
+    };
+    match fetch_models(&state.http, &cfg.base_url, &slot.key).await {
+        Ok(resp) if resp.status().is_success() => {
+            let body = resp.bytes().await.unwrap_or_default();
+            *state.models_cache.lock().await = Some((Instant::now(), body));
+        }
+        Ok(resp) => {
+            if retryable(resp.status()) {
+                enter_cooldown(&slot, resp.status().as_str(), backoff_for(&resp));
+            }
+            tracing::warn!(status = %resp.status(), "models refresh: upstream error");
+        }
+        Err(e) => {
+            tracing::warn!(error = %e, "models refresh failed");
+        }
+    }
+}
+
+/// /v1/models with singleflight + stale-while-revalidate.
+///
+/// The old code held `models_cache.lock()` across `reserve_slot` (up to 30s)
+/// + the live NVIDIA fetch — one slow upstream blocked ALL concurrent
+/// /v1/models requests behind the mutex. Now:
+/// - Fresh cache: served immediately, lock held only for a clone (µs).
+/// - Stale cache: served immediately; a background refresh is singleflighted
+///   via `models_refreshing` AtomicBool (only one refresh runs; the rest serve stale).
+/// - Cold (no cache): singleflight via blocking lock; followers re-check the
+///   cache after the leader populates it instead of each doing a fetch.
 async fn models(state: Arc<AppState>, cfg: Arc<Config>) -> Response {
-    let mut cache = state.models_cache.lock().await;
-    if let Some((at, body)) = cache.as_ref() {
+    // Fast path: snapshot the cache without holding the lock across I/O.
+    let cached: Option<(Instant, Bytes)> = { state.models_cache.lock().await.clone() };
+    if let Some((at, body)) = cached {
+        if at.elapsed() < cfg.models_ttl {
+            let merged = aggregate_models(&body, &state.router);
+            return json_response(StatusCode::OK, merged);
+        }
+        // Stale: serve stale NOW, refresh in background (singleflight via AtomicBool).
+        // swap returns the previous value: if it was false, we are the leader.
+        if !state.models_refreshing.swap(true, std::sync::atomic::Ordering::AcqRel) {
+            let state2 = state.clone();
+            let cfg2 = cfg.clone();
+            tokio::spawn(async move {
+                refresh_models_cache(&state2, &cfg2).await;
+                state2.models_refreshing.store(false, std::sync::atomic::Ordering::Release);
+            });
+        }
+        let merged = aggregate_models(&body, &state.router);
+        return json_response(StatusCode::OK, merged);
+    }
+    // Cold start: no cache at all. Singleflight via the refresh lock —
+    // the winner fetches, followers re-check the cache when they get the lock.
+    let _guard = state.models_refresh.lock().await;
+    // Re-check: a concurrent request may have populated the cache while we waited.
+    if let Some((at, body)) = state.models_cache.lock().await.clone() {
         if at.elapsed() < cfg.models_ttl {
             let merged = aggregate_models(&body, &state.router);
             return json_response(StatusCode::OK, merged);
         }
     }
+    // We are the leader: fetch synchronously (cold start has nothing stale to serve).
     let deadline = Instant::now() + Duration::from_secs(30);
     let Some(slot) = reserve_slot(&state, cfg.heartbeat, deadline, None, || true).await else {
         return gateway_timeout(&cfg, state.pool().len());
@@ -1166,7 +1225,7 @@ async fn models(state: Arc<AppState>, cfg: Arc<Config>) -> Response {
     match fetch_models(&state.http, &cfg.base_url, &slot.key).await {
         Ok(resp) if resp.status().is_success() => {
             let body = resp.bytes().await.unwrap_or_default();
-            *cache = Some((Instant::now(), body.clone()));
+            *state.models_cache.lock().await = Some((Instant::now(), body.clone()));
             let merged = aggregate_models(&body, &state.router);
             json_response(StatusCode::OK, merged)
         }
@@ -1185,6 +1244,8 @@ async fn models(state: Arc<AppState>, cfg: Arc<Config>) -> Response {
         }
     }
 }
+
+
 
 /// The raw model-catalog fetch with an explicit key — shared by the cached
 /// `/v1/models` path above and the setup wizard's key-validation probe
