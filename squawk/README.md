@@ -149,6 +149,20 @@ Deliberate deviations: the CRDT merge is trivial today (one shared filesystem = 
 
 `tests/` (pytest) covers chat, tasks, leases, path locks, state, hooks, and the feed (`test_squawk_feed.py`: auth 404s, fat shape, wake-on-post, truncation, sealed-envelope handling). `squawk_seal.py selftest` runs the crypto roundtrip without touching chat state. `smoke_relay.py` exercises relay-in/relay-out end to end, including tamper → signature-invalid; `tests_smoke_two_agent.py` covers the base post/wait/read contract. `tests/test_history_search.py` covers the history-search CLI (frontmatter parsing, all filters, query modes, limit bounding, JSON/human output).
 
+## Build
+
+The main build entry is `scripts/flicker-build.py` — it submits the canonical
+test suite (`/usr/bin/python3.14 -m pytest tests -q`; the box interpreter
+carrying pytest, cryptography and pynacl) as a job to flicker, the estate
+build-job system, and streams the log:
+
+```bash
+./scripts/flicker-build.py
+```
+
+Honors `FLICKER_URL` (default `http://127.0.0.1:25148`). Exit 0 on success
+(or cached identical success), 1 on failure/timeout.
+
 ## License
 
 Base `chat.py` is Apache-2.0 (`n24q02m/agent-chat-plugin`). Fleet modules are original implementations of stolen *concepts*; see each module's docstring for provenance.
