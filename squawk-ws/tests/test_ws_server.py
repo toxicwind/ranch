@@ -576,3 +576,17 @@ class AuthTest(unittest.TestCase):
             s2.close()
         finally:
             holder["server"].close()
+
+
+class ReservedDirsTest(unittest.TestCase):
+    def test_keys_not_discovered_as_channel(self):
+        tmp, root = make_root()
+        self.addCleanup(lambda: __import__("shutil").rmtree(tmp, ignore_errors=True))
+        (root / "keys").mkdir(exist_ok=True)
+        (root / "keys" / "agent1.key").write_text("x")
+        (root / "realchan").mkdir(exist_ok=True)
+        srv = load_server(server_env(tmp, root))
+        srv._discover_channels()
+        self.assertNotIn("keys", srv._dynamic_channels)
+        self.assertIn("realchan", srv._dynamic_channels)
+        self.assertIn("keys", srv.RESERVED_DIRS)
