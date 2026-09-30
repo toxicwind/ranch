@@ -3,8 +3,13 @@
 //! The port is behavior-faithful: closed allows everything; `max_failures`
 //! consecutive failures open the circuit for `timeout`; a half-open trial
 //! needs `half_open_max` consecutive successes to close, and a single failure
-//! re-opens. Defaults match AstMatrix exactly (5 failures, 30 s timeout,
-//! 3 half-open successes).
+//! re-opens. Defaults match AstMatrix (5 failures, 30 s timeout) with the
+//! GenPark correction of 2 half-open successes (1 is too twitchy, 3 sluggish).
+//!
+//! GenPark single-probe isolation: while half-open, exactly ONE probe is
+//! admitted at a time. Concurrent callers are rejected (fail fast, fail
+//! over) until the in-flight probe records its outcome — a recovering
+//! provider is never thundering-herded by the whole queue at once.
 //!
 //! Deliberate correction vs AstMatrix: its race path never consulted the
 //! breaker at all, and its hybrid path treated any status below 500 as
@@ -41,6 +46,10 @@ pub struct CircuitBreaker {
     max_failures: u32,
     timeout: Duration,
     half_open_max: u32,
+    /// GenPark single-probe isolation: while half-open, at most one probe
+    /// may be in flight. Set by `allow()`, cleared by `record_success`,
+    /// `record_failure`, or `release_probe()`.
+    probe_inflight: bool,
 }
 
 impl CircuitBreaker {
@@ -54,14 +63,14 @@ impl CircuitBreaker {
             max_failures: max_failures.max(1),
             timeout,
             half_open_max: half_open_max.max(1),
+            probe_inflight: false,
         }
     }
 
-    /// AstMatrix's defaults: open after 5 failures, 30 s open timeout,
-    /// 3 half-open successes to close.
+    /// AstMatrix's defaults: open after 5 failures, 30 s open timeout.
+    /// GenPark pattern: 2 consecutive successes close the circuit.
+    /// 1 is too twitchy (single lucky success flaps); 3 is sluggish.
     pub fn astmatrix_defaults() -> Self {
-        // GenPark pattern: 2 consecutive successes close the circuit.
-        // 1 is too twitchy (single lucky success flaps); 3 is sluggish.
         Self::new(5, Duration::from_secs(30), 2)
     }
 
@@ -73,28 +82,51 @@ impl CircuitBreaker {
         self.failures
     }
 
-    /// `Allow` from `circuit.go`: closed always allows; open allows only
-    /// after the timeout has elapsed (transitioning to half-open); half-open
-    /// allows.
+    /// `Allow` from `circuit.go`, plus GenPark single-probe isolation: closed
+    /// always allows; open allows only after the timeout has elapsed
+    /// (transitioning to half-open and granting the probe lease to the
+    /// transitioner); half-open admits exactly one in-flight probe —
+    /// concurrent callers get `false` (fail fast, fail over) until the probe
+    /// records its outcome. The comment at the call site in `acquire()`
+    /// ("a half-open trial consumes the trial") is now literally true.
     pub fn allow(&mut self) -> bool {
         match self.state {
-            CircuitState::Closed | CircuitState::HalfOpen => true,
+            CircuitState::Closed => true,
             CircuitState::Open => {
                 if let Some(t) = self.last_failure {
                     if t.elapsed() >= self.timeout {
                         self.state = CircuitState::HalfOpen;
                         self.consecutive_successes = 0;
+                        self.probe_inflight = true;
                         return true;
                     }
                 }
                 false
             }
+            CircuitState::HalfOpen => {
+                if self.probe_inflight {
+                    false
+                } else {
+                    self.probe_inflight = true;
+                    true
+                }
+            }
         }
+    }
+
+    /// Release a held probe lease without recording an outcome. The
+    /// admission stack calls this when an admitted probe never reaches the
+    /// upstream (rate limit, deadline, client gone) so the next half-open
+    /// caller can probe instead of failing over against a stuck lease.
+    pub fn release_probe(&mut self) {
+        self.probe_inflight = false;
     }
 
     /// `RecordSuccess`: a half-open trial that reaches `half_open_max`
     /// consecutive successes closes the circuit and resets failures.
+    /// Releases the probe lease either way.
     pub fn record_success(&mut self) {
+        self.probe_inflight = false;
         match self.state {
             CircuitState::Closed => {
                 self.failures = 0;
@@ -113,8 +145,9 @@ impl CircuitBreaker {
 
     /// `RecordFailure`: increments the failure count; reaching
     /// `max_failures` opens the circuit. A half-open failure re-opens
-    /// immediately.
+    /// immediately. Releases the probe lease either way.
     pub fn record_failure(&mut self, now_unix: u64) {
+        self.probe_inflight = false;
         match self.state {
             CircuitState::Closed => {
                 self.failures += 1;
@@ -158,11 +191,14 @@ impl CircuitBreaker {
     /// Restore from a persisted snapshot. An open circuit whose timeout has
     /// already elapsed while the process was down becomes half-open on the
     /// next `allow()` — same behavior as if the timeout had elapsed live.
+    /// No probe survives a restart, so the single-probe lease always
+    /// restores clear.
     pub fn restore(snap: CircuitSnapshot, now_unix: u64) -> Self {
         let mut cb = Self::astmatrix_defaults();
         cb.failures = snap.failures;
         cb.consecutive_successes = snap.consecutive_successes;
         cb.last_failure_unix = snap.last_failure_unix;
+        cb.probe_inflight = false;
         if snap.last_failure_unix > 0 {
             let age = now_unix.saturating_sub(snap.last_failure_unix);
             cb.last_failure = Some(Instant::now() - Duration::from_secs(age));
@@ -234,6 +270,79 @@ mod tests {
         }
         assert_eq!(cb.state(), CircuitState::Closed);
         assert_eq!(cb.failures(), 0);
+    }
+
+    #[test]
+    fn half_open_admits_exactly_one_probe() {
+        // GenPark single-probe isolation: while a half-open probe is in
+        // flight, concurrent callers fail fast instead of thundering-herding
+        // the recovering provider.
+        let mut cb = CircuitBreaker::new(2, Duration::from_millis(10), 2);
+        for _ in 0..2 {
+            cb.record_failure(1000);
+        }
+        assert_eq!(cb.state(), CircuitState::Open);
+        std::thread::sleep(Duration::from_millis(20));
+        assert!(cb.allow()); // transitioner takes the probe lease
+        assert_eq!(cb.state(), CircuitState::HalfOpen);
+        assert!(!cb.allow()); // sibling: rejected while probe in flight
+        assert!(!cb.allow());
+        cb.record_success(); // probe lands: lease released
+        assert!(cb.allow()); // next caller may probe
+        assert!(!cb.allow()); // ...but only one at a time
+    }
+
+    #[test]
+    fn release_probe_unsticks_an_abandoned_lease() {
+        let mut cb = CircuitBreaker::new(2, Duration::from_millis(10), 2);
+        for _ in 0..2 {
+            cb.record_failure(1000);
+        }
+        std::thread::sleep(Duration::from_millis(20));
+        assert!(cb.allow());
+        assert!(!cb.allow());
+        // The probe never reached upstream (rate limit / deadline / client
+        // gone): release without an outcome so the next caller can probe.
+        cb.release_probe();
+        assert!(cb.allow());
+        assert_eq!(cb.state(), CircuitState::HalfOpen);
+    }
+
+    #[test]
+    fn closed_never_holds_a_probe_lease() {
+        let mut cb = CircuitBreaker::astmatrix_defaults();
+        for _ in 0..10 {
+            assert!(cb.allow());
+        }
+        cb.record_success();
+        for _ in 0..10 {
+            assert!(cb.allow());
+        }
+    }
+
+    #[test]
+    fn failure_releases_probe_and_reopens() {
+        let mut cb = CircuitBreaker::new(2, Duration::from_millis(10), 2);
+        for _ in 0..2 {
+            cb.record_failure(1000);
+        }
+        std::thread::sleep(Duration::from_millis(20));
+        assert!(cb.allow());
+        cb.record_failure(1001); // probe fails: re-opens immediately
+        assert_eq!(cb.state(), CircuitState::Open);
+        assert!(!cb.allow());
+    }
+
+    #[test]
+    fn restore_clears_the_probe_lease() {
+        let mut cb = CircuitBreaker::new(2, Duration::from_millis(10), 2);
+        for _ in 0..2 {
+            cb.record_failure(5000);
+        }
+        let snap = cb.snapshot();
+        let mut restored = CircuitBreaker::restore(snap, 5000 + 31);
+        assert!(restored.allow()); // half-open, lease to transitioner
+        assert!(!restored.allow());
     }
 
     #[test]

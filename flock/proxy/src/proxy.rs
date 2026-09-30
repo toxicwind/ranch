@@ -803,7 +803,11 @@ fn streaming(
                 record_request(&ctx, "disconnect");
                 return;
             }
-            loop {
+            // Per-attempt ledger (Phase D): one entry per upstream attempt,
+            // emitted with the completed decision on every exit path.
+            let decision = std::sync::RwLock::new(crate::decision::RoutingDecision::new());
+            let _decision_emit = crate::decision::DecisionEmit { decision: &decision, model: &ctx.model };
+            'attempt: loop {
                 // Model-pressure permit first (worker concurrency), then an RPM
                 // slot — both heartbeating so the harness doesn't hang up. The
                 // permit spans the whole upstream exchange and drops on every
@@ -861,6 +865,7 @@ fn streaming(
                             sent_at.elapsed(),
                             false,
                         );
+                        decision.write().unwrap().push_attempt("nvidia", 0, sent_at.elapsed());
                         continue;
                     }
                 };
@@ -878,6 +883,7 @@ fn streaming(
                         sent_at.elapsed(),
                         false,
                     );
+                    decision.write().unwrap().push_attempt("nvidia", 400, sent_at.elapsed());
                     continue;
                 }
 
@@ -909,6 +915,7 @@ fn streaming(
                         sent_at.elapsed(),
                         exhausted,
                     );
+                    decision.write().unwrap().push_attempt("nvidia", status.as_u16(), sent_at.elapsed());
                     if !send(": retrying\n\n").await {
                         record_request(&ctx, "disconnect");
                         return;
@@ -930,6 +937,7 @@ fn streaming(
                         sent_at.elapsed(),
                         false,
                     );
+                    decision.write().unwrap().push_attempt("nvidia", status.as_u16(), sent_at.elapsed());
                     let _ = tx
                         .send(Ok(sse_error(&format!("upstream error {status}: {detail}"))))
                         .await;
@@ -943,6 +951,7 @@ fn streaming(
                     sent_at.elapsed(),
                     false,
                 );
+                decision.write().unwrap().push_attempt("nvidia", resp.status().as_u16(), sent_at.elapsed());
                 *observer.lock().unwrap() = Some(SseObserver::default());
                 let mut first_chunk: Option<Instant> = None;
                 let mut chunks = resp.bytes_stream();
@@ -969,6 +978,16 @@ fn streaming(
                         read = upstream_read => match read {
                             Ok(n) => n,
                             Err(_) => {
+                                // First-chunk commit (Phase E): nothing has
+                                // reached the client yet, so a stalled
+                                // upstream is retried on the outer loop,
+                                // not surfaced. Once the first chunk
+                                // commits, the retry window closes and a
+                                // stall errors as it always has.
+                                if first_chunk.is_none() && Instant::now() < deadline {
+                                    tracing::warn!(model = %ctx.model, idle = ?cfg.stream_idle, "upstream stalled before first chunk, retrying");
+                                    continue 'attempt;
+                                }
                                 finalize_sse_observer(&ctx, &observer, StreamOutcome::Truncated);
                                 tracing::warn!(model = %ctx.model, idle = ?cfg.stream_idle, "upstream stream stalled");
                                 record_request(&ctx, "stall");
@@ -982,6 +1001,11 @@ fn streaming(
                         Ok(b) => {
                             if first_chunk.is_none() {
                                 first_chunk = Some(Instant::now());
+                                // Explicit commit marker: from this point
+                                // the response is live to the client and the
+                                // pre-commit retry window closes.
+                                counter!("flock_stream_commit_total", "model" => ctx.model.clone())
+                                    .increment(1);
                                 histogram!("flock_ttft_seconds", "model" => ctx.model.clone())
                                     .record(sent_at.elapsed().as_secs_f64());
                             }

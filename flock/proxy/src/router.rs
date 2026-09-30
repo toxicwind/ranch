@@ -781,7 +781,10 @@ impl RouterHandle {
         counter!("flock_route_requests_total", "provider" => candidate.provider.clone())
             .increment(1);
 
-        // Circuit gate (mutating: a half-open trial consumes the trial).
+        // Circuit gate (mutating: a half-open trial consumes the single-probe
+        // lease). Every early return below this gate releases the lease —
+        // an admitted probe that never reaches the upstream must not wedge
+        // half-open admission for everyone else.
         {
             let mut cb = rt.circuit.lock().unwrap();
             if !cb.allow() {
@@ -805,19 +808,33 @@ impl RouterHandle {
             rt.metrics.rate_limited.fetch_add(1, Ordering::Relaxed);
             counter!("flock_route_rate_limited_total", "provider" => candidate.provider.clone())
                 .increment(1);
+            rt.circuit.lock().unwrap().release_probe();
             return Err(RouteError::RateLimited(candidate.provider.clone()));
         }
         // Governor permit for generation paths.
-        let permit = self
-            .admit_model(&rt, &candidate.model, ctx, candidate)
-            .await?;
+        let permit = match self.admit_model(&rt, &candidate.model, ctx, candidate).await {
+            Ok(p) => p,
+            Err(e) => {
+                rt.circuit.lock().unwrap().release_probe();
+                return Err(e);
+            }
+        };
         // FIFO dispatcher slot.
         let prefer = ctx.prefer_lane;
         let slot = {
             let rx = rt.dispatcher.acquire(ctx.deadline, prefer);
             tokio::select! {
-                s = rx => s.map_err(|_| RouteError::Deadline)?,
-                _ = ctx.client_gone() => return Err(RouteError::ClientGone),
+                s = rx => match s {
+                    Ok(slot) => slot,
+                    Err(_) => {
+                        rt.circuit.lock().unwrap().release_probe();
+                        return Err(RouteError::Deadline);
+                    }
+                },
+                _ = ctx.client_gone() => {
+                    rt.circuit.lock().unwrap().release_probe();
+                    return Err(RouteError::ClientGone);
+                }
             }
         };
         let base_url = rt.def.read().unwrap().base_url.clone();
@@ -1461,10 +1478,16 @@ impl RouterHandle {
             None,
             budget,
         );
+        // Per-attempt ledger (Phase D): the decision record gains one entry
+        // per upstream attempt as the retry loop runs below. The RwLock +
+        // DecisionEmit pair emits the completed record (selection, skips,
+        // attempts) as a structured tracing event on every exit path.
+        let decision = std::sync::RwLock::new(decision);
+        let _decision_emit = crate::decision::DecisionEmit { decision: &decision, model: &model };
         // Routing decision record (AstrLink pattern): structured observability
         // for why this provider was chosen and what was skipped.
         tracing::debug!(
-            decision = ?decision,
+            decision = ?decision.read().unwrap(),
             model = %model,
             budget,
             "routing decision"
@@ -1537,7 +1560,13 @@ impl RouterHandle {
                     continue;
                 }
                 Err(RouteError::Unavailable(p)) => {
+                    // Same "saturation waits" as the RateLimited arm: a lone
+                    // circuit-open candidate must not hot-spin the loop.
+                    // (Half-open probe isolation routes rejected siblings
+                    // here; without the yield they would busy-loop until
+                    // the deadline.)
                     last_error = RouteError::Unavailable(p);
+                    tokio::time::sleep(Duration::from_millis(50)).await;
                     continue;
                 }
                 Err(e) => return Err(e),
@@ -1562,6 +1591,11 @@ impl RouterHandle {
                     // lane 5 s with the "connect" label, exactly the old
                     // serving path.
                     self.finish_failure(&acq, 0, false, None);
+                    decision.write().unwrap().push_attempt(
+                        &candidate.provider,
+                        0,
+                        acq.attempt_started.elapsed(),
+                    );
                     last_error = RouteError::Unavailable(format!("{}: {e}", candidate.provider));
                 }
                 Ok(r) => {
@@ -1580,6 +1614,11 @@ impl RouterHandle {
                         let detail = r.text().await.unwrap_or_default();
                         let exhausted = governor::is_worker_exhausted(&detail);
                         self.finish_failure(&acq, status, exhausted, retry_after);
+                        decision.write().unwrap().push_attempt(
+                            &candidate.provider,
+                            status,
+                            acq.attempt_started.elapsed(),
+                        );
                         last_error = RouteError::Unavailable(format!(
                             "{}: upstream {status}",
                             candidate.provider
@@ -1622,6 +1661,11 @@ impl RouterHandle {
                                 drop(lead.take());
                                 self.finish_failure(&acq, status, false, None);
                                 self.record_empty_strike(&candidate.provider, &model);
+                                decision.write().unwrap().push_attempt(
+                                    &candidate.provider,
+                                    status,
+                                    acq.attempt_started.elapsed(),
+                                );
                                 empty_count += 1;
                                 if empty_count >= candidates.len() {
                                     // Every candidate came back empty: an
@@ -1643,6 +1687,11 @@ impl RouterHandle {
                                 continue;
                             }
                             self.finish_success(&acq, status);
+                            decision.write().unwrap().push_attempt(
+                                &candidate.provider,
+                                status,
+                                acq.attempt_started.elapsed(),
+                            );
                             if let Some(lead) = lead.take() {
                                 let shared = std::sync::Arc::new(
                                     crate::coalescer::SharedResponse {
@@ -1665,6 +1714,11 @@ impl RouterHandle {
                             });
                         }
                         self.finish_success(&acq, status);
+                        decision.write().unwrap().push_attempt(
+                            &candidate.provider,
+                            status,
+                            acq.attempt_started.elapsed(),
+                        );
                         if let Some(lead) = lead.take() {
                             let ct = r
                                 .headers()

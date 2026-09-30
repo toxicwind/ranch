@@ -197,10 +197,14 @@ export const PROVIDER_DEFS: ProviderDef[] = [
       "models/gemini-2.5-flash-lite",
       "models/gemini-2.0-flash",
       "models/gemma-4-31b-it",
+      "models/gemini-3-flash-preview",
+      "models/gemini-3-pro-preview",
     ],
     contextLengths: {
       "models/gemini-2.5-flash": 1000000,
-      "models/gemini-2.5-flash-lite": 1000000
+      "models/gemini-2.5-flash-lite": 1000000,
+      "models/gemini-3-flash-preview": 1000000,
+      "models/gemini-3-pro-preview": 1000000
     },
   },
   {
@@ -227,12 +231,14 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     keyEnv: "OPENAI_API_KEY",
     auth: "bearer",
     adapter: "openai",
-    seeds: ["gpt-5.5", "gpt-5.5-mini", "gpt-5.4", "daybreak-blue-latest"],
+    seeds: ["gpt-5.5", "gpt-5.5-mini", "gpt-5.4", "daybreak-blue-latest", "gpt-5.2-codex", "gpt-5.1-codex-max"],
     contextLengths: {
       "daybreak-blue-latest": 400000,
       "gpt-5.4": 400000,
       "gpt-5.5": 400000,
-      "gpt-5.5-mini": 400000
+      "gpt-5.5-mini": 400000,
+      "gpt-5.2-codex": 400000,
+      "gpt-5.1-codex-max": 400000
     },
   },
   {
@@ -242,11 +248,13 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "x-api-key",
     headerName: "x-api-key",
     adapter: "openai",
-    seeds: ["claude-opus-5-5", "claude-sonnet-5", "claude-fable-5"],
+    seeds: ["claude-opus-5-5", "claude-sonnet-5", "claude-fable-5", "claude-opus-4-5-20251101", "claude-sonnet-4-5-20250929"],
     contextLengths: {
       "claude-fable-5": 500000,
       "claude-opus-5-5": 1000000,
-      "claude-sonnet-5": 1000000
+      "claude-sonnet-5": 1000000,
+      "claude-opus-4-5-20251101": 200000,
+      "claude-sonnet-4-5-20250929": 200000
     },
   },
   {
@@ -255,10 +263,11 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     keyEnv: "DEEPSEEK_API_KEY",
     auth: "bearer",
     adapter: "openai",
-    seeds: ["deepseek-v4-pro", "deepseek-v4-flash"],
+    seeds: ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-v3.2-chat"],
     contextLengths: {
       "deepseek-v4-flash": 256000,
-      "deepseek-v4-pro": 256000
+      "deepseek-v4-pro": 256000,
+      "deepseek-v3.2-chat": 256000
     },
   },
   {
@@ -316,10 +325,11 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     keyEnvAlt: "KIMI_API_KEY",
     auth: "bearer",
     adapter: "openai",
-    seeds: ["kimi-k2.7-code", "kimi-k2.6"],
+    seeds: ["kimi-k2.7-code", "kimi-k2.6", "kimi-k2-thinking"],
     contextLengths: {
       "kimi-k2.6": 256000,
-      "kimi-k2.7-code": 256000
+      "kimi-k2.7-code": 256000,
+      "kimi-k2-thinking": 256000
     },
   },
   {
@@ -639,6 +649,19 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     seeds: ["perplexity/sonar"],
     contextLengths: {
       "perplexity/sonar": 200000
+    },
+  },
+  {
+    name: "dashscope",
+    displayName: "Alibaba DashScope",
+    baseUrl: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+    keyEnv: "DASHSCOPE_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    seeds: ["qwen3-coder-plus", "qwen3-coder-flash"],
+    contextLengths: {
+      "qwen3-coder-plus": 256000,
+      "qwen3-coder-flash": 256000
     },
   },
 ];
