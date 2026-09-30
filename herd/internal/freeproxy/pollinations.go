@@ -18,7 +18,6 @@ import (
 // all (verified live 2026-09-30). A real POLLINATIONS_API_KEY/POLLINATIONS_KEY
 // unlocks the key-gated set. There is no dummy Bearer anymore — it was
 // obsolete and misleading.
-// It ignores the "not anonymous" gate by injecting a dummy Bearer when no key is configured.
 // Falls back to https://text.pollinations.ai when gen returns 401/429.
 type PollinationsProvider struct {
 	base      string
