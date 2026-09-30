@@ -20,6 +20,3 @@
 [submodule "corral"]
 	path = corral
 	url = https://github.com/toxicwind/super-ralph.git
-[submodule "paddock"]
-	path = paddock
-	url = https://github.com/toxicwind/VansRouter.git
