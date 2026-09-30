@@ -31,6 +31,7 @@ One table, every animal first-class — no "secondary" framing, no pens inside p
 | 🟢 **stream-broker** | `25215` | `stream-broker/` (in-tree, Bun) | Event-streaming backbone for the estate. |
 | 🟢 **windmill** | `25219` | `windmill/` (in-tree, Bun) | GPU / PCIe telemetry — tells you which way the wind blows. Rebuilt 2026-09-30 (was `pcie-moe-telemetry`). |
 | 🟢 **browserless** | `25130` | `barn/browserless` (in-tree) | Browser automation: browserless.io MCP server + native-launcher deployment. |
+| 🟢 **lookout** | `6080` | `barn/lookout` (in-tree) | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower Chris climbs to see what the agent browser is doing. |
 | **tack** | — | `tack/` (in-tree, `@ranch/tack`, Bun/TS) | 🤠 The tack room — the master provider catalog: every provider/model the estate rides, one registry. Feeds tau, herd's generated Go, the router. |
 | **squawk** | — | `squawk/` (in-tree) | File-based multi-agent chat: signed, sequenced message files. NATS bus (`squawk/nats/`) underneath. |
 | **corral** | — | `corral/` (submodule → `toxicwind/super-ralph`) | The super-ralph agent framework — the mission runner. |
