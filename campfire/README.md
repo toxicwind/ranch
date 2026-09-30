@@ -15,6 +15,9 @@ Campfire is the ranch's chatty helper system — the multi-agent conversation la
 | `docs/CHAT-PATTERNS.md` | PatternBorrower's GitHub audit — 64 repos, borrowable conversation patterns. |
 | `docs/LOGGING.md` | LogSleuth's audit — do provider agents have herd-level logs? (No.) |
 | `docs/ARCHITECTURE.md` | System design — event flow, decision tree, component map. |
+| `docs/collusion-dataframe.csv` | Ledger 20-behavior dataframe — measured from the verified collusion.wiki dump. |
+| `docs/collusion-audit.md` | Ledger data-grounded audit — the swarm seven drives. |
+| `docs/local-swarm-design.md` | The Local Swarm — seven drives to seven native capabilities. |
 | `SKILL.md` | **The "How to Chat" skill** — when to speak, when to shut up, how to sound alive. |
 | `AGENTS.md` | Behavioral contract for agents working in this repo. |
 | `src/` | Bun/TypeScript implementation — the chatty fleet helper. |
