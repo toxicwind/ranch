@@ -398,12 +398,30 @@ async function poll(myGen) {
     $('lat').textContent = 'wake ' + Math.round(performance.now() - t0) + 'ms';
   } catch (e) {
     if (myGen !== gen) return; // superseded: the new generation owns the loop now
+    if (e && e.message === 'unauthorized') return authFailed();
     failures++;
     setState('reconnecting', failures > 1 ? ` · try ${failures}` : '');
     if (failures === 1) line('feed hiccup — retrying…', 'sys');
     await new Promise(r => setTimeout(r, Math.min(5000, 500 * failures)));
   }
   poll(myGen);
+}
+
+// Definitive auth rejection (401): the stored token is dead. Retrying the
+// snapshot forever shows "reconnecting..." and never loads -- surface the gate
+// so a fresh token can be pasted instead of spinning.
+function authFailed() {
+  running = false; booted = false; failures = 0;
+  try { if (pollCtrl) pollCtrl.abort(); } catch (e) {}
+  if (wsLive_sock) { try { wsLive_sock.close(); } catch (e) {} wsLive_sock = null; }
+  if (natsWs) { try { natsWs.close(); } catch (e) {} natsWs = null; }
+  token = '';
+  try { sessionStorage.removeItem('squawk-token'); } catch (e) {}
+  const gp = document.querySelector('#gate p');
+  if (gp) gp.innerHTML = 'That token was <b>rejected</b> (401) -- paste a fresh feed token.';
+  $('app').style.display = 'none';
+  $('gate').style.display = 'block';
+  setState('loading');
 }
 
 // Initial load: one bounded snapshot (the TAIL most recent messages) lands
@@ -433,6 +451,7 @@ async function boot() {
     booted = true;
   } catch (e) {
     if (myGen !== gen) return;
+    if (e && e.message === 'unauthorized') return authFailed();
     setState('reconnecting');
     await new Promise(r => setTimeout(r, 1500));
     if (running && myGen === gen) return boot();
