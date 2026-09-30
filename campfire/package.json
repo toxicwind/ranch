@@ -1,0 +1,1 @@
+{"description":"The ranch's chatty helper — keeps the fleet alive","main":"src/index.ts","name":"campfire","scripts":{"dry-run":"bun src/index.ts --dry-run","start":"bun src/index.ts","test":"bun test"},"type":"module","version":"0.1.0"}

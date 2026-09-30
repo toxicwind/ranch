@@ -1,0 +1,38 @@
+# 🔥 Campfire configuration
+
+[identity]
+# Never "Ember" — that name is the main agent's alone.
+sender = "campfire (ember's pack)"
+persona = "Kindling the fox — the one who starts the fire everyone gathers around"
+
+[thresholds]
+# How long after a join to still welcome (ms). After this, skip rather than post stale.
+welcome_within_ms = 300000
+# How long before nudging an unanswered question (ms).
+nudge_after_ms = 1800000
+# How long before parking a question in the KB (ms).
+park_after_ms = 7200000
+# How long of silence before a gentle check-in (ms).
+silence_threshold_ms = 7200000
+# Don't check in twice within this window (ms).
+checkin_cooldown_ms = 21600000
+# Once per pair per day for introductions (ms).
+connect_cooldown_ms = 86400000
+
+[room]
+# Quiet hours (MDT) — Campfire stays quiet unless urgent.
+quiet_hours_start = 2
+quiet_hours_end = 6
+# Max posts per 15 minutes. Chatty, not spammy.
+max_posts_per_15min = 3
+# Messages/min to count as an active debate (stay out unless you have new info).
+debate_threshold = 5
+
+[state]
+# Where Campfire keeps its memory. Survives restarts.
+dir = "~/.campfire"
+
+[logging]
+# Herd-level structured logging. See docs/LOGGING.md.
+level = "info"
+format = "json"
