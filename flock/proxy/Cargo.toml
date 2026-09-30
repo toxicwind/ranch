@@ -1,3 +1,5 @@
+[workspace]
+
 [package]
 name = "flock"
 version = "0.6.6"

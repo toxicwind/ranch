@@ -155,3 +155,23 @@ cargo test          # unit + end-to-end vs a scripted mock NIM
 
 - **License:** the proxy is **MIT** — see [`proxy/LICENSE`](proxy/LICENSE). Upstream provenance is `miztertea/nim-proxy` (MIT). This repo root carries no separate license file; `client/` and `tools/` each carry their own `LICENSE`.
 - **Security:** report vulnerabilities privately via [`proxy/SECURITY.md`](proxy/SECURITY.md), never in a public issue. The proxy fails closed: before setup `/v1` returns `503 setup_required`; after setup the dashboard always requires login and `/v1` is keyed (`npk_…`) or explicitly open — never accidentally open. Client key secrets are shown exactly once (only SHA-256 digest + last-4 stored); passwords are PBKDF2-HMAC-SHA256 (600k iterations); credentials live in `config.json` (mode 0600), not env vars.
+
+
+## Build
+
+The main build entry is `scripts/flicker-build.sh` — it submits the canonical
+build+test as a job to flicker, the estate build-job system, and streams
+the log. The job runs in `flock/proxy` (the in-tree Rust crate):
+
+```bash
+cargo build && cargo test
+```
+
+Run it via:
+
+```bash
+./scripts/flicker-build.sh
+```
+
+Honors `FLICKER_URL` (default `http://127.0.0.1:25148`). Exit 0 on success
+(or cached identical success), 1 on failure/timeout.
