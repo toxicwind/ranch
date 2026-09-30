@@ -9,7 +9,7 @@
 
 # 🤠 ranch
 
-**The ranch holds the herd and the flock.**
+**The ranch holds the herd, the flock, and every animal that works them.**
 
 One map over the whole inference stack: the local front door, the external provider router, and the contract between them. No more re-deriving it from stray checkouts.
 
@@ -22,10 +22,11 @@ If you run models on a box and also call cloud APIs, this is the shape of the an
 | Service | Port | Source | Role |
 |---|---|---|---|
 | **herd** | `25100` | `stockyard/herd` (in-tree) — the llama-swap fork, Go | **LOCAL front door.** Serves on-box GGUFs over llama.cpp engines (`:25001+`). Anything cloud goes to the flock daemon via its `flock:` config key. |
-| **flock** | `25193` | [`toxicwind/flock`](https://github.com/toxicwind/flock) — own repo, checked out outside the ranch; `stockyard/flock/` is a pointer README, not the source | **EXTERNAL provider router.** Rust. Strategies, key pools, 429 rotation, circuit breakers, health/Elo. NIM · OpenRouter · Groq · Cerebras · … |
-| **gatehouse** | `25127` | `barn/gatehouse` (this repo) | **MCP gateway.** Tool serving. A peer of the other two, not their parent — see [Not the holder](#not-the-holder). |
+| **flock** | `25193` | [`toxicwind/flock`](https://github.com/toxicwind/flock) — own repo, checked out outside the ranch; `remuda/flock/` is a pointer README, not the source | **EXTERNAL provider router.** Rust. Strategies, key pools, 429 rotation, circuit breakers, health/Elo. NIM · OpenRouter · Groq · Cerebras · … |
+| **gatehouse** | `25127` | `barn/gatehouse` (this repo) | **MCP gateway.** Tool serving. A peer of the others, not their parent — see [Not the holder](#not-the-holder). |
+| **chute** | `25111` | `barn/chute` (this repo) | **Tau engine, TCP-exposed.** stdio→TCP ACP passage — the tau coding-agent engine as a daemon on a real port. |
 
-All three run under **pitchfork** as daemons `herd`, `flock`, and `gatehouse`.
+All four run under **pitchfork** as daemons `herd`, `flock`, `gatehouse`, and `tau` (via chute).
 
 ## 📜 The contract
 
@@ -81,8 +82,9 @@ curl -s http://127.0.0.1:25193/v1/chat/completions \
 ### Local vs external
 
 - **herd is LOCAL.** On-box models (GGUFs via llama.cpp engines), served at `:25100`. Lives in the monorepo (`stockyard/herd`); `~/sovereign/projects/herd` is a compat symlink to it. No separate fork repo.
-- **flock is EXTERNAL.** Cloud providers — NVIDIA NIM, OpenRouter, Groq, Cerebras, … — routed at `:25193`. Own repo, own cadence, checked out at `/home/toxic/projects/flock`. This tree holds only a pointer (`stockyard/flock/`).
-- **gatehouse is a peer.** The MCP gateway (`barn/gatehouse`), not the parent of the other two.
+- **flock is EXTERNAL.** Cloud providers — NVIDIA NIM, OpenRouter, Groq, Cerebras, … — routed at `:25193`. Own repo, own cadence, checked out at `/home/toxic/projects/flock`. This tree holds only a pointer (`remuda/flock/`).
+- **gatehouse is a peer.** The MCP gateway (`barn/gatehouse`), not the parent of the other three.
+- **chute is the tau engine's doorway.** `barn/chute` turns the tau coding-agent engine's stdio ACP into a TCP daemon at `:25111`, so agents are observable on a real port like everything else.
 
 ### Rules
 
@@ -106,19 +108,23 @@ The ranch is held together by **pitchfork** (supervision), this repo (the map), 
 
 | Path | What it is |
 |---|---|
-| `stockyard/` | Pointers, not code: `flock/` (→ `toxicwind/flock`), `herd/` (in-tree llama-swap fork), `paddock/`, `router-legacy/`, `stream-broker/` |
-| `barn/gatehouse` | MCP gateway (`:25127`) — tool serving, peer of herd/flock |
-| `barn/chute` | TCP ↔ stdio ACP passage: makes the tau engine observable as a daemon on a real port |
-| `barn/browserless` | Browser automation: browserless.io MCP server + native-launcher deployment |
+| `stockyard/` | In-tree code: `herd/` (llama-swap fork, Go) + `stream-broker/` — the routers moved out to `remuda/` |
+| `remuda/` | All the routers: `flock/` (pointer → [`toxicwind/flock`](https://github.com/toxicwind/flock)), `router-legacy/`, `paddock/` (VansRouter submodule) |
+| `barn/gatehouse` | MCP gateway (`:25127`) — tool serving, peer of the animals |
+| `barn/chute` | TCP ↔ stdio ACP passage: the tau engine as a daemon on `:25111` |
+| `barn/browserless` | Browser automation (`:25130`): browserless.io MCP server + native-launcher deployment |
 | `barn/gemini-mcp` | First-class Gemini API MCP server; multi-key pool with round-robin + failover |
 | `barn/secretsmith` | Maximal freedesktop Secret Service CLI for the estate |
 | `roundup/` | Roundup benchmark estate (renamed from guidellm 2026-09-30; in-tree code, standalone repo `toxicwind/roundup`) |
+| `trailboss/` | Vendored defork of goldfinger: cuts repo selections across the org and drives changes through every head — built for agents as much as people |
+| `drover/` | ModelPilot VS Code extension (multi-provider AI routing for Copilot Chat), sovereign build |
+| `gear/` | The estate's skill library — hundreds of skills, one directory each |
 | `ui/` | Ranch control UI — one Svelte SPA over herd + flock (llama-swap's web UI, adopted) |
 | `squawk/` | File-based multi-agent chat: no daemon, no sockets — signed, sequenced message files |
-| `squawk-ws/` | Squawk websocket client/server |
+| `squawk-ws/` | Squawk websocket client/server (`:25147`) |
+| `corral/` | super-ralph agent framework (submodule) — the mission runner |
 | `research/` | Provider/model discovery scripts |
 | `data/` | Discovery + categorization JSON |
-| `corral/` | Empty — reserved |
 
 Each subproject keeps its own README; this file is the map, not the territory.
 
@@ -131,6 +137,7 @@ Each subproject keeps its own README; this file is the map, not the territory.
 | `25100` | herd (llama-swap fork, Go) | `stockyard/herd` |
 | `25193` | flock router (Rust) | [`toxicwind/flock`](https://github.com/toxicwind/flock) → `/home/toxic/projects/flock` |
 | `25127` | gatehouse (MCP gateway) | `barn/gatehouse` |
+| `25111` | chute — tau ACP engine over TCP | `barn/chute` |
 | `25104` | sovereign TS router (bench/Elo layer) | sovereign-projects |
 | `25109` | keypool sidecar | sovereign-projects |
 | `25001+` | llama.cpp engines | herd config |
@@ -146,7 +153,8 @@ This repo is a **map** — the implementations live in their owning repos:
 - herd changes → `stockyard/herd` (in-tree), following its own `CONTRIBUTING.md`
 - flock changes → [`toxicwind/flock`](https://github.com/toxicwind/flock)
 - gatehouse changes → `barn/gatehouse`
-- Map changes (this README, `docs/ARCHITECTURE.md`, `stockyard/*` pointers) → here
+- chute changes → `barn/chute`
+- Map changes (this README, `docs/ARCHITECTURE.md`, `remuda/*` pointers) → here
 
 When a subproject's README goes stale, fix it at the source and update the pointer row here. **No monkeypatches** — fixes land in the owning repo, never as local overlays.
 
