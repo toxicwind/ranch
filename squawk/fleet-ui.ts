@@ -8,15 +8,73 @@
 // A plain fetch() proxy cannot complete the 101 upgrade, so without this the UI
 // always degraded to 65s long-polling after every WS attempt 404'd. Upgrade
 // requests are now shuttled frame-by-frame to the real backends over loopback.
+//
+// Server-auth (2026-09-30): the squawk server holds the feed token itself
+// (/home/toxic/.fleet-bus/squawk-relay/feed-token) and injects it on proxied
+// feed requests and squawk-ws upgrades when the browser sent none (or an empty
+// one). Browsers never paste tokens; the token value only travels on loopback.
+// The funnel only listens on tailnet addresses, so this is not a public
+// exposure. A pasted/magic-link token is still forwarded as-is when present.
+//
+// Hot-reload (2026-09-30): ui.html is read per request and served with
+// window.SERVER_AUTH injected, so UI edits land without a daemon restart.
+import { readFileSync, statSync } from "node:fs";
+
 const FEED = "http://127.0.0.1:25135";
-const UI_HTML = await Bun.file("/home/toxic/sovereign/projects/range/ranch/squawk/ui.html").text();
+const UI_PATH = "/home/toxic/sovereign/projects/range/ranch/squawk/ui.html";
+const FEED_TOKEN_PATH = "/home/toxic/.fleet-bus/squawk-relay/feed-token";
 
 // websocket upgrade targets: client path -> backend ws url.
-// the query string is forwarded verbatim (it carries ?token= for squawk-ws).
 const WS_TARGETS: Record<string, string> = {
   "/squawk-ws": "ws://127.0.0.1:25147/squawk-ws",
   "/nats-ws": "ws://127.0.0.1:4223/",
 };
+
+// --- server-side feed token: read lazily, refresh when the file changes ---
+let feedToken = "";
+let feedTokenMtimeMs = 0;
+function getFeedToken(): string {
+  try {
+    const st = statSync(FEED_TOKEN_PATH);
+    if (st.mtimeMs !== feedTokenMtimeMs) {
+      feedToken = readFileSync(FEED_TOKEN_PATH, "utf8").trim();
+      feedTokenMtimeMs = st.mtimeMs;
+    }
+  } catch {
+    /* token file unreadable: keep whatever we have (possibly empty) */
+  }
+  return feedToken;
+}
+
+// copy incoming headers, injecting the server-side feed token when the
+// browser sent no usable Authorization header of its own.
+function authHeaders(incoming: Headers): Headers {
+  const out = new Headers(incoming);
+  const auth = out.get("authorization") || "";
+  if (!/^bearer\s+\S/i.test(auth)) {
+    const t = getFeedToken();
+    if (t) out.set("authorization", "Bearer " + t);
+  }
+  return out;
+}
+
+// backend ws url for an upgrade request; injects the server token into
+// squawk-ws when the browser's ?token= is missing or empty.
+function wsTarget(pathname: string, search: string): string {
+  const base = WS_TARGETS[pathname];
+  if (!base) return "";
+  if (pathname === "/squawk-ws" && !new URLSearchParams(search).get("token")) {
+    const t = getFeedToken();
+    if (t) return base + "?token=" + encodeURIComponent(t);
+  }
+  return base + search;
+}
+
+// ui.html, read fresh per request (hot-reload) with the server-auth flag injected.
+async function uiHtml(): Promise<string> {
+  const raw = await Bun.file(UI_PATH).text();
+  return raw.replace("<script>", "<script>\nwindow.SERVER_AUTH=true;");
+}
 
 type SockData = { target: string; backend?: WebSocket; pending: (string | Buffer)[] };
 
@@ -27,14 +85,14 @@ Bun.serve<SockData>({
     const url = new URL(req.url);
     // --- websocket upgrade: shuttle to the real backend, don't fetch-proxy ---
     if (req.headers.get("upgrade")?.toLowerCase() === "websocket") {
-      const base = WS_TARGETS[url.pathname];
-      if (base && server.upgrade(req, { data: { target: base + url.search, pending: [] } })) {
+      const target = wsTarget(url.pathname, url.search);
+      if (target && server.upgrade(req, { data: { target, pending: [] } })) {
         return; // upgraded: the socket now lives in the websocket handlers
       }
       return new Response("no websocket target for " + url.pathname, { status: 404 });
     }
     if (url.pathname === "/" || url.pathname === "/ui") {
-      return new Response(UI_HTML, { headers: { "Content-Type": "text/html" } });
+      return new Response(await uiHtml(), { headers: { "Content-Type": "text/html" } });
     }
     // proxy everything else to the feed
     // the feed serves everything under /squawk-feed/*; the client speaks
@@ -43,7 +101,7 @@ Bun.serve<SockData>({
     const target = FEED + pfx + url.pathname + url.search;
     const resp = await fetch(target, {
       method: req.method,
-      headers: req.headers,
+      headers: authHeaders(req.headers),
       body: req.method === "GET" || req.method === "HEAD" ? undefined : req.body,
     });
     return new Response(resp.body, { status: resp.status, headers: resp.headers });
@@ -86,4 +144,4 @@ Bun.serve<SockData>({
     },
   },
 });
-console.log("fleet-ui on 0.0.0.0:25136 (funnel /fleet + tailnet-direct), ws-aware");
+console.log("fleet-ui on 0.0.0.0:25136 (funnel /fleet + tailnet-direct), ws-aware, server-auth, hot-reload");

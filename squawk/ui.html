@@ -489,7 +489,10 @@ $('channel').onchange = () => {
   line(`switched to #${$('channel').value.trim() || 'fleet'} — pulling the latest traffic…`, 'sys');
   boot();
 };
-if (token) { $('token').value = token; $('go').click(); }
+// server-auth mode: fleet-ui proxies with the feed token itself (injected as
+// window.SERVER_AUTH) -- skip the gate, the server tunes us in.
+if (window.SERVER_AUTH) { $('gate').style.display = 'none'; $('app').style.display = 'flex'; running = true; boot(); }
+else if (token) { $('token').value = token; $('go').click(); }
 </script>
 </body>
 </html>
