@@ -1,0 +1,6 @@
+version = "0.5.0.dev0"
+build_type = "dev"
+build_iteration = "0"
+git_commit = "4601968d8a06ffc1aecce987753da1118ea637a0"
+git_branch = "main"
+git_last_tag = "None"

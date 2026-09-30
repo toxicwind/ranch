@@ -1,0 +1,532 @@
+import csv
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+from guidellm.benchmark.outputs.csv import GenerativeBenchmarkerCSV
+from guidellm.scheduler import ThroughputStrategy
+from guidellm.schemas import StatusDistributionSummary
+from tests.unit.benchmark.html_report_fixtures import (
+    make_benchmark,
+    metric_summary,
+    report,
+)
+
+
+class TestAlignColumns:
+    """
+    Tests for _align_columns ensuring correct column merging and alignment
+    when benchmarks have different sets of metrics.
+
+    ## WRITTEN BY AI ##
+    """
+
+    @pytest.mark.regression
+    def test_headers_merge_in_first_seen_order(self):
+        """
+        Headers from multiple benchmarks are merged preserving first-seen order,
+        producing the union of all columns.
+
+        ## WRITTEN BY AI ##
+        """
+        headers_b1 = [["GroupA", "Field1", ""], ["GroupB", "Field2", ""]]
+        headers_b2 = [["GroupA", "Field1", ""], ["GroupC", "Field3", ""]]
+        values_b1 = ["v1", "v2"]
+        values_b2 = ["v1_b2", "v3"]
+
+        headers, rows = GenerativeBenchmarkerCSV._align_columns(
+            [headers_b1, headers_b2], [values_b1, values_b2]
+        )
+
+        assert headers == [
+            ["GroupA", "Field1", ""],
+            ["GroupB", "Field2", ""],
+            ["GroupC", "Field3", ""],
+        ]
+        assert rows[0] == ["v1", "v2", ""]
+        assert rows[1] == ["v1_b2", "", "v3"]
+
+    @pytest.mark.regression
+    def test_missing_columns_filled_with_empty_string(self):
+        """
+        When the second benchmark is missing a column the first has, that
+        position is filled with an empty string.
+
+        ## WRITTEN BY AI ##
+        """
+        headers_b1 = [["G", "A", ""], ["G", "B", ""]]
+        headers_b2 = [["G", "A", ""]]
+        values_b1 = ["a", "b"]
+        values_b2 = ["a2"]
+
+        headers, rows = GenerativeBenchmarkerCSV._align_columns(
+            [headers_b1, headers_b2], [values_b1, values_b2]
+        )
+
+        assert headers == [["G", "A", ""], ["G", "B", ""]]
+        assert rows[0] == ["a", "b"]
+        assert rows[1] == ["a2", ""]
+
+    @pytest.mark.regression
+    def test_first_benchmark_missing_columns(self):
+        """
+        When the first benchmark lacks columns that the second has, those
+        columns are appended and the first row gets empty strings.
+
+        ## WRITTEN BY AI ##
+        """
+        headers_b1 = [["G", "A", ""]]
+        headers_b2 = [["G", "A", ""], ["G", "B", ""]]
+        values_b1 = ["a1"]
+        values_b2 = ["a2", "b2"]
+
+        headers, rows = GenerativeBenchmarkerCSV._align_columns(
+            [headers_b1, headers_b2], [values_b1, values_b2]
+        )
+
+        assert headers == [["G", "A", ""], ["G", "B", ""]]
+        assert rows[0] == ["a1", ""]
+        assert rows[1] == ["a2", "b2"]
+
+    @pytest.mark.regression
+    def test_identical_columns_no_padding(self):
+        """
+        When all benchmarks have the same columns, no padding is needed.
+
+        ## WRITTEN BY AI ##
+        """
+        headers_b1 = [["G", "X", ""], ["G", "Y", ""]]
+        headers_b2 = [["G", "X", ""], ["G", "Y", ""]]
+        values_b1 = ["1", "2"]
+        values_b2 = ["3", "4"]
+
+        headers, rows = GenerativeBenchmarkerCSV._align_columns(
+            [headers_b1, headers_b2], [values_b1, values_b2]
+        )
+
+        assert headers == [["G", "X", ""], ["G", "Y", ""]]
+        assert rows[0] == ["1", "2"]
+        assert rows[1] == ["3", "4"]
+
+    @pytest.mark.smoke
+    def test_empty_benchmarks_list(self):
+        """
+        No benchmarks produces empty headers and no data rows.
+
+        ## WRITTEN BY AI ##
+        """
+        headers, rows = GenerativeBenchmarkerCSV._align_columns([], [])
+        assert headers == []
+        assert rows == []
+
+    @pytest.mark.smoke
+    def test_single_benchmark(self):
+        """
+        A single benchmark returns its headers and values unchanged.
+
+        ## WRITTEN BY AI ##
+        """
+        headers_b1 = [["A", "B", "C"], ["D", "E", "F"]]
+        values_b1 = [10, 20]
+
+        headers, rows = GenerativeBenchmarkerCSV._align_columns(
+            [headers_b1], [values_b1]
+        )
+
+        assert headers == [["A", "B", "C"], ["D", "E", "F"]]
+        assert rows == [[10, 20]]
+
+    @pytest.mark.regression
+    def test_three_benchmarks_disjoint_columns(self):
+        """
+        Three benchmarks each with unique columns produces the full union
+        with correct empty-fill for each row.
+
+        ## WRITTEN BY AI ##
+        """
+        headers_b1 = [["G", "A", ""]]
+        headers_b2 = [["G", "B", ""]]
+        headers_b3 = [["G", "C", ""]]
+        values_b1 = ["a"]
+        values_b2 = ["b"]
+        values_b3 = ["c"]
+
+        headers, rows = GenerativeBenchmarkerCSV._align_columns(
+            [headers_b1, headers_b2, headers_b3],
+            [values_b1, values_b2, values_b3],
+        )
+
+        assert headers == [["G", "A", ""], ["G", "B", ""], ["G", "C", ""]]
+        assert rows[0] == ["a", "", ""]
+        assert rows[1] == ["", "b", ""]
+        assert rows[2] == ["", "", "c"]
+
+
+class TestHasDistributionData:
+    """
+    Tests for _has_distribution_data on GenerativeBenchmarkerCSV.
+
+    ## WRITTEN BY AI ##
+    """
+
+    @pytest.mark.smoke
+    def test_returns_true_for_zero_valued_distribution(self):
+        """
+        _has_distribution_data returns True when a status has count > 0
+        but total_sum == 0 (e.g. errored tool-call requests with count=0).
+
+        ## WRITTEN BY AI ##
+        """
+        dist = StatusDistributionSummary.from_values(
+            successful=[],
+            incomplete=[],
+            errored=[0.0, 0.0, 0.0],
+        )
+        csv_out = GenerativeBenchmarkerCSV.__new__(GenerativeBenchmarkerCSV)
+        assert csv_out._has_distribution_data(dist) is True
+
+    @pytest.mark.smoke
+    def test_returns_false_for_empty_distribution(self):
+        """
+        _has_distribution_data returns False when all statuses have
+        count == 0 (no data at all).
+
+        ## WRITTEN BY AI ##
+        """
+        dist = StatusDistributionSummary.from_values(
+            successful=[],
+            incomplete=[],
+            errored=[],
+        )
+        csv_out = GenerativeBenchmarkerCSV.__new__(GenerativeBenchmarkerCSV)
+        assert csv_out._has_distribution_data(dist) is False
+
+    @pytest.mark.smoke
+    def test_returns_true_for_positive_distribution(self):
+        """
+        _has_distribution_data returns True for a normal positive distribution.
+
+        ## WRITTEN BY AI ##
+        """
+        dist = StatusDistributionSummary.from_values(
+            successful=[5.0, 10.0],
+            incomplete=[],
+            errored=[],
+        )
+        csv_out = GenerativeBenchmarkerCSV.__new__(GenerativeBenchmarkerCSV)
+        assert csv_out._has_distribution_data(dist) is True
+
+
+@pytest.mark.asyncio
+@pytest.mark.sanity
+async def test_finalize_aligns_columns_in_written_csv(tmp_path: Path):
+    """
+    Integration test: finalize writes a CSV where all rows (headers + data)
+    have the same column count, even when benchmarks produce different columns.
+
+    Uses patching to control the column shape without constructing full
+    benchmark objects.
+
+    ## WRITTEN BY AI ##
+    """
+    report = SimpleNamespace(
+        benchmarks=[
+            SimpleNamespace(_test_fields=[(("G", "A", ""), "a1")]),
+            SimpleNamespace(
+                _test_fields=[(("G", "A", ""), "a2"), (("G", "B", ""), "b2")]
+            ),
+        ],
+        metadata=SimpleNamespace(model_dump_json=lambda: "{}"),
+        args=SimpleNamespace(model_dump_json=lambda: "{}"),
+    )
+
+    out = GenerativeBenchmarkerCSV(output_path=tmp_path)
+
+    # Stub all emitters except _add_run_info so we control column shape
+    for name in [
+        "_add_benchmark_info",
+        "_add_timing_info",
+        "_add_request_counts",
+        "_add_request_latency_metrics",
+        "_add_server_throughput_metrics",
+        "_add_modality_metrics",
+        "_add_scheduler_info",
+        "_add_runtime_info",
+    ]:
+        setattr(out, name, lambda *a, **k: None)
+
+    def _add_run_info(self, benchmark, headers, values):
+        for key, val in benchmark._test_fields:
+            headers.append(list(key))
+            values.append(val)
+
+    out._add_run_info = _add_run_info.__get__(out, out.__class__)
+
+    path = await out.finalize(report)
+
+    rows = list(csv.reader(path.open()))
+    assert len(rows) == 5  # 3 header rows + 2 data rows
+
+    # All rows must have the same column count
+    col_counts = {len(row) for row in rows}
+    assert len(col_counts) == 1, f"Expected uniform column count, got {col_counts}"
+
+    # Data row for first benchmark should have blank in column B
+    data_rows = rows[3:]
+    assert data_rows[0] == ["a1", ""]
+    assert data_rows[1] == ["a2", "b2"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.regression
+async def test_finalize_exports_tool_call_metrics(tmp_path: Path):
+    """Tool call token and count metrics are included in the CSV output.
+
+    ## WRITTEN BY AI ##
+    """
+    benchmark = make_benchmark(
+        strategy=ThroughputStrategy(),
+        rps=1.0,
+        tps=10.0,
+    )
+    benchmark.metrics.tool_call.tokens = metric_summary(32.0, count=2)
+    benchmark.metrics.tool_call.mixed_tokens = metric_summary(8.0, count=2)
+    benchmark.metrics.tool_call.count = metric_summary(2.0, count=2)
+
+    output = GenerativeBenchmarkerCSV(output_path=tmp_path / "tool_calls.csv")
+    path = await output.finalize(report(benchmark))
+    rows = list(csv.reader(path.open()))
+
+    expected_means = {
+        "Tool Call Tokens": "32.0",
+        "Tool Call Mixed Tokens": "8.0",
+        "Tool Call Count": "2.0",
+    }
+    for group, expected_mean in expected_means.items():
+        column_index = next(
+            index
+            for index, header in enumerate(rows[0])
+            if header == group
+            and rows[1][index] == "Successful Output"
+            and rows[2][index] == "Mean"
+        )
+        assert rows[3][column_index] == expected_mean
+
+
+# Metrics read by GenerativeBenchmarkerCSV._add_request_latency_metrics.
+_LATENCY_CSV_METRICS = (
+    "request_latency",
+    "request_dispatch_delay",
+    "turn_predecessor_delay",
+    "turn_scheduling_delay",
+    "request_scheduled_latency",
+    "request_streaming_iterations_count",
+    "time_to_first_token_ms",
+    "time_to_first_output_token_ms",
+    "time_per_output_token_ms",
+    "inter_token_latency_ms",
+    "time_to_last_round_trip_ms",
+    "avg_round_trip_time_ms",
+)
+
+
+def _latency_metric_groups(
+    tmp_path: Path, schedule_metrics_missing: bool = False
+) -> list[str]:
+    """Emit the latency CSV section and return its column group names in order.
+
+    ## WRITTEN BY AI ##
+    """
+    distribution = StatusDistributionSummary.from_values([1.0, 2.0, 3.0], [], [])
+    metrics = dict.fromkeys(_LATENCY_CSV_METRICS, distribution)
+    if schedule_metrics_missing:
+        for name in (
+            "request_dispatch_delay",
+            "turn_predecessor_delay",
+            "turn_scheduling_delay",
+            "request_scheduled_latency",
+        ):
+            metrics[name] = None
+    benchmark = SimpleNamespace(metrics=SimpleNamespace(**metrics))
+
+    output = GenerativeBenchmarkerCSV(output_path=tmp_path)
+    headers: list[list[str]] = []
+    values: list[str | int | float] = []
+    output._add_request_latency_metrics(benchmark, headers, values)
+
+    groups: list[str] = []
+    for header in headers:
+        if header[0] not in groups:
+            groups.append(header[0])
+
+    return groups
+
+
+class TestRequestLatencyCSVMetrics:
+    """
+    Verify the latency section of the CSV export.
+
+    ## WRITTEN BY AI ##
+    """
+
+    @pytest.mark.sanity
+    def test_exports_schedule_relative_metrics(self, tmp_path: Path):
+        """
+        Dispatch delay and scheduled latency reach the CSV even though they are
+        omitted from the console table.
+
+        ## WRITTEN BY AI ##
+        """
+        groups = _latency_metric_groups(tmp_path)
+
+        assert "Dispatch Delay" in groups
+        assert "Turn Predecessor Delay" in groups
+        assert "Turn Scheduling Delay" in groups
+        assert "Scheduled Latency" in groups
+
+    @pytest.mark.regression
+    def test_preserves_existing_column_order(self, tmp_path: Path):
+        """
+        Pre-existing latency columns keep their relative order, so the new
+        groups are additions rather than a reshuffle.
+
+        ## WRITTEN BY AI ##
+        """
+        groups = _latency_metric_groups(tmp_path)
+        existing = [
+            group
+            for group in groups
+            if group
+            not in {
+                "Dispatch Delay",
+                "Turn Predecessor Delay",
+                "Turn Scheduling Delay",
+                "Scheduled Latency",
+            }
+        ]
+
+        assert existing == [
+            "Request Latency",
+            "Streaming Iterations",
+            "Time to First Token",
+            "Time to First Output Token",
+            "Time per Output Token",
+            "Inter Token Latency",
+            "Time To Last Round Trip",
+            "Avg Round Trip Time",
+        ]
+
+    @pytest.mark.regression
+    def test_omits_schedule_metrics_when_not_applicable(self, tmp_path: Path):
+        """
+        Schedule-relative metrics set to None produce no CSV columns.
+
+        GenerativeMetrics.compile leaves these None for strategies without an
+        arrival schedule, so a throughput row carries no misleading values.
+
+        ## WRITTEN BY AI ##
+        """
+        groups = _latency_metric_groups(tmp_path, schedule_metrics_missing=True)
+
+        assert "Dispatch Delay" not in groups
+        assert "Turn Predecessor Delay" not in groups
+        assert "Turn Scheduling Delay" not in groups
+        assert "Scheduled Latency" not in groups
+        assert "Request Latency" in groups
+
+
+class TestServerThroughputGoodputColumns:
+    """
+    Tests for goodput columns in the CSV server throughput section.
+
+    ## WRITTEN BY AI ##
+    """
+
+    @staticmethod
+    def _render(attainment, goodput_mean):
+        """Render the throughput section for one benchmark and return headers."""
+        goodput = (
+            None
+            if goodput_mean is None
+            else StatusDistributionSummary.from_values(
+                successful=[goodput_mean], incomplete=[], errored=[]
+            )
+        )
+        distribution = StatusDistributionSummary.from_values([1.0, 2.0], [], [])
+        # Every distribution the throughput section reads, so the stub does not
+        # need updating when unrelated columns are added.
+        metric_names = (
+            "iter_tokens_per_iteration",
+            "output_token_count",
+            "output_tokens_per_iteration",
+            "output_tokens_per_second",
+            "prompt_token_count",
+            "prompt_tokens_per_second",
+            "request_concurrency",
+            "requests_per_second",
+            "tokens_per_second",
+            "total_token_count",
+        )
+        benchmark = SimpleNamespace(
+            config=SimpleNamespace(slo=object()),
+            metrics=SimpleNamespace(
+                **dict.fromkeys(metric_names, distribution),
+                slo_attainment=attainment,
+                request_goodput=goodput,
+            ),
+        )
+        csv_out = GenerativeBenchmarkerCSV.__new__(GenerativeBenchmarkerCSV)
+        headers: list[list[str]] = []
+        values: list[str | int | float] = []
+        csv_out._add_server_throughput_metrics(benchmark, headers, values)
+
+        return headers, values
+
+    @pytest.mark.regression
+    def test_columns_present_when_nothing_conforms(self):
+        """
+        The goodput columns are written even when no request met the
+        objectives.
+
+        _add_stats_for_metric drops any status whose total is 0.0, which would
+        omit the columns from the CSV while the console and JSON still report
+        0.0 for the same run.
+
+        ## WRITTEN BY AI ##
+        """
+        headers, values = self._render(attainment=0.0, goodput_mean=0.0)
+        flat = [h[1] for h in headers]
+
+        assert "Successful Goodput/Sec" in flat
+        assert "SLO Attainment" in flat
+        assert values[flat.index("Successful Goodput/Sec")] == 0.0
+        assert values[flat.index("SLO Attainment")] == 0.0
+
+    @pytest.mark.regression
+    def test_columns_match_between_conforming_and_non_conforming_runs(self):
+        """
+        A run that conforms to nothing produces the same columns as one that
+        conforms, so rows stay aligned across a multi-benchmark report.
+
+        ## WRITTEN BY AI ##
+        """
+        conforming, _ = self._render(attainment=0.9, goodput_mean=9.0)
+        failing, _ = self._render(attainment=0.0, goodput_mean=0.0)
+
+        assert conforming == failing
+
+    @pytest.mark.regression
+    def test_columns_empty_when_objectives_cannot_be_evaluated(self):
+        """
+        Objectives that no request can be evaluated against still produce the
+        columns, with empty values.
+
+        ## WRITTEN BY AI ##
+        """
+        headers, values = self._render(attainment=None, goodput_mean=None)
+        flat = [h[1] for h in headers]
+
+        assert "Successful Goodput/Sec" in flat
+        assert values[flat.index("Successful Goodput/Sec")] == ""
+        assert values[flat.index("SLO Attainment")] == ""

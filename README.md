@@ -112,7 +112,7 @@ The ranch is held together by **pitchfork** (supervision), this repo (the map), 
 | `barn/browserless` | Browser automation: browserless.io MCP server + native-launcher deployment |
 | `barn/gemini-mcp` | First-class Gemini API MCP server; multi-key pool with round-robin + failover |
 | `barn/secretsmith` | Maximal freedesktop Secret Service CLI for the estate |
-| `guidellm/` | GuideLLM benchmark estate (consolidated 2026-09-29) |
+| `roundup/` | Roundup benchmark estate (renamed from guidellm 2026-09-30; in-tree code, standalone repo `toxicwind/roundup`) |
 | `ui/` | Ranch control UI — one Svelte SPA over herd + flock (llama-swap's web UI, adopted) |
 | `squawk/` | File-based multi-agent chat: no daemon, no sockets — signed, sequenced message files |
 | `squawk-ws/` | Squawk websocket client/server |
