@@ -1,0 +1,375 @@
+{
+  "name": "drover",
+  "displayName": "Drover (Herd Router)",
+  "publisher": "toxic",
+  "author": "Aman Sharma Dev",
+  "icon": "images/icon.png",
+  "description": "Herd-level model routing with Gemini EAP tool retrieval for VS Code Insiders.",
+  "version": "1.0.0-sovereign",
+  "preview": true,
+  "engines": {
+    "vscode": "^1.129.0"
+  },
+  "extensionPack": [
+    "github.com.copilot-chat"
+  ],
+  "galleryBanner": {
+    "color": "#0f172a",
+    "theme": "dark"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Other"
+  ],
+  "keywords": [
+    "modelpilot",
+    "copilot",
+    "ai",
+    "routing",
+    "agent",
+    "groq",
+    "nvidia",
+    "nvidia nim",
+    "openrouter",
+    "cerebras",
+    "llm",
+    "chatbot",
+    "free ai",
+    "coding assistant",
+    "security",
+    "ctf",
+    "hackthebox",
+    "deepseek",
+    "cybersecurity",
+    "chat participant",
+    "model routing"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/A-man-Sharma-04/modelpilot"
+  },
+  "homepage": "https://github.com/A-man-Sharma-04/modelpilot#readme",
+  "bugs": {
+    "url": "https://github.com/A-man-Sharma-04/modelpilot/issues"
+  },
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "drover.newChat",
+        "title": "ModelPilot: New Chat"
+      },
+      {
+        "command": "drover.listModels",
+        "title": "ModelPilot: View Available Models"
+      },
+      {
+        "command": "drover.refreshModels",
+        "title": "ModelPilot: Refresh Models"
+      },
+      {
+        "command": "drover.selectExpert",
+        "title": "ModelPilot: Select Expert Profile"
+      },
+      {
+        "command": "drover.addApiKey",
+        "title": "ModelPilot: Add API Key"
+      },
+      {
+        "command": "drover.explainCode",
+        "title": "ModelPilot: Explain Code"
+      },
+      {
+        "command": "drover.fixCode",
+        "title": "ModelPilot: Fix Code"
+      },
+      {
+        "command": "drover.reviewCode",
+        "title": "ModelPilot: Review Code"
+      },
+      {
+        "command": "drover.generateTests",
+        "title": "ModelPilot: Generate Tests"
+      },
+      {
+        "command": "drover.showAnalytics",
+        "title": "ModelPilot: View Token & Cost Analytics"
+      },
+      {
+        "command": "drover.inlineChat",
+        "title": "ModelPilot: Inline Chat (Edit/Generate Code)"
+      },
+      {
+        "command": "drover.runInTerminal",
+        "title": "ModelPilot: Run in Terminal"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "drover.newChat",
+        "key": "ctrl+alt+m",
+        "mac": "cmd+alt+m",
+        "when": "multipleEditorGroups || true"
+      },
+      {
+        "command": "drover.inlineChat",
+        "key": "ctrl+alt+i",
+        "mac": "cmd+alt+i",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "ModelPilot",
+      "properties": {
+        "drover.defaultExpert": {
+          "type": "string",
+          "default": "coding",
+          "enum": [
+            "coding",
+            "reverse-engineering",
+            "binary-exploitation",
+            "web-security",
+            "malware-analysis",
+            "cryptography",
+            "linux",
+            "writing",
+            "documentation",
+            "learning"
+          ],
+          "enumDescriptions": [
+            "Coding Expert - software engineering, code generation and review",
+            "Reverse Engineering Expert - assembly, decompilers, ELF/PE analysis",
+            "Binary Exploitation Expert - buffer overflows, ROP chains, pwntools",
+            "Web Security Expert - XSS, SQLi, SSRF, web vulnerabilities",
+            "Malware Analysis Expert - triage, IOC extraction, behavioral analysis",
+            "Cryptography Expert - CTF crypto, cipher analysis, encoding",
+            "Linux Expert - system admin, shell scripting, internals",
+            "Writing Expert - reports, documentation, creative writing",
+            "Documentation Expert - READMEs, API docs, technical guides",
+            "Learning Expert - explanations, tutorials, concept breakdowns"
+          ],
+          "description": "Default expert profile when opening a new chat.",
+          "order": 4
+        },
+        "drover.streamResponses": {
+          "type": "boolean",
+          "default": true,
+          "description": "Stream responses token by token as they arrive.",
+          "order": 5
+        },
+        "drover.approvalMode": {
+          "type": "string",
+          "default": "default",
+          "enum": [
+            "default",
+            "bypass",
+            "autopilot"
+          ],
+          "enumDescriptions": [
+            "Default - Prompt for approval on all modifying operations (human-in-the-loop)",
+            "Bypass - Automatically approve all tool and command executions",
+            "Autopilot - Automatically approve all tool executions and run autonomously"
+          ],
+          "description": "Approval mode for workspace tools and terminal commands.",
+          "order": 6
+        },
+        "drover.defaultMode": {
+          "type": "string",
+          "default": "default",
+          "enum": [
+            "default",
+            "ask",
+            "plan",
+            "agent"
+          ],
+          "enumDescriptions": [
+            "Default - Automatically select mode based on request commands or user intent classification",
+            "Ask - Conversational support mode (equivalent to /ask, no tool execution)",
+            "Plan - Plan formulation mode (equivalent to /plan, generates implementation plans)",
+            "Agent - Autonomous agent mode (equivalent to /agent, executes tasks using tools)"
+          ],
+          "description": "Default mode of operation when no slash command is explicitly entered in chat.",
+          "order": 7
+        },
+        "drover.maxAutoFixRetries": {
+          "type": "number",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Maximum number of automatic self-correction retries when a terminal command fails. Set to 0 to disable the auto-fix loop.",
+          "order": 8
+        },
+        "drover.autoGenerateCommitMessageOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically generate a suggested commit message and git diff summary when files are saved.",
+          "order": 9
+        },
+        "drover.customInstructions": {
+          "type": "string",
+          "default": "",
+          "description": "Custom instructions to personalize ModelPilot chat and inline code generation responses (e.g., coding style guidelines, project preferences).",
+          "order": 10
+        },
+        "drover.local.baseUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:25100/v1",
+          "description": "Base URL for the local llama.cpp / llama-swap server"
+        },
+        "drover.local.model": {
+          "type": "string",
+          "default": "local-fast",
+          "description": "Preferred model ID on the local server"
+        },
+        "drover.nimlocal.baseUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:25104/v1",
+          "description": "Base URL for the local NVIDIA NIM proxy"
+        },
+        "drover.nimlocal.model": {
+          "type": "string",
+          "default": "moonshotai/kimi-k3",
+          "description": "Preferred model ID on the NIM proxy"
+        }
+      }
+    },
+    "chatParticipants": [
+      {
+        "id": "drover.chatParticipant",
+        "name": "modelpilot",
+        "description": "Smart model routing and provider aggregation.",
+        "isDefault": false,
+        "commands": [
+          {
+            "name": "ask",
+            "description": "Ask Mode - conversational support, no tool executions"
+          },
+          {
+            "name": "plan",
+            "description": "Plan Mode - generate a structured step-by-step implementation plan"
+          },
+          {
+            "name": "agent",
+            "description": "Agent Mode - autonomous task execution with tools and commands"
+          },
+          {
+            "name": "terminal",
+            "description": "Terminal Mode - generate terminal command suggestions"
+          },
+          {
+            "name": "commit",
+            "description": "Commit Mode - generate commit message based on git diff and commit changes"
+          },
+          {
+            "name": "general",
+            "description": "General profile - fast conversational queries"
+          },
+          {
+            "name": "coding",
+            "description": "Coding Expert - software engineering, code generation and review"
+          },
+          {
+            "name": "reverse-engineering",
+            "description": "Reverse Engineering Expert - assembly, decompilers, ELF/PE analysis"
+          },
+          {
+            "name": "binary-exploitation",
+            "description": "Binary Exploitation Expert - buffer overflows, ROP chains, pwntools"
+          },
+          {
+            "name": "web-security",
+            "description": "Web Security Expert - XSS, SQLi, SSRF, web vulnerabilities"
+          },
+          {
+            "name": "malware-analysis",
+            "description": "Malware Analysis Expert - triage, IOC extraction, behavioral analysis"
+          },
+          {
+            "name": "cryptography",
+            "description": "Cryptography Expert - CTF crypto, cipher analysis, encoding"
+          },
+          {
+            "name": "linux",
+            "description": "Linux Expert - system admin, shell scripting, internals"
+          },
+          {
+            "name": "writing",
+            "description": "Writing Expert - reports, documentation, creative writing"
+          },
+          {
+            "name": "documentation",
+            "description": "Documentation Expert - READMEs, API docs, technical guides"
+          },
+          {
+            "name": "learning",
+            "description": "Learning Expert - explanations, tutorials, concept breakdowns"
+          },
+          {
+            "name": "export",
+            "description": "Export current chat history as a Markdown file in the workspace"
+          }
+        ]
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "drover.explainCode",
+          "group": "modelpilot@1",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "drover.fixCode",
+          "group": "modelpilot@2",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "drover.reviewCode",
+          "group": "modelpilot@3",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "drover.generateTests",
+          "group": "modelpilot@4",
+          "when": "editorHasSelection"
+        }
+      ]
+    },
+    "languageModelChatProviders": [
+      {
+        "vendor": "drover",
+        "displayName": "Drover (Free Models)"
+      }
+    ]
+  },
+  "scripts": {
+    "package": "node esbuild.js && npx --no-install @vscode/vsce package --no-dependencies --target linux-x64 --out drover-1.0.0-sovereign.vsix",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit",
+    "install": "code-insiders --install-extension drover-1.0.0-sovereign.vsix --force",
+    "sidecar:build": "cd sidecar && node esbuild.js",
+    "sidecar:package": "cd sidecar && node esbuild.js && npx --no-install @vscode/vsce package --no-dependencies --out drover-eap-0.1.0.vsix",
+    "sidecar:install": "code-insiders --install-extension sidecar/drover-eap-0.1.0.vsix --force"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.90.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "typescript-eslint": "^8.56.1",
+    "eslint": "^9.39.3",
+    "esbuild": "^0.27.3",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  },
+  "__metadata": {
+    "installedTimestamp": 1789323885118,
+    "targetPlatform": "undefined",
+    "size": 5007807
+  }
+}

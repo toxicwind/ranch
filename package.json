@@ -1,0 +1,17 @@
+{
+  "description": "Ranch monorepo — herd router (Go), flock routing (Go), corral agent CLI (TS), drover VS Code extension (TS), squawk fleet chat",
+  "name": "ranch",
+  "private": true,
+  "scripts": {
+    "build:drover": "bun run --cwd drover build",
+    "test": "bun run --filter '*' test",
+    "test:corral": "bun run --cwd corral test",
+    "typecheck": "bun run --filter '*' typecheck"
+  },
+  "version": "1.0.0",
+  "workspaces": [
+    "corral",
+    "drover",
+    "drover/sidecar"
+  ]
+}
