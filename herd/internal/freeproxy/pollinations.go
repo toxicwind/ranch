@@ -13,7 +13,11 @@ import (
 	"time"
 )
 
-// PollinationsProvider proxies to https://gen.pollinations.ai with anonymous workaround.
+// PollinationsProvider proxies to https://gen.pollinations.ai.
+// Anonymous models (openai, gpt-oss) are served with NO Authorization header at
+// all (verified live 2026-09-30). A real POLLINATIONS_API_KEY/POLLINATIONS_KEY
+// unlocks the key-gated set. There is no dummy Bearer anymore — it was
+// obsolete and misleading.
 // It ignores the "not anonymous" gate by injecting a dummy Bearer when no key is configured.
 // Falls back to https://text.pollinations.ai when gen returns 401/429.
 type PollinationsProvider struct {
@@ -28,6 +32,29 @@ type PollinationsProvider struct {
 	cache     Cache
 }
 
+// anonymousModels are live-verified (2026-09-30) to return 200 with NO
+// Authorization header. keyGatedModels 401 anonymously and unlock only with a
+// real POLLINATIONS_API_KEY. Upstream availability shifts over time; when in
+// doubt re-probe gen.pollinations.ai/v1/chat/completions per model.
+var anonymousModels = []string{"openai", "gpt-oss"}
+
+var keyGatedModels = []string{
+	"gemma-4-31b", "qwen3.8-27b", "muse-glimmer", "muse-spark-1.2",
+	"nemotron-3.5-lightning", "kimi-k3", "glm-5.3", "grok-4.6",
+	"deepseek/deepseek-v4-flash-vision-exp",
+}
+
+func anonymousModelSet(apiKey string) []string {
+	if apiKey != "" {
+		all := make([]string, 0, len(anonymousModels)+len(keyGatedModels))
+		all = append(all, anonymousModels...)
+		return append(all, keyGatedModels...)
+	}
+	out := make([]string, len(anonymousModels))
+	copy(out, anonymousModels)
+	return out
+}
+
 func NewPollinationsProvider(limiter RateLimiter, cache Cache) *PollinationsProvider {
 	base := "https://gen.pollinations.ai"
 	textBase := "https://text.pollinations.ai"
@@ -36,11 +63,8 @@ func NewPollinationsProvider(limiter RateLimiter, cache Cache) *PollinationsProv
 	if apiKey == "" {
 		apiKey = os.Getenv("POLLINATIONS_KEY")
 	}
-	// Workaround: any Bearer bypasses anonymous gate; use stable dummy that Pollinations accepts.
-	// We ignore anonymous distinction entirely — always inject something.
-	if apiKey == "" {
-		apiKey = "pollinations-free-workaround"
-	}
+	// REMOVED 2026-09-30: dummy Bearer workaround. Upstream serves anonymous
+	// models with zero auth; the dummy was dead weight.
 	// ponytail: dummy bearer for free backends; use real key via POLLINATIONS_API_KEY if rate-limit matters
 	baseURL, _ := url.Parse(base)
 	textURL, _ := url.Parse(textBase)
@@ -57,10 +81,7 @@ func NewPollinationsProvider(limiter RateLimiter, cache Cache) *PollinationsProv
 		base:     base,
 		textBase: textBase,
 		apiKey:   apiKey,
-		models: []string{
-			"openai", "gemma-4-31b", "gpt-oss", "qwen3.8-27b", "muse-glimmer", "muse-spark-1.2",
-			"nemotron-3.5-lightning", "glm-5.3", "kimi-k3", "grok-4.6", "deepseek/deepseek-v4-flash-vision-exp",
-		},
+		models:   anonymousModelSet(apiKey),
 		modelSet: make(map[string]struct{}),
 		limiter:  limiter,
 		cache:    cache,
@@ -74,9 +95,16 @@ func NewPollinationsProvider(limiter RateLimiter, cache Cache) *PollinationsProv
 		Rewrite: func(r *httputil.ProxyRequest) {
 			r.SetURL(baseURL)
 			r.Out.Host = r.Out.URL.Host
-			// Inject workaround auth — ignore anonymous gate
-			r.Out.Header.Set("Authorization", "Bearer "+p.apiKey)
-			r.Out.Header.Set("x-api-key", p.apiKey)
+			// Anonymous when no key: upstream serves the anonymous set with
+			// no auth at all. Only inject Bearer for a real configured key.
+			// Also strip any client-supplied auth so client keys never leak upstream.
+			if p.apiKey != "" {
+				r.Out.Header.Set("Authorization", "Bearer "+p.apiKey)
+				r.Out.Header.Set("x-api-key", p.apiKey)
+			} else {
+				r.Out.Header.Del("Authorization")
+				r.Out.Header.Del("x-api-key")
+			}
 			// Preserve content-type, strip client auth leakage
 			r.Out.Header.Set("Content-Type", "application/json")
 		},
@@ -93,8 +121,13 @@ func NewPollinationsProvider(limiter RateLimiter, cache Cache) *PollinationsProv
 		Rewrite: func(r *httputil.ProxyRequest) {
 			r.SetURL(textURL)
 			r.Out.Host = r.Out.URL.Host
-			r.Out.Header.Set("Authorization", "Bearer "+p.apiKey)
-			r.Out.Header.Set("x-api-key", p.apiKey)
+			if p.apiKey != "" {
+				r.Out.Header.Set("Authorization", "Bearer "+p.apiKey)
+				r.Out.Header.Set("x-api-key", p.apiKey)
+			} else {
+				r.Out.Header.Del("Authorization")
+				r.Out.Header.Del("x-api-key")
+			}
 		},
 	}
 
@@ -110,7 +143,9 @@ func (p *PollinationsProvider) Handles(model string) bool {
 }
 func (p *PollinationsProvider) Health(ctx context.Context) error {
 	req, _ := http.NewRequestWithContext(ctx, "GET", p.base+"/v1/models", nil)
-	req.Header.Set("Authorization", "Bearer "+p.apiKey)
+	if p.apiKey != "" {
+		req.Header.Set("Authorization", "Bearer "+p.apiKey)
+	}
 	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
