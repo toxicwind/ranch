@@ -1,0 +1,4 @@
+# nested fork checkout — own repo (toxicwind/guidellm), managed independently
+/fork/
+# sweep outputs — generated artifacts, never committed
+/results/
