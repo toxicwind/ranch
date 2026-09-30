@@ -1,0 +1,26 @@
+#!/bin/bash
+# Flock launcher: injects provider API keys from /home/toxic/.secrets
+# into the daemon environment, then execs the binary. Keeps secret
+# values out of pitchfork.toml (which is committed to git).
+set -euo pipefail
+
+SECRETS="/home/toxic/.secrets"
+
+load_key() {
+    local name="$1" val
+    val="$(grep -m1 "^${name}=" "$SECRETS" | cut -d= -f2-)" || true
+    if [ -n "$val" ]; then
+        export "$name=$val"
+    fi
+}
+
+load_key GROQ_API_KEY
+load_key CEREBRAS_API_KEY
+load_key NVIDIA_API_KEY
+
+export HOST="${HOST:-127.0.0.1}"
+export PORT="${PORT:-${FLOCK_PORT:-25193}}"
+export FLOCK_PORT="$PORT"
+export DATA_DIR="${DATA_DIR:-/home/toxic/.flock-data}"
+
+exec /home/toxic/.flock/flock "$@"
