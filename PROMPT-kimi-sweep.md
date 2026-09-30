@@ -31,7 +31,7 @@ the coordinator handles the main push after rebase. Never force-push.
 
 ## Hard boundaries (do not cross)
 
-- `projects/guidellm` — separate builder lane. Do not read, write, or execute
+- `projects/range/ranch/guidellm` — separate builder lane. Do not read, write, or execute
   anything under it.
 - `config/herd.yaml` peer blocks — the census coordinator's lane. You may read
   it; you may NOT edit peer blocks. Other files are fine.
@@ -48,7 +48,7 @@ the coordinator handles the main push after rebase. Never force-push.
 
 - Run `projects/openrouter-probe/e2e-probe.py` for the remaining 7 re-verified
   models (see `reverify-20260920.jsonl` for the list; nex-n2.5-mini:free is
-  done). Outputs to `projects/openrouter-probe/guidellm/*.json`.
+  done). Outputs to `projects/range/ranch/guidellm/results/*.json`.
 - Build the thinking-strip adapter for reasoning models
   (nemotron-3.5-lightning, nemotron-3-nano-omni-30b-a3b-reasoning wrap answers
   in thinking blocks) — required before scores mean anything. Open item in
