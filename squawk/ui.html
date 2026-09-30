@@ -124,6 +124,9 @@ function paintSrc() { const b = $('src'); if (b) { b.textContent = srcMode;
 const TAIL = 200;       // bounded recent snapshot for initial load
 const BATCH_CAP = 50;   // server MAX_MESSAGES: a full batch means backlog
 
+// API base: directory of this page, so the UI works under any mount point
+// (/, /fleet/, ...). Proxies strip the mount prefix before the backend.
+const APIBASE = location.pathname.replace(/[^/]*$/, '');
 function auth() { return { 'Authorization': 'Bearer ' + token }; }
 function chan() { return encodeURIComponent($('channel').value.trim() || 'fleet'); }
 
@@ -260,7 +263,7 @@ $('msg').addEventListener('keydown', e => {
 let wsLive_sock = null;
 function wsUrl() {
   return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host
-       + '/squawk-ws?token=' + encodeURIComponent(token);
+       + APIBASE + 'squawk-ws?token=' + encodeURIComponent(token);
 }
 function wsLive(myGen) {
   if (myGen !== gen || !running) return;
@@ -314,7 +317,7 @@ function wsFallback(myGen, why) {
 // falls back to the long-poll loop -- the file feed stays the fallback.
 let natsWs = null;
 function natsUrl() {
-  return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/nats-ws';
+  return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + APIBASE + 'nats-ws';
 }
 function natsLive(myGen) {
   if (myGen !== gen || !running) return;
