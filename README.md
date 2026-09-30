@@ -34,7 +34,7 @@ All four run under **pitchfork** as daemons `herd`, `flock`, `gatehouse`, and `t
 |---|---|
 | `herd/` | In-tree code: the llama-swap fork (Go) — the local front door `:25100` |
 | `flock/` | In-tree code: the Rust provider router (`:25193`); standalone repo [`toxicwind/flock`](https://github.com/toxicwind/flock) |
-| `remuda/` | 🐎 Master provider catalog (`@ranch/remuda`, Bun/TS) — the single source of truth for providers/models: tau's main-class provider system, herd's generated Go, the router's direct import |
+| `tack/` | 🤠 The tack room (`@ranch/tack`, Bun/TS) — the master provider catalog: every provider/model the estate rides, one registry. tau's main-class provider system, herd's generated Go, the router's direct import |
 | `stream-broker/` | `sovereign-stream-broker` on `127.0.0.1:25215` (Bun) |
 | `router-legacy/` | Legacy router — kept for reference |
 | `paddock/` | VansRouter submodule (`toxicwind/VansRouter`) |

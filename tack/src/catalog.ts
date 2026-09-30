@@ -375,7 +375,7 @@ export class ModelCatalog {
    * they must not recompute membership themselves. The TS package remains
    * the only place the catalog logic exists.
    *
-   * Contract: ranch-remuda/live-catalog/v1
+   * Contract: ranch-tack/live-catalog/v1
    */
   liveCatalogJson(): LiveCatalogJson {
     const providers: LiveCatalogJson["providers"] = {};
@@ -388,9 +388,9 @@ export class ModelCatalog {
       };
     }
     return {
-      contract: "ranch-remuda/live-catalog/v1",
+      contract: "ranch-tack/live-catalog/v1",
       generatedAt: nowIso(),
-      generator: "@ranch/remuda ModelCatalog — DO NOT EDIT BY HAND",
+      generator: "@ranch/tack ModelCatalog — DO NOT EDIT BY HAND",
       deadIds: [...this.deadIds].sort(),
       providers,
     };

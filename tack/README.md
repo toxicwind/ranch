@@ -1,9 +1,10 @@
-# 🐎 remuda — `@ranch/remuda`
+# 🤠 tack — `@ranch/tack`
 
-> *On a working ranch, the **remuda** is the herd of saddle horses the crew
-> draws from — you don't ride the whole range, you pick your mount for the
-> day's work from the remuda. This package is the estate's remuda: the master
-> provider catalog every router, agent, and daemon picks its model from.*
+> *Every ranch has a **tack room** — where the saddles, bridles, and gear are
+> kept, oiled, and ready. You don't ride the whole range; you walk into the
+> tack room and pick your gear for the day's work. This package is the
+> estate's tack room: the master provider catalog every router, agent, and
+> daemon gears up from.*
 
 **Single source of truth** for LLM providers across the ranch and the
 sovereign estate:
@@ -27,21 +28,21 @@ in tau, model lists in Python research scripts). Live discovery could only
 production until a human noticed. This package makes the **live listing the
 source of truth** and demotes curation to cold-start seeds.
 
-One catalog. Every consumer reads from it; nobody keeps a private copy.
-When a provider kills a model, the whole estate learns it within two
+One tack room. Every consumer gears up from it; nobody keeps a private
+saddle. When a provider kills a model, the whole estate learns it within two
 refreshes — no human in the loop.
 
-## Who picks from the remuda
+## Who gears up here
 
 | Consumer | How it consumes | Status |
 |---|---|---|
 | **tau** (`ranch/tau`, `toxicwind/tau`) | Main-class provider system — replaces `pi-catalog`'s KDL provider entries, `provider-models` data, and discovery | THE provider authority for the coding-agent engine |
-| **herd** (Go, `ranch/herd`) | `internal/astmatrix/providers_generated.go` — generated, checked in, never hand-edited; `live_catalog.go` reads the live-catalog export | Provenance `@ranch/remuda` |
-| **sovereign-router** (TS) | Direct Bun import of `remuda/src/index.ts` | Same-filesystem import |
+| **herd** (Go, `ranch/herd`) | `internal/astmatrix/providers_generated.go` — generated, checked in, never hand-edited; `live_catalog.go` reads the live-catalog export | Provenance `@ranch/tack` |
+| **sovereign-router** (TS) | Direct Bun import of `tack/src/index.ts` | Same-filesystem import |
 | **flock** (Rust) | Via herd's serving sets / router config | Indirect |
-| Python research scripts | `generated/providers.json` — canonical data artifact | Stable schema `ranch-remuda/v1` |
+| Python research scripts | `generated/providers.json` — canonical data artifact | Stable schema `ranch-tack/v1` |
 
-The rule: **if it names a provider or a model id, it reads the remuda.**
+The rule: **if it names a provider or a model id, it reads the tack room.**
 Hand-maintained provider/model inventories are a bug — file it as one.
 
 ## Layout
@@ -52,12 +53,12 @@ src/
   adapters.ts   one parser per /models wire shape (openai, google-v1beta, mistral, static, none)
   discovery.ts  fetch + parse with timeout; failures never cached, never acted on
   catalog.ts    ModelCatalog — serving sets, miss counters, quarantine, persistence,
-                live-catalog export (contract ranch-remuda/live-catalog/v1)
+                live-catalog export (contract ranch-tack/live-catalog/v1)
   data.ts       THE source of truth: provider defs, seeds, aliases, dead ids
   codegen.ts    emits generated/providers.json + generated/providers.go
 scripts/build.ts  `bun run build` — regenerates generated/
 generated/
-  providers.json  canonical data artifact (Python consumers), $schema ranch-remuda/v1
+  providers.json  canonical data artifact (Python consumers), $schema ranch-tack/v1
   providers.go    drop-in Go data file for herd (package astmatrix)
 tests/          adapter shapes, prune/quarantine paths, concurrency, artifact sync
 ```
@@ -107,4 +108,4 @@ bun run build     # regenerate generated/ from src/data.ts
 ```
 
 Part of the [ranch](../README.md) monorepo (`toxicwind/ranch`), workspace
-`remuda`, package `@ranch/remuda`.
+`tack`, package `@ranch/tack`.

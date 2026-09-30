@@ -1,8 +1,8 @@
 {
-  "$schema": "ranch-remuda/v1",
-  "generatedAt": "2026-09-30T03:55:58.699Z",
-  "generator": "@ranch/remuda codegen — DO NOT EDIT BY HAND",
-  "provenance": "@ranch/remuda src/data.ts",
+  "$schema": "ranch-tack/v1",
+  "generatedAt": "2026-09-30T04:10:39.380Z",
+  "generator": "@ranch/tack codegen — DO NOT EDIT BY HAND",
+  "provenance": "@ranch/tack src/data.ts",
   "adapters": [
     "openai",
     "google-v1beta",

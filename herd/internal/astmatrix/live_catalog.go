@@ -1,7 +1,7 @@
 package astmatrix
 
 // liveCatalogReader — thin reader for the live catalog JSON exported by the
-// TS package (@ranch/remuda ModelCatalog.writeLiveCatalog).
+// TS package (@ranch/tack ModelCatalog.writeLiveCatalog).
 //
 // This file contains NO catalog logic. It does not discover, prune, or
 // quarantine anything. The TS package is the brain: it owns the provider
@@ -12,7 +12,7 @@ package astmatrix
 // 2026-09-30 verdict); the JSON catalog is the contract, the TS package is
 // the brain.
 //
-// Contract: ranch-remuda/live-catalog/v1
+// Contract: ranch-tack/live-catalog/v1
 //   { "contract": ..., "generatedAt": ..., "deadIds": [...],
 //     "providers": { "<name>": { "serving": [...], "quarantined": [...],
 //                               "discovered": bool } } }
@@ -97,7 +97,7 @@ func (r *LiveCatalogReader) refreshIfStale() *liveCatalogData {
 	if err := json.Unmarshal(raw, &d); err != nil {
 		return nil
 	}
-	if d.Contract != "ranch-remuda/live-catalog/v1" {
+	if d.Contract != "ranch-tack/live-catalog/v1" {
 		return nil
 	}
 	if d.Providers == nil {
