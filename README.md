@@ -38,6 +38,7 @@ One table, every animal first-class — no "secondary" framing, no pens inside p
 | **roundup** | — | `roundup/` (in-tree); standalone [`toxicwind/roundup`](https://github.com/toxicwind/roundup) | Benchmark estate (renamed from guidellm 2026-09-30) — gathers and assesses every head. |
 | **trailboss** | — | `trailboss/` (in-tree, Go) | Cuts repo selections across the org and drives changes through every head — built for agents as much as people. |
 | **drover** | — | `drover/` (in-tree) | ModelPilot VS Code extension — multi-provider AI routing for Copilot Chat. |
+| **lasso** | — | `lasso/` (in-tree, Python) | Hyprland-native desktop control MCP - forked from hypruse. Window/screenshot/input control; three-strategy focus (hyprctl Lua / wlrctl / legacy). |
 | **gear** | — | `gear/` (in-tree) | The estate's skill library — 493 skills, one directory each. |
 | **brand** | — | `brand/` (in-tree) | The branding iron — git hooks (pre-commit, pre-push, gitleaks) every ranch repo wears. |
 | **router-legacy** | — | `router-legacy/` (in-tree) | Legacy router — kept for reference. |

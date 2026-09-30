@@ -309,6 +309,30 @@
     },
     {
       "args": [
+        "run",
+        "--directory",
+        "/home/toxic/sovereign/projects/range/ranch/lasso",
+        "hypruse"
+      ],
+      "auto_approve_tool_changes": true,
+      "command": "uv",
+      "created": "2026-09-30T00:00:00-06:00",
+      "enabled": true,
+      "health_check_interval": "15s",
+      "isolation": {
+        "enabled": false,
+        "mode": "none"
+      },
+      "name": "lasso",
+      "oauth": null,
+      "protocol": "stdio",
+      "quarantined": false,
+      "tool_discovery_interval": "2m0s",
+      "trust_mode": "auto",
+      "updated": "2026-09-30T00:00:00-06:00"
+    },
+    {
+      "args": [
         "-y",
         "@upstash/context7-mcp@latest"
       ],
