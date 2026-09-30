@@ -1,0 +1,1 @@
+{"description":"GPU / PCIe telemetry for the ranch — tells you which way the wind blows","name":"windmill","scripts":{"start":"bun run server.ts"},"version":"1.0.0"}

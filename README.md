@@ -50,6 +50,7 @@ All four run under **pitchfork** as daemons `herd`, `flock`, `gatehouse`, and `t
 | `roundup/` | Roundup benchmark estate (renamed from guidellm 2026-09-30; in-tree code, standalone repo `toxicwind/roundup`) |
 | `trailboss/` | Vendored defork of goldfinger: cuts repo selections across the org and drives changes through every head — built for agents as much as people |
 | `drover/` | ModelPilot VS Code extension (multi-provider AI routing for Copilot Chat), sovereign build |
+| `windmill/` | GPU / PCIe telemetry (`:25219`) -- rebuilt 2026-09-30 (was `pcie-moe-telemetry`); tells you which way the wind blows |
 | `gear/` | The estate's skill library — hundreds of skills, one directory each |
 | `../ui/` | Ranch control UI — now held at the range level (sibling of ranch/): one Svelte SPA over herd + flock |
 | `squawk/` | File-based multi-agent chat: no daemon, no sockets — signed, sequenced message files |
