@@ -7034,6 +7034,8 @@ fn default_embedding_model_for_provider(provider: &str) -> &'static str {
         "openai" => "text-embedding-3-small",
         "groq" => "nomic-embed-text",
         "mistral" => "mistral-embed",
+        // yote: on-box nomic-embed-text-v1.5 (768 dims) on RTX 3090.
+        "yote" => "nomic-embed-text",
         "together" => "togethercomputer/m2-bert-80M-8k-retrieval",
         "fireworks" => "nomic-ai/nomic-embed-text-v1.5",
         "cohere" => "embed-english-v3.0",

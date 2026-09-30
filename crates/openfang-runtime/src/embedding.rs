@@ -202,6 +202,7 @@ pub fn create_embedding_driver(
                     | "fireworks"
                     | "mistral"
                     | "ollama"
+                    | "yote"
                     | "vllm"
                     | "lmstudio"
             );
@@ -217,6 +218,8 @@ pub fn create_embedding_driver(
             "together" => TOGETHER_BASE_URL.to_string(),
             "fireworks" => FIREWORKS_BASE_URL.to_string(),
             "mistral" => MISTRAL_BASE_URL.to_string(),
+            // yote: on-box embedding server (RTX 3090), OpenAI-compatible.
+            "yote" => "http://127.0.0.1:25200/v1".to_string(),
             "ollama" => OLLAMA_BASE_URL.to_string(),
             "vllm" => VLLM_BASE_URL.to_string(),
             "lmstudio" => LMSTUDIO_BASE_URL.to_string(),
