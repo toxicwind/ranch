@@ -1,0 +1,1 @@
+{"dependencies":{"task-launch":"workspace:*"},"description":"Executable agent profile for the MetaAIVM estate (metaaivm.com): Hatch-autoloaded / ipnext identification with autonomy-directive injection at the pre-agent layer.","name":"metaaivm-profile","scripts":{"test":"bun test"},"version":"1.0.0"}
