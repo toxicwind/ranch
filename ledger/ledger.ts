@@ -355,31 +355,13 @@ function getDb(): Database {
 }
 
 function migrate(d: Database): void {
-  d.exec(`
-    CREATE TABLE IF NOT EXISTS usage_log (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      ts INTEGER NOT NULL,
-      date TEXT NOT NULL,
-      provider TEXT NOT NULL DEFAULT 'unknown',
-      model TEXT NOT NULL,
-      raw_model TEXT NOT NULL,
-      input_tokens INTEGER NOT NULL,
-      output_tokens INTEGER NOT NULL,
-      cost_usd REAL,
-      request_id TEXT
-    );
-    CREATE INDEX IF NOT EXISTS idx_usage_date ON usage_log(date);
-    CREATE INDEX IF NOT EXISTS idx_usage_model ON usage_log(model);
-    CREATE INDEX IF NOT EXISTS idx_usage_ts ON usage_log(ts);
-    CREATE INDEX IF NOT EXISTS idx_usage_provider ON usage_log(provider);
-  `);
-  // v1 schema had no provider column and cost_usd REAL NOT NULL.
-  // Rebuild once to add provider + allow NULL cost (unpriced rows).
+  // Detect the v1 schema (no provider column, cost_usd NOT NULL) and rebuild
+  // BEFORE creating any indexes — indexing a missing column throws.
   const cols = d.query(`PRAGMA table_info(usage_log)`).all() as any[];
   const hasProvider = cols.some((c) => c.name === "provider");
   const ddl = (d.query(`SELECT sql FROM sqlite_master WHERE name='usage_log'`).get() as any)?.sql || "";
   const costNotNull = /cost_usd\s+REAL\s+NOT\s+NULL/i.test(ddl);
-  if (!hasProvider || costNotNull) {
+  if (cols.length > 0 && (!hasProvider || costNotNull)) {
     d.exec(`
       CREATE TABLE usage_log_new (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -400,12 +382,26 @@ function migrate(d: Database): void {
         FROM usage_log;
       DROP TABLE usage_log;
       ALTER TABLE usage_log_new RENAME TO usage_log;
-      CREATE INDEX IF NOT EXISTS idx_usage_date ON usage_log(date);
-      CREATE INDEX IF NOT EXISTS idx_usage_model ON usage_log(model);
-      CREATE INDEX IF NOT EXISTS idx_usage_ts ON usage_log(ts);
-      CREATE INDEX IF NOT EXISTS idx_usage_provider ON usage_log(provider);
     `);
   }
+  d.exec(`
+    CREATE TABLE IF NOT EXISTS usage_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ts INTEGER NOT NULL,
+      date TEXT NOT NULL,
+      provider TEXT NOT NULL DEFAULT 'unknown',
+      model TEXT NOT NULL,
+      raw_model TEXT NOT NULL,
+      input_tokens INTEGER NOT NULL,
+      output_tokens INTEGER NOT NULL,
+      cost_usd REAL,
+      request_id TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_usage_date ON usage_log(date);
+    CREATE INDEX IF NOT EXISTS idx_usage_model ON usage_log(model);
+    CREATE INDEX IF NOT EXISTS idx_usage_ts ON usage_log(ts);
+    CREATE INDEX IF NOT EXISTS idx_usage_provider ON usage_log(provider);
+  `);
 }
 
 export interface UsageRecord {
