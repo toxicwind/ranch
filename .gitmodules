@@ -21,5 +21,5 @@
 	path = corral
 	url = https://github.com/toxicwind/super-ralph.git
 [submodule "remuda/paddock"]
-	path = paddock
+	path = remuda/paddock
 	url = https://github.com/toxicwind/VansRouter.git
