@@ -590,3 +590,25 @@ class ReservedDirsTest(unittest.TestCase):
         self.assertNotIn("keys", srv._dynamic_channels)
         self.assertIn("realchan", srv._dynamic_channels)
         self.assertIn("keys", srv.RESERVED_DIRS)
+
+
+class EmptyOutboxReplayTest(unittest.TestCase):
+    """Fresh restart (empty outbox): since=0 must still backfill from disk."""
+
+    def test_replay_since_zero_with_empty_outbox(self):
+        tmp, root = make_root()
+        self.addCleanup(lambda: __import__("shutil").rmtree(tmp, ignore_errors=True))
+        for i in (1, 2, 3):
+            write_msg(root, "fleet", i, text="m%d" % i)
+        srv = load_server(server_env(tmp, root))
+        srv.load_state()
+        srv.scan_channels(initial=True)
+        # simulate a fresh restart: outbox empty, map/state intact
+        srv.outbox.clear()
+        got = srv.replay_since(frozenset(["fleet"]), 0)
+        self.assertEqual(len(got), 3)
+        self.assertEqual([m["file_seq"] for m in got], [1, 2, 3])
+        self.assertTrue(all(m["seq"] > 0 for m in got))
+        # and a real cursor still filters
+        got2 = srv.replay_since(frozenset(["fleet"]), got[1]["seq"])
+        self.assertEqual([m["file_seq"] for m in got2], [3])

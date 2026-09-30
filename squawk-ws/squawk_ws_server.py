@@ -455,11 +455,12 @@ def replay_since(want, since):
     for ch in sorted(want):
         cur = cursor_for(ch)
         buf = outbox.get(ch, [])
-        # Fast path: cursor inside (or newer than) outbox coverage.
-        if not buf or cur >= buf[0]["seq"]:
+        # Fast path: cursor inside outbox coverage.
+        if buf and cur >= buf[0]["seq"]:
             out.extend(m for m in buf if m["seq"] > cur)
             continue
-        # Slow path: cursor older than outbox -- scan disk via the map.
+        # Slow path: cursor older than outbox (or outbox empty after a
+        # restart) -- scan disk via the durable file_seq->gseq map.
         d = CHAT_ROOT / ch
         try:
             files = sorted(p for p in d.iterdir()
@@ -467,6 +468,7 @@ def replay_since(want, since):
         except OSError:
             out.extend(m for m in buf if m["seq"] > cur)
             continue
+        seen = set()
         for p in files:
             parsed = parse_msg_file(p)
             if not parsed:
@@ -480,6 +482,10 @@ def replay_since(want, since):
             if not parsed["sealed"]:
                 m["text"] = parsed["text"]
             out.append(m)
+            seen.add(parsed["msg_seq"])
+        # live tail not yet on disk (skip file_seqs already covered above)
+        out.extend(m for m in buf
+                   if m["seq"] > cur and m.get("file_seq") not in seen)
     out.sort(key=lambda m: m["seq"])
     return out[-REPLAY_MAX:]
 
@@ -639,14 +645,9 @@ async def handle_client(reader, writer):
         print("subscriber %s channels=%s since=%s"
               % (peer, sorted(want), since), flush=True)
         try:
-            # backfill: `since` cursor when given, else last BACKFILL_N
-            # per channel, oldest first
-            if since:
-                backlog = replay_since(want, since)
-            else:
-                backlog = []
-                for ch in sorted(want):
-                    backlog.extend(outbox.get(ch, [])[-BACKFILL_N:])
+            # backfill: replay everything after `since` (since=0 means
+            # recent history from disk, capped at REPLAY_MAX), oldest first
+            backlog = replay_since(want, since)
             for m in backlog:
                 writer.write(ws_encode(json.dumps(m).encode()))
             await writer.drain()
