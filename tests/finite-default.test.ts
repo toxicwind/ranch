@@ -7,6 +7,7 @@
  */
 import { describe, expect, test, beforeAll, afterAll } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -16,6 +17,10 @@ let workdir: string;
 
 beforeAll(() => {
   workdir = mkdtempSync(join(tmpdir(), "sr-finite-test-"));
+  // corral requires --cwd to be a colocated jj repo (non-repos are redirected
+  // to an isolated ~/.corral/runs workspace); init a scratch repo here.
+  execSync("git init -q", { cwd: workdir, stdio: "ignore" });
+  execSync("jj git init --colocate", { cwd: workdir, stdio: "ignore" });
 });
 
 afterAll(() => {
