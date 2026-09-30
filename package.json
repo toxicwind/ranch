@@ -1,18 +1,28 @@
 {
-  "description": "Ranch monorepo — herd router (Go), flock routing (Go), corral agent CLI (TS), drover VS Code extension (TS), squawk fleet chat",
+  "description": "Ranch monorepo \u2014 every animal on the spread: herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), flicker (Go), corral (TS), drover (TS), tack (TS), and the Bun/TS herd",
   "name": "ranch",
   "private": true,
   "scripts": {
+    "build": "moon run :build",
     "build:drover": "bun run --cwd drover build",
-    "test": "bun run --filter '*' test",
-    "test:corral": "bun run --cwd corral test",
+    "ci": "moon ci",
+    "lint": "moon run :lint",
+    "test": "moon run :test",
     "typecheck": "bun run --filter '*' typecheck"
   },
   "version": "1.0.0",
   "workspaces": [
+    "barn/browserless",
+    "campfire",
     "corral",
     "drover",
     "drover/sidecar",
-    "tack"
+    "flock/client",
+    "flock/dashboard",
+    "herd",
+    "stream-broker",
+    "switchboard",
+    "tack",
+    "windmill"
   ]
 }

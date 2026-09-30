@@ -1,0 +1,28 @@
+# Ranch monorepo — every animal first-class. One entry per animal.
+# The rancher owns the spread; component owners: propose yours here.
+
+/barn/ @toxicwind
+/brand/ @toxicwind
+/branding/ @toxicwind
+/campfire/ @toxicwind
+/corral/ @toxicwind
+/data/ @toxicwind
+/docs/ @toxicwind
+/drover/ @toxicwind
+/flicker/ @toxicwind
+/flock/ @toxicwind
+/herd/ @toxicwind
+/lasso/ @toxicwind
+/oracle/ @toxicwind
+/research/ @toxicwind
+/rig/ @toxicwind
+/roundup/ @toxicwind
+/spark/ @toxicwind
+/squawk/ @toxicwind
+/squawk-ws/ @toxicwind
+/stream-broker/ @toxicwind
+/switchboard/ @toxicwind
+/tack/ @toxicwind
+/windmill/ @toxicwind
+/.moon/ @toxicwind
+/.github/ @toxicwind

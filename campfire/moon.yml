@@ -1,0 +1,10 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+language: 'typescript'
+layer: 'application'
+# Note: campfire.test.ts has a time-dependent failure during quiet hours
+# (the test uses real Date.now() instead of mocking time). Pre-existing,
+# owned by the campfire lane.
+tasks:
+  test:
+    command: 'bun test'
+    inputs: ['src/**/*']

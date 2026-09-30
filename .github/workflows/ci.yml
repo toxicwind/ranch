@@ -1,0 +1,40 @@
+name: ci
+
+# Ranch monorepo CI — moon runs only the tasks affected by the change.
+# Push to main runs everything; PRs run the affected slice.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  monorepo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+
+      - name: Install moon
+        run: |
+          bun add -g @moonrepo/cli
+          sudo ln -sf "$HOME/.bun/install/global/node_modules/@moonrepo/core-linux-x64-gnu/moon" /usr/local/bin/moon
+          moon --version
+
+      - name: Install JS workspaces
+        run: bun install
+
+      - name: Affected tasks (PR)
+        if: github.event_name == 'pull_request'
+        run: moon ci
+
+      - name: All tasks (push to main)
+        if: github.event_name == 'push'
+        run: moon run :build :test :lint

@@ -1,0 +1,10 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+language: 'rust'
+layer: 'application'
+tasks:
+  build:
+    command: 'cargo build --workspace'
+    inputs: ['crates/**/*.rs', 'Cargo.toml', 'Cargo.lock']
+  test:
+    command: 'cargo test --workspace'
+    inputs: ['crates/**/*.rs', 'Cargo.toml', 'Cargo.lock']
