@@ -1,13 +1,17 @@
 // windmill — GPU / PCIe telemetry for the ranch.
 // The thing on the ranch that never stops spinning and tells you which way the wind blows.
 // Rebuilt 2026-09-30 (was: pcie-moe-telemetry, whose server file went missing from disk).
-// Bun, zero dependencies. Polls nvidia-smi, serves JSON.
+// Merged design: coarse nvidia-smi polling (hardware state) + precise CUDA-event
+// timing probes (on-device operation latency). Bun, zero dependencies.
 //
 // Endpoints:
-//   GET /api/status   -> 200 + summary (pitchfork health/ready contract — keep stable)
+//   GET /api/status   -> 200 + summary incl. cuda (pitchfork health/ready contract — keep stable)
 //   GET /api/gpu      -> full per-GPU vitals
 //   GET /api/pcie     -> PCIe link + throughput detail
+//   GET /api/probe    -> run a fresh CUDA-event timing probe (200; 503 if CUDA unavailable)
 //   GET /api/history  -> ring buffer of recent samples (5s cadence)
+
+import { probe as cudaProbe, cudaAvailable, type CudaProbeResult } from "./cuda_probe.ts";
 
 const PORT = Number(process.env.WINDMILL_PORT ?? 25219);
 const POLL_MS = 5_000;
@@ -36,9 +40,26 @@ type GpuVitals = {
 
 type Sample = { ts: number; gpus: GpuVitals[]; degraded: boolean };
 
+type CudaState = { ts: number; result: CudaProbeResult };
+
 let latest: Sample = { ts: Date.now(), gpus: [], degraded: true };
+let lastCuda: CudaState | null = null;
 const history: Sample[] = [];
 const bootedAt = Date.now();
+
+// CUDA-event timing probe: precise GPU round-trip ms. Best-effort —
+// failures never touch the health contract, they just report available:false.
+const PROBE_MS = 30_000;
+function runCudaProbe(): void {
+  try {
+    lastCuda = { ts: Date.now(), result: cudaProbe() };
+  } catch (err) {
+    lastCuda = {
+      ts: Date.now(),
+      result: { available: false, error: err instanceof Error ? err.message : String(err) },
+    };
+  }
+}
 
 const num = (s: string): number | null => {
   const t = s.trim();
@@ -136,6 +157,11 @@ function summary() {
           rx_kbps: g.pcie.rx_kbps,
         }
       : null,
+    cuda: {
+      available: lastCuda?.result.available ?? cudaAvailable(),
+      last_probe_ms: lastCuda?.result.elapsed_ms ?? null,
+      last_probe_ts: lastCuda?.ts ?? null,
+    },
   };
 }
 
@@ -158,12 +184,24 @@ const server = Bun.serve({
         });
       case "/api/history":
         return json({ ts: Date.now(), cadence_ms: POLL_MS, samples: history });
+      case "/api/probe": {
+        // On-demand precise timing probe (fresh, not the background sample).
+        runCudaProbe();
+        const r = lastCuda!.result;
+        return json(
+          { ts: lastCuda!.ts, cuda: r },
+          r.available ? 200 : 503,
+        );
+      }
       default:
-        return json({ error: "not found", routes: ["/api/status", "/api/gpu", "/api/pcie", "/api/history"] }, 404);
+        return json({ error: "not found", routes: ["/api/status", "/api/gpu", "/api/pcie", "/api/probe", "/api/history"] }, 404);
     }
   },
 });
 
 await poll();
 setInterval(poll, POLL_MS);
+// Background CUDA timing probe — precise GPU round-trip ms, independent of vitals polling.
+runCudaProbe();
+setInterval(runCudaProbe, PROBE_MS);
 console.log(`\u{1F32C}\uFE0F windmill spinning on http://localhost:${server.port} (was pcie-moe-telemetry)`);
