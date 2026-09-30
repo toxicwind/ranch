@@ -51,7 +51,7 @@ All four run under **pitchfork** as daemons `herd`, `flock`, `gatehouse`, and `t
 | `trailboss/` | Vendored defork of goldfinger: cuts repo selections across the org and drives changes through every head — built for agents as much as people |
 | `drover/` | ModelPilot VS Code extension (multi-provider AI routing for Copilot Chat), sovereign build |
 | `gear/` | The estate's skill library — hundreds of skills, one directory each |
-| `ui/` | Ranch control UI — one Svelte SPA over herd + flock (llama-swap's web UI, adopted) |
+| `../ui/` | Ranch control UI — now held at the range level (sibling of ranch/): one Svelte SPA over herd + flock |
 | `squawk/` | File-based multi-agent chat: no daemon, no sockets — signed, sequenced message files |
 | `squawk-ws/` | Squawk websocket client/server (`:25147`) |
 | `corral/` | super-ralph agent framework (submodule) — the mission runner |
