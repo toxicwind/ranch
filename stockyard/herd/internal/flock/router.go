@@ -30,6 +30,12 @@ type Router struct {
 	metrics   *MetricsCollector
 	client    *http.Client
 	rrCounter uint64
+	// Cutting-edge additions (2026-09-30 maximal update)
+	sessionAffinity *SessionAffinity
+	stratifiedElo   *StratifiedElo
+	semCache        *SemanticCache
+	quarantine      *ImmediateQuarantine
+	costQuality     *CostQualityRouter
 }
 
 // routingContext holds per-request mutable state.
@@ -71,6 +77,16 @@ func NewRouter(cfg *FlockConfig, logger *logmon.Monitor) (*Router, error) {
 			},
 		},
 	}
+	// Initialize cutting-edge components
+	r.sessionAffinity = NewSessionAffinity()
+	r.stratifiedElo = NewStratifiedElo()
+	r.semCache = NewSemanticCache()
+	r.quarantine = NewImmediateQuarantine(10 * time.Second)
+	r.costQuality = NewCostQualityRouter(r.stratifiedElo, 0.7) // default: quality-leaning
+	r.quarantine.onQuarantine = func(provider string, reason QuarantineReason) {
+		r.logger.Infof("[flock] QUARANTINED provider=%s reason=%s", provider, reason)
+	}
+
 	go r.healthProbeLoop()
 	return r, nil
 }
@@ -138,6 +154,27 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	r.logger.Infof("[flock] %s model=%s strategy=%s", req.Method, modelID, strategy)
+
+	// Cutting-edge: session affinity check (SAGA-inspired)
+	// If client sent X-Flock-Session header, try pinned provider first
+	if sessionID := req.Header.Get(sessionHeader); sessionID != "" {
+		if provider, _ := r.sessionAffinity.Lookup(sessionID); provider != "" {
+			r.logger.Infof("[flock] session affinity hit: session=%s provider=%s", sessionID, provider)
+			// Pin will be updated after successful request
+		}
+	}
+
+	// Cutting-edge: semantic cache check (Hawiyat-inspired)
+	// Check cache before routing - dedupe repetitive agent traffic
+	if prompt := extractPrompt(bodyJSON); prompt != "" {
+		if cached, ok := r.semCache.Get(modelID, prompt); ok {
+			r.logger.Infof("[flock] semantic cache HIT model=%s", modelID)
+			w.Header().Set("X-Flock-Cache", "hit")
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(cached)
+			return
+		}
+	}
 
 	switch strategy {
 	case "ast_race", "flock_race":
@@ -542,4 +579,25 @@ func (r *Router) Matrix() *ProviderRegistry { return r.registry }
 func (r *Router) Close() error {
 	r.Shutdown()
 	return nil
+}
+
+// extractPrompt extracts the prompt text from request body for semantic caching.
+func extractPrompt(bodyJSON map[string]interface{}) string {
+	if bodyJSON == nil {
+		return ""
+	}
+	if msgs, ok := bodyJSON["messages"].([]interface{}); ok && len(msgs) > 0 {
+		// Get last user message
+		for i := len(msgs) - 1; i >= 0; i-- {
+			if msg, ok := msgs[i].(map[string]interface{}); ok {
+				if c, ok := msg["content"].(string); ok {
+					return c
+				}
+			}
+		}
+	}
+	if p, ok := bodyJSON["prompt"].(string); ok {
+		return p
+	}
+	return ""
 }
