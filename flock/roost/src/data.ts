@@ -62,6 +62,17 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     seeds: ["local-fast", "local-quality", "local-longctx"],
   },
   {
+    name: "nebius",
+    displayName: "Nebius",
+    baseUrl: "https://api.studio.nebius.com/v1",
+    keyEnv: "NEBIUS_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models 401s without a key (verified live 2026-09-30) — GPU cloud
+    // token API. Model list unknowable without a key; seeds empty.
+    seeds: [],
+  },
+  {
     name: "nim-local",
     displayName: "NIM proxy (local)",
     baseUrl: "http://127.0.0.1:8000/v1",
@@ -89,6 +100,7 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: [
+      "qwen/qwen3.8-27b:free",
       "poolside/laguna-xs-2.1:free",
       "google/gemma-4-31b-it:free",
       "nvidia/nemotron-3-super-120b-a12b:free",
@@ -179,6 +191,27 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     },
   },
   {
+    name: "bitdeer",
+    displayName: "Bitdeer AI",
+    baseUrl: "https://api-inference.bitdeer.ai/v1",
+    keyEnv: "BITDEER_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models 401s without a key (verified live 2026-09-30) — real endpoint.
+    // Seeds from Bitdeer's own docs (developers.bitdeer.ai) + community spot
+    // checks. Catalog: GLM, Kimi, Qwen, MiniMax, Nemotron, DeepSeek, MiMo.
+    seeds: [
+      "zai-org/GLM-5.3-Flash",
+      "deepseek-ai/DeepSeek-V4.1-Flash",
+      "deepseek-ai/DeepSeek-V4-Flash",
+      "Qwen/Qwen3.8-27B",
+      "moonshotai/Kimi-K3",
+      "moonshotai/Kimi-K2.5",
+      "zai-org/GLM-5.3",
+      "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
+    ],
+  },
+  {
     name: "cerebras",
     baseUrl: "https://api.cerebras.ai/v1",
     keyEnv: "CEREBRAS_API_KEY",
@@ -263,12 +296,24 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     keyEnv: "DEEPSEEK_API_KEY",
     auth: "bearer",
     adapter: "openai",
-    seeds: ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-v3.2-chat"],
+    seeds: [
+      "deepseek-v4.1-flash","deepseek-v4-pro", "deepseek-v4-flash", "deepseek-v3.2-chat"],
     contextLengths: {
       "deepseek-v4-flash": 256000,
       "deepseek-v4-pro": 256000,
       "deepseek-v3.2-chat": 256000
     },
+  },
+  {
+    name: "wandb",
+    displayName: "W&B Inference",
+    baseUrl: "https://api.inference.wandb.ai/v1",
+    keyEnv: "WANDB_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models 401s without a key (verified live 2026-09-30) — serverless
+    // inference, $100/mo free-credit tier per free-llm-api-hub. Seeds empty.
+    seeds: [],
   },
   {
     name: "xai",
@@ -333,6 +378,25 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     },
   },
   {
+    name: "sambanova",
+    displayName: "SambaNova",
+    baseUrl: "https://api.sambanova.ai/v1",
+    keyEnv: "SAMBANOVA_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models lists WITHOUT a key (verified live 2026-09-30); completions
+    // need a key. Seeds are the live no-auth listing.
+    seeds: [
+      "DeepSeek-V3.2",
+      "DeepSeek-V3.1",
+      "MiniMax-M3",
+      "MiniMax-M2.7",
+      "Meta-Llama-3.3-70B-Instruct",
+      "gemma-4-31B-it",
+      "gpt-oss-120b",
+    ],
+  },
+  {
     name: "siliconflow",
     baseUrl: "https://api.siliconflow.com/v1",
     keyEnv: "SILICONFLOW_API_KEY",
@@ -359,6 +423,23 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     auth: "bearer",
     adapter: "openai",
     seeds: ["moonshotai/kimi-k2.7-code"],
+  },
+  {
+    name: "typhoon",
+    displayName: "Typhoon (SCB 10X)",
+    baseUrl: "https://api.opentyphoon.ai/v1",
+    keyEnv: "TYPHOON_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models lists WITHOUT a key (verified live 2026-09-30); completions
+    // need a key. Free research showcase (Thai LLMs + OCR/ASR). Seeds are the
+    // live no-auth listing's chat/OCR models.
+    seeds: [
+      "typhoon-v2.5-30b-a3b-instruct",
+      "typhoon-ocr-v1.5",
+      "typhoon-ocr",
+      "typhoon-ocr-preview",
+    ],
   },
   {
     name: "venice",
@@ -416,7 +497,8 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     keyEnv: "ZAI_API_KEY",
     auth: "bearer",
     adapter: "openai",
-    seeds: ["glm-5.3", "glm-5.2"],
+    seeds: [
+      "glm-5.3-flash","glm-5.3", "glm-5.2"],
   },
   {
     name: "zenmux",
@@ -456,7 +538,8 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     keyEnv: "XIAOMI_API_KEY",
     auth: "bearer",
     adapter: "openai",
-    seeds: ["mimo-v2.5"],
+    seeds: [
+      "mimo-v2.6-flash","mimo-v2.5"],
   },
   {
     name: "qianfan",
@@ -531,6 +614,17 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     seeds: ["moonshotai/kimi-k2.7-code"],
   },
   {
+    name: "chutes",
+    displayName: "Chutes",
+    baseUrl: "https://inference.chutes.ai/v1",
+    keyEnv: "CHUTES_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models 401s without a key (verified live 2026-09-30) — decentralized
+    // GPU compute (Bittensor), OpenAI-compatible. Seeds empty until keyed.
+    seeds: [],
+  },
+  {
     name: "cloudflare-ai-gateway",
     displayName: "Cloudflare AI Gateway",
     baseUrl: "https://gateway.ai.cloudflare.com/v1/<account>/<gateway>",
@@ -578,6 +672,21 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     seeds: ["glm-5.3"],
   },
   {
+    name: "cohere",
+    displayName: "Cohere",
+    baseUrl: "https://api.cohere.com/compatibility/v1",
+    keyEnv: "COHERE_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /compatibility/v1/models 401s without a key (verified live 2026-09-30).
+    // Command model IDs are Cohere's stable OpenAI-compat slugs.
+    seeds: [
+      "command-a",
+      "command-r-plus",
+      "command-r7b",
+    ],
+  },
+  {
     name: "commandcode",
     displayName: "Command Code",
     baseUrl: "https://api.commandcode.ai/provider",
@@ -615,6 +724,18 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     seeds: ["deepseek-ai/DeepSeek-V4.1-Flash"],
   },
   {
+    name: "hetzner",
+    displayName: "Hetzner Inference",
+    baseUrl: "https://inference.hetzner.com/api/v1",
+    keyEnv: "HETZNER_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /api/v1/models 401s without a key (verified live 2026-09-30) — free
+    // experimental endpoint (announced 2026-07-24, experiments.hetzner.com).
+    // Model list unknowable without a key; seeds empty per cold-start contract.
+    seeds: [],
+  },
+  {
     name: "hyperbolic",
     displayName: "Hyperbolic",
     baseUrl: "https://api.hyperbolic.xyz/v1",
@@ -638,6 +759,41 @@ export const PROVIDER_DEFS: ProviderDef[] = [
       "github/Phi-4": 128000,
       "github/gpt-4o-mini": 128000
     },
+  },
+  {
+    name: "ovhcloud",
+    displayName: "OVHcloud AI Endpoints",
+    baseUrl: "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
+    keyEnv: "OVHCLOUD_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models lists WITHOUT a key (verified live 2026-09-30). Seeds are
+    // the live listing's chat models (TTS/embeddings/STT omitted).
+    seeds: [
+      "Qwen3.8-27B",
+      "Qwen3.6-27B",
+      "Qwen3.5-397B-A17B",
+      "Qwen3.5-9B",
+      "Qwen3-Coder-30B-A3B-Instruct",
+      "Meta-Llama-3_3-70B-Instruct",
+      "Mistral-7B-Instruct-v0.3",
+      "Mistral-Nemo-Instruct-2407",
+      "Mistral-Small-3.2-24B-Instruct-2506",
+      "gpt-oss-120b",
+      "gpt-oss-20b",
+      "Qwen2.5-VL-72B-Instruct",
+    ],
+  },
+  {
+    name: "parasail",
+    displayName: "Parasail",
+    baseUrl: "https://api.parasail.io/v1",
+    keyEnv: "PARASAIL_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models 401s without a key (verified live 2026-09-30) — serverless
+    // GPU deployments, OpenAI-compatible. Seeds empty until keyed.
+    seeds: [],
   },
   {
     name: "perplexity",
