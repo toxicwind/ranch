@@ -1,209 +1,209 @@
 [
-  {
-    "new_name": "postal-spectre-usps",
-    "github_repo": "toxicwind/postal-spectre-usps",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: ffs hits only in spark migration manifests, not estate code. USPS presort-line/permit-indicia/address-plate/campaign-disclaimer/Gutenberg-layout OCR parsing engine, zero-dependency ESM. Renamed package @sovereign/postal-spectre -> postal-spectre-usps; removed 5 unused deps and dead lint/format/build scripts; added repository/bugs/homepage; fixed 2 stale name refs; wrote README with API ver",
-    "batch": 1
-  },
-  {
-    "new_name": "toolchain-doctor",
-    "github_repo": "toxicwind/toolchain-doctor",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: estate hits only in spark manifests, not duplicate. Zero-dep diagnostic CLI (Bun linker audit, Cargo cfg-linker audit, dep-specifier lint, AST-vs-BM25 retriever). Corrected README coverage badge 99.2% -> measured 97.7%. Added repository/bugs/homepage + author + test:bun script. Kept container_manifest/ as provenance of the 2026-09-28 capture run (not Chris's live standing files). Secrets g",
-    "batch": 1
-  },
-  {
-    "new_name": "sovereign-hatch-toolkit",
-    "github_repo": "toxicwind/sovereign-hatch-toolkit",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: ffs sweep found no estate code (147k files searched) - the mirror's real fragment is unique. Kept the two real modules: hatch_core/noise_protocol.py (Noise_XX_25519_ChaChaPoly_SHA256 state machine, 334 lines) and orchestrator/fsbus_engine.py (atomic POSIX FSBus, 161 lines). Deleted dead: identity_router/ (mcp_server.py imported nonexistent modules), scripts/ (verify_all.py had a hard synta",
-    "batch": 1
-  },
-  {
-    "new_name": "sovereign-mesh",
-    "github_repo": "toxicwind/sovereign-mesh",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: no live estate duplicate (only manifest references). Zero-dependency TS agent mesh: Noise_XX (node:crypto), atomic POSIX FSBus, procedural DAG engine, MCP stdio server, CLI. Fixed 5 literal-backslash syntax errors in src/mcp/server.ts; rebuilt stale dist/ (tests import from dist); fixed 4 strict tsc errors; added build script; fixed repository URL placeholder. Wrote a pure-TypeScript ChaCh",
-    "batch": 1
-  },
-  {
-    "new_name": "telemetric-runtime-oracle",
-    "github_repo": "",
-    "visibility": "",
-    "status": "duplicate-of",
-    "duplicate_path": "/home/toxic/sovereign/projects/range/ranch/corral/src/telemetricOracle.ts",
-    "notes": "DUPLICATE - not pushed. The mirror dir had no src/ at all (only a SKILL.md variant, coverage-report.txt, package.json, tsconfig.json, bunfig.toml). The canonical TelemetricOracle class already lives in the estate at ranch/corral/src/telemetricOracle.ts plus the estate skill; ffs sweep 2026-09-30 confirmed. The mirror SKILL.md was an older invasive variant (tmux send-keys dispatch) vs the estate's ",
-    "batch": 1
-  },
-  {
-    "new_name": "phytovapor",
-    "github_repo": "toxicwind/phytovapor",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: only spark manifest references, no estate code. Zero-dependency TS botanical aerosol/OAV/economics engine: Ergun packed-bed pressure drop, Dean vortex helical filtration, moving-bed pyrolysis thermal zones, Clausius-Clapeyron distillation, log-normal aerosol deposition, OAV + 5-axis sensory radar, unit economics + wholesale deflation stress test, MCP server, CLI. Wired the missing build sc",
-    "batch": 1
-  },
-  {
-    "new_name": "dualspace-ast-bm25-hybrid",
-    "github_repo": "toxicwind/dualspace-ast-bm25-hybrid",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: genuinely distinct from dualspace-ast-bm25 and dualspace-ast-bm25-v2 (sibling batches). Fixed real bug in src/bm25.js: tokenizer split(/\\\\s+/) had 2 genuine backslash bytes so camelCase-expanded tokens never split; 3/4 -> 4/4 node --test. Also fixed separator char class, repaired benchmark script, deleted dead build script, renamed package to dualspace-ast-bm25-hybrid, rewrote README. Secr",
-    "batch": 2
-  },
-  {
-    "new_name": "political-ad-intel-engine",
-    "github_repo": "toxicwind/political-ad-intel-engine",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: unique (Python engine; JS sibling subset postal_spectre/ kept in place by design per phase-3 notes). Fixed real bug: RE_DISCLAIMER had doubled escapes (raw string with \\\\., \\\\n, \\\\r, \\\\s) so sponsor/registered-agent disclaimer never matched and dossier.disclaimer was always None; 5/6 -> 6/6 pytest. Anonymized residential PII in test fixtures (Deborah Ortega / 2787 W 106th Cir -> synthetic)",
-    "batch": 2
-  },
-  {
-    "new_name": "postal-spectre",
-    "github_repo": "toxicwind/postal-spectre",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: consolidated full JS engine; diffed against -detector/-correlator (variant code, extra JSDoc, small fixes) - genuinely distinct. Fixed RE_DISCLAIMER doubled escapes (45 tests: 35/5 -> 45/45 on node --test AND bun test). Fixed literal backslash-n syntax error in tests/demographic-profiler.test.mjs (whole file failed to load). Anonymized cli.mjs sample PII. Renamed package to postal-spectre,",
-    "batch": 2
-  },
-  {
-    "new_name": "postal-spectre-detector",
-    "github_repo": "toxicwind/postal-spectre-detector",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: synthetic-detector + contradiction-engine module subset with variant code - genuinely distinct. 20/20 node --test green as committed, no source bugs. Wrote the missing README, renamed package to postal-spectre-detector, removed unused deps and dead lint/build scripts. Secrets grep clean.",
-    "batch": 2
-  },
-  {
-    "new_name": "postal-spectre-correlator",
-    "github_repo": "toxicwind/postal-spectre-correlator",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: entity-graph + demographic-profiler module subset with variant code - genuinely distinct. 13/13 node --test green as committed, no source bugs. Renamed package to postal-spectre-correlator, removed unused deps and dead lint/build scripts, rewrote README (old one referenced the old package name). Secrets grep clean.",
-    "batch": 2
-  },
-  {
-    "new_name": "bayesian-knapsack-bandit",
-    "github_repo": "toxicwind/bayesian-knapsack-bandit",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Dedupe: unique (bayesian depletion + bandit + knapsack optimizer). 11/11 node --test green, benchmarks clean. Removed fake lint script (printed success without linting). Corrected stale benchmark table in README against measured yote runs (12.06M bayesian ops/s, 9.33M UCB1 ops/s, 3153 knapsack solves/s). Package name already correct. Secrets grep clean.",
-    "batch": 2
-  },
-  {
-    "new_name": "dualspace-ast-bm25",
-    "github_repo": "toxicwind/dualspace-ast-bm25",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Tests/benchmarks 3/3 pass. package.json renamed @sovereign/dual-space-code-retriever -> dualspace-ast-bm25. ls-remote verified.",
-    "batch": 3
-  },
-  {
-    "new_name": "dualspace-ast-bm25-v2",
-    "github_repo": "",
-    "visibility": "",
-    "status": "duplicate-of",
-    "duplicate_path": "",
-    "notes": "Content-identical to dualspace-ast-bm25 apart from notebooks; notebooks merged into the pushed repo. Not pushed separately.",
-    "batch": 3
-  },
-  {
-    "new_name": "gatehouse",
-    "github_repo": "toxicwind/gatehouse",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Real fixes: 5 tsc errors \u2014 typed MCPInitializeResult/MCPToolCallResult contracts added to src/protocol/mcp.ts, duplicate SearchResult/ToonSavingsResult interfaces deleted from src/types.ts. bun test 62/62. README rewritten (org sovereign-systems -> toxicwind); package.json @sovereign/gatehouse -> gatehouse. ls-remote verified.",
-    "batch": 3
-  },
-  {
-    "new_name": "herd-keypool-gateway",
-    "github_repo": "toxicwind/herd-keypool-gateway",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "node --test 22/22. README rewritten (clone URL sovereign-infrastructure -> toxicwind); package.json @sovereign/keypool -> herd-keypool-gateway. ls-remote verified.",
-    "batch": 3
-  },
-  {
-    "new_name": "hyper-racer",
-    "github_repo": "toxicwind/hyper-racer",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Deep repair: stale committed .js mirrors masked a .ts tree that never compiled under its strict tsconfig. Deleted mirrors; repaired .ts for real: tsc 175 errors -> 0. Ported 3 JS-only modules to typed TS (core/equivalence.ts, core/fuzzer.ts, core/adaptive.ts), typed HighPrecisionTimer into core/timer.ts, full typed StatisticsEngine in core/stats.ts, reconstructed src/index.ts barrel + src/types.ts",
-    "batch": 3
-  },
-  {
-    "new_name": "metaclaw-runtime",
-    "github_repo": "",
-    "visibility": "",
-    "status": "quarantined-secrets",
-    "duplicate_path": "",
-    "notes": "QUARANTINE \u2014 do NOT push without Chris's explicit call. src/sentinel/auto-approve.ts calls egress.approval.decide to auto-approve Sentinel HITL egress approvals (safeguard bypass). src/auth/session.ts persists hatchSessionCookie/authToken/noiseNotaryToken to data/session.json. test/runner.js:181 embeds a JWT-shaped notary-token payload (endorsement.v1:eyJ..., iss https://muse.ai, sub = VM UUID).",
-    "batch": 3
-  },
-  {
-    "new_name": "olfactory-headspace-engine",
-    "github_repo": "toxicwind/olfactory-headspace-engine",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Python aromachemical headspace engine (Clausius-Clapeyron, Langmuir-Knudsen, trigeminal/olfactory receptors, sillage dispersion, illusion classifier). 21/21 tests pass in clean venv; examples/run_simulation.py runs end-to-end. Secret scan clean. Kept as Python (working code, minimal-fixes rule). Follow-up commit e57aa305: README project-structure root dir name corrected.",
-    "batch": 4
-  },
-  {
-    "new_name": "ranch-interlock",
-    "github_repo": "toxicwind/ranch-interlock",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Bun/TS headless Muse/Hatch Noise-gateway client (@ranch/interlock). Audit fixes: pinned @types/libsodium-wrappers-sumo to resolvable versions (old ones absent from npm); wrapped WebCrypto args in new Uint8Array for TS 5.7+ strictness (29 type errors -> 0); re-exported missing CookieJar; 12 biome lint fixes. biome check + tsc --noEmit + bun test 7/7 green; bun run build produces standalone dist/int",
-    "batch": 4
-  },
-  {
-    "new_name": "sovereign-skills-hub",
-    "github_repo": "toxicwind/sovereign-skills-hub",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Zero-dep Node.js skill monorepo engine (GraSP router, paper finder, validator, loader). Only 1 skill (sovereign-master-orchestrator) is staged under skills/ \u2014 the other 83 of the original 84-skill manifest were never staged anywhere (searched all dropbox shards + tarballs); a separate consolidation lane staged real skill bodies to ~/workspace/skills and /home/toxic/sovereign/skills, not into this ",
-    "batch": 4
-  },
-  {
-    "new_name": "universal-keypool-bun",
-    "github_repo": "toxicwind/universal-keypool-bun",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "Bun/Node dual-runtime AI keypool gateway (hedged key racing, status-aware circuit breakers, model virtualization, OpenAI-compatible /v1). 17/17 tests pass (node --test), node --check lint clean, no code fixes needed. Renamed package keypool -> @sovereign/universal-keypool-bun. Secret scan clean.",
-    "batch": 4
-  },
-  {
-    "new_name": "universal-keypool-gateway",
-    "github_repo": "toxicwind/universal-keypool-gateway",
-    "visibility": "private",
-    "status": "pushed",
-    "duplicate_path": "",
-    "notes": "TypeScript rewrite of the keypool gateway (strict node:http, node:crypto, node:events only). Audit wrote 4 missing modules the repo referenced but didn't ship: src/adapters.ts (provider auth routing), src/config.ts (validated YAML config), src/virtualizer.ts (model aliasing, reasoning floors, sampling-param stripping), bin/keypool.ts (entry point; boots all 7 example pools). 31/31 tests pass. Rena",
-    "batch": 4
-  }
+ {
+  "new_name": "postal-spectre-usps",
+  "github_repo": "toxicwind/postal-spectre-usps",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: ffs hits only in spark migration manifests, not estate code. USPS presort-line/permit-indicia/address-plate/campaign-disclaimer/Gutenberg-layout OCR parsing engine, zero-dependency ESM. Renamed package @sovereign/postal-spectre -> postal-spectre-usps; removed 5 unused deps and dead lint/format/build scripts; added repository/bugs/homepage; fixed 2 stale name refs; wrote README with API ver",
+  "batch": 1
+ },
+ {
+  "new_name": "toolchain-doctor",
+  "github_repo": "toxicwind/toolchain-doctor",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: estate hits only in spark manifests, not duplicate. Zero-dep diagnostic CLI (Bun linker audit, Cargo cfg-linker audit, dep-specifier lint, AST-vs-BM25 retriever). Corrected README coverage badge 99.2% -> measured 97.7%. Added repository/bugs/homepage + author + test:bun script. Kept container_manifest/ as provenance of the 2026-09-28 capture run (not Chris's live standing files). Secrets g",
+  "batch": 1
+ },
+ {
+  "new_name": "sovereign-hatch-toolkit",
+  "github_repo": "toxicwind/sovereign-hatch-toolkit",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: ffs sweep found no estate code (147k files searched) - the mirror's real fragment is unique. Kept the two real modules: hatch_core/noise_protocol.py (Noise_XX_25519_ChaChaPoly_SHA256 state machine, 334 lines) and orchestrator/fsbus_engine.py (atomic POSIX FSBus, 161 lines). Deleted dead: identity_router/ (mcp_server.py imported nonexistent modules), scripts/ (verify_all.py had a hard synta",
+  "batch": 1
+ },
+ {
+  "new_name": "sovereign-mesh",
+  "github_repo": "toxicwind/sovereign-mesh",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: no live estate duplicate (only manifest references). Zero-dependency TS agent mesh: Noise_XX (node:crypto), atomic POSIX FSBus, procedural DAG engine, MCP stdio server, CLI. Fixed 5 literal-backslash syntax errors in src/mcp/server.ts; rebuilt stale dist/ (tests import from dist); fixed 4 strict tsc errors; added build script; fixed repository URL placeholder. Wrote a pure-TypeScript ChaCh",
+  "batch": 1
+ },
+ {
+  "new_name": "telemetric-runtime-oracle",
+  "github_repo": "",
+  "visibility": "",
+  "status": "duplicate-of",
+  "duplicate_path": "/home/toxic/sovereign/projects/range/ranch/corral/src/telemetricOracle.ts",
+  "notes": "DUPLICATE - not pushed. The mirror dir had no src/ at all (only a SKILL.md variant, coverage-report.txt, package.json, tsconfig.json, bunfig.toml). The canonical TelemetricOracle class already lives in the estate at ranch/corral/src/telemetricOracle.ts plus the estate skill; ffs sweep 2026-09-30 confirmed. The mirror SKILL.md was an older invasive variant (tmux send-keys dispatch) vs the estate's ",
+  "batch": 1
+ },
+ {
+  "new_name": "phytovapor",
+  "github_repo": "toxicwind/phytovapor",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: only spark manifest references, no estate code. Zero-dependency TS botanical aerosol/OAV/economics engine: Ergun packed-bed pressure drop, Dean vortex helical filtration, moving-bed pyrolysis thermal zones, Clausius-Clapeyron distillation, log-normal aerosol deposition, OAV + 5-axis sensory radar, unit economics + wholesale deflation stress test, MCP server, CLI. Wired the missing build sc",
+  "batch": 1
+ },
+ {
+  "new_name": "dualspace-ast-bm25-hybrid",
+  "github_repo": "toxicwind/dualspace-ast-bm25-hybrid",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: genuinely distinct from dualspace-ast-bm25 and dualspace-ast-bm25-v2 (sibling batches). Fixed real bug in src/bm25.js: tokenizer split(/\\\\s+/) had 2 genuine backslash bytes so camelCase-expanded tokens never split; 3/4 -> 4/4 node --test. Also fixed separator char class, repaired benchmark script, deleted dead build script, renamed package to dualspace-ast-bm25-hybrid, rewrote README. Secr",
+  "batch": 2
+ },
+ {
+  "new_name": "political-ad-intel-engine",
+  "github_repo": "toxicwind/political-ad-intel-engine",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: unique (Python engine; JS sibling subset postal_spectre/ kept in place by design per phase-3 notes). Fixed real bug: RE_DISCLAIMER had doubled escapes (raw string with \\\\., \\\\n, \\\\r, \\\\s) so sponsor/registered-agent disclaimer never matched and dossier.disclaimer was always None; 5/6 -> 6/6 pytest. Anonymized residential PII in test fixtures (Deborah Ortega / 2787 W 106th Cir -> synthetic)",
+  "batch": 2
+ },
+ {
+  "new_name": "postal-spectre",
+  "github_repo": "toxicwind/postal-spectre",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: consolidated full JS engine; diffed against -detector/-correlator (variant code, extra JSDoc, small fixes) - genuinely distinct. Fixed RE_DISCLAIMER doubled escapes (45 tests: 35/5 -> 45/45 on node --test AND bun test). Fixed literal backslash-n syntax error in tests/demographic-profiler.test.mjs (whole file failed to load). Anonymized cli.mjs sample PII. Renamed package to postal-spectre,",
+  "batch": 2
+ },
+ {
+  "new_name": "postal-spectre-detector",
+  "github_repo": "toxicwind/postal-spectre-detector",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: synthetic-detector + contradiction-engine module subset with variant code - genuinely distinct. 20/20 node --test green as committed, no source bugs. Wrote the missing README, renamed package to postal-spectre-detector, removed unused deps and dead lint/build scripts. Secrets grep clean.",
+  "batch": 2
+ },
+ {
+  "new_name": "postal-spectre-correlator",
+  "github_repo": "toxicwind/postal-spectre-correlator",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: entity-graph + demographic-profiler module subset with variant code - genuinely distinct. 13/13 node --test green as committed, no source bugs. Renamed package to postal-spectre-correlator, removed unused deps and dead lint/build scripts, rewrote README (old one referenced the old package name). Secrets grep clean.",
+  "batch": 2
+ },
+ {
+  "new_name": "bayesian-knapsack-bandit",
+  "github_repo": "toxicwind/bayesian-knapsack-bandit",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Dedupe: unique (bayesian depletion + bandit + knapsack optimizer). 11/11 node --test green, benchmarks clean. Removed fake lint script (printed success without linting). Corrected stale benchmark table in README against measured yote runs (12.06M bayesian ops/s, 9.33M UCB1 ops/s, 3153 knapsack solves/s). Package name already correct. Secrets grep clean.",
+  "batch": 2
+ },
+ {
+  "new_name": "dualspace-ast-bm25",
+  "github_repo": "toxicwind/dualspace-ast-bm25",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Tests/benchmarks 3/3 pass. package.json renamed @sovereign/dual-space-code-retriever -> dualspace-ast-bm25. ls-remote verified.",
+  "batch": 3
+ },
+ {
+  "new_name": "dualspace-ast-bm25-v2",
+  "github_repo": "",
+  "visibility": "",
+  "status": "duplicate-of",
+  "duplicate_path": "",
+  "notes": "Content-identical to dualspace-ast-bm25 apart from notebooks; notebooks merged into the pushed repo. Not pushed separately.",
+  "batch": 3
+ },
+ {
+  "new_name": "gatehouse",
+  "github_repo": "toxicwind/gatehouse",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Real fixes: 5 tsc errors — typed MCPInitializeResult/MCPToolCallResult contracts added to src/protocol/mcp.ts, duplicate SearchResult/ToonSavingsResult interfaces deleted from src/types.ts. bun test 62/62. README rewritten (org sovereign-systems -> toxicwind); package.json @sovereign/gatehouse -> gatehouse. ls-remote verified.",
+  "batch": 3
+ },
+ {
+  "new_name": "herd-keypool-gateway",
+  "github_repo": "toxicwind/herd-keypool-gateway",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "node --test 22/22. README rewritten (clone URL sovereign-infrastructure -> toxicwind); package.json @sovereign/keypool -> herd-keypool-gateway. ls-remote verified.",
+  "batch": 3
+ },
+ {
+  "new_name": "hyper-racer",
+  "github_repo": "toxicwind/hyper-racer",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Deep repair: stale committed .js mirrors masked a .ts tree that never compiled under its strict tsconfig. Deleted mirrors; repaired .ts for real: tsc 175 errors -> 0. Ported 3 JS-only modules to typed TS (core/equivalence.ts, core/fuzzer.ts, core/adaptive.ts), typed HighPrecisionTimer into core/timer.ts, full typed StatisticsEngine in core/stats.ts, reconstructed src/index.ts barrel + src/types.ts",
+  "batch": 3
+ },
+ {
+  "new_name": "metaclaw-runtime",
+  "github_repo": "toxicwind/metaclaw-runtime",
+  "visibility": "private",
+  "status": "published",
+  "duplicate_path": "",
+  "notes": "QUARANTINE RESOLVED 2026-09-30 - Chris's direct call: harden .gitignore and publish. Hardening: comprehensive .gitignore (data/session.json runtime auth state, *.pem/*.key, .env, logs, caches, build output); JWT-shaped test fixture replaced with unmistakably synthetic value (alg=none, .invalid issuer, nil UUID, literal fake signature); tree swept for secret shapes - clean. Auto-approval is the project's intended feature (kept). node test/runner.js 9/9 green, tsc --noEmit clean. Pushed PRIVATE to toxicwind/metaclaw-runtime @ e7c74c5f95b5302a4d5a2731eda473c3b0717895 (ls-remote verified).",
+  "batch": 3
+ },
+ {
+  "new_name": "olfactory-headspace-engine",
+  "github_repo": "toxicwind/olfactory-headspace-engine",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Python aromachemical headspace engine (Clausius-Clapeyron, Langmuir-Knudsen, trigeminal/olfactory receptors, sillage dispersion, illusion classifier). 21/21 tests pass in clean venv; examples/run_simulation.py runs end-to-end. Secret scan clean. Kept as Python (working code, minimal-fixes rule). Follow-up commit e57aa305: README project-structure root dir name corrected.",
+  "batch": 4
+ },
+ {
+  "new_name": "ranch-interlock",
+  "github_repo": "toxicwind/ranch-interlock",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Bun/TS headless Muse/Hatch Noise-gateway client (@ranch/interlock). Audit fixes: pinned @types/libsodium-wrappers-sumo to resolvable versions (old ones absent from npm); wrapped WebCrypto args in new Uint8Array for TS 5.7+ strictness (29 type errors -> 0); re-exported missing CookieJar; 12 biome lint fixes. biome check + tsc --noEmit + bun test 7/7 green; bun run build produces standalone dist/int",
+  "batch": 4
+ },
+ {
+  "new_name": "sovereign-skills-hub",
+  "github_repo": "toxicwind/sovereign-skills-hub",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Zero-dep Node.js skill monorepo engine (GraSP router, paper finder, validator, loader). Only 1 skill (sovereign-master-orchestrator) is staged under skills/ — the other 83 of the original 84-skill manifest were never staged anywhere (searched all dropbox shards + tarballs); a separate consolidation lane staged real skill bodies to ~/workspace/skills and /home/toxic/sovereign/skills, not into this ",
+  "batch": 4
+ },
+ {
+  "new_name": "universal-keypool-bun",
+  "github_repo": "toxicwind/universal-keypool-bun",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "Bun/Node dual-runtime AI keypool gateway (hedged key racing, status-aware circuit breakers, model virtualization, OpenAI-compatible /v1). 17/17 tests pass (node --test), node --check lint clean, no code fixes needed. Renamed package keypool -> @sovereign/universal-keypool-bun. Secret scan clean.",
+  "batch": 4
+ },
+ {
+  "new_name": "universal-keypool-gateway",
+  "github_repo": "toxicwind/universal-keypool-gateway",
+  "visibility": "private",
+  "status": "pushed",
+  "duplicate_path": "",
+  "notes": "TypeScript rewrite of the keypool gateway (strict node:http, node:crypto, node:events only). Audit wrote 4 missing modules the repo referenced but didn't ship: src/adapters.ts (provider auth routing), src/config.ts (validated YAML config), src/virtualizer.ts (model aliasing, reasoning floors, sampling-param stripping), bin/keypool.ts (entry point; boots all 7 example pools). 31/31 tests pass. Rena",
+  "batch": 4
+ }
 ]
