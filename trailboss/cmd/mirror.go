@@ -1,0 +1,349 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/toxicwind/trailboss/mirror"
+	"github.com/toxicwind/trailboss/models"
+	"github.com/toxicwind/trailboss/selection"
+	"github.com/spf13/cobra"
+)
+
+// mirrorReportName is the filename `--write-report` writes under the workspace.
+const mirrorReportName = "trailboss-mirror.json"
+
+// reportOptions selects which machine-readable report outputs a mirror emits.
+type reportOptions struct {
+	toStdout bool // --report-json: print the report JSON to stdout
+	toFile   bool // --write-report: write <workspace>/trailboss-mirror.json (only on success)
+	quiet    bool
+	// ghorgLogPath is the 0600 file capturing ghorg's full output for this run (WS3
+	// of #48), "" under --quiet (where the output is discarded). runMirror prints it
+	// so an operator can drill into clone errors after the terse summary.
+	ghorgLogPath string
+}
+
+func newMirrorCmd() *cobra.Command {
+	var (
+		selectionPath string
+		name          string
+		workspace     string
+		purpose       string
+		branch        string
+		concurrency   int
+		cloneDepth    int
+		noClean       bool
+		dryRun        bool
+		reportJSON    bool
+		writeReport   bool
+	)
+	cmd := &cobra.Command{
+		Use:   "mirror",
+		Short: "Clone the selection into a local workspace via ghorg",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			quiet := quietRequested(cmd)
+			errOut := humanErr(cmd)
+			// Pure/local validation first — flag combos, selection path, workspace —
+			// so a bad invocation fails without resolving a token (which can shell out
+			// to `gh`) or hitting the network.
+			if err := validateMirror(mirrorValidation{branch: branch, cloneDepth: cloneDepth}); err != nil {
+				return err
+			}
+			path, err := resolveSelectionPath(name, selectionPath)
+			if err != nil {
+				return err
+			}
+			sel, err := selection.Read(path)
+			if err != nil {
+				return err
+			}
+			ws, snap, err := resolveWorkspace(workspace, purpose, branch)
+			if err != nil {
+				return err
+			}
+			// Now resolve auth and the child tool, then verify identity before the
+			// (potentially long) ghorg clone — honours the documented per-run principal
+			// print and fails fast on a bad token without re-running discovery.
+			token, source, err := resolveToken(cmd.Context())
+			if err != nil {
+				return err
+			}
+			announceTokenSource(errOut, source)
+			if err := requireTool("ghorg", "https://github.com/gabrie30/ghorg#installation"); err != nil {
+				return err
+			}
+			if err := verifyAndAnnouncePrincipal(cmd.Context(), errOut, token); err != nil {
+				return err
+			}
+			// WS3 of #48: capture ghorg's full output to a 0600 log while still
+			// streaming it live to stderr (the human default is unchanged), so the
+			// terse reconciliation summary has a drill-down artifact to point at. Under
+			// --quiet the output is discarded as before — no live stream, no log, no
+			// path an agent couldn't consume.
+			run := execRunQuiet
+			ghorgLogPath := ""
+			if !quiet {
+				logFile, logErr := newGhorgLog()
+				if logErr != nil {
+					return logErr
+				}
+				// The log is a persistent drill-down artifact (like apply's captured
+				// output), so it is not removed — only the handle is closed once ghorg
+				// has finished writing through the tee.
+				defer func() { _ = logFile.Close() }()
+				ghorgLogPath = logFile.Name()
+				run = func(ctx context.Context, name string, args, env []string) error {
+					return execRunToWriter(ctx, name, args, env, io.MultiWriter(os.Stderr, logFile))
+				}
+			}
+			if err := runMirror(cmd.Context(), run, sel, ws, token, mirror.Options{
+				Branch:      branch,
+				Concurrency: concurrency,
+				CloneDepth:  cloneDepth,
+				NoClean:     noClean,
+				DryRun:      dryRun,
+			}, reportOptions{toStdout: reportJSON, toFile: writeReport, quiet: quiet, ghorgLogPath: ghorgLogPath}, cmd.OutOrStdout(), errOut); err != nil {
+				return err
+			}
+			// #29: drop a sidecar manifest in each --purpose snapshot so `workspaces
+			// list/prune` get reliable structured metadata (purpose/branch/stamp/
+			// owner) instead of parsing the ambiguous dir name. Owner is only known
+			// here, from the selection.
+			if snap != nil {
+				snap.Owner = sel.Owner
+			}
+			return writeSnapshotManifest(ws, snap, dryRun)
+		},
+	}
+	addSelectionFlags(cmd, &name, &selectionPath)
+	f := cmd.Flags()
+	f.StringVar(&workspace, "workspace", "", "absolute workspace dir (default ~/trailboss; repos land in <workspace>/<owner>)")
+	f.StringVar(&purpose, "purpose", "", "ephemeral, timestamped workspace ~/trailboss/<purpose>-<YYYY-MM-DD-HHMMSS.mmm> (trailboss stamps the time to the millisecond; you clean the dir up when done); mutually exclusive with --workspace")
+	f.StringVar(&branch, "branch", "", "checkout this branch in every cloned repo (one name for all repos; ghorg leaves a repo on its default branch where the branch is absent). With --purpose it is also folded into the dir name: <purpose>-<branch>-<stamp>. Default: each repo's own default branch")
+	f.IntVar(&concurrency, "concurrency", 0, "concurrent clones (0 = ghorg default)")
+	f.IntVar(&cloneDepth, "clone-depth", 0, "shallow clone depth (0 = full history). Incompatible with --branch: a shallow clone only fetches each repo's default branch, so --branch would silently fall back to the default")
+	f.BoolVar(&noClean, "no-clean", false, "preserve local changes in existing clones (skip ghorg's git clean on re-sync)")
+	f.BoolVar(&dryRun, "dry-run", false, "show what ghorg would clone without cloning")
+	f.BoolVar(&reportJSON, "report-json", false, "after a successful, non-dry-run mirror, print a machine-readable JSON report (workspace, owner, repo count, requested branch, per-repo branch status from the lockfile, and a reconciliation block counting selected-vs-on-disk coverage) to stdout")
+	f.BoolVar(&writeReport, "write-report", false, "after a successful, non-dry-run mirror, write the JSON report to <workspace>/"+mirrorReportName)
+	return cmd
+}
+
+// runMirror frames the mirror phase and delegates to the mirror package. It is
+// the testable core of the mirror command (the Runner seam lets tests exercise
+// it without ghorg installed).
+//
+// stdout carries exactly one machine-readable representation of the mirror: the
+// bare workspace path by default, or the JSON report (which already includes the
+// workspace) when --report-json is set. Emitting both would make the JSON
+// unparseable, so the bare path is suppressed in report mode. Human banners and
+// the ghorg child's own output always go to errOut (stderr) to keep stdout
+// clean. The bare path prints before delegating, so it survives a later ghorg
+// failure — callers must check the exit code, not stdout, for success; the JSON
+// report, by contrast, is emitted only after a successful mirror.
+func runMirror(ctx context.Context, run mirror.Runner, sel models.Selection, ws, token string, opts mirror.Options, report reportOptions, out, errOut io.Writer) error {
+	errOut = quietWriter(errOut, report.quiet)
+	opts.Workspace = ws
+	// Reject an empty selection *before* printing anything to stdout. mirror.Mirror
+	// also rejects it, but only after runMirror would already have emitted the bare
+	// workspace path — misleading machine output for a run that never happens. An
+	// empty lockfile usually means a misconfigured select (see §6), so fail loud
+	// and clean here.
+	if len(sel.Repos) == 0 {
+		return errors.New("selection is empty — nothing to mirror; re-run `select` (a 0-repo select is an error unless --allow-empty)")
+	}
+	// A dry-run clones nothing and may never create the workspace, so under
+	// --quiet (where no banner explains the mode) a bare path on stdout would
+	// look like a real mirror result an agent could `cd` into. Suppress it there;
+	// non-quiet keeps the path (with the clarifying banner below) for parity.
+	misleadingDryRunPath := report.quiet && opts.DryRun
+	if !report.toStdout && !misleadingDryRunPath {
+		fmt.Fprintln(out, ws)
+	}
+	banner(errOut, fmt.Sprintf("Mirroring %d repo(s) into %s", len(sel.Repos), ws))
+	if err := mirror.Mirror(ctx, run, sel, token, opts); err != nil {
+		// Surface the captured log even on failure — a partial clone is exactly when
+		// the ghorg errors matter, and they have already scrolled past on stderr.
+		if report.ghorgLogPath != "" {
+			warn(errOut, "ghorg output (incl. errors) captured at "+report.ghorgLogPath)
+		}
+		return err
+	}
+	done(errOut, fmt.Sprintf("mirror complete → %s/%s", ws, sel.Owner))
+	if report.ghorgLogPath != "" {
+		done(errOut, "ghorg output captured at "+report.ghorgLogPath)
+	}
+	// A dry-run clones nothing, so an on-disk reconciliation (and the report built
+	// from it) would be misleading — skip both, matching the pre-WS3 behaviour.
+	if opts.DryRun {
+		return nil
+	}
+	// trailboss's own reconciliation — the honest counterpart to ghorg's "N new
+	// clones" summary and its per-repo "Could not checkout" fall-back noise. The one
+	// read-only stat is shared between the human line and the JSON report (WS3 of
+	// #48), so an agent reading --report-json gets the same coverage/failure truth.
+	rec := reconcile(sel, ws, opts)
+	reportReconciliation(errOut, rec, ws, sel.Owner, report.ghorgLogPath)
+	return emitMirrorReport(sel, ws, opts, rec, report, out, errOut)
+}
+
+// emitMirrorReport renders the mirror report to the requested sinks. It runs
+// only after a successful, non-dry-run mirror (the caller has already returned on
+// a dry-run): a report is never left claiming a clone that failed, and a dry-run
+// produces no report — a --write-report into a possibly non-existent workspace
+// would otherwise fail. The reconciliation is passed in so the report shares the
+// caller's single read-only stat (WS3 of #48).
+func emitMirrorReport(sel models.Selection, ws string, opts mirror.Options, rec reconciliation, report reportOptions, out, errOut io.Writer) error {
+	if !report.toStdout && !report.toFile {
+		return nil
+	}
+	rep := buildMirrorReport(sel, ws, opts, rec)
+	// stdout follows the machine-mode format contract (compact under --quiet); the
+	// persisted report file is an artifact a human may open, so it stays indented
+	// regardless. Same shape either way — only whitespace differs.
+	if report.toStdout {
+		if err := emitJSON(out, rep, report.quiet); err != nil {
+			return fmt.Errorf("render mirror report: %w", err)
+		}
+	}
+	if report.toFile {
+		data, err := json.MarshalIndent(rep, "", "  ")
+		if err != nil {
+			return fmt.Errorf("render mirror report: %w", err)
+		}
+		path := filepath.Join(ws, mirrorReportName)
+		if err := os.WriteFile(path, append(data, '\n'), 0o600); err != nil {
+			return fmt.Errorf("write mirror report: %w", err)
+		}
+		// WriteFile only applies the mode when creating the file, so a re-mirror
+		// over a report left 0644 by an older trailboss would keep the looser
+		// mode; chmod makes 0600 hold on rewrite too.
+		if err := os.Chmod(path, 0o600); err != nil {
+			return fmt.Errorf("secure mirror report perms: %w", err)
+		}
+		done(errOut, "report written to "+path)
+	}
+	return nil
+}
+
+// writeSnapshotManifest persists the sidecar manifest for a --purpose snapshot
+// after a successful, non-dry-run mirror. It is a no-op for the persistent
+// default/--workspace case (snap == nil) and for a dry-run (which never creates a
+// workspace to write into) — mirroring emitMirrorReport's "only on a real,
+// successful mirror" posture, so no manifest is ever left describing a clone that
+// did not happen.
+func writeSnapshotManifest(ws string, snap *workspaceManifest, dryRun bool) error {
+	if snap == nil || dryRun {
+		return nil
+	}
+	return writeWorkspaceManifest(ws, *snap)
+}
+
+// nowFunc is the clock used to timestamp ephemeral --purpose workspaces. It is
+// a package var so tests can pin the time.
+var nowFunc = time.Now
+
+// resolveWorkspace returns an absolute workspace directory. ghorg requires an
+// absolute --path. There are three cases, in priority order:
+//   - --purpose: an ephemeral, timestamped dir
+//     ~/trailboss/<purpose>[-<branch>]-<YYYY-MM-DD-HHMMSS.mmm>. trailboss
+//     stamps the time to the millisecond so the operator supplies only the
+//     purpose (and, when mirroring a specific --branch, that branch is folded
+//     into the name too) and each run gets its own pristine dir; trailboss
+//     never deletes it — the operator cleans it up. Mutually exclusive with
+//     --workspace.
+//   - --workspace: used as given (made absolute).
+//   - neither: defaults to ~/trailboss.
+//
+// For a --purpose snapshot it also returns a *workspaceManifest carrying the
+// snapshot's identity (purpose, branch, stamp, creation time) so the caller can
+// persist it after a successful mirror; Owner is left for the caller to fill from
+// the selection. The manifest is nil for the --workspace and default cases, which
+// are persistent workspaces, not managed snapshots.
+func resolveWorkspace(workspace, purpose, branch string) (string, *workspaceManifest, error) {
+	if workspace != "" && purpose != "" {
+		return "", nil, errors.New("--workspace and --purpose are mutually exclusive")
+	}
+	if purpose != "" {
+		if err := validatePurpose(purpose); err != nil {
+			return "", nil, err
+		}
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", nil, fmt.Errorf("resolve home dir for workspace: %w", err)
+		}
+		now := nowFunc()
+		stamp := now.Format(stampLayout)
+		dir := purpose
+		if branch != "" {
+			// The real branch (with any slashes) still goes to ghorg; only the
+			// dir-name component is sanitised so it stays a single safe segment.
+			dir += "-" + sanitizeForDir(branch)
+		}
+		dir += "-" + stamp
+		snap := &workspaceManifest{
+			Version:   workspaceManifestVersion,
+			Purpose:   purpose,
+			Branch:    branch,
+			Stamp:     stamp,
+			CreatedAt: now,
+		}
+		return filepath.Join(home, "trailboss", dir), snap, nil
+	}
+	if workspace == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", nil, fmt.Errorf("resolve home dir for workspace: %w", err)
+		}
+		return filepath.Join(home, "trailboss"), nil, nil
+	}
+	abs, err := filepath.Abs(workspace)
+	if err != nil {
+		return "", nil, fmt.Errorf("resolve workspace path: %w", err)
+	}
+	return abs, nil, nil
+}
+
+// validatePurpose rejects anything that isn't a plain directory-name component,
+// so --purpose can't traverse out of ~/trailboss or produce a surprising path.
+func validatePurpose(p string) error {
+	for _, r := range p {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+		case r == '-', r == '_', r == '.':
+		default:
+			return fmt.Errorf("--purpose %q: only letters, digits, and - _ . are allowed (it becomes a directory name)", p)
+		}
+	}
+	if strings.Contains(p, "..") {
+		return fmt.Errorf("--purpose %q must not contain %q", p, "..")
+	}
+	return nil
+}
+
+// sanitizeForDir maps any character that isn't a plain directory-name component
+// (letters, digits, - _ .) to '-', so a branch like "feature/x" folds into a
+// single safe path segment ("feature-x") in a --purpose workspace name. The
+// original branch is still passed to ghorg unchanged.
+func sanitizeForDir(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+			b.WriteRune(r)
+		case r == '-', r == '_', r == '.':
+			b.WriteRune(r)
+		default:
+			b.WriteRune('-')
+		}
+	}
+	return b.String()
+}
