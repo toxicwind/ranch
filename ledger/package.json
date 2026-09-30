@@ -1,0 +1,1 @@
+{"description":"The ranch account book — durable Gemini token/cost accounting from authoritative Google pricing","name":"ledger","scripts":{"daily":"bun run ledger.ts daily","pricing":"bun run ledger.ts pricing"},"version":"1.0.0"}
