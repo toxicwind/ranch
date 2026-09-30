@@ -17,6 +17,3 @@
 # (/vansrouter/, /tau/, /boundless/, /sigma/, /omp-semantic-policy/,
 # /barn/woodpecker/) are deliberately NOT listed here. They are ignored
 # rather than tracked, so they contribute no gitlinks and need no entry.
-[submodule "corral"]
-	path = corral
-	url = https://github.com/toxicwind/super-ralph.git
