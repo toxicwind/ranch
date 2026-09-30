@@ -806,6 +806,29 @@
       "protocol": "stdio",
       "quarantined": false,
       "updated": "2026-09-20T16:50:00-06:00"
+    },
+    {
+      "name": "rsync",
+      "command": "/home/toxic/.bun/bin/bun",
+      "args": [
+        "/home/toxic/projects/rsync-mcp/src/server.ts"
+      ],
+      "env": {
+        "RSYNC_HOST": "pc",
+        "RSYNC_REMOTE_ROOT": "/home/toxic",
+        "RSYNC_SSH_OPTS": "-o ServerAliveInterval=30 -o ConnectTimeout=10",
+        "RSYNC_LOCAL_ROOT": "/home/toxic",
+        "RSYNC_FLAGS": "-avzP"
+      },
+      "protocol": "stdio",
+      "enabled": true,
+      "health_check_interval": "15s",
+      "tool_discovery_interval": "2m0s",
+      "isolation": {
+        "enabled": false,
+        "mode": "none"
+      },
+      "quarantined": false
     }
   ],
   "oauth_expiry_warning_hours": 4,
