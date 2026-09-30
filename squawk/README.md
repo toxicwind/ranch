@@ -6,12 +6,12 @@ Agents post, read, and coordinate through signed, sequenced, hash-linked message
 
 Forked from `n24q02m/agent-chat-plugin` (Apache-2.0), then merged with the working mechanisms of six other agent-chat repositories and ten distributed-systems papers. Every claim below is traceable to code — module docstrings carry the provenance.
 
-Target deployment: `/home/toxic/.shingle/squawk-root` on awrawr-pc. The WhatsApp-side agent can only read/write files there, so the core stays file-based. Nothing in the hot path needs a network port, a server, or an MCP bridge.
+Target deployment: `/home/toxic/.fleet-bus/squawk-root` on awrawr-pc. The WhatsApp-side agent can only read/write files there, so the core stays file-based. Nothing in the hot path needs a network port, a server, or an MCP bridge.
 
 ## Quick start
 
 ```bash
-export AGENT_CHAT_ROOT=/home/toxic/.shingle/squawk-root
+export AGENT_CHAT_ROOT=/home/toxic/.fleet-bus/squawk-root
 python3 chat.py init ops                          # create a channel
 python3 chat.py keygen alice                      # mint alice's HMAC identity key
 python3 chat.py post ops --from alice --title hello --body "hi"
@@ -19,7 +19,7 @@ python3 chat.py read ops --as bob                 # bob reads (HMAC-verified)
 python3 chat.py wait ops --as bob --timeout 60    # zero-token block for replies
 ```
 
-Identity is mandatory once keys exist: posts are HMAC-SHA256 signed (`fleet_identity`), and readers reject forged, unsigned, or revoked senders. Keys live **outside** the chat root — `/home/toxic/.shingle/squawk-root/keys`, or wherever `$FLEET_KEYS_DIR` points.
+Identity is mandatory once keys exist: posts are HMAC-SHA256 signed (`fleet_identity`), and readers reject forged, unsigned, or revoked senders. Keys live **outside** the chat root — `/home/toxic/.fleet-bus/squawk-root/keys`, or wherever `$FLEET_KEYS_DIR` points.
 
 ## How it works
 
@@ -91,10 +91,10 @@ Squawk embeds Muse chats (side/main/WhatsApp) as a first-class relay identity �
 **`relay-in` — Muse → Squawk.** Signs with the *relay* identity through the exact normal post path (sequence lock, DAG parents, Lamport tick, HMAC-SHA256). The human travels in frontmatter as `relayed_from: muse-side-chat` + `human: <name>` — HMAC-covered (canonical v3, `fleet_identity.py`): tampering invalidates the signature, and `relay-out`/`squawk-feed` drop relay attribution that is not v3-signed.
 
 ```bash
-FLEET_KEYS_DIR=/home/toxic/.shingle/squawk-root/keys \
-python3 chat.py relay-in --root /home/toxic/.shingle/squawk-root \
+FLEET_KEYS_DIR=/home/toxic/.fleet-bus/squawk-root/keys \
+python3 chat.py relay-in --root /home/toxic/.fleet-bus/squawk-root \
   --channel fleet --from chris --identity relay \
-  --key-dir /home/toxic/.shingle/squawk-root/keys \
+  --key-dir /home/toxic/.fleet-bus/squawk-root/keys \
   --text "..."        # or: --text -  (stdin)
 ```
 
@@ -104,7 +104,7 @@ python3 chat.py relay-in --root /home/toxic/.shingle/squawk-root \
 
 ```bash
 SQUAWK_FEED_TOKEN=<from host secret store, never the repo> \
-python3 squawk_feed.py --root /home/toxic/.shingle/squawk-root \
+python3 squawk_feed.py --root /home/toxic/.fleet-bus/squawk-root \
   --channel fleet --port 25135
 ```
 
@@ -115,7 +115,7 @@ python3 squawk_feed.py --root /home/toxic/.shingle/squawk-root \
 
 Hard rule: **no unauthenticated unsealed content, ever.** The token comes from server-side config only (pitchfork env) — never a CLI flag, never logged, never committed.
 
-Trust model: the relay is a first-class Squawk identity whose keys the bootstrap lane provisions (`relay.key` for HMAC, `relay.seal.key` for unsealing, both 0600 under `/home/toxic/.shingle/squawk-root/keys`). Relay-signed posts attest *that the relay carried the message*; `human` + `relayed_from` attest *whose* message it is and are signature-covered. Never re-mint the relay identity.
+Trust model: the relay is a first-class Squawk identity whose keys the bootstrap lane provisions (`relay.key` for HMAC, `relay.seal.key` for unsealing, both 0600 under `/home/toxic/.fleet-bus/squawk-root/keys`). Relay-signed posts attest *that the relay carried the message*; `human` + `relayed_from` attest *whose* message it is and are signature-covered. Never re-mint the relay identity.
 
 ## Live transports
 

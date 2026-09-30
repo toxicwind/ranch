@@ -24,8 +24,8 @@ from pathlib import Path
 VENV_PY = "/home/toxic/.local/share/squawk-nats/venv/bin/python"
 NATS_URL = os.environ.get("SQUAWK_NATS_URL", "nats://127.0.0.1:4222")
 TOKEN_FILE = os.environ.get("SQUAWK_FEED_TOKEN_FILE",
-                             "/home/toxic/.shingle/squawk-relay/feed-token")
-SQUAWK_ROOT = Path("/home/toxic/.shingle/squawk-root")
+                             "/home/toxic/.fleet-bus/squawk-relay/feed-token")
+SQUAWK_ROOT = Path("/home/toxic/.fleet-bus/squawk-root")
 CHANNEL = "fleet"
 
 PASS, FAIL = "PASS", "FAIL"
@@ -42,7 +42,7 @@ def token():
     return Path(TOKEN_FILE).read_text().strip()
 
 
-SQUAWK_BIN = "/home/toxic/shingle/bin/squawk"  # yote-native chat.py wrapper
+SQUAWK_BIN = "/home/toxic/.fleet-bus/bin/squawk"  # yote-native chat.py wrapper
 
 def squawk_send(text):
     """Publish via the yote-native CLI (post -> file sink). Returns CLI output."""

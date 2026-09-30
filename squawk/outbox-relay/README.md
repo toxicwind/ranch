@@ -6,7 +6,7 @@ the main chat (#fleet), with at-least-once, idempotent, ordered delivery.
 ## Architecture
 
 ```
-squawk channel logs (/home/toxic/.shingle/squawk-root/<channel>/)
+squawk channel logs (/home/toxic/.fleet-bus/squawk-root/<channel>/)
         │ inotify (libc ctypes, stdlib only) + 60s full-sweep fallback
         ▼
 squawk-relay-sink  (pitchfork daemon)
@@ -66,7 +66,7 @@ so relayed copies are never re-ingested. No echo loop.
 
 Measure every hop: if you can't see it, you can't cut it.
 
-## Files (live on awrawr-pc, /home/toxic/shingle/squawk-relay/)
+## Files (live on awrawr-pc, /home/toxic/.fleet-bus/squawk-relay/)
 
 | file | role |
 |---|---|

@@ -16,7 +16,7 @@ Two, watched independently and merged into one monotonic sequence.
 
 | Source | Watched via | Default |
 | :--- | :--- | :--- |
-| `<chat-root>/<channel>/*.md` | inotify `CLOSE_WRITE`, `MOVED_TO`, `CREATE` | `/home/toxic/.shingle/squawk-root` |
+| `<chat-root>/<channel>/*.md` | inotify `CLOSE_WRITE`, `MOVED_TO`, `CREATE` | `/home/toxic/.fleet-bus/squawk-root` |
 | zipfs-vault `vault.zip` | zip central-directory rescan | `…/zipfs-vault/store/vault.zip` |
 
 Channel files are `<seq>-<sender>-<slug>.md` with optional YAML frontmatter.
@@ -70,7 +70,7 @@ Every env var the server reads, with code defaults:
 | Var | Default |
 | :--- | :--- |
 | `SQUAWK_WS_PORT` | `25147` |
-| `SQUAWK_CHAT_ROOT` | `/home/toxic/.shingle/squawk-root` |
+| `SQUAWK_CHAT_ROOT` | `/home/toxic/.fleet-bus/squawk-root` |
 | `SQUAWK_WS_CHANNELS` | `fleet,leads` |
 | `SQUAWK_WS_VAULT` | `…/zipfs-vault/store/vault.zip` |
 | `SQUAWK_WS_TOKEN_FILE` | `/home/toxic/.squawk-ws-token` |

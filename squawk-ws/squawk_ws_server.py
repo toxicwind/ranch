@@ -6,7 +6,7 @@ new messages to subscribed websocket clients in real time. Replaces all
 polling (vault pulls, long-poll, digest crons) for the Chris-facing feed.
 
 Sources:
-  - /home/toxic/.shingle/squawk-root/<channel>/*.md  (chat.py channel files)
+  - /home/toxic/.fleet-bus/squawk-root/<channel>/*.md  (chat.py channel files)
   - zipfs-vault local zip manifest (unsealed relay envelopes)
 
 Protocol:
@@ -39,7 +39,7 @@ import zipfile
 from pathlib import Path
 
 PORT = int(os.environ.get("SQUAWK_WS_PORT", "25147"))
-CHAT_ROOT = Path(os.environ.get("SQUAWK_CHAT_ROOT", "/home/toxic/.shingle/squawk-root"))
+CHAT_ROOT = Path(os.environ.get("SQUAWK_CHAT_ROOT", "/home/toxic/.fleet-bus/squawk-root"))
 CHANNELS = [c for c in os.environ.get("SQUAWK_WS_CHANNELS", "fleet,leads").split(",") if c]
 VAULT_ZIP = Path(os.environ.get("SQUAWK_WS_VAULT",
                                "/home/toxic/workspace/skills/zipfs-vault/store/vault.zip"))

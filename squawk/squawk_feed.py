@@ -24,11 +24,11 @@ Auth: `Authorization: Bearer <token>`, constant-time compare
 (hmac.compare_digest); missing or invalid -> 404 with an empty body, never
 revealing the endpoint exists. The token auto-configures server-style:
 $ SQUAWK_FEED_TOKEN env var first, then the canonical token file
-(~/.shingle/squawk-relay/feed-token), else a secure random token is
+(~/.fleet-bus/squawk-relay/feed-token), else a secure random token is
 generated, persisted (0600) to the token file, and used. The server never
 refuses to start for a missing token -- it is a server, it configures
 itself. Additional keys for future use go in the settings file
-(~/.shingle/squawk-relay/settings.conf, KEY=VALUE lines). The token is
+(~/.fleet-bus/squawk-relay/settings.conf, KEY=VALUE lines). The token is
 never logged and never committed.
 
 Fat response: {"seq": M, "messages": [relay-record envelopes, ...]} where
@@ -137,10 +137,10 @@ def _install_telemetry():
 TOKEN_ENV = "SQUAWK_FEED_TOKEN"
 # Canonical token file (auto-created on first run, 0600). Overridable via
 # --token-file or $SQUAWK_FEED_TOKEN_FILE. Server-like: never ask, configure.
-TOKEN_FILE_DEFAULT = str(Path.home() / ".shingle" / "squawk-relay" / "feed-token")
+TOKEN_FILE_DEFAULT = str(Path.home() / ".fleet-bus" / "squawk-relay" / "feed-token")
 # Settings file for future keys: KEY=VALUE lines, sourced on startup.
 # Add other keys here as needed; the server reads them into the environment.
-SETTINGS_FILE_DEFAULT = str(Path.home() / ".shingle" / "squawk-relay" / "settings.conf")
+SETTINGS_FILE_DEFAULT = str(Path.home() / ".fleet-bus" / "squawk-relay" / "settings.conf")
 HOLD_SECONDS = 55.0
 MAX_MESSAGES = 50
 TAIL_CAP = 1000  # server-side ceiling for ?tail=N snapshots
@@ -631,7 +631,7 @@ def _ensure_keys_env(root: Path) -> None:
     """squawk_seal reads FLEET_KEYS_DIR at import; make sure it resolves.
 
     Never overrides an explicit setting -- the service definition should
-    set FLEET_KEYS_DIR=/home/toxic/.shingle/squawk-root/keys.
+    set FLEET_KEYS_DIR=/home/toxic/.fleet-bus/squawk-root/keys.
     """
     if "FLEET_KEYS_DIR" not in os.environ:
         os.environ["FLEET_KEYS_DIR"] = str(
@@ -726,12 +726,12 @@ def main(argv=None) -> None:
                     help="squawk web UI html (default: ui.html next to this script)")
     ap.add_argument("--token-file", default=None,
                     help="bearer token file (default: $SQUAWK_FEED_TOKEN_FILE, "
-                         "else ~/.shingle/squawk-relay/feed-token; "
+                         "else ~/.fleet-bus/squawk-relay/feed-token; "
                          "auto-generated on first run if missing)")
     ap.add_argument("--settings-file", default=None,
                     help="settings file for future keys, KEY=VALUE lines "
                          "(default: $SQUAWK_FEED_SETTINGS, else "
-                         "~/.shingle/squawk-relay/settings.conf)")
+                         "~/.fleet-bus/squawk-relay/settings.conf)")
     a = ap.parse_args(argv)
 
     token_file = (a.token_file

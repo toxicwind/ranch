@@ -10,7 +10,7 @@ ranked it #1; Squawk stays the first-class UI as a passive aggregator.
   squawk CLI / POST /send / estate-reconcile
         │  (unchanged: writes <seq>-<sender>-<slug>.md)
         ▼
-  /home/toxic/.shingle/squawk-root/{fleet,leads}/   ◄── file feed (source of truth, untouched)
+  /home/toxic/.fleet-bus/squawk-root/{fleet,leads}/   ◄── file feed (source of truth, untouched)
         │  inotify
         ▼
   squawk_nats_tail.py  ──parse──►  JetStream stream `squawk`
