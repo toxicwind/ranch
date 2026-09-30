@@ -519,6 +519,33 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     adapter: "openai",
     seeds: ["deepseek-ai/DeepSeek-V4.1-Flash"],
   },
+  {
+    name: "hyperbolic",
+    displayName: "Hyperbolic",
+    baseUrl: "https://api.hyperbolic.xyz/v1",
+    keyEnv: "HYPERBOLIC_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    seeds: ["hyperbolic/llama-3.1-70b"],
+  },
+  {
+    name: "github",
+    displayName: "GitHub Models",
+    baseUrl: "https://models.inference.ai.azure.com",
+    keyEnv: "GITHUB_TOKEN",
+    auth: "bearer",
+    adapter: "openai",
+    seeds: ["github/Phi-4", "github/gpt-4o-mini"],
+  },
+  {
+    name: "perplexity",
+    displayName: "Perplexity",
+    baseUrl: "https://api.perplexity.ai",
+    keyEnv: "PERPLEXITY_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    seeds: ["perplexity/sonar"],
+  },
 ];
 
 /**

@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-tack/v1",
-  "generatedAt": "2026-09-30T04:32:58.319Z",
+  "generatedAt": "2026-09-30T06:26:46.588Z",
   "generator": "@ranch/tack codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/tack src/data.ts",
   "adapters": [
@@ -386,6 +386,30 @@
       "keyEnv": "SINGULARITYAPI_TECH_API_KEY",
       "adapter": "openai",
       "auth": "bearer"
+    },
+    {
+      "name": "hyperbolic",
+      "displayName": "Hyperbolic",
+      "baseUrl": "https://api.hyperbolic.xyz/v1",
+      "keyEnv": "HYPERBOLIC_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "github",
+      "displayName": "GitHub Models",
+      "baseUrl": "https://models.inference.ai.azure.com",
+      "keyEnv": "GITHUB_TOKEN",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "perplexity",
+      "displayName": "Perplexity",
+      "baseUrl": "https://api.perplexity.ai",
+      "keyEnv": "PERPLEXITY_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
     }
   ],
   "seeds": {
@@ -577,6 +601,16 @@
     ],
     "singularityapi-tech": [
       "deepseek-ai/DeepSeek-V4.1-Flash"
+    ],
+    "hyperbolic": [
+      "hyperbolic/llama-3.1-70b"
+    ],
+    "github": [
+      "github/Phi-4",
+      "github/gpt-4o-mini"
+    ],
+    "perplexity": [
+      "perplexity/sonar"
     ]
   },
   "seedsContract": "Cold-start only: served while a provider has never had a successful discovery; inert afterwards. Never hand-edit model membership here — discovery owns it.",
