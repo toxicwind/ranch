@@ -1,0 +1,7 @@
+type: ts
+tasks:
+  test:
+    cmd: bun test
+    inputs:
+      - src/**/*.ts
+      - tests/**/*.ts

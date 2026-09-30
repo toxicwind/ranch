@@ -1,0 +1,1 @@
+{"description":"First-class safety-classifier false-positive detectors and autonomy failure-mode regressions. Executable detectors for canned refusals, stall phrasing, false-success run records, and misattributed API dispatch (the tasks category error).","name":"classifier","scripts":{"test":"bun test"},"version":"1.0.0"}
