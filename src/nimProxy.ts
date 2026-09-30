@@ -2,7 +2,7 @@
  * nimProxy — flock integration for super-ralph (nim-proxy absorbed by flock 2026-09-17).
  *
  * Routes every model call through the local flock proxy (default
- * http://127.0.0.1:25193) instead of direct provider APIs:
+ * http://127.0.0.1:25104) instead of direct provider APIs:
  *
  * - `resolveProxyConfig()` reads FLOCK_API_KEY (comma-separated for
  *   multi-key rotation), falling back to NIM_PROXY_API_KEY (deprecated alias), then ANTHROPIC_API_KEY / NVIDIA_API_KEY.
@@ -29,7 +29,7 @@ export const DEFAULT_PROXY_BASE_URL =
   process.env.SOVEREIGN_ROUTER_URL ||
   process.env.FLOCK_BASE_URL ||
   `http://127.0.0.1:${DEFAULT_ROUTER_PORT}`;
-export const DEFAULT_PROXY_MODEL = "free";
+export const DEFAULT_PROXY_MODEL = "gemini-eap-openai/gemini-3.8-flash";
 const DEFAULT_RETRY_AFTER_MS = 60_000;
 
 export class NimProxyConfigError extends Error {
