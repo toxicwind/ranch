@@ -10,6 +10,7 @@ const { chromium } = require("/home/toxic/.browserless/app/node_modules/playwrig
 const fs = require("fs");
 const http = require("http");
 const path = require("path");
+const { execSync } = require("child_process");
 
 const PROFILE_DIR = "/home/toxic/.browserless/profiles/nv-audit";
 const CDP_PORT = 9223;
@@ -24,6 +25,50 @@ const STARTED_AT = new Date().toISOString();
 let relaunchCount = 0;
 let lastError = null;
 let lastHealthyAt = Date.now();
+
+// Sable 2026-09-30: hard-recycle helpers. A wedged chromium (ptrace-stopped
+// crashpad, flock deadlock, ...) does not die on ctx.close() -- the 2026-09-30
+// incident piled 100+ chrome/crashpad processes behind one wedged crashpad's
+// flock on the shared Crash Reports settings.dat, taking down the keeper AND
+// the browserless pool. So: find keeper chromes by PROFILE_DIR in their
+// cmdline, and SIGKILL them when graceful close fails or stale ones linger.
+function keeperChromePids() {
+  try {
+    const out = execSync("ps -eo pid,args", { encoding: "utf8" });
+    const pids = [];
+    for (const line of out.split("\n")) {
+      const m = line.match(/^\s*(\d+)\s+(.*)$/);
+      if (!m) continue;
+      const pid = parseInt(m[1], 10);
+      if (pid === process.pid) continue;
+      const cmd = m[2];
+      if (cmd.includes("/chrome-linux64/chrome") && cmd.includes(PROFILE_DIR)) pids.push(pid);
+    }
+    return pids;
+  } catch (e) { log("pid scan failed:", e.message); return []; }
+}
+
+function sigkillPids(pids, why) {
+  for (const pid of pids) {
+    try { process.kill(pid, "SIGKILL"); log("SIGKILL pid " + pid + " (" + why + ")"); }
+    catch (e) { /* already gone */ }
+  }
+}
+
+async function hardRecycle(ctx, why) {
+  log("hard recycle:", why);
+  try {
+    await Promise.race([
+      (async () => { try { await ctx.close(); } catch (e) { log("close error:", e.message); } })(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("close-timeout")), 10000)),
+    ]);
+  } catch (e) { log("graceful close failed/timed out:", e.message); }
+  await new Promise((r) => setTimeout(r, 2000));
+  const lingering = keeperChromePids();
+  if (lingering.length) sigkillPids(lingering, "recycle-linger");
+  else log("graceful close reaped all keeper chromes");
+  activeCtx = null;
+}
 
 async function shutdown(signal) {
   log(signal + " received, closing browser");
@@ -100,8 +145,7 @@ async function launchOnce() {
       });
     }
   }
-  try { await ctx.close(); } catch (e) { log("close error:", e.message); }
-  activeCtx = null;
+  await hardRecycle(ctx, "CDP unresponsive");
   writeStatus(baseStatus("relaunching"));
 }
 
@@ -111,6 +155,12 @@ async function launchOnce() {
     process.exit(0);
   }
   for (;;) {
+    const stale = keeperChromePids();
+    if (stale.length) {
+      log("stale keeper chromes from a previous incident, reaping:", stale.join(","));
+      sigkillPids(stale, "startup-stale-reap");
+      await new Promise((r) => setTimeout(r, 2000));
+    }
     try { await launchOnce(); }
     catch (e) {
       lastError = e && e.message ? e.message : String(e);
