@@ -1,0 +1,14 @@
+# ranch/squawk — project-owned daemon manifest. Source of truth for 'fleet-ui'.
+# Owned by the ranch/squawk project; the parent only composes it.
+
+
+[daemons.fleet-ui]
+# squawk fleet web UI + feed proxy (:25136). Serves BOTH lanes: funnel /fleet -> 127.0.0.1:25136
+# and tailnet-direct 100.72.199.93:25136 (binds 0.0.0.0). retry=true = correct failover.
+port = 25136
+run = "exec /home/toxic/.bun/bin/bun /home/toxic/sovereign/projects/range/ranch/squawk/fleet-ui.ts"
+dir = "/home/toxic/sovereign/projects/range/ranch/squawk"
+mise = false
+retry = true
+boot_start = true
+auto = ["start"]

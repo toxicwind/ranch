@@ -1,0 +1,13 @@
+# ranch/squawk-ws — project-owned daemon manifest. Source of truth for 'squawk-ws'.
+# Owned by the ranch/squawk-ws project; the parent only composes it.
+
+
+[daemons.squawk-ws]
+port = 25147
+run = "exec python3 /home/toxic/sovereign/projects/range/ranch/squawk-ws/squawk_ws_server.py"
+dir = "/home/toxic/sovereign/projects/range/ranch/squawk-ws"
+mise = false
+retry = true
+boot_start = true
+env = { SQUAWK_WS_PORT = "25147", SQUAWK_CHAT_ROOT = "/home/toxic/sovereign/hatch/agents/ember/squawk-root" }
+auto = ["start"]

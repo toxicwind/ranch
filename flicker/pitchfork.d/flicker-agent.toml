@@ -1,0 +1,14 @@
+# ranch/flicker — project-owned daemon manifest. Source of truth for 'flicker-agent'.
+# Owned by the ranch/flicker project; the parent only composes it.
+
+[daemons.flicker-agent]
+run = "exec /home/toxic/sovereign/projects/range/ranch/flicker/bin/flicker-agent"
+dir = "/home/toxic/sovereign/projects/range/ranch/flicker"
+mise = false
+retry = true
+boot_start = true
+env = { WOODPECKER_SERVER = "127.0.0.1:25240", WOODPECKER_AGENT_SECRET = "c6eee4c1bce957ae19638a330efe5fc3c561f18ea58e3468fe224a60416faf4f" }
+auto = ["start"]
+
+# SUPERSEDED 2026-09-30 (peregrine): brand-watchdog retired with brand.
+# Flicker has its own health_http checks; no external watchdog needed.

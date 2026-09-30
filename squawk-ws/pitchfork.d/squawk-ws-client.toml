@@ -1,0 +1,16 @@
+# ranch/squawk-ws — project-owned daemon manifest. Source of truth for 'squawk-ws-client'.
+# Owned by the ranch/squawk-ws project; the parent only composes it.
+
+[daemons.squawk-ws-client]
+run = "exec python3 /home/toxic/sovereign/projects/range/ranch/squawk-ws/squawk_ws_client_local.py"
+dir = "/home/toxic/sovereign/projects/range/ranch/squawk-ws"
+mise = false
+retry = true
+boot_start = true
+depends = ["squawk-ws"]
+auto = ["start"]
+
+# 2026-09-16: event-driven supervisor for the refusal-hunt pipeline.
+# No cron, no sleep, no timers — main loop blocks in inotifywait.
+# Survives cell death (runs here, not in the cell); independent of the
+# scheduled-task safety gate (not a scheduled job).
