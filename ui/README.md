@@ -210,4 +210,4 @@ restored. It reads `LLAMA_SWAP_URL`, `DOCS_AGENT_MODEL` and
 ## See also
 
 - [`../stockyard/herd/`](../stockyard/herd/) — where this UI came from
-- [`../stockyard/flock/`](../stockyard/flock/) — the cloud side it does not yet reach
+- [`../remuda/flock/`](../remuda/flock/) — the cloud side it does not yet reach

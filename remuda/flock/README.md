@@ -19,7 +19,7 @@ vendored here and this file is the whole of the directory.
 | Data dir | `~/.flock-data` |
 | Port | `127.0.0.1:25193` |
 | Health | `GET /health` |
-| This directory | pointer only — `stockyard/flock/` has no code |
+| This directory | pointer only — `remuda/flock/` has no code |
 
 One merged tree (2026-09-17), renamed in full from what had been eight
 scattered NIM projects; previously `nim-proxy`. The part that runs as a daemon
@@ -63,7 +63,7 @@ Worth separating before you debug across trees — the names collide.
 | :--- | :--- | :--- |
 | **The daemon** | `~/projects/flock` → `~/.flock/flock`, pitchfork `flock` | **live**, `:25193` |
 | herd's in-process router | `stockyard/herd/internal/flock/`, `stockyard/herd/mesh/gateway/flock.go` | **retired 2026-09-17** |
-| This pointer | `stockyard/flock/` | docs only |
+| This pointer | `remuda/flock/` | docs only |
 
 The second is the trap. `stockyard/herd/README_FLOCK_V2.md` documents a
 substantial Go router — circuit breakers, request coalescing, an SQLite health

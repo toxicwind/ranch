@@ -13,13 +13,13 @@
 # URLs are each checkout's own `origin`, verified with
 # `git remote get-url origin` from inside the submodule.
 #
-# NOTE: the four nested checkouts ignored in .gitignore
-# (/stockyard/vansrouter/, /stockyard/tau/, /stockyard/boundless/,
+# NOTE: the six nested checkouts ignored in .gitignore
+# (/stockyard/vansrouter/, /stockyard/tau/, /stockyard/boundless/, /sigma/, /omp-semantic-policy/,
 # /barn/woodpecker/) are deliberately NOT listed here. They are ignored
 # rather than tracked, so they contribute no gitlinks and need no entry.
 [submodule "corral"]
 	path = corral
 	url = https://github.com/toxicwind/super-ralph.git
-[submodule "stockyard/paddock"]
-	path = stockyard/paddock
+[submodule "remuda/paddock"]
+	path = remuda/paddock
 	url = https://github.com/toxicwind/VansRouter.git
