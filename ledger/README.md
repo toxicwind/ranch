@@ -2,37 +2,46 @@
 
 > 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
 
-The ranch account book — durable Gemini token and cost accounting, priced from the
-**authoritative Google Cloud Billing Catalog API**. Every token accounted for.
+The ranch account book — durable multi-provider token and cost accounting.
+Every provider key that serves traffic gets its tokens counted and, where a
+verified per-token price exists, its dollars accounted.
 
-## Why
+## Pricing — verified, never guessed
 
-Request counts tell you volume. The ledger tells you **dollars** — measured tokens ×
-Google's own list pricing, recorded per request, aggregated per day, queryable forever.
-Forward-looking from the moment it's wired in; no BigQuery export required.
+Each static price cites its source and fetch date in the `PRICING` table in
+`ledger.ts`. OpenRouter pricing is dynamic: fetched from
+`https://openrouter.ai/api/v1/models` and cached on disk (7-day TTL).
 
-## Pricing — authoritative, not estimated
-
-Fetched 2026-09-30 from `GET https://cloudbilling.googleapis.com/v1/services/AEFD-7695-64FA/skus`
-(Gemini service). Key discovery: the API's `unitPrice.nanos` is **per-token**, not
-per-`displayQuantity` (which misleadingly says 1,000,000). Verified against public pricing.
-
-| Model | Input / 1M | Output / 1M |
+| Provider | Source | Fetched |
 |---|---|---|
-| gemini-2.5-pro | $1.25 | $10.00 |
-| gemini-2.5-flash | $0.30 | $2.50 |
-| gemini-2.5-flash-lite | $0.10 | $0.40 |
-| gemini-2.0-flash | $0.10 | $0.40 |
+| google (Gemini 2.x) | Google Cloud Billing Catalog API `AEFD-7695-64FA` (nanos are per-token) | 2026-09-30 |
+| google (Gemini 3.x) | https://ai.google.dev/gemini-api/docs/pricing | 2026-09-30 |
+| mistral | https://mistral.ai/pricing | 2026-09-30 |
+| groq | https://groq.com/pricing (verified rate cards) | 2026-09-30 |
+| cerebras | https://www.cerebras.ai/pricing (CostBench verified rates) | 2026-09-30 |
+| deepseek | https://api-docs.deepseek.com/quick_start/pricing | 2026-09-30 |
+| moonshot | https://platform.moonshot.ai/docs/pricing | 2026-09-30 |
+| anthropic (via flock/NIM) | https://www.anthropic.com/pricing | 2026-09-30 |
+| openrouter | https://openrouter.ai/api/v1/models (disk cache) | dynamic |
 
-Unknown Gemini model IDs fall back to 2.5-flash pricing (conservative).
+**No silent fallbacks.** An unknown model is never priced as something else: it is
+recorded with `NULL` cost and surfaced as **unpriced** in reports (tokens still
+counted). Known-free traffic (local herd, `:free` tiers, HuggingFace/GitHub
+inference) is recorded at `$0.00` — free is a price, not a gap. Unpriced on
+purpose: nvidia/NIM (credit billing, no verified per-token rate), kimi-auto
+(resolves dynamically), Gemini `-latest` aliases, audio/speech models.
+
+Run `bun ledger.ts pricing` for the full per-model table.
 
 ## CLI
 
 ```bash
-bun ledger.ts daily 2026-09-30        # one day, per-model breakdown, JSON
+bun ledger.ts daily 2026-09-30        # one day, provider+model breakdown, JSON
 bun ledger.ts range 2026-09-28 2026-09-30
-bun ledger.ts pricing                 # the authoritative table
-bun ledger.ts record gemini-2.5-flash 1200 300 --request abc123
+bun ledger.ts pricing                 # the full verified table
+bun ledger.ts pricing refresh         # refresh the OpenRouter price cache
+bun ledger.ts status                  # db path, row count, providers, unpriced rows
+bun ledger.ts record models/gemini-3-flash-preview 1200 300 --provider google --request abc123
 ```
 
 ## Library
@@ -40,47 +49,47 @@ bun ledger.ts record gemini-2.5-flash 1200 300 --request abc123
 ```typescript
 import { recordUsage, getDailyCost } from "./ledger.ts";
 
+// returns USD cost, 0 for known-free, null when unpriced
 const cost = recordUsage({
-  model: "gemini-2.5-pro",
+  provider: "google",
+  model: "models/gemini-3-flash-preview",
   inputTokens: 5000,
   outputTokens: 1000,
   requestId: "req-123",
 });
-const day = getDailyCost("2026-09-30"); // { requests, inputTokens, outputTokens, costUsd, byModel }
+
+const day = getDailyCost("2026-09-30");
+// { requests, inputTokens, outputTokens, costUsd, unpricedRequests, unpricedTokens,
+//   byProvider, byModel, unpricedModels }
 ```
 
 ## Wiring into a router
 
-After receiving a Gemini response with `usageMetadata`:
-
-```typescript
-import { recordUsage } from "<path-to>/ranch/ledger/ledger.ts";
-
-const usage = response.usageMetadata;
-if (usage) {
-  recordUsage({
-    model: requestedModel,
-    inputTokens: usage.promptTokenCount || 0,
-    outputTokens: usage.candidatesTokenCount || 0,
-    requestId,
-  });
-}
-```
-
-For streaming responses, accumulate tokens from the final chunk's `usageMetadata`.
+The sovereign router hooks `recordUsage` into the non-streaming `callOne` path
+for **every** provider — the response's `usage` block fires the record, gated
+only on tokens being present. Best-effort and wrapped: accounting never throws
+into the response path. (Streaming SSE accumulation is still open.)
 
 ## Storage
 
 SQLite at `~/.cache/ranch-ledger/ledger.db` — table `usage_log`
-(ts, date, model, raw_model, input_tokens, output_tokens, cost_usd, request_id),
-indexed by date, model, ts.
+(ts, date, **provider**, model, raw_model, input_tokens, output_tokens,
+cost_usd, request_id), indexed by date, model, provider, ts.
+
+Cost semantics per row:
+- `cost_usd > 0` → priced at a verified per-token rate
+- `cost_usd = 0` → known-free
+- `cost_usd NULL` → unpriced (tokens counted, dollars unknown)
 
 ## Honest limits
 
 - **Forward-looking only.** Dollars start accruing when the hook goes live.
-  Historical billed cost needs the BigQuery billing export (one click in Cloud Console —
-  the `billing_export` dataset already exists).
+  Historical billed cost needs the BigQuery billing export (one click in Cloud
+  Console — the `billing_export` dataset already exists).
 - **Computed from list pricing, not the invoice.** EAP discounts, credits, and the
-  >200k-token tiers can move the real bill. There is no Google API for actual billed
-  spend outside BigQuery export — verified exhaustively 2026-09-30 (Catalog API,
-  29 GitHub repos, web). This is a platform limitation, not a tooling gap.
+  >200k-token tiers can move the real bill. There is no Google API for actual
+  billed spend outside BigQuery export — verified exhaustively 2026-09-30
+  (Catalog API, 29 GitHub repos, web). This is a platform limitation, not a
+  tooling gap.
+- **OpenRouter cache drift.** Prices are cached for 7 days; refresh with
+  `pricing refresh` when precision matters.
