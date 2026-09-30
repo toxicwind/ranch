@@ -183,3 +183,18 @@ instead of emitting. Money and credentials NEVER go through the oracle
 (`intake_request` is open to anyone), while control-signed `task_post`s
 gate the auction. Market state is an append-only brand book with replay
 guards, so re-ingested requests never duplicate decisions.
+
+
+## Build
+
+The main build entry is `scripts/flicker-build.py` — it submits the canonical
+core suite (`python3 bench/test_core.py`: deterministic, no model calls, no
+network; exits nonzero on failure) as a job to flicker, the estate build-job
+system, and streams the log:
+
+```bash
+./scripts/flicker-build.py
+```
+
+Honors `FLICKER_URL` (default `http://127.0.0.1:25148`). Exit 0 on success
+(or cached identical success), 1 on failure/timeout.
