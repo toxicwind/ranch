@@ -9,6 +9,8 @@ Usage: scripts/flicker-build.py
 Env:   FLICKER_URL (default http://127.0.0.1:25148)
 Exit:  0 iff the flicker job succeeds (or an identical job already succeeded:
        CACHED). 1 on failure/timeout.
+Job submission retries transient flicker 5xx/connection errors with
+backoff; polling tolerates transient flicker errors until the timeout.
 """
 import json
 import os
@@ -22,7 +24,14 @@ BUILD_CMD = "uv run pytest"
 WORKDIR_REL = "."
 TIMEOUT_S = 600
 POLL_S = 2
+SUBMIT_ATTEMPTS = 5
 FLICKER_URL = os.environ.get("FLICKER_URL", "http://127.0.0.1:25148")
+
+
+class FlickerError(Exception):
+    def __init__(self, message, retryable=False):
+        super().__init__(message)
+        self.retryable = retryable
 
 
 def api(method, path, body=None):
@@ -34,10 +43,12 @@ def api(method, path, body=None):
             text = r.read().decode()
     except urllib.error.HTTPError as e:
         text = e.read().decode(errors="replace")
-        raise SystemExit("flicker %s %s -> HTTP %s: %s"
-                         % (method, path, e.code, text[:500]))
+        raise FlickerError(
+            "flicker %s %s -> HTTP %s: %s" % (method, path, e.code, text[:500]),
+            retryable=500 <= e.code < 600)
     except OSError as e:
-        raise SystemExit("flicker %s %s unreachable: %s" % (method, path, e))
+        raise FlickerError("flicker %s %s unreachable: %s" % (method, path, e),
+                           retryable=True)
     if not text.strip():
         return None
     try:
@@ -46,12 +57,26 @@ def api(method, path, body=None):
         return text  # raw log text
 
 
+def submit(name, command):
+    delay = 2
+    for attempt in range(1, SUBMIT_ATTEMPTS + 1):
+        try:
+            return api("POST", "/api/jobs", {"name": name, "command": command})
+        except FlickerError as e:
+            if not e.retryable or attempt == SUBMIT_ATTEMPTS:
+                raise SystemExit("submit failed: %s" % e)
+            print("submit attempt %d failed (%s); retrying in %ds"
+                  % (attempt, e, delay))
+            time.sleep(delay)
+            delay *= 2
+
+
 def main():
     repo = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     workdir = os.path.normpath(os.path.join(repo, WORKDIR_REL))
     command = 'cd "%s" && %s' % (workdir, BUILD_CMD)
 
-    sub = api("POST", "/api/jobs", {"name": NAME, "command": command}) or {}
+    sub = submit(NAME, command) or {}
     jid = sub.get("id")
     if jid is None:
         print("submit failed: no id in %r" % (sub,), file=sys.stderr)
@@ -68,9 +93,13 @@ def main():
     seen = 0
     deadline = time.time() + TIMEOUT_S
     while True:
-        st = api("GET", "/api/jobs/%s" % jid) or {}
-        status = st.get("status", "")
-        logs = api("GET", "/api/jobs/%s/logs" % jid) or ""
+        try:
+            st = api("GET", "/api/jobs/%s" % jid) or {}
+            status = st.get("status", "")
+            logs = api("GET", "/api/jobs/%s/logs" % jid) or ""
+        except FlickerError as e:
+            print("(transient flicker error: %s; continuing)" % e)
+            status, logs = "", ""
         if len(logs) < seen:
             seen = 0
         if len(logs) > seen:
