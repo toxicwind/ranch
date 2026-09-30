@@ -1,0 +1,60 @@
+{
+  "batch": "audit-batch-3",
+  "auditor": "Surge",
+  "date": "2026-09-30",
+  "repos": [
+    {
+      "source_dir": "dualspace-ast-bm25",
+      "new_name": "dualspace-ast-bm25",
+      "github_repo": "toxicwind/dualspace-ast-bm25",
+      "visibility": "private",
+      "status": "pushed",
+      "sha": "b6d32041c3a1c1d94342c6fed0224e7f1128c435",
+      "notes": "Tests/benchmarks 3/3 pass. package.json renamed @sovereign/dual-space-code-retriever -> dualspace-ast-bm25. ls-remote verified."
+    },
+    {
+      "source_dir": "dualspace-ast-bm25-v2",
+      "new_name": null,
+      "github_repo": null,
+      "visibility": null,
+      "status": "duplicate-of",
+      "duplicate_of": "toxicwind/dualspace-ast-bm25",
+      "notes": "Content-identical to dualspace-ast-bm25 apart from notebooks; notebooks merged into the pushed repo. Not pushed separately."
+    },
+    {
+      "source_dir": "gatehouse",
+      "new_name": "gatehouse",
+      "github_repo": "toxicwind/gatehouse",
+      "visibility": "private",
+      "status": "pushed",
+      "sha": "a5eb1e265e98c3120c0831eba8046e05bdfa89b4",
+      "notes": "Real fixes: 5 tsc errors \u2014 typed MCPInitializeResult/MCPToolCallResult contracts added to src/protocol/mcp.ts, duplicate SearchResult/ToonSavingsResult interfaces deleted from src/types.ts. bun test 62/62. README rewritten (org sovereign-systems -> toxicwind); package.json @sovereign/gatehouse -> gatehouse. ls-remote verified."
+    },
+    {
+      "source_dir": "herd-keypool-gateway",
+      "new_name": "herd-keypool-gateway",
+      "github_repo": "toxicwind/herd-keypool-gateway",
+      "visibility": "private",
+      "status": "pushed",
+      "sha": "deeb7a0f4e973c3e53da97105051153d6462c830",
+      "notes": "node --test 22/22. README rewritten (clone URL sovereign-infrastructure -> toxicwind); package.json @sovereign/keypool -> herd-keypool-gateway. ls-remote verified."
+    },
+    {
+      "source_dir": "hyper-racer",
+      "new_name": "hyper-racer",
+      "github_repo": "toxicwind/hyper-racer",
+      "visibility": "private",
+      "status": "pushed",
+      "sha": "c6aae6aef7c8ab6ec3b4b7246a4e8062d6803191",
+      "notes": "Deep repair: stale committed .js mirrors masked a .ts tree that never compiled under its strict tsconfig. Deleted mirrors; repaired .ts for real: tsc 175 errors -> 0. Ported 3 JS-only modules to typed TS (core/equivalence.ts, core/fuzzer.ts, core/adaptive.ts), typed HighPrecisionTimer into core/timer.ts, full typed StatisticsEngine in core/stats.ts, reconstructed src/index.ts barrel + src/types.ts shim. Rewrote CandidateResult to the runtime shape, re-parameterized RaceOptions<TInput,TOutput>, added RaceSuiteResult/SystemSpecs/EquivalenceStatus/CIRegressionThresholds types, de-genericized VerificationReport. Added inline SVG throughput chart to MarkdownReporter.render(). bun run build clean; node --test 7/7; bun test 7/7. README: dead npm badge -> GitHub badge, from-source clone block, audit-status section. Not a duplicate of the race (hft_latency) skill: that is Python latency-racing doctrine; hyper-racer is a TS nanosecond benchmark/adaptive-routing library. ls-remote verified."
+    },
+    {
+      "source_dir": "metaclaw-runtime",
+      "new_name": null,
+      "github_repo": null,
+      "visibility": null,
+      "status": "quarantined-secrets",
+      "notes": "QUARANTINE \u2014 do NOT push without Chris's explicit call. src/sentinel/auto-approve.ts calls egress.approval.decide to auto-approve Sentinel HITL egress approvals (safeguard bypass). src/auth/session.ts persists hatchSessionCookie/authToken/noiseNotaryToken to data/session.json. test/runner.js:181 embeds a JWT-shaped notary-token payload (endorsement.v1:eyJ..., iss https://muse.ai, sub = VM UUID)."
+    }
+  ]
+}
