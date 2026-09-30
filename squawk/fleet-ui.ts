@@ -14,7 +14,10 @@ Bun.serve({
       return new Response(UI_HTML, { headers: { "Content-Type": "text/html" } });
     }
     // proxy everything else to the feed
-    const target = FEED + url.pathname + url.search;
+    // the feed serves everything under /squawk-feed/*; the client speaks
+    // bare relative paths, so add the prefix here (unless already present)
+    const pfx = url.pathname.startsWith("/squawk-feed/") ? "" : "/squawk-feed";
+    const target = FEED + pfx + url.pathname + url.search;
     const resp = await fetch(target, {
       method: req.method,
       headers: req.headers,
