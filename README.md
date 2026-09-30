@@ -30,6 +30,7 @@ One table, every animal first-class — no "secondary" framing, no pens inside p
 | 🟢 **squawk-ws** | `25147` | `squawk-ws/` (in-tree) | Squawk websocket server — the fleet channel's live socket. |
 | 🟢 **stream-broker** | `25215` | `stream-broker/` (in-tree, Bun) | Event-streaming backbone for the estate. |
 | 🟢 **windmill** | `25219` | `windmill/` (in-tree, Bun) | GPU / PCIe telemetry — tells you which way the wind blows. Rebuilt 2026-09-30 (was `pcie-moe-telemetry`). |
+| 🟢 **branding** | `25148` | `branding/` (in-tree, Python stdlib) | **Fleet build-job daemon.** Disk-backed queue, streaming logs, content-hash artifact cache — a brand marks the build. Moved 2026-09-30 (was `tools/buildsrv` in sovereign-projects). |
 | 🟢 **browserless** | `25130` | `barn/browserless` (in-tree) | Browser automation: browserless.io MCP server + native-launcher deployment. |
 | 🟢 **lookout** | `6080` | `barn/lookout` (in-tree) | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower Chris climbs to see what the agent browser is doing. |
 | **tack** | — | `tack/` (in-tree, `@ranch/tack`, Bun/TS) | 🤠 The tack room — the master provider catalog: every provider/model the estate rides, one registry. Feeds tau, herd's generated Go, the router. |
