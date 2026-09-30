@@ -21,8 +21,7 @@ Two hops, both verifiable in git:
 ```
 
 `d39a6f8` — *"ranch: adopt herd UI as the ranch dashboard (apiBase-configurable,
-vite outDir dist)"*. It created `ui/` at the top of this repo; there is no
-`ui/` under `stockyard/`, and the dashboard is a sibling of `stockyard/`, not
+vite outDir dist)"*. It created `ui/` at the top of this repo; the dashboard sits at the ranch root as a sibling of `herd/`, not
 a child of it. The upstream fingerprints are still everywhere in `src/`:
 
 | Evidence | Where |
@@ -209,5 +208,5 @@ restored. It reads `LLAMA_SWAP_URL`, `DOCS_AGENT_MODEL` and
 
 ## See also
 
-- [`../stockyard/herd/`](../stockyard/herd/) — where this UI came from
-- [`../remuda/flock/`](../remuda/flock/) — the cloud side it does not yet reach
+- [`../herd/`](../herd/) — where this UI came from
+- [`../flock/`](../flock/) — the cloud side it does not yet reach

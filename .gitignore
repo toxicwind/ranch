@@ -62,15 +62,15 @@ __pycache__/
 # Nested checkouts that carry their own .git but are NOT registered in
 # .gitmodules. Committing them would add gitlinks with no URL entry, which
 # breaks `git clone --recursive`. They are managed as independent repos.
-/stockyard/vansrouter/
-/stockyard/tau/
-/stockyard/boundless/
+/vansrouter/
+/tau/
+/boundless/
 /sigma/
 /omp-semantic-policy/
 /barn/woodpecker/
 /gear/
 
-# `corral` and `remuda/paddock` are ALSO nested checkouts, but unlike the
+# `corral` and `paddock` are ALSO nested checkouts, but unlike the
 # four paths above they are tracked on purpose: each is a gitlink (mode
 # 160000) with a path and url declared in .gitmodules, so `git clone
 # --recursive` can resolve them. Do not add them here -- an ignore rule does

@@ -1,8 +1,7 @@
 # stream-broker
 
 Socket fan-in for token streams on the mesh, supervised as
-`sovereign-stream-broker` on `127.0.0.1:25215`. Lives under `stockyard/`, not at
-`ranch/stream-broker/`.
+`sovereign-stream-broker` on `127.0.0.1:25215`.
 
 > **This is a placeholder.** 57 lines in `src/index.ts`, no dependency beyond
 > Node's `net`/`fs`/`path`, and the handler is a byte echo — the source says so
@@ -59,7 +58,7 @@ Any process that can reach either socket gets its own bytes back.
 
 ```toml
 [daemons.sovereign-stream-broker]
-dir        = "/home/toxic/sovereign/projects/range/ranch/stockyard/stream-broker"
+dir        = "/home/toxic/sovereign/projects/range/ranch/stream-broker"
 run        = "exec bun run src/index.ts"
 port       = 25215
 ready_port = 25215
