@@ -1,4 +1,5 @@
 import json
+import time
 from pathlib import Path
 
 import pytest
@@ -264,6 +265,7 @@ def _argv(monkeypatch, provider):
     # ranch/lasso fork: the lua_ipc_broken() probe also calls _run; pin it
     # False here so dispatch tests exercise the dispatch path, not the probe.
     monkeypatch.setattr(hyprctl, "_lua_ipc_broken", False)
+    monkeypatch.setattr(hyprctl, "_lua_ipc_broken_at", time.monotonic())
     return seen
 
 
@@ -379,7 +381,8 @@ def test_dispatch_reprobes_and_retries_when_the_manager_changed(monkeypatch):
     # talking the wrong language mid-session
     seen = []
     monkeypatch.setattr(hyprctl, "_provider", hyprctl.HYPRLANG)
-    monkeypatch.setattr(hyprctl, "_lua_ipc_broken", False)  # lasso probe pin
+    monkeypatch.setattr(hyprctl, "_lua_ipc_broken", False)
+    monkeypatch.setattr(hyprctl, "_lua_ipc_broken_at", time.monotonic())  # lasso probe pin
 
     def run(*args):
         seen.append(args)
@@ -402,7 +405,8 @@ def test_dispatch_reprobes_and_retries_when_the_manager_changed(monkeypatch):
 def test_dispatch_does_not_retry_when_the_manager_is_the_same(monkeypatch):
     seen = []
     monkeypatch.setattr(hyprctl, "_provider", hyprctl.HYPRLANG)
-    monkeypatch.setattr(hyprctl, "_lua_ipc_broken", False)  # lasso probe pin
+    monkeypatch.setattr(hyprctl, "_lua_ipc_broken", False)
+    monkeypatch.setattr(hyprctl, "_lua_ipc_broken_at", time.monotonic())  # lasso probe pin
 
     def run(*args):
         seen.append(args)
@@ -468,7 +472,8 @@ def test_dispatch_does_not_retry_on_a_probe_it_could_not_run(monkeypatch):
     # dispatch that may well have landed before the socket went quiet.
     seen = []
     monkeypatch.setattr(hyprctl, "_provider", hyprctl.LUA)
-    monkeypatch.setattr(hyprctl, "_lua_ipc_broken", False)  # lasso probe pin
+    monkeypatch.setattr(hyprctl, "_lua_ipc_broken", False)
+    monkeypatch.setattr(hyprctl, "_lua_ipc_broken_at", time.monotonic())  # lasso probe pin
 
     def run(*args):
         seen.append(args)

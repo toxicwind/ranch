@@ -24,7 +24,9 @@ import json
 import os
 import shutil
 import subprocess
-from typing import Any
+import threading
+import time
+from typing import Any, Callable
 
 from hypruse import journal
 
@@ -147,6 +149,13 @@ def forget_provider() -> None:
     _provider = None
 
 _lua_ipc_broken: bool | None = None
+_lua_ipc_broken_at: float = 0.0
+# A Hyprland `reload full-reset` (or safe-mode entry) can swap the config
+# manager and rebuild the IPC Lua state while hypruse is running, so a
+# forever-cache would pin the wrong strategy. The probe re-runs when the
+# cached answer is older than this; one `hyprctl eval` a minute is the
+# whole cost.
+_LUA_IPC_BROKEN_TTL_S = 60.0
 
 
 def lua_ipc_broken() -> bool:
@@ -157,16 +166,18 @@ def lua_ipc_broken() -> bool:
     the full hl.* API but the *IPC* Lua state (hyprctl eval / dispatch)
     only sees hl as a boolean flag. Every hl.dsp.* expression then fails
     with "attempt to index a boolean value (global 'hl')", so no dispatcher
-    can run through IPC at all. Probed once and cached; a clear error beats
-    the raw Lua traceback. See COMPAT.md.
+    can run through IPC at all. A clear error beats the raw Lua traceback.
+    See COMPAT.md.
     """
-    global _lua_ipc_broken
-    if _lua_ipc_broken is None:
+    global _lua_ipc_broken, _lua_ipc_broken_at
+    now = time.monotonic()
+    if _lua_ipc_broken is None or now - _lua_ipc_broken_at >= _LUA_IPC_BROKEN_TTL_S:
         try:
             _run("eval", "return type(hl.dsp)")
             _lua_ipc_broken = False
         except HyprctlError as exc:
             _lua_ipc_broken = "boolean" in str(exc)
+        _lua_ipc_broken_at = now
     return _lua_ipc_broken
 
 
@@ -351,26 +362,54 @@ def dispatch(name: str, *args: str) -> None:
         _dispatch_as(now, name, args)
 
 
-# --- ranch/lasso: three-strategy window focus --------------------------------
+# --- ranch/lasso: hyper-raced three-strategy window focus ------------------------
 # Hyprland 0.56.2's IPC Lua state exposes hl as boolean true (not the API
 # table), so hl.dsp.* dispatch fails there. Strategy 2 routes around it via
 # Wayland foreign-toplevel-management (wlrctl). Verified live 2026-09-30.
+#
+# The three strategies race concurrently (one daemon thread each) instead of
+# running in sequence: a hung strategy never blocks the race, and the first
+# STRICTLY VERIFIED win returns. Verification is the win condition — a
+# strategy that answers "ok" without the window actually taking focus loses.
+# Nothing is ever rolled back: all three strategies stay, cutting edge
+# first; the race itself is the fallback mechanism.
+
+# Per-strategy ceiling for the dispatch attempt. Daemon threads, so a loser
+# that hangs here never blocks the return.
+_FOCUS_DISPATCH_TIMEOUT_S = 3.0
+# Activewindow polling budget after a strategy claims success.
+_FOCUS_VERIFY_TIMEOUT_S = 2.0
+_FOCUS_VERIFY_POLL_S = 0.1
+# Race loop quantum. Two strategies verifying inside the same quantum tie;
+# ties break by _FOCUS_PREFERENCE, otherwise first-valid-wins, period.
+_FOCUS_RACE_QUANTUM_S = 0.025
+# Backstop: the whole race, stragglers included, never exceeds this.
+_FOCUS_RACE_TIMEOUT_S = 12.0
+# Same-tick tie-break only: hyprctl > wlrctl > legacy.
+_FOCUS_PREFERENCE = ("hyprctl", "wlrctl", "legacy")
 
 
 def _app_id_for_address(address: str) -> str | None:
-    """Map a Hyprland window address to its Wayland app-id (class)."""
+    """Map a Hyprland window address to its Wayland app-id (class).
+
+    The clients list can be stale (a window opened since the last read), so
+    a miss is followed by ONE fresh query before giving up — declaring
+    wlrctl inapplicable on a stale read would forfeit a working strategy
+    for no reason.
+    """
     addr = address.removeprefix("address:")
-    try:
-        clients = query("clients")
-    except HyprctlError:
-        return None
-    for c in clients:
-        if isinstance(c, dict) and c.get("address") == addr:
-            return c.get("class") or None
+    for _ in range(2):
+        try:
+            clients = query("clients")
+        except HyprctlError:
+            return None
+        for c in clients:
+            if isinstance(c, dict) and c.get("address") == addr:
+                return c.get("class") or None
     return None
 
 
-def _wlrctl_focus(app_id: str) -> None:
+def _wlrctl_focus(app_id: str, timeout: float = _FOCUS_DISPATCH_TIMEOUT_S) -> None:
     """Focus via wlrctl foreign-toplevel-management. Raises on failure."""
     if not shutil.which("wlrctl"):
         raise HyprctlError("wlrctl not on PATH")
@@ -380,7 +419,7 @@ def _wlrctl_focus(app_id: str) -> None:
     try:
         proc = subprocess.run(
             ["wlrctl", "toplevel", "focus", app_id],
-            capture_output=True, text=True, timeout=15, env=env,
+            capture_output=True, text=True, timeout=timeout, env=env,
         )
     except (subprocess.TimeoutExpired, OSError) as exc:
         raise HyprctlError(f"wlrctl toplevel focus: {exc}")
@@ -390,47 +429,158 @@ def _wlrctl_focus(app_id: str) -> None:
         )
 
 
+def _verify_focus(wanted: str, timeout: float = _FOCUS_VERIFY_TIMEOUT_S) -> bool:
+    """Strict win condition: `hyprctl -j activewindow` must name our address.
+
+    Polls briefly because the compositor applies focus asynchronously; a
+    strategy whose dispatch answered "ok" without the window taking focus
+    (wrong workspace, swallowed event, lying exit status) is NOT a win. A
+    verification that cannot complete inside the budget fails the strategy
+    the same as a wrong answer.
+    """
+    wanted = wanted.removeprefix("address:").lower()
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            active = query("activewindow")
+        except HyprctlError:
+            active = None
+        if isinstance(active, dict):
+            got = str(active.get("address") or "").removeprefix("address:").lower()
+            if got and got == wanted:
+                return True
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(_FOCUS_VERIFY_POLL_S)
+
+
+def _applicable_focus_strategies(
+    addr: str, raw_address: str
+) -> tuple[list[tuple[str, Callable[[], None]]], list[tuple[str, str]]]:
+    """The strategies that may run, plus the ones skipped and why.
+
+    Applicability is decided BEFORE the race starts, in the main thread, so
+    the dry-run barrier (which fires first, in focus_window) strictly
+    precedes any strategy thread. A strategy with no app-id mapping is kept
+    as an immediately-raising entry so the final error says WHY wlrctl sat
+    out instead of silently dropping it.
+    """
+    runners: list[tuple[str, Callable[[], None]]] = []
+    skipped: list[tuple[str, str]] = []
+    prov = provider()
+    if not (prov == LUA and lua_ipc_broken()):
+        runners.append(("hyprctl", lambda: _dispatch_as(prov, "focuswindow", (addr,))))
+    else:
+        skipped.append(
+            ("hyprctl", "IPC Lua state lacks the hl API table (see lasso/COMPAT.md)")
+        )
+
+    app_id = _app_id_for_address(raw_address)
+    if app_id is not None:
+        runners.append(("wlrctl", lambda: _wlrctl_focus(app_id, _FOCUS_DISPATCH_TIMEOUT_S)))
+    else:
+        def _no_app_id() -> None:
+            raise HyprctlError(f"no app-id for {raw_address} in clients list")
+
+        runners.append(("wlrctl", _no_app_id))
+
+    runners.append(("legacy", lambda: _dispatch_as(HYPRLANG, "focuswindow", (addr,))))
+    return runners, skipped
+
+
+def _race_focus_strategy(
+    name: str,
+    thunk: Callable[[], None],
+    wanted: str,
+    outcomes: dict[str, tuple[bool, str]],
+    lock: threading.Lock,
+    won: threading.Event,
+) -> None:
+    """One strategy's race entry: dispatch, then strict verification.
+
+    Any exception — dispatch failure, verify timeout, anything unexpected —
+    is recorded as this strategy's loss, never as a dead thread: a worker
+    must never kill the race.
+    """
+    ok, err = False, ""
+    try:
+        thunk()
+    except HyprctlError as exc:
+        err = f"{name}: {exc}"
+    except Exception as exc:  # noqa: BLE001 — the race degrades, never dies
+        err = f"{name}: unexpected {type(exc).__name__}: {exc}"
+    else:
+        if won.is_set():
+            return  # decided already; don't pile verification queries on
+        if _verify_focus(wanted, timeout=_FOCUS_VERIFY_TIMEOUT_S):
+            ok = True
+        else:
+            err = (
+                f"{name}: dispatch claimed success but activewindow never "
+                f"showed {wanted}"
+            )
+    with lock:
+        outcomes[name] = (ok, err)
+
+
 def focus_window(address: str) -> str:
-    """Focus the window at ADDRESS, trying three strategies in order.
+    """Focus the window at ADDRESS, hyper-racing three strategies.
+
+    All applicable strategies fire at once (one daemon thread each); the
+    first STRICTLY VERIFIED win returns. Verification queries
+    `hyprctl -j activewindow` and requires the focused address to match —
+    an "ok" that didn't move focus is a loss, not a win. Per-strategy
+    ceilings (dispatch and verify) mean a hung strategy never blocks the
+    race; losers are daemon threads that die with the process.
 
     1. hyprctl dispatch (Lua hl.dsp.* when the IPC Lua state has the API
        table, else legacy) — strict stdout == "ok" check.
     2. wlrctl toplevel focus <app-id> via foreign-toplevel-management.
     3. Legacy focuswindow as a last resort (hyprlang sessions).
 
-    Returns the strategy that succeeded ("hyprctl", "wlrctl", "legacy").
-    Raises HyprctlError if all three fail. Dry-run barrier applies.
+    Same-tick ties break hyprctl > wlrctl > legacy; otherwise
+    first-valid-wins, period. Returns the winning strategy's name
+    ("hyprctl", "wlrctl", "legacy"). Raises HyprctlError carrying every
+    strategy's error (and every skip reason) if all fail. The dry-run
+    barrier fires before any strategy thread starts.
     """
     journal.refuse_if_dry(f"focus_window {address}")
     addr = address if address.startswith("address:") else f"address:{address}"
-    prov = provider()
-    errors: list[str] = []
+    wanted = addr.removeprefix("address:").lower()
+    runners, skipped = _applicable_focus_strategies(addr, address)
 
-    # Strategy 1: hyprctl dispatch through the session's own config manager.
-    if not (prov == LUA and lua_ipc_broken()):
-        try:
-            _dispatch_as(prov, "focuswindow", (addr,))
-            return "hyprctl"
-        except HyprctlError as exc:
-            errors.append(f"hyprctl: {exc}")
+    outcomes: dict[str, tuple[bool, str]] = {}
+    lock = threading.Lock()
+    won = threading.Event()
+    for name, thunk in runners:
+        threading.Thread(
+            target=_race_focus_strategy,
+            args=(name, thunk, wanted, outcomes, lock, won),
+            name=f"focus-race-{name}",
+            daemon=True,
+        ).start()
 
-    # Strategy 2: wlrctl via foreign-toplevel-management.
-    try:
-        app_id = _app_id_for_address(address)
-        if not app_id:
-            raise HyprctlError(f"no app-id for {address} in clients list")
-        _wlrctl_focus(app_id)
-        return "wlrctl"
-    except HyprctlError as exc:
-        errors.append(f"wlrctl: {exc}")
+    deadline = time.monotonic() + _FOCUS_RACE_TIMEOUT_S
+    while True:
+        with lock:
+            for name in _FOCUS_PREFERENCE:
+                res = outcomes.get(name)
+                if res is not None and res[0]:
+                    won.set()
+                    return name
+            if len(outcomes) >= len(runners):
+                break  # everyone reported; no winner among them
+        if time.monotonic() >= deadline:
+            break  # hung stragglers; daemon threads die with the process
+        time.sleep(_FOCUS_RACE_QUANTUM_S)
 
-    # Strategy 3: legacy dispatcher string, last resort.
-    try:
-        _dispatch_as(HYPRLANG, "focuswindow", (addr,))
-        return "legacy"
-    except HyprctlError as exc:
-        errors.append(f"legacy: {exc}")
-
+    errors = [f"{name}: skipped ({reason})" for name, reason in skipped]
+    for name, _thunk in runners:
+        res = outcomes.get(name)
+        if res is None:
+            errors.append(f"{name}: timed out without reporting")
+        elif not res[0]:
+            errors.append(res[1])
     raise HyprctlError(
         f"focus_window {address}: all strategies failed: " + "; ".join(errors)
     )

@@ -27,22 +27,34 @@ Upstream `computer-use-linux` v0.7.7 (latest, 2026-09-29) has the same broken
 
 ## The fix: three-strategy focus (ranch/lasso fork)
 
-`hypruse.hyprctl.focus_window(address)` tries, in order:
+`hypruse.hyprctl.focus_window(address)` hyper-races three strategies
+concurrently — all applicable strategies fire at once, first strictly
+verified win returns:
 
 1. **hyprctl dispatch** — Lua `hl.dsp.*` when the IPC Lua state has the API
-   table (normal 0.56 builds), else the legacy dispatcher string (hyprlang
-   sessions). Strict `stdout == "ok"` check, not just exit status.
+   table (normal 0.56 builds). Strict `stdout == "ok"` check, not just exit
+   status.
 2. **wlrctl** — `wlrctl toplevel focus "<app-id>"` via Wayland
    foreign-toplevel-management. Address → app-id mapped through
-   `hyprctl -j clients` (`class` field). **Verified live 2026-09-30**: flips
-   the active window on the broken-hl build where strategy 1 cannot run.
-   Needs `wlrctl` on PATH (`/usr/local/bin/wlrctl` on yote).
-3. **Legacy focuswindow** — last resort for hyprlang sessions.
+   `hyprctl -j clients` (`class` field), refreshed once on a stale miss.
+   **Verified live 2026-09-30**: flips the active window on the broken-hl
+   build where strategy 1 cannot run. Needs `wlrctl` on PATH
+   (`/usr/local/bin/wlrctl` on yote).
+3. **Legacy focuswindow** — the hyprlang dispatcher string, always
+   applicable.
 
-The `type(hl)` probe (`lua_ipc_broken()`) is cached at startup — one
-`hyprctl eval` per process, not per call. `dispatch()` itself still raises a
-clear `HyprctlError` pointing here when the IPC Lua state is broken, instead
-of surfacing the raw Lua traceback.
+A win requires strict verification: `hyprctl -j activewindow` must show the
+exact requested address (an "ok" that didn't move focus is a loss, not a
+win). If multiple strategies verify in the same tick, preference order is
+hyprctl > wlrctl > legacy. All strategies share short ceilings (3s dispatch,
+2s verify, 12s global); hung strategies never block the race. If all fail,
+`HyprctlError` carries every strategy's error and every skip reason.
+
+The `type(hl)` probe (`lua_ipc_broken()`) is cached with a 60s TTL — one
+`hyprctl eval` per minute, not per call — and `forget_provider()` expires
+it immediately. `dispatch()` itself still raises a clear `HyprctlError`
+pointing here when the IPC Lua state is broken, instead of surfacing the
+raw Lua traceback.
 
 ## What works on the ranch's 0.56.2 build
 
