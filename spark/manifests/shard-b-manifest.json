@@ -1,0 +1,19 @@
+{
+  "shard": "b",
+  "entries": [
+    "Sovereign_Political_Ad_Intel_Engine_20260929T134500",
+    "Sovereign_Star_Repo_DualSpace_AST_BM25_20260928T134531",
+    "Sovereign_Master_Orchestrator",
+    "Sovereign_Star_Repo_Gatehouse_TwoTier_MCP_20260929T141500",
+    "Sovereign_Star_Repo_MetaClaw_Runtime_20260929T213000",
+    "Sovereign_Postal_Spectre_ESM",
+    "Sovereign_Star_Repo_DualSpace_AST_BM25_20260928T134642"
+  ],
+  "files": 301,
+  "bytes": 1344058,
+  "sha256": "c07d8c3c49cc2a5a568cea8b2b4a74e8beca0794e3770ae4d1dd9bf72e1446f4",
+  "failed": [],
+  "listingFiles": 301,
+  "listingBytes": 1344058,
+  "tarballBytes": 446990
+}

@@ -1,0 +1,19 @@
+{
+  "shard": "a",
+  "entries": [
+    "Sovereign",
+    "Sovereign_Artifacts_Bundle",
+    "Functional Programming in Scala.pdf",
+    "Sovereign_Star_Repo_Ranch_Interlock_20260929T220000",
+    "sovereign-master-fix.sh",
+    "Sovereign_Star_Repo_Olfactory_Headspace_Engine_20260929T134000",
+    "Sovereign_Star_Repo_Universal_KeyPool_Bun_20260929T141500"
+  ],
+  "files": 96,
+  "bytes": 13005903,
+  "sha256": "0364a07b146f4db3eff34ec6d7f7447378371e4100ba4083ae4bba47ab0702ed",
+  "failed": [],
+  "listingFiles": 96,
+  "listingBytes": 13005903,
+  "tarballBytes": 10062021
+}
