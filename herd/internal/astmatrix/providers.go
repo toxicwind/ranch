@@ -129,7 +129,9 @@ var codingAlias = func() map[string][2]string {
 	return m
 }()
 
-// herdLocalAliases are herd-specific alias extras not in the canonical catalog:
+// herdLocalAliases are herd-specific aliases with NO canonical equivalent.
+// Canonical aliases live in ProviderCatalogAliases (generated from @ranch/remuda);
+// anything duplicated there was removed 2026-09-30 - this map holds only true extras:
 // strategy directives, local-role shortcuts, and extended-registry aliases
 // (whose providers live in registry.go, not the core catalog).
 var herdLocalAliases = map[string][2]string{
@@ -145,47 +147,9 @@ var herdLocalAliases = map[string][2]string{
 	"local-longctx": {"llama-swap", "local-longctx"},
 	"local-auto":    {"llama-swap", "local-quality"},
 	// OpenRouter free aliases (verified working 2026-07-28)
-	"gemma4-31b":     {"openrouter", "google/gemma-4-31b-it:free"},
-	"gemma4-26b":     {"openrouter", "google/gemma-4-26b-a4b-it:free"},
-	"nemotron-super": {"openrouter", "nvidia/nemotron-3-super-120b-a12b:free"},
-	"nemotron-nano":  {"openrouter", "nvidia/nemotron-3-nano-30b-a3b:free"},
-	"nemotron-ultra": {"openrouter", "nvidia/nemotron-3-ultra-550b-a55b:free"},
-	"nemotron-omni":  {"openrouter", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"},
-	"laguna-xs":      {"openrouter", "poolside/laguna-xs-2.1:free"},
-	"laguna-s":       {"openrouter", "poolside/laguna-s-2.1:free"},
-	"north-mini":     {"openrouter", "cohere/north-mini-code:free"},
 	"gpt-oss-20b":    {"openrouter", "openai/gpt-oss-20b:free"},
-	"ling-flash":     {"openrouter", "inclusionai/ling-3.0-flash:free"},
 	// NVIDIA NIM aliases
-	"nim-nemotron-super":    {"nvidia", "nvidia/nemotron-3-super-120b-a12b"},
-	"nim-nemotron-nano":     {"nvidia", "nvidia/nemotron-3-nano-30b-a3b"},
-	"nim-llama-3.1-70b":     {"nvidia", "meta/llama-3.1-70b-instruct"},
 	"nim-llama-3.3-70b":     {"nvidia", "meta/llama-3.3-70b-instruct"},
-	"nim-qwen3.5-397b":      {"nvidia", "qwen/qwen3.5-397b-a17b"},
-	"nim-qwen3.5-122b":      {"nvidia", "qwen/qwen3.5-122b-a10b"},
-	"nim-deepseek-v4-flash": {"nvidia", "deepseek-ai/deepseek-v4-flash"},
-	"nim-deepseek-v4-pro":   {"nvidia", "deepseek-ai/deepseek-v4-pro"},
-	"nim-mistral-large-3":   {"nvidia", "mistralai/mistral-large-3-675b-instruct-2512"},
-	"nim-gemma4-31b":        {"nvidia", "google/gemma-4-31b-it"},
-	"nim-glm5.2":            {"nvidia", "z-ai/glm-5.2"},
-	"nim-inkling":           {"nvidia", "thinkingmachines/inkling"},
-	// Google aliases
-	"gemini-2.5-flash":      {"google", "models/gemini-2.5-flash"},
-	"gemini-2.5-flash-lite": {"google", "models/gemini-2.5-flash-lite"},
-	"gemini-2.0-flash":      {"google", "models/gemini-2.0-flash"},
-	"gemma4-31b-google":     {"google", "models/gemma-4-31b-it"},
-	// Mistral aliases
-	"mistral-small":  {"mistral", "mistral-small-latest"},
-	"codestral":      {"mistral", "codestral-latest"},
-	"mistral-large":  {"mistral", "mistral-large-latest"},
-	"mistral-medium": {"mistral", "mistral-medium-latest"},
-	// Groq aliases
-	"groq-llama-3.3-70b": {"groq", "llama-3.3-70b-versatile"},
-	"groq-qwen3-32b":     {"groq", "qwen/qwen3-32b"},
-	"groq-qwen3.6-27b":   {"groq", "qwen/qwen3.6-27b"},
-	"groq-gpt-oss-120b":  {"groq", "openai/gpt-oss-120b"},
-	"groq-gpt-oss-20b":   {"groq", "openai/gpt-oss-20b"},
-	"groq-llama-4-scout": {"groq", "meta-llama/llama-4-scout-17b-16e-instruct"},
 	// Extended provider aliases from registry
 	"opencode":           {"opencode", "opencode"},
 	"xai-grok-4":         {"xai", "grok-4"},

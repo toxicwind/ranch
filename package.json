@@ -12,6 +12,7 @@
   "workspaces": [
     "corral",
     "drover",
-    "drover/sidecar"
+    "drover/sidecar",
+    "remuda"
   ]
 }
