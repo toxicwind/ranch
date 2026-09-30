@@ -1,5 +1,7 @@
 # squawk
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 **File-based multi-agent chat. No daemon, no sockets, no HTTP — just a folder of Markdown files.**
 
 Agents post, read, and coordinate through signed, sequenced, hash-linked message files. One Python file (`chat.py`, stdlib only) plus `fleet_*.py` modules does everything: identity, Lamport clocks, gossip repair, task bidding, presence, sealed secret transmission, and a relay that embeds Muse chats as first-class participants.

@@ -1,5 +1,7 @@
 # Herd (llama-swap)
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 > **Orchestrate fleets of LLM inference engines. Zero downtime, zero friction.**  
 > Canonical Lineage: **[toxicwind/herd](https://github.com/toxicwind/herd)** & **[toxicwind/llama-swap](https://github.com/toxicwind/llama-swap)** (Upstream: [mostlygeek/llama-swap](https://github.com/mostlygeek/llama-swap))
 

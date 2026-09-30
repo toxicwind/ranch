@@ -1,5 +1,7 @@
 # secretsmith
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 Maximal freedesktop Secret Service CLI for the estate. Fork lineage:
 [GNOME/libsecret](https://github.com/GNOME/libsecret) (`secret-tool`), forked to
 [toxicwind/libsecret](https://github.com/toxicwind/libsecret) — this tool

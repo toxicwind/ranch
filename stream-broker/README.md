@@ -1,5 +1,7 @@
 # stream-broker
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 Socket fan-in for token streams on the mesh, supervised as
 `sovereign-stream-broker` on `127.0.0.1:25215`.
 

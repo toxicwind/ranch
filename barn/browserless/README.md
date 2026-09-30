@@ -1,5 +1,7 @@
 # Browserless — sovereign mesh
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 Browser automation for the fleet: the **browserless.io MCP server** plus the
 **native-launcher deployment** of the browserless server itself, unified
 under the ranch monorepo at `projects/range/ranch/barn/browserless/`.

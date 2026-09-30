@@ -1,5 +1,7 @@
 # Switchboard — the master skill router
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 **Status:** proof-of-concept live (2026-09-30). MCP server + agent-driven deploy proof passing.
 
 ## The problem it solves

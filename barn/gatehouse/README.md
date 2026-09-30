@@ -74,6 +74,8 @@ The installer automatically:
 macOS (Homebrew):
 ```bash
 # macOS — GUI tray app (recommended):
+
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
 brew install --cask smart-mcp-proxy/mcpproxy/mcpproxy
 
 # macOS / Linux — headless CLI only:

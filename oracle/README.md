@@ -1,5 +1,7 @@
 # 🔮 Oracle — the ranch's decision corral
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 ![ranch](https://img.shields.io/badge/ranch-corral-brown?style=for-the-badge)
 ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![oracle-engine](https://img.shields.io/badge/oracle--engine-673AB7?style=for-the-badge)

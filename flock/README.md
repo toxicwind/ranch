@@ -9,6 +9,8 @@
 
 # 🐦 flock
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 **One OpenAI-compatible front door for every cloud model you can reach — with the rate-limit brains to stay inside every provider's speed limit.**
 
 flock is the herd's sky counterpart: not local models, APIs. It routes `chat/completions` across **13 providers** — NVIDIA NIM, OpenRouter, Groq, Cerebras, Together, Fireworks, Hyperbolic, GitHub Models, Mistral, OpenAI, Perplexity, SiliconFlow, and back to local models via the llama-swap provider — using named **strategies** instead of model names.

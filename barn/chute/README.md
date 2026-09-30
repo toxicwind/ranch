@@ -1,5 +1,7 @@
 # chute
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 TCP ↔ stdio ACP passage for the herd.
 
 Named for the ranch chute: the constrained single-file passage through

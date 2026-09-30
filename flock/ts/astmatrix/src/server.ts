@@ -7,7 +7,7 @@
  * the health DB — the full behavioral port of herd/internal/astmatrix.
  *
  * Env:
- *   ASTMATRIX_PORT   listen port (default 25194)
+ *   ASTMATRIX_PORT   listen port (default 25214)
  *   ASTMATRIX_STRATEGY default strategy (default "hybrid")
  *   (plus SOVEREIGN_LIVE_CATALOG, SOVEREIGN_CATALOG_404_URL,
  *    SOVEREIGN_CATALOG_ADMIN_TOKEN from live-catalog.ts)
@@ -15,7 +15,7 @@
 import { Router } from "./router.ts";
 import { serveUI, uiData } from "./ui.ts";
 
-const PORT = parseInt(process.env.ASTMATRIX_PORT || "25194", 10);
+const PORT = parseInt(process.env.ASTMATRIX_PORT || "25214", 10);
 
 const router = Router.create({
   enabled: true,
@@ -42,7 +42,7 @@ Bun.serve({
     const url = new URL(req.url);
     try {
       if (url.pathname === "/health") {
-        return Response.json({ status: "ok", router: "astmatrix-ts", ...router.uiData() });
+        return Response.json({ status: "ok", ...router.uiData(), router: "astmatrix-ts" });
       }
       if (url.pathname === "/v1/models") return modelsList();
       if (url.pathname === "/v1/chat/completions" && req.method === "POST") {

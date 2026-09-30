@@ -1,5 +1,7 @@
 # 🤠 lasso
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 **Hyprland-native desktop control MCP** — you lasso windows to control them.
 
 Forked from [IlyasKhallouki/hypruse](https://github.com/IlyasKhallouki/hypruse) v0.11.0

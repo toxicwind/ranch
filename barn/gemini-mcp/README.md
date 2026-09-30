@@ -1,5 +1,7 @@
 # gemini-mcp
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 First-class Gemini API MCP server for awrawr-pc. Multi-key pool with
 round-robin + automatic failover across 5 Gemini API keys.
 

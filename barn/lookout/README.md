@@ -1,5 +1,7 @@
 # lookout
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 The ranch's watchtower. An isolated virtual display where the agent browser
 lives, plus an interactive web viewer so Chris can climb up and see what
 it's doing — without the browser ever touching his visible Hyprland session.

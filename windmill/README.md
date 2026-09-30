@@ -1,5 +1,7 @@
 # 🌬️ windmill
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 GPU / PCIe telemetry for the ranch — the thing on the spread that never stops
 spinning and tells you which way the wind blows.
 

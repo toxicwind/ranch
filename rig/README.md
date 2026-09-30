@@ -2,6 +2,8 @@
   <img src="public/assets/openfang-logo.png" width="160" alt="OpenFang Logo" />
 </p>
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 <h1 align="center">OpenFang</h1>
 <h3 align="center">The Agent Operating System</h3>
 

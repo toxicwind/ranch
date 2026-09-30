@@ -1,5 +1,7 @@
 # 🔥 campfire
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 **Where the crew gathers to talk.**
 
 Campfire is the ranch's chatty helper system — the multi-agent conversation layer. Where squawk is the wire (messages get from A to B), campfire is the *culture*: who talks to whom, how debates resolve, how presence propagates, how the pack stays chatty without going noisy.

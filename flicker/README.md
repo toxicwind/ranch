@@ -1,5 +1,7 @@
 # Woodpecker
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 <p align="center">
   <a href="https://github.com/woodpecker-ci/woodpecker/">
     <img alt="Woodpecker" src="docs/static/img/logo.svg" width="220"/>

@@ -1,5 +1,7 @@
 # Drover — Herd Router VS Code Extension
 
+> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+
 VS Code extension for herd-level model routing with Gemini EAP tool retrieval.
 
 ## Structure

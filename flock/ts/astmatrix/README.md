@@ -38,7 +38,7 @@ src/
   registry.ts      extended provider registry (9Router-derived, hand-maintained)
   router.ts        Router: strategies, racing, callOne, HTTP handling
   ui.ts            self-contained dashboard HTML
-  server.ts        Bun sidecar entrypoint (HTTP on $ASTMATRIX_PORT, default 25194)
+  server.ts        Bun sidecar entrypoint (HTTP on $ASTMATRIX_PORT, default 25214)
   index.ts         public exports
 tests/             bun:test ports of the Go test files + Tack integration tests
 ```
@@ -49,7 +49,7 @@ tests/             bun:test ports of the Go test files + Tack integration tests
 bun install
 bun test            # 61 tests
 bun run typecheck   # tsc --noEmit
-ASTMATRIX_PORT=25194 bun ./src/server.ts
+ASTMATRIX_PORT=25214 bun ./src/server.ts
 ```
 
 Endpoints: `GET /health`, `GET /v1/models`, `POST /v1/chat/completions`
