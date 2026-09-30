@@ -16,5 +16,5 @@ models = "curl -sf http://127.0.0.1:25100/v1/models | python3 -c 'import sys,jso
 # mostlygeek/llama-swap's ui/). It used to live here as ui-svelte, with
 # mesh/ui-svelte as a byte-identical dead twin and ui/ as a third, diverged
 # copy. All three are gone; this task now points at the master.
-ui = "cd ../ui && bun run dev"
-"ui:build" = "cd ../ui && bun run build"
+ui = "cd ../../ui && bun run dev"
+"ui:build" = "cd ../../ui && bun run build"
