@@ -1284,9 +1284,13 @@ async fn relay(resp: reqwest::Response, ctx: &Ctx) -> Response {
     if status.is_success() {
         record_observations(ctx, &observe_buffered(&body));
     }
+    // BrighTO pattern: x-router-overhead-ms measures ingress->dispatch.
+    // Uses Ctx.started (request ingress time) for the overhead calculation.
+    let overhead_ms = ctx.started.elapsed().as_millis().to_string();
     Response::builder()
         .status(status)
         .header(header::CONTENT_TYPE, content_type)
+        .header("x-router-overhead-ms", overhead_ms)
         .body(Body::from(body))
         .unwrap()
 }
