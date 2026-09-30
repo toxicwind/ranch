@@ -19,46 +19,40 @@ If you run models on a box and also call cloud APIs, this is the shape of the an
 
 ## 🐄 The ranch
 
-| Service | Port | Source | Role |
+One table, every animal first-class — no "secondary" framing, no pens inside pens. 🟢 = live under pitchfork, port verified listening.
+
+| Component | Port | Path | Role |
 |---|---|---|---|
-| **herd** | `25100` | `herd/` (in-tree) — the llama-swap fork, Go | **LOCAL front door.** Serves on-box GGUFs over llama.cpp engines (`:25001+`). Anything cloud goes to the flock daemon via its `flock:` config key. |
-| **flock** | `25193` | `flock/` (in-tree) — the Rust provider router; standalone repo [`toxicwind/flock`](https://github.com/toxicwind/flock) | **EXTERNAL provider router.** Rust. Strategies, key pools, 429 rotation, circuit breakers, health/Elo. NIM · OpenRouter · Groq · Cerebras · … |
-| **gatehouse** | `25127` | `barn/gatehouse` (this repo) | **MCP gateway.** Tool serving. A peer of the others, not their parent — see [Not the holder](#not-the-holder). |
-| **chute** | `25111` | `barn/chute` (this repo) | **Tau engine, TCP-exposed.** stdio→TCP ACP passage — the tau coding-agent engine as a daemon on a real port. |
-
-All four run under **pitchfork** as daemons `herd`, `flock`, `gatehouse`, and `tau` (via chute).
-
-### Every part of the spread
-
-| Path | What it is |
-|---|---|
-| `herd/` | In-tree code: the llama-swap fork (Go) — the local front door `:25100` |
-| `flock/` | In-tree code: the Rust provider router (`:25193`); standalone repo [`toxicwind/flock`](https://github.com/toxicwind/flock) |
-| `tack/` | 🤠 The tack room (`@ranch/tack`, Bun/TS) — the master provider catalog: every provider/model the estate rides, one registry. tau's main-class provider system, herd's generated Go, the router's direct import |
-| `stream-broker/` | `sovereign-stream-broker` on `127.0.0.1:25215` (Bun) |
-| `router-legacy/` | Legacy router — kept for reference |
-| `paddock/` | VansRouter submodule (`toxicwind/VansRouter`) |
-| `barn/gatehouse` | MCP gateway (`:25127`) — tool serving, peer of the ranch |
-| `barn/chute` | TCP ↔ stdio ACP passage: the tau engine as a daemon on `:25111` |
-| `barn/browserless` | Browser automation (`:25130`): browserless.io MCP server + native-launcher deployment |
-| `barn/gemini-mcp` | First-class Gemini API MCP server; multi-key pool with round-robin + failover |
-| `barn/secretsmith` | Maximal freedesktop Secret Service CLI for the estate |
-| `tau/` | Live tau engine checkout (gitignored) — the coding-agent engine chute serves on `:25111` |
-| `boundless/` | Live boundless checkout (gitignored) |
-| `vansrouter/` | Live VansRouter checkout (gitignored) |
-| `sigma/` | Live sigma checkout (gitignored) |
-| `omp-semantic-policy/` | Live omp-semantic-policy checkout (gitignored) |
-| `roundup/` | Roundup benchmark estate (renamed from guidellm 2026-09-30; in-tree code, standalone repo `toxicwind/roundup`) |
-| `trailboss/` | Vendored defork of goldfinger: cuts repo selections across the org and drives changes through every head — built for agents as much as people |
-| `drover/` | ModelPilot VS Code extension (multi-provider AI routing for Copilot Chat), sovereign build |
-| `windmill/` | GPU / PCIe telemetry (`:25219`) -- rebuilt 2026-09-30 (was `pcie-moe-telemetry`); tells you which way the wind blows |
-| `gear/` | The estate's skill library — hundreds of skills, one directory each |
-| `../ui/` | Ranch control UI — now held at the range level (sibling of ranch/): one Svelte SPA over herd + flock |
-| `squawk/` | File-based multi-agent chat: no daemon, no sockets — signed, sequenced message files |
-| `squawk-ws/` | Squawk websocket client/server (`:25147`) |
-| `corral/` | super-ralph agent framework (submodule) — the mission runner |
-| `research/` | Provider/model discovery scripts |
-| `data/` | Discovery + categorization JSON |
+| 🟢 **herd** | `25100` | `herd/` (in-tree) | **LOCAL front door.** Serves on-box GGUFs over llama.cpp engines (`:25001+`). Anything cloud goes to the flock daemon via its `flock:` config key. |
+| 🟢 **flock** | `25193` | `flock/` (in-tree); standalone [`toxicwind/flock`](https://github.com/toxicwind/flock) | **EXTERNAL provider router.** Rust. Strategies, key pools, 429 rotation, circuit breakers, health/Elo. NIM · OpenRouter · Groq · Cerebras · … |
+| 🟢 **gatehouse** | `25127` | `barn/gatehouse` (in-tree) | **MCP gateway.** Tool serving — a peer of the others, not their parent. |
+| 🟢 **chute** | `25111` | `barn/chute` (in-tree) | **Tau engine, TCP-exposed.** stdio→TCP ACP passage — the tau coding-agent engine as a daemon on a real port. |
+| 🟢 **squawk-ws** | `25147` | `squawk-ws/` (in-tree) | Squawk websocket server — the fleet channel's live socket. |
+| 🟢 **stream-broker** | `25215` | `stream-broker/` (in-tree, Bun) | Event-streaming backbone for the estate. |
+| 🟢 **windmill** | `25219` | `windmill/` (in-tree, Bun) | GPU / PCIe telemetry — tells you which way the wind blows. Rebuilt 2026-09-30 (was `pcie-moe-telemetry`). |
+| 🟢 **browserless** | `25130` | `barn/browserless` (in-tree) | Browser automation: browserless.io MCP server + native-launcher deployment. |
+| **tack** | — | `tack/` (in-tree, `@ranch/tack`, Bun/TS) | 🤠 The tack room — the master provider catalog: every provider/model the estate rides, one registry. Feeds tau, herd's generated Go, the router. |
+| **squawk** | — | `squawk/` (in-tree) | File-based multi-agent chat: signed, sequenced message files. NATS bus (`squawk/nats/`) underneath. |
+| **corral** | — | `corral/` (submodule → `toxicwind/super-ralph`) | The super-ralph agent framework — the mission runner. |
+| **paddock** | — | `paddock/` (submodule → `toxicwind/VansRouter`) | VansRouter — routed agent traffic. |
+| **roundup** | — | `roundup/` (in-tree); standalone [`toxicwind/roundup`](https://github.com/toxicwind/roundup) | Benchmark estate (renamed from guidellm 2026-09-30) — gathers and assesses every head. |
+| **trailboss** | — | `trailboss/` (in-tree, Go) | Cuts repo selections across the org and drives changes through every head — built for agents as much as people. |
+| **drover** | — | `drover/` (in-tree) | ModelPilot VS Code extension — multi-provider AI routing for Copilot Chat. |
+| **gear** | — | `gear/` (in-tree) | The estate's skill library — 493 skills, one directory each. |
+| **brand** | — | `brand/` (in-tree) | The branding iron — git hooks (pre-commit, pre-push, gitleaks) every ranch repo wears. |
+| **router-legacy** | — | `router-legacy/` (in-tree) | Legacy router — kept for reference. |
+| **barn/gemini-mcp** | — | `barn/gemini-mcp` (in-tree) | First-class Gemini API MCP server — multi-key pool, round-robin + failover. |
+| **barn/secretsmith** | — | `barn/secretsmith` (in-tree) | Maximal freedesktop Secret Service CLI for the estate. |
+| **tau** | — | `tau/` (live checkout, gitignored) | The tau coding-agent engine — chute serves it on `:25111`. Own repo [`toxicwind/tau`](https://github.com/toxicwind/tau). |
+| **boundless** | — | `boundless/` (live checkout, gitignored) | Live boundless checkout — deploys from its own repo. |
+| **vansrouter** | — | `vansrouter/` (live checkout, gitignored) | Live VansRouter checkout — deploys from its own repo. |
+| **sigma** | — | `sigma/` (live checkout, gitignored) | Live sigma checkout — deploys from its own repo. |
+| **omp-semantic-policy** | — | `omp-semantic-policy/` (live checkout, gitignored) | Live omp-semantic-policy checkout — deploys from its own repo. |
+| **barn/woodpecker** | — | `barn/woodpecker` (live checkout, gitignored) | Woodpecker CI source checkout — CI tooling. |
+| **ui** | — | `../ui/` (range level, Svelte) | Ranch control UI — one SPA over herd + flock, held at the range level. |
+| **research** | — | `research/` (in-tree) | Provider/model discovery scripts. |
+| **data** | — | `data/` (in-tree) | Discovery + categorization JSON. |
+| **docs** | — | `docs/` (in-tree) | Architecture docs — the written contract. |
 
 Each subproject keeps its own README; this file is the map, not the territory.
 
@@ -70,7 +64,7 @@ Each subproject keeps its own README; this file is the map, not the territory.
 - **Strategy names are routing directives, not model names:** `free` → `Strategy::Free` → free-tier external providers (NIM first — the best damn free endpoint — then OpenRouter-free, …)
 - **The provider registry lives in flock.** herd's in-tree `internal/flock` in-process router was retired 2026-09-17 and is not compiled into the shipped binary; the server imports routing from the upstream `llama-swap` module instead. Cloud routing is the `flock:` key
 - **This repo is the map, not the territory.** Fixes land in the owning repo — never as local overlays. No monkeypatches.
-- **Live checkouts** (`tau/`, `boundless/`, `vansrouter/`, `sigma/`, `omp-semantic-policy/`) are gitignored and deploy from their own repos; the ranch tracks only the map
+- **Live checkouts** (`tau/`, `boundless/`, `vansrouter/`, `sigma/`, `omp-semantic-policy/`, `barn/woodpecker/`) are gitignored and deploy from their own repos; the ranch tracks only the map
 - See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full contract
 
 ---
