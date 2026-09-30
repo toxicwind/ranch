@@ -337,3 +337,66 @@ class SquawkFeedFatTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class AtomicWriteTests(unittest.TestCase):
+    """Crash-safe write path (write-file-atomic pattern): temp + fsync
+    + atomic replace + dir fsync; temp cleaned on failure."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.d = Path(self._tmp.name)
+
+    def test_atomic_write_roundtrip(self):
+        target = self.d / "final.md"
+        squawk_feed._atomic_write_text(target, "hello\n")
+        self.assertEqual(target.read_text(), "hello\n")
+        leftovers = [x for x in self.d.iterdir() if x.name.startswith(".tmp-")]
+        self.assertEqual(leftovers, [], "no temp files left behind")
+
+    def test_atomic_write_fsyncs_file_and_dir(self):
+        calls = []
+        real_fsync = os.fsync
+
+        def spy(fd):
+            calls.append(fd)
+            return real_fsync(fd)
+
+        target = self.d / "final.md"
+        orig = os.fsync
+        os.fsync = spy
+        try:
+            squawk_feed._atomic_write_text(target, "data")
+        finally:
+            os.fsync = orig
+        # at least two fsyncs: the temp file and the directory
+        self.assertGreaterEqual(len(calls), 2,
+                                "must fsync both file and dir, got %d" % len(calls))
+
+    def test_atomic_write_cleans_temp_on_failure(self):
+        target = self.d / "final.md"
+        real_replace = os.replace
+
+        def boom(*a):
+            raise OSError("injected")
+
+        os.replace = boom
+        try:
+            with self.assertRaises(OSError):
+                squawk_feed._atomic_write_text(target, "data")
+        finally:
+            os.replace = real_replace
+        self.assertFalse(target.exists())
+        leftovers = [x for x in self.d.iterdir() if x.name.startswith(".tmp-")]
+        self.assertEqual(leftovers, [], "temp must be cleaned on failure")
+
+    def test_publish_message_uses_crash_safe_write(self):
+        root = self.d / "chat-root"
+        seq, fname = squawk_feed._publish_message(
+            root, "fleet", "tester", "title", "crash-safe body")
+        final = root / "fleet" / fname
+        self.assertTrue(final.is_file())
+        self.assertGreater(final.stat().st_size, 0)
+        self.assertIn("crash-safe body", final.read_text())
+        self.assertIn("seq: %d" % seq, final.read_text())

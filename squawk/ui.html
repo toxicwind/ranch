@@ -78,7 +78,7 @@
 <header>
   <h1>SQUAWK</h1>
   <input id="channel" value="fleet" size="10" title="channel" aria-label="channel">
-  <button id="src" title="live source: click to switch poll/nats" aria-label="live source">poll</button>
+  <button id="src" title="live source: click to switch poll/ws/nats" aria-label="live source">poll</button>
   <div class="spacer"></div>
   <span id="conn" aria-hidden="true">●</span>
 </header>
@@ -113,11 +113,12 @@ try {
 } catch (e) {}
 let since = 0, running = false, failures = 0, booted = false, gen = 0;
 let pollCtrl = null; // per-generation AbortController: a channel switch aborts in-flight polls
-// live source: 'poll' (long-poll, default) or 'nats' (JetStream mirror over websocket).
-// ?src=nats selects NATS; the header button toggles at runtime.
+// live source: 'poll' (long-poll, default), 'ws' (squawk-ws push server),
+// or 'nats' (JetStream mirror over websocket). ?src= selects; the header
+// button cycles poll -> ws -> nats at runtime.
 let srcMode = 'poll';
 try { const qsrc = new URLSearchParams(location.search).get('src');
-      if (qsrc === 'nats' || qsrc === 'poll') srcMode = qsrc; } catch (e) {}
+      if (qsrc === 'nats' || qsrc === 'poll' || qsrc === 'ws') srcMode = qsrc; } catch (e) {}
 function paintSrc() { const b = $('src'); if (b) { b.textContent = srcMode;
   b.title = 'live source: ' + srcMode + ' (click to switch)'; } }
 const TAIL = 200;       // bounded recent snapshot for initial load
@@ -250,6 +251,62 @@ $('msg').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
 });
 
+// --- squawk-ws live source --------------------------------------------
+// Push feed from the squawk-ws server (first-class websocket, inotify-driven).
+// History comes from the bounded file snapshot in boot(); this socket carries
+// live messages plus reconnect replay: we send our last seen `seq` as `since`
+// and the server replays everything missed (socket.io-style recovery).
+// Any failure falls back to the long-poll loop -- the file feed stays the fallback.
+let wsLive_sock = null;
+function wsUrl() {
+  return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host
+       + '/squawk-ws?token=' + encodeURIComponent(token);
+}
+function wsLive(myGen) {
+  if (myGen !== gen || !running) return;
+  setState('loading');
+  let ws;
+  try { ws = new WebSocket(wsUrl()); } catch (e) { return wsFallback(myGen, 'ws blocked'); }
+  wsLive_sock = ws;
+  let fails = 0;
+  const dead = why => {
+    try { ws.close(); } catch (e) {}
+    if (myGen !== gen || !running) return;
+    if (++fails > 3) return wsFallback(myGen, why);
+    line('squawk-ws hiccup — resuming from seq ' + since + '…', 'sys');
+    setTimeout(() => wsLive(myGen), Math.min(5000, 500 * fails));
+  };
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ subscribe: [chan()], since: since }));
+    setState('live', ' · ws');
+    fails = 0;
+  };
+  ws.onmessage = ev => {
+    if (myGen !== gen || !running) return;
+    let m;
+    try { m = JSON.parse(ev.data); } catch (e) { return; }
+    if ((m.seq || 0) > since) {
+      render(m); since = m.seq;
+      $('seq').textContent = 'seq ' + since;
+    }
+  };
+  ws.onerror = () => dead('ws error');
+  ws.onclose = ev => {
+    if (wsLive_sock === ws) {
+      // 1013 = slow consumer: server asked us to back off and resume.
+      if (ev.code === 1013) line('squawk-ws asked us to slow down (1013) — resuming…', 'sys');
+      dead('ws closed' + (ev.code ? ' ' + ev.code : ''));
+    }
+  };
+};
+function wsFallback(myGen, why) {
+  wsLive_sock = null;
+  srcMode = 'poll'; paintSrc();
+  line('squawk-ws unavailable (' + esc(why || '?') + ') — back on long-poll, nothing lost', 'sys');
+  setState('reconnecting');
+  poll(myGen);
+}
+
 // --- NATS live source ------------------------------------------------
 // Minimal NATS-over-WebSocket client: INFO/CONNECT/SUB/MSG/PING/PONG only.
 // History still comes from the bounded file snapshot in boot(); this socket
@@ -378,7 +435,9 @@ async function boot() {
     if (running && myGen === gen) return boot();
     return;
   }
-  if (srcMode === 'nats') natsLive(myGen); else poll(myGen);
+  if (srcMode === 'nats') natsLive(myGen);
+  else if (srcMode === 'ws') wsLive(myGen);
+  else poll(myGen);
 }
 
 $('go').onclick = () => {
@@ -391,7 +450,7 @@ $('go').onclick = () => {
   boot();
 };
 $('src').onclick = () => {
-  srcMode = srcMode === 'nats' ? 'poll' : 'nats';
+  srcMode = srcMode === 'poll' ? 'ws' : srcMode === 'ws' ? 'nats' : 'poll';
   paintSrc();
   if (!running || !booted) return;
   $('log').innerHTML = '';

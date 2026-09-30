@@ -328,6 +328,50 @@ def build_fat(since: int, state: FeedState,
 
 
 # ---------------------------------------------------------------------------
+
+
+def _fsync_dir(d):
+    """Flush a directory entry to disk. Best-effort: filesystems that do
+    not support dir fsync (some network mounts) are not fatal."""
+    try:
+        fd = os.open(d, os.O_RDONLY)
+    except OSError:
+        return
+    try:
+        os.fsync(fd)
+    except OSError:
+        pass
+    finally:
+        os.close(fd)
+
+
+def _atomic_write_text(final, content):
+    """Crash-safe file write (borrowed from write-file-atomic via the
+    estate's own lease_store/path_locks): same-dir temp file -> fsync
+    the file -> atomic os.replace -> fsync the directory. Without both
+    fsyncs a power loss can lose the file even after rename() returns.
+    Cleans up the temp file on failure; never leaves a half-written
+    final path."""
+    tmp = final.parent / (".tmp-%d-%s" % (os.getpid(), final.name))
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(content)
+            f.flush()
+            try:
+                os.fsync(f.fileno())
+            except OSError:
+                pass
+        os.replace(tmp, final)
+        _fsync_dir(final.parent)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
 # publish: atomic seq allocation + file write (same shape as squawk CLI)
 # ---------------------------------------------------------------------------
 
@@ -381,11 +425,11 @@ def _publish_message(root: Path, channel: str, sender: str, title: str, text: st
                 "---\n"
                 f"{text}\n"
             )
-            # atomic write via temp file then rename
-            tmp = chan_dir / f".tmp-{seq}-{sender_slug}.md"
-            tmp.write_text(content, encoding="utf-8")
+            # crash-safe atomic write: temp + fsync(file) + replace +
+            # fsync(dir). Without the fsyncs a power loss can lose the
+            # message even after rename() returns.
             final = chan_dir / fname
-            tmp.replace(final)
+            _atomic_write_text(final, content)
             if not final.is_file() or final.stat().st_size == 0:
                 raise RuntimeError("write failed for %s" % fname)
             return seq, fname

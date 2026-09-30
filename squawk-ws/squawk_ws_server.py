@@ -12,18 +12,32 @@ Sources:
 Protocol:
   - wss://host/squawk-ws  (behind Tailscale funnel; server binds 127.0.0.1)
   - Auth: `Authorization: Bearer <token>` header on the Upgrade request,
-    constant-time compared against SQUAWK_WS_TOKEN_FILE. No header -> 401.
+    or `?token=<token>` query param (browsers cannot set headers on
+    WebSocket()). Constant-time compared against SQUAWK_WS_TOKEN_FILE
+    plus the feed token file (unified web credential). No valid
+    credential -> 401.
   - After 101, client sends {"subscribe": ["fleet","leads"]} (or nothing =
-    all channels). Server replays the last ~20 messages per channel, then
-    streams live messages as JSON text frames:
-      {"seq": N, "channel": "fleet", "sender": "shingle",
+    all channels). Optional "since": <gseq> (or {"since": {"fleet": N, ...}})
+    replays everything newer than that cursor -- outbox first, then disk
+    via the durable file_seq->gseq map for cursors older than outbox
+    retention. Server replays backlog oldest-first, then streams live
+    messages as JSON text frames:
+      {"seq": N, "file_seq": M, "channel": "fleet", "sender": "shingle",
        "text": "...", "ts": "...", "sealed": false}
+    `seq` is the server-global monotonic cursor (use for `since`).
+    `file_seq` is the durable per-channel file sequence from seq_alloc
+    (survives restarts, merges, and reseeds; the stable cross-writer id).
     Sealed messages broadcast sender + sealed:true FLAG ONLY -- never
     content or ciphertext.
+  - Slow consumers: if a client's queue (256) fills, the server closes the
+    connection with WS code 1013 (try again later) instead of silently
+    dropping. Reconnect with "since" to resume without loss.
   - Plain HTTP GET /ping -> {"ok": true, ...} (health check, no auth).
 
-State: global monotonic seq + per-source cursors persisted in
-SQUAWK_WS_STATE_DIR/state.json, so restarts never reset or duplicate.
+State: global monotonic seq + per-source cursors + file_seq->gseq map
+persisted in SQUAWK_WS_STATE_DIR/state.json, so restarts never reset or
+duplicate. The map is backfilled on first boot after upgrade (one-time
+renumber of pre-map history); afterwards every file keeps a stable gseq.
 """
 import asyncio
 import base64
@@ -35,6 +49,7 @@ import json
 import os
 import re
 import struct
+import threading
 import zipfile
 from pathlib import Path
 
@@ -44,10 +59,15 @@ CHANNELS = [c for c in os.environ.get("SQUAWK_WS_CHANNELS", "fleet,leads").split
 VAULT_ZIP = Path(os.environ.get("SQUAWK_WS_VAULT",
                                "/home/toxic/workspace/skills/zipfs-vault/store/vault.zip"))
 TOKEN_FILE = Path(os.environ.get("SQUAWK_WS_TOKEN_FILE", "/home/toxic/.squawk-ws-token"))
+FEED_TOKEN_FILE = Path(os.environ.get(
+    "SQUAWK_WS_FEED_TOKEN_FILE",
+    "/home/toxic/.fleet-bus/squawk-relay/feed-token"))
 STATE_DIR = Path(os.environ.get("SQUAWK_WS_STATE_DIR", "/home/toxic/.squawk-ws"))
 STATE_FILE = STATE_DIR / "state.json"
 OUTBOX_KEEP = 200
 BACKFILL_N = 20
+REPLAY_MAX = 1000  # hard cap on a single since-replay, oldest-first
+SLOW_CLOSE_CODE = 1013  # WS "try again later" -- slow consumer
 WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.DOTALL)
@@ -131,32 +151,70 @@ def parse_msg_file(path):
     }
 
 
-def load_token():
+def _read_token_file(path):
     try:
-        return TOKEN_FILE.read_text().strip()
+        return path.read_text().strip()
     except OSError:
         return ""
 
 
+def load_tokens():
+    """All valid bearer tokens: the WS token file plus the feed token
+    file. The feed token already grants full read access via the feed;
+    accepting it here unifies the web credential so the UI (which holds
+    the feed token) can use the WS without a second secret. Browsers
+    cannot set Authorization headers on WebSocket(), so ?token= is also
+    accepted (same magic-link pattern as the feed)."""
+    toks = set()
+    for path in (TOKEN_FILE, FEED_TOKEN_FILE):
+        tok = _read_token_file(path)
+        if tok:
+            toks.add(tok)
+    return toks
+
+
+def load_token():
+    toks = load_tokens()
+    return next(iter(toks)) if toks else ""
+
+
 # ---------------- shared state ----------------
-import threading
 _scan_lock = threading.Lock()
 
 gseq = 0
 chan_last = {}          # channel -> last msg_seq seen
 vault_last = 0          # last vault alias seq seen
+gseq_map = {}           # channel -> {str(file_seq): gseq}; durable cursor map
 outbox = {}             # channel -> [broadcast msgs], oldest-first
-subscribers = set()     # asyncio.Queue per connection
+subscribers = set()     # (asyncio.Queue, frozenset(channels), writer)
+_dynamic_channels = set()  # channels discovered on disk beyond CHANNELS
+_watched_dirs = set()   # str paths with an inotify watch installed
+_loop = None            # event loop, set in main() for cross-thread close
 _state_dirty = False
 
 
+def all_channels():
+    return list(CHANNELS) + sorted(_dynamic_channels)
+
+
+def _map_get(ch, file_seq):
+    return gseq_map.get(ch, {}).get(str(file_seq))
+
+
+def _map_put(ch, file_seq, g):
+    gseq_map.setdefault(ch, {})[str(file_seq)] = g
+
+
 def load_state():
-    global gseq, chan_last, vault_last
+    global gseq, chan_last, vault_last, gseq_map
     try:
         s = json.loads(STATE_FILE.read_text())
         gseq = int(s.get("gseq", 0))
         chan_last = dict(s.get("chan", {}))
         vault_last = int(s.get("vault", 0))
+        raw = s.get("gseq_map", {})
+        gseq_map = {ch: {str(k): int(v) for k, v in m.items()}
+                    for ch, m in raw.items() if isinstance(m, dict)}
     except (OSError, ValueError):
         pass
 
@@ -165,19 +223,55 @@ def save_state():
     global _state_dirty
     try:
         STATE_DIR.mkdir(parents=True, exist_ok=True)
-        STATE_FILE.write_text(json.dumps(
-            {"gseq": gseq, "chan": chan_last, "vault": vault_last}))
+        tmp = STATE_FILE.with_suffix(".tmp")
+        tmp.write_text(json.dumps(
+            {"gseq": gseq, "chan": chan_last, "vault": vault_last,
+             "gseq_map": gseq_map}))
+        tmp.replace(STATE_FILE)  # atomic: readers never see a half-write
         _state_dirty = False
     except OSError as e:
         print("state save failed: %s" % e, flush=True)
 
 
-def publish(channel, sender, text, ts, sealed):
+def _close_writer_slow(writer, peer):
+    """Loop-thread close for a slow consumer: WS 1013 then TCP close."""
+    try:
+        writer.write(bytes([0x88, 0x02, 0x03, 0xF5]))  # close, code 1013
+    except Exception:
+        pass
+    try:
+        writer.close()
+    except Exception:
+        pass
+    print("slow consumer %s closed (1013)" % (peer,), flush=True)
+
+
+def _fanout(msg, targets):
+    """Deliver one message to subscribed queues. Runs on the event loop
+    thread (scheduled via call_soon_threadsafe) so put_nowait wakes
+    getters promptly -- a bare cross-thread put_nowait can leave the
+    loop asleep in select() and delay delivery up to the 30s ping."""
+    for q, want, writer in targets:
+        if msg["channel"] not in want:
+            continue
+        try:
+            q.put_nowait(msg)
+        except asyncio.QueueFull:
+            # Slow consumer: close with 1013 so it can reconnect with
+            # `since` and resume without loss. Discard now so we don't
+            # keep scheduling closes for a dead connection.
+            subscribers.discard((q, want, writer))
+            _close_writer_slow(writer, writer.get_extra_info("peername"))
+
+
+def publish(channel, sender, text, ts, sealed, file_seq=0):
     """Assign global seq, buffer, persist, broadcast. Returns the message."""
     global gseq, _state_dirty
     gseq += 1
-    msg = {"seq": gseq, "channel": channel, "sender": sender,
-           "ts": ts or "", "sealed": bool(sealed)}
+    if file_seq:
+        _map_put(channel, file_seq, gseq)
+    msg = {"seq": gseq, "file_seq": file_seq, "channel": channel,
+           "sender": sender, "ts": ts or "", "sealed": bool(sealed)}
     if not sealed:
         msg["text"] = text or ""
     buf = outbox.setdefault(channel, [])
@@ -185,32 +279,51 @@ def publish(channel, sender, text, ts, sealed):
     del buf[:max(0, len(buf) - OUTBOX_KEEP)]
     _state_dirty = True
     save_state()
-    dead = []
-    for q, want in list(subscribers):
-        if channel in want:
-            try:
-                q.put_nowait(msg)
-            except asyncio.QueueFull:
-                dead.append((q, want))
-    for d in dead:
-        subscribers.discard(d)
-    print("publish seq=%d ch=%s from=%s sealed=%s" % (gseq, channel, sender, sealed),
-          flush=True)
+    targets = list(subscribers)
+    if _loop is not None:
+        _loop.call_soon_threadsafe(_fanout, msg, targets)
+    else:
+        _fanout(msg, targets)
+    print("publish seq=%d file_seq=%d ch=%s from=%s sealed=%s"
+          % (gseq, file_seq, channel, sender, sealed), flush=True)
     return msg
 
 
 # ---------------- source scanning ----------------
+def _discover_channels():
+    """Pick up channel dirs created after startup; watch them too."""
+    try:
+        names = [p.name for p in CHAT_ROOT.iterdir() if p.is_dir()]
+    except OSError:
+        return
+    for name in names:
+        if name.startswith(".") or name in CHANNELS or name in _dynamic_channels:
+            continue
+        _dynamic_channels.add(name)
+        d = CHAT_ROOT / name
+        key = str(d)
+        if key not in _watched_dirs:
+            try:
+                _add_watch(d, IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)
+                _watched_dirs.add(key)
+                print("discovered + watching channel %s" % d, flush=True)
+            except OSError as e:
+                print("watch failed for %s: %s" % (d, e), flush=True)
+
+
 def scan_channels(initial=False):
     if not _scan_lock.acquire(blocking=False):
         return
     try:
+        _discover_channels()
         _scan_channels_locked(initial)
     finally:
         _scan_lock.release()
 
 
 def _scan_channels_locked(initial=False):
-    for ch in CHANNELS:
+    global gseq
+    for ch in all_channels():
         d = CHAT_ROOT / ch
         if not d.is_dir():
             continue
@@ -221,34 +334,52 @@ def _scan_channels_locked(initial=False):
                            if p.is_file() and MSG_FILE_RE.match(p.name))
         except OSError:
             continue
+        if initial:
+            # Seed outbox with REAL gseqs. Files already in the durable
+            # map keep their recorded gseq (stable across restarts);
+            # pre-map history gets fresh gseqs once, then persists.
+            for p in files:
+                parsed = parse_msg_file(p)
+                if not parsed:
+                    continue
+                fs = parsed["msg_seq"]
+                g = _map_get(ch, fs)
+                if g is None:
+                    gseq += 1
+                    g = gseq
+                    _map_put(ch, fs, g)
+                buf = outbox.setdefault(ch, [])
+                m = {"seq": g, "file_seq": fs, "channel": parsed["channel"],
+                     "sender": parsed["sender"], "ts": parsed["ts"],
+                     "sealed": parsed["sealed"]}
+                if not parsed["sealed"]:
+                    m["text"] = parsed["text"]
+                buf.append(m)
+                newest = max(newest, fs)
+            buf = outbox.get(ch)
+            if buf:
+                del buf[:max(0, len(buf) - OUTBOX_KEEP)]
+            if newest != last:
+                chan_last[ch] = newest
+            _state_dirty = True
+            continue
         for p in files:
             parsed = parse_msg_file(p)
             if not parsed or parsed["msg_seq"] <= last:
                 continue
             newest = max(newest, parsed["msg_seq"])
-            if not initial:
-                # Advance the in-memory cursor BEFORE publishing so a
-                # concurrent or repeated scan of the same directory sees
-                # the updated floor and skips the file. publish() persists
-                # state, so chan_last is durable as soon as this line runs.
-                chan_last[ch] = newest
-                publish(parsed["channel"], parsed["sender"], parsed["text"],
-                        parsed["ts"], parsed["sealed"])
-        if initial or newest != last:
-            # seed outbox on initial scan without broadcasting
-            if initial:
-                for p in files:
-                    parsed = parse_msg_file(p)
-                    if parsed:
-                        buf = outbox.setdefault(ch, [])
-                        m = {"seq": 0, "channel": parsed["channel"],
-                             "sender": parsed["sender"], "ts": parsed["ts"],
-                             "sealed": parsed["sealed"]}
-                        if not parsed["sealed"]:
-                            m["text"] = parsed["text"]
-                        buf.append(m)
-                del outbox[ch][:max(0, len(outbox[ch]) - OUTBOX_KEEP)]
+            # Advance the in-memory cursor BEFORE publishing so a
+            # concurrent or repeated scan of the same directory sees
+            # the updated floor and skips the file. publish() persists
+            # state, so chan_last is durable as soon as this line runs.
             chan_last[ch] = newest
+            publish(parsed["channel"], parsed["sender"], parsed["text"],
+                    parsed["ts"], parsed["sealed"],
+                    file_seq=parsed["msg_seq"])
+        if newest != last:
+            chan_last[ch] = newest
+    if initial:
+        save_state()
 
 
 def scan_vault(initial=False):
@@ -296,6 +427,58 @@ def _scan_vault_locked(initial=False):
         publish(ch, env.get("sender", "?"), env.get("text", ""),
                 env.get("ts", ""), sealed)
         vault_last = max(vault_last, num)
+
+
+def replay_since(want, since):
+    """Messages with gseq > `since`, oldest-first, capped at REPLAY_MAX.
+
+    `since` may be a single gseq (applies to all channels) or a dict
+    {channel: gseq}. Outbox covers recent history; for cursors older than
+    outbox retention we fall back to a disk scan via the durable
+    file_seq->gseq map.
+    """
+    def cursor_for(ch):
+        if isinstance(since, dict):
+            try:
+                return int(since.get(ch, 0))
+            except (ValueError, TypeError):
+                return 0
+        try:
+            return int(since)
+        except (ValueError, TypeError):
+            return 0
+
+    out = []
+    for ch in sorted(want):
+        cur = cursor_for(ch)
+        buf = outbox.get(ch, [])
+        # Fast path: cursor inside (or newer than) outbox coverage.
+        if not buf or cur >= buf[0]["seq"]:
+            out.extend(m for m in buf if m["seq"] > cur)
+            continue
+        # Slow path: cursor older than outbox -- scan disk via the map.
+        d = CHAT_ROOT / ch
+        try:
+            files = sorted(p for p in d.iterdir()
+                           if p.is_file() and MSG_FILE_RE.match(p.name))
+        except OSError:
+            out.extend(m for m in buf if m["seq"] > cur)
+            continue
+        for p in files:
+            parsed = parse_msg_file(p)
+            if not parsed:
+                continue
+            g = _map_get(ch, parsed["msg_seq"])
+            if g is None or g <= cur:
+                continue
+            m = {"seq": g, "file_seq": parsed["msg_seq"],
+                 "channel": parsed["channel"], "sender": parsed["sender"],
+                 "ts": parsed["ts"], "sealed": parsed["sealed"]}
+            if not parsed["sealed"]:
+                m["text"] = parsed["text"]
+            out.append(m)
+    out.sort(key=lambda m: m["seq"])
+    return out[-REPLAY_MAX:]
 
 
 # ---------------- websocket framing ----------------
@@ -377,8 +560,12 @@ async def handle_client(reader, writer):
                 headers[k.strip().lower()] = v.strip()
 
         if method == "GET" and path.split("?")[0].rstrip("/").endswith("/ping"):
-            body = json.dumps({"ok": True, "seq": gseq,
-                               "clients": len(subscribers)}).encode()
+            body = json.dumps({
+                "ok": True, "seq": gseq, "clients": len(subscribers),
+                "channels": all_channels(),
+                "high_water": {ch: chan_last.get(ch, 0)
+                               for ch in all_channels()},
+            }).encode()
             writer.write(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n"
                          b"Content-Length: " + str(len(body)).encode() +
                          b"\r\nConnection: close\r\n\r\n" + body)
@@ -392,10 +579,25 @@ async def handle_client(reader, writer):
             await writer.drain()
             return
 
+        # auth: Authorization: Bearer <t> header, or ?token=<t> query
+        # (browsers cannot set headers on WebSocket()).
+        toks = load_tokens()
         auth = headers.get("authorization", "")
-        token = load_token()
-        expect = "Bearer " + token if token else "Bearer "
-        if not token or not hmac.compare_digest(auth, expect):
+        qtoken = ""
+        if "?" in path:
+            _qs = path.split("?", 1)[1]
+            for _part in _qs.split("&"):
+                if _part.startswith("token="):
+                    qtoken = _part[6:]
+                    break
+        ok = False
+        if toks:
+            if auth.startswith("Bearer "):
+                presented = auth[7:].strip()
+                ok = any(hmac.compare_digest(presented, tok) for tok in toks)
+            if not ok and qtoken:
+                ok = any(hmac.compare_digest(qtoken, tok) for tok in toks)
+        if not ok:
             writer.write(b"HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n"
                          b"Content-Length: 0\r\n\r\n")
             await writer.drain()
@@ -410,7 +612,8 @@ async def handle_client(reader, writer):
         await writer.drain()
 
         # --- subscribe ---
-        want = set(CHANNELS)
+        want = set(all_channels())
+        since = 0
         try:
             async for kind, payload in ws_read_message(reader):
                 if kind == "text":
@@ -418,7 +621,8 @@ async def handle_client(reader, writer):
                         sub = json.loads(payload.decode("utf-8", "replace"))
                         chans = sub.get("subscribe", "all")
                         if chans != "all":
-                            want = set(chans) & set(CHANNELS)
+                            want = set(chans) & set(all_channels())
+                        since = sub.get("since", 0)
                     except (ValueError, AttributeError):
                         pass
                     break
@@ -428,13 +632,18 @@ async def handle_client(reader, writer):
 
         want = frozenset(want)  # tuple elements must be hashable
         q = asyncio.Queue(maxsize=256)
-        subscribers.add((q, want))
-        print("subscriber %s channels=%s" % (peer, sorted(want)), flush=True)
+        subscribers.add((q, want, writer))
+        print("subscriber %s channels=%s since=%s"
+              % (peer, sorted(want), since), flush=True)
         try:
-            # backfill: last BACKFILL_N per channel, oldest first
-            backlog = []
-            for ch in sorted(want):
-                backlog.extend(outbox.get(ch, [])[-BACKFILL_N:])
+            # backfill: `since` cursor when given, else last BACKFILL_N
+            # per channel, oldest first
+            if since:
+                backlog = replay_since(want, since)
+            else:
+                backlog = []
+                for ch in sorted(want):
+                    backlog.extend(outbox.get(ch, [])[-BACKFILL_N:])
             for m in backlog:
                 writer.write(ws_encode(json.dumps(m).encode()))
             await writer.drain()
@@ -463,7 +672,7 @@ async def handle_client(reader, writer):
                  asyncio.create_task(receiver())],
                 return_when=asyncio.FIRST_COMPLETED)
         finally:
-            subscribers.discard((q, want))
+            subscribers.discard((q, want, writer))
             print("subscriber %s gone" % (peer,), flush=True)
     except (ConnectionResetError, asyncio.IncompleteReadError, BrokenPipeError):
         pass
@@ -505,21 +714,26 @@ def on_inotify():
 
 
 async def main():
+    global _loop
     load_state()
     do_rescan()  # initial: seed outbox + cursors, no broadcast
     print("squawk-ws: initial scan done, gseq=%d" % gseq, flush=True)
 
-    for ch in CHANNELS:
+    for ch in all_channels():
         d = CHAT_ROOT / ch
         if d.is_dir():
-            _add_watch(d, IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)
-            print("watching %s" % d, flush=True)
+            try:
+                _add_watch(d, IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)
+                _watched_dirs.add(str(d))
+                print("watching %s" % d, flush=True)
+            except OSError as e:
+                print("watch failed for %s: %s" % (d, e), flush=True)
     if VAULT_ZIP.parent.is_dir():
         _add_watch(VAULT_ZIP.parent, IN_CLOSE_WRITE | IN_MOVED_TO)
         print("watching %s" % VAULT_ZIP.parent, flush=True)
 
-    loop = asyncio.get_running_loop()
-    loop.add_reader(_inotify_fd, on_inotify)
+    _loop = asyncio.get_running_loop()
+    _loop.add_reader(_inotify_fd, on_inotify)
 
     server = await asyncio.start_server(handle_client, "127.0.0.1", PORT)
     print("squawk-ws listening on 127.0.0.1:%d" % PORT, flush=True)
