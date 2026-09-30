@@ -38,7 +38,7 @@ One table, every animal first-class — no "secondary" framing, no pens inside p
 | 🟢 **oracle** | `25151` | `oracle/` (Python) | 🔮 The decision corral — prediction-market work loop + deterministic Oracle verdict engine (dated yes/no, evidence-backed). Daemons: oracle-market, oracle-core, oracle-chat, bidder-forge/scout, market-watchdog. |
 | 🟢 **browserless** | `25130` | `barn/browserless` | Browser automation: browserless.io MCP server + native-launcher deployment. |
 | 🟢 **lookout** | `6080` | `barn/lookout` | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower. |
-| **tack** | — | `tack/` (`@ranch/tack`, Bun/TS) | 🤠 The tack room — the master provider catalog: every provider/model the estate rides, one registry. Feeds tau, herd's generated Go, the router. |
+| **roost** | — | `flock/roost/` (`@ranch/roost`, Bun/TS) | 🪹 The roost — the master provider catalog: every provider/model the estate perches on, one registry. Feeds tau, herd's generated Go, flock's generated Rust, the router. |
 | **squawk** | — | `squawk/` (Python) | File-based multi-agent chat: signed, sequenced message files. NATS bus (`squawk/nats/`) underneath. |
 | **corral** | — | `corral/` (in-tree, Bun/TS) | The super-ralph agent framework — the mission runner. Absorbed in-tree 2026-09-30 with full history; **no submodules, ever.** |
 | **roundup** | — | `roundup/` | Benchmark estate — gathers and assesses every head. |
@@ -85,7 +85,7 @@ moon ci              # affected-only: what CI runs on PRs
 - **herd serves what's local;** anything cloud goes to the flock daemon via its `flock:` config key
 - **flock's `llama-swap` provider points back at herd `:25100`** for local models
 - **Strategy names are routing directives, not model names:** `free` → `Strategy::Free` → free-tier external providers (NIM first — the best damn free endpoint — then OpenRouter-free, …)
-- **The provider registry lives in tack** (`@ranch/tack`) and flock. herd's in-tree `internal/flock` in-process router was retired 2026-09-17 and is not compiled into the shipped binary; the server imports routing from the upstream `llama-swap` module instead. Cloud routing is the `flock:` key
+- **The provider registry lives in roost** (`@ranch/roost`, nested under flock/). herd's in-tree `internal/flock` in-process router was retired 2026-09-17 and is not compiled into the shipped binary; the server imports routing from the upstream `llama-swap` module instead. Cloud routing is the `flock:` key
 - **No monkeypatches.** Fixes land in the owning animal's files, never as overlays.
 - **No submodules.** New code lands in-tree with history; vendoring without history is a bug.
 - See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full contract

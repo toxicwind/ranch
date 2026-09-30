@@ -920,7 +920,7 @@ impl RouterHandle {
     /// How long a probe-refreshed models cache counts as "fresh" for
     /// advertisement. The probe loop refreshes every `probe_interval`
     /// (default 30 s); 5 minutes tolerates several missed probes before
-    /// falling back to the Tack seeds.
+    /// falling back to the Roost seeds.
     pub const MODELS_CACHE_FRESH_TTL: Duration = Duration::from_secs(300);
 
     /// Extract model IDs from a cached upstream `/v1/models` response body.
@@ -944,7 +944,7 @@ impl RouterHandle {
     ///
     /// The model list prefers the probe-refreshed upstream listing (fix B):
     /// when `models_cache` holds a fresh entry, those live IDs are advertised
-    /// instead of the Tack cold-start seeds. A stale or missing cache falls
+    /// instead of the Roost cold-start seeds. A stale or missing cache falls
     /// back to the seeds, so advertisement never goes empty on probe trouble.
     pub fn provider_metadata(&self) -> Vec<ProviderMeta> {
         let runtimes = self.inner.runtimes.read().unwrap();
@@ -972,7 +972,7 @@ impl RouterHandle {
     }
 
     /// Resolve the advertised model list for one runtime: fresh probe cache
-    /// wins over the Tack seeds (fix B).
+    /// wins over the Roost seeds (fix B).
     fn live_model_list(rt: &ProviderRuntime, def: &ProviderDef) -> Vec<String> {
         if let Some((at, body)) = rt.models_cache.lock().unwrap().as_ref() {
             if at.elapsed() < Self::MODELS_CACHE_FRESH_TTL {

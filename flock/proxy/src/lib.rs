@@ -16,7 +16,7 @@ mod ratelimit;
 mod router;
 mod routes;
 mod settings;
-mod tack_providers;
+mod roost_providers;
 
 pub use api::openapi_json;
 

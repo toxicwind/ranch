@@ -1112,11 +1112,11 @@ fn aggregate_models(body: &Bytes, router: &crate::router::RouterHandle) -> Bytes
         }
     }
     // Fix C: quarantine filter. Two layers --
-    //  1. Tack's dead-ID list (static, curated): known-dead IDs never ship.
+    //  1. Roost's dead-ID list (static, curated): known-dead IDs never ship.
     //  2. Live 404 strikes (dynamic): a model the upstream 404'd
     //     QUARANTINE_STRIKES times stops being advertised until the strikes
     //     decay (see RouterHandle::EMPTY_STRIKE_DECAY).
-    let dead: std::collections::HashSet<&str> = crate::tack_providers::TACK_DEAD_IDS
+    let dead: std::collections::HashSet<&str> = crate::roost_providers::ROOST_DEAD_IDS
         .iter()
         .copied()
         .collect();

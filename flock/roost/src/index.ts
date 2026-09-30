@@ -1,5 +1,5 @@
 /**
- * @ranch/tack — master provider catalog for the sovereign estate.
+ * @ranch/roost — master provider catalog for the sovereign estate.
  *
  * Single source of truth for: provider definitions (base URL, key env,
  * endpoint adapter per /models shape), live discovery, alias map, curated

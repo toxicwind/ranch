@@ -1,10 +1,9 @@
-# 🤠 tack — `@ranch/tack`
+# 🪹 roost — `@ranch/roost`
 
-> *Every ranch has a **tack room** — where the saddles, bridles, and gear are
-> kept, oiled, and ready. You don't ride the whole range; you walk into the
-> tack room and pick your gear for the day's work. This package is the
-> estate's tack room: the master provider catalog every router, agent, and
-> daemon gears up from.*
+> *Every flock comes home to **roost** — where the birds settle, perch, and
+> rest. You don't chase every bird across the sky; you walk to the roost
+> and find the whole flock waiting. This package is the estate's roost: the
+> master provider catalog every router, agent, and daemon perches on.*
 
 **Single source of truth** for LLM providers across the ranch and the
 sovereign estate:
@@ -28,21 +27,21 @@ in tau, model lists in Python research scripts). Live discovery could only
 production until a human noticed. This package makes the **live listing the
 source of truth** and demotes curation to cold-start seeds.
 
-One tack room. Every consumer gears up from it; nobody keeps a private
-saddle. When a provider kills a model, the whole estate learns it within two
+One roost. Every consumer perches on it; nobody keeps a private nest. When a
+provider kills a model, the whole estate learns it within two
 refreshes — no human in the loop.
 
-## Who gears up here
+## Who roosts here
 
 | Consumer | How it consumes | Status |
 |---|---|---|
 | **tau** (`ranch/tau`, `toxicwind/tau`) | Main-class provider system — replaces `pi-catalog`'s KDL provider entries, `provider-models` data, and discovery | THE provider authority for the coding-agent engine |
-| **herd** (Go, `ranch/herd`) | `internal/astmatrix/providers_generated.go` — generated, checked in, never hand-edited; `live_catalog.go` reads the live-catalog export | Provenance `@ranch/tack` |
-| **sovereign-router** (TS) | Direct Bun import of `tack/src/index.ts` | Same-filesystem import |
-| **flock** (Rust) | Via herd's serving sets / router config | Indirect |
-| Python research scripts | `generated/providers.json` — canonical data artifact | Stable schema `ranch-tack/v1` |
+| **herd** (Go, `ranch/herd`) | `internal/astmatrix/providers_generated.go` — generated, checked in, never hand-edited; `live_catalog.go` reads the live-catalog export | Provenance `@ranch/roost` |
+| **sovereign-router** (TS) | Direct Bun import of `roost/src/index.ts` | Same-filesystem import |
+| **flock** (Rust) | `proxy/src/roost_providers.rs` — generated Rust module, synced by `scripts/sync-roost-providers.ts` (CI drift gate) | Direct, Phase 2 |
+| Python research scripts | `generated/providers.json` — canonical data artifact | Stable schema `ranch-roost/v1` |
 
-The rule: **if it names a provider or a model id, it reads the tack room.**
+The rule: **if it names a provider or a model id, it reads the roost.**
 Hand-maintained provider/model inventories are a bug — file it as one.
 
 ## Layout
@@ -53,13 +52,14 @@ src/
   adapters.ts   one parser per /models wire shape (openai, google-v1beta, mistral, static, none)
   discovery.ts  fetch + parse with timeout; failures never cached, never acted on
   catalog.ts    ModelCatalog — serving sets, miss counters, quarantine, persistence,
-                live-catalog export (contract ranch-tack/live-catalog/v1)
+                live-catalog export (contract ranch-roost/live-catalog/v1)
   data.ts       THE source of truth: provider defs, seeds, aliases, dead ids
-  codegen.ts    emits generated/providers.json + generated/providers.go
+  codegen.ts    emits generated/providers.json + generated/providers.go + generated/providers.rs
 scripts/build.ts  `bun run build` — regenerates generated/
 generated/
-  providers.json  canonical data artifact (Python consumers), $schema ranch-tack/v1
+  providers.json  canonical data artifact (Python consumers), $schema ranch-roost/v1
   providers.go    drop-in Go data file for herd (package astmatrix)
+  providers.rs    drop-in Rust data module for flock (ROOST_* constants)
 tests/          adapter shapes, prune/quarantine paths, concurrency, artifact sync
 ```
 
@@ -86,6 +86,8 @@ tests/          adapter shapes, prune/quarantine paths, concurrency, artifact sy
 4. Copy `generated/providers.go` over herd's
    `internal/astmatrix/providers_generated.go` (the test tells you the exact
    path when it's stale).
+5. Run `bun scripts/sync-roost-providers.ts --write` in `flock/` to refresh
+   flock's Rust copy (CI gates on drift).
 
 ## Adding an endpoint shape
 
@@ -103,12 +105,12 @@ understands both the v2 shape and the legacy router
 ## Developing
 
 ```bash
-bun test          # 61 tests — adapters, catalog, codegen, concurrency, data
+bun test          # 69 tests — adapters, catalog, codegen, concurrency, data
 bun run build     # regenerate generated/ from src/data.ts
 ```
 
-Part of the [ranch](../README.md) monorepo (`toxicwind/ranch`), workspace
-`tack`, package `@ranch/tack`.
+Part of the [ranch](../../README.md) monorepo (`toxicwind/ranch`), nested under
+`flock/roost/`, package `@ranch/roost`.
 
 ## Build
 

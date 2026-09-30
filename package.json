@@ -1,5 +1,5 @@
 {
-  "description": "Ranch monorepo \u2014 every animal on the spread: herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), flicker (Go), corral (TS), drover (TS), tack (TS), and the Bun/TS herd",
+  "description": "Ranch monorepo \u2014 every animal on the spread: herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), flicker (Go), corral (TS), drover (TS), roost (TS), and the Bun/TS herd",
   "name": "ranch",
   "private": true,
   "scripts": {
@@ -22,7 +22,7 @@
     "herd",
     "stream-broker",
     "switchboard",
-    "tack",
+    "flock/roost",
     "windmill"
   ]
 }

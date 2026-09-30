@@ -18,7 +18,7 @@ const { jsonPath, goPath, rustPath } = await emitAll(outDir, {
   defs: PROVIDER_DEFS,
   aliases: MODEL_ALIASES,
   deadIds: DEAD_MODEL_IDS,
-  provenance: "@ranch/tack src/data.ts",
+  provenance: "@ranch/roost src/data.ts",
 });
 
 console.log(`wrote ${jsonPath}`);

@@ -1,4 +1,4 @@
-# tack (@ranch/tack) — design (2026-09-30; renamed + moved to ranch 2026-09-30)
+# roost (@ranch/roost) — design (2026-09-30; Tack renamed to Roost, moved under flock)
 
 ## The disease
 
@@ -10,12 +10,12 @@ The same hardcoded provider→models lists existed in four places:
 2. `herd/internal/astmatrix/providers.go` (Go) — hardcoded
    per-provider lists + alias map (35 entries duplicated the canonical catalog),
    including the same 4 dead groq ids. Deduped 2026-09-30: only true herd-local
-   extras remain; the rest is generated from @ranch/tack.
+   extras remain; the rest is generated from @ranch/roost.
 3. `research/add_groq.py`, `research/check_providers.py` (Python) — hardcoded
    groq/provider model lists.
 4. TAU `pi-catalog` — 86 KDL-authored provider entries under
    `packages/catalog/src/compat/rules/providers/` + compiled
-   `src/compat/providers.ts` (replaced by @ranch/tack 2026-09-30).
+   `src/compat/providers.ts` (replaced by @ranch/roost 2026-09-30).
 
 Production symptom: 4 of 6 groq ids 404'd until a human noticed (groq
 re-verification 2026-09-30). Chris: "there shouldn't be hardcoding of any
@@ -23,11 +23,11 @@ model names in the provider -> what models they have thing."
 
 ## The cure
 
-One Bun/TypeScript package — `tack` (`@ranch/tack`)
+One Bun/TypeScript package — `roost` (`@ranch/roost`)
 in the ranch monorepo — as the single source of truth. Consumers:
 
 - **sovereign-router-ts**: imports the TS package directly.
-- **tau** (`ranch/tau`, toxicwind/tau): @ranch/tack is the main-class provider
+- **tau** (`ranch/tau`, toxicwind/tau): @ranch/roost is the main-class provider
   system — it replaced pi-catalog's KDL provider entries, provider-models data,
   and discovery.
 - **herd (Go)**: cannot import TS → consumes `generated/providers.go`,
@@ -102,7 +102,7 @@ The next odd shape gets an adapter, not a special case.
 
 `src/data.ts` is the source of truth. `bun run build` emits:
 
-- `generated/providers.json` — `$schema: ranch-tack/v1`, providers,
+- `generated/providers.json` — `$schema: ranch-roost/v1`, providers,
   seeds (+ contract text), aliases, deadIds (+ contract text), provenance.
 - `generated/providers.go` — `package astmatrix`, `ProviderDef` struct,
   `ProviderCatalogDefs`, `ProviderCatalogSeeds`, `ProviderCatalogStaticModels`,
@@ -128,7 +128,7 @@ the herd audit to be a drop-in data replacement.
   commit); merge loop untouched, reads generated tables.
 - `research/add_groq.py`, `check_providers.py`: read `generated/providers.json`
   instead of hardcoded lists (ranch commit).
-- tau pi-catalog: @ranch/tack replaced the KDL provider entries entirely
+- tau pi-catalog: @ranch/roost replaced the KDL provider entries entirely
   (per Pip's trace of `currentModelRegistry`'s origin).
 
 ## Open items

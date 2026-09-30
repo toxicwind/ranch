@@ -441,13 +441,13 @@ impl ProviderSet {
 /// environment variables, model lists, weights, and ELO seeds — exactly as
 /// `providers.go` declares them. Key material is never stored here; each
 /// entry names the env var AstMatrix resolved.
-/// Flock's hand-maintained operational overlay on top of Tack's wire data.
+/// Flock's hand-maintained operational overlay on top of Roost's wire data.
 ///
-/// Tack (`crate::tack_providers`) is the authority for wire fields: base URLs,
+/// Roost (`crate::roost_providers`) is the authority for wire fields: base URLs,
 /// key env vars, auth schemes, cold-start seeds. This overlay decides WHICH
-/// Tack providers flock serves and carries flock's operational tuning:
+/// Roost providers flock serves and carries flock's operational tuning:
 /// ELO/weight seeds, free-tier flags, model maps, RPM defaults, display
-/// names. Values are carried verbatim from the pre-Tack hardcoded defaults;
+/// names. Values are carried verbatim from the pre-Roost hardcoded defaults;
 /// do not retune here — retuning is a deliberate separate change.
 struct ProviderOverlay {
     name: &'static str,
@@ -581,34 +581,34 @@ const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
     },
 ];
 
-/// Flock's provider registry, built from Tack's wire data merged with the
+/// Flock's provider registry, built from Roost's wire data merged with the
 /// hand-maintained [`FLOCK_PROVIDER_OVERLAY`].
 ///
 /// This is on the live serving path: `config.rs::migrate_v1()` calls it on
 /// every boot (the on-disk config is v1 with no providers field), so what
 /// this returns is what `:25193` advertises and routes after a restart.
 ///
-/// Tack contract: `seeds` are cold-start data and may name dead IDs — they
-/// are filtered through `TACK_DEAD_IDS` here, at the single construction
+/// Roost contract: `seeds` are cold-start data and may name dead IDs — they
+/// are filtered through `ROOST_DEAD_IDS` here, at the single construction
 /// site, so no consumer ever sees a known-dead ID from this registry.
 pub fn default_providers() -> Vec<ProviderDef> {
-    use crate::tack_providers as tack;
+    use crate::roost_providers as roost;
     let dead: std::collections::HashSet<&str> =
-        tack::TACK_DEAD_IDS.iter().copied().collect();
+        roost::ROOST_DEAD_IDS.iter().copied().collect();
     let mut v = Vec::with_capacity(FLOCK_PROVIDER_OVERLAY.len());
     for ov in FLOCK_PROVIDER_OVERLAY {
-        let t = tack::TACK_PROVIDERS
+        let t = roost::ROOST_PROVIDERS
             .iter()
             .find(|p| p.name == ov.name)
-            .unwrap_or_else(|| panic!("overlay references unknown Tack provider: {}", ov.name));
+            .unwrap_or_else(|| panic!("overlay references unknown Roost provider: {}", ov.name));
         assert!(
             !t.router_local,
-            "flock overlay must not include router-local Tack provider {}",
+            "flock overlay must not include router-local Roost provider {}",
             ov.name
         );
         assert!(
             t.enabled,
-            "flock overlay includes disabled Tack provider {}",
+            "flock overlay includes disabled Roost provider {}",
             ov.name
         );
         let mut keys = vec![ProviderKey {
@@ -616,7 +616,7 @@ pub fn default_providers() -> Vec<ProviderDef> {
             ..ProviderKey::default()
         }];
         if !t.key_env_alt.is_empty() {
-            // Tack's multi-key semantic (e.g. NVIDIA_API_KEYS): the alt var
+            // Roost's multi-key semantic (e.g. NVIDIA_API_KEYS): the alt var
             // becomes a second key on the same provider.
             keys.push(ProviderKey {
                 key_env: t.key_env_alt.to_string(),
@@ -791,33 +791,33 @@ mod tests {
     }
 
     #[test]
-    fn builtin_defaults_match_tack() {
-        // Tack-derived expectations: wire fields (base_url, key_env, seeds)
-        // come from tack/generated/providers.rs; operational tuning
+    fn builtin_defaults_match_roost() {
+        // Roost-derived expectations: wire fields (base_url, key_env, seeds)
+        // come from flock/roost/generated/providers.rs; operational tuning
         // (elo/weight/free_tier) comes from FLOCK_PROVIDER_OVERLAY verbatim.
-        use crate::tack_providers as tack;
+        use crate::roost_providers as roost;
         let defs = default_providers();
         let by_name = |n: &str| defs.iter().find(|p| p.name == n).unwrap();
-        let tack_by_name =
-            |n: &str| tack::TACK_PROVIDERS.iter().find(|p| p.name == n).unwrap();
+        let roost_by_name =
+            |n: &str| roost::ROOST_PROVIDERS.iter().find(|p| p.name == n).unwrap();
         let dead: std::collections::HashSet<&str> =
-            tack::TACK_DEAD_IDS.iter().copied().collect();
+            roost::ROOST_DEAD_IDS.iter().copied().collect();
 
-        // Every overlay entry resolves in Tack, is enabled, and is not
+        // Every overlay entry resolves in Roost, is enabled, and is not
         // router-local.
         for ov in FLOCK_PROVIDER_OVERLAY {
-            let t = tack_by_name(ov.name);
-            assert!(t.enabled, "{} disabled in Tack", ov.name);
+            let t = roost_by_name(ov.name);
+            assert!(t.enabled, "{} disabled in Roost", ov.name);
             assert!(!t.router_local, "{} is router-local", ov.name);
         }
 
-        // Wire fields match Tack exactly.
+        // Wire fields match Roost exactly.
         for ov in FLOCK_PROVIDER_OVERLAY {
             let d = by_name(ov.name);
-            let t = tack_by_name(ov.name);
+            let t = roost_by_name(ov.name);
             assert_eq!(d.base_url, t.base_url, "{} base_url", ov.name);
             assert_eq!(d.keys[0].key_env, t.key_env, "{} key_env", ov.name);
-            // Seeds are Tack's minus dead IDs (the Tack contract).
+            // Seeds are Roost's minus dead IDs (the Roost contract).
             let want: Vec<String> = t
                 .seeds
                 .iter()
@@ -835,7 +835,7 @@ mod tests {
             assert_eq!(d.free_tier, ov.free_tier, "{} free_tier", ov.name);
         }
 
-        // Spot checks on values that changed with the Tack migration.
+        // Spot checks on values that changed with the Roost migration.
         let ls = by_name("llama-swap");
         assert!(ls.no_auth);
         assert_eq!(ls.elo, 1600);
@@ -856,13 +856,13 @@ mod tests {
             nv.model_map.get("free").map(|s| s.as_str()),
             Some("nvidia/nemotron-3-ultra-550b-a55b")
         );
-        // Tack's nvidia seeds (12) replace the 2 stale hardcoded ones.
+        // Roost's nvidia seeds (12) replace the 2 stale hardcoded ones.
         assert_eq!(nv.models.len(), 12);
         let mi = by_name("mistral");
-        // Tack authority: no /v1 suffix (the old hardcode was wrong).
+        // Roost authority: no /v1 suffix (the old hardcode was wrong).
         assert_eq!(mi.base_url, "https://api.mistral.ai");
         let sf = by_name("siliconflow");
-        // Tack authority: .com not .cn.
+        // Roost authority: .com not .cn.
         assert_eq!(sf.base_url, "https://api.siliconflow.com/v1");
         assert!(sf.free_tier);
         assert_eq!(sf.elo, 1470);
@@ -878,12 +878,12 @@ mod tests {
     }
 
     #[test]
-    fn tack_providers_copy_in_sync() {
-        // flock/proxy/src/tack_providers.rs must be byte-identical to
-        // tack/generated/providers.rs modulo the Generated-at stamp.
-        // Regenerate with: bun scripts/sync-tack-providers.ts --write
-        let generated = include_str!("../../../tack/generated/providers.rs");
-        let copy = include_str!("tack_providers.rs");
+    fn roost_providers_copy_in_sync() {
+        // flock/proxy/src/roost_providers.rs must be byte-identical to
+        // flock/roost/generated/providers.rs modulo the Generated-at stamp.
+        // Regenerate with: bun scripts/sync-roost-providers.ts --write
+        let generated = include_str!("../../roost/generated/providers.rs");
+        let copy = include_str!("roost_providers.rs");
         fn normalize(s: &str) -> String {
             s.lines()
                 .map(|l| {
@@ -899,7 +899,7 @@ mod tests {
         assert_eq!(
             normalize(copy),
             normalize(generated),
-            "tack_providers.rs drifted from tack/generated/providers.rs"
+            "roost_providers.rs drifted from flock/roost/generated/providers.rs"
         );
     }
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /**
- * flicker-build.ts — tack build entry.
+ * flicker-build.ts — roost build entry.
  *
- * Submits tack's canonical build+test command as a job to the flicker
+ * Submits roost's canonical build+test command as a job to the flicker
  * build daemon's HTTP API (default http://127.0.0.1:25148), polls the job to
  * completion (2s cadence, 600s timeout), prints the job log on failure, and
  * exits 0 iff the job succeeded. An identical resubmission comes back CACHED
@@ -11,16 +11,19 @@
  * Usage:  bun scripts/flicker-build.ts
  *         FLICKER_URL=http://127.0.0.1:25148 bun scripts/flicker-build.ts
  *
- * Pure HTTP via Bun's native fetch — no CLI, no brand.
+ * Pure HTTP via Bun's native fetch — no CLI, flicker HTTP API only.
  */
 import { dirname, join, resolve } from "node:path";
 
 
-const PROJECT = "tack";
+const PROJECT = "roost";
 const FLICKER_URL = (process.env.FLICKER_URL ?? "http://127.0.0.1:25148").replace(/\/$/, "");
 const REPO = resolve(join(dirname(import.meta.path), ".."));
 const JOB_NAME = `${PROJECT}-build`;
 const BUILD_CMD = `bun run build && bun test`;
+// The local backend ignores the step's `directory` (cmd.Dir = workspaceDir),
+// so the command must cd into the repo itself.
+const REMOTE_CMD = `cd ${REPO} && ${BUILD_CMD}`;
 const POLL_MS = 2000;
 const TIMEOUT_MS = 600_000;
 
@@ -30,7 +33,7 @@ async function check(res: Response, what: string): Promise<Response> {
 }
 
 console.log(`[${PROJECT}] flicker=${FLICKER_URL} repo=${REPO}`);
-console.log(`[${PROJECT}] cmd: ${BUILD_CMD}`);
+console.log(`[${PROJECT}] cmd: ${REMOTE_CMD}`);
 
 // Fail fast if the daemon is down.
 try {
@@ -46,7 +49,7 @@ const submit = await (
     await fetch(`${FLICKER_URL}/api/jobs`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name: JOB_NAME, workdir: REPO, command: BUILD_CMD }),
+      body: JSON.stringify({ name: JOB_NAME, workdir: REPO, command: REMOTE_CMD }),
     }),
     "submit"
   )

@@ -1,9 +1,9 @@
-# Flock ← Tack integration design (Phase 2)
+# Flock ← Roost integration design (Phase 2)
 
-**Status:** design + Tack-side codegen LANDED; flock serving-path changes PROPOSED (needs review).
-**Date:** 2026-09-30 · **Lane:** flock-tack-phase2 · **Author:** forge (Ember's crew)
-**Decision target:** Tack is the sole provider catalog (52 providers). Flock's
-Rust proxy (`:25193`) must consume Tack-derived wire data instead of its
+**Status:** design + Roost-side codegen LANDED; flock serving-path changes PROPOSED (needs review).
+**Date:** 2026-09-30 · **Lane:** flock-roost-phase2 · **Author:** forge (Ember's crew)
+**Decision target:** Roost is the sole provider catalog (52 providers). Flock's
+Rust proxy (`:25193`) must consume Roost-derived wire data instead of its
 hand-maintained duplicate registry.
 
 ---
@@ -51,18 +51,18 @@ present) — keyless providers' static IDs are advertised anyway.
   one remote command) → verify `/health`, `/v1/models`, real completion,
   restart durability.
 
-### 1.4 Tack ↔ flock provider overlap
+### 1.4 Roost ↔ flock provider overlap
 
-All 13 of flock's providers exist in Tack's 52 (verified by name):
+All 13 of flock's providers exist in Roost's 52 (verified by name):
 `llama-swap, openrouter, nvidia, groq, together, cerebras, fireworks,
 hyperbolic, github, mistral, openai, perplexity, siliconflow`.
 The three flock-originated providers (**hyperbolic, github, perplexity**)
 are present with matching base URLs and seeds — no special-casing needed.
 
 Staleness character: **none** of flock's current static seeds appear in
-`TACK_DEAD_IDS` — the rot is frozen old curation (e.g. 2 nvidia seeds vs
-Tack's 12 current ones), not known-dead IDs. The win is freshness + a single
-source of truth, with `TACK_DEAD_IDS` as the permanent EOL guard.
+`ROOST_DEAD_IDS` — the rot is frozen old curation (e.g. 2 nvidia seeds vs
+Roost's 12 current ones), not known-dead IDs. The win is freshness + a single
+source of truth, with `ROOST_DEAD_IDS` as the permanent EOL guard.
 (Correction to an earlier fleet note: bare `openai/gpt-oss-20b` is NOT in
 deadIds — only the `:free` form was delisted. The 4 Groq 404-verified IDs
 are `llama-3.3-70b-versatile`, `qwen/qwen3-32b`, `qwen/qwen3.6-27b`,
@@ -70,7 +70,7 @@ are `llama-3.3-70b-versatile`, `qwen/qwen3-32b`, `qwen/qwen3.6-27b`,
 
 ### 1.5 What flock owns (stays hand-written)
 
-Tack's `ProviderDef` has no flock-operational fields. These stay in flock:
+Roost's `ProviderDef` has no flock-operational fields. These stay in flock:
 `Strategy`, `RoutingCfg` (max_parallel, max_retries, sticky_ttl, fifo_max,
 coalescing, probe_interval), per-key `rpm`/`owner`/`enabled`, `free_tier`,
 `model_map`, `weight`, `elo`, `default_rpm`, `display_name` tuning,
@@ -78,22 +78,22 @@ coalescing, probe_interval), per-key `rpm`/`owner`/`enabled`, `free_tier`,
 
 ---
 
-## 2. What landed in this lane (Tack side — committed)
+## 2. What landed in this lane (Roost side — committed)
 
-`tack/src/codegen.ts` gains **`buildProvidersRust()`**, following the exact
+`roost/src/codegen.ts` gains **`buildProvidersRust()`**, following the exact
 pattern of the existing Go codegen for herd:
 
-- `tack/generated/providers.rs` — checked-in generated Rust module:
-  - `TACK_PROVENANCE: &str`
-  - `TackProvider` struct — `name, display_name, base_url, key_env,
+- `roost/generated/providers.rs` — checked-in generated Rust module:
+  - `ROOST_PROVENANCE: &str`
+  - `RoostProvider` struct — `name, display_name, base_url, key_env,
     key_env_alt, adapter, auth, header_name, query_param, models_path,
     router_local, enabled, seeds, static_models` (all `&'static str` /
     `&'static [&'static str]` / `bool` — zero-cost, no serde needed)
-  - `TACK_PROVIDERS: &[TackProvider]` (52 entries)
-  - `TACK_DEAD_IDS: &[&str]` (sorted)
-  - `TACK_ALIASES: &[(&str, &str, &str)]` (sorted)
+  - `ROOST_PROVIDERS: &[RoostProvider]` (52 entries)
+  - `ROOST_DEAD_IDS: &[&str]` (sorted)
+  - `ROOST_ALIASES: &[(&str, &str, &str)]` (sorted)
 - Seeds are emitted **raw** (may name dead IDs); the consumer filters
-  `TACK_DEAD_IDS` — same contract as the Go artifact.
+  `ROOST_DEAD_IDS` — same contract as the Go artifact.
 - `emitAll()` now writes all three artifacts; `scripts/build.ts` logs the
   third path; `src/index.ts` re-exports `buildProvidersRust`.
 - `tests/codegen.test.ts`: new `providers.rs` describe block (header,
@@ -110,10 +110,10 @@ pattern of the existing Go codegen for herd:
 ### 3.1 Data flow
 
 ```
-tack/src/data.ts ──bun run build──▶ tack/generated/providers.rs
+roost/src/data.ts ──bun run build──▶ roost/generated/providers.rs
         │                                    │  (checked-in, sync-tested)
         │ sync script (bun)                  ▼
-        │                     flock/proxy/src/tack_providers.rs
+        │                     flock/proxy/src/roost_providers.rs
         │                              (byte-identical copy)
         ▼                                    │
 flock/proxy/src/providers.rs ◀── merges ─────┘
@@ -124,16 +124,16 @@ flock/proxy/src/providers.rs ◀── merges ─────┘
 config.rs (defaults, migrate_v1) — comments updated, logic unchanged
 ```
 
-Sync mechanism: `flock/scripts/sync-tack-providers.ts` (bun) copies
-`tack/generated/providers.rs` → `flock/proxy/src/tack_providers.rs` and
+Sync mechanism: `flock/scripts/sync-roost-providers.ts` (bun) copies
+`roost/generated/providers.rs` → `flock/proxy/src/roost_providers.rs` and
 fails non-zero on drift; a Rust unit test in `providers.rs` re-checks the
-copy against `../../../tack/generated/providers.rs` (normalized timestamp)
+copy against `../../../roost/generated/providers.rs` (normalized timestamp)
 so `cargo test` catches a stale copy. This mirrors the herd Go-consumer
-pattern (tack's own test asserts herd's `providers_generated.go` is
+pattern (roost's own test asserts herd's `providers_generated.go` is
 byte-identical).
 
 **Alternative considered and rejected:** `build.rs` doing
-`include_str!("../../../tack/generated/providers.json")` + serde parse at
+`include_str!("../../../roost/generated/providers.json")` + serde parse at
 startup. Rejected: adds a runtime parse dependency and keeps JSON as the
 wire; the checked-in generated module is zero-cost, greppable, and matches
 the herd precedent.
@@ -141,7 +141,7 @@ the herd precedent.
 ### 3.2 `default_providers()` rewrite (sketch)
 
 ```rust
-mod tack_providers; // generated, DO NOT EDIT
+mod roost_providers; // generated, DO NOT EDIT
 
 struct ProviderOverlay {
     name: &'static str,
@@ -149,11 +149,11 @@ struct ProviderOverlay {
     weight: f64,
     free_tier: bool,
     default_rpm: usize,
-    display_name: &'static str,          // "" = use Tack's
+    display_name: &'static str,          // "" = use Roost's
     model_map: &'static [(&'static str, &'static str)],
 }
 
-// Hand-maintained: WHICH Tack providers flock serves + operational tuning.
+// Hand-maintained: WHICH Roost providers flock serves + operational tuning.
 // Values carried over verbatim from the current hardcoded defaults.
 const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
     // llama-swap (elo 1600), openrouter (1500), nvidia (1550, w 1.2,
@@ -165,17 +165,17 @@ const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
 ];
 
 pub fn default_providers() -> Vec<ProviderDef> {
-    let dead: HashSet<&str> = tack_providers::TACK_DEAD_IDS.iter().copied().collect();
+    let dead: HashSet<&str> = roost_providers::ROOST_DEAD_IDS.iter().copied().collect();
     let mut out = Vec::with_capacity(FLOCK_PROVIDER_OVERLAY.len());
     for ov in FLOCK_PROVIDER_OVERLAY {
-        let t = tack_providers::TACK_PROVIDERS.iter()
+        let t = roost_providers::ROOST_PROVIDERS.iter()
             .find(|p| p.name == ov.name)
-            .unwrap_or_else(|| panic!("overlay references unknown Tack provider: {}", ov.name));
+            .unwrap_or_else(|| panic!("overlay references unknown Roost provider: {}", ov.name));
         assert!(!t.router_local, "flock overlay must not include router-local {}", ov.name);
-        assert!(t.enabled, "flock overlay includes disabled Tack provider {}", ov.name);
+        assert!(t.enabled, "flock overlay includes disabled Roost provider {}", ov.name);
         let mut keys = vec![ProviderKey { key_env: t.key_env.into(), ..Default::default() }];
         if !t.key_env_alt.is_empty() {
-            // Tack's multi-key semantic (e.g. NVIDIA_API_KEYS).
+            // Roost's multi-key semantic (e.g. NVIDIA_API_KEYS).
             keys.push(ProviderKey { key_env: t.key_env_alt.into(), ..Default::default() });
         }
         let no_auth = t.auth == "none";
@@ -185,7 +185,7 @@ pub fn default_providers() -> Vec<ProviderDef> {
             auth: if no_auth { AuthScheme::None } else { AuthScheme::ApiKey },
             keys, no_auth,
             free_tier: ov.free_tier,
-            // Tack contract: seeds are cold-start data; filter deadIds everywhere.
+            // Roost contract: seeds are cold-start data; filter deadIds everywhere.
             models: t.seeds.iter().filter(|m| !dead.contains(*m)).map(|s| s.to_string()).collect(),
             model_map: ov.model_map.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect(),
             weight: ov.weight, elo: ov.elo,
@@ -207,7 +207,7 @@ Notes:
   `AuthScheme` has no header-name support. No regression (no x-api-key
   provider is in the 13), but **anthropic cannot join the overlay until
   header support lands** — tracked as follow-up.
-- The `panic!` on unknown overlay name is intentional: a Tack
+- The `panic!` on unknown overlay name is intentional: a Roost
   rename/removal must fail loudly at boot, never silently drop a provider.
 - `migrate_v1()`'s `.filter(|p| p.name != "nvidia")` and the empty-list
   recovery keep working unchanged.
@@ -219,10 +219,10 @@ of these in `aggregate_models` / `provider_metadata`:
 
 - **(B, recommended)** Prefer the probe-refreshed `models_cache` IDs over
   `def.models` when the cache is fresh; fall back to seeds. This makes
-  discovery actually own membership, per Tack's contract. Behavior change:
+  discovery actually own membership, per Roost's contract. Behavior change:
   advertised set now tracks live upstream listings.
 - **(C, recommended with B)** Filter merged static IDs through
-  `TACK_DEAD_IDS` (+ record serve-404s into a runtime quarantine that
+  `ROOST_DEAD_IDS` (+ record serve-404s into a runtime quarantine that
   suppresses re-advertisement — flock already has `record_empty_strike`
   machinery to build on).
 - **(A, deferred)** Skip `!usable` providers' static IDs in the merge.
@@ -234,13 +234,13 @@ of these in `aggregate_models` / `provider_metadata`:
 
 - `thirteen_builtin_providers` — keep (still 13 via overlay).
 - `builtin_defaults_match_astmatrix` — rewrite: expectations become
-  Tack-derived (e.g. openrouter seeds grow, groq seeds = Tack's 6 minus
-  deadIds). Assert base_url/key_env equality against `TACK_PROVIDERS`.
-- New: every overlay name resolves in `TACK_PROVIDERS`; no overlay entry is
+  Roost-derived (e.g. openrouter seeds grow, groq seeds = Roost's 6 minus
+  deadIds). Assert base_url/key_env equality against `ROOST_PROVIDERS`.
+- New: every overlay name resolves in `ROOST_PROVIDERS`; no overlay entry is
   `router_local`/`!enabled`; no generated `models` entry is in
-  `TACK_DEAD_IDS`; `key_env_alt` produces a second key (nvidia).
-- New: sync test — `tack_providers.rs` byte-identical to
-  `tack/generated/providers.rs` modulo the `Generated at` stamp.
+  `ROOST_DEAD_IDS`; `key_env_alt` produces a second key (nvidia).
+- New: sync test — `roost_providers.rs` byte-identical to
+  `roost/generated/providers.rs` modulo the `Generated at` stamp.
 
 ### 3.5 Rollout (after review approval)
 
@@ -250,7 +250,7 @@ of these in `aggregate_models` / `provider_metadata`:
 3. `cargo build --release`; deploy to `/home/toxic/.flock/flock`
    (backup the current binary first).
 4. Restart via the owned pitchfork flow; verify `/health`, authenticated
-   `/v1/models` (spot-check dead IDs gone, seed counts match Tack),
+   `/v1/models` (spot-check dead IDs gone, seed counts match Roost),
    `POST /v1/chat/completions {"model":"free"}` E2E (the Sable regression),
    and restart durability (config still v1 → migrate path re-runs clean).
 5. Post completion to fleet with commit SHAs.
@@ -271,4 +271,4 @@ of these in `aggregate_models` / `provider_metadata`:
 
 - Herd's first-class flock delegation re-enablement (separate lane).
 - sovereign-router `:25104` thinning (separate lane).
-- Changing Tack's catalog data itself (no provider additions/removals here).
+- Changing Roost's catalog data itself (no provider additions/removals here).
