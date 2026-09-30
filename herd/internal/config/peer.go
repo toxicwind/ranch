@@ -20,6 +20,9 @@ type PeerConfig struct {
 	// Timeout settings for proxy connections
 	Timeouts TimeoutsConfig `yaml:"timeouts"`
 
+	// Health settings for peer health tracking
+	Health HealthConfig `yaml:"health"`
+
 	tailcatBlob       string
 	tailcatPrivateKey *tailcat.PrivateKey
 }

@@ -43,14 +43,6 @@ func testHealthConfig() config.HealthConfig {
 	}
 }
 
-// expireCoolOff moves the tracker's opened-at stamp into the past so the next
-// Admit call is probe-eligible. Deterministic: no sleeping.
-func expireCoolOff(h *PeerHealth) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	h.openedAt = time.Now().Add(-time.Hour)
-}
-
 func TestClassifyOutcome(t *testing.T) {
 	okBody := []byte(`{"choices":[{"message":{"content":"hello"}}]}`)
 	emptyChoices := []byte(`{"choices":[]}`)

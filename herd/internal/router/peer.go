@@ -35,6 +35,9 @@ type Peer struct {
 	logger *logmon.Monitor
 	peers  map[string]*peerRoute
 
+	mu     sync.RWMutex
+	health map[string]*PeerHealth
+
 	shutdownCtx  context.Context
 	shutdownFn   context.CancelFunc
 	shuttingDown atomic.Bool
@@ -55,6 +58,15 @@ func NewPeer(cfg config.Config, logger *logmon.Monitor) (*Peer, error) {
 		peerIDs = append(peerIDs, peerID)
 	}
 	sort.Strings(peerIDs)
+
+	health := make(map[string]*PeerHealth, len(peerIDs))
+	for _, peerID := range peerIDs {
+		hc := peers[peerID].Health
+		if hc.Enabled == nil {
+			hc = config.DefaultHealthConfig()
+		}
+		health[peerID] = NewPeerHealth(peerID, hc, logger)
+	}
 
 	for _, peerID := range peerIDs {
 		peer := peers[peerID]
@@ -148,6 +160,7 @@ func NewPeer(cfg config.Config, logger *logmon.Monitor) (*Peer, error) {
 		cfg:         cfg,
 		logger:      logger,
 		peers:       modelMap,
+		health:      health,
 		shutdownCtx: shutdownCtx,
 		shutdownFn:  shutdownFn,
 	}, nil
