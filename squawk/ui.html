@@ -379,7 +379,7 @@ async function poll(myGen) {
   if (!running || myGen !== gen) return;
   const t0 = performance.now();
   try {
-    const r = await fetch(`wait?since=${since}&channel=${chan()}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(65000)]) });
+    const r = await fetch(`wait?since=${since}&channel=${chan()}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(30000)])} });
     if (r.status === 401 || r.status === 404) throw new Error('unauthorized');
     const data = await r.json();
     if (myGen !== gen) return; // channel switched mid-flight: drop the stale response
@@ -399,6 +399,7 @@ async function poll(myGen) {
   } catch (e) {
     if (myGen !== gen) return; // superseded: the new generation owns the loop now
     if (e && e.message === 'unauthorized') return authFailed();
+    if (e && e.name === 'TimeoutError') { setState('live'); return poll(myGen); }
     failures++;
     setState('reconnecting', failures > 1 ? ` · try ${failures}` : '');
     if (failures === 1) line('feed hiccup — retrying…', 'sys');
@@ -434,7 +435,7 @@ async function boot() {
   setState('loading');
   if (!booted) line('tuned in — pulling the latest traffic…', 'sys');
   try {
-    const r = await fetch(`wait?since=0&tail=${TAIL}&channel=${chan()}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(65000)]) });
+    const r = await fetch(`wait?since=0&tail=${TAIL}&channel=${chan()}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(8000)])} });
     if (r.status === 401 || r.status === 404) throw new Error('unauthorized');
     const data = await r.json();
     if (myGen !== gen) return; // superseded by a channel switch
