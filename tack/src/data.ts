@@ -492,6 +492,33 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     adapter: "openai",
     seeds: ["claude-sonnet-5"],
   },
+  {
+    name: "firepass",
+    displayName: "Fire Pass",
+    baseUrl: "https://api.fireworks.ai/inference/v1",
+    keyEnv: "FIREPASS_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    seeds: ["glm-5.2-fast"],
+  },
+  {
+    name: "singularityapi-dev",
+    displayName: "SingularityAPI",
+    baseUrl: "https://api.singularityapi.dev/v1",
+    keyEnv: "SINGULARITYAPI_DEV_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    seeds: ["deepseek-v4-flash"],
+  },
+  {
+    name: "singularityapi-tech",
+    displayName: "SingularityAPI Tech",
+    baseUrl: "https://api.singularityapi.tech/v1",
+    keyEnv: "SINGULARITYAPI_TECH_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    seeds: ["deepseek-ai/DeepSeek-V4.1-Flash"],
+  },
 ];
 
 /**

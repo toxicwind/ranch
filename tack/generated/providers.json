@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-tack/v1",
-  "generatedAt": "2026-09-30T04:28:17.125Z",
+  "generatedAt": "2026-09-30T04:32:58.319Z",
   "generator": "@ranch/tack codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/tack src/data.ts",
   "adapters": [
@@ -362,6 +362,30 @@
       "keyEnvAlt": "COMMANDCODE_API_KEY",
       "adapter": "openai",
       "auth": "bearer"
+    },
+    {
+      "name": "firepass",
+      "displayName": "Fire Pass",
+      "baseUrl": "https://api.fireworks.ai/inference/v1",
+      "keyEnv": "FIREPASS_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "singularityapi-dev",
+      "displayName": "SingularityAPI",
+      "baseUrl": "https://api.singularityapi.dev/v1",
+      "keyEnv": "SINGULARITYAPI_DEV_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "singularityapi-tech",
+      "displayName": "SingularityAPI Tech",
+      "baseUrl": "https://api.singularityapi.tech/v1",
+      "keyEnv": "SINGULARITYAPI_TECH_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
     }
   ],
   "seeds": {
@@ -544,6 +568,15 @@
     ],
     "commandcode": [
       "claude-sonnet-5"
+    ],
+    "firepass": [
+      "glm-5.2-fast"
+    ],
+    "singularityapi-dev": [
+      "deepseek-v4-flash"
+    ],
+    "singularityapi-tech": [
+      "deepseek-ai/DeepSeek-V4.1-Flash"
     ]
   },
   "seedsContract": "Cold-start only: served while a provider has never had a successful discovery; inert afterwards. Never hand-edit model membership here — discovery owns it.",
