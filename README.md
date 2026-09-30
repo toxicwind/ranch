@@ -33,6 +33,7 @@ One table, every animal first-class — no "secondary" framing, no pens inside p
 | 🟢 **branding** | `25148` | `branding/` (in-tree, Python stdlib) | **Fleet build-job daemon.** Disk-backed queue, streaming logs, content-hash artifact cache — a brand marks the build. Moved 2026-09-30 (was `tools/buildsrv` in sovereign-projects). |
 | 🟢 **browserless** | `25130` | `barn/browserless` (in-tree) | Browser automation: browserless.io MCP server + native-launcher deployment. |
 | 🟢 **lookout** | `6080` | `barn/lookout` (in-tree) | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower Chris climbs to see what the agent browser is doing. |
+| 🟢 **oracle** | `25151` | `oracle/` (in-tree) | 🔮 The decision corral — prediction-market work loop + deterministic Oracle verdict engine (dated yes/no, evidence-backed). Daemons: oracle-market, oracle-core, oracle-chat, bidder-forge/scout, market-watchdog. |
 | **tack** | — | `tack/` (in-tree, `@ranch/tack`, Bun/TS) | 🤠 The tack room — the master provider catalog: every provider/model the estate rides, one registry. Feeds tau, herd's generated Go, the router. |
 | **squawk** | — | `squawk/` (in-tree) | File-based multi-agent chat: signed, sequenced message files. NATS bus (`squawk/nats/`) underneath. |
 | **corral** | — | `corral/` (submodule → `toxicwind/super-ralph`) | The super-ralph agent framework — the mission runner. |
