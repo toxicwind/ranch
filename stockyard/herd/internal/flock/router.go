@@ -36,6 +36,10 @@ type Router struct {
 	semCache        *SemanticCache
 	quarantine      *ImmediateQuarantine
 	costQuality     *CostQualityRouter
+	// GitHub-borrowed patterns (2026-09-30)
+	modelBreakers   *ModelBreakerRegistry
+	hardCoalescer   *HardenedCoalescer
+	failoverPolicy  *FailoverPolicy
 }
 
 // routingContext holds per-request mutable state.
@@ -86,6 +90,13 @@ func NewRouter(cfg *FlockConfig, logger *logmon.Monitor) (*Router, error) {
 	r.quarantine.onQuarantine = func(provider string, reason QuarantineReason) {
 		r.logger.Infof("[flock] QUARANTINED provider=%s reason=%s", provider, reason)
 	}
+
+	// GitHub-borrowed: per-model breakers (fallback to provider breaker)
+	r.modelBreakers = NewModelBreakerRegistry(func(provider string) *CircuitBreaker {
+		return r.getCircuit(provider)
+	})
+	r.hardCoalescer = NewHardenedCoalescer()
+	r.failoverPolicy = NewFailoverPolicy()
 
 	go r.healthProbeLoop()
 	return r, nil
