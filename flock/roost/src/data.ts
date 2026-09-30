@@ -221,7 +221,7 @@ export const PROVIDER_DEFS: ProviderDef[] = [
   },
   {
     name: "google",
-    baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
+    baseUrl: "http://127.0.0.1:25109/gemini-eap-interactions",
     keyEnv: "GOOGLE_API_KEY",
     auth: "bearer",
     adapter: "openai",

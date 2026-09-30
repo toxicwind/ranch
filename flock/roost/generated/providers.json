@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-roost/v1",
-  "generatedAt": "2026-09-30T12:10:56.438Z",
+  "generatedAt": "2026-09-30T12:28:11.154Z",
   "generator": "@ranch/roost codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/roost src/data.ts",
   "adapters": [
@@ -87,7 +87,7 @@
     },
     {
       "name": "google",
-      "baseUrl": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "baseUrl": "http://127.0.0.1:25109/gemini-eap-interactions",
       "keyEnv": "GOOGLE_API_KEY",
       "adapter": "openai",
       "auth": "bearer"
