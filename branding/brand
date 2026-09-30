@@ -166,7 +166,7 @@ def cmd_status(a):
         print(f"  logs: {ROOT}/logs/{a.id}.log")
         return
     jobs = sorted(st["jobs"].items(),
-                  key=lambda kv: kv[1].get("submitted_at", ""), reverse=True)[: (a.n or 15)]
+                  key=lambda kv: kv[1].get("submitted_at") or "", reverse=True)[: (a.n or 15)]
     if not jobs:
         print("(no jobs on record)")
         return
