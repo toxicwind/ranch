@@ -1,0 +1,53 @@
+name: Publish to npm — DISABLED (do not re-enable)
+
+# =============================================================================
+# DO NOT RE-ENABLE. Publishing was disabled deliberately, on purpose.
+#
+# WHY
+# ---
+# This package declares the name `@sovereign/corral`, but the `@sovereign`
+# scope on registry.npmjs.org is owned by an unrelated third party (the
+# "Sovereign SDK", publisher `ross-weir`). This project has never owned that
+# scope. `npm view @sovereign/corral` resolves to 404 — the name is not ours.
+#
+# Before this file was neutralised, an ordinary `git tag v1.2.3 && git push
+# --tags` would fire this workflow and run `npm publish --access public` into
+# a namespace owned by someone else. That is a nuisance inflicted on a third
+# party, and deleting the tag afterwards does not un-publish anything.
+#
+# Nothing consumes this package from a registry, so there is nothing to lose:
+#   * the six bin aliases (corral, ralph, hyper, hyper-ralph, super-ralph,
+#     taskforge) are consumed as ~/.local/bin symlinks pointing directly at
+#     src/cli/index.ts — never via `npm install -g`;
+#   * agents/oracle-market/bin/bidder.py resolves the binary by probing
+#     ~/.local/bin on the filesystem; it never consults npm;
+#   * `@sovereign/corral` appears in neither bun.lock nor package-lock.json;
+#   * no source file imports the package by name.
+#
+# This is an internal CLI, not a distributed library. If it ever must be
+# published, do it from a fork that owns a scope you control, under a
+# different name — not by re-enabling this workflow.
+# =============================================================================
+
+on:
+  # Intentionally NOT `push: tags: - "v*"`. No tag pattern, no branch, and no
+  # schedule: a `v*` tag provably cannot start this workflow. `workflow_dispatch`
+  # is the only trigger, and even that runs a no-op job (see below).
+  workflow_dispatch:
+
+# Dropped from `contents: write`. Nothing here needs write access any more.
+permissions: {}
+
+jobs:
+  publish:
+    name: "No-op — publishing is disabled"
+    runs-on: ubuntu-latest
+    steps:
+      # No checkout, no install, no `npm publish`, no `gh release`. The job
+      # exists only to emit the explanation below if someone dispatches it.
+      - name: Publishing is disabled
+        run: |
+          echo "::warning::Publishing is intentionally disabled for @sovereign/corral."
+          echo "The @sovereign scope on npmjs.org is owned by an unrelated third party."
+          echo "This package is consumed as local bin symlinks, never from a registry."
+          echo "See the comment at the top of .github/workflows/publish.yml for the full rationale."
