@@ -57,6 +57,29 @@ export async function ensureWorkspace(requestedCwd: string, promptSourcePath: st
   const workspace = path.join(process.env.HOME || "/tmp", ".corral", "runs", `${stamp}-${slug}-${uniq}`);
   fs.mkdirSync(workspace, { recursive: true });
   initColocated(workspace);
+  // Seed an initial commit + main branch. Smithers' engine attaches git
+  // metadata to agent worktrees via `git worktree add` against this repo,
+  // trying main/origin/main/HEAD in order. A fresh `jj git init --colocate`
+  // has no commits and none of these refs exist, which fails the run at
+  // the discover step with WORKTREE_CREATE_FAILED.
+  try {
+    fs.writeFileSync(
+      path.join(workspace, ".corral-workspace"),
+      "corral isolated workspace\n"
+    );
+    cp.execSync("jj commit -m 'corral: initial workspace commit'", {
+      cwd: workspace,
+      stdio: "pipe",
+    });
+    cp.execSync("jj bookmark create main -r @-", {
+      cwd: workspace,
+      stdio: "pipe",
+    });
+  } catch (e: any) {
+    console.error(
+      `corral: warning: failed to seed initial commit in ${workspace}: ${e?.message ?? e}`
+    );
+  }
   console.error(`corral: ${requestedCwd} is not a colocated jj repo — provisioned isolated workspace ${workspace}`);
   return workspace;
 }
