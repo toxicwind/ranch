@@ -962,5 +962,10 @@
   "update_check": {
     "channel": "stable",
     "enabled": true
-  }
+  },
+  "trusted_hosts": [
+    "github-mcp-host.tailc9ac71.ts.net",
+    "localhost",
+    "127.0.0.1"
+  ]
 }
