@@ -1,0 +1,11 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+language: 'typescript'
+layer: 'system'
+# Agent profile for the Meta AI VM (metaaivm.com) estate.
+# Applies to agents carrying the Hatch autoloaded identifier or the ipnext identifier.
+# Corpus: /home/toxic/sovereign/hatch/metaaivm-corpus/
+# Fork: toxicwind/muse-cli (fork of nikships/muse-cli)
+tasks:
+  verify:
+    command: 'bun verify.ts'
+    inputs: ['profile.json', 'verify.ts']
