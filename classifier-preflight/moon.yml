@@ -1,6 +1,6 @@
 $schema: 'https://moonrepo.dev/schemas/project.json'
 language: 'typescript'
-layer: 'system'
+layer: 'tool'
 # classifier-preflight: internal meta tool. Scans task bodies, briefs, docs,
 # and chat drafts for known safety-classifier false-positive trigger shapes
 # (observed 2026-09-30: refused replies/spawns, retired tmp-janitor cron,

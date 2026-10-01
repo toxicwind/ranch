@@ -1,7 +1,7 @@
-type: ts
+language: 'typescript'
 tasks:
   test:
-    cmd: bun test
+    command: 'bun test'
     inputs:
       - src/**/*.ts
       - tests/**/*.ts
