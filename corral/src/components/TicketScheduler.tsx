@@ -91,6 +91,34 @@ const GLOBAL_JOB_NODE_IDS: Record<string, string> = {
   "progress-update": "update-progress",
 };
 
+/**
+ * Deterministic next-stage routing (2026-10-01 repair).
+ *
+ * computePipelineStage returns the highest COMPLETED stage. The scheduler
+ * LLM repeatedly misread "current pipeline stage: test" as "test needs
+ * running" and re-scheduled `ticket:test` forever instead of advancing.
+ * The next job is now computed in code, rendered as an authoritative
+ * column in the ticket table, and the prompt forbids scheduling any other
+ * pipeline job for the ticket. Null = pipeline complete, schedule nothing.
+ */
+export const NEXT_JOB_FOR_COMPLETED_STAGE: Record<string, string | null> = {
+  "not_started": "ticket:research",
+  "research": "ticket:plan",
+  "plan": "ticket:implement",
+  "implement": "ticket:test",
+  "test": "ticket:build-verify",
+  "build_verify": "ticket:spec-review",
+  "spec_review": "ticket:code-review",
+  "code_review": "ticket:review-fix",
+  "review_fix": "ticket:report",
+  "report": "ticket:report",
+  "landed": null,
+};
+
+export function nextJobForStage(stage: string): string | null {
+  return NEXT_JOB_FOR_COMPLETED_STAGE[stage] ?? null;
+}
+
 export function jobNodeId(job: { jobId: string; jobType: string }): string {
   return GLOBAL_JOB_NODE_IDS[job.jobId] ?? job.jobId;
 }
@@ -124,11 +152,12 @@ export type TicketSchedulerProps = {
 };
 
 function formatTicketTable(tickets: TicketState[]): string {
-  const header = "| ID | Title | Priority | Pipeline Stage | Landed | Report Done |";
-  const sep    = "|----|-------|----------|----------------|--------|-------------|";
-  const rows = tickets.map(({ ticket, pipelineStage, landed, reportComplete }) =>
-    `| ${ticket.id} | ${ticket.title} | ${ticket.priority} | ${pipelineStage} | ${landed ? "✓" : "✗"} | ${reportComplete ? "✓" : "✗"} |`,
-  );
+  const header = "| ID | Title | Priority | Completed Stage | Schedule Next (authoritative) | Landed | Report Done |";
+  const sep    = "|----|-------|----------|-----------------|-------------------------------|--------|-------------|";
+  const rows = tickets.map(({ ticket, pipelineStage, landed, reportComplete }) => {
+    const next = landed || reportComplete ? "— (done)" : (nextJobForStage(pipelineStage) ?? "— (done)");
+    return `| ${ticket.id} | ${ticket.title} | ${ticket.priority} | ${pipelineStage} | ${next} | ${landed ? "✓" : "✗"} | ${reportComplete ? "✓" : "✗"} |`;
+  });
   return [header, sep, ...rows].join("\n");
 }
 
@@ -199,7 +228,7 @@ Each ticket progresses through: research → plan → implement → test → bui
 - \`ticket:review-fix\` — Fix review issues (requires reviews done with issues)
 - \`ticket:report\` — Final status report (requires all above done)
 
-**Schedule the NEXT stage for each ticket based on its current pipeline stage.** Don't schedule a stage that's already complete or whose prerequisites aren't met.
+**The "Schedule Next" column in the Ticket State table is authoritative and computed deterministically: "Completed Stage" is the highest stage with finished output, and "Schedule Next" is the ONLY pipeline job you may schedule for that ticket. NEVER schedule any other pipeline job for a ticket — re-scheduling a completed stage is a bug, not progress. A "— (done)" ticket gets no pipeline jobs.**
 
 ### Global jobs (ticketId=null)
 - \`discovery\` — Find new tickets to work on (focusId=null, jobId="discovery")
@@ -213,7 +242,7 @@ Each ticket progresses through: research → plan → implement → test → bui
 
 2. **Resume in-progress tickets first.** Tickets further in the pipeline get priority — drive existing work to completion before starting new tickets.
 
-3. **Schedule the correct NEXT stage.** Look at each ticket's pipeline stage and schedule only the next logical step. Example: if a ticket is at "research" stage, schedule "ticket:plan" next.
+3. **Schedule the authoritative NEXT stage.** Read the "Schedule Next (authoritative)" column for each ticket and schedule exactly that jobType. Do not infer, substitute, or repeat a completed stage. Example: Completed Stage "test" → schedule "ticket:build-verify", never "ticket:test".
 
 4. **Load balance across agents.** Distribute work across ALL available agents. Don't funnel everything through 1-2 favorites. Every agent should get work when there are enough jobs.
 
