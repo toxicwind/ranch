@@ -43,4 +43,25 @@ export NIM_BASE_URL="${NIM_BASE_URL:-http://127.0.0.1:25193/v1}"
 if [[ -z "${NVIDIA_API_KEY:-}" && -n "${NIM_PROXY_API_KEY:-}" ]]; then
   export NVIDIA_API_KEY="$NIM_PROXY_API_KEY"
 fi
-exec /home/toxic/.local/bin/claude.nim-shim-real "$@"
+# 2026-10-01: Route through ReAct loop for Gatehouse MCP tool support.
+# The nim-shim-real binary is prompt->text only with no tool capability.
+# claude-react-loop.py implements ReAct: it prepends tool instructions,
+# parses <tool_call> tags from model output, executes via Gatehouse MCP,
+# and loops until the task is complete.
+# For --version/--help, pass through directly.
+if [[ "${1:-}" == "--version" || "${1:-}" == "--help" ]]; then
+  exec /home/toxic/.local/bin/claude.nim-shim-real "$@"
+fi
+# Extract prompt: last non-flag argument, or join all args
+_prompt=""
+for arg in "$@"; do
+  case "$arg" in
+    -*) ;;
+    *) _prompt="$arg" ;;
+  esac
+done
+if [[ -n "$_prompt" ]]; then
+  exec /usr/bin/python3 /home/toxic/sovereign/projects/range/ranch/corral/bin/claude-react-loop.py "$_prompt"
+else
+  exec /home/toxic/.local/bin/claude.nim-shim-real "$@"
+fi
