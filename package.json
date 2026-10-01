@@ -26,5 +26,8 @@
     "windmill",
     "task-launch",
     "metaaivm-profile"
-  ]
+  ],
+  "overrides": {
+    "effect": "4.0.0-rc.118"
+  }
 }

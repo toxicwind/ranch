@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "//private": "Internal CLI, not a distributed library. npm refuses to publish a package with private:true regardless of any --access flag. Set because the '@sovereign' scope on npmjs.org belongs to an unrelated third party, so publishing this name would squat someone else's namespace. The six bin aliases are consumed as ~/.local/bin symlinks to src/cli/index.ts, never from a registry. See .github/workflows/publish.yml.",
   "private": true,
-  "description": "Sovereign Corral — Multi-agent ticket-driven development & speculative merge queue orchestrator on Smithers (evolved from super-ralph lineage)",
+  "description": "Sovereign Corral \u2014 Multi-agent ticket-driven development & speculative merge queue orchestrator on Smithers (evolved from super-ralph lineage)",
   "author": "Sovereign Fleet (orig. William Cory)",
   "license": "MIT",
   "type": "module",
@@ -69,7 +69,9 @@
     "better-sqlite3": "^11.0.0",
     "effect": "4.0.0-rc.118",
     "react": "19.3.0",
-    "smithers-orchestrator": "0.32.0"
+    "smithers-orchestrator": "0.32.0",
+    "smthrs": "0.35.0",
+    "zod": "^4.4.3"
   },
   "overrides": {
     "effect": "4.0.0-rc.118"

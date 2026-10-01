@@ -17,6 +17,12 @@ load_key() {
 load_key GROQ_API_KEY
 load_key CEREBRAS_API_KEY
 load_key NVIDIA_API_KEY
+load_key FLOCK_API_KEY
+# The flock proxy authenticates clients against PROXY_API_KEYS, but the
+# estate bidder clients (super-ralph) send FLOCK_API_KEY. Accept the
+# existing estate key server-side so both sides agree. No new secret is
+# created or rotated here.
+export PROXY_API_KEYS="${PROXY_API_KEYS:-$FLOCK_API_KEY}"
 
 export HOST="${HOST:-127.0.0.1}"
 export PORT="${PORT:-${FLOCK_PORT:-25193}}"
