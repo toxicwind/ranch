@@ -22,6 +22,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.request
 
 GATEHOUSE_BIN = "/home/toxic/sovereign/projects/range/bin/gatehouse"
 GATEHOUSE_CONFIG = (
@@ -126,9 +127,52 @@ CRITICAL RULES:
 
 
 def call_model(prompt):
-    """Call nim-shim-real. No timeout - returns when the model returns."""
+    """Call nim-shim-real. No timeout - returns when the model returns.
+
+    Reasoning-model fallback: some models (e.g. gpt-oss) nondeterministically
+    put their answer in the `reasoning` field with empty `content`, which the
+    shim drops. When the shim returns empty, retry via a direct API call and
+    use content, falling back to reasoning. 2026-10-01.
+    """
     result = run([NIM_SHIM_REAL, prompt])
-    return result.stdout.strip()
+    out = result.stdout.strip()
+    if out:
+        return out
+    return direct_model_call(prompt)
+
+
+def direct_model_call(prompt):
+    """Direct OpenAI-compatible chat call; merges content and reasoning."""
+    base = os.environ.get("NIM_BASE_URL", "http://127.0.0.1:25193/v1").rstrip("/")
+    key = os.environ.get("NVIDIA_API_KEY", "")
+    model = os.environ.get("NIM_MODEL", "")
+    body = json.dumps({
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 8192,
+        "temperature": 1,
+        "top_p": 0.95,
+    }).encode()
+    req = urllib.request.Request(
+        base + "/chat/completions", data=body,
+        headers={"Authorization": "Bearer " + key,
+                 "Content-Type": "application/json",
+                 "User-Agent": "corral-react-loop/1.0"},
+    )
+    try:
+        with urllib.request.urlopen(req) as resp:
+            data = json.loads(resp.read().decode())
+    except Exception as e:
+        print("direct_model_call failed: %s" % e, file=sys.stderr)
+        return ""
+    try:
+        msg = data["choices"][0]["message"]
+    except (KeyError, IndexError, TypeError):
+        return ""
+    content = (msg.get("content") or "").strip()
+    if content:
+        return content
+    return (msg.get("reasoning") or "").strip()
 
 
 def intent_for(tool_name):
