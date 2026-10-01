@@ -1,0 +1,1 @@
+{"description":"Sovereign provider wire-data authority: base URLs, key env vars, auth schemes for tau catalog","exports":{".":"./src/index.ts"},"main":"./src/index.ts","name":"@ranch/tack","type":"module","version":"1.0.0"}
