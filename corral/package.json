@@ -67,8 +67,9 @@
   "dependencies": {
     "@opentui/core": "^0.1.81",
     "better-sqlite3": "^11.0.0",
-    "smithers-orchestrator": "0.32.0",
-    "react": "19.3.0"
+    "effect": "4.0.0-rc.118",
+    "react": "19.3.0",
+    "smithers-orchestrator": "0.32.0"
   },
   "overrides": {
     "effect": "4.0.0-rc.118"
