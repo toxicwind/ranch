@@ -122,7 +122,7 @@ export function InterpretConfig({
     ),
     "",
     "Hard requirements:",
-    "- isSimpleReply: set true ONLY if the user request is a simple direct reply instruction requiring no repo work, no tickets, no code changes (example: reply with exactly the word ALIVE). When true, the workflow skips all work loops and goes straight to the final report.",
+    "- isSimpleReply: set true ONLY for pure text responses with ZERO side effects - no file creation, no file writes, no filesystem changes of any kind, no repo work, no tickets, no code changes (example: reply with exactly the word ALIVE). ANY request that creates, modifies, or deletes files - even a single file like /tmp/foo.txt - is NOT a simple reply and MUST use isSimpleReply=false so the work loops actually execute. When true, the workflow skips all work loops and goes straight to the final report.",
     "- Commands must be realistic for the repo.",
     "- Keep focuses concise (2-6).",
     "- Prefer paths relative to repo root.",
