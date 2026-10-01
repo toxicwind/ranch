@@ -66,3 +66,19 @@ identifier. The profile:
   exa web search — never by stalling on the user.
 
 See `profile.json` for the machine-readable form.
+
+## Scheduling (canonical, verified 2026-10-01)
+
+Two jobs, two mechanisms — both live on yote:
+
+- **Collector** — yote crontab `17 3 * * *`: runs
+  `ranch/metaaivm/collector.ts` (Bun), appending to
+  `/home/toxic/sovereign/hatch/metaaivm-harvest/`. State:
+  `watermark.json` in the harvest dir. cronie confirmed active.
+- **Verifier** — systemd user unit `metaaivm-profile-verify.path`
+  (enabled, active): event-driven, watches `profile.json`
+  (`PathChanged`) and the corpus dir (`PathModified`), triggers
+  `metaaivm-profile-verify.service` which runs `verify.ts` (12 checks)
+  and appends to `/home/toxic/sovereign/hatch/metaaivm-profile-verify.log`.
+  This supersedes the older `metaaivm-profile-verify.timer` (04:17 daily),
+  which is disabled and stays disabled — event-driven, never timers.
