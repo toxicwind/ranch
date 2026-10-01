@@ -62,9 +62,11 @@ func NewPeer(cfg config.Config, logger *logmon.Monitor) (*Peer, error) {
 	health := make(map[string]*PeerHealth, len(peerIDs))
 	for _, peerID := range peerIDs {
 		hc := peers[peerID].Health
-		if hc.Enabled == nil {
-			hc = config.DefaultHealthConfig()
-		}
+		// ApplyDefaults fills unset fields and preserves explicitly
+		// configured ones. Replacing the whole struct when Enabled is
+		// nil discarded FailureThreshold/Weights, so peers never
+		// ejected under a partially-specified health config.
+		hc.ApplyDefaults()
 		health[peerID] = NewPeerHealth(peerID, hc, logger)
 	}
 
@@ -99,10 +101,31 @@ func NewPeer(cfg config.Config, logger *logmon.Monitor) (*Peer, error) {
 			if strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "text/event-stream") {
 				resp.Header.Set("X-Accel-Buffering", "no")
 			}
+			// Health observation: classify the outcome from the actual
+			// response. A non-2xx status is immediately classifiable; a
+			// 2xx body is observed through to EOF so the 200-empty
+			// honesty check sees the real bytes. Exactly-once is
+			// enforced by the observer itself.
+			if obs := healthObserverFrom(resp.Request.Context()); obs != nil {
+				if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+					obs.finishStatus(resp.StatusCode)
+				} else {
+					obs.status = resp.StatusCode
+					if strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "text/event-stream") {
+						obs.streaming = true
+					}
+					resp.Body = &observingReadCloser{ReadCloser: resp.Body, obs: obs}
+				}
+			}
 			return nil
 		}
 
 		reverseProxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+			// Health observation: a proxy-level error is a transport
+			// outcome (or a neutral cancel when the client went away).
+			if obs := healthObserverFrom(r.Context()); obs != nil {
+				obs.finishTransport(err)
+			}
 			// A cancelled request is not a peer failure, so keep it out of the
 			// warning stream whether or not the sentinel applies below.
 			if errors.Is(err, context.Canceled) || r.Context().Err() != nil {
@@ -219,6 +242,21 @@ func (r *Peer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	pp := route.member
+
+	// Health admission: an ejected peer fails fast with 503 instead
+	// of burning a backend call. Admitted requests carry a health
+	// observer (in the request context) that reports exactly one
+	// outcome when the proxied response completes or fails.
+	if ph, ok := r.health[pp.peerID]; ok && ph != nil {
+		admit, probe, gen := ph.Admit()
+		if !admit {
+			swaputil.SendResponse(w, req, http.StatusServiceUnavailable,
+				"peer_circuit_open: peer ejected by health monitor; retry later")
+			return
+		}
+		obs := newHealthObserver(ph, req, false, probe, gen)
+		req = req.WithContext(context.WithValue(req.Context(), healthObserverKey{}, obs))
+	}
 
 	r.logger.Debugf("peer: routing model %s to peer %s as %s (free=%v)", data.ModelID, pp.peerID, route.modelID, pp.apiKey == "")
 

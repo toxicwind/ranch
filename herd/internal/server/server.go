@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/mostlygeek/llama-swap/internal/astmatrix"
+	"github.com/mostlygeek/llama-swap/internal/capcompat"
 	"github.com/mostlygeek/llama-swap/internal/chain"
 	"github.com/mostlygeek/llama-swap/internal/config"
 	"github.com/mostlygeek/llama-swap/internal/docagent"
 	"github.com/mostlygeek/llama-swap/internal/event"
 	"github.com/mostlygeek/llama-swap/internal/freeproxy"
-	"github.com/mostlygeek/llama-swap/internal/capcompat"
 	"github.com/mostlygeek/llama-swap/internal/hw"
 	"github.com/mostlygeek/llama-swap/internal/logmon"
 	"github.com/mostlygeek/llama-swap/internal/mcptools"
@@ -40,7 +40,7 @@ type Server struct {
 	perf     *perf.Monitor
 	inflight *inflightTracker
 	metrics  *metricsMonitor
-  store    store.Store
+	store    store.Store
 	hardware *hw.HardwareSnapshot
 
 	// reference is llama-swap's own embedded documentation, served to the
@@ -81,8 +81,8 @@ type Server struct {
 	// discovery. The event dispatcher is process-wide, so a hot config reload
 	// would otherwise leave the retired Server probing alongside the new one.
 	capcompatCancel context.CancelFunc
-	mux     *http.ServeMux
-	handler http.Handler
+	mux             *http.ServeMux
+	handler         http.Handler
 
 	shutdownCtx  context.Context
 	shutdownFn   context.CancelFunc
@@ -194,9 +194,10 @@ type BuildInfo struct {
 	Commit  string
 	Date    string
 }
-  func New(cfg config.Config, muxlog *logmon.Monitor, proxylog *logmon.Monitor, upstreamlog *logmon.Monitor, perfMon *perf.Monitor, st store.Store, build BuildInfo, hardware *hw.HardwareSnapshot, refs *docagent.Docs) (*Server, error) {
-  var local router.LocalRouter
-  var err error
+
+func New(cfg config.Config, muxlog *logmon.Monitor, proxylog *logmon.Monitor, upstreamlog *logmon.Monitor, perfMon *perf.Monitor, st store.Store, build BuildInfo, hardware *hw.HardwareSnapshot, refs *docagent.Docs) (*Server, error) {
+	var local router.LocalRouter
+	var err error
 
 	switch cfg.Routing.Router.Use {
 	case "matrix":
@@ -289,7 +290,7 @@ type BuildInfo struct {
 	s.startPreload()
 	// Continuously reconcile model load/unload state and broadcast transitions
 	// Initialize capcompat and its cancel func.
-  s.capcompat = capcompat.New(s.store.Cache(), proxylog)
+	s.capcompat = capcompat.New(s.store.Cache(), proxylog)
 	// on /models/sse so subscribers (e.g. Zed's llama.cpp provider) see models
 	// appear/disappear as they are loaded on demand or unloaded — not just at
 	// subscribe time. statusEvent dedupes against lastStatus, so only real

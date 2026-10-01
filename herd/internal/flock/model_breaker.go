@@ -22,7 +22,7 @@ import (
 // model scope doesn't apply.
 
 const (
-	maxModelBreakers   = 1024
+	maxModelBreakers    = 1024
 	modelBreakerIdleTTL = 10 * time.Minute
 )
 

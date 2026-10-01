@@ -178,7 +178,7 @@ func (p corsPolicy) writePreflightHeaders(h http.Header, r *http.Request) {
 // short-circuits before auth: browsers never attach credentials to a preflight.
 func CreateCORSMiddleware(cfg config.Config) chain.Middleware {
 	var corsCfg config.CORSConfig
-	if cfg.Security!= nil {
+	if cfg.Security != nil {
 		corsCfg = cfg.Security.CORS
 	}
 	policy := newCORSPolicy(corsCfg)

@@ -39,6 +39,11 @@ var cmdSecretPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?i)(authorization["']?\s*[:=]\s*(?:bearer|basic)\s+)(\S+)`),
 }
 
+// tailcatTokenPattern matches a Tailcat connection token inside a tailcat://
+// proxy URL. The token is a credential: whoever holds it can reach the
+// private listener, so it is scrubbed wherever it lands.
+var tailcatTokenPattern = regexp.MustCompile(`(?i)(tailcat://)([A-Za-z0-9_-]+)`)
+
 // envSecretName matches the NAME half of a NAME=VALUE env entry whose value
 // should be blanked.
 var envSecretName = regexp.MustCompile(`(?i)(key|token|secret|password|passwd|credential)`)
@@ -212,6 +217,7 @@ func scrubTokens(s string) string {
 	for _, re := range secretValuePatterns {
 		s = re.ReplaceAllString(s, RedactedPlaceholder)
 	}
+	s = tailcatTokenPattern.ReplaceAllString(s, "${1}"+RedactedPlaceholder)
 	return s
 }
 

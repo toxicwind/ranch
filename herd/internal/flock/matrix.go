@@ -24,5 +24,5 @@ func NewMatrix(cfg *FlockConfig, reg *ProviderRegistry, health *HealthDB, limite
 }
 
 func (m *Matrix) Providers() *ProviderRegistry { return m.registry }
-func (m *Matrix) Health() *HealthDB          { return m.health }
-func (m *Matrix) Limiter() *RateLimiter      { return m.limiter }
+func (m *Matrix) Health() *HealthDB            { return m.health }
+func (m *Matrix) Limiter() *RateLimiter        { return m.limiter }

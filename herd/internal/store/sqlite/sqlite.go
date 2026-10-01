@@ -120,27 +120,36 @@ func (s *Store) Close() error {
 	}
 	return s.db.Close()
 }
+
 // ListActivity implements store.Store directly on sqlite.Store.
 
 // ListActivity implements store.Store directly on sqlite.Store.
 
 // Delegations satisfying store.Store on sqlite.Store
 func (s *Store) ListActivity(ctx context.Context, query store.ActivityQuery) (store.ActivityPage, error) {
-	if s == nil || s.activity == nil { return store.ActivityPage{}, nil }
+	if s == nil || s.activity == nil {
+		return store.ActivityPage{}, nil
+	}
 	return s.activity.List(ctx, query)
 }
 
 func (s *Store) ActivityStats(ctx context.Context, query store.ActivityStatsQuery) (store.ActivityStats, error) {
-	if s == nil || s.activity == nil { return store.ActivityStats{}, nil }
+	if s == nil || s.activity == nil {
+		return store.ActivityStats{}, nil
+	}
 	return s.activity.Stats(ctx, query)
 }
 
 func (s *Store) InsertActivity(ctx context.Context, entry store.ActivityLogEntry) (store.ActivityLogEntry, error) {
-	if s == nil || s.activity == nil { return store.ActivityLogEntry{}, nil }
+	if s == nil || s.activity == nil {
+		return store.ActivityLogEntry{}, nil
+	}
 	return s.activity.Insert(ctx, entry)
 }
 
 func (s *Store) PruneActivity(ctx context.Context, maxRows int) error {
-	if s == nil || s.activity == nil { return nil }
+	if s == nil || s.activity == nil {
+		return nil
+	}
 	return s.activity.Prune(ctx, maxRows)
 }

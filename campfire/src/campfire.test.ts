@@ -27,7 +27,11 @@ describe("room", () => {
 
   test("different shape passes", () => {
     const s = createRoomState();
-    const now = Date.now();
+    // Fixed clock at noon MDT: this test asserts the template-repeat check
+    // passes a different shape through, so it must not depend on the real
+    // wall clock (quiet hours are 02:00-06:00 MDT and would otherwise make
+    // this time-dependent).
+    const now = Date.UTC(2026, 5, 15, 18, 0, 0); // 12:00 MDT
     recordPost(s, "welcome to the den, Scout!", now);
     const reason = shouldStayQuiet(s, messageShape("Forge, your merge at #12345 is clean — nice work"), undefined, now);
     expect(reason).toBeNull();

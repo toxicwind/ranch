@@ -83,6 +83,29 @@ var allBeans = []any{
 }
 
 // TODO: make xormigrate context aware
+// SyncLogEntryForFixture creates the log_entries table in its pre-dedupe
+// form: the columns of model.LogEntry but WITHOUT the UNIQUE(step_id, line)
+// index (that index is what the dedupe migration clears the way for).
+// Used by the test-fixture generator.
+func SyncLogEntryForFixture(e *xorm.Engine) error {
+	_, err := e.Exec(`CREATE TABLE IF NOT EXISTS log_entries (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		step_id BIGINT, time BIGINT, line INTEGER,
+		data BLOB, created BIGINT, type INTEGER
+	)`)
+	if err != nil {
+		return err
+	}
+	_, err = e.Exec(`CREATE INDEX IF NOT EXISTS idx_log_entries_step_id ON log_entries (step_id)`)
+	_ = model.LogEntry{}
+	return err
+}
+
+// MigrationTasks returns the ordered migration list. Exported for the
+// test-fixture generator (see test-files/README.md): it builds the
+// pre-dedupe schema by running all migrations up to deduplicate-log-entries.
+func MigrationTasks() []*xormigrate.Migration { return migrationTasks }
+
 func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 	e.SetDisableGlobalCache(true)
 

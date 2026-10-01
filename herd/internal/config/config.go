@@ -182,33 +182,33 @@ func (c *ProfileConfig) UnmarshalYAML(value *yaml.Node) error {
 }
 
 type Config struct {
-	GlobalConcurrencyLimit int                       `yaml:"global_concurrency_limit" json:"global_concurrency_limit"`
-	Security               *SecurityConfig           `yaml:"security" json:"security"`
-	Tailcat                *TailcatConfig            `yaml:"tailcat" json:"tailcat"`
+	GlobalConcurrencyLimit int             `yaml:"global_concurrency_limit" json:"global_concurrency_limit"`
+	Security               *SecurityConfig `yaml:"security" json:"security"`
+	Tailcat                *TailcatConfig  `yaml:"tailcat" json:"tailcat"`
 	tailcatEnabled         bool
-	HealthCheckTimeout   int                       `yaml:"healthCheckTimeout"`
-	LogRequests          bool                      `yaml:"logRequests"`
-	LogLevel             string                    `yaml:"logLevel"`
-	LogTimeFormat        string                    `yaml:"logTimeFormat"`
-	LogToStdout          string                    `yaml:"logToStdout"`
-	MetricsMaxInMemory   int                       `yaml:"metricsMaxInMemory"`
-	CaptureBuffer        int                       `yaml:"captureBuffer"`
-	Store                *Store                    `yaml:"store"`
-	UI                   UIConfig                  `yaml:"ui"`
-	Performance          PerformanceConfig         `yaml:"performance"`
-	GlobalTTL            int                       `yaml:"globalTTL"`
-	UnloadTimeout        int                       `yaml:"unloadTimeout"`
-	Models               map[string]ModelConfig    `yaml:"models"`
-	Profiles             map[string]ProfileConfig  `yaml:"profiles"`
-	Selectors            map[string]SelectorConfig `yaml:"selectors"`
-	aliases              map[string]string
-	StartPort            int                  `yaml:"startPort"`
-	Hooks                HooksConfig          `yaml:"hooks"`
-	SendLoadingState     bool                 `yaml:"sendLoadingState"`
-	IncludeAliasesInList bool                 `yaml:"includeAliasesInList"`
-	RequiredAPIKeys      []string             `yaml:"apiKeys"`
-	Peers                PeerDictionaryConfig `yaml:"peers"`
-	Upstream             UpstreamConfig       `yaml:"upstream"`
+	HealthCheckTimeout     int                       `yaml:"healthCheckTimeout"`
+	LogRequests            bool                      `yaml:"logRequests"`
+	LogLevel               string                    `yaml:"logLevel"`
+	LogTimeFormat          string                    `yaml:"logTimeFormat"`
+	LogToStdout            string                    `yaml:"logToStdout"`
+	MetricsMaxInMemory     int                       `yaml:"metricsMaxInMemory"`
+	CaptureBuffer          int                       `yaml:"captureBuffer"`
+	Store                  *Store                    `yaml:"store"`
+	UI                     UIConfig                  `yaml:"ui"`
+	Performance            PerformanceConfig         `yaml:"performance"`
+	GlobalTTL              int                       `yaml:"globalTTL"`
+	UnloadTimeout          int                       `yaml:"unloadTimeout"`
+	Models                 map[string]ModelConfig    `yaml:"models"`
+	Profiles               map[string]ProfileConfig  `yaml:"profiles"`
+	Selectors              map[string]SelectorConfig `yaml:"selectors"`
+	aliases                map[string]string
+	StartPort              int                  `yaml:"startPort"`
+	Hooks                  HooksConfig          `yaml:"hooks"`
+	SendLoadingState       bool                 `yaml:"sendLoadingState"`
+	IncludeAliasesInList   bool                 `yaml:"includeAliasesInList"`
+	RequiredAPIKeys        []string             `yaml:"apiKeys"`
+	Peers                  PeerDictionaryConfig `yaml:"peers"`
+	Upstream               UpstreamConfig       `yaml:"upstream"`
 	// AstMatrix configures the AST Matrix cloud router (Sovereign extension - autonomous first-class).
 	// When enabled, cloud model requests are routed through the matrix to remote providers.
 	AstMatrix *AstMatrixConfig `yaml:"astMatrix"`

@@ -16,13 +16,13 @@ import (
 var taskClasses = []string{"code", "reasoning", "chat", "retrieval", "multimodal", "other"}
 
 const (
-	eloKFactor    = 32.0
-	eloSeed       = 1000.0
-	eloDecayRate  = 0.999 // per-update decay toward seed (prevents stale dominance)
+	eloKFactor   = 32.0
+	eloSeed      = 1000.0
+	eloDecayRate = 0.999 // per-update decay toward seed (prevents stale dominance)
 )
 
 type StratifiedElo struct {
-	mu    sync.RWMutex
+	mu sync.RWMutex
 	// class -> model -> elo
 	ratings map[string]map[string]float64
 	// class -> model -> battle count

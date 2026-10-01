@@ -27,9 +27,9 @@ func TestConfig_SecurityCORSUnsetOriginsSelectLegacyPolicy(t *testing.T) {
 			if err != nil {
 				t.Fatalf("LoadConfigFromReader: %v", err)
 			}
-  if cfg.Security == nil || len(cfg.Security.CORS.AllowedOrigins) != 0 {
-      t.Errorf("allowedOrigins = %v, want empty so the legacy policy applies", cfg.Security)
-  }
+			if cfg.Security == nil || len(cfg.Security.CORS.AllowedOrigins) != 0 {
+				t.Errorf("allowedOrigins = %v, want empty so the legacy policy applies", cfg.Security)
+			}
 		})
 	}
 }

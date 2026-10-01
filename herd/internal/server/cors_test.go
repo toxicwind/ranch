@@ -32,11 +32,11 @@ func corsTestServer(t *testing.T, cfg config.CORSConfig) *Server {
 	if err := cfg.Validate(); err != nil {
 		t.Fatalf("test CORS config is invalid: %v", err)
 	}
-  return newTestServerWithConfig(
-      config.Config{Security: &config.SecurityConfig{CORS: cfg}},
-      newStubRouter([]string{"m1"}, "OK"),
-      newStubRouter(nil, ""),
-  )
+	return newTestServerWithConfig(
+		config.Config{Security: &config.SecurityConfig{CORS: cfg}},
+		newStubRouter([]string{"m1"}, "OK"),
+		newStubRouter(nil, ""),
+	)
 }
 
 // assertNoCORSHeaders fails when the recorder carries any Access-Control-*

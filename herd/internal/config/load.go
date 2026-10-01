@@ -118,6 +118,24 @@ func LoadConfigFromReader(r io.Reader) (Config, error) {
 		return Config{}, fmt.Errorf("logToStdout must be one of: proxy, upstream, both, none")
 	}
 
+	// Security defaults and validation. A missing security block still
+	// yields a non-nil Security so the zero CORSConfig selects the legacy
+	// permissive policy; Validate rejects an explicitly empty
+	// allowedOrigins list rather than reading it as "allow everything".
+	if config.Security == nil {
+		config.Security = &SecurityConfig{}
+	}
+	if err := config.Security.CORS.Validate(); err != nil {
+		return Config{}, fmt.Errorf("security.cors: %w", err)
+	}
+
+	// Tailcat allow-list canonicalization and model validation. Like the
+	// CORS check above, the validator existed but was never invoked from
+	// the load path.
+	if err := validateTailcatConfig(&config); err != nil {
+		return Config{}, err
+	}
+
 	// Populate the aliases map
 	config.aliases = make(map[string]string)
 	for modelName, modelConfig := range config.Models {

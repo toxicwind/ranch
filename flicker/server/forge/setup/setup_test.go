@@ -31,23 +31,37 @@ func TestForgeUnknownType(t *testing.T) {
 
 func TestForgeBitbucket(t *testing.T) {
 	t.Parallel()
-	// bitbucket needs no URL, so it constructs successfully
+	// flicker stripped remote forges: bitbucket must be rejected
 	f, err := Forge(&model.Forge{
 		ID:                1,
 		Type:              model.ForgeTypeBitbucket,
 		OAuthClientID:     "id",
 		OAuthClientSecret: "secret",
 	})
-	require.NoError(t, err)
-	assert.NotNil(t, f)
+	require.Error(t, err)
+	assert.Nil(t, f)
+	assert.Contains(t, err.Error(), "only supports the local forge")
 }
 
 func TestForgeGitHub(t *testing.T) {
 	t.Parallel()
+	// flicker stripped remote forges: github must be rejected
 	f, err := Forge(&model.Forge{
 		ID:   1,
 		Type: model.ForgeTypeGithub,
 		URL:  "https://github.com",
+	})
+	require.Error(t, err)
+	assert.Nil(t, f)
+	assert.Contains(t, err.Error(), "only supports the local forge")
+}
+
+func TestForgeLocal(t *testing.T) {
+	t.Parallel()
+	// the local no-op forge is the only supported driver
+	f, err := Forge(&model.Forge{
+		ID:   1,
+		Type: model.ForgeTypeLocal,
 	})
 	require.NoError(t, err)
 	assert.NotNil(t, f)

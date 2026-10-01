@@ -37,7 +37,7 @@ func (e ActivityLogEvent) Type() uint32 {
 // activity in a store, and (when captures are enabled) stores
 // zstd+CBOR-compressed request/response captures in a sized in-memory cache.
 type metricsMonitor struct {
-  store          store.Store
+	store          store.Store
 	maxMetrics     int
 	logger         *logmon.Monitor
 	enableCaptures bool

@@ -37,9 +37,9 @@ type Router struct {
 	quarantine      *ImmediateQuarantine
 	costQuality     *CostQualityRouter
 	// GitHub-borrowed patterns (2026-09-30)
-	modelBreakers   *ModelBreakerRegistry
-	hardCoalescer   *HardenedCoalescer
-	failoverPolicy  *FailoverPolicy
+	modelBreakers  *ModelBreakerRegistry
+	hardCoalescer  *HardenedCoalescer
+	failoverPolicy *FailoverPolicy
 }
 
 // routingContext holds per-request mutable state.

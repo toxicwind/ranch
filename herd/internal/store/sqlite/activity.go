@@ -82,7 +82,6 @@ func (r *activityRepository) Insert(ctx context.Context, entry store.ActivityLog
 	return entry, nil
 }
 
-
 // ValidActivitySortKey reports whether key is accepted by ActivityQuery.Sort.
 func (r *activityRepository) ValidActivitySortKey(key string) bool {
 	if _, ok := activitySortColumns[key]; !ok {

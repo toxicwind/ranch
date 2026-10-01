@@ -11,7 +11,10 @@ def _feed(monkeypatch, frames):
     def fake_capture(
         window="", region="", scale=0.0, max_bytes=None, max_edge=None, lossless=False
     ):
-        i = min(calls["n"], len(frames) - 1)
+        # Cycle instead of saturating: a saturated fake returns the
+        # same frame forever, which a fast loop (interval=0) misreads
+        # as "settled". Cycling keeps never-settling content unsettled.
+        i = calls["n"] % len(frames)
         calls["n"] += 1
         return frames[i], {"format": "png", "frame": i}
 

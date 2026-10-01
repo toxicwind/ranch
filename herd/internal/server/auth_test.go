@@ -27,18 +27,18 @@ func TestAuth_SanitizeAccessControlRequestHeaders(t *testing.T) {
 	}
 }
 
-  func TestServer_IsTokenChar(t *testing.T) {
-      for _, r := range "abcXYZ0129!#$%&'*+-.^_`|~" {
-          if !config.IsHTTPToken(string(r)) {
-              t.Errorf("IsHTTPToken(%q) = false, want true", string(r))
-          }
-      }
-      for _, r := range " @()/\t\"" {
-          if config.IsHTTPToken(string(r)) {
-              t.Errorf("IsHTTPToken(%q) = true, want false", string(r))
-          }
-      }
-  }
+func TestServer_IsTokenChar(t *testing.T) {
+	for _, r := range "abcXYZ0129!#$%&'*+-.^_`|~" {
+		if !config.IsHTTPToken(string(r)) {
+			t.Errorf("IsHTTPToken(%q) = false, want true", string(r))
+		}
+	}
+	for _, r := range " @()/\t\"" {
+		if config.IsHTTPToken(string(r)) {
+			t.Errorf("IsHTTPToken(%q) = true, want false", string(r))
+		}
+	}
+}
 
 func TestServer_RequestContextMiddleware(t *testing.T) {
 	cfg := config.Config{

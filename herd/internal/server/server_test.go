@@ -13,16 +13,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mostlygeek/llama-swap/internal/capcompat"
 	"github.com/mostlygeek/llama-swap/internal/config"
 	"github.com/mostlygeek/llama-swap/internal/docagent"
 	"github.com/mostlygeek/llama-swap/internal/event"
 	"github.com/mostlygeek/llama-swap/internal/logmon"
 	"github.com/mostlygeek/llama-swap/internal/mcptools"
-	"github.com/mostlygeek/llama-swap/internal/capcompat"
 	"github.com/mostlygeek/llama-swap/internal/process"
 	"github.com/mostlygeek/llama-swap/internal/router"
-	"github.com/mostlygeek/llama-swap/internal/store/sqlite"
 	"github.com/mostlygeek/llama-swap/internal/store"
+	"github.com/mostlygeek/llama-swap/internal/store/sqlite"
 	"github.com/mostlygeek/llama-swap/internal/swaputil"
 )
 
@@ -107,10 +107,10 @@ func (s *stubRouter) ProcessLogger(modelID string) (*logmon.Monitor, bool) {
 func newTestServer(local router.LocalRouter, peer router.Router) *Server {
 	ctx, cancel := context.WithCancel(context.Background())
 	proxylog := logmon.NewWriter(io.Discard)
-  st, err := sqlite.New("")
-  if err != nil {
-    panic(err)
-  }
+	st, err := sqlite.New("")
+	if err != nil {
+		panic(err)
+	}
 	s := &Server{
 		cfg:         config.Config{Security: &config.SecurityConfig{}},
 		muxlog:      logmon.NewWriter(io.Discard),
@@ -137,6 +137,7 @@ func newTestServerWithConfig(cfg config.Config, local router.LocalRouter, peer r
 	s.routes()
 	return s
 }
+
 // newTestServerWithReference is newTestServer plus an indexed documentation
 // library, for the /api/mcp tests. Handlers read s.reference at request time,
 // so no re-registration is needed.

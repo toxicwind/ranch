@@ -103,6 +103,7 @@ func ValidActivitySortKey(key string) bool {
 	}
 	return false
 }
+
 // ActivitySortColumn returns the SQL column name for a sortable API
 // key and whether the key is recognized.
 func ActivitySortColumn(key string) (string, bool) {

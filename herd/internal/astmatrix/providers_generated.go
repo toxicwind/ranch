@@ -986,7 +986,7 @@ var ProviderCatalogSeeds = map[string][]string{
 		"local-quality",
 		"local-longctx",
 	},
-	"nebius": []string{},
+	"nebius":    []string{},
 	"nim-local": []string{},
 	"kimi-auto": []string{
 		"kimi-auto",
@@ -1184,7 +1184,7 @@ var ProviderCatalogSeeds = map[string][]string{
 	"aiand": []string{
 		"moonshotai/kimi-k2.7-code",
 	},
-	"chutes": []string{},
+	"chutes":                []string{},
 	"cloudflare-ai-gateway": []string{},
 	"bedrock-mantle": []string{
 		"openai.gpt-5.6-terra",

@@ -664,9 +664,10 @@ func firstLine(s string, max int) string {
 }
 
 func expireCoolOff(h *PeerHealth) {
-	if h == nil { return }
+	if h == nil {
+		return
+	}
 	h.mu.Lock()
 	h.openedAt = time.Now().Add(-2 * h.coolOff())
 	h.mu.Unlock()
 }
-

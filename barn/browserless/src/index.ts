@@ -426,6 +426,9 @@ class BrowserlessMCPServer {
             const config = BrowserlessConfigSchema.parse(args);
             this.client = new BrowserlessClient(config);
             const health = await this.client.getHealth();
+            if (!health.success) {
+              throw new Error('Browserless health check failed during initialization.');
+            }
             return {
               content: [
                 {

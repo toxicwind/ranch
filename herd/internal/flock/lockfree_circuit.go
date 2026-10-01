@@ -42,7 +42,7 @@ type LockFreeCircuitBreaker struct {
 	successToClose   int32
 
 	// Transition mutex (only for state changes, not the hot path)
-	mu           sync.Mutex
+	mu            sync.Mutex
 	onStateChange func(old, new CircuitState)
 }
 

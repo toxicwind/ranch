@@ -287,12 +287,12 @@ func parseActivityQuery(r *http.Request) (store.ActivityQuery, error) {
 		query.Page = page
 	}
 
-  if raw := strings.TrimSpace(r.URL.Query().Get("sort")); raw != "" {
-      if !store.ValidActivitySortKey(raw) {
-          return store.ActivityQuery{}, fmt.Errorf("invalid sort column")
-      }
-      query.Sort = raw
-  }
+	if raw := strings.TrimSpace(r.URL.Query().Get("sort")); raw != "" {
+		if !store.ValidActivitySortKey(raw) {
+			return store.ActivityQuery{}, fmt.Errorf("invalid sort column")
+		}
+		query.Sort = raw
+	}
 
 	if raw := strings.TrimSpace(r.URL.Query().Get("order")); raw != "" {
 		switch strings.ToLower(raw) {

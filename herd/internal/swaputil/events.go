@@ -3,14 +3,15 @@ package swaputil
 import "time"
 
 const (
-	ProcessStateChangeEventID = 0x01
-	ConfigFileChangedEventID  = 0x03
-	ActivityLogEventID        = 0x05
-	ModelPreloadedEventID     = 0x06
-	InFlightRequestsEventID   = 0x07
-	ProfileChangedEventID     = 0x08
+	ProcessStateChangeEventID       = 0x01
+	ConfigFileChangedEventID        = 0x03
+	ActivityLogEventID              = 0x05
+	ModelPreloadedEventID           = 0x06
+	InFlightRequestsEventID         = 0x07
+	ProfileChangedEventID           = 0x08
 	ModelCapabilitiesChangedEventID = 0x09
 )
+
 // ProcessStateChangeEvent is emitted whenever a process transitions between
 // lifecycle states. States are carried as strings so this package stays a leaf
 // (no import of internal/process).
@@ -80,6 +81,7 @@ type ProfileChangedEvent struct {
 func (e ProfileChangedEvent) Type() uint32 {
 	return ProfileChangedEventID
 }
+
 // ModelCapabilitiesChangedEvent is emitted when capability discovery changes
 // for a model and capabilities need to be re-advertised.
 type ModelCapabilitiesChangedEvent struct {

@@ -205,7 +205,11 @@ groups:
 		Security:      &SecurityConfig{},
 		LogTimeFormat: "",
 		LogToStdout:   LogToStdoutProxy,
-		StartPort:     5800,
+		// LoadConfigFromReader normalizes a missing security block to a
+		// non-nil Security so the zero CORSConfig selects the legacy
+		// permissive policy.
+		Security:  &SecurityConfig{},
+		StartPort: 5800,
 		Macros: MacroList{
 			{"svr-path", "path/to/server"},
 		},

@@ -1,10 +1,10 @@
 package server
 
 import (
-	"net/http"
 	"github.com/mostlygeek/llama-swap/internal/chain"
 	"github.com/mostlygeek/llama-swap/internal/config"
 	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"net/http"
 )
 
 // CreateAuthMiddleware returns middleware that validates API keys when the

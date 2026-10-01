@@ -59,6 +59,7 @@ func (c ModelCapConfig) Validate() error {
 	}
 	return nil
 }
+
 // Merge returns c with every zero-valued field filled in from auto.
 func (c ModelCapConfig) Merge(auto ModelCapConfig) ModelCapConfig {
 	if c.In == nil {

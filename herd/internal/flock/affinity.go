@@ -15,16 +15,16 @@ import (
 // Pin expires after sessionTTL of inactivity.
 
 const (
-	sessionTTL       = 30 * time.Minute
-	sessionHeader    = "X-Flock-Session"
-	maxSessions      = 10000
+	sessionTTL    = 30 * time.Minute
+	sessionHeader = "X-Flock-Session"
+	maxSessions   = 10000
 )
 
 type sessionPin struct {
-	provider   string
-	model      string
-	lastUsed   time.Time
-	callCount  int
+	provider  string
+	model     string
+	lastUsed  time.Time
+	callCount int
 }
 
 type SessionAffinity struct {

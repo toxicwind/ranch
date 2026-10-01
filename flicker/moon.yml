@@ -9,5 +9,5 @@ tasks:
     command: 'go build -tags external_web ./...'
     inputs: ['**/*.go', 'go.mod', 'go.sum']
   test:
-    command: 'go test -tags external_web ./...'
+    command: 'go test -tags "external_web test" ./...'
     inputs: ['**/*.go', 'go.mod', 'go.sum']

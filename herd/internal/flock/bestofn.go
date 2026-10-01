@@ -14,9 +14,9 @@ package flock
 // This extends flock's astRace beyond first-substantive-wins.
 
 const (
-	confidenceHigh      = 0.75
-	confidenceLow       = 0.40
-	uncertainSamples    = 4 // best-of-4 in the uncertain band
+	confidenceHigh   = 0.75
+	confidenceLow    = 0.40
+	uncertainSamples = 4 // best-of-4 in the uncertain band
 )
 
 // SamplingDecision tells the router how to execute this request.

@@ -147,9 +147,9 @@ var herdLocalAliases = map[string][2]string{
 	"local-longctx": {"llama-swap", "local-longctx"},
 	"local-auto":    {"llama-swap", "local-quality"},
 	// OpenRouter free aliases (verified working 2026-07-28)
-	"gpt-oss-20b":    {"openrouter", "openai/gpt-oss-20b:free"},
+	"gpt-oss-20b": {"openrouter", "openai/gpt-oss-20b:free"},
 	// NVIDIA NIM aliases
-	"nim-llama-3.3-70b":     {"nvidia", "meta/llama-3.3-70b-instruct"},
+	"nim-llama-3.3-70b": {"nvidia", "meta/llama-3.3-70b-instruct"},
 	// Extended provider aliases from registry
 	"opencode":           {"opencode", "opencode"},
 	"xai-grok-4":         {"xai", "grok-4"},

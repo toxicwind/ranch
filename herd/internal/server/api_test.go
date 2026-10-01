@@ -228,7 +228,6 @@ func TestServer_HandleUpstream(t *testing.T) {
 	})
 }
 
-
 func TestProxy_HandleUpstreamPreservesEscapedPath(t *testing.T) {
 	tests := []struct {
 		name   string

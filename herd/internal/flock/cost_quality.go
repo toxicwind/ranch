@@ -23,11 +23,11 @@ type ProviderCost struct {
 }
 
 type CostQualityRouter struct {
-	mu       sync.RWMutex
-	alpha    float64 // 0=cheap, 1=quality
-	costs    map[string]*ProviderCost
-	elo      *StratifiedElo
-	maxCost  float64 // for normalization
+	mu      sync.RWMutex
+	alpha   float64 // 0=cheap, 1=quality
+	costs   map[string]*ProviderCost
+	elo     *StratifiedElo
+	maxCost float64 // for normalization
 }
 
 func NewCostQualityRouter(elo *StratifiedElo, alpha float64) *CostQualityRouter {

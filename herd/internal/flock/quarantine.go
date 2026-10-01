@@ -33,7 +33,7 @@ type quarantineEntry struct {
 }
 
 type ImmediateQuarantine struct {
-	mu         sync.RWMutex
+	mu          sync.RWMutex
 	quarantined map[string]*quarantineEntry
 	// how long before a quarantined provider gets a canary probe
 	canaryDelay time.Duration
