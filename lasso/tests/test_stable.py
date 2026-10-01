@@ -34,9 +34,23 @@ def test_identical_from_the_start_is_two_captures(monkeypatch):
     assert calls["n"] == 2
 
 
+class _InfiniteFrames:
+    """A feed that never repeats: every capture yields a distinct frame,
+    so the content genuinely never settles. (A finite list gets exhausted
+    on fast hardware — interval=0 burns 1000 frames in <50ms — the clamped
+    feed then repeats and the capture correctly reports stable=True.)"""
+
+    def __len__(self):
+        return 10**18
+
+    def __getitem__(self, i):
+        return str(i).encode()
+
+
 def test_never_settles_times_out_with_last_frame(monkeypatch):
-    frames = [str(i).encode() for i in range(1000)]
-    _feed(monkeypatch, frames)
+    frames = _InfiniteFrames()
+    calls = _feed(monkeypatch, frames)
     data, meta = screenshot.capture_stable(interval=0, timeout=0.05)
     assert meta["stable"] is False
-    assert data == frames[min(999, int(meta["frame"]))]
+    assert calls["n"] > 2  # kept capturing until the timeout hit
+    assert data == frames[int(meta["frame"])]

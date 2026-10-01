@@ -198,7 +198,11 @@ groups:
 	}
 
 	expected := Config{
-		LogLevel:      "info",
+		LogLevel: "info",
+		// LoadConfigFromReader always materializes the security block, even
+		// when the YAML names none: empty CORS selects the legacy permissive
+		// policy (see TestConfig_SecurityCORSUnsetOriginsSelectLegacyPolicy).
+		Security:      &SecurityConfig{},
 		LogTimeFormat: "",
 		LogToStdout:   LogToStdoutProxy,
 		StartPort:     5800,

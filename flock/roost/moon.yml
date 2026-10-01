@@ -5,7 +5,7 @@ tasks:
   build:
     command: 'bun run build'
     inputs: ['src/**/*', 'scripts/**/*', 'package.json']
-    outputs: ['dist']
+    outputs: ['dist', 'generated']
   test:
     command: 'bun test'
     inputs: ['src/**/*', 'tests/**/*']

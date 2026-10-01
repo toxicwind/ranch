@@ -10,7 +10,7 @@ tasks:
     command: 'bun harvest.ts'
     inputs: ['harvest.ts']
   verify:
-    command: 'bun harvest.ts --dry-run && bun verify.ts'
+    script: 'bun harvest.ts --dry-run && bun verify.ts'
     inputs: ['harvest.ts', 'verify.ts', 'profile.json']
   test:
     command: 'bun test'

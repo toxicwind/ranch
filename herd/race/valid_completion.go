@@ -54,8 +54,9 @@ func validCompletion(status int, body []byte) bool {
 		}
 	}
 	// "api key" in the opening of the content is a provider auth notice;
-	// deep in a long answer it is ordinary prose.
-	if strings.Contains(head, "api key") && len(content) < 500 {
+	// deep in a long answer it is ordinary prose. Position decides, not
+	// total length: a head mention in a long answer is still a notice.
+	if strings.Contains(head, "api key") {
 		return false
 	}
 	return true

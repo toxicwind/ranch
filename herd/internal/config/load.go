@@ -72,6 +72,17 @@ func LoadConfigFromReader(r io.Reader) (Config, error) {
 		return Config{}, fmt.Errorf("performance: %w", err)
 	}
 
+	// A missing security block keeps the permissive legacy CORS policy, but
+	// callers read cfg.Security unconditionally, so always materialize it.
+	// Validation runs on every load: an empty allowedOrigins list or orphan
+	// CORS settings are rejected here, not at request time.
+	if config.Security == nil {
+		config.Security = &SecurityConfig{}
+	}
+	if err = config.Security.CORS.Validate(); err != nil {
+		return Config{}, fmt.Errorf("security.cors: %w", err)
+	}
+
 	if config.StartPort < 1 {
 		return Config{}, fmt.Errorf("startPort must be greater than 1")
 	}

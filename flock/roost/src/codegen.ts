@@ -9,6 +9,10 @@
  * All are checked in. `bun run build` regenerates them; the sync test
  * regenerates into a temp dir and diffs byte-for-byte, so a stale artifact
  * fails the build. The generated files carry a DO-NOT-EDIT header.
+ *
+ * Timestamps are deterministic (SOURCE_DATE_EPOCH pinned by scripts/build.ts
+ * to the source-of-truth commit), so rebuilds with unchanged data produce
+ * byte-identical output and a clean working tree.
  */
 import type { ModelAlias, ProviderDef } from "./types.ts";
 
@@ -19,6 +23,20 @@ export interface CodegenInput {
   /** Free-form provenance, e.g. git sha of the source. */
   provenance?: string;
 }
+
+/**
+ * Deterministic codegen timestamp. Honors SOURCE_DATE_EPOCH (reproducible-builds
+ * standard). scripts/build.ts pins it to the last commit touching src/data.ts,
+ * so a rebuild with unchanged data is byte-identical and the tree stays clean.
+ */
+export function codegenTimestamp(): string {
+  const epoch = process.env.SOURCE_DATE_EPOCH;
+  if (epoch && /^\d+$/.test(epoch.trim())) {
+    return new Date(Number(epoch.trim()) * 1000).toISOString();
+  }
+  return new Date().toISOString();
+}
+
 
 function jsonEscaped(s: string): string {
   return JSON.stringify(s);
@@ -53,7 +71,7 @@ function goAliasMap(m: Record<string, ModelAlias>): string {
 export function buildProvidersJson(input: CodegenInput): string {
   const doc = {
     $schema: "ranch-roost/v1",
-    generatedAt: new Date().toISOString(),
+    generatedAt: codegenTimestamp(),
     generator: "@ranch/roost codegen — DO NOT EDIT BY HAND",
     ...(input.provenance ? { provenance: input.provenance } : {}),
     adapters: ["openai", "google-v1beta", "mistral", "static", "none"],
@@ -95,7 +113,7 @@ export function buildProvidersJson(input: CodegenInput): string {
  * already declares ProviderDef for the extended 9Router registry.
  */
 export function buildProvidersGo(input: CodegenInput): string {
-  const generatedAt = new Date().toISOString();
+  const generatedAt = codegenTimestamp();
   const defStructs = input.defs
     .map((d) => {
       const fields = [
@@ -221,7 +239,7 @@ function rustCtxLengths(m: Record<string, number>): string {
 }
 
 export function buildProvidersRust(input: CodegenInput): string {
-  const generatedAt = new Date().toISOString();
+  const generatedAt = codegenTimestamp();
   const provenance = input.provenance ? input.provenance : "unknown";
 
   const defs = input.defs

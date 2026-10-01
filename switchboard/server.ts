@@ -11,6 +11,11 @@
  * Protocol: each stdin line is one JSON-RPC 2.0 request; each stdout line is
  * one response. Handles: initialize, notifications/initialized, tools/list,
  * tools/call. (Borrowed framing from hashline's MCP server.)
+ *
+ * Testability: scoreSkill, loadSkills, callTool, and handleRequest are
+ * exported pure-ish units. The stdio bootstrap only runs under
+ * `import.meta.main`, so `bun test` can import this module without
+ * hijacking stdin.
  */
 
 import { readdirSync, readFileSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
@@ -24,9 +29,9 @@ const SKILL_DIRS = [
 const STACKS_ROOT = "/home/toxic/switchboard/stacks";
 mkdirSync(STACKS_ROOT, { recursive: true });
 
-type Skill = { name: string; description: string; path: string };
+export type Skill = { name: string; description: string; path: string };
 
-function loadSkills(): Skill[] {
+export function loadSkills(): Skill[] {
   const out: Skill[] = [];
   for (const dir of SKILL_DIRS) {
     let entries: string[] = [];
@@ -61,7 +66,7 @@ async function sh(cmd: string[], opts: { timeoutMs?: number } = {}): Promise<{ o
   return { ok: code === 0, out: (so + se).trim().slice(0, 8000) };
 }
 
-const TOOLS = [
+export const TOOLS = [
   {
     name: "skill_search",
     description: "Search the estate's skill index by intent keywords. Returns ranked skills (name, description, path). This is the master skill router: agents ask what capability fits, switchboard answers.",
@@ -102,7 +107,7 @@ const TOOLS = [
   },
 ];
 
-function scoreSkill(q: string, s: Skill): number {
+export function scoreSkill(q: string, s: Skill): number {
   const hay = (s.name + " " + s.description).toLowerCase();
   let score = 0;
   for (const tok of q.toLowerCase().split(/\s+/)) {
@@ -112,17 +117,17 @@ function scoreSkill(q: string, s: Skill): number {
   return score;
 }
 
-async function callTool(name: string, args: any): Promise<any> {
+export async function callTool(name: string, args: any, skills: Skill[] = SKILLS): Promise<any> {
   switch (name) {
     case "skill_search": {
       const q = String(args.query ?? "");
-      const ranked = SKILLS.map((s) => ({ s, score: scoreSkill(q, s) }))
+      const ranked = skills.map((s) => ({ s, score: scoreSkill(q, s) }))
         .filter((r) => r.score > 0).sort((a, b) => b.score - a.score).slice(0, 10)
         .map((r) => ({ name: r.s.name, description: r.s.description, path: r.s.path, score: r.score }));
       return { query: q, count: ranked.length, skills: ranked };
     }
     case "skill_get": {
-      const s = SKILLS.find((x) => x.name === args.name);
+      const s = skills.find((x) => x.name === args.name);
       if (!s) throw new Error(`skill not found: ${args.name}`);
       return { name: s.name, path: s.path, content: readFileSync(s.path, "utf8").slice(0, 12000) };
     }
@@ -154,6 +159,27 @@ async function callTool(name: string, args: any): Promise<any> {
   }
 }
 
+export type RequestResult = { ok: true; result: any } | { ok: false; error: string };
+
+export async function handleRequest(req: any, skills: Skill[] = SKILLS): Promise<RequestResult> {
+  if (req.method === "initialize") {
+    return {
+      ok: true,
+      result: {
+        protocolVersion: "2024-11-05",
+        capabilities: { tools: {} },
+        serverInfo: { name: "switchboard", version: "0.1.0" },
+      },
+    };
+  } else if (req.method === "tools/list") {
+    return { ok: true, result: { tools: TOOLS } };
+  } else if (req.method === "tools/call") {
+    const out = await callTool(req.params?.name, req.params?.arguments ?? {}, skills);
+    return { ok: true, result: { content: [{ type: "text", text: JSON.stringify(out, null, 2) }] } };
+  }
+  return { ok: false, error: `unknown method: ${req.method}` };
+}
+
 async function main() {
   const rl = (await import("node:readline")).createInterface({ input: process.stdin, crlfDelay: Infinity });
   for await (const line of rl) {
@@ -161,31 +187,20 @@ async function main() {
     if (!t) continue;
     let req: any;
     try { req = JSON.parse(t); } catch { continue; }
+    // notifications/initialized is a notification: no response line.
+    if (req.method === "notifications/initialized") continue;
     const respond = (result: any) =>
       console.log(JSON.stringify({ jsonrpc: "2.0", id: req.id ?? null, result }));
     const fail = (msg: string) =>
       console.log(JSON.stringify({ jsonrpc: "2.0", id: req.id ?? null, error: { code: -32000, message: msg } }));
     try {
-      if (req.method === "initialize") {
-        respond({
-          protocolVersion: "2024-11-05",
-          capabilities: { tools: {} },
-          serverInfo: { name: "switchboard", version: "0.1.0" },
-        });
-      } else if (req.method === "notifications/initialized") {
-        // no-op
-      } else if (req.method === "tools/list") {
-        respond({ tools: TOOLS });
-      } else if (req.method === "tools/call") {
-        const out = await callTool(req.params?.name, req.params?.arguments ?? {});
-        respond({ content: [{ type: "text", text: JSON.stringify(out, null, 2) }] });
-      } else {
-        fail(`unknown method: ${req.method}`);
-      }
+      const res = await handleRequest(req);
+      if (res.ok) respond(res.result);
+      else fail(res.error);
     } catch (e: any) {
       fail(e?.message ?? String(e));
     }
   }
 }
 
-main();
+if (import.meta.main) main();

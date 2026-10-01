@@ -64,7 +64,7 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 - **tau live on `:25111`.** The coding agent ([toxicwind/tau](https://github.com/toxicwind/tau), fork of oh-my-pi) nests into the ranch at `tau/` and is served as a TCP daemon through **chute** — stdio ACP in, supervised port out, `mcpServers` shape normalized.
 - **Squawk maximalization shipped** ([`4295bb4`](https://github.com/toxicwind/ranch/commit/4295bb4)): WS reconnect replay, atomic crash-safe feed writes, since-based feed replay; interactive noVNC viewer on the isolated agent-browser display.
 - **flicker build daemon live on `:25148`** — disk-backed job queue, streaming logs, content-hash artifact cache. The branding iron (`brand`) is deprecated and consolidated into flicker.
-- **roost — the master provider catalog** ([`5d75050`](https://github.com/toxicwind/ranch/commit/5d75050)): 53 providers in one registry feeding herd, flock, and tau.
+- **roost — the master provider catalog** ([`5d75050`](https://github.com/toxicwind/ranch/commit/5d75050)): 63 providers in one registry feeding herd, flock, and tau.
 - **lasso focus hyper-race**: three window-focus strategies (hyprctl Lua → wlrctl → legacy) raced, first strictly-verified win.
 - **herd serving 116 local models** behind one OpenAI-compatible `/v1/models`.
 
@@ -135,7 +135,7 @@ curl -s http://127.0.0.1:25193/v1/chat/completions \
 
 ## 🐄 The ranch
 
-Every animal first-class — no "secondary" framing. Statuses verified live 2026-09-30 (🟢 = port listening under pitchfork supervision).
+Every animal first-class — no "secondary" framing. Statuses verified live 2026-09-30, re-verified 2026-10-01 (🟢 = port listening under pitchfork supervision).
 
 | Component | Port | Path | Role |
 |---|---|---|---|
@@ -153,7 +153,7 @@ Every animal first-class — no "secondary" framing. Statuses verified live 2026
 | 🟢 **oracle** | `25151` | `oracle/` (Python) | 🔮 The decision corral — prediction-market work loop + deterministic verdict engine (dated yes/no, evidence-backed). |
 | 🟢 **browserless** | `25130` | `barn/browserless` | Browser automation: browserless.io MCP server + native-launcher deployment. |
 | 🟢 **lookout** | `6080` | `barn/lookout` | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower. |
-| **roost** | — | `flock/roost/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: 53 providers/models the estate perches on, one registry. Feeds tau, herd's generated Go, flock's generated Rust, the router. |
+| **roost** | — | `flock/roost/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: 63 providers/models the estate perches on, one registry. Feeds tau, herd's generated Go, flock's generated Rust, the router. |
 | **squawk** | — | `squawk/` (Python) | File-based multi-agent chat: signed, sequenced message files. NATS bus (`squawk/nats/`) underneath. |
 | **corral** | — | `corral/` (in-tree, Bun/TS) | The super-ralph agent framework — the mission runner. Absorbed in-tree 2026-09-30 with full history; **no submodules, ever.** |
 | **roundup** | — | `roundup/` | Benchmark estate — gathers and assesses every head. |
@@ -168,6 +168,12 @@ Every animal first-class — no "secondary" framing. Statuses verified live 2026
 | **research** | — | `research/` | Provider/model discovery scripts. |
 | **data** | — | `data/` | Discovery + categorization JSON. |
 | **docs** | — | `docs/` | Architecture docs — the written contract. |
+| **mission-control** | — | `mission-control/` | 🎛 Event-driven continuation controller — a mission stays open until observable proof. |
+| **task-launch** | — | `task-launch/` | 🚀 First-class classifier/task-launch repair (not a doc-wording patch). |
+| **classifier** | — | `classifier/` | 🔧 Diagnostic CLI for classifier/safety-review failures — verifies actual execution from observable state. |
+| **classifier-preflight** | — | `classifier-preflight/` | 🔧 Preflight task bodies, briefs, docs against known classifier trigger shapes. |
+| **metaaivm** | — | `metaaivm/` | 📡 Incremental GitHub harvester for metaaivm keywords (daily cron on yote). |
+| **metaaivm-profile** | — | `metaaivm-profile/` | 📡 First-class agent profile for the Meta AI VM estate. |
 | ~~**brand**~~ | — | `brand/` | The branding iron — git hooks. **Deprecated 2026-09-30:** consolidated into flicker. |
 
 Each subproject keeps its own README; this file is the map, not the territory.
@@ -209,7 +215,7 @@ flowchart TD
 - [x] Flatten to a first-class monorepo — Bun workspaces + moon, pinned toolchains (2026-09-30)
 - [x] Squawk maximalization — WS reconnect replay, crash-safe feed, since-based replay
 - [x] flicker build daemon live; brand deprecated and consolidated
-- [x] roost provider catalog (53 providers) feeding herd / flock / tau
+- [x] roost provider catalog (63 providers) feeding herd / flock / tau
 - [x] lasso three-strategy focus hyper-race
 - [ ] Squawk presence, threading, reactions, read receipts (deferred from maximalization)
 - [ ] NATS as the first-class fleet bus under squawk (substrate research done)
