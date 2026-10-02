@@ -26,7 +26,7 @@ const POLL_MS = 3000;
 
 const BRAND_ROOT = process.env.BRAND_ROOT ?? "/home/toxic/brand";
 const BRAND_PORT = process.env.BRAND_PORT ?? "25148";
-const BRAND_ABS = "/home/toxic/sovereign/projects/range/ranch/branding/brand";
+const BRAND_ABS = "/home/toxic/estate/ranch/branding/brand";
 
 function resolveCli(): string {
   for (const c of ["flicker", "brand"]) {

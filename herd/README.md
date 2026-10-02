@@ -127,7 +127,7 @@ graph TD
 ```bash
 # Build with Zen 4 AVX-512 and maximal Go compiler flags
 go build -v -ldflags="-s -w" -o llama-swap ./cmd
-./llama-swap --config /home/toxic/sovereign/config/llama-swap.yaml
+./llama-swap --config /home/toxic/estate/config/llama-swap.yaml
 ```
 The main build entry is `scripts/flicker-build.ts` — it submits the canonical
 build+test (`go build ./... && go test -short -count=1 ./internal/...`, matching
