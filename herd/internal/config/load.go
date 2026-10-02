@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"reflect"
 	"sort"
 	"strings"
 	"time"
@@ -50,6 +51,21 @@ func LoadConfigFromReader(r io.Reader) (Config, error) {
 			"X-Session-ID",
 			"X-Litellm-Session-Id",
 		}}},
+	}
+	// yaml.v3's Node.Decode silently discards any key the target struct does
+	// not declare. That is not a cosmetic problem: herd.yaml carried a
+	// top-level `aliases:` block for months that parsed cleanly, produced no
+	// warning, and was never served by anything. The only yaml:"aliases" tag
+	// in the tree is on ModelConfig (models.<id>.aliases), so the block was
+	// dropped at every load and the four names in it only resolved because
+	// models: re-declared them separately.
+	// Strictness is applied to the TOP LEVEL only, by reflecting over the
+	// Config struct's yaml tags. A recursive decoder is not usable here:
+	// KnownFields(true) also applies inside the legacy `filters.strip_params`
+	// anonymous-struct path, which exists precisely to tolerate fields it
+	// does not model, and enforcing it there rejects configs that must load.
+	if err = rejectUnknownTopLevelKeys(&node); err != nil {
+		return Config{}, err
 	}
 	if err = node.Decode(&config); err != nil {
 		return Config{}, err
@@ -539,4 +555,63 @@ func normalizeHeaderNames(names []string) []string {
 		normalized = append(normalized, name)
 	}
 	return normalized
+}
+
+// knownTopLevelKeys returns the set of keys Config declares, read from the
+// struct's yaml tags. Keys tagged `yaml:"-"` are decode-inert and are not
+// accepted from input.
+func knownTopLevelKeys() map[string]struct{} {
+	out := make(map[string]struct{})
+	t := reflect.TypeOf(Config{})
+	for i := 0; i < t.NumField(); i++ {
+		tag := t.Field(i).Tag.Get("yaml")
+		if tag == "" || tag == "-" {
+			continue
+		}
+		name := strings.Split(tag, ",")[0]
+		if name != "" {
+			out[name] = struct{}{}
+		}
+	}
+	// `defs` holds YAML anchors that models consume through `<<:` merge keys.
+	// The YAML parser resolves those anchors itself and nothing reads the
+	// block as Config data, so it has no struct field by design.
+	out["defs"] = struct{}{}
+	return out
+}
+
+// rejectUnknownTopLevelKeys fails the load when the document carries a
+// top-level key Config does not declare.
+//
+// This exists because yaml.v3 drops such keys silently: a config can name
+// `aliases:` at the top level, parse without error, and have the block
+// discarded at every load — which is how a four-model alias block sat in
+// herd.yaml serving nothing for months while its names appeared to work
+// because they were declared again under `models:`.
+//
+// Only the top level is checked on purpose. Strictness at every depth is not
+// an option: the legacy `filters.strip_params` path decodes through an
+// anonymous struct that must tolerate fields it does not model.
+func rejectUnknownTopLevelKeys(node *yaml.Node) error {
+	doc := node
+	if doc.Kind == yaml.DocumentNode && len(doc.Content) > 0 {
+		doc = doc.Content[0]
+	}
+	if doc.Kind != yaml.MappingNode {
+		return nil
+	}
+	known := knownTopLevelKeys()
+	var unknown []string
+	for i := 0; i+1 < len(doc.Content); i += 2 {
+		key := doc.Content[i].Value
+		if _, ok := known[key]; !ok {
+			unknown = append(unknown, key)
+		}
+	}
+	if len(unknown) == 0 {
+		return nil
+	}
+	sort.Strings(unknown)
+	return fmt.Errorf("unknown top-level config key(s): %s (herd ignores keys it does not know; "+
+		"check for a typo, or a feature this build does not support)", strings.Join(unknown, ", "))
 }
