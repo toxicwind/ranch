@@ -1,0 +1,86 @@
+<!doctype html>
+<html
+  lang="en"
+  class="no-flex-gap no-css-math no-backdrop-filter no-aspect-ratio"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>ToxicWind Streams</title>
+    <link rel="stylesheet" href="../../ui/styles/toxicwind.css" />
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.20"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dashjs@4.7.4/dist/dash.all.min.js"></script>
+    <script type="module" src="../../core/manifest-proxy.js"></script>
+    <script type="module" src="../../core/sel-engine.js"></script>
+    <script type="module" src="../../core/deduplicator.js"></script>
+    <script type="module" src="../../subtitle/translator.js"></script>
+    <script type="module" src="../../p2p/swarm-manager.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <h1 class="brand">ᵗᵒˣⁱᶜʷⁱⁿᵈ</h1>
+        <span class="tagline">ˢᵗʳᵉᵃᵐˢ</span>
+      </header>
+      <nav class="app-nav" id="main-nav">
+        <button data-section="home" class="nav-item active">Home</button>
+        <button data-section="catalogs" class="nav-item">Catalogs</button>
+        <button data-section="search" class="nav-item">Search</button>
+        <button data-section="settings" class="nav-item">Settings</button>
+      </nav>
+      <main id="content" class="app-content">
+        <section id="home" class="section active">
+          <div class="hero">
+            <h2>ᴡᴇʟᴄᴏᴍᴇ</h2>
+            <p class="subtitle">
+              ˢᵉˡ ᵖᵒʷᵉʳᵉᵈ · ᵖ²ᵖ ᵉⁿʰᵃⁿᶜᵉᵈ · ˢᵘᵇᵐᵃᵏᵉʳ ⁱⁿᵗᵉᵍʳᵃᵗᵉᵈ
+            </p>
+          </div>
+          <div class="grid" id="home-grid"></div>
+        </section>
+        <section id="catalogs" class="section">
+          <div class="grid" id="catalog-grid"></div>
+        </section>
+        <section id="search" class="section">
+          <input type="text" id="search-input" placeholder="Search..." />
+          <div class="grid" id="search-results"></div>
+        </section>
+        <section id="settings" class="section">
+          <div class="settings-group">
+            <label>Manifest URL</label>
+            <input type="text" id="manifest-url" value="" />
+          </div>
+          <div class="settings-group">
+            <label>Subtitle Proxy</label>
+            <input
+              type="text"
+              id="subtitle-proxy"
+              value="http://arch-ip:8080"
+            />
+          </div>
+          <div class="settings-group">
+            <label>P2P Tracker</label>
+            <input
+              type="text"
+              id="p2p-tracker"
+              value="wss://tracker.toxicwind.is"
+            />
+          </div>
+          <div class="settings-group">
+            <button id="save-settings">Save</button>
+          </div>
+        </section>
+      </main>
+      <footer class="app-footer">
+        <span id="torbox-hud">⚡ TorBox: -- / 1TB</span>
+        <span id="p2p-hud">⇄ P2P: 0 peers</span>
+        <span id="sel-hud">SEL: active</span>
+      </footer>
+    </div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

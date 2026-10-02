@@ -1,0 +1,15 @@
+{
+  "id": "com.toxicwind.streamers",
+  "version": "1.0.0",
+  "vendor": "Toxicwind",
+  "type": "web",
+  "main": "index.html",
+  "title": "AETHER // STREAMERS",
+  "icon": "icon.png",
+  "largeIcon": "icon.png",
+  "bgColor": "#000000",
+  "splashBackground": "splash.png",
+  "resolution": "1920x1080",
+  "transparent": true,
+  "appDescription": "Hardware-accelerated AIOStreams monolithic client."
+}

@@ -1,0 +1,19 @@
+{
+  "id": "space.toxicwind.streams",
+  "version": "1.0.0-alpha",
+  "vendor": "toxicwind",
+  "type": "web",
+  "main": "index.html",
+  "title": "ToxicWind Streams",
+  "description": "Ultimate Stremio-native streaming for LG webOS. SEL-powered. P2P-enhanced. SubMaker-integrated.",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "splashBackground": "splash.png",
+  "bgColor": "#0c0b11",
+  "handlesRelaunch": true,
+  "resolution": "1920x1080",
+  "transparent": false,
+  "requiredVersion": "5.0.0",
+  "services": ["space.toxicwind.streams.service"],
+  "requiredPermissions": ["internet", "media.operation", "media.query"]
+}

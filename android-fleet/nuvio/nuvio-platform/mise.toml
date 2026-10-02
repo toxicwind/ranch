@@ -1,0 +1,26 @@
+[tools]
+node = "20"
+docker = "latest"
+
+[tasks.build]
+description = "Build webOS app"
+run = "npm run build:webos"
+
+[tasks.test]
+description = "Run test suite with coverage"
+run = "npm run test:coverage"
+
+[tasks.package]
+description = "Package webOS IPK"
+run = "npm run package:webos"
+
+depends = ["build"]
+
+[tasks.deploy]
+description = "Deploy to webOS TV"
+run = "node scripts/ares-install-webos.mjs"
+depends = ["package"]
+
+[tasks.dev]
+description = "Start dev server"
+run = "npm run dev"

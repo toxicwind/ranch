@@ -1,0 +1,33 @@
+[submodule "submodules/NuvioWeb"]
+	path = submodules/NuvioWeb
+	url = https://github.com/NuvioMedia/NuvioWeb.git
+[submodule "submodules/NuvioTVWebOS"]
+	path = submodules/NuvioTVWebOS
+	url = https://github.com/NuvioMedia/NuvioTVWebOS.git
+[submodule "submodules/NuvioWebTVInstaller"]
+	path = submodules/NuvioWebTVInstaller
+	url = https://github.com/NuvioMedia/NuvioWebTVInstaller.git
+[submodule "submodules/comet"]
+	path = submodules/comet
+	url = https://github.com/g0ldyy/comet.git
+[submodule "submodules/p2p-media-loader"]
+	path = submodules/p2p-media-loader
+	url = https://github.com/Novage/p2p-media-loader.git
+[submodule "submodules/hlsjs-p2p-engine"]
+	path = submodules/hlsjs-p2p-engine
+	url = https://github.com/cdnbye/hlsjs-p2p-engine.git
+[submodule "submodules/subtitle-translator"]
+	path = submodules/subtitle-translator
+	url = https://github.com/VjayC/SRT-Subtitle-Translator-Validator.git
+[submodule "submodules/llm-subtrans"]
+	path = submodules/llm-subtrans
+	url = https://github.com/machinewrapped/llm-subtrans.git
+[submodule "submodules/xiu"]
+	path = submodules/xiu
+	url = https://github.com/harlanc/xiu.git
+[submodule "submodules/webos-homebrew"]
+	path = submodules/webos-homebrew
+	url = https://github.com/webosbrew/webos-homebrew-channel.git
+[submodule "submodules/docchi-addon"]
+	path = submodules/docchi-addon
+	url = https://github.com/skoruppa/docchi-stremio-addon.git

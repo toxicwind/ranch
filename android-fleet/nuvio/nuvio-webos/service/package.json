@@ -1,0 +1,6 @@
+{
+  "name": "io.strem.tv.server",
+  "version": "1.0.0",
+  "description": "Stremio Server",
+  "main": "launch.js"
+}

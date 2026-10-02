@@ -76,3 +76,21 @@ __pycache__/
 # --recursive` can resolve them. Do not add them here -- an ignore rule does
 # not apply to a tracked gitlink, and removing their .gitmodules entries
 # would reintroduce `fatal: no submodule mapping found in .gitmodules`.
+
+# ─── nuvio (android-fleet/nuvio) ──────────────────────────────────────────
+# Nuvio is an LG webOS TV media theater, a fleet target, not an ADB one --
+# it deploys over the webOS `ares` CLI instead. It lives here because the
+# fleet is the collection of Chris's own screens, not because webOS is
+# Android.
+#
+# `nuvio-platform/submodules/` holds 11 vendored third-party checkouts
+# (NuvioWeb, NuvioTVWebOS, NuvioWebTVInstaller, comet, p2p-media-loader,
+# hlsjs-p2p-engine, subtitle-translator, llm-subtrans, xiu, webos-homebrew,
+# docchi-addon) declared in nuvio-platform/.gitmodules. Those URLs belong to
+# third parties, not to this monorepo, so they are managed as independent
+# checkouts rather than committed as gitlinks here.
+/android-fleet/nuvio/nuvio-platform/submodules/
+
+# The same 11 projects also arrive as source archives, unpacked on demand.
+# 49 MB of vendored tarballs duplicating the checkouts above.
+/android-fleet/nuvio/nuvio-platform/*.tar.gz

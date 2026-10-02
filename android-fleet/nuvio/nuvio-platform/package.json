@@ -1,0 +1,36 @@
+{
+  "name": "toxicwind-streams",
+  "version": "1.0.0-alpha",
+  "private": true,
+  "description": "Ultimate Stremio-native streaming stack for LG webOS. Forked from Nuvio + 8 submodules. Asymmetric profit, $0 start.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:webos": "node scripts/build-webos.mjs",
+    "test": "node --test tests/*.test.js",
+    "test:coverage": "c8 --reporter=text --reporter=lcov node --test tests/*.test.js",
+    "lint": "eslint src/",
+    "package:webos": "npm run build:webos && node scripts/package-webos.mjs",
+    "package:tizen": "npm run build && node scripts/package-tizen.mjs",
+    "dev": "node scripts/dev-server.mjs",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "submodules:update": "git submodule update --init --recursive --depth=1"
+  },
+  "dependencies": {
+    "hls.js": "^1.5.20",
+    "dashjs": "^4.7.4",
+    "p2p-media-loader-core": "^2.0.0",
+    "p2p-media-loader-hlsjs": "^2.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "c8": "^10.0.0",
+    "@webosose/ares-cli": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "author": "toxicwind",
+  "license": "GPL-3.0"
+}
