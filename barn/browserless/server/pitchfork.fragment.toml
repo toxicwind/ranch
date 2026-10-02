@@ -1,9 +1,9 @@
 # Pitchfork daemon fragment — merged into the [daemons.browserless] section
-# of /home/toxic/sovereign/pitchfork.toml (owned sequence: stop -> ss-verify ->
-# clean --daemon -> start from /home/toxic/sovereign).
+# of /home/toxic/estate/pitchfork.toml (owned sequence: stop -> ss-verify ->
+# clean --daemon -> start from /home/toxic/estate).
 [daemons.browserless]
 port = 25130
-run = "exec /home/toxic/sovereign/projects/range/ranch/barn/browserless/server/run.sh"
+run = "exec /home/toxic/estate/projects/range/ranch/barn/browserless/server/run.sh"
 dir = "."
 mise = false
 retry = true

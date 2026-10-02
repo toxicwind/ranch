@@ -15,7 +15,7 @@ The estate has three kinds of routers and none of them route *capabilities*:
 | flock (`:25193`) | (model routing variant) | 25193 |
 
 Meanwhile **skills** — the estate's actual capabilities (`SKILL.md` files with
-`name:` + `description:` frontmatter in `/home/toxic/sovereign/skills/` and
+`name:` + `description:` frontmatter in `/home/toxic/estate/skills/` and
 `~/workspace/skills/`) — have no index and no router. OpenFang agents declare
 `skills = []` and `mcp_servers = []` in `agent.toml`, but nothing resolves
 those fields (verified: zero matches for "skill router" across 152k sovereign

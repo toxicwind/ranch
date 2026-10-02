@@ -34,7 +34,7 @@ projects/yote/ops/yote-doctor.sh \
 shingle-workspace/awrawr_ws_exec.py \
   | 84586bebe27d56023e094f4de6d09aa000e4adec \
   | 24586 \
-  -> /home/toxic/sovereign/shingle-workspace/awrawr_ws_exec.py.new \
+  -> /home/toxic/estate/shingle-workspace/awrawr_ws_exec.py.new \
   | 40b282f2a0293927a42b123bc4cde3338c2e9d1dcc0e63f57bdb9ae3efabdfcd
   # REVIEW ONLY: staged side-by-side as .new, NEVER overwrites the live file.
   # The parent diffs the box's live copy against this staged copy before any

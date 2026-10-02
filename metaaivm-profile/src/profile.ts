@@ -7,7 +7,7 @@
  * injects the autonomy directive for Hatch-autoloaded / ipnext agents.
  *
  * Observed estate facts (2026-09-30, receipts in ../README.md and
- * /home/toxic/sovereign/hatch/metaaivm-corpus/):
+ * /home/toxic/estate/hatch/metaaivm-corpus/):
  * - metaaivm.com: Meta's per-user AI VM domain (WHOIS: Meta Platforms, Inc.)
  * - Gateway: wss://hatch.metaaivm.com/v1/noise (Noise_XX_25519_AESGCM_SHA256)
  * - Model identifier seen in agent rows: ipnext/avocado-5.16-v4

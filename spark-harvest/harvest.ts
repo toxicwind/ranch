@@ -22,7 +22,7 @@ import { $ } from "bun";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const HARVEST = "/home/toxic/sovereign/hatch/spark-harvest";
+const HARVEST = "/home/toxic/estate/hatch/spark-harvest";
 const WATERMARK = join(HARVEST, "watermark.json");
 const KEYWORDS = ["muse-spark", "muse spark", "meta-muse-spark"];
 const DRY = process.argv.includes("--dry-run");

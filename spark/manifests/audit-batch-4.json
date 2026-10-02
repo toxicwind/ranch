@@ -28,7 +28,7 @@
       "commit": "5f48a037",
       "github_repo": "toxicwind/sovereign-skills-hub",
       "new_name": "sovereign-skills-hub",
-      "notes": "Zero-dep Node.js skill monorepo engine (GraSP router, paper finder, validator, loader). Only 1 skill (sovereign-master-orchestrator) is staged under skills/ \u2014 the other 83 of the original 84-skill manifest were never staged anywhere (searched all dropbox shards + tarballs); a separate consolidation lane staged real skill bodies to ~/workspace/skills and /home/toxic/sovereign/skills, not into this repo. Made the 3 content-dependent tests honest (dynamic staged-count assertions) instead of fabricating 83 skills. 12/12 tests pass. README claims corrected from '84' to staged reality. Secret scan clean.",
+      "notes": "Zero-dep Node.js skill monorepo engine (GraSP router, paper finder, validator, loader). Only 1 skill (sovereign-master-orchestrator) is staged under skills/ \u2014 the other 83 of the original 84-skill manifest were never staged anywhere (searched all dropbox shards + tarballs); a separate consolidation lane staged real skill bodies to ~/workspace/skills and /home/toxic/estate/skills, not into this repo. Made the 3 content-dependent tests honest (dynamic staged-count assertions) instead of fabricating 83 skills. 12/12 tests pass. README claims corrected from '84' to staged reality. Secret scan clean.",
       "status": "pushed",
       "visibility": "private"
     },

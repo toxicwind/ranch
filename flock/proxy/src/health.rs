@@ -30,7 +30,7 @@ use crate::governor::GovernorSnapshot;
 pub fn astmatrix_db_default() -> PathBuf {
     std::env::var("FLOCK_ASTMATRIX_DB")
         .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/home/toxic/sovereign/data/ast_matrix.db"))
+        .unwrap_or_else(|_| PathBuf::from("/home/toxic/estate/data/ast_matrix.db"))
 }
 
 pub fn state_db_path(data_dir: &Path) -> PathBuf {

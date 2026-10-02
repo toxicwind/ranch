@@ -1,9 +1,9 @@
 /**
  * metaaivm corpus dedup + rank.
  *
- * Reads all harvest files from /home/toxic/sovereign/hatch/metaaivm-harvest/,
+ * Reads all harvest files from /home/toxic/estate/hatch/metaaivm-harvest/,
  * deduplicates across surfaces, ranks by signal strength, and writes a
- * ranked manifest to /home/toxic/sovereign/hatch/metaaivm-corpus/manifest.json.
+ * ranked manifest to /home/toxic/estate/hatch/metaaivm-corpus/manifest.json.
  *
  * Ranking signals (higher is better):
  * - Recency: newer items rank higher (exponential decay, 30-day half-life)
@@ -14,8 +14,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from "fs";
 import { join } from "path";
 
-const HARVEST = "/home/toxic/sovereign/hatch/metaaivm-harvest";
-const CORPUS = "/home/toxic/sovereign/hatch/metaaivm-corpus";
+const HARVEST = "/home/toxic/estate/hatch/metaaivm-harvest";
+const CORPUS = "/home/toxic/estate/hatch/metaaivm-corpus";
 const MANIFEST = join(CORPUS, "manifest.json");
 
 type RankedItem = {

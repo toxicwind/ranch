@@ -25,7 +25,7 @@ export function defaultConfig(partial: Partial<AstMatrixConfig> = {}): AstMatrix
     enabled: partial.enabled ?? false,
     strategy: partial.strategy || "hybrid",
     maxParallel: partial.maxParallel && partial.maxParallel > 0 ? partial.maxParallel : 4,
-    dbPath: partial.dbPath || "/home/toxic/sovereign/data/ast_matrix.db",
+    dbPath: partial.dbPath || "/home/toxic/estate/data/ast_matrix.db",
     stickyTtl: partial.stickyTtl && partial.stickyTtl > 0 ? partial.stickyTtl : 1800,
     fifoMax: partial.fifoMax && partial.fifoMax > 0 ? partial.fifoMax : 64,
     providers: partial.providers ?? {},

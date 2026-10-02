@@ -5,8 +5,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = import.meta.dir;
-const CORPUS = "/home/toxic/sovereign/hatch/spark-corpus";
-const HARVEST = "/home/toxic/sovereign/hatch/spark-harvest";
+const CORPUS = "/home/toxic/estate/hatch/spark-corpus";
+const HARVEST = "/home/toxic/estate/hatch/spark-harvest";
 
 let failures: string[] = [];
 const check = (name: string, ok: boolean) => {

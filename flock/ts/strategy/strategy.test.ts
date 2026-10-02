@@ -333,7 +333,7 @@ describe("candidate selection", () => {
       // pay model without :free suffix and without zero pricing sits out
       expect(cands).not.toContainEqual(["openrouter", "openai/gpt-oss-20b"]);
       // local roles always join (zero cost) — asserted against the real
-      // LOCAL_ROLES (reads /home/toxic/sovereign/.state/best-models.json on
+      // LOCAL_ROLES (reads /home/toxic/estate/.state/best-models.json on
       // yote, defaults elsewhere), so this holds in any environment
       expect(cands).toContainEqual(["llama-swap", LOCAL_ROLES.fast]);
       expect(cands).toContainEqual(["llama-swap", LOCAL_ROLES.quality]);

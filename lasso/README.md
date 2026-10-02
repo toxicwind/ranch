@@ -49,7 +49,7 @@ spawns:
   "name": "lasso",
   "protocol": "stdio",
   "command": "uv",
-  "args": ["run", "--directory", "/home/toxic/sovereign/projects/range/ranch/lasso", "hypruse"]
+  "args": ["run", "--directory", "/home/toxic/estate/projects/range/ranch/lasso", "hypruse"]
 }
 ```
 
@@ -64,7 +64,7 @@ Read-only verbs (safe to probe): `desktop`, `screenshot`, `zoom`, `ui`,
 ## CLI quickstart
 
 ```bash
-cd /home/toxic/sovereign/projects/range/ranch/lasso
+cd /home/toxic/estate/projects/range/ranch/lasso
 export HYPRLAND_INSTANCE_SIGNATURE=$(ls /run/user/1000/hypr/ | head -1)
 uv run hypruse desktop --json | head -c 600   # window list
 uv run hypruse screenshot --out /tmp/shot.png # screenshot

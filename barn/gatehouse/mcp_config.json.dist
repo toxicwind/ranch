@@ -311,7 +311,7 @@
       "args": [
         "run",
         "--directory",
-        "/home/toxic/sovereign/projects/range/ranch/lasso",
+        "/home/toxic/estate/projects/range/ranch/lasso",
         "hypruse"
       ],
       "auto_approve_tool_changes": true,
@@ -418,7 +418,7 @@
     },
     {
       "auto_approve_tool_changes": true,
-      "command": "/home/toxic/sovereign/projects/range/ranch/barn/shep/bin/github-mcp.sh",
+      "command": "/home/toxic/estate/projects/range/ranch/barn/shep/bin/github-mcp.sh",
       "created": "2026-09-19T00:28:53.936591-06:00",
       "enabled": true,
       "health_check_interval": "15s",
@@ -460,7 +460,7 @@
     {
       "args": [
         "run",
-        "/home/toxic/sovereign/src/mcp/llama_swap.ts"
+        "/home/toxic/estate/src/mcp/llama_swap.ts"
       ],
       "auto_approve_tool_changes": true,
       "command": "/home/toxic/.bun/bin/bun",
@@ -546,7 +546,7 @@
     {
       "command": "/usr/bin/python3",
       "args": [
-        "/home/toxic/sovereign/projects/range/bin/openfang-mcp-shim.py"
+        "/home/toxic/estate/projects/range/bin/openfang-mcp-shim.py"
       ],
       "created": "2026-09-19T02:46:46.338368942-06:00",
       "enabled": true,
@@ -725,7 +725,7 @@
     },
     {
       "args": [
-        "/home/toxic/sovereign/tools/tmux-mcp/server.ts"
+        "/home/toxic/estate/tools/tmux-mcp/server.ts"
       ],
       "command": "/home/toxic/.bun/bin/bun",
       "created": "2026-09-14T14:51:04.584222675-06:00",
@@ -796,7 +796,7 @@
     },
     {
       "args": [
-        "/home/toxic/sovereign/tools/websearch-mcp/server.py"
+        "/home/toxic/estate/tools/websearch-mcp/server.py"
       ],
       "command": "python3",
       "created": "2026-09-20T16:50:00-06:00",

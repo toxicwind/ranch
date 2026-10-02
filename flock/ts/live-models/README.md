@@ -13,7 +13,7 @@ tier's `modelFree` consume.
 
 - `provider-catalog.json` — Roost-owned (quarantine, miss streaks,
   everDiscovered). Written atomically by the catalog itself.
-- `live-models.json` (`/home/toxic/sovereign/.state/live-models.json`) —
+- `live-models.json` (`/home/toxic/estate/.state/live-models.json`) —
   scheduler-owned `{ fetchedAt, meta }` (per-model live metadata). On
   upgrade from the old shape, a legacy `{ models }` map is folded into the
   catalog once via Roost's v1 migration path so the warm cache survives.

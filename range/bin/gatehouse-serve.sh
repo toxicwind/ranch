@@ -2,8 +2,8 @@
 # gatehouse-serve.sh -- mcpproxy-go gateway
 set -e
 SECRETS=/home/toxic/.secrets
-CFG=/home/toxic/sovereign/projects/range/ranch/barn/gatehouse/mcp_config.json
-DIST=/home/toxic/sovereign/projects/range/ranch/barn/gatehouse/mcp_config.json.dist
+CFG=/home/toxic/estate/projects/range/ranch/barn/gatehouse/mcp_config.json
+DIST=/home/toxic/estate/projects/range/ranch/barn/gatehouse/mcp_config.json.dist
 if [ -f "$SECRETS" ]; then
   # shellcheck disable=SC1090
   . "$SECRETS"
@@ -17,7 +17,7 @@ if [ ! -f "$CFG" ]; then
   cp "$DIST" "$CFG"
   chmod 600 "$CFG"
 fi
-exec /home/toxic/sovereign/projects/range/bin/gatehouse serve \
+exec /home/toxic/estate/projects/range/bin/gatehouse serve \
   --config="$CFG" \
   --log-level=warn --log-to-file \
   --listen=127.0.0.1:25127 "$@"

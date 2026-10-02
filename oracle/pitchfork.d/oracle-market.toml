@@ -3,8 +3,8 @@
 
 
 [daemons.oracle-market]
-run = "exec /home/toxic/sovereign/projects/range/ranch/oracle/bin/run.sh"
-dir = "/home/toxic/sovereign/projects/range/ranch/oracle"
+run = "exec /home/toxic/estate/projects/range/ranch/oracle/bin/run.sh"
+dir = "/home/toxic/estate/projects/range/ranch/oracle"
 mise = false
 retry = true
 env = { ORACLE_INTAKE = "1" }

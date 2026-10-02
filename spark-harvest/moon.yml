@@ -2,8 +2,8 @@ $schema: 'https://moonrepo.dev/schemas/project.json'
 language: 'typescript'
 layer: 'automation'
 # Incremental GitHub harvester for muse-spark keywords.
-# Writes deduped results into /home/toxic/sovereign/hatch/spark-harvest/.
-# Corpus: /home/toxic/sovereign/hatch/spark-corpus/.
+# Writes deduped results into /home/toxic/estate/hatch/spark-harvest/.
+# Corpus: /home/toxic/estate/hatch/spark-corpus/.
 # Fork: toxicwind/meta-muse-spark-api (profile commit 83edf43).
 tasks:
   harvest:

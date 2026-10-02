@@ -4,10 +4,10 @@ Incremental GitHub harvest + first-class agent profile for the **Muse Spark** mo
 
 ## What this is
 
-- `harvest.ts` — bun harvester: GitHub repos / code / issues / PRs / commits / discussions for muse-spark keywords, watermarked + deduped into `/home/toxic/sovereign/hatch/spark-harvest/`. Runs on yote via crontab (see below).
+- `harvest.ts` — bun harvester: GitHub repos / code / issues / PRs / commits / discussions for muse-spark keywords, watermarked + deduped into `/home/toxic/estate/hatch/spark-harvest/`. Runs on yote via crontab (see below).
 - `src/profile.ts` + `profile.json` — executable first-class agent profile: machine-readable identity, validated against observed estate identifiers, with a pre-agent launch path that injects the autonomy directive.
 - `verify.ts` — local integrity check (no network).
-- Corpus: `/home/toxic/sovereign/hatch/spark-corpus/` (raw clones).
+- Corpus: `/home/toxic/estate/hatch/spark-corpus/` (raw clones).
 
 ## Observed facts (2026-09-30 / 2026-10-01)
 
@@ -39,7 +39,7 @@ Corpus clones: `meta-muse-spark-api/`, `muse-spark/`, `fork/` (the toxicwind for
 ## yote cron
 
 ```
-37 4 * * * cd /home/toxic/sovereign/projects/range/ranch/spark-harvest && /home/toxic/.bun/bin/bun harvest.ts >> /home/toxic/sovereign/hatch/spark-harvest/harvest.log 2>&1
+37 4 * * * cd /home/toxic/estate/projects/range/ranch/spark-harvest && /home/toxic/.bun/bin/bun harvest.ts >> /home/toxic/estate/hatch/spark-harvest/harvest.log 2>&1
 ```
 
 Mirrors the metaaivm collector pattern (03:17). Auth: `gh` CLI as toxicwind.

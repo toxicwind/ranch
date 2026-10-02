@@ -1,7 +1,7 @@
 /**
  * task-launch/src/queue.ts
  *
- * File-based atomic task queue under /home/toxic/sovereign/hatch/task-launch/.
+ * File-based atomic task queue under /home/toxic/estate/hatch/task-launch/.
  * Tasks are JSON files created with O_EXCL (exclusive create); the daemon
  * watches the queue dir with inotify and processes each file exactly once
  * by atomically renaming it into processing/ before work starts.
@@ -16,7 +16,7 @@ import { mkdirSync, renameSync, writeFileSync, readdirSync, readFileSync } from 
 import { join } from "node:path";
 import type { LaunchSurface } from "./launcher";
 
-export const DEFAULT_QUEUE_ROOT = "/home/toxic/sovereign/hatch/task-launch";
+export const DEFAULT_QUEUE_ROOT = "/home/toxic/estate/hatch/task-launch";
 
 /** Dynamic so tests can point at a temp dir via TASK_LAUNCH_ROOT. */
 export function queueRoot(): string {

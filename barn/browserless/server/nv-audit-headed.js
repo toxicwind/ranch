@@ -13,7 +13,7 @@
 //   - --disable-blink-features=AutomationControlled
 //   - navigator.webdriver hidden via init script
 //
-// Usage: from /home/toxic/sovereign (playwright browsers.json CWD contract):
+// Usage: from /home/toxic/estate (playwright browsers.json CWD contract):
 //   WAYLAND_DISPLAY=wayland-1 XDG_RUNTIME_DIR=/run/user/1000 \
 //   PLAYWRIGHT_BROWSERS_PATH=/home/toxic/.browserless/browsers \
 //   node nv-audit-headed.js

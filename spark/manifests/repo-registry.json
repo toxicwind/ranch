@@ -40,7 +40,7 @@
   "github_repo": "",
   "visibility": "",
   "status": "duplicate-of",
-  "duplicate_path": "/home/toxic/sovereign/projects/range/ranch/corral/src/telemetricOracle.ts",
+  "duplicate_path": "/home/toxic/estate/projects/range/ranch/corral/src/telemetricOracle.ts",
   "notes": "DUPLICATE - not pushed. The mirror dir had no src/ at all (only a SKILL.md variant, coverage-report.txt, package.json, tsconfig.json, bunfig.toml). The canonical TelemetricOracle class already lives in the estate at ranch/corral/src/telemetricOracle.ts plus the estate skill; ffs sweep 2026-09-30 confirmed. The mirror SKILL.md was an older invasive variant (tmux send-keys dispatch) vs the estate's ",
   "batch": 1
  },
@@ -185,7 +185,7 @@
   "visibility": "private",
   "status": "pushed",
   "duplicate_path": "",
-  "notes": "Zero-dep Node.js skill monorepo engine (GraSP router, paper finder, validator, loader). Only 1 skill (sovereign-master-orchestrator) is staged under skills/ — the other 83 of the original 84-skill manifest were never staged anywhere (searched all dropbox shards + tarballs); a separate consolidation lane staged real skill bodies to ~/workspace/skills and /home/toxic/sovereign/skills, not into this ",
+  "notes": "Zero-dep Node.js skill monorepo engine (GraSP router, paper finder, validator, loader). Only 1 skill (sovereign-master-orchestrator) is staged under skills/ — the other 83 of the original 84-skill manifest were never staged anywhere (searched all dropbox shards + tarballs); a separate consolidation lane staged real skill bodies to ~/workspace/skills and /home/toxic/estate/skills, not into this ",
   "batch": 4
  },
  {

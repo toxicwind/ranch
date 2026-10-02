@@ -60,7 +60,7 @@ Any process that can reach either socket gets its own bytes back.
 
 ```toml
 [daemons.sovereign-stream-broker]
-dir        = "/home/toxic/sovereign/projects/range/ranch/stream-broker"
+dir        = "/home/toxic/estate/projects/range/ranch/stream-broker"
 run        = "exec bun run src/index.ts"
 port       = 25215
 ready_port = 25215
@@ -88,7 +88,7 @@ workspace — do not assume it works.
 
 ## See also
 
-- [`pitchfork.toml`](/home/toxic/sovereign/pitchfork.toml) — the `sovereign-stream-broker` unit
+- [`pitchfork.toml`](/home/toxic/estate/pitchfork.toml) — the `sovereign-stream-broker` unit
 - [`../herd/`](../herd/) — the local-model side of the same mesh
 
 ## Build

@@ -3,8 +3,8 @@
 
 
 [daemons.nats-tail]
-run = "exec /home/toxic/sovereign/projects/range/ranch/squawk/nats/run-tail.sh"
-dir = "/home/toxic/sovereign/projects/range/ranch/squawk/nats"
+run = "exec /home/toxic/estate/projects/range/ranch/squawk/nats/run-tail.sh"
+dir = "/home/toxic/estate/projects/range/ranch/squawk/nats"
 mise = false
 retry = true
 boot_start = true

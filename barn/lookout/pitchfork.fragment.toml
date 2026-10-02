@@ -1,6 +1,6 @@
 # Pitchfork daemon record — lookout (isolated agent-browser display + viewer).
-# Already merged into /home/toxic/sovereign/pitchfork.toml; this file is the
-# committed record, not a merge source. Owned restart from /home/toxic/sovereign:
+# Already merged into /home/toxic/estate/pitchfork.toml; this file is the
+# committed record, not a merge source. Owned restart from /home/toxic/estate:
 #   ./bin/pitchfork-restart <agent-display|agent-viewer> --reregister
 #
 # See README.md for the full lane docs. The keeper itself is at

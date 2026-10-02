@@ -10,8 +10,8 @@ health_http = { url = "http://127.0.0.1:25127/health", interval = "30s", timeout
 port = 25127
 # gatehouse-serve.sh self-heals: bootstraps gitignored mcp_config.json from .dist when missing,
 # injects secrets from /home/toxic/.secrets (gatehouse direct-run crash-loops without it).
-run = "exec /home/toxic/sovereign/projects/range/bin/gatehouse-serve.sh"
-dir = "/home/toxic/sovereign/projects/range/ranch/barn/gatehouse"
+run = "exec /home/toxic/estate/projects/range/bin/gatehouse-serve.sh"
+dir = "/home/toxic/estate/projects/range/ranch/barn/gatehouse"
 mise = false
 retry = true
 ready_http = "http://127.0.0.1:25127/health"

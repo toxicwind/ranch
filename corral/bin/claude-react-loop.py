@@ -24,9 +24,9 @@ import subprocess
 import sys
 import urllib.request
 
-GATEHOUSE_BIN = "/home/toxic/sovereign/projects/range/bin/gatehouse"
+GATEHOUSE_BIN = "/home/toxic/estate/projects/range/bin/gatehouse"
 GATEHOUSE_CONFIG = (
-    "/home/toxic/sovereign/projects/range/ranch/barn/gatehouse/mcp_config.json"
+    "/home/toxic/estate/projects/range/ranch/barn/gatehouse/mcp_config.json"
 )
 NIM_SHIM_REAL = "/home/toxic/.local/bin/claude.nim-shim-real"
 MAX_ITERATIONS = 25

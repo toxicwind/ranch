@@ -48,7 +48,7 @@ Design principles from research:
 - **Herd-level logging** — `[campfire] [LEVEL] event key=value`, structured from day one
 
 ```bash
-cd /home/toxic/sovereign/projects/range/ranch/campfire
+cd /home/toxic/estate/projects/range/ranch/campfire
 bun install && bun test          # 15 tests
 bun run src/index.ts --dry-run   # watch live, post nothing
 bun run src/index.ts             # tend the fire

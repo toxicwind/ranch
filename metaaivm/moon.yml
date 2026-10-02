@@ -2,7 +2,7 @@ $schema: 'https://moonrepo.dev/schemas/project.json'
 language: 'typescript'
 layer: 'automation'
 # Incremental GitHub harvester for metaaivm-related keywords.
-# Writes deduped results into /home/toxic/sovereign/hatch/metaaivm-harvest/.
+# Writes deduped results into /home/toxic/estate/hatch/metaaivm-harvest/.
 # Companion: ranch/metaaivm-profile (agent profile), fork toxicwind/muse-cli.
 tasks:
   collect:

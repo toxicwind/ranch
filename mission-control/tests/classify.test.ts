@@ -68,7 +68,7 @@ describe("terminal failure classes", () => {
       ...base,
       resultSummary: "Sweep done; findings in findings-2026-09-30.md, commit a1b2c3d.",
       logBytes: 4096,
-      artifacts: ["/home/toxic/sovereign/hatch/spark-corpus/findings.md"],
+      artifacts: ["/home/toxic/estate/hatch/spark-corpus/findings.md"],
       substantiveMilestones: ["autonomy directive verified on 13 tasks"],
     });
     expect(c.terminal).toBe("proven-complete");

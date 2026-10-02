@@ -5,7 +5,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = import.meta.dir;
-const CORPUS = "/home/toxic/sovereign/hatch/metaaivm-corpus";
+const CORPUS = "/home/toxic/estate/hatch/metaaivm-corpus";
 
 let failures: string[] = [];
 const check = (name: string, ok: boolean) => {

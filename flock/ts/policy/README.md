@@ -24,7 +24,7 @@ human timescales. They complement; they do not duplicate:
 import { EloEngine, loadBenchPriors, CircuitPolicy, WarmStandby, PolicyHealthDB } from "./index.ts";
 
 // 1. Health analytics DB (SQLite WAL). elo_state doubles as the Elo store.
-const health = new PolicyHealthDB("/home/toxic/sovereign/data/flock_policy.db");
+const health = new PolicyHealthDB("/home/toxic/estate/data/flock_policy.db");
 
 // 2. Elo engine, writing through to the DB.
 const elo = new EloEngine(health.asEloStore());

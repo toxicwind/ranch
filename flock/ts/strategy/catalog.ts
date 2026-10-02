@@ -64,7 +64,7 @@ export function loadLocalRoleModels(): LocalRoles {
     longctx: "beellama/qwen-flash-256k",
   };
   try {
-    const p = "/home/toxic/sovereign/.state/best-models.json";
+    const p = "/home/toxic/estate/.state/best-models.json";
     if (!existsSync(p)) return defaults;
     const j = JSON.parse(readFileSync(p, "utf8"));
     return {

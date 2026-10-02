@@ -7,7 +7,7 @@
 set -euo pipefail
 cd /home/toxic/super-ralph
 export FLOCK_BYPASS=1  # direct-provider behavior; no flock key on this box
-export RALPH_CWD=/home/toxic/sovereign
+export RALPH_CWD=/home/toxic/estate
 exec bun run src/cli/index.ts ./PROMPT-kimi-sweep.md \
   --max-concurrency 8 --skip-questions \
   >>/tmp/super-ralph-kimi-sweep.log 2>&1

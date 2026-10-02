@@ -10,7 +10,7 @@
 # browserless is excluded: needs npm install + a live server (own lane).
 set -euo pipefail
 CLI=""; for c in flicker brand; do if command -v "$c" >/dev/null 2>&1; then CLI="$c"; break; fi; done
-[ -n "$CLI" ] || CLI="/home/toxic/sovereign/projects/range/ranch/branding/brand"
+[ -n "$CLI" ] || CLI="/home/toxic/estate/projects/range/ranch/branding/brand"
 export BRAND_ROOT="${BRAND_ROOT:-/home/toxic/brand}"; export BRAND_PORT="${BRAND_PORT:-25148}"
 NAME="barn-build"; REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_CMD='set -euo pipefail

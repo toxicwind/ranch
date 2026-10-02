@@ -1,7 +1,7 @@
 // SPARKFALL phase 3 — organize + rename the Dropbox mirror.
 // Reads /home/toxic/dropbox-mirror (4 shards, read-only), builds
 // /home/toxic/dropbox-mirror/organized/ and writes rename manifests into
-// /home/toxic/sovereign/projects/range/ranch/spark/manifests/.
+// /home/toxic/estate/projects/range/ranch/spark/manifests/.
 // Run: bun organize-phase3.ts   (on yote, as user toxic)
 // NEVER deletes or touches the shard dirs.
 
@@ -10,7 +10,7 @@ import { join } from 'path';
 
 const MIRROR = '/home/toxic/dropbox-mirror';
 const ORG = join(MIRROR, 'organized');
-const MANIFESTS = '/home/toxic/sovereign/projects/range/ranch/spark/manifests';
+const MANIFESTS = '/home/toxic/estate/projects/range/ranch/spark/manifests';
 
 const SHARD_ROOTS: Record<string, string> = {
   'shard-a': join(MIRROR, 'shard-a', 'shard-a'),

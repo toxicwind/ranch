@@ -65,7 +65,7 @@ stays untouched — removal happens only after the sidecar is deployed,
 supervised, and verified end-to-end.
 
 - `SOVEREIGN_LIVE_CATALOG` — live catalog file path
-  (default `/home/toxic/sovereign/.state/provider-catalog.live.json`)
+  (default `/home/toxic/estate/.state/provider-catalog.live.json`)
 - `SOVEREIGN_CATALOG_404_URL` — Roost's serve-404 intake
   (default `http://127.0.0.1:25104/admin/catalog/serve-404`)
 - `ASTMATRIX_STRATEGY` — default routing strategy (default `hybrid`)

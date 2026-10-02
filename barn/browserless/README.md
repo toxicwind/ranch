@@ -44,9 +44,9 @@ is stock **browserless.io v2.49.0** (SSPL, npm-installed — build output and
   `exec node /home/toxic/.browserless/app/build/index.js`.
 - Pitchfork daemon `[daemons.browserless]` on **:25130** (canonical section
   in `server/pitchfork.fragment.toml`; live section in
-  `/home/toxic/sovereign/pitchfork.toml`). Owned restart sequence: `pitchfork stop
+  `/home/toxic/estate/pitchfork.toml`). Owned restart sequence: `pitchfork stop
   browserless` → verify dead via `ss` → `pitchfork clean --daemon
-  browserless` → `pitchfork start browserless` from `/home/toxic/sovereign`
+  browserless` → `pitchfork start browserless` from `/home/toxic/estate`
   (or the `bin/pitchfork-restart` wrapper).
 - `config/ports.env`: `BROWSERLESS_PORT=25130` (collision resolved 2026-09-14 —
   browserless keeps 25130).
@@ -80,7 +80,7 @@ projects/range/ranch/barn/browserless/
 
 ```bash
 # via pitchfork (canonical)
-/home/toxic/sovereign/bin/pitchfork-restart browserless
+/home/toxic/estate/bin/pitchfork-restart browserless
 # liveness (no token needed to prove it's serving — 401 means the gate is up)
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:25130/pressure
 # authenticated check (token stays in this shell; only the status code leaves it)

@@ -42,7 +42,7 @@ BARE = (
     "title: estate-reconcile ALERT: herd-keypool drifted, not restored\n"
     "---\n"
     "estate-reconcile ALERT: herd-keypool drifted, not restored\n"
-    "Binary /home/toxic/sovereign/bin/herd-keypool.py could not be restored "
+    "Binary /home/toxic/estate/bin/herd-keypool.py could not be restored "
     "because HEAD was unsigned; no trusted restore source available.\n"
 )
 

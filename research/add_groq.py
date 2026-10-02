@@ -2,7 +2,7 @@
 """Add Groq models to sovereign-ast-matrix router."""
 import re
 
-ROUTER = "/home/toxic/sovereign/tools/ast-matrix/sovereign-ast-matrix/router.py"
+ROUTER = "/home/toxic/estate/tools/ast-matrix/sovereign-ast-matrix/router.py"
 
 with open(ROUTER) as f:
     src = f.read()

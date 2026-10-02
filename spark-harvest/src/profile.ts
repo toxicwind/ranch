@@ -7,7 +7,7 @@
  * injects the autonomy directive for Muse Spark autoloaded agents.
  *
  * Observed estate facts (2026-09-30 / 2026-10-01, receipts in ../README.md
- * and /home/toxic/sovereign/hatch/spark-corpus/):
+ * and /home/toxic/estate/hatch/spark-corpus/):
  * - Runtime: hatch cell (htch-runtime, /home/hatch, /opt/hatch)
  * - Model identifier in runtime trace: "Muse Spark"
  * - Muse Spark = Meta Superintelligence Labs model family, internal codename

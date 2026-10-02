@@ -12,8 +12,8 @@ spawning ephemeral sessions, so logins, tabs and state survive across tasks.
   dies. Single-instance: exits if CDP already answers.
 - `keeper.sh` - pitchfork launcher for the isolated display: unsets `WAYLAND_DISPLAY`, sets `DISPLAY=:99`, execs keeper.js (Forge 2026-09-21 — the keeper never renders in Chris's Hyprland session).
 - `pitchfork.fragment.toml` - merge into `[daemons.browser-keeper]` in
-  `/home/toxic/sovereign/pitchfork.toml` (owned sequence from
-  `/home/toxic/sovereign`).
+  `/home/toxic/estate/pitchfork.toml` (owned sequence from
+  `/home/toxic/estate`).
 - `browser-toggle.sh` - LEGACY: showed/hid the keeper window via the Hyprland
   scratchpad. Dead since the keeper moved to the isolated Xvnc :99 display
   (no Hyprland window exists any more); kept for reference.
@@ -58,7 +58,7 @@ npm install && npm run build   # tsc -> dist/ (dist/ and node_modules/ are gitig
 Registered in the mesh MCP registry
 (`/home/toxic/projects/my-ai-tools/configs/mcp-registry.json`) as
 `browserless-mcp` -> command
-`/home/toxic/sovereign/projects/range/ranch/barn/browserless/mcp.sh`.
+`/home/toxic/estate/projects/range/ranch/barn/browserless/mcp.sh`.
 The `persistent_*` tools attach to the keeper CDP at `127.0.0.1:9223`
 (override: `BROWSER_KEEPER_CDP`); keeper state file
 `/home/toxic/.browserless/keeper/status.json` (override:

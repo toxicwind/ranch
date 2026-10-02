@@ -2,8 +2,8 @@
 # Owned by the ranch/oracle project; the parent only composes it.
 
 [daemons.market-watchdog]
-run = "exec /home/toxic/sovereign/projects/range/ranch/oracle/bin/market-watchdog.sh"
-dir = "/home/toxic/sovereign/projects/range/ranch/oracle"
+run = "exec /home/toxic/estate/projects/range/ranch/oracle/bin/market-watchdog.sh"
+dir = "/home/toxic/estate/projects/range/ranch/oracle"
 mise = false
 retry = true
 auto = ["start"]

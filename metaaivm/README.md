@@ -3,7 +3,7 @@
 Incremental GitHub harvester for `metaaivm`-related keywords. Runs on yote
 via crontab (daily). Companion pieces:
 
-- `/home/toxic/sovereign/hatch/metaaivm-harvest/` — deduped search record
+- `/home/toxic/estate/hatch/metaaivm-harvest/` — deduped search record
   (manifest, repos, issues, PRs, raw code hits) + this collector's output
 - `ranch/metaaivm-profile/` — first-class agent profile for hatch-autoloaded
   / ipnext-identifier agents
@@ -21,7 +21,7 @@ machine family we run on.
 ## Run
 
 ```bash
-cd /home/toxic/sovereign/projects/range/ranch/metaaivm
+cd /home/toxic/estate/projects/range/ranch/metaaivm
 bun collector.ts            # incremental, watermarked
 bun collector.ts --dry-run  # report only
 ```

@@ -48,7 +48,7 @@ if os.getenv("GROQ_API_KEY"):
 if os.getenv("CEREBRAS_API_KEY"):
     results["cerebras"] = fetch("https://api.cerebras.ai/v1", os.getenv("CEREBRAS_API_KEY")); time.sleep(0.5)
 
-with open("/home/toxic/sovereign/tools/ast-matrix/models_discovered.json", "w") as f:
+with open("/home/toxic/estate/tools/ast-matrix/models_discovered.json", "w") as f:
     json.dump(results, f, indent=2)
 print("Saved models_discovered.json")
 
@@ -104,7 +104,7 @@ for mid, alias in {"mistral-small-latest": "mistral-small",
                    "mistral-medium-latest": "mistral-medium"}.items():
     coding[alias] = ("mistral", mid)
 
-with open("/home/toxic/sovereign/tools/ast-matrix/coding_generated.json", "w") as f:
+with open("/home/toxic/estate/tools/ast-matrix/coding_generated.json", "w") as f:
     json.dump(coding, f, indent=2)
 print("Saved coding_generated.json")
 print(f"Total aliases: {len([k for k in coding if coding[k]])}")

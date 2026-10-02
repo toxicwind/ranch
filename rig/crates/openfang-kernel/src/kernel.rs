@@ -9909,11 +9909,11 @@ system_prompt = "You are a test agent."
     fn test_resolve_reload_config_path_prefers_boot_path() {
         let mut cfg = KernelConfig::default();
         cfg.config_path = Some(std::path::PathBuf::from(
-            "/home/toxic/sovereign/config/openfang-25196.toml",
+            "/home/toxic/estate/config/openfang-25196.toml",
         ));
         assert_eq!(
             OpenFangKernel::resolve_reload_config_path(&cfg),
-            std::path::PathBuf::from("/home/toxic/sovereign/config/openfang-25196.toml")
+            std::path::PathBuf::from("/home/toxic/estate/config/openfang-25196.toml")
         );
     }
 

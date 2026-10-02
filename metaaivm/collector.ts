@@ -22,7 +22,7 @@ import { $ } from "bun";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const HARVEST = "/home/toxic/sovereign/hatch/metaaivm-harvest";
+const HARVEST = "/home/toxic/estate/hatch/metaaivm-harvest";
 const WATERMARK = join(HARVEST, "watermark.json");
 const KEYWORDS = ["metaaivm", "meta-aivm"];
 const DRY = process.argv.includes("--dry-run");

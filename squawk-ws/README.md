@@ -77,7 +77,7 @@ Every env var the server reads, with code defaults:
 | `SQUAWK_WS_STATE_DIR` | `/home/toxic/.squawk-ws` |
 
 The supervised daemon does **not** use the `SQUAWK_CHAT_ROOT` default —
-pitchfork overrides it to `/home/toxic/sovereign/hatch/agents/ember/squawk-root`.
+pitchfork overrides it to `/home/toxic/estate/hatch/agents/ember/squawk-root`.
 The var is unprefixed relative to its siblings, which is easy to guess wrong
 as `SQUAWK_WS_CHAT_ROOT`; no such name appears in the server.
 

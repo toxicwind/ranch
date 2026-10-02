@@ -22,7 +22,7 @@ import { readdirSync, readFileSync, mkdirSync, writeFileSync, existsSync } from 
 import { join } from "node:path";
 
 const SKILL_DIRS = [
-  "/home/toxic/sovereign/skills",
+  "/home/toxic/estate/skills",
   "/home/toxic/hatch/skills",
 ].filter((d) => existsSync(d));
 

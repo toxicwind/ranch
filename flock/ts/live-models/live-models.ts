@@ -25,7 +25,7 @@ import { dirname } from "node:path";
 import { discover } from "../../roost/src/index.ts";
 import type { ModelCatalog } from "../../roost/src/index.ts";
 
-export const META_STATE_PATH = "/home/toxic/sovereign/.state/live-models.json";
+export const META_STATE_PATH = "/home/toxic/estate/.state/live-models.json";
 
 export const LIVE_STATUS: Record<
   string,

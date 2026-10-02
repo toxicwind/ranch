@@ -18,8 +18,8 @@ schema filter, and `--schema` resolves through the known-schema registry
 Deps: `python3`, `dbus-python`, `cryptography` (for the Chromium pipeline).
 
 ```bash
-# yote launcher (mesh checkout at /home/toxic/sovereign):
-ln -sf /home/toxic/sovereign/projects/mesh/secretsmith/bin/secretsmith \
+# yote launcher (mesh checkout at /home/toxic/estate):
+ln -sf /home/toxic/estate/projects/mesh/secretsmith/bin/secretsmith \
        ~/.local/bin/secretsmith
 ```
 

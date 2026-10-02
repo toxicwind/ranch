@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 
-BRAND_ABS = "/home/toxic/sovereign/projects/range/ranch/branding/brand"
+BRAND_ABS = "/home/toxic/estate/projects/range/ranch/branding/brand"
 NAME = "squawk-ws-build"
 TOOLCHAIN = "python3"
 BUILD_CMD = (
