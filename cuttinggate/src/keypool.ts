@@ -141,6 +141,11 @@ export class CredentialPlane {
     state.reason = error ?? (status === null ? "network/unknown" : `HTTP ${status}`);
   }
 
+  /** True when a pool is configured for this upstream, even if currently exhausted. */
+  hasPool(upstream: string): boolean {
+    return this.pools.has(upstream);
+  }
+
   /** Throw a diagnosable error instead of letting a bare 502 escape. */
   claim(upstream: string, opts: { paid?: boolean } = {}): string {
     const pool = this.pools.get(upstream);

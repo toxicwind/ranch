@@ -114,9 +114,17 @@ export class Router {
 
   /** Take a key for this attempt. Called by the race body so the attribution below is stub-proof. */
   private claimKey(provider: string): string {
-    const key = this.credentials
-      ? this.credentials.claim(provider, { paid: false })
-      : (this.config.keys[provider] ?? "");
+    let key = "";
+    if (this.credentials) {
+      if (this.credentials.hasPool(provider)) {
+        // Pool configured: claim() throws a diagnosable error when exhausted.
+        key = this.credentials.claim(provider, { paid: false });
+      }
+      // No pool for this provider (local/keyless paths like llama-swap,
+      // nim-local, kimi-auto): fall through to the single configured key.
+    }
+    const single = this.config.keys[provider] ?? "";
+    if (!key) key = single;
     this.claimed.set(provider, key);
     return key;
   }
@@ -190,6 +198,7 @@ export class Router {
     });
 
     let winner: Settled | null = null;
+    let lastError: string | undefined;
     for (;;) {
       if (winner) break;
       if (!settled.length) {
@@ -205,6 +214,9 @@ export class Router {
       while (settled.length) {
         const r = settled.shift()!;
         if (r.valid && !winner) winner = r;
+        // The drain above empties `settled`; keep the first error so the
+        // final reason names the real failure instead of a generic message.
+        else if (r.error !== undefined && lastError === undefined) lastError = r.error;
       }
     }
     controller.abort();
@@ -221,7 +233,7 @@ export class Router {
       };
     }
 
-    const reason = settled.find((r) => r.error)?.error ?? `no provider returned valid content (tried ${providers.join(", ")})`;
+    const reason = lastError ?? `no provider returned valid content (tried ${providers.join(", ")})`;
     return { ok: false, error: reason };
   }
 }
