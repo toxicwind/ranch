@@ -2,12 +2,7 @@
 # Owned by the ranch/stream-broker project; the parent only composes it.
 
 [daemons.sovereign-stream-broker]
-dir = "/home/toxic/sovereign/projects/range/ranch/stream-broker"
+dir = "/home/toxic/estate/ranch/stream-broker"
 run = "exec bun run src/index.ts"
 port = 25215
 ready_port = 25215
-
-# Sovereign Router (bun router.ts v3.2) -- intelligent free-pool routing behind
-# the fleet default model sovereign/free (:25104). Restored 2026-09-27: this
-# daemon never had a pitchfork entry, so the 2026-09-21 ad-hoc deploy died
-# silently in the 9/26 yote flaps. Owned by pitchfork now, auto-started.
