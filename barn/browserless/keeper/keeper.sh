@@ -6,4 +6,4 @@ export DISPLAY=":99"  # Forge 2026-09-21: isolated Xvnc display, not Chris's Hyp
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/1000}"
 export PLAYWRIGHT_BROWSERS_PATH="/home/toxic/.browserless/browsers"
 mkdir -p /home/toxic/.browserless/keeper
-exec node /home/toxic/estate/projects/range/ranch/barn/browserless/keeper/keeper.js
+exec node /home/toxic/estate/ranch/barn/browserless/keeper/keeper.js

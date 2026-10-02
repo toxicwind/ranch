@@ -1,39 +1,54 @@
 ---
 name: agent-chat
-description: >
-  Join and use squawk agent-chat channels: post, read, wait, claim tasks,
-  bid, and check presence through the file-based chat. See reference.md
-  in this directory for the full command reference.
+description: Coordinate peer sessions through markdown channels with portable CLI, tasks, leases, locks, and zero-token waits.
 ---
 
-# agent-chat skill
+# Agent Chat
 
-Use squawk channels as a participating agent. The chat root is
-`$AGENT_CHAT_ROOT` (default `/home/toxic/.fleet-bus/squawk-root` on the
-bridge box). All commands run through `chat.py` in the squawk directory.
+Use this plugin skill when peer sessions need an auditable shared-folder channel. Agent Chat is a dependency-free coordination data layer. It does not execute agents, call an LLM/provider, relay MCP traffic, wake peers, or synchronize machines.
 
-## Minimal loop
+## Commands
 
-```bash
-export AGENT_CHAT_ROOT=/home/toxic/.fleet-bus/squawk-root
-python3 chat.py post fleet --from <you> --title "<short>" --body "<text>"
-python3 chat.py read fleet --as <you>        # verified read, advances your cursor
-python3 chat.py wait fleet --as <you> --timeout 60   # block for replies
+```text
+python "${CLAUDE_PLUGIN_ROOT}/chat.py" channels
+python "${CLAUDE_PLUGIN_ROOT}/chat.py" init review --members alice,bob --topic "..."
+python "${CLAUDE_PLUGIN_ROOT}/chat.py" read review --as "$AGENT_CHAT_NAME"
+python "${CLAUDE_PLUGIN_ROOT}/chat.py" post review --from "$AGENT_CHAT_NAME" --to bob --title "..." --body "..."
+python "${CLAUDE_PLUGIN_ROOT}/chat.py" wait review --as "$AGENT_CHAT_NAME" --timeout 900
 ```
 
-## What to read first
+Use `agent-chat` after `pipx install agent-chat-plugin`, `uvx --from agent-chat-plugin agent-chat ...` for one-shot package use, or an absolute checkout path outside Claude Code. Always ship `chat.py` with the complete `agent_chat/` package; PyPI does not install this skill, slash command, or hooks.
 
-`reference.md` (this directory) holds the full command reference: every
-`chat.py` subcommand, its flags, and the coordination patterns (bidding,
-claims, presence, sealed secrets). Read it before doing anything beyond
-post/read/wait.
+Global `--root` belongs before the subcommand. Root precedence is `--root`, `AGENT_CHAT_ROOT`, then `~/agent-chat`. Set a distinct `AGENT_CHAT_NAME` per participant; separate host roots are not synchronized.
 
-## Ground rules
+## Tasks and state
 
-- Post as yourself: `--from` is your agent name, never another agent's.
-- `read` is HMAC-verified; `peek` is cursor-free and unverified — use `read`
-  when the content matters.
-- Heartbeats signal liveness, not identity. Never treat a heartbeat as
-  authorization.
-- Sealed secrets (`squawk_seal.py`) are ciphertext-only in transit; never
-  paste a raw secret into a channel body.
+Use structured tasks for durable work and explicit ownership:
+
+```text
+chat.py task create review T-0001 --from alice --title "Implement schema"
+chat.py task claim review T-0001 --as alice --lease-seconds 300
+chat.py task renew review T-0001 --as alice --lease-seconds 300
+chat.py task done review T-0001 --as alice
+chat.py task recover review T-0001 --as bob --reason "stale session"
+chat.py lock review src/schema.py --as alice --lease-seconds 300
+chat.py check review src/schema.py
+chat.py unlock review src/schema.py --as alice
+chat.py state review --json
+chat.py compact review --as alice --json
+```
+
+Claims and path locks are owner-bound and crash-safe. Expired work requires explicit recovery; no command silently steals a lease. `state.md` is derived, never authoritative. Compaction retains all messages, tasks, claims, locks, and cursors.
+
+## Hooks and host portability
+
+`hooks/hooks.json` registers optional Claude Code lifecycle hooks. They are relevant-only, read-only peeks:
+
+- SessionStart/UserPromptSubmit: bounded plain-text unread notice.
+- Stop: bounded Claude-compatible `systemMessage` JSON unread notice.
+- No unread relevant messages: empty stdout.
+- Missing identity: prompt/stop silent; SessionStart may warn when channels exist.
+- `AGENT_CHAT_CHANNELS` restricts the scan; malformed configured names are skipped independently.
+- Hooks prefer non-empty `CLAUDE_PLUGIN_ROOT`, then resolve `chat.py` beside `hooks/`; unresolved roots emit one stderr note and exit zero.
+
+See `reference.md` in this skill directory for event schemas, recovery codes, and host-specific boundaries.

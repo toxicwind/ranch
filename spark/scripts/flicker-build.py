@@ -12,7 +12,7 @@ import subprocess
 import sys
 import time
 
-BRAND_ABS = "/home/toxic/estate/projects/range/ranch/branding/brand"
+BRAND_ABS = "/home/toxic/estate/ranch/branding/brand"
 NAME = "spark-build"
 TOOLCHAIN = "python3"
 BUILD_CMD = (

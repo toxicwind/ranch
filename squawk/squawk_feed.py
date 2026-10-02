@@ -17,9 +17,7 @@ Fat response: {"seq": M, "messages": [relay-record envelopes, ...]} where
 every envelope carries its own per-message "seq". Messages with seq >
 since, oldest first, capped at 50 per response; the returned "seq" is the
 seq of the LAST message in the batch, so the client re-polls with it to
-drain the rest. Query param tail=N returns the N most recent messages in
-one shot (the boot snapshot path) with "seq" set to the channel
-high-water mark, so the client lands at the live cursor immediately.
+drain the rest. Each message text is truncated to 500 chars. Sealed
 messages are unsealed server-side with the relay identity (the hosting
 lane provisions relay.seal.key); unopenable ones ride as
 {"sealed": true, "body": null} -- ciphertext is never served.
@@ -184,14 +182,13 @@ def _truncate(text, cap: int = TEXT_CAP) -> str:
 
 
 def build_fat(since: int, state: FeedState,
-              max_messages: int = MAX_MESSAGES, tail: int = 0) -> dict:
+              max_messages: int = MAX_MESSAGES) -> dict:
     """{"seq": M, "messages": [...]} for messages with seq > since.
 
     M is the seq of the last message in the batch (== channel high-water
     when nothing was capped), so the client can re-poll to drain.
     """
-    paths = _new_messages(state.chan_dir, since)
-    paths = paths[-tail:] if tail > 0 else paths[:max_messages]
+    paths = _new_messages(state.chan_dir, since)[:max_messages]
     messages = []
     last = since
     for p in paths:
@@ -255,16 +252,11 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             except (TypeError, ValueError):
                 since = 0
             since = max(since, 0)
-            try:
-                tail = int(qs.get("tail", ["0"])[0])
-            except (TypeError, ValueError):
-                tail = 0
-            tail = max(tail, 0)
             state = self.server.state
             with state.cond:
                 if state.high <= since:
                     state.cond.wait(timeout=self.server.hold)
-            self._send_json(200, build_fat(since, state, tail=tail))
+            self._send_json(200, build_fat(since, state))
             return
         self._send_404()
 

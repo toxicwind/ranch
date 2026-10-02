@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 build/
 *.egg-info/
+.ruff_cache/
+.pytest-out.txt
+ui.html.bak-*

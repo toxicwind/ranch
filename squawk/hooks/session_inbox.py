@@ -61,12 +61,7 @@ def _bounded_unread_summary(
     return ", ".join(parts)
 
 
-def collect_notice(quiet_no_identity: bool = False) -> str | None:
-    """Return the unread-peer notice line, or None when the hook stays quiet.
-
-    Prints a one-line stderr skip note when the plugin root cannot be
-    resolved; never raises.
-    """
+def main() -> None:
     # Import chat.py from the plugin root. Claude Code sets CLAUDE_PLUGIN_ROOT
     # for hook commands; other harnesses fall back to this script's own
     # directory chain (hooks/ lives directly under the plugin root).
@@ -80,17 +75,17 @@ def collect_notice(quiet_no_identity: bool = False) -> str | None:
             f"(no chat.py under {plugin_root}); hook is non-blocking",
             file=sys.stderr,
         )
-        return None
+        return
     sys.path.insert(0, plugin_root)
     try:
         import chat
     except Exception:
-        return None
+        return
 
     try:
         root = chat.root_dir(os.environ.get("AGENT_CHAT_ROOT"))
         if not root.exists():
-            return None
+            return
 
         name = os.environ.get("AGENT_CHAT_NAME", "").strip()
         if not name:
@@ -110,12 +105,12 @@ def collect_notice(quiet_no_identity: bool = False) -> str | None:
                             break
             except OSError:
                 pass
-            if has_channels and not quiet_no_identity:
+            if has_channels:
                 print(
                     "[agent-chat] Inbox hook disabled: identity is unset; "
                     "set AGENT_CHAT_NAME."
                 )
-            return None
+            return
 
         unread_by_channel: list[tuple[str, int]] = []
         for ch in _channels_to_check(root, os.environ.get("AGENT_CHAT_CHANNELS", "")):
@@ -148,22 +143,14 @@ def collect_notice(quiet_no_identity: bool = False) -> str | None:
 
         if unread_by_channel:
             summary = _bounded_unread_summary(unread_by_channel)
-            return (
+            print(
                 f"[agent-chat] {name} has unread peer messages: {summary}. "
                 "Run /agent-chat to read/reply."
             )
-        return None
     # Hook errors must not fail the host session, including SystemExit raised
     # by an imported CLI path.
     except (Exception, SystemExit):
-        return None
-
-
-def main(quiet_no_identity: bool = False) -> None:
-    """SessionStart entry point: print the unread notice, if any."""
-    notice = collect_notice(quiet_no_identity=quiet_no_identity)
-    if notice:
-        print(notice)
+        return
 
 
 if __name__ == "__main__":

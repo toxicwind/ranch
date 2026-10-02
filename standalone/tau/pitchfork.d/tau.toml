@@ -4,7 +4,7 @@
 [daemons.tau]
 # omp acp exposed as TCP daemon via chute (stdio→TCP + mcpServers normalization)
 port = 25111
-run = "exec /home/toxic/sovereign/projects/range/ranch/barn/chute/chute.mjs --port 25111 -- /home/toxic/.local/bin/tau acp -e /home/toxic/.tau/extensions/vansrouter.ts"
+run = "exec /home/toxic/sovereign/ranch/barn/chute/chute.mjs --port 25111 -- /home/toxic/.local/bin/tau acp -e /home/toxic/.tau/extensions/vansrouter.ts"
 # 2026-10-01 taurun: dist/omp deleted (ranch/tau tree rm -rf 02:17 MDT); fork cannot
 # rebuild here (missing @ranch/tack monorepo sibling). Pinned launcher (upstream
 # 18.3.0, same pin as ~/.local/bin/tau) restores the daemon. Revert to dist/omp

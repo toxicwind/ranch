@@ -6,7 +6,7 @@ module = "builtin:chat"
 
 [model]
 # Target: daemon NVIDIA model once the key install lands (worker 1).
-# If the daemon still 401s, fall back to herd/fast (pilot pattern) —
+# If the daemon still 401s, fall back to llama-swap/fast (pilot pattern) —
 # but fast cannot tool-call, so the relay agent needs the NVIDIA path to work.
 provider = "nvidia"
 model = "openai/gpt-oss-20b"

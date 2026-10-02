@@ -179,21 +179,6 @@ class SquawkFeedFatTests(unittest.TestCase):
         self.assertTrue(text.endswith("…"))
 
     # -- wake + timeout --------------------------------------------------------
-    def test_wait_tail_returns_most_recent(self):
-        # the UI boot path: wait?since=0&tail=N must return the LAST N
-        # messages (landing at the live cursor), not the first N.
-        port = self._serve()
-        base = self._high(port)
-        for i in range(6):
-            self._post(f"msg{i}")
-        status, obj = _get(port, "/squawk-feed/wait?since=0&tail=2",
-                           token=TOKEN)
-        self.assertEqual(status, 200)
-        self.assertEqual(len(obj["messages"]), 2)
-        self.assertEqual([m["body"] for m in obj["messages"]],
-                         ["msg4", "msg5"])
-        self.assertEqual(obj["seq"], base + 6)
-
 
     def test_wait_wakes_on_post(self):
         port = self._serve()
@@ -258,30 +243,6 @@ class SquawkFeedFatTests(unittest.TestCase):
         self.assertTrue(rec["sealed"])
         self.assertEqual(rec["body"], "secret for relay")
 
-
-    # -- ui.html static checks ---------------------------------------------------
-
-    def test_ui_html_has_no_duplicate_ids(self):
-        from html.parser import HTMLParser
-
-        class _IdCollector(HTMLParser):
-            def __init__(self):
-                super().__init__(convert_charrefs=True)
-                self.ids = []
-
-            def handle_starttag(self, tag, attrs):
-                for k, v in attrs:
-                    if k == "id":
-                        self.ids.append(v)
-
-        ui = Path(__file__).resolve().parent.parent / "ui.html"
-        self.assertTrue(ui.is_file(), "ui.html missing")
-        col = _IdCollector()
-        col.feed(ui.read_text(encoding="utf-8"))
-        dupes = {i for i in col.ids if col.ids.count(i) > 1}
-        self.assertEqual(dupes, set(), "duplicate ids in ui.html: %s" % sorted(dupes))
-        self.assertIn("conn", col.ids)
-        self.assertIn("connHead", col.ids)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

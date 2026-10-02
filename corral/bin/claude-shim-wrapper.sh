@@ -61,7 +61,7 @@ for arg in "$@"; do
   esac
 done
 if [[ -n "$_prompt" ]]; then
-  exec /usr/bin/python3 /home/toxic/estate/projects/range/ranch/corral/bin/claude-react-loop.py "$_prompt"
+  exec /usr/bin/python3 /home/toxic/estate/ranch/corral/bin/claude-react-loop.py "$_prompt"
 else
   exec /home/toxic/.local/bin/claude.nim-shim-real "$@"
 fi

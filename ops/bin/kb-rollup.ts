@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // kb-rollup.ts — per-crew KB ownership for §2 Active Crews.
 //
-// Each crew owns docs/fleet/crews/<slug>.md (YAML frontmatter). The §2 table in
+// Each crew owns fleet/crews/<slug>.md (YAML frontmatter). The §2 table in
 // docs/fleet-knowledgebase.md is a GENERATED rollup between
 // <!-- KB-ROLLUP:START --> / <!-- KB-ROLLUP:END --> markers — never hand-edit it.
 //
@@ -35,13 +35,13 @@ const HEADER = "| Crew | Scope | Owner / coordinator | Status |";
 const SEPARATOR = "|---|---|---|---|";
 
 const GENERATED_NOTE =
-  "> **GENERATED TABLE — do not edit by hand.** Source of truth is `docs/fleet/crews/<crew>.md` " +
+  "> **GENERATED TABLE — do not edit by hand.** Source of truth is `fleet/crews/<crew>.md` " +
   "(one file per crew). Regenerate with `bun projects/ops/bin/kb-rollup.ts`. " +
   "Register via `fleet-onboard.sh --register`; mark done via `fleet-onboard.sh --done SHA`.";
 
 const RULE_18 =
   "18. **Per-crew KB ownership (Chris 2026-09-29).** §2 Active Crews is a GENERATED rollup — " +
-  "never hand-edit the table. Each crew owns `docs/fleet/crews/<crew>.md` " +
+  "never hand-edit the table. Each crew owns `fleet/crews/<crew>.md` " +
   "(frontmatter: crew/scope/owner/status); register and mark-done through `fleet-onboard.sh`, " +
   "which writes your file and regenerates the rollup via `bun projects/ops/bin/kb-rollup.ts`. " +
   "Concurrent registrations cannot clobber each other: per-crew files merge cleanly and the " +
@@ -342,7 +342,7 @@ async function cmdRegister(kbPath: string, name: string, scope: string, owner: s
   const lname = name.toLowerCase();
   const dup = crews.find((c) => c.crew.toLowerCase() === lname);
   if (dup) {
-    console.log(`kb-rollup: '${name}' is already registered (docs/fleet/crews/${dup.file}) — not duplicating.`);
+    console.log(`kb-rollup: '${name}' is already registered (fleet/crews/${dup.file}) — not duplicating.`);
     return;
   }
   const file = slug(name) + ".md";
@@ -361,7 +361,7 @@ async function cmdRegister(kbPath: string, name: string, scope: string, owner: s
     registered: t,
     updated: t,
   });
-  console.log(`kb-rollup: registered '${name}' -> docs/fleet/crews/${file}`);
+  console.log(`kb-rollup: registered '${name}' -> fleet/crews/${file}`);
   await cmdRollup(kbPath);
 }
 

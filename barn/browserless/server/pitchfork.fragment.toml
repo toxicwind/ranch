@@ -3,7 +3,7 @@
 # clean --daemon -> start from /home/toxic/estate).
 [daemons.browserless]
 port = 25130
-run = "exec /home/toxic/estate/projects/range/ranch/barn/browserless/server/run.sh"
+run = "exec /home/toxic/estate/ranch/barn/browserless/server/run.sh"
 dir = "."
 mise = false
 retry = true

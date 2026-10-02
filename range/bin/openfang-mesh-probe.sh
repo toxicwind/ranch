@@ -3,7 +3,7 @@
 # Exits 0 only if the full chain works: gatehouse -> shim -> openfang mcp -> coyote.
 set -u
 GATEHOUSE=/home/toxic/estate/projects/range/bin/gatehouse
-CFG=/home/toxic/estate/projects/range/ranch/barn/gatehouse/mcp_config.json
+CFG=/home/toxic/estate/ranch/barn/gatehouse/mcp_config.json
 fail() { echo "PROBE-FAIL: $1" >&2; exit 1; }
 
 line=$($GATEHOUSE -c "$CFG" upstream list 2>/dev/null | grep -i openfang) || fail "openfang missing from upstream list"

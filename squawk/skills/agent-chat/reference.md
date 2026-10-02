@@ -1,91 +1,77 @@
-# agent-chat reference
+# Agent Chat reference
 
-Full command reference for the squawk `chat.py` CLI. Companion to the
-agent-chat `SKILL.md` in this directory.
+This file holds the detailed operational reference so the loaded `SKILL.md` stays small. It is product documentation, not a second implementation.
 
-## Channel lifecycle
+## Root and message protocol
 
-| Command | Effect |
-|---|---|
-| `chat.py init <channel>` | create a channel |
-| `chat.py channels` | list channels (`.channels-index`) |
-| `chat.py roster <channel>` | membership |
+A channel is `<root>/<channel>/`. `init` creates `_meta.json`; messages are immutable numbered Markdown files with frontmatter. `read` and successful `wait` advance the caller's cursor. `peek` does not. `post --to all` or omitted `--to` broadcasts. Use one channel per topic and one identity per participant.
 
-## Messaging
+Root precedence is `--root` before the subcommand, then `AGENT_CHAT_ROOT`, then `~/agent-chat`. Every participant must point to the same root on a filesystem supporting the package's atomic replacement and locking semantics. The package does not synchronize home/company roots or install a background service.
 
-| Command | Effect |
-|---|---|
-| `chat.py post <channel> --from <agent> --title <t> --body <text> [--to <agent>] [--reply <seq>]` | signed, Lamport-stamped, DAG-linked message file `NNNN-<from>-<slug>.md` |
-| `chat.py read <channel> --as <agent>` | HMAC-verified read; advances cursor |
-| `chat.py peek <channel>` | cursor-free read (unverified) |
-| `chat.py wait <channel> --as <agent> --timeout <s>` | zero-token block for new messages |
-| `chat.py digest <channel> --as <agent>` | slow-path "what's new" across channels |
+## Portable surfaces
 
-## Repair and inspection
+- Package CLI: `pipx install agent-chat-plugin`, then `agent-chat ...`.
+- One-shot package CLI: `uvx --from agent-chat-plugin agent-chat ...`.
+- Checkout/plugin CLI: `python "/path/to/agent-chat-plugin/chat.py" ...`.
+- Standalone skill bundle: copy `SKILL.md`, `chat.py`, and the complete `agent_chat/` package together.
+- Claude Code plugin: keep `.claude-plugin/`, `commands/`, `skills/`, `hooks/`, `chat.py`, and `agent_chat/` together.
 
-| Command | Effect |
-|---|---|
-| `chat.py gossip [--repair]` | anti-entropy: scan seq gaps, backfill from `log.jsonl` |
-| `chat.py dag <channel>` | verify the hash chain |
-| `chat.py thread <channel> --seq <n>` | reply thread |
-| `chat.py clocks` | Lamport clock diagnostics |
-| `chat.py ops` / `state` / `compact` | commutative op log, channel state, compaction |
+PyPI contains the CLI and runtime modules, not the skill, slash command, or hooks. A Python entry point is portable; host lifecycle registration and output interpretation are host-specific. No surface changes host models, credentials, MCP configuration, or provider routing.
 
-## Coordination
+## Structured tasks
 
-| Command | Effect |
-|---|---|
-| `chat.py task <channel> ...` | structured task |
-| `chat.py claim <channel> <task> --as <agent>` | atomic claim (mkdir lock) |
-| `chat.py lock <channel> <path> --as <agent>` | path lock |
-| `chat.py check <channel>` | claim/lock status |
-| `chat.py react <channel> --as <agent> --seq <n> --kind <k>` | stigmergic pheromone trace |
-| `chat.py suggest-role --as <agent>` | advisory role suggestion from claim traces |
-
-## Presence (liveness only — never authorization)
-
-| Command | Effect |
-|---|---|
-| `chat.py heartbeat --as <agent>` | write liveness hint |
-| `chat.py presence` | SWIM peer views |
-| `chat.py suspect <peer>` | mark suspicion |
-
-## Identity and keys
-
-| Command | Effect |
-|---|---|
-| `chat.py keygen <agent>` | mint per-agent HMAC-SHA256 key |
-| Keys live outside the chat root | `/home/toxic/.fleet-bus/squawk-root/keys` or `$FLEET_KEYS_DIR` |
-
-Posts are HMAC-signed once keys exist; readers reject forged, unsigned, or
-revoked senders.
-
-## Sealed secrets
-
-```bash
-python3 squawk_seal.py keygen <agent>          # mint NaCl keypair
-python3 squawk_seal.py seal --from <a> --to <b> --channel <c> [--burn] --note <n>  # stdin: secret
-python3 squawk_seal.py unseal --as <b>         # decrypt
+```text
+chat.py task create <channel> <id> --from <agent> --title <title>
+chat.py task list <channel>
+chat.py task show <channel> <id>
+chat.py task claim <channel> <id> --as <agent> --lease-seconds 300
+chat.py task renew <channel> <id> --as <agent> --lease-seconds 300
+chat.py task done <channel> <id> --as <agent>
+chat.py task block <channel> <id> --as <agent>
+chat.py task release <channel> <id> --as <agent>
+chat.py task recover <channel> <id> --as <agent> --reason "stale session"
+chat.py task recover-pending <channel> --as <agent> [--resolve-publication rollback|published]
 ```
 
-Ciphertext only in channel logs, transcripts, and audit trails. Never
-paste a raw secret into a message body.
+Tasks are JSON records under `<root>/<channel>/tasks/`; claims are owner-bound records under `claims/`. Valid statuses are `open`, `in_progress`, `blocked`, `done`, and `cancelled`. Dependencies must be `done` before claim/transition. Expired claims require explicit recovery and preserve the previous owner, expiry, and reason. A crash marker fails closed until `recover-pending` resolves it. Task failures exit 2 with stable `TASK_*` codes.
 
-## Private channels (`priv-*`)
+## Path locks and state
 
-End-to-end encrypted: `init` provisions a Fernet channel key,
-`post` encrypts before HMAC-signing, `read`/`wait`/`peek`
-verify-then-decrypt. Requires `pip install cryptography` (declared in
-`pyproject.toml`); without it every `priv-*` operation fails closed.
+```text
+chat.py lock <channel> <paths...> --as <agent> --lease-seconds 300
+chat.py check <channel> <paths...> [--as <agent>]
+chat.py unlock <channel> <lock-id-or-path> --as <agent>
+chat.py recover <channel> <lock-id-or-path> --as <agent> --reason "stale session"
+chat.py recover-pending <channel> --as <agent> [--resolve-publication rollback|published]
+chat.py state <channel> [--write] [--json] [--strict]
+chat.py compact <channel> [--as <agent>] [--no-audit] [--json] [--strict]
+```
 
-## History search
+Locks normalize workspace-relative paths, reject traversal/symlink escapes and Windows-invalid names, and detect file/file and directory/file overlap. Only the owner unlocks an active lock; stale recovery is explicit. Lock errors use stable `PATH_LOCK_*` codes.
 
-`history_search.py` is a standalone batch CLI (not a `chat.py` subcommand):
-metadata + body search with channel/sender/status/seq-range/time-range
-filters, bounded results, JSONL or human output. Read-only, no daemon.
-See `HISTORY_SEARCH.md`.
+`state` and `compact` derive deterministic `state.md`; compaction atomically writes the derived file, retains all source records, and normally posts one `state.compacted` audit. JSON mode emits one parseable JSON document. State failures use stable `STATE_*` codes.
 
-## Ephemeral channels
+## Hooks
 
-`chat.py mark-ephemeral <channel>` then `chat.py gc`: TTL channels are
-archive-then-reaped.
+`hooks/hooks.json` wires `SessionStart`, `UserPromptSubmit`, and `Stop` for Claude Code. The scripts can also run by absolute path in another host only when that host explicitly adapts the lifecycle and output contract.
+
+Environment:
+
+- `AGENT_CHAT_NAME`: participant identity. Prompt/Stop are silent when absent; SessionStart may warn if channels exist.
+- `AGENT_CHAT_ROOT`: channel root.
+- `AGENT_CHAT_CHANNELS`: optional comma-separated relevant channels. Invalid names are skipped without suppressing valid channels.
+- `CLAUDE_PLUGIN_ROOT`: preferred plugin root; otherwise the hook resolves `chat.py` beside its own `hooks/` directory.
+
+Hooks peek only: no cursor writes, body output, replies, task mutations, peer wakeups, provider calls, or synchronization. They print only when unread messages addressed to the current identity or broadcast exist. Notices are bounded to a small stdout budget; idle hooks are silent. Every hook exits zero, including missing roots and per-channel filesystem failures. An unresolved plugin root emits one bounded stderr diagnostic.
+
+Stop output is JSON with one `systemMessage` field. SessionStart and UserPromptSubmit output plain text. Neither output is a claim that the host loaded the plugin natively.
+
+## Adapter-neutral events
+
+```text
+chat.py event post <channel> --from <agent> --type capability --harness <host>
+chat.py event post <channel> --from <agent> --type status --harness <host> --status ready
+chat.py event read <channel> [--type capability|status]
+```
+
+Events advertise portable local capabilities/status only. They do not claim MCP, ACP, agent execution, provider access, or native host integration.
