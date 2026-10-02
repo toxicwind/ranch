@@ -2,8 +2,8 @@
 # Owned by the ranch/squawk-ws project; the parent only composes it.
 
 [daemons.squawk-ws-client]
-run = "exec python3 /home/toxic/sovereign/projects/range/ranch/squawk-ws/squawk_ws_client_local.py"
-dir = "/home/toxic/sovereign/projects/range/ranch/squawk-ws"
+run = "exec /usr/bin/python3 /home/toxic/estate/ranch/squawk-ws/squawk_ws_client_local.py"
+dir = "/home/toxic/estate/ranch/squawk-ws"
 mise = false
 retry = true
 boot_start = true
