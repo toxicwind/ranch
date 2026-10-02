@@ -11,6 +11,8 @@
  */
 
 import { z } from "zod";
+import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
 
 const Num = z.coerce.number().int().min(1).max(65535);
 
@@ -76,6 +78,32 @@ function readRpm(): Record<string, number> {
     if (m && Number.isFinite(n) && n > 0) out[m[1]!.toLowerCase()] = n;
   }
   return out;
+}
+
+/**
+ * Load the estate secrets files into process.env (no overwrite).
+ * Mirrors sovereign-router-ts so the cutover keeps the same credential
+ * sources: ~/.secrets and /home/toxic/.secrets. Called from main() before
+ * loadConfig so *_API_KEY entries are visible to readKeys().
+ */
+export function loadSecretsFiles(): void {
+  for (const path of [`${homedir()}/.secrets`, "/home/toxic/.secrets"]) {
+    if (!existsSync(path)) continue;
+    try {
+      for (let line of readFileSync(path, "utf8").split("\n")) {
+        line = line.trim();
+        if (!line || line.startsWith("#")) continue;
+        if (line.startsWith("export ")) line = line.slice(7);
+        const eq = line.indexOf("=");
+        if (eq < 1) continue;
+        const k = line.slice(0, eq).trim();
+        const v = line.slice(eq + 1).trim().replace(/^['"]|['"]$/g, "");
+        if (k && v && !process.env[k]) process.env[k] = v;
+      }
+    } catch (e) {
+      console.error(`cuttinggate: loadSecretsFiles ${path}:`, e);
+    }
+  }
 }
 
 export function loadConfig(overrides: Partial<Config> = {}): Config {

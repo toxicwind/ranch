@@ -17,7 +17,7 @@
 import { Elysia, t } from "elysia";
 import pino from "pino";
 
-import { loadConfig, type Config } from "./config.ts";
+import { loadConfig, loadSecretsFiles, type Config } from "./config.ts";
 import { ProviderGate } from "./circuit.ts";
 import { Quarantine } from "./quarantine.ts";
 import { Ledger } from "./ledger.ts";
@@ -128,6 +128,7 @@ export function buildApp(deps: AppDeps) {
 
 /** Boots with the real process environment. Exits non-zero on bad config. */
 export async function main(): Promise<void> {
+  loadSecretsFiles();
   let config: Config;
   try {
     config = loadConfig();
