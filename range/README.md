@@ -1,7 +1,8 @@
 # Range — Tool Federation & Ranch Domain Layer
 
-`range/` holds the tool-federation and routing domain: service launchers,
-domain config, and the `ranch/` monorepo.
+`range/` is a thin domain wrapper: `ranch/` (the `toxicwind/ranch` monorepo,
+symlinked back to the repo root) plus this README, which documents the
+tool-federation and routing layer.
 
 ---
 
@@ -9,22 +10,14 @@ domain config, and the `ranch/` monorepo.
 
 ```text
 range/
-├── bin/                        # Service launchers and probes
-├── config.yml                  # Unified range config — model roles, port mappings
-└── ranch/                      # Monorepo (toxicwind/ranch)
-    ├── stockyard/              # Routers (herd, flock, paddock, router-legacy)
-    ├── barn/                   # MCP tools (gatehouse, browserless, gemini-mcp, secretsmith)
-    ├── corral/                 # Multi-agent engineering engine (@sovereign/corral)
-    ├── squawk/                 # File-based multi-agent markdown chat
-    ├── squawk-ws/              # WebSocket bridge for squawk events
-    ├── data/                   # Model discovery catalogs, package tables
-    ├── research/               # Research scripts and extraction toolkits
-    ├── docs/                   # Architecture and contract documentation
-    └── ui/                     # Ranch web dashboard
+├── ranch/                      # Monorepo (toxicwind/ranch) — symlink to repo root
+└── README.md                   # this file: federation & routing notes
 ```
 
-Launchers in `bin/`: `landing.py`, `gatehouse-serve.sh`,
-`openfang-mesh-probe.sh`.
+The ranch itself is flat since 2026-09-30 — every component at the root, no
+`stockyard/` or `remuda/` pens (the [ranch README](../README.md) component table
+is the map). `barn/` holds the small single-purpose tools (gatehouse, chute,
+lookout, browserless, gemini-mcp, secretsmith).
 
 ---
 
@@ -58,7 +51,7 @@ upstream name. The local rename frees `shep` for the unrelated
 
 The live multi-provider gateway: 7 providers (llama-swap, openrouter, nvidia,
 groq, cerebras, google, mistral), 7 routing strategies, built-in `/ui`
-dashboard. Source: `ranch/stockyard/router-legacy/sovereign-router-ts/`.
+dashboard. Source: `tools/sovereign-router/sovereign-router-ts/` (estate root).
 
 Override the strategy per request:
 
@@ -80,7 +73,7 @@ curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25104/v1/chat/completions
 
 ## Sovereign MCP gateway (:25120)
 
-`ranch/stockyard/router-legacy/sovereign-mcp-gateway/` is a trust boundary in
+`ranch/herd/mesh/router/sovereign-mcp-gateway/` is a trust boundary in
 front of upstream MCP servers: per-upstream circuit breakers quarantine
 poisoned servers, `notifications/initialized` pins sticky sessions, and
 `tools/list` is served as a provenance-namespaced union (`<upstream>__<tool>`)

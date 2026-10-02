@@ -177,4 +177,4 @@ orchestrator. Two consequences:
 
 - [`pitchfork.toml`](/home/toxic/estate/pitchfork.toml) — daemon definitions
 - [`barn/gatehouse/`](../ranch/barn/gatehouse/) — the gateway this directory launches
-- [`../ranch/stockyard/herd/docs/flock/`](../ranch/stockyard/herd/docs/flock/) — the other side of the mesh
+- [`../../herd/docs/flock/`](../../herd/docs/flock/) — the other side of the mesh

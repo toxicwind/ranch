@@ -91,7 +91,7 @@ that spawns the entry, connects a real socket, and verifies a
 ## Related
 
 - Gateway: `projects/range/ranch/barn/wrangler/` — MCP federation on :25127
-- Engine: `projects/range/ranch/stockyard/tau/` — the omp fork
+- Engine: `tau/` — the omp fork
 - Supervisor: `pitchfork.toml` `[daemons.tau]`
 - PATH shim: `bin/chute` → this file
 
