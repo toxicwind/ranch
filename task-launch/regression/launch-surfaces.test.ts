@@ -212,7 +212,7 @@ describe("agent profile (Hatch autoloaded / ipnext)", () => {
     expect(out.effectiveBody).toBe("Sweep /tmp.");
   });
 });
-import { enqueue } from "../src/queue";
+import { enqueue, claimNext } from "../src/queue";
 import { executeTask, drain } from "../src/daemon";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -276,5 +276,58 @@ describe("daemon execution honesty", () => {
     expect(receipt.outcome).toBe("failed");
     expect(receipt.exitCode).toBe(3);
     expect(receipt.stderr).toContain("oops");
+  });
+
+  test("executeTask times out a hung command and reports timed-out", async () => {
+    tmpRoot();
+    const prev = process.env.TASK_LAUNCH_EXEC_TIMEOUT_MS;
+    process.env.TASK_LAUNCH_EXEC_TIMEOUT_MS = "400";
+    try {
+      const r = await executeTask(task("t-timeout", { cmd: "sleep 30" }));
+      expect(r).not.toBeNull();
+      expect(r!.timedOut).toBe(true);
+      expect(r!.exitCode).toBe(124);
+    } finally {
+      if (prev === undefined) delete process.env.TASK_LAUNCH_EXEC_TIMEOUT_MS;
+      else process.env.TASK_LAUNCH_EXEC_TIMEOUT_MS = prev;
+    }
+  });
+
+  test("drain writes timed-out receipt with evidence for a hung command", async () => {
+    const root = tmpRoot();
+    const prev = process.env.TASK_LAUNCH_EXEC_TIMEOUT_MS;
+    process.env.TASK_LAUNCH_EXEC_TIMEOUT_MS = "400";
+    try {
+      enqueue(task("t-timeout2", { cmd: "sleep 30" }), root);
+      await drain(root);
+      const receipt = JSON.parse(await readFile(join(root, "receipts", "t-timeout2.json"), "utf8"));
+      expect(receipt.outcome).toBe("timed-out");
+      expect(receipt.exitCode).toBe(124);
+      expect(receipt.evidence.length).toBeGreaterThan(0);
+    } finally {
+      if (prev === undefined) delete process.env.TASK_LAUNCH_EXEC_TIMEOUT_MS;
+      else process.env.TASK_LAUNCH_EXEC_TIMEOUT_MS = prev;
+    }
+  });
+
+  test("claimNext is atomic: second claim of the same task returns null", async () => {
+    const root = tmpRoot();
+    enqueue(task("t-claim", { cmd: "printf x" }), root);
+    const first = claimNext(root);
+    expect(first).not.toBeNull();
+    expect(first!.task.id).toBe("t-claim");
+    const second = claimNext(root);
+    expect(second).toBeNull();
+  });
+
+  test("concurrent drains claim each task exactly once", async () => {
+    const root = tmpRoot();
+    enqueue(task("t-race1", { cmd: "printf a" }), root);
+    enqueue(task("t-race2", { cmd: "printf b" }), root);
+    await Promise.all([drain(root), drain(root), drain(root)]);
+    const r1 = JSON.parse(await readFile(join(root, "receipts", "t-race1.json"), "utf8"));
+    const r2 = JSON.parse(await readFile(join(root, "receipts", "t-race2.json"), "utf8"));
+    expect(r1.outcome).toBe("executed");
+    expect(r2.outcome).toBe("executed");
   });
 });

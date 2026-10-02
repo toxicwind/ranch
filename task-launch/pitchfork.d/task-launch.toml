@@ -1,0 +1,10 @@
+# ranch/task-launch — project-owned daemon manifest. Source of truth for 'task-launch'.
+# Owned by the ranch/task-launch project; the parent only composes it.
+
+[daemons.task-launch]
+run = "exec /home/toxic/.bun/bin/bun /home/toxic/estate/ranch/task-launch/src/daemon.ts"
+dir = "/home/toxic/estate/ranch/task-launch"
+mise = false
+retry = true
+auto = ["start"]
+ready_cmd = "pgrep -f '[t]ask-launch/src/daemon.ts' >/dev/null"

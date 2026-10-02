@@ -20,7 +20,14 @@ import { launch, planRelaunch, type RunRecord } from "./launcher";
 import { claimNext, ensureDirs, writeReceipt, queueRoot, QUEUE_ROOT, type QueuedTask } from "./queue";
 import { join } from "node:path";
 
-const EXEC_TIMEOUT_MS = 120_000;
+/**
+ * Execution ceiling for spawned commands. Override per-run via
+ * TASK_LAUNCH_EXEC_TIMEOUT_MS (tests use a short ceiling); defaults to 120s.
+ */
+function execTimeoutMs(): number {
+  const v = Number(process.env.TASK_LAUNCH_EXEC_TIMEOUT_MS);
+  return Number.isFinite(v) && v > 0 ? Math.floor(v) : 120_000;
+}
 const EVIDENCE_CAP = 65536;
 
 function log(msg: string): void {
@@ -55,7 +62,7 @@ export async function executeTask(task: QueuedTask): Promise<ExecResult | null> 
     } catch {
       /* already exited */
     }
-  }, EXEC_TIMEOUT_MS);
+  }, execTimeoutMs());
   const [stdout, stderr, exitCode] = await Promise.all([
     new Response(proc.stdout).text(),
     new Response(proc.stderr).text(),
