@@ -158,6 +158,16 @@ function dateInStatus(status: string): string | null {
 }
 
 function crewsDirFor(kbPath: string): string {
+  // Crews live at the ESTATE ROOT (fleet/crews), not next to the KB doc.
+  // Walk upward from the KB until a fleet/crews dir is found.
+  let dir = dirname(kbPath);
+  for (let i = 0; i < 8; i++) {
+    const cand = join(dir, "fleet", "crews");
+    if (existsSync(cand)) return cand;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
   return join(dirname(kbPath), "fleet", "crews");
 }
 
