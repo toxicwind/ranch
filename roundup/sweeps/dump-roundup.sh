@@ -4,15 +4,15 @@ set -u
 
 FILES=(
   # plan + audit
-  /home/toxic/sovereign/projects/range/ranch/roundup/docs/GUIDELLM_EVAL_PLAN.md
-  /home/toxic/sovereign/projects/range/ranch/roundup/docs/upstream-audit-guidellm-2026-09-20.md
+  /home/toxic/estate/ranch/roundup/docs/GUIDELLM_EVAL_PLAN.md
+  /home/toxic/estate/ranch/roundup/docs/upstream-audit-guidellm-2026-09-20.md
   # sweep scripts
-  /home/toxic/sovereign/projects/range/ranch/roundup/sweeps/roundup_herd_sweep.sh
-  /home/toxic/sovereign/projects/range/ranch/roundup/sweeps/roundup_sweep.sh
+  /home/toxic/estate/ranch/roundup/sweeps/roundup_herd_sweep.sh
+  /home/toxic/estate/ranch/roundup/sweeps/roundup_sweep.sh
 )
 
 # forge work dirs — include every text file
-for d in /home/toxic/sovereign/agents/oracle-market/work/forge/guidellm-*/; do
+for d in /home/toxic/estate/agents/oracle-market/work/forge/guidellm-*/; do
   [ -d "$d" ] || continue
   while IFS= read -r f; do
     FILES+=("$f")
@@ -24,9 +24,9 @@ done
 
 # guidellm project metadata
 for f in \
-  /home/toxic/sovereign/projects/range/ranch/roundup/fork/pyproject.toml \
-  /home/toxic/sovereign/projects/range/ranch/roundup/fork/README.md \
-  /home/toxic/sovereign/projects/range/ranch/roundup/fork/setup.py \
+  /home/toxic/estate/ranch/roundup/fork/pyproject.toml \
+  /home/toxic/estate/ranch/roundup/fork/README.md \
+  /home/toxic/estate/ranch/roundup/fork/setup.py \
   ; do
   [ -f "$f" ] && FILES+=("$f")
 done
@@ -34,7 +34,7 @@ done
 # squawk task files
 while IFS= read -r f; do
   FILES+=("$f")
-done < <(find /home/toxic/sovereign/hatch/agents/ember/squawk-root/bid-market \
+done < <(find /home/toxic/estate/hatch/agents/ember/squawk-root/bid-market \
   -name '*guidellm*' -type f 2>/dev/null | sort)
 
 echo "found ${#FILES[@]} files"

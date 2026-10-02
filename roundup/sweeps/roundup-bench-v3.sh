@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-FORK=/home/toxic/sovereign/projects/range/ranch/roundup/fork
+FORK=/home/toxic/estate/ranch/roundup/fork
 GUIDELLM=/home/toxic/.local/bin/guidellm
 VENV=/home/toxic/.venv-guidellm
-OUT=/home/toxic/sovereign/projects/range/ranch/roundup/results/bench
+OUT=/home/toxic/estate/ranch/roundup/results/bench
 SECDIR=/home/toxic/.config/guidellm-bench
-PROMPTS=/home/toxic/sovereign/projects/openrouter-probe/abstract-prompts.txt
+PROMPTS=/home/toxic/estate/ranch/openrouter-probe/abstract-prompts.txt
 SENTINEL="ABSTRACT-7X3Q"
 PARALLEL=20
 PROBE_TIMEOUT=5

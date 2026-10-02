@@ -4,7 +4,7 @@
 # Rank on quality/latency/availability only -- cost is NOT a factor (Chris directive).
 set -u
 SECRETS=/home/toxic/.secrets
-OUTDIR=/home/toxic/sovereign/projects/range/ranch/roundup/results/sweeps
+OUTDIR=/home/toxic/estate/ranch/roundup/results/sweeps
 mkdir -p "$OUTDIR"
 KEY=$(grep -E '^[[:space:]]*(export[[:space:]]+)?OPENROUTER_API_KEY_FREE[[:space:]]*=' "$SECRETS" | head -1 | sed -E 's/^[[:space:]]*(export[[:space:]]+)?OPENROUTER_API_KEY_FREE[[:space:]]*=[[:space:]]*//; s/^"//; s/"$//')
 if [ -z "$KEY" ]; then echo "KEY NOT FOUND"; exit 1; fi

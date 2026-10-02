@@ -12,7 +12,7 @@ import subprocess
 import sys
 import time
 
-BRAND_ABS = "/home/toxic/sovereign/projects/range/ranch/branding/brand"
+BRAND_ABS = "/home/toxic/estate/ranch/branding/brand"
 NAME = "roundup-build"
 TOOLCHAIN = "python3"
 BUILD_CMD = (

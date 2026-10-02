@@ -64,8 +64,8 @@ aggregates cover completed requests only. Touches `accumulator.py`, tests.
 
 ## Deep links
 
-- Master README: `/home/toxic/sovereign/README.md`
+- Master README: `/home/toxic/estate/README.md`
 - Our fork: https://github.com/toxicwind/roundup
 - Upstream: https://github.com/vllm-project/guidellm
-- Local working copy (git-ignored, benchmark runs): `/home/toxic/sovereign/projects/range/ranch/roundup/fork/`
-- Permanent tooling from today's work: `/home/toxic/sovereign/skills/surgical-edit/`
+- Local working copy (git-ignored, benchmark runs): `/home/toxic/estate/ranch/roundup/fork/`
+- Permanent tooling from today's work: `/home/toxic/estate/skills/surgical-edit/`

@@ -19,7 +19,7 @@
 # (multi-GB loads; use --include to opt in).
 set -u
 
-OUTDIR=/home/toxic/sovereign/projects/range/ranch/roundup/results/herd
+OUTDIR=/home/toxic/estate/ranch/roundup/results/herd
 INCLUDE='.*'
 EXCLUDE='^(kimi|kimi-k2|kimi-code|kimi-auto)$|flock-|^beellama/|toolcall-local'
 MAX_MODELS=0

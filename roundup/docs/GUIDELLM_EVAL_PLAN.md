@@ -64,11 +64,11 @@ KEY=$(grep -E "^[[:space:]]*(export[[:space:]]+)?OPENROUTER_API_KEY_FREE[[:space
 # one model, real tokenizer, abstract prompts as file data, 10 sync requests
 guidellm run \
   --backend "kind=openai_http,target=https://openrouter.ai/api/v1,model=nex-agi/nex-n2.5-mini:free,api_key=$KEY,validate_backend=False" \
-  --data kind=text_file,path=/home/toxic/sovereign/projects/openrouter-probe/abstract-prompts.txt \
+  --data kind=text_file,path=/home/toxic/estate/ranch/openrouter-probe/abstract-prompts.txt \
   --profile kind=synchronous \
   --constraint kind=max_requests,count=10 \
   --tokenizer kind=huggingface_auto,model=nex-agi/Nex-N2.5-mini \
-  --output "kind=json,path=/home/toxic/sovereign/projects/range/ranch/roundup/results/sweeps/nex-n2.5-mini.json" \
+  --output "kind=json,path=/home/toxic/estate/ranch/roundup/results/sweeps/nex-n2.5-mini.json" \
   --disable-progress
 
 Repeat per model, swapping model + tokenizer repo from the table above.
