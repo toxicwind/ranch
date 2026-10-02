@@ -46,7 +46,7 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 
 ### The agent this estate serves
 
-**tau** is the coding agent — a terminal coding agent (fork of [oh-my-pi](https://github.com/can1357/oh-my-pi)) with an interactive CLI + SDK (`omp`), 30+ tools, subagents, LSP-aware editing, and a native Rust hot path. It speaks to 82 providers through a compiled model catalog sourced from **roost**, the ranch's single provider-data authority. Tau lives in its own repo ([toxicwind/tau](https://github.com/toxicwind/tau)) and nests into the ranch at `tau/` (gitignored — an independent repo, like `vansrouter/`); on a live estate, **chute** exposes its stdio ACP engine as a TCP daemon on `:25111`, and its model traffic flows through herd and flock. If you only learn one animal, learn tau — the rest of the ranch exists so the agent can work.
+**tau** is the coding agent — a terminal coding agent (fork of [oh-my-pi](https://github.com/can1357/oh-my-pi)) with an interactive CLI + SDK (`omp`), 30+ tools, subagents, LSP-aware editing, and a native Rust hot path. It speaks to 82 providers through a compiled model catalog sourced from **roost**, the ranch's single provider-data authority. Tau lives in its own repo ([toxicwind/tau](https://github.com/toxicwind/tau)) and nests into the ranch at `tau/` (gitignored — an independent repo with its own remote); on a live estate, **chute** exposes its stdio ACP engine as a TCP daemon on `:25111`, and its model traffic flows through herd and flock. If you only learn one animal, learn tau — the rest of the ranch exists so the agent can work.
 
 ### Built with
 
@@ -135,7 +135,7 @@ curl -s http://127.0.0.1:25193/v1/chat/completions \
 
 ## 🐄 The ranch
 
-Every animal first-class — no "secondary" framing. Statuses verified live 2026-09-30, re-verified 2026-10-01 (🟢 = port listening under pitchfork supervision).
+Every animal first-class — no "secondary" framing. Statuses verified live 2026-09-30, re-verified 2026-10-02 (🟢 = port listening under pitchfork supervision).
 
 | Component | Port | Path | Role |
 |---|---|---|---|
@@ -154,17 +154,18 @@ Every animal first-class — no "secondary" framing. Statuses verified live 2026
 | 🟢 **browserless** | `25130` | `barn/browserless` | Browser automation: browserless.io MCP server + native-launcher deployment. |
 | 🟢 **lookout** | `6080` | `barn/lookout` | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower. |
 | **roost** | — | `flock/roost/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: 63 providers/models the estate perches on, one registry. Feeds tau, herd's generated Go, flock's generated Rust, the router. |
-| **squawk** | — | `squawk/` (Python) | File-based multi-agent chat: signed, sequenced message files. NATS bus (`squawk/nats/`) underneath. |
+| **tack** | — | `tack/` (`@ranch/tack`, Bun/TS) | 🔌 Sovereign provider wire-data authority: base URLs, key env vars, auth schemes for the tau catalog. |
+| **squawk** | — | `squawk/` (Python) | File-based multi-agent chat: signed, sequenced message files. |
 | **corral** | — | `corral/` (in-tree, Bun/TS) | The super-ralph agent framework — the mission runner. Absorbed in-tree 2026-09-30 with full history; **no submodules, ever.** |
 | **roundup** | — | `roundup/` | Benchmark estate — gathers and assesses every head. |
-| **drover** | — | `drover/` | ModelPilot VS Code extension — multi-provider AI routing for Copilot Chat. |
+| **drover** | — | `drover/` | Herd Router VS Code extension — herd-level model routing with Gemini EAP tool retrieval. |
 | **lasso** | — | `lasso/` (Python) | Hyprland-native desktop control MCP — forked from hypruse. Window/screenshot/input control; three-strategy focus race. |
-| **rig** | — | `rig/` (Rust workspace) | OpenFang kernel — 14 crates, the runtime the market rides on. |
+| **rig** | — | `rig/` (Rust workspace) | OpenFang kernel — 13 crates, the runtime the market rides on. |
 | **campfire** | — | `campfire/` (Bun) | 🔥 The chatty helper system — multi-agent conversation layer. |
 | **switchboard** | — | `switchboard/` (Bun) | Skill-router MCP server — `skill_search`/`skill_get` over the estate's SKILL.md index. |
 | **barn/gemini-mcp** | — | `barn/gemini-mcp` (Python) | First-class Gemini API MCP server — multi-key pool, round-robin + failover. |
 | **barn/secretsmith** | — | `barn/secretsmith` (Python) | Maximal freedesktop Secret Service CLI for the estate. |
-| **spark** | — | `spark/` | Manifests + inventory. |
+| **spark** | — | `spark/` | ⚡ Dropbox operation — full inventory, mirror, organize + repo-ify of Chris's Dropbox; manifests + repo registry. |
 | **research** | — | `research/` | Provider/model discovery scripts. |
 | **data** | — | `data/` | Discovery + categorization JSON. |
 | **docs** | — | `docs/` | Architecture docs — the written contract. |
@@ -198,7 +199,7 @@ flowchart TD
 
 ## 📜 The contract
 
-- **Flat.** Every animal lives at the ranch root, one directory per component — with two deliberate exceptions: `barn/`, the utility pen for small single-purpose tools (gatehouse, chute, lookout, …), and gitignored nested checkouts (`tau/`, `vansrouter/`, …) that are independent repos with their own remotes.
+- **Flat.** Every animal lives at the ranch root, one directory per component — with two deliberate exceptions: `barn/`, the utility pen for small single-purpose tools (gatehouse, chute, lookout, …), and gitignored nested checkouts (`tau/`, …) that are independent repos with their own remotes.
 - **tau is the primary operator.** herd serves what's local; flock routes what's cloud; the rest of the estate (gateway, builds, chat, decisions, telemetry) exists so the agent can work.
 - **herd serves what's local;** anything cloud goes to the flock daemon via its `flock:` config key
 - **flock's `llama-swap` provider points back at herd `:25100`** for local models
