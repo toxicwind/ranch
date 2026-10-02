@@ -25,6 +25,7 @@ package astmatrix
 import (
 	"bytes"
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"sync"
@@ -37,7 +38,7 @@ func LiveCatalogPath() string {
 	if p := os.Getenv("SOVEREIGN_LIVE_CATALOG"); p != "" {
 		return p
 	}
-	return "/home/toxic/sovereign/.state/provider-catalog.live.json"
+	return "/home/toxic/estate/.state/provider-catalog.live.json"
 }
 
 type liveCatalogProvider struct {
@@ -45,6 +46,11 @@ type liveCatalogProvider struct {
 	Quarantined []string `json:"quarantined"`
 	Discovered  bool     `json:"discovered"`
 }
+
+const (
+	liveCatalogContract       = "ranch-roost/live-catalog/v1"
+	legacyLiveCatalogContract = "sovereign-providers/live-catalog/v1"
+)
 
 type liveCatalogData struct {
 	Contract    string                         `json:"contract"`
@@ -97,8 +103,16 @@ func (r *LiveCatalogReader) refreshIfStale() *liveCatalogData {
 	if err := json.Unmarshal(raw, &d); err != nil {
 		return nil
 	}
-	if d.Contract != "ranch-roost/live-catalog/v1" {
+	if d.Contract != liveCatalogContract && d.Contract != legacyLiveCatalogContract {
+		// Silently returning nil here is what let a pre-rename contract file sit
+		// on disk while every consumer quietly fell back to cold-start seeds.
+		// The mismatch is now loud, and the legacy name is accepted on read so
+		// the estate keeps working across the roost rename.
+		log.Printf("[live-catalog] %s declares unknown contract %q; expected %s", r.path, d.Contract, liveCatalogContract)
 		return nil
+	}
+	if d.Contract == legacyLiveCatalogContract {
+		log.Printf("[live-catalog] %s declares the pre-rename contract %s; accepting it, but rewrite with %s", r.path, legacyLiveCatalogContract, liveCatalogContract)
 	}
 	if d.Providers == nil {
 		d.Providers = map[string]liveCatalogProvider{}

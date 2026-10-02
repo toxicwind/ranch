@@ -25,11 +25,14 @@ import { statSync, readFileSync } from "node:fs";
 
 export const LIVE_CATALOG_CONTRACT = "ranch-roost/live-catalog/v1";
 
+/** The pre-rename name, still emitted by older writers. Accepted on read. */
+export const LEGACY_CATALOG_CONTRACT = "sovereign-providers/live-catalog/v1";
+
 /** Resolve the live catalog file path: env override first, then default. */
 export function liveCatalogPath(): string {
   return (
     process.env.SOVEREIGN_LIVE_CATALOG ||
-    "/home/toxic/sovereign/.state/provider-catalog.live.json"
+    "/home/toxic/estate/.state/provider-catalog.live.json"
   );
 }
 
@@ -91,7 +94,24 @@ export class LiveCatalogReader {
     } catch {
       return null;
     }
-    if (d.contract !== LIVE_CATALOG_CONTRACT) return null;
+    if (d.contract !== LIVE_CATALOG_CONTRACT) {
+      // Silently returning null here is what let a pre-rename contract file sit
+      // on disk while every consumer quietly fell back to cold-start seeds. The
+      // mismatch is now loud, and the legacy name is accepted so the estate keeps
+      // working across the roost rename.
+      if (d.contract === LEGACY_CATALOG_CONTRACT) {
+        console.warn(
+          `[live-catalog] ${this.path} declares the pre-rename contract ${d.contract}; ` +
+            `accepting it, but rewrite the file with ${LIVE_CATALOG_CONTRACT}`,
+        );
+      } else {
+        console.warn(
+          `[live-catalog] ${this.path} declares unknown contract ${JSON.stringify(d.contract)}; ` +
+            `expected ${LIVE_CATALOG_CONTRACT}. Falling back to cold-start seeds.`,
+        );
+        return null;
+      }
+    }
     if (!d.providers) d.providers = {};
     this.data = d;
     this.mtimeMs = mtMs;
