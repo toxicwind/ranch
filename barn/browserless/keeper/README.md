@@ -116,3 +116,7 @@ Restart/rollback: `pitchfork-restart agent-viewer --reregister` (picks up
 `pitchfork.toml` run-line changes).
 To close the external route without touching the daemons:
 `tailscale serve --https=8443 --set-path /agent-browser off` as root.
+
+## CDP WebSocket Origin quirk (Lumen 2026-10-02)
+
+The CDP WebSocket endpoint rejects connections carrying the default `Origin: http://127.0.0.1:9223` header (403, "Rejected an incoming WebSocket connection"). Workaround: suppress the Origin header entirely on the client side. Python `websocket-client` does this with `suppress_origin=True` on `create_connection()` — the handshake then goes through clean.
