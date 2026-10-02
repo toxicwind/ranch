@@ -375,7 +375,7 @@ async function poll(myGen) {
   if (!running || myGen !== gen) return;
   const t0 = performance.now();
   try {
-    const r = await fetch(`wait?since=${since}&channel=${chan()}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(30000)])} });
+    const r = await fetch(`wait?since=${since}&channel=${chan()}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(30000)]) });
     if (r.status === 401 || r.status === 404) throw new Error('unauthorized');
     const data = await r.json();
     if (myGen !== gen) return; // channel switched mid-flight: drop the stale response
@@ -431,7 +431,7 @@ async function boot() {
   setState('loading');
   if (!booted) line('tuned in — pulling the latest traffic…', 'sys');
   try {
-    const r = await fetch(`wait?since=0&tail=${TAIL}&channel=${chan()}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(8000)])} });
+    const r = await fetch(`wait?since=0&tail=${TAIL}&channel=${chan()}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(8000)]) });
     if (r.status === 401 || r.status === 404) throw new Error('unauthorized');
     const data = await r.json();
     if (myGen !== gen) return; // superseded by a channel switch
@@ -488,7 +488,7 @@ $('channel').onchange = () => {
 };
 // server-auth mode: fleet-ui proxies with the feed token itself (injected as
 // window.SERVER_AUTH) -- skip the gate, the server tunes us in.
-if (window.SERVER_AUTH) { $('gate').style.display = 'none'; $('app').style.display = 'flex'; running = true; boot(); }
+if (window.SERVER_AUTH) { document.getElementById("app").style.display = "flex"; running = true; boot(); }
 else if (token) { $('token').value = token; $('go').click(); }
 </script>
 </body>
