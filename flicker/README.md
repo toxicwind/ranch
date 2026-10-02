@@ -1,85 +1,52 @@
-# Woodpecker
+# Flicker
 
-> 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
+> Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
 
-<p align="center">
-  <a href="https://github.com/woodpecker-ci/woodpecker/">
-    <img alt="Woodpecker" src="docs/static/img/logo.svg" width="220"/>
-  </a>
-</p>
-<br/>
-<p align="center">
-  <a href="https://ci.woodpecker-ci.org/repos/3780" title="Pipeline Status">
-    <img src="https://ci.woodpecker-ci.org/api/badges/3780/status.svg" alt="Pipeline Status">
-  </a>
-  <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
-    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/main/graph/badge.svg" alt="Code coverage">
-  </a>
-  <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
-    <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/svg-badge.svg" alt="Translation status" />
-  </a>
-  <a href="https://matrix.to/#/#woodpecker:matrix.org" title="Join the Matrix space at https://matrix.to/#/#woodpecker:matrix.org">
-    <img src="https://img.shields.io/matrix/woodpecker:matrix.org?label=matrix" alt="Matrix space">
-  </a>
-  <a href="https://pkg.go.dev/go.woodpecker-ci.org/woodpecker/v3" title="go reference">
-    <img src="https://pkg.go.dev/badge/go.woodpecker-ci.org/woodpecker/v3" alt="go reference">
-  </a>
-  <a href="https://github.com/woodpecker-ci/woodpecker/releases/latest" title="GitHub release">
-    <img src="https://img.shields.io/github/v/release/woodpecker-ci/woodpecker?sort=semver" alt="GitHub release">
-  </a>
-  <a href="https://hub.docker.com/r/woodpeckerci/woodpecker-server" title="Docker pulls">
-    <img src="https://img.shields.io/docker/pulls/woodpeckerci/woodpecker-server" alt="Docker pulls">
-  </a>
-  <a href="https://opensource.org/licenses/Apache-2.0" title="License: Apache-2.0">
-    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache-2.0">
-  </a>
-  <a href="https://bestpractices.coreinfrastructure.org/projects/5309">
-    <img src="https://bestpractices.coreinfrastructure.org/projects/5309/badge" alt="OpenSSF best practices">
-  </a>
-  <a href="https://results.pre-commit.ci/repo/github/179344069" title="pre-commit.ci">
-    <img src="https://results.pre-commit.ci/badge/github/woodpecker-ci/woodpecker/main.svg" alt="pre-commit.ci">
-  </a>
-</p>
-<br/>
+Flicker is the estate's local-only build daemon: a Woodpecker v3 Go fork stripped down to direct job execution with content-hash caching. It replaced the old Python `buildsrv` daemon (briefly and mistakenly renamed "brand" on 2026-09-30 — that name is gone) on the same port, as a drop-in replacement.
 
-Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.
+No containers, no remote forges, no auth — single-tenant daemon that runs jobs through bash login shells (so mise toolchains resolve) and returns `CACHED` when an identical job spec was already run.
 
-![woodpecker](docs/woodpecker.png)
+## Quick start
 
-## Installation & Resources
+```bash
+# Health
+curl -fsS http://127.0.0.1:25148/api/health
 
-Woodpecker can be installed in various ways (see the [Installation Instructions](https://woodpecker-ci.org/docs/administration/general)) and runs with SQLite as database by default.
-It requires around 100 MB of RAM (Server) and 30 MB (Agent) at runtime in idle mode.
+# Submit a job
+curl -s -X POST http://127.0.0.1:25148/api/jobs \
+  -H "Content-Type: application/json" \
+  -d {'"name":"hello","command":"echo hello","workdir":"/tmp","timeout":300}'}
 
-## Support
+# Or use the CLI
+flicker submit --name hello -- 'echo hello'
+flicker status 1
+flicker logs 1
+```
 
-You can support the project by becoming a backer on [Open Collective](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE) or via [GitHub Sponsors](https://github.com/sponsors/woodpecker-ci).
+## API
 
-<a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890" alt="Open Collective backers"></a>
+| Method | Path | What |
+|---|---|---|
+| GET | `/api/health` | Service health + cache stats |
+| POST | `/api/jobs` | Submit a job (`name`, `command`/`script`, `workdir`, `env`, `timeout`, `cache_key`, `artifacts`) |
+| GET | `/api/jobs` | List jobs |
+| GET | `/api/jobs/:id` | Job status (`pending`/`running`/`success`/`failure`/`canceled`/`error`) |
+| GET | `/api/jobs/:id/logs` | Plain-text job logs |
 
-## Documentation
+Identical job specs (command, workdir, sorted env, cache key, sorted artifacts) hash to the same content key — resubmits return the cached success immediately.
 
-Our documentation can be found at <https://woodpecker-ci.org/docs/intro>.
+## Layout
 
-## Translation
+- `ranch/flicker/` — this source (Woodpecker v3 fork, `flicker/bin/` holds committed binaries)
+- `/home/toxic/.local/bin/flicker` — the CLI
+- `/home/toxic/flicker/` — state on yote
+- Ports: `:25148` HTTP API, `:25240` gRPC
 
-We have a self-hosted [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
+Pitchfork supervises `sovereign/flicker` (server) and `sovereign/flicker-agent` (local execution agent).
 
-An overview of the current translation state is available at <https://translate.woodpecker-ci.org/projects/woodpecker-ci/#languages>.
+## History
 
-## Public Woodpecker Instances
-
-Woodpecker is used as the main CI/CD engine at [Codeberg](https://codeberg.org), an alternative Git hosting platform with a focus on privacy and free software development.
-
-## Plugins
-
-Woodpecker can be extended via plugins.
-The [plugin overview website](https://woodpecker-ci.org/plugins) helps browsing available plugins.
-It combines both plugins by the Woodpecker core team and community-maintained ones.
-
-## License
-
-Woodpecker is Apache 2.0 licensed.
-The source files have a header indicating which license they are under and what copyrights apply.
-
-Everything in `docs/` is licensed under the Creative Commons Attribution-ShareAlike 4.0 International Public License.
+- `buildsrv`: original stdlib-Python daemon (`buildsrvd.py`), port 25148.
+- 2026-09-30 00:05: renamed to `brand` (bad name, acknowledged).
+- 2026-09-30 01:54: deleted from the tree in an unrelated commit.
+- Same night: Flicker (this fork) cut over as the live replacement. All `brand`/`branding` folders removed 2026-10-02.
