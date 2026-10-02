@@ -10,7 +10,9 @@
 
 # 🤠 ranch
 
-**The whole self-hosted AI estate in one monorepo.** Local model serving (**herd**), cloud provider routing (**flock**), the canonical router (**cuttinggate**), the coding agent (**tau**), the MCP gateway (**gatehouse**), the build-job system (**flicker**), fleet chat (**squawk**), the decision engine (**oracle**), and the provider catalog (**roost**) they all share — one directory per component, the full mesh on one box, everything OpenAI-compatible.
+**The whole self-hosted AI estate in one monorepo.** Local model serving (**herd**), cloud provider routing (**flock**), the canonical router (**cuttinggate**), the coding agent (**tau**), the MCP gateway (**gatehouse**), the build-job system (**flicker**), fleet chat (**squawk**), and the provider catalog (**roost**) they all share — one directory per component, the full mesh on one box, everything OpenAI-compatible.
+
+> The decision engine (**oracle**) used to live here at `oracle/` — it moved out on 2026-10-02 (commit [`92bb79c`](https://github.com/toxicwind/ranch/commit/92bb79c)) to [toxicwind/squawk](https://github.com/toxicwind/squawk) (`oracle/`, verified live). Don't go looking for it in the ranch anymore.
 
 [Explore the docs »](docs/) · [Report Bug](https://github.com/toxicwind/ranch/issues/new?labels=bug&template=bug_report.md) · [Request Feature](https://github.com/toxicwind/ranch/issues/new?labels=enhancement&template=feature_request.md)
 
@@ -28,6 +30,7 @@
 <li><a href="#-usage">Usage</a></li>
 <li><a href="#%EF%B8%8F-architecture">Architecture</a></li>
 <li><a href="#-the-ranch--component-map">The ranch — component map</a></li>
+<li><a href="#-repo-topology">Repo topology</a></li>
 <li><a href="#-the-contract">The contract</a></li>
 <li><a href="#%EF%B8%8F-roadmap">Roadmap</a></li>
 <li><a href="#-contributing">Contributing</a></li>
@@ -54,7 +57,7 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 - [Go](https://go.dev) — herd (local front door), flicker (build jobs), gatehouse (MCP gateway)
 - [Rust](https://www.rust-lang.org) — flock proxy (provider router), rig (OpenFang kernel), tau's native hot path
 - [Bun](https://bun.sh) + [TypeScript](https://www.typescriptlang.org) — workspaces, cuttinggate, fleet-ui, windmill, stream-broker, roost, tau's agent brain
-- [Python](https://www.python.org) — squawk (fleet chat), squawk-ws, oracle (decision engine), lasso (desktop control)
+- [Python](https://www.python.org) — squawk (fleet chat), squawk-ws, lasso (desktop control)
 - [moon](https://moonrepo.dev) — polyglot task orchestration with pinned toolchains (`.moon/toolchain.yml`)
 - **pitchfork** — the daemon supervisor: 82 supervised services on the live estate
 
@@ -101,14 +104,14 @@ curl -s http://127.0.0.1:25100/v1/models | jq -r '.data[].id' | head -4
 # beellama/exaone-4-0-1-2b-q5km
 # beellama/exaone-4-0-1-2b-q6k
 
-# every core service answers
-for p in 25100 25193 25127 25151 25200; do
+# every core service answers (the oracle decision engine moved out of the
+# ranch on 2026-10-02 — it now lives in toxicwind/squawk, see repo topology)
+for p in 25100 25193 25127 25200; do
   printf '%s %s\n' "$p" "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$p/health)"
 done
 # 25100 200   herd — local front door
 # 25193 200   flock — cloud provider router
 # 25127 200   gatehouse — MCP gateway
-# 25151 200   oracle — decision engine
 # 25200 200   cuttinggate — canonical router
 ```
 
@@ -160,7 +163,7 @@ flowchart LR
         CLOUD["NIM · OpenRouter · Groq<br/>Cerebras · Mistral · …"]
         TAU["tau via chute :25111"]
         GH["gatehouse :25127<br/>MCP gateway"]
-        SUP["squawk · oracle · flicker<br/>fleet & build plane"]
+        SUP["squawk · flicker<br/>fleet & build plane"]
     end
     A --> CG
     TAU --> CG
@@ -192,7 +195,7 @@ Every animal first-class — no "secondary" framing. 🟢 = port verified listen
 | 🟢 **windmill** | `25219` | `windmill/` (Bun) | GPU / PCIe telemetry — tells you which way the wind blows. |
 | **ledger** | — | `ledger/` (Bun) | 📒 The ranch account book — multi-provider token/cost accounting. Every provider key's tokens counted, dollars from verified per-token pricing, unpriced models surfaced — never guessed. |
 | 🟢 **flicker** | `25148` | `flicker/` (Go) | **Fleet build-job system.** Disk-backed queue, streaming logs, content-hash artifact cache. Brand consolidated into flicker. |
-| 🟢 **oracle** | `25151` | `oracle/` (Python) | 🔮 The decision corral — prediction-market work loop + deterministic verdict engine (dated yes/no, evidence-backed). |
+| ~~**oracle**~~ | — | ~~`oracle/`~~ | 🔮 **Moved 2026-10-02** — the decision corral left the ranch (commit [`92bb79c`](https://github.com/toxicwind/ranch/commit/92bb79c)) and now lives in [toxicwind/squawk](https://github.com/toxicwind/squawk) at `oracle/`. |
 | 🟢 **browserless** | `25130` | `barn/browserless` | Browser automation: browserless.io MCP server + native-launcher deployment. |
 | 🟢 **lookout** | `6080` | `barn/lookout` | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower. |
 | **roost** | — | `flock/roost/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: 43 provider definitions the estate perches on, one registry. Feeds tau, herd's generated Go, flock's generated Rust, the router. |
@@ -220,6 +223,19 @@ Every animal first-class — no "secondary" framing. 🟢 = port verified listen
 | ~~**brand**~~ | — | `brand/` | The branding iron — git hooks. **Deprecated 2026-09-30:** consolidated into flicker. |
 
 ---
+
+## 🗂️ Repo topology
+
+Where the ranch sits in the estate. All four `main` SHAs verified live on 2026-10-02 (`git ls-remote`).
+
+| Repo | Visibility | `main` (verified) | Relationship |
+|---|---|---|---|
+| [toxicwind/ranch](https://github.com/toxicwind/ranch) | PUBLIC | `4323dda` | This repo — the workshop monorepo. |
+| [toxicwind/estate](https://github.com/toxicwind/estate) | PUBLIC | `a52d28be3a` | The parent checkout: the ranch nests inside it at `ranch/` (gitignored in estate, own repo, own history). |
+| [toxicwind/hatch](https://github.com/toxicwind/hatch) | PRIVATE | `b3b0630` | The control-cell split — the estate's `hatch/` tree as its own repo (167 commits, 573 files). |
+| [toxicwind/squawk](https://github.com/toxicwind/squawk) | PUBLIC | `5f7eaf3` | New home of the oracle decision engine (`oracle/`) — migrated out of the ranch on 2026-10-02. |
+
+The rule is simple: project work lives in the ranch, control-plane work in the estate, control-cell internals in hatch. The oracle left the ranch — don't go looking for it here.
 
 ## 📜 The contract
 
