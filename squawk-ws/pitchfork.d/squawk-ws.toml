@@ -9,5 +9,5 @@ dir = "/home/toxic/estate/ranch/squawk-ws"
 mise = false
 retry = true
 boot_start = true
-env = { SQUAWK_WS_PORT = "25147", SQUAWK_CHAT_ROOT = "/home/toxic/estate/hatch/agents/ember/squawk-root" }
+env = { SQUAWK_WS_PORT = "25147", SQUAWK_CHAT_ROOT = "/home/toxic/.fleet-bus/squawk-root" }
 auto = ["start"]
