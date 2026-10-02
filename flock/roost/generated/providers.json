@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-roost/v1",
-  "generatedAt": "2026-09-30T13:10:25.000Z",
+  "generatedAt": "2026-10-02T11:58:10.000Z",
   "generator": "@ranch/roost codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/roost src/data.ts",
   "adapters": [
@@ -39,7 +39,7 @@
     {
       "name": "kimi-auto",
       "displayName": "kimi-auto shim",
-      "baseUrl": "http://127.0.0.1:25105/v1",
+      "baseUrl": "http://127.0.0.1:25153/v1",
       "keyEnv": "KIMI_AUTO_SHIM_KEY",
       "adapter": "static",
       "auth": "none",
@@ -269,7 +269,7 @@
     },
     {
       "name": "typesafe",
-      "baseUrl": "https://api.typesafe.ai",
+      "baseUrl": "https://api.typesafe.ai/v1",
       "keyEnv": "TYPESAFE_API_KEY",
       "adapter": "openai",
       "auth": "bearer"
@@ -379,7 +379,7 @@
     {
       "name": "vercel-ai-gateway",
       "displayName": "Vercel AI Gateway",
-      "baseUrl": "https://ai-gateway.vercel.sh",
+      "baseUrl": "https://ai-gateway.vercel.sh/v1",
       "keyEnv": "AI_GATEWAY_API_KEY",
       "keyEnvAlt": "VERCEL_AI_GATEWAY_API_KEY",
       "adapter": "openai",
@@ -413,7 +413,7 @@
     {
       "name": "commandcode",
       "displayName": "Command Code",
-      "baseUrl": "https://api.commandcode.ai/provider",
+      "baseUrl": "https://api.commandcode.ai/provider/v1",
       "keyEnv": "COMMAND_CODE_API_KEY",
       "keyEnvAlt": "COMMANDCODE_API_KEY",
       "adapter": "openai",
@@ -462,7 +462,7 @@
     {
       "name": "github",
       "displayName": "GitHub Models",
-      "baseUrl": "https://models.inference.ai.azure.com",
+      "baseUrl": "https://models.github.ai/inference",
       "keyEnv": "GITHUB_TOKEN",
       "adapter": "openai",
       "auth": "bearer"
@@ -486,7 +486,7 @@
     {
       "name": "perplexity",
       "displayName": "Perplexity",
-      "baseUrl": "https://api.perplexity.ai",
+      "baseUrl": "https://api.perplexity.ai/v1",
       "keyEnv": "PERPLEXITY_API_KEY",
       "adapter": "openai",
       "auth": "bearer"

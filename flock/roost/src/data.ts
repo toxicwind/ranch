@@ -85,7 +85,8 @@ export const PROVIDER_DEFS: ProviderDef[] = [
   {
     name: "kimi-auto",
     displayName: "kimi-auto shim",
-    baseUrl: "http://127.0.0.1:25105/v1",
+    // 2026-10-02: :25105 is mesh-front/prometheus, not kimi-auto -- the kimi-auto alias-shim is :25153 (200 on /v1/models).
+    baseUrl: "http://127.0.0.1:25153/v1",
     keyEnv: "KIMI_AUTO_SHIM_KEY",
     auth: "none",
     adapter: "static",
@@ -518,7 +519,8 @@ export const PROVIDER_DEFS: ProviderDef[] = [
   },
   {
     name: "typesafe",
-    baseUrl: "https://api.typesafe.ai",
+    // 2026-10-02: /models 404s; /v1/models 403s (alive, auth-gated) -- baseUrl needed the /v1.
+    baseUrl: "https://api.typesafe.ai/v1",
     keyEnv: "TYPESAFE_API_KEY",
     auth: "bearer",
     adapter: "openai",
@@ -645,7 +647,8 @@ export const PROVIDER_DEFS: ProviderDef[] = [
   {
     name: "vercel-ai-gateway",
     displayName: "Vercel AI Gateway",
-    baseUrl: "https://ai-gateway.vercel.sh",
+    // 2026-10-02: /models 404s; /v1/models 200s with 406-model open listing -- baseUrl needed the /v1.
+    baseUrl: "https://ai-gateway.vercel.sh/v1",
     keyEnv: "AI_GATEWAY_API_KEY",
     keyEnvAlt: "VERCEL_AI_GATEWAY_API_KEY",
     auth: "bearer",
@@ -689,7 +692,8 @@ export const PROVIDER_DEFS: ProviderDef[] = [
   {
     name: "commandcode",
     displayName: "Command Code",
-    baseUrl: "https://api.commandcode.ai/provider",
+    // 2026-10-02: /provider/models 404s; /provider/v1/models 200s with 85-model open listing.
+    baseUrl: "https://api.commandcode.ai/provider/v1",
     keyEnv: "COMMAND_CODE_API_KEY",
     keyEnvAlt: "COMMANDCODE_API_KEY",
     auth: "bearer",
@@ -750,7 +754,8 @@ export const PROVIDER_DEFS: ProviderDef[] = [
   {
     name: "github",
     displayName: "GitHub Models",
-    baseUrl: "https://models.inference.ai.azure.com",
+    // 2026-10-02: models.inference.ai.azure.com is DNS-dead; GitHub Models moved to models.github.ai.
+    baseUrl: "https://models.github.ai/inference",
     keyEnv: "GITHUB_TOKEN",
     auth: "bearer",
     adapter: "openai",
@@ -798,7 +803,8 @@ export const PROVIDER_DEFS: ProviderDef[] = [
   {
     name: "perplexity",
     displayName: "Perplexity",
-    baseUrl: "https://api.perplexity.ai",
+    // 2026-10-02: /models 404s; /v1/models 401s (alive, auth-gated) -- baseUrl needed the /v1.
+    baseUrl: "https://api.perplexity.ai/v1",
     keyEnv: "PERPLEXITY_API_KEY",
     auth: "bearer",
     adapter: "openai",
