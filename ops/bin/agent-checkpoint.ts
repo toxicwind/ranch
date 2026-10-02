@@ -25,11 +25,25 @@
  */
 
 import { join } from "path";
+import { existsSync } from "node:fs";
 
 const HOME = process.env.HOME ?? "/home/hatch";
 const CHECKPOINT_DIR = join(HOME, "workspace", "checkpoints");
-// Overridable for tests (fixtures live in a temp dir, not the real agents tree).
-const AGENTS_DIR = process.env.CHECKPOINT_AGENTS_DIR ?? "/home/hatch/agents";
+// Box-aware: the session store lives wherever the runtime cell keeps it.
+// Env override wins (tests, exotic layouts); otherwise probe candidates.
+function defaultAgentsDir(): string {
+  if (process.env.CHECKPOINT_AGENTS_DIR) return process.env.CHECKPOINT_AGENTS_DIR;
+  if (existsSync("/home/hatch/agents")) return "/home/hatch/agents";
+  const h = join(HOME, "agents");
+  if (existsSync(h)) return h;
+  return "/home/hatch/agents"; // fail-closed default; recover reports "no session file"
+}
+const AGENTS_DIR = defaultAgentsDir();
+// Spawn registry: agent_id -> { name, lane, brief, parent, chat, ... }.
+// Written by `lane-resume register` at spawn time so `recover` can resolve
+// the real lane/persona/brief instead of deriving placeholders from thin
+// session metadata.
+const REGISTRY_PATH = process.env.LANE_REGISTRY ?? join(HOME, "workspace", "lane-registry.json");
 const TAIL_ITEMS = 30;
 const MAX_TEXT = 600;
 
@@ -505,6 +519,33 @@ async function readSessionLines(agentId: string): Promise<string[]> {
   return (await f.text()).split("\n").filter((l) => l.trim().length > 0);
 }
 
+interface RegistryEntry {
+  name?: string;
+  lane?: string;
+  brief?: string;
+  parent?: string;
+  chat?: string;
+  registered_at?: string;
+  status?: string;
+  recovered_at?: string;
+  checkpoint?: string;
+}
+
+async function loadRegistry(): Promise<Record<string, RegistryEntry>> {
+  try {
+    const f = Bun.file(REGISTRY_PATH);
+    if (!(await f.exists())) return {};
+    const j = (await f.json()) as Record<string, RegistryEntry>;
+    return j && typeof j === "object" ? j : {};
+  } catch {
+    return {};
+  }
+}
+
+async function saveRegistry(reg: Record<string, RegistryEntry>): Promise<void> {
+  await Bun.write(REGISTRY_PATH, JSON.stringify(reg, null, 1) + "\n");
+}
+
 function deriveName(lines: string[], fallback: string): string {
   for (const line of lines) {
     try {
@@ -555,14 +596,21 @@ async function cmdRecover(args: Args): Promise<void> {
     console.log(`last verified step: ${ev.last_verified_step || "(none observed)"}`);
     return;
   }
-  const name = str(args["name"]) || deriveName(lines, `agent-${agentId.slice(0, 8)}`);
-  const lane = str(args["lane"]) || "unknown-lane";
-  const brief = str(args["brief"]) || "(original brief unavailable — derived from transcript tail)";
+  // Spawn registry first: real lane/persona/brief beats derivation.
+  // Explicit flags win over the registry; derivation is the last resort.
+  const registry = await loadRegistry();
+  const reg = registry[agentId] ?? {};
+  const name = str(args["name"]) || reg.name || deriveName(lines, `agent-${agentId.slice(0, 8)}`);
+  const lane = str(args["lane"]) || reg.lane || "unknown-lane";
+  const brief =
+    str(args["brief"]) || reg.brief || "(original brief unavailable — derived from transcript tail)";
+  const parent = str(args["parent"]) || reg.parent || "";
+  const chat = str(args["chat"]) || reg.chat || "";
   const cp = {
     version: 3,
     captured_at: new Date().toISOString(),
     captured_by: "cinder lane-resume (post-mortem recover)",
-    agent: { id: agentId, name, lane, parent: str(args["parent"]), chat: str(args["chat"]) },
+    agent: { id: agentId, name, lane, parent, chat },
     brief,
     pending: str(args["pending"]) || "",
     kb_row: str(args["kb-row"]) || "",
@@ -589,6 +637,16 @@ async function cmdRecover(args: Args): Promise<void> {
   const stamp = cp.captured_at.replace(/[:.]/g, "-");
   const path = join(CHECKPOINT_DIR, `${agentId}-${stamp}.json`);
   await Bun.write(path, JSON.stringify(cp, null, 2) + "\n");
+  // Mark the registry entry recovered (dedup: scan --recover skips these).
+  if (registry[agentId]) {
+    registry[agentId] = {
+      ...registry[agentId],
+      status: "recovered",
+      recovered_at: cp.captured_at,
+      checkpoint: path,
+    };
+    await saveRegistry(registry);
+  }
   console.log(`Checkpoint: ${path}`);
   console.log(`kill: ${ev.kind}`);
   console.log(`agent: ${name} (${agentId}) — ${lane}`);
