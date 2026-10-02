@@ -20,14 +20,14 @@ herd :25100 ── local model? ──▶ llama.cpp engines (ports 25001+)
 flock :25193 ── Strategy::Free ──▶ NIM → OpenRouter-free → …
         │        (model "free")      (free-tier external providers)
         ├── Strategy::Hybrid ──▶ Elo-ranked external providers
-        └── provider=llama-swap ─▶ herd :25100 (local models via router)
+        └── provider=herd ─▶ herd :25100 (local models via router)
 ```
 
 ## Ports
 
 | Port | Service | Home |
 |---|---|---|
-| 25100 | herd (llama-swap fork, Go) | sovereign-projects/projects/herd |
+| 25100 | herd (herd fork, Go) | sovereign-projects/projects/herd |
 | 25193 | flock router (Rust) | toxicwind/flock → /home/toxic/projects/flock |
 | 25104 | sovereign TS router (bench/Elo layer) | sovereign-projects |
 | 25109 | keypool sidecar | sovereign-projects |

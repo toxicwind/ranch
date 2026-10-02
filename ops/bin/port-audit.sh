@@ -150,7 +150,7 @@ declare -A HERD_DYN=()     # port -> 1  (llama-server workers, ports assigned fr
 for port in "${!PORT_PROCS[@]}"; do
   for e in ${PORT_PROCS[$port]//;/ }; do
     pid="${e%%:*}"
-    if [[ "${PID_CMD[$pid]:-}" == *llama-server* || "${PID_CMD[$pid]:-}" == *llama-swap* ]]; then
+    if [[ "${PID_CMD[$pid]:-}" == *llama-server* || "${PID_CMD[$pid]:-}" == *herd* ]]; then
       HERD_DYN[$port]=1
     fi
   done

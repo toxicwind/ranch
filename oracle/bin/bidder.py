@@ -626,7 +626,7 @@ class Bidder:
         # FLOCK_* (not NIM_MODEL). Inherited FLOCK pair (nemotron on
         # :25193) is a dead route -> empty stdout, slashed no-result.
         # Pin the pair probed live working 2026-10-02: :25100
-        # (llama-swap, 200) + gemma-4-12b (model calls succeeded).
+        # (herd, 200) + gemma-4-12b (model calls succeeded).
         renv["FLOCK_BASE_URL"] = "http://127.0.0.1:25100"
         renv["FLOCK_MODEL"] = "gemma-4-12b"
         # 2026-09-21 (tern): the oracle's exec deadline is

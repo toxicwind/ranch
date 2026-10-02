@@ -2,10 +2,10 @@
 
 The ranch control UI: one Svelte single-page app over **herd** (local models)
 and **flock** (cloud providers). Pure client — no backend, no database, no
-server of its own. It talks to a llama-swap-shaped HTTP API over a single
+server of its own. It talks to a herd-shaped HTTP API over a single
 configurable base URL.
 
-> **Read the provenance first.** This is llama-swap's web UI, adopted into the
+> **Read the provenance first.** This is herd's web UI, adopted into the
 > ranch. It is not a UI written for the ranch, and its route names, vocabulary
 > and API surface are upstream's.
 
@@ -16,7 +16,7 @@ configurable base URL.
 Two hops, both verifiable in git:
 
 ```
-  mostlygeek/llama-swap  ──►  herd  ──►  ranch/ui
+  mostlygeek/herd  ──►  herd  ──►  ranch/ui
         (the UI)          (carried it)   commit d39a6f8
 ```
 
@@ -26,23 +26,23 @@ a child of it. The upstream fingerprints are still everywhere in `src/`:
 
 | Evidence | Where |
 | :--- | :--- |
-| `<title>llama-swap</title>` | `index.html` |
-| `appTitle` defaults to `"llama-swap"` | `src/stores/theme.ts` |
-| MCP client for "llama-swap's own `/api/mcp`" | `src/lib/agentTools.ts` |
-| Docs agent answering questions *about llama-swap* | `src/lib/prompts/docsAgent.ts`, `src/cli/` |
-| `Exported from [llama-swap](…)` | `src/lib/activityExport.ts` |
-| Links to mostlygeek/llama-swap issues & discussions | `src/routes/Performance.svelte` |
-| Dev proxy defaults to llama-swap's `localhost:8080` | `vite.config.ts` |
+| `<title>herd</title>` | `index.html` |
+| `appTitle` defaults to `"herd"` | `src/stores/theme.ts` |
+| MCP client for "herd's own `/api/mcp`" | `src/lib/agentTools.ts` |
+| Docs agent answering questions *about herd* | `src/lib/prompts/docsAgent.ts`, `src/cli/` |
+| `Exported from [herd](…)` | `src/lib/activityExport.ts` |
+| Links to mostlygeek/herd issues & discussions | `src/routes/Performance.svelte` |
+| Dev proxy defaults to herd's `localhost:8080` | `vite.config.ts` |
 
 The upstream commit this forked from is **not recorded anywhere in the tree**.
-If a llama-swap feature matters to you, check upstream release notes rather
+If a herd feature matters to you, check upstream release notes rather
 than assuming a version.
 
 The ranch-specific delta is genuinely small and concentrated in two files:
 `src/lib/apiBase.ts` (detach the API base from the origin) and `vite.config.ts`
 (`base: "/ui/"`, `outDir: dist`). Everything else is upstream. In particular the
 roadmap the earlier README listed — a flock panel, a unified local+cloud model
-view — is **not implemented**; `/models` and `/playground` are llama-swap's and
+view — is **not implemented**; `/models` and `/playground` are herd's and
 know nothing about flock. Treat those as open, not pending.
 
 ---
@@ -107,9 +107,9 @@ window.__HERD_API__ = "http://127.0.0.1:25100";
 Everything goes through the exported `api(path)` helper, so this one value
 redirects the whole app.
 
-**Do not confuse it with `LLAMA_SWAP_URL`.** That is dev-server plumbing: Vite
+**Do not confuse it with `HERD_URL`.** That is dev-server plumbing: Vite
 proxies `/api`, `/logs`, `/upstream`, `/unload`, `/v1` and `/sdapi` to
-`LLAMA_SWAP_URL` (default `http://localhost:8080`), which is what lets the dev
+`HERD_URL` (default `http://localhost:8080`), which is what lets the dev
 server work with no `VITE_HERD_API` build. It has no effect on a production
 bundle; `VITE_HERD_API` / `__HERD_API__` is what the bundle actually calls.
 
@@ -201,7 +201,7 @@ bun run src/cli/docsAgent.ts ask "how do I configure a model?"
 Its default case and results directories resolve to
 `ranch/evals/docs-agent/{cases,runs}` — **that directory does not exist in this
 tree**, so `eval` and `judge` have no defaults to work from until it is
-restored. It reads `LLAMA_SWAP_URL`, `DOCS_AGENT_MODEL` and
+restored. It reads `HERD_URL`, `DOCS_AGENT_MODEL` and
 `DOCS_AGENT_JUDGE_MODEL`.
 
 ---

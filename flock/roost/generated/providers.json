@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-roost/v1",
-  "generatedAt": "2026-10-02T12:22:07.000Z",
+  "generatedAt": "2026-10-02T12:23:35.000Z",
   "generator": "@ranch/roost codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/roost src/data.ts",
   "adapters": [
@@ -12,10 +12,10 @@
   ],
   "providers": [
     {
-      "name": "llama-swap",
-      "displayName": "llama-swap (local)",
+      "name": "herd",
+      "displayName": "herd (local)",
       "baseUrl": "http://127.0.0.1:25100/v1",
-      "keyEnv": "LLAMA_SWAP_API_KEY",
+      "keyEnv": "HERD_API_KEY",
       "adapter": "openai",
       "auth": "none"
     },
@@ -88,9 +88,19 @@
     {
       "name": "google",
       "baseUrl": "http://127.0.0.1:25109/gemini-eap-interactions",
-      "keyEnv": "GOOGLE_API_KEY",
-      "adapter": "openai",
-      "auth": "bearer"
+      "keyEnv": "",
+      "adapter": "static",
+      "auth": "none",
+      "staticModels": [
+        "models/gemini-flash-tool-retrieval",
+        "models/gemini-3.8-flash",
+        "models/gemini-3.7-flash",
+        "models/gemini-3.6-flash",
+        "models/gemini-3.5-flash",
+        "models/gemini-3.1-pro-preview",
+        "models/gemini-3-flash-preview",
+        "models/gemini-2.5-flash"
+      ]
     },
     {
       "name": "mistral",
@@ -597,7 +607,7 @@
     }
   ],
   "seeds": {
-    "llama-swap": [
+    "herd": [
       "local-fast",
       "local-quality",
       "local-longctx"
@@ -656,14 +666,7 @@
       "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B"
     ],
     "cerebras": [],
-    "google": [
-      "models/gemini-2.5-flash",
-      "models/gemini-2.5-flash-lite",
-      "models/gemini-2.0-flash",
-      "models/gemma-4-31b-it",
-      "models/gemini-3-flash-preview",
-      "models/gemini-3-pro-preview"
-    ],
+    "google": [],
     "mistral": [
       "mistral-small-latest",
       "codestral-latest",
@@ -1004,21 +1007,37 @@
       "nvidia",
       "thinkingmachines/inkling"
     ],
+    "gemini-eap": [
+      "google",
+      "models/gemini-flash-tool-retrieval"
+    ],
+    "gemini-3.8-flash": [
+      "google",
+      "models/gemini-3.8-flash"
+    ],
+    "gemini-3.7-flash": [
+      "google",
+      "models/gemini-3.7-flash"
+    ],
+    "gemini-3.6-flash": [
+      "google",
+      "models/gemini-3.6-flash"
+    ],
+    "gemini-3.5-flash": [
+      "google",
+      "models/gemini-3.5-flash"
+    ],
+    "gemini-3.1-pro": [
+      "google",
+      "models/gemini-3.1-pro-preview"
+    ],
+    "gemini-3-flash": [
+      "google",
+      "models/gemini-3-flash-preview"
+    ],
     "gemini-2.5-flash": [
       "google",
       "models/gemini-2.5-flash"
-    ],
-    "gemini-2.5-flash-lite": [
-      "google",
-      "models/gemini-2.5-flash-lite"
-    ],
-    "gemini-2.0-flash": [
-      "google",
-      "models/gemini-2.0-flash"
-    ],
-    "gemma4-31b-google": [
-      "google",
-      "models/gemma-4-31b-it"
     ],
     "mistral-small": [
       "mistral",

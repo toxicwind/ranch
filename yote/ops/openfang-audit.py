@@ -86,7 +86,7 @@ def main():
         asst = agents.get("assistant", {})
         check(
             "assistant-route",
-            asst.get("model_provider") == "llama-swap"
+            asst.get("model_provider") == "herd"
             and "nex" in str(asst.get("model_name")),
             f"{asst.get('model_name')}/{asst.get('model_provider')}",
         )

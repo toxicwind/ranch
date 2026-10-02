@@ -32,9 +32,9 @@ export interface HealthStatus {
 const TO = 2000;
 const RT = 2;
 const RD = 500;
-// Sovereign 25xxx map: llama-swap :25100, openfang :25103
+// Sovereign 25xxx map: herd :25100, openfang :25103
 const LP = Number(
-  process.env.LLAMA_SWAP_PORT ?? process.env.LLAMA_PORT ?? "25100",
+  process.env.HERD_PORT ?? process.env.LLAMA_PORT ?? "25100",
 );
 const OP = Number(process.env.OPENFANG_PORT ?? "25103");
 function env(n: string, f: string) {
@@ -106,13 +106,13 @@ export async function checkService(n: string, url: string, o: any = {}) {
     } as ServiceHealth;
   }
 }
-export async function checkLlamaSwap(
+export async function checkHerd(
   url = env("LLAMA_HEALTH_URL", u(LP, "/v1/models")),
   o: any = {},
 ) {
-  const r = await checkService("llama-swap", url, o);
+  const r = await checkService("herd", url, o);
   if (!r.healthy) {
-    const f = await checkService("llama-swap", u(LP, "/v1/models"), {
+    const f = await checkService("herd", u(LP, "/v1/models"), {
       ...o,
       timeoutMs: (o.timeoutMs ?? TO) / 2,
       retries: 0,
@@ -179,7 +179,7 @@ export function unloadModel(m: string) {
 }
 export async function checkHealth() {
   const st = performance.now();
-  const [ls, of] = await Promise.all([checkLlamaSwap(), checkOpenFang()]);
+  const [ls, of] = await Promise.all([checkHerd(), checkOpenFang()]);
   const ms = await fetchLlamaModels().catch(() => []);
   const rn = await fetchRunningModels().catch(() => []);
   const mt = await fetchLlamaMetrics().catch(() => null);
@@ -210,7 +210,7 @@ export async function checkHealth() {
 }
 export async function checkHealthLegacy() {
   const [l, o] = await Promise.all([
-    checkLlamaSwap()
+    checkHerd()
       .then((r) => r.healthy)
       .catch(() => false),
     checkOpenFang()

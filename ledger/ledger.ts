@@ -233,7 +233,7 @@ export function resolvePricing(provider: string, rawModel: string): ResolvedPric
   if (m.startsWith("models/")) m = m.slice(7); // google "models/" prefix
 
   // ---- known-free traffic ----
-  if (p === "llama-swap" || p === "nim-local") return { key: `${p}/${m}`, pricing: ZERO, free: true };
+  if (p === "herd" || p === "nim-local") return { key: `${p}/${m}`, pricing: ZERO, free: true };
   if (p === "huggingface" || p === "github") return { key: `${p}/${m}`, pricing: ZERO, free: true };
   if (m.endsWith(":free")) return { key: `${p}/${m}`, pricing: ZERO, free: true };
 
@@ -560,7 +560,7 @@ if (import.meta.main) {
     const c = loadORCache();
     console.log(`openrouter: dynamic via https://openrouter.ai/api/v1/models` +
       (c ? ` (cache: ${Object.keys(c.models).length} models, fetched ${c.fetchedAt})` : ` (no cache — run 'pricing refresh')`));
-    console.log(`free: llama-swap, nim-local, huggingface, github, *:free tiers ($0.00)`);
+    console.log(`free: herd, nim-local, huggingface, github, *:free tiers ($0.00)`);
     console.log(`unpriced: nvidia/NIM (credit billing, no verified per-token rate), kimi-auto, unknown models`);
   } else if (cmd === "status") {
     console.log(JSON.stringify(getStatus(), null, 2));

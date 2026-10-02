@@ -27,7 +27,7 @@ const FIXTURE: LiveCatalog = {
   generatedAt: "2026-10-02T00:00:00.000Z",
   deadIds: ["meta-llama/llama-3.3-70b-instruct"],
   providers: {
-    "llama-swap": { serving: ["beellama/qwen-flash-64k", "beellama/exaone-4-0-1-2b-iq4xs"], quarantined: [], discovered: true },
+    "herd": { serving: ["beellama/qwen-flash-64k", "beellama/exaone-4-0-1-2b-iq4xs"], quarantined: [], discovered: true },
     nvidia: { serving: ["nvidia/nemotron-3.5-lightning-30b-a3b"], quarantined: ["nvidia/retired-slug"], discovered: true },
   },
 };

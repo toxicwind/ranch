@@ -8,7 +8,7 @@
 
 ## Why this exists
 
-- **One endpoint, every provider** — a single OpenAI-compatible API fronts llama-swap, openrouter, nvidia, groq, cerebras, google, and mistral. Clients never rewire when providers change.
+- **One endpoint, every provider** — a single OpenAI-compatible API fronts herd, openrouter, nvidia, groq, cerebras, google, and mistral. Clients never rewire when providers change.
 - **Zero-cost is a strategy, not a hope** — the `free` strategy races local GPU inference against every `:free` cloud model, so cost-sensitive work never touches a paid endpoint by accident.
 - **Self-healing under load** — per-provider circuit breakers (open/half-open), Elo-weighted selection from live success/latency history, and 30-minute sticky sessions for multi-turn coherence.
 - **Observable by default** — a self-contained `/ui` dashboard shows the provider matrix, free-tier models, live circuit/Elo state, and a chat box that posts to the real endpoint.
@@ -21,7 +21,7 @@ flowchart LR
     strat -->|free| freepool["race: local + :free cloud"]
     strat -->|circuit_chain| seq["sequential +<br/>circuit breakers"]
     strat -->|sticky_affinity| pin["session-pinned<br/>upstream"]
-    race --> herd[("herd :25100<br/>local llama-swap")]
+    race --> herd[("herd :25100<br/>local herd")]
     race --> cloud[(openrouter · nvidia<br/>groq · cerebras<br/>google · mistral)]
     freepool --> herd
     freepool --> cloud
@@ -54,7 +54,7 @@ Set per request with the `X-Sovereign-Strategy` header.
 | Strategy | Behavior |
 |----------|-----------|
 | `hybrid` (default) | sticky → ast_race → circuit_chain |
-| `free` | **races local llama-swap + every `:free` cloud model** (zero-cost) |
+| `free` | **races local herd + every `:free` cloud model** (zero-cost) |
 | `ast_race` | parallel N providers, first AST/code-shaped response wins |
 | `sticky_affinity` | 30-min session pinning for multi-turn |
 | `weighted_elo` | dynamic Elo from success/latency |
@@ -79,7 +79,7 @@ projects/mesh/router/
 
 The `free` strategy is the zero-cost path. It builds a candidate pool of:
 
-- **local llama-swap** (always free — `local-fast` / `local-quality` / `local-longctx`)
+- **local herd** (always free — `local-fast` / `local-quality` / `local-longctx`)
 - **every `:free` model** across keyed cloud providers (OpenRouter's `tencent/hy3:free`, `poolside/laguna-*`, `qwen3-coder:free`, `gemma-4-31b-it:free`, `nemotron-*`, `hermes-3-*`, `gpt-oss-20b:free`, …)
 
 and races them through the *same* parallel/AST-preference/circuit machinery as `ast_race`. So local GPU and free cloud models compete on equal footing, and circuit breakers still apply per provider.

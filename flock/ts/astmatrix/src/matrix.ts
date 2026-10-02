@@ -257,7 +257,7 @@ export function firstModelFor(
   p: string,
   providers: Record<string, Provider>,
 ): string {
-  if (p === "llama-swap") return "local-quality";
+  if (p === "herd") return "local-quality";
   const prov = providers[p];
   if (prov && prov.models.length > 0) return prov.models[0];
   return "";

@@ -31,7 +31,7 @@ if (!process.env.SOURCE_DATE_EPOCH) {
   }
 }
 
-const { jsonPath, goPath, rustPath } = await emitAll(outDir, {
+const { jsonPath, goPath, rustPath, tauPath } = await emitAll(outDir, {
   defs: PROVIDER_DEFS,
   aliases: MODEL_ALIASES,
   deadIds: DEAD_MODEL_IDS,
@@ -41,3 +41,10 @@ const { jsonPath, goPath, rustPath } = await emitAll(outDir, {
 console.log(`wrote ${jsonPath}`);
 console.log(`wrote ${goPath}`);
 console.log(`wrote ${rustPath}`);
+console.log(`wrote ${tauPath}`);
+
+// Sync to Tau consumer copies
+const tauContent = await Bun.file(tauPath).text();
+await Bun.write("/home/toxic/.tau/models.yml", tauContent);
+await Bun.write("/home/toxic/estate/config/tau/models.yml", tauContent);
+console.log("synced to ~/.tau/models.yml and estate/config/tau/models.yml");

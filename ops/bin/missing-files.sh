@@ -5,7 +5,7 @@
 #   1. systemd units (system + user): ExecStart/ExecStop/ExecReload/ExecCondition/
 #      EnvironmentFile/WorkingDirectory/ReadWritePaths
 #   2. live configs: herd.yaml, pitchfork.toml, ports.env, keypools.yaml,
-#      model_constraints.yaml, llama-swap.yaml
+#      model_constraints.yaml, herd.yaml
 #   3. docs (*.md) under /home/toxic/estate: /home/toxic/... paths ending in
 #      .sh .py .toml .yaml .yml .service .timer .env .json (skips JSONL-substring
 #      artifacts, prose fragments, and example patterns)
@@ -102,7 +102,7 @@ if [ "$DO_CONFIGS" = "1" ]; then
            /home/toxic/estate/config/ports.env \
            /home/toxic/estate/config/keypools.yaml \
            /home/toxic/estate/config/model_constraints.yaml \
-           /home/toxic/estate/config/llama-swap.yaml; do
+           /home/toxic/estate/config/herd.yaml; do
     [ -f "$c" ] || { log "  (config not present: $c)"; continue; }
     while IFS=: read -r lineno raw; do
       rline="$(sed -n "${lineno}p" "$c")"

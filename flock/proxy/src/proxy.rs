@@ -682,6 +682,15 @@ async fn buffered(
             .and_then(|v| v.to_str().ok())
             .map(str::to_owned),
         body,
+        // Relay the Gemini Interactions turn handle. keypool (:25109) reads
+        // `x-previous-interaction-id` to build `previous_interaction_id` and
+        // answers with `x-interaction-id`; without the relay every tool loop
+        // through flock dies with a 400 on the second turn.
+        passthrough: headers
+            .get("x-previous-interaction-id")
+            .and_then(|v| v.to_str().ok())
+            .map(|v| vec![("x-previous-interaction-id".to_owned(), v.to_owned())])
+            .unwrap_or_default(),
         model: raw_model.to_owned(),
         session: Some(session),
         deadline,
@@ -711,6 +720,7 @@ async fn buffered(
             status,
             content_type,
             body,
+            extra,
         }) => {
             // The router already applied the empty-completion substance
             // guard to these bytes; relay verbatim and observe.
@@ -722,11 +732,15 @@ async fn buffered(
             if http_status.is_success() {
                 record_observations(&ctx, &observe_buffered(&body));
             }
-            Response::builder()
+            let mut builder = Response::builder()
                 .status(http_status)
-                .header(header::CONTENT_TYPE, content_type)
-                .body(Body::from(body))
-                .unwrap()
+                .header(header::CONTENT_TYPE, content_type);
+            // Pass the upstream turn handle back to the client so an OpenAI
+            // caller can echo it as `x-previous-interaction-id` next turn.
+            for (k, v) in &extra {
+                builder = builder.header(k.as_str(), v.as_str());
+            }
+            builder.body(Body::from(body)).unwrap()
         }
         Err(crate::router::RouteError::Deadline) => {
             record_request(&ctx, "504");
@@ -755,11 +769,13 @@ fn relay_shared(shared: &crate::coalescer::SharedResponse, ctx: &Ctx) -> Respons
     } else {
         shared.content_type.clone()
     };
-    Response::builder()
+    let mut builder = Response::builder()
         .status(status)
-        .header(header::CONTENT_TYPE, content_type)
-        .body(Body::from(shared.body.clone()))
-        .unwrap()
+        .header(header::CONTENT_TYPE, content_type);
+    for (k, v) in &shared.extra {
+        builder = builder.header(k.as_str(), v.as_str());
+    }
+    builder.body(Body::from(shared.body.clone())).unwrap()
 }
 
 /// Streaming: commit to a 200 SSE response immediately and emit `: heartbeat`
@@ -1295,6 +1311,19 @@ async fn relay(resp: reqwest::Response, ctx: &Ctx) -> Response {
         .and_then(|v| v.to_str().ok())
         .unwrap_or("application/json")
         .to_owned();
+    // Relay upstream turn handles to the client. keypool stamps
+    // `x-interaction-id` with the Gemini Interactions turn id; without it a
+    // caller cannot send a `function_result` on the next turn, and the tool
+    // loop breaks the moment it routes through flock.
+    let extra: Vec<(String, String)> = ["x-interaction-id"]
+        .iter()
+        .filter_map(|k| {
+            resp.headers()
+                .get(*k)
+                .and_then(|v| v.to_str().ok())
+                .map(|v| ((*k).to_owned(), v.to_owned()))
+        })
+        .collect();
     let body = match resp.bytes().await {
         Ok(b) => b,
         Err(e) => {
@@ -1311,12 +1340,14 @@ async fn relay(resp: reqwest::Response, ctx: &Ctx) -> Response {
     // BrighTO pattern: x-router-overhead-ms measures ingress->dispatch.
     // Uses Ctx.started (request ingress time) for the overhead calculation.
     let overhead_ms = ctx.started.elapsed().as_millis().to_string();
-    Response::builder()
+    let mut builder = Response::builder()
         .status(status)
         .header(header::CONTENT_TYPE, content_type)
-        .header("x-router-overhead-ms", overhead_ms)
-        .body(Body::from(body))
-        .unwrap()
+        .header("x-router-overhead-ms", overhead_ms);
+    for (k, v) in &extra {
+        builder = builder.header(k.as_str(), v.as_str());
+    }
+    builder.body(Body::from(body)).unwrap()
 }
 
 /// The proxy's standard error envelope: `{"error":{message,type,code}}`.

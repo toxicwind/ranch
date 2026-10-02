@@ -9,7 +9,7 @@
 //! ```
 //!
 //! [`resolve_agent_set`] is pure (no daemon, no I/O) so the parsing rules —
-//! including tricky model IDs like `llama-swap/beellama/exaone-4-0-1-2b-iq4xs`
+//! including tricky model IDs like `herd/beellama/exaone-4-0-1-2b-iq4xs`
 //! or `qwen:qwen-plus` — are covered by unit tests instead of manual CLI runs.
 
 /// Resolved `agent set` invocation: `(field, value, provider)`.
@@ -60,29 +60,29 @@ mod tests {
 
     #[test]
     fn flags_provider_and_model() {
-        let r = resolve_agent_set(None, None, s("llama-swap"), s("fast"));
+        let r = resolve_agent_set(None, None, s("herd"), s("fast"));
         assert_eq!(
             r,
             Ok((
                 "model".to_string(),
                 "fast".to_string(),
-                Some("llama-swap".to_string())
+                Some("herd".to_string())
             ))
         );
     }
 
     #[test]
     fn flags_model_with_tricky_slashed_id_passes_through() {
-        // Multi-segment llama-swap model IDs must reach the daemon verbatim;
+        // Multi-segment herd model IDs must reach the daemon verbatim;
         // provider splitting happens daemon-side.
-        let id = "llama-swap/beellama/exaone-4-0-1-2b-iq4xs";
-        let r = resolve_agent_set(None, None, s("llama-swap"), s(id));
+        let id = "herd/beellama/exaone-4-0-1-2b-iq4xs";
+        let r = resolve_agent_set(None, None, s("herd"), s(id));
         assert_eq!(
             r,
             Ok((
                 "model".to_string(),
                 id.to_string(),
-                Some("llama-swap".to_string())
+                Some("herd".to_string())
             ))
         );
     }
@@ -114,13 +114,13 @@ mod tests {
 
     #[test]
     fn legacy_positional_plus_provider_flag() {
-        let r = resolve_agent_set(s("model"), s("fast"), s("llama-swap"), None);
+        let r = resolve_agent_set(s("model"), s("fast"), s("herd"), None);
         assert_eq!(
             r,
             Ok((
                 "model".to_string(),
                 "fast".to_string(),
-                Some("llama-swap".to_string())
+                Some("herd".to_string())
             ))
         );
     }
@@ -135,6 +135,6 @@ mod tests {
     fn missing_value_rejected() {
         assert!(resolve_agent_set(s("model"), None, None, None).is_err());
         assert!(resolve_agent_set(None, None, None, None).is_err());
-        assert!(resolve_agent_set(None, None, s("llama-swap"), s("  ")).is_err());
+        assert!(resolve_agent_set(None, None, s("herd"), s("  ")).is_err());
     }
 }

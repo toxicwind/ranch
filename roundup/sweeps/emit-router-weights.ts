@@ -16,7 +16,7 @@
  * score bonus, healthy_frac<0.5 -> -5.
  *
  * Provider mapping (sweep label -> router provider key):
- *   herd  -> llama-swap   (the local herd lane in bench-priors.json)
+ *   herd  -> herd   (the local herd lane in bench-priors.json)
  *   flock -> openrouter   (flock-served OpenRouter free-tier models)
  *   sov   -> sov          (router lane remaps as needed)
  *
@@ -27,7 +27,7 @@
 import { writeFileSync, readFileSync, existsSync } from "node:fs";
 
 const PROVIDER_MAP: Record<string, string> = {
-  herd: "llama-swap",
+  herd: "herd",
   flock: "openrouter",
   sov: "sov",
 };
@@ -121,10 +121,10 @@ function selftest(): void {
   const out: any = build(recs, "selftest");
   if (out.schema_version !== 2) throw new Error("schema_version");
   if (out.model_priors.length !== 2) throw new Error("model_priors count");
-  if (out.model_priors[0].provider !== "llama-swap") throw new Error("herd->llama-swap map");
+  if (out.model_priors[0].provider !== "herd") throw new Error("herd->herd map");
   if (out.model_priors[1].provider !== "openrouter") throw new Error("flock->openrouter map");
   if (out.model_priors[0].quality_mean !== 1.8) throw new Error("quality scale passthrough");
-  if (out.provider_priors["llama-swap"].elo !== Math.round(1000 + (1.8 - 1) * 80))
+  if (out.provider_priors["herd"].elo !== Math.round(1000 + (1.8 - 1) * 80))
     throw new Error("elo rule");
   console.log("selftest OK: router schema_version 2 emission valid, provider map + elo rule hold");
 }

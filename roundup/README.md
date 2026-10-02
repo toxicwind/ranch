@@ -44,7 +44,7 @@ flowchart LR
   end
 
   subgraph Gateways
-    H["herd :25100<br/>llama-swap<br/>local GGUF router"]
+    H["herd :25100<br/>herd<br/>local GGUF router"]
     F["flock :25193<br/>13 providers<br/>Elo + circuit breakers"]
   end
 

@@ -18,7 +18,7 @@ use crate::llm_driver::{DriverConfig, LlmDriver, LlmError};
 use openfang_types::model_catalog::{
     AI21_BASE_URL, ANTHROPIC_BASE_URL, AZURE_OPENAI_BASE_URL, CEREBRAS_BASE_URL, CHUTES_BASE_URL,
     COHERE_BASE_URL, DEEPSEEK_BASE_URL, FIREWORKS_BASE_URL, GEMINI_BASE_URL, GROQ_BASE_URL,
-    HUGGINGFACE_BASE_URL, KIMI_CODING_BASE_URL, LEMONADE_BASE_URL, LLAMA_SWAP_BASE_URL,
+    HUGGINGFACE_BASE_URL, KIMI_CODING_BASE_URL, LEMONADE_BASE_URL, HERD_BASE_URL,
     LMSTUDIO_BASE_URL, MINIMAX_BASE_URL, MISTRAL_BASE_URL, MOONSHOT_BASE_URL, NOVITA_BASE_URL,
     NVIDIA_NIM_BASE_URL, OLLAMA_BASE_URL, OPENAI_BASE_URL, OPENROUTER_BASE_URL,
     PERPLEXITY_BASE_URL, QIANFAN_BASE_URL, QWEN_BASE_URL, REPLICATE_BASE_URL, REQUESTY_BASE_URL,
@@ -39,7 +39,7 @@ struct ProviderDefaults {
 /// Resolve an OpenAI-compatible base URL for a local/self-hosted provider from
 /// well-known environment variables. Returns `None` if no override is set.
 ///
-/// This lets users point Ollama / LM Studio / vLLM / Lemonade / LlamaSwap at a remote host
+/// This lets users point Ollama / LM Studio / vLLM / Lemonade / Herd at a remote host
 /// (VPS, LXC, another box on the LAN) without editing `~/.openfang/config.toml`.
 ///
 /// Recognised variables:
@@ -47,7 +47,7 @@ struct ProviderDefaults {
 /// - `lmstudio` → `LMSTUDIO_BASE_URL`, then `LMSTUDIO_HOST`
 /// - `vllm`     → `VLLM_BASE_URL`, then `VLLM_HOST`
 /// - `lemonade` → `LEMONADE_BASE_URL`, then `LEMONADE_HOST`
-/// - `llama-swap` → `LLAMA_SWAP_BASE_URL`, then `LLAMA_SWAP_HOST`
+/// - `herd` → `HERD_BASE_URL`, then `HERD_HOST`
 ///
 /// `*_HOST` values may omit the scheme and the `/v1` suffix
 /// (e.g. `OLLAMA_HOST=192.168.1.50:11434`); both are normalised.
@@ -83,7 +83,7 @@ pub fn local_provider_url_from_env(provider: &str) -> Option<String> {
         "lmstudio" => ("LMSTUDIO_BASE_URL", "LMSTUDIO_HOST"),
         "vllm" => ("VLLM_BASE_URL", "VLLM_HOST"),
         "lemonade" => ("LEMONADE_BASE_URL", "LEMONADE_HOST"),
-        "llama-swap" => ("LLAMA_SWAP_BASE_URL", "LLAMA_SWAP_HOST"),
+        "herd" => ("HERD_BASE_URL", "HERD_HOST"),
         _ => return None,
     };
 
@@ -164,9 +164,9 @@ fn provider_defaults(provider: &str) -> Option<ProviderDefaults> {
             api_key_env: "LEMONADE_API_KEY",
             key_required: false,
         }),
-        "llama-swap" => Some(ProviderDefaults {
-            base_url: LLAMA_SWAP_BASE_URL,
-            api_key_env: "LLAMA_SWAP_API_KEY",
+        "herd" => Some(ProviderDefaults {
+            base_url: HERD_BASE_URL,
+            api_key_env: "HERD_API_KEY",
             key_required: false,
         }),
         "perplexity" => Some(ProviderDefaults {
@@ -547,7 +547,7 @@ pub fn create_driver(config: &DriverConfig) -> Result<Arc<dyn LlmDriver>, LlmErr
         // Precedence for the base URL:
         //   1. Explicit `DriverConfig.base_url` (from config.toml or `[provider_urls]`)
         //   2. Well-known env vars for local providers (`OLLAMA_HOST`, etc.) — issue #1154
-        //   3. Hard-coded provider default (localhost for ollama/lmstudio/vllm/lemonade/llama-swap)
+        //   3. Hard-coded provider default (localhost for ollama/lmstudio/vllm/lemonade/herd)
         let base_url = config
             .base_url
             .clone()
@@ -676,7 +676,7 @@ pub fn known_providers() -> &'static [&'static str] {
         "ollama",
         "vllm",
         "lmstudio",
-        "llama-swap",
+        "herd",
         "perplexity",
         "cohere",
         "ai21",
@@ -854,7 +854,7 @@ mod tests {
         assert!(providers.contains(&"claude-code"));
         assert!(providers.contains(&"qwen-code"));
         assert!(providers.contains(&"azure"));
-        assert!(providers.contains(&"llama-swap"));
+        assert!(providers.contains(&"herd"));
         assert_eq!(providers.len(), 39);
     }
 
@@ -1318,27 +1318,27 @@ mod tests {
         assert!(driver.is_ok(), "lmstudio default should construct");
     }
 
-    // ── llama-swap: first-class local provider ──
+    // ── herd: first-class local provider ──
 
     #[test]
-    fn test_local_url_env_llama_swap_host_normalised() {
+    fn test_local_url_env_herd_host_normalised() {
         let _lock = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
-        let _g1 = EnvVarGuard::remove("LLAMA_SWAP_BASE_URL");
-        let _g2 = EnvVarGuard::set("LLAMA_SWAP_HOST", "127.0.0.1:25100");
-        let url = local_provider_url_from_env("llama-swap").expect("env should resolve");
+        let _g1 = EnvVarGuard::remove("HERD_BASE_URL");
+        let _g2 = EnvVarGuard::set("HERD_HOST", "127.0.0.1:25100");
+        let url = local_provider_url_from_env("herd").expect("env should resolve");
         assert_eq!(url, "http://127.0.0.1:25100/v1");
     }
 
     #[test]
-    fn test_provider_defaults_llama_swap() {
-        let d = provider_defaults("llama-swap").unwrap();
+    fn test_provider_defaults_herd() {
+        let d = provider_defaults("herd").unwrap();
         assert_eq!(d.base_url, "http://localhost:25100/v1");
-        assert_eq!(d.api_key_env, "LLAMA_SWAP_API_KEY");
+        assert_eq!(d.api_key_env, "HERD_API_KEY");
         assert!(!d.key_required);
     }
 
     #[test]
-    fn test_known_providers_includes_llama_swap() {
-        assert!(known_providers().contains(&"llama-swap"));
+    fn test_known_providers_includes_herd() {
+        assert!(known_providers().contains(&"herd"));
     }
 }

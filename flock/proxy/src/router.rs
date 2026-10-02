@@ -181,7 +181,11 @@ struct RouterInner {
     data_dir: PathBuf,
     /// Owns the SQLite writer thread. `None` in unit tests (persistence
     /// disabled); the persist handle is separately `PersistHandle::disabled`.
-    _writer: Option<StateWriter>,
+    /// Owns the SQLite writer thread. `None` in unit tests (persistence
+    /// disabled); the persist handle is separately `PersistHandle::disabled`.
+    /// Taken by `RouterHandle::shutdown` so queued writes flush on SIGTERM
+    /// instead of dying with the process.
+    writer: Mutex<Option<StateWriter>>,
     /// Empty-completion strikes per (provider, model): incremented when a
     /// 2xx chat completion arrives with no content and no tool calls.
     /// Entries decay after EMPTY_STRIKE_DECAY; surfaced on /metrics.
@@ -192,6 +196,18 @@ struct RouterInner {
 #[derive(Clone)]
 pub struct RouterHandle {
     inner: Arc<RouterInner>,
+}
+
+impl RouterHandle {
+    /// Flush and join the persistence writer. Idempotent, and safe once every
+    /// clone has been dropped. The field used to be `_writer`, so `Drop` never
+    /// ran `StateWriter::shutdown` and queued SQLite ops were lost on SIGTERM.
+    pub fn shutdown(&self) {
+        let taken = self.inner.writer.lock().ok().and_then(|mut g| g.take());
+        if let Some(writer) = taken {
+            writer.shutdown();
+        }
+    }
 }
 
 /// A routing failure the proxy turns into an HTTP status.
@@ -224,12 +240,17 @@ pub struct Acquired {
     pub provider: String,
     pub model: String,
     pub base_url: String,
+    /// The provider delegates credentials upstream (auth: none), so no
+    /// Authorization header is attached to the upstream request.
+    pub no_auth: bool,
     pub strategy: Strategy,
     pub slot: crate::dispatch::Slot,
     pub permit: Option<ModelPermit>,
     pub attempt_started: Instant,
     /// Session identity for sticky affinity; written on success.
     pub session: Option<String>,
+    /// Headers to relay upstream, taken from the client request.
+    pub passthrough: Vec<(String, String)>,
 }
 
 /// True for chat-completion request paths (query string included): the
@@ -354,7 +375,7 @@ impl RouterHandle {
                 .build()
                 .map_err(|e| format!("cannot build HTTP client: {e}"))?,
             data_dir: data_dir.to_path_buf(),
-            _writer: Some(writer),
+            writer: Mutex::new(Some(writer)),
             empty_strikes: Mutex::new(HashMap::new()),
         });
         let handle = Self { inner };
@@ -630,6 +651,10 @@ impl RouterHandle {
                 }
             };
             if let Some(r) = reason {
+                // Surface why a provider never became a candidate. Without
+                // this the only signal is a bare 502 at the client, which is
+                // how a mis-scoped model list stayed invisible.
+                tracing::warn!(provider = %name, reason = ?r, model = %model, "provider skipped");
                 decision.push_skip(name.clone(), r);
             }
         }
@@ -837,16 +862,21 @@ impl RouterHandle {
                 }
             }
         };
-        let base_url = rt.def.read().unwrap().base_url.clone();
+        let (base_url, no_auth) = {
+            let def = rt.def.read().unwrap();
+            (def.base_url.clone(), def.no_auth)
+        };
         Ok(Acquired {
             provider: candidate.provider.clone(),
             model: candidate.model.clone(),
             base_url,
+            no_auth,
             strategy: candidate.strategy,
             slot,
             permit,
             attempt_started: Instant::now(),
             session: ctx.session.clone(),
+            passthrough: ctx.passthrough.clone(),
         })
     }
 
@@ -1204,11 +1234,26 @@ impl RouterHandle {
             .map(|rt| {
                 let this = self.clone();
                 async move {
-                    let (name, base_url) = {
+                    // A keyless provider behind a rewriting proxy (Google EAP
+                    // on keypool :25109) has no OpenAI `/v1/models` endpoint to
+                    // probe: keypool answers 400/502 there, which marked the
+                    // provider permanently unhealthy and opened the circuit,
+                    // so every chat request failed in 0 ms. Its model list is
+                    // carried in the definition, so there is nothing to
+                    // discover — record health directly and skip the fetch.
+                    let (name, probe_url) = {
                         let def = rt.def.read().unwrap();
-                        (def.name.clone(), def.base_url.clone())
+                        let probe = if def.no_auth && !def.models.is_empty() {
+                            None
+                        } else {
+                            Some(format!("{}/v1/models", def.base_url.trim_end_matches('/')))
+                        };
+                        (def.name.clone(), probe)
                     };
-                    let url = format!("{}/v1/models", base_url.trim_end_matches('/'));
+                    let Some(url) = probe_url else {
+                        this.inner.health.record_health(&name, true, now_unix);
+                        return;
+                    };
                     let started = Instant::now();
                     // 15s per-probe ceiling: a hanging provider doesn't stall the loop.
                     let resp = tokio::time::timeout(
@@ -1315,6 +1360,8 @@ pub struct AcquireCtx {
     pub prefer_lane: Option<usize>,
     /// Session identity for sticky affinity (set on success).
     pub session: Option<String>,
+    /// Headers to relay upstream, taken from the client request.
+    pub passthrough: Vec<(String, String)>,
     /// Poll this to notice a gone client without holding the borrow.
     pub client_gone: Box<dyn Fn() -> bool + Send + Sync>,
 }
@@ -1405,6 +1452,12 @@ pub struct ExecuteCtx {
     pub body: Bytes,
     /// Requested model label (pre-rewrite); used for selection.
     pub model: String,
+    /// Client headers relayed upstream instead of consumed.
+    /// `x-previous-interaction-id` carries the Gemini Interactions turn
+    /// handle: keypool (:25109) needs it to accept a `function_result`, and
+    /// `x-interaction-id` must come back on the response. Dropping them
+    /// breaks the tool loop for anything routed through flock.
+    pub passthrough: Vec<(String, String)>,
     /// Session identity for sticky affinity.
     pub session: Option<String>,
     pub deadline: Instant,
@@ -1427,6 +1480,10 @@ pub enum ExecuteOutcome {
         status: u16,
         content_type: String,
         body: bytes::Bytes,
+        /// Upstream headers the client must see, e.g. `x-interaction-id`
+        /// from keypool. Without relaying it, a Gemini tool loop routed
+        /// through flock has no turn handle for its second turn.
+        extra: Vec<(String, String)>,
     },
     /// Shared buffered response (coalescing on): the leader read the full
     /// body and published it; followers receive the same bytes.
@@ -1459,6 +1516,7 @@ impl RouterHandle {
             accept,
             body,
             model,
+            passthrough,
             session,
             deadline,
             heartbeat,
@@ -1524,6 +1582,7 @@ impl RouterHandle {
             gated_path,
             prefer_lane,
             session,
+            passthrough,
             client_gone,
         };
         // A lone candidate retries until the deadline (exactly the old
@@ -1573,10 +1632,18 @@ impl RouterHandle {
             };
             let req_body = rewrite_body_model(&body, &acq.model);
             let url = format!("{}{}", acq.base_url, path_query);
-            let mut req = http.request(method.clone(), &url).header(
-                reqwest::header::AUTHORIZATION,
-                format!("Bearer {}", acq.slot.key),
-            );
+            let mut req = http.request(method.clone(), &url);
+            if !acq.no_auth {
+                req = req.header(
+                    reqwest::header::AUTHORIZATION,
+                    format!("Bearer {}", acq.slot.key),
+                );
+            }
+            // Relay the Interactions turn handle so keypool can accept a
+            // `function_result` on the next turn.
+            for (k, v) in &acq.passthrough {
+                req = req.header(k.as_str(), v.as_str());
+            }
             if let Some(ct) = &content_type {
                 req = req.header(reqwest::header::CONTENT_TYPE, ct.as_str());
             }
@@ -1641,6 +1708,19 @@ impl RouterHandle {
                                 .and_then(|v| v.to_str().ok())
                                 .unwrap_or("application/json")
                                 .to_owned();
+                            // Relay upstream turn handles to the client.
+                            // keypool stamps `x-interaction-id` with the
+                            // Gemini Interactions turn id; a client cannot
+                            // complete a `function_result` without it.
+                            let extra: Vec<(String, String)> = ["x-interaction-id"]
+                                .iter()
+                                .filter_map(|k| {
+                                    r.headers()
+                                        .get(*k)
+                                        .and_then(|v| v.to_str().ok())
+                                        .map(|v| ((*k).to_owned(), v.to_owned()))
+                                })
+                                .collect();
                             // A stalled body is a gateway failure, never an empty
                             // 200: the old relay() mapped body-read errors to
                             // 502, and failover cannot help a body that already
@@ -1698,12 +1778,14 @@ impl RouterHandle {
                                         status,
                                         content_type: content_type.clone(),
                                         body: bytes,
+                                        extra: extra.clone(),
                                     },
                                 );
                                 lead.complete(crate::coalescer::SharedResponse {
                                     status: shared.status,
                                     content_type: shared.content_type.clone(),
                                     body: shared.body.clone(),
+                                    extra: shared.extra.clone(),
                                 });
                                 return Ok(ExecuteOutcome::Coalesced(shared));
                             }
@@ -1711,6 +1793,7 @@ impl RouterHandle {
                                 status,
                                 content_type,
                                 body: bytes,
+                                extra,
                             });
                         }
                         self.finish_success(&acq, status);
@@ -1745,11 +1828,13 @@ impl RouterHandle {
                                 status,
                                 content_type: ct,
                                 body: bytes,
+                                extra: Vec::new(),
                             });
                             lead.complete(crate::coalescer::SharedResponse {
                                 status: shared.status,
                                 content_type: shared.content_type.clone(),
                                 body: shared.body.clone(),
+                                extra: shared.extra.clone(),
                             });
                             return Ok(ExecuteOutcome::Coalesced(shared));
                         }

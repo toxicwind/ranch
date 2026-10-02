@@ -1,5 +1,5 @@
 // Yote — Unified Messaging Gateway
-// Telegram + Discord → LLM (llama-swap :25100)
+// Telegram + Discord → LLM (herd :25100)
 
 mod telegram;
 mod discord;
@@ -16,7 +16,7 @@ async fn main() {
 
     // TODO: Initialize Telegram bot
     // TODO: Initialize Discord gateway
-    // TODO: Connect to llama-swap on :25100
+    // TODO: Connect to herd on :25100
 
     info!("Yote ready. Telegram + Discord unified.");
 

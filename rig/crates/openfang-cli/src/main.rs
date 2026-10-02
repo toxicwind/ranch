@@ -540,7 +540,7 @@ enum AgentCommands {
         field: Option<String>,
         /// New value. Optional when --model is given.
         value: Option<String>,
-        /// Provider for the model (e.g. llama-swap). Forwarded to the daemon;
+        /// Provider for the model (e.g. herd). Forwarded to the daemon;
         /// implies field=model when no positional field is given.
         #[arg(long)]
         provider: Option<String>,
@@ -1489,7 +1489,7 @@ fn provider_list() -> Vec<(&'static str, &'static str, &'static str, &'static st
             "OpenRouter",
         ),
         ("minimax", "MINIMAX_API_KEY", "MiniMax-M2.7", "MiniMax"),
-        ("llama-swap", "LLAMA_SWAP_API_KEY", "fast", "LlamaSwap"),
+        ("herd", "HERD_API_KEY", "fast", "Herd"),
     ]
 }
 

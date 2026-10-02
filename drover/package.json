@@ -217,7 +217,7 @@
         "drover.local.baseUrl": {
           "type": "string",
           "default": "http://127.0.0.1:25100/v1",
-          "description": "Base URL for the local llama.cpp / llama-swap server"
+          "description": "Base URL for the local llama.cpp / herd server"
         },
         "drover.local.model": {
           "type": "string",

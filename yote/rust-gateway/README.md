@@ -12,7 +12,7 @@
 > **Why care? One service, both chat networks: the gateway unifies Telegram Bot API and Discord into a single LLM-backed service, extracted from `openfang-channels` so it can evolve independently.**
 
 - **Telegram + Discord in one binary — unified message ingress**
-- **LLM-backed — routes through llama-swap (`:25100`)**
+- **LLM-backed — routes through herd (`:25100`)**
 - **Sovereign port discipline — `:25102` via `YOTE_PORT`, per the ports SSOT**
 - **Extracted from OpenFang — `crates/openfang-channels` lineage, standalone future**
 
@@ -20,7 +20,7 @@
 flowchart LR
     TG[Telegram Bot API] --> GW[yote gateway]
     DC[Discord gateway] --> GW
-    GW --> LLM[llama-swap :25100]
+    GW --> LLM[herd :25100]
     LLM --> R[responses]
     R --> GW --> TG & DC
 ```

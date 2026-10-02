@@ -784,7 +784,7 @@ pub async fn run() {
         .route(routes::V1_WILDCARD, any(proxy::handle))
         .layer(axum::middleware::from_fn(security_headers))
         .layer(DefaultBodyLimit::max(64 * 1024 * 1024))
-        .with_state(state);
+        .with_state(Arc::clone(&state));
 
     let host = env_or("HOST", "0.0.0.0");
     let addr = format!("{host}:{port}");
@@ -816,6 +816,10 @@ pub async fn run() {
         .await;
     let _ = sampler_shutdown.send(true);
     sampler.await.expect("history sampler task");
+    // Drain the SQLite writer before the process exits. `state` holds the
+    // RouterHandle (and through it the StateWriter thread); without this the
+    // queued provider-health writes were dropped on SIGTERM.
+    state.router.shutdown();
     server.expect("server");
 }
 

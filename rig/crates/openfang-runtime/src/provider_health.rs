@@ -26,11 +26,11 @@ pub struct ProbeResult {
 /// Check if a provider is a local provider (no key required, localhost URL).
 ///
 /// Returns true for `"ollama"`, `"vllm"`, `"lmstudio"`, `"lemonade"`,
-/// `"llama-swap"`.
+/// `"herd"`.
 pub fn is_local_provider(provider: &str) -> bool {
     matches!(
         provider.to_lowercase().as_str(),
-        "ollama" | "vllm" | "lmstudio" | "lemonade" | "llama-swap"
+        "ollama" | "vllm" | "lmstudio" | "lemonade" | "herd"
     )
 }
 
@@ -388,7 +388,7 @@ mod tests {
 
     #[test]
     fn test_is_local_provider_covers_all_local_backends() {
-        for p in ["ollama", "vllm", "lmstudio", "lemonade", "llama-swap"] {
+        for p in ["ollama", "vllm", "lmstudio", "lemonade", "herd"] {
             assert!(is_local_provider(p), "{p} must be a local provider");
         }
         for p in ["openai", "anthropic", "groq"] {

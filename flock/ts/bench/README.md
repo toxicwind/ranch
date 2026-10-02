@@ -13,7 +13,7 @@ Reusable provider benchmark runner, ported from sovereign-router's
 Provider definitions and model lists come from the **Roost package**
 (`../../roost/src`) — the same catalog the strategy tier routes against —
 instead of a divergent static list. `servingModels()` (live discovery ∪
-seeds, minus quarantine/dead) is the bench population. `llama-swap`,
+seeds, minus quarantine/dead) is the bench population. `herd`,
 `kimi-auto`, and `openrouter` are deliberately excluded (local compute not
 for tasks; Moonshot billing; GuideLLM priors already exist) — see
 `BENCH_EXCLUDE`.

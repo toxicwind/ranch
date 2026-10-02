@@ -1,9 +1,9 @@
 name = "coyote"
-description = "Autonomous agent inference engine. Routes through llama-swap AST matrix with sigil-driven control. First-class sovereign service."
+description = "Autonomous agent inference engine. Routes through herd AST matrix with sigil-driven control. First-class sovereign service."
 version = "3.1.0"
 
 [model]
-# Uses llama-swap AST matrix — model aliases resolved dynamically
+# Uses herd AST matrix — model aliases resolved dynamically
 alias = "kimi-auto"
 # Fallback chain: kimi-auto → local-fast → free (zero-cost providers)
 fallback = ["local-fast", "free"]

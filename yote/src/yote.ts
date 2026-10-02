@@ -56,9 +56,9 @@ const CF = join(CD, "yote_chats.json");
 const LF = join(CD, "last_update.json");
 const LG = join(LD, "yote.log");
 const PORT = Number(process.env.YOTE_PORT ?? "25102");
-const TOK = process.env.YOTE_TELEGRAM_BOT_TOKEN ?? "";
+const TOK = process.env.YOTE_TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || "";
 const ALW = new Set(
-  (process.env.YOTE_TELEGRAM_ALLOWED_USERS ?? "")
+  (process.env.YOTE_TELEGRAM_ALLOWED_USERS || process.env.TELEGRAM_ALLOWED_USERS || "")
     .split(",")
     .map((s) => Number(s.trim()))
     .filter((n) => !isNaN(n) && n > 0),
@@ -67,7 +67,7 @@ const CHS = (process.env.YOTE_TELEGRAM_CHANNELS ?? "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
-const LLM = process.env.LLM_PROXY_URL ?? "http://127.0.0.1:25100";
+const LLM = process.env.LLM_PROXY_URL ?? "http://127.0.0.1:25193/v1";
 const OF_URL = process.env.OPENFANG_URL ?? "http://127.0.0.1:25103";
 const DEFAULT_AGENT = (
   process.env.YOTE_OPENFANG_AGENT ||
@@ -288,7 +288,7 @@ async function send(cid: number, t: string, o: any = {}) {
   return res;
 }
 
-/** OpenFang HTTP chat only — never llama-swap env wiring for OF agents */
+/** OpenFang HTTP chat only — never herd env wiring for OF agents */
 async function ofChat(txt: string, agent?: string) {
   const a = agent || DEFAULT_AGENT;
   const r = await ofClient.chat(txt, { agent: a, max_tokens: 1024 });

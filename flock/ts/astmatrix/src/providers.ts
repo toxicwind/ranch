@@ -102,13 +102,13 @@ export const herdLocalAliases: Record<string, ModelAlias> = {
   auto: [] as unknown as ModelAlias,
   fcm: [] as unknown as ModelAlias,
   // Local-first ranked roles
-  fast: ["llama-swap", "local-fast"],
-  "local-fast": ["llama-swap", "local-fast"],
-  quality: ["llama-swap", "local-quality"],
-  "local-quality": ["llama-swap", "local-quality"],
-  longctx: ["llama-swap", "local-longctx"],
-  "local-longctx": ["llama-swap", "local-longctx"],
-  "local-auto": ["llama-swap", "local-quality"],
+  fast: ["herd", "local-fast"],
+  "local-fast": ["herd", "local-fast"],
+  quality: ["herd", "local-quality"],
+  "local-quality": ["herd", "local-quality"],
+  longctx: ["herd", "local-longctx"],
+  "local-longctx": ["herd", "local-longctx"],
+  "local-auto": ["herd", "local-quality"],
   // OpenRouter free aliases (verified working 2026-07-28)
   "gpt-oss-20b": ["openrouter", "openai/gpt-oss-20b:free"],
   // NVIDIA NIM aliases
@@ -136,11 +136,11 @@ export const codingAlias: Record<string, ModelAlias> = (() => {
 /** Known local GGUF model ID prefixes. */
 const localPatterns = /^(beellama|mradermacher|jackrong|turboquant|ik_llama|ik_turboquant|holo|qwen\/|gemma-4|exaone)/;
 
-/** Model IDs that should route to the local llama-swap. */
+/** Model IDs that should route to the local herd. */
 export function isLocalSwapModelId(model: string): boolean {
   if (!model || model === "auto" || model === "fcm") return false;
   const target = codingAlias[model];
-  if (target && target.length > 0 && target[0] === "llama-swap") return true;
+  if (target && target.length > 0 && target[0] === "herd") return true;
   return localPatterns.test(model);
 }
 
@@ -157,25 +157,25 @@ export function resolveModel(
     }
   }
   // Local GGUF model ID
-  if (isLocalSwapModelId(model)) return ["llama-swap", model];
+  if (isLocalSwapModelId(model)) return ["herd", model];
   // Auto/fcm: search all providers — first with a key and models
   if (model === "auto" || model === "fcm") {
     for (const [pname, p] of Object.entries(providers)) {
-      if (pname === "llama-swap") continue;
+      if (pname === "herd") continue;
       if (p.noAuth || process.env[p.keyEnv]) {
         if (p.models.length > 0) return [pname, p.models[0]];
       }
     }
-    return ["llama-swap", "local-quality"];
+    return ["herd", "local-quality"];
   }
   // Search provider model lists
   for (const [pname, p] of Object.entries(providers)) {
     if (p.models.includes(model)) return [pname, model];
   }
-  // Fallback: openrouter -> nvidia -> llama-swap
+  // Fallback: openrouter -> nvidia -> herd
   if (providers["openrouter"]) return ["openrouter", model];
   if (providers["nvidia"]) return ["nvidia", model];
-  return ["llama-swap", "local-quality"];
+  return ["herd", "local-quality"];
 }
 
 /** True if the model maps to a specific provider via coding aliases. */

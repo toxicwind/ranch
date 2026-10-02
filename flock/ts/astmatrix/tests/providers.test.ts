@@ -41,8 +41,8 @@ describe("tack parity", () => {
     expect(provs["blackbox"]).toBeDefined();
     // Non-openai format registry entries stay out
     expect(provs["anthropic"]).toBeDefined(); // anthropic is in Tack core too
-    // llama-swap is noAuth
-    expect(provs["llama-swap"].noAuth).toBe(true);
+    // herd is noAuth
+    expect(provs["herd"].noAuth).toBe(true);
     expect(provs["groq"].keyEnv).toBe("GROQ_API_KEY");
     expect(provs["nvidia"].keyEnvAlt).toBe("NVIDIA_API_KEYS");
   });
@@ -93,7 +93,7 @@ describe("codingAlias merge", () => {
   test("canonical tack aliases present, herd-local wins on collision", () => {
     expect(codingAlias["ling"]).toEqual(["openrouter", "inclusionai/ling-3.0-flash-fin:free"]);
     // herd-local extras
-    expect(codingAlias["quality"]).toEqual(["llama-swap", "local-quality"]);
+    expect(codingAlias["quality"]).toEqual(["herd", "local-quality"]);
     expect(codingAlias["gpt-oss-20b"]).toEqual(["openrouter", "openai/gpt-oss-20b:free"]);
     // auto/fcm are empty tuples (strategy directives)
     expect(codingAlias["auto"] as unknown as unknown[]).toEqual([]);
@@ -119,12 +119,12 @@ describe("resolveModel", () => {
   });
   test("herd-local alias resolves", () => {
     const provs = defaultProviders();
-    expect(resolveModel("quality", provs)).toEqual(["llama-swap", "local-quality"]);
+    expect(resolveModel("quality", provs)).toEqual(["herd", "local-quality"]);
   });
   test("local gguf prefix is a passthrough", () => {
     const provs = defaultProviders();
     expect(resolveModel("qwen/Qwen3-14B-Q4_K_M.gguf", provs)).toEqual([
-      "llama-swap",
+      "herd",
       "qwen/Qwen3-14B-Q4_K_M.gguf",
     ]);
   });
@@ -134,7 +134,7 @@ describe("resolveModel", () => {
     expect(p).not.toBe("");
     expect(m).not.toBe("");
   });
-  test("unknown falls to openrouter -> nvidia -> llama-swap", () => {
+  test("unknown falls to openrouter -> nvidia -> herd", () => {
     const provs = defaultProviders();
     expect(resolveModel("nope/never", provs)[0]).toBe("openrouter");
   });
@@ -152,7 +152,7 @@ describe("isExplicit", () => {
 });
 
 describe("isLocalSwapModelId", () => {
-  test("prefix patterns and llama-swap aliases", () => {
+  test("prefix patterns and herd aliases", () => {
     expect(isLocalSwapModelId("qwen/Qwen3-14B-Q4_K_M.gguf")).toBe(true);
     expect(isLocalSwapModelId("mradermacher/foo")).toBe(true);
     expect(isLocalSwapModelId("quality")).toBe(true);

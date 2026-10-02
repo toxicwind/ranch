@@ -460,7 +460,7 @@ async function routeFree(
   const model = getModel(body);
   if (isExplicit(model)) {
     const [p, mid] = resolveModel(model, m.providers);
-    if (mid.includes(":free") || p === "llama-swap") {
+    if (mid.includes(":free") || p === "herd") {
       const r = await callOne(m, p, mid, body, signal);
       if (r.ok) {
         m.stickySet(session, p, mid);
@@ -476,7 +476,7 @@ async function routeFree(
       if (mid.includes(":free")) cands.push([name, mid]);
     }
   }
-  if (m.keyOk("llama-swap")) cands.push(["llama-swap", "local-quality"]);
+  if (m.keyOk("herd")) cands.push(["herd", "local-quality"]);
   if (cands.length === 0) {
     return { ok: false, status: 503, provider: "", model: "", lat: 0, err: "no_free_providers", winner: 0 };
   }

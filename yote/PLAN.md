@@ -181,7 +181,7 @@
 - [x] `/agents` — detailed list with model/provider/latency/status ✅
 - [x] `/probe` — run health check on all ready agents (parallel)
 - [x] `/probe <agent>` — test specific agent with custom prompt
-- [x] `/status` — full system health (llama-swap, openfang, GPU, overlord, mesh)
+- [x] `/status` — full system health (herd, openfang, GPU, overlord, mesh)
 - [x] `/agent <name> @chat` — cross-chat agent invocation
 
 ### 2.2 Agent Personality & System Prompts (MAXIMAL)
@@ -264,7 +264,7 @@
 
 ### 5.1 Multi-Provider Chat (MAXIMAL)
 - [ ] `/model <provider/model>` — direct model selection with autocomplete
-- [ ] `/llm <prompt>` — use llama-swap fallback (local)
+- [ ] `/llm <prompt>` — use herd fallback (local)
 - [ ] `/inkling <prompt>` — use NVIDIA NIM Inkling (reasoning)
 - [ ] `/nemotron <prompt>` — use Nemotron 3 Ultra/Super/Nano
 - [ ] `/gemini <prompt>` — use Google Gemini 2.5 Flash/Pro
@@ -447,7 +447,7 @@ jobs:
 - [ ] **Agent Versioning**: Semantic versioning + changelog per agent
 
 ### 9.4 Sovereign Mesh Expansion (MAXIMAL)
-- [ ] **Multi-Node Mesh**: Yote + OpenFang + llama-swap on separate nodes
+- [ ] **Multi-Node Mesh**: Yote + OpenFang + herd on separate nodes
 - [ ] **Geo-Distributed**: Run mesh nodes in different regions
 - [ ] **Mesh Federation**: Connect multiple sovereign meshes
 

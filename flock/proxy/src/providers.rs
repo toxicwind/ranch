@@ -357,6 +357,18 @@ impl ProviderDef {
     /// Disabled keys ride along as state carriers so a disable→enable cycle
     /// can't reset their windows — exactly the old pool's contract.
     pub fn lane_specs(&self) -> Vec<crate::pool::LaneSpec> {
+        // A keyless provider (auth: none) has no key material by design: the
+        // upstream proxy owns the credential. Filtering on resolve_key_material
+        // would hand it zero lanes, so `active == 0`, `reserve` waits out the
+        // whole window, and every request dies as a 0 ms 502. Synthesize one
+        // lane so the provider can actually be granted a slot.
+        if self.no_auth {
+            return vec![crate::pool::LaneSpec {
+                key: String::new(),
+                rpm: self.rpm_for(&ProviderKey::default()),
+                enabled: true,
+            }];
+        }
         let mut seen = std::collections::HashSet::new();
         self.keys
             .iter()
@@ -469,12 +481,12 @@ struct ProviderOverlay {
 /// bare provider name (verbatim from the old hardcoded defaults).
 const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
     ProviderOverlay {
-        name: "llama-swap",
+        name: "herd",
         elo: 1600,
         weight: 1.0,
         free_tier: false,
         default_rpm: 0,
-        display_name: "llama-swap",
+        display_name: "herd",
         model_map: &[],
     },
     ProviderOverlay {
@@ -585,6 +597,20 @@ const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
         display_name: "siliconflow",
         model_map: &[],
     },
+    ProviderOverlay {
+        // EAP Gemini. keypool (:25109) injects the credential and translates
+        // OpenAI bodies onto the Interactions API, so the provider itself is
+        // keyless (auth: none in the Roost table). Without this overlay entry
+        // flock never advertised the provider, so tau could not reach the
+        // only project that holds the EAP entitlement.
+        name: "google",
+        elo: 1600,
+        weight: 1.6,
+        free_tier: false,
+        default_rpm: 0,
+        display_name: "google (EAP interactions)",
+        model_map: &[],
+    },
 ];
 
 /// Flock's provider registry, built from Roost's wire data merged with the
@@ -641,12 +667,19 @@ pub fn default_providers() -> Vec<ProviderDef> {
             keys,
             no_auth,
             free_tier: ov.free_tier,
-            models: t
-                .seeds
-                .iter()
-                .filter(|m| !dead.contains(*m))
-                .map(|s| s.to_string())
-                .collect(),
+            // A static adapter carries its list in the definition; there is no
+            // /models endpoint to discover. Seeding only from `seeds` left such
+            // providers advertising zero models, which is why the EAP google
+            // route was invisible on :25193.
+            models: if t.static_models.is_empty() {
+                t.seeds
+                    .iter()
+                    .filter(|m| !dead.contains(*m))
+                    .map(|s| s.to_string())
+                    .collect()
+            } else {
+                t.static_models.iter().map(|s| s.to_string()).collect()
+            },
             model_map: ov
                 .model_map
                 .iter()
@@ -682,7 +715,7 @@ mod tests {
         assert_eq!(defs.len(), 13);
         let names: Vec<&str> = defs.iter().map(|p| p.name.as_str()).collect();
         for expected in [
-            "llama-swap",
+            "herd",
             "openrouter",
             "nvidia",
             "groq",
@@ -847,7 +880,7 @@ mod tests {
         }
 
         // Spot checks on values that changed with the Roost migration.
-        let ls = by_name("llama-swap");
+        let ls = by_name("herd");
         assert!(ls.no_auth);
         assert_eq!(ls.elo, 1600);
         assert_eq!(

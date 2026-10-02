@@ -19,7 +19,7 @@ input. Two shapes exist; the router's `schema_version: 2` is the contract.
   "generated_ts": "...",
   "run_id": "2026-10-02",
   "provider_priors": {
-    "llama-swap": { "elo": 1064, "quality_mean": 1.8, "latency_p50_ms": 310,
+    "herd": { "elo": 1064, "quality_mean": 1.8, "latency_p50_ms": 310,
                     "healthy_frac": 1.0, "basis": "roundup 2026-10-02" }
   },
   "model_priors": [
@@ -41,7 +41,7 @@ Provider elo follows the estate rule `1000 + (q-1)*80`. The router applies
 
 | Sweep label | Router key | Why |
 |---|---|---|
-| `herd` | `llama-swap` | the local herd lane in the router's provider table |
+| `herd` | `herd` | the local herd lane in the router's provider table |
 | `flock` | `openrouter` | flock-served OpenRouter free-tier models |
 | `sov` | `sov` | benchmarked through the router itself; the router lane remaps |
 

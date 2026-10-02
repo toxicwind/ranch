@@ -96,9 +96,9 @@ describe("Matrix keyOk/getKey", () => {
   test("noAuth always ok; keyed providers need env", () => {
     const m = freshMatrix();
     expect(m.keyOk("nim-local")).toBe(false); // router-local, not in providers
-    // llama-swap has noAuth
-    expect(m.keyOk("llama-swap")).toBe(true);
-    expect(m.getKey("llama-swap")).toBe("not-required-for-local");
+    // herd has noAuth
+    expect(m.keyOk("herd")).toBe(true);
+    expect(m.getKey("herd")).toBe("not-required-for-local");
     m.close();
   });
 
@@ -158,8 +158,8 @@ describe("Router", () => {
         body: JSON.stringify({ model: "auto", messages: [] }),
       }),
     );
-    // llama-swap is a free fallback; no keys configured -> may 503 or route
-    // to llama-swap if keyOk. Accept either, but it must respond JSON.
+    // herd is a free fallback; no keys configured -> may 503 or route
+    // to herd if keyOk. Accept either, but it must respond JSON.
     expect(resp.headers.get("Content-Type")).toContain("application/json");
     r.close();
   });

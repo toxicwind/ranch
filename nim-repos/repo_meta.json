@@ -1,0 +1,170 @@
+{
+ "NVIDIA/NemoClaw": {
+  "stars": 22499,
+  "forks": 3101,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "tibbee/pi-nvidia-nim-provider": {
+  "stars": 3,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "diegovisk/pi-nvidia-nim": {
+  "stars": 2,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "joeldg/nvidiarouter": {
+  "stars": 1,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "lizhebio/nim-qwen-model-router": {
+  "stars": 0,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "lucky-mandator/gocode-router": {
+  "stars": 0,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "rickeshtn/nim-code": {
+  "stars": 0,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "thispointon/kondi": {
+  "stars": 5,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "iammalego/keymux": {
+  "stars": 2,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "nirholas/three.ws": {
+  "stars": 201,
+  "forks": 47,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "xRyul/pi-nvidia-nim": {
+  "stars": 49,
+  "forks": 18,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "stillhue/claudio": {
+  "stars": 2,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "shaivpidadi/freeridev3": {
+  "stars": 47,
+  "forks": 6,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "bauka0/nvidia-nim-provider": {
+  "stars": 11,
+  "forks": 1,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "nezerkc/opencode-provider-nvidia-nim": {
+  "stars": 2,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "david-eve-za/nvidia-nim-mcp": {
+  "stars": 1,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "Sateeshreddymaddi/Custom-Nvidia-Nim-Node": {
+  "stars": 0,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "gabriel-ferraresi/NIMGEN": {
+  "stars": 0,
+  "forks": 1,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "api-evangelist/nvidia-nim": {
+  "stars": 1,
+  "forks": 1,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "olszalsik/a0-nvidia-nim": {
+  "stars": 0,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "h0rcrux/hermes-backup": {
+  "stars": 0,
+  "forks": 0,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "Gitlawb/openclaude": {
+  "stars": 33441,
+  "forks": 9099,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "musistudio/claude-code-router": {
+  "stars": 37329,
+  "forks": 3140,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ },
+ "enricoros/big-agi": {
+  "stars": 7126,
+  "forks": 1595,
+  "archived": false,
+  "pushed": null,
+  "fork": false
+ }
+}

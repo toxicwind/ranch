@@ -125,18 +125,6 @@ impl HealthDb {
             .unwrap_or(1500)
     }
 
-    pub fn set_elo(&self, provider: &str, elo: i32) {
-        self.inner
-            .write()
-            .unwrap()
-            .elos
-            .insert(provider.to_string(), elo);
-        self.persist.op(PersistOp::ProviderElo {
-            provider: provider.to_string(),
-            elo,
-        });
-    }
-
     /// `SetSticky` — AstMatrix declared this but never called it from the
     /// router. Here the router calls it on every successful response, and
     /// expiry is enforced (persisted).
@@ -326,13 +314,6 @@ pub struct PersistHandle {
 }
 
 impl PersistHandle {
-    pub fn disabled() -> Self {
-        Self { tx: None }
-    }
-
-    pub fn is_enabled(&self) -> bool {
-        self.tx.is_some()
-    }
 
     pub fn op(&self, op: PersistOp) {
         if let Some(tx) = &self.tx {

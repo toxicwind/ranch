@@ -712,6 +712,12 @@ fn validate_providers(sc: &StoredConfig) -> Result<(), String> {
             ));
         }
         let mut materials = std::collections::HashSet::new();
+        // A keyless provider (auth: none) delegates the credential to an
+        // upstream proxy — keypool on :25109 owns the Google EAP key and
+        // rewrites the request body. It legitimately has no key material, so
+        // skip the material check for it instead of forcing a fake env var.
+        let keyless = p.no_auth;
+        if !keyless {
         for k in &p.keys {
             if k.key.trim().is_empty() && k.key_env.trim().is_empty() {
                 return Err(format!(
@@ -728,6 +734,7 @@ fn validate_providers(sc: &StoredConfig) -> Result<(), String> {
             if !k.key.is_empty() && !materials.insert(k.key.as_str()) {
                 return Err(format!("provider {:?} has a duplicate key", p.name));
             }
+        }
         }
     }
     Ok(())

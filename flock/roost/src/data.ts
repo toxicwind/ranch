@@ -14,7 +14,7 @@
  *   EOL 2026-08-26 → deadIds). Herd gains nemotron-3-nano-omni-30b-a3b-reasoning.
  * - groq seeds: identical in both (6); the 4 verified-dead 2026-09-30 stay
  *   in seeds but are filtered by deadIds everywhere (cold start included).
- * - llama-swap seeds: the canonical stable role names. The TS router
+ * - herd seeds: the canonical stable role names. The TS router
  *   overlays its runtime LOCAL_ROLES (best-models.json) at catalog build;
  *   herd serves these names directly.
  * - mistral: baseUrl WITHOUT the /v1 segment; the mistral adapter appends
@@ -53,10 +53,10 @@ import type { ModelAlias, ProviderDef } from "./types.ts";
 
 export const PROVIDER_DEFS: ProviderDef[] = [
   {
-    name: "llama-swap",
-    displayName: "llama-swap (local)",
+    name: "herd",
+    displayName: "herd (local)",
     baseUrl: "http://127.0.0.1:25100/v1",
-    keyEnv: "LLAMA_SWAP_API_KEY",
+    keyEnv: "HERD_API_KEY",
     auth: "none",
     adapter: "openai",
     seeds: ["local-fast", "local-quality", "local-longctx"],
@@ -222,23 +222,35 @@ export const PROVIDER_DEFS: ProviderDef[] = [
   },
   {
     name: "google",
+    // keypool injects one of the six gen-lang-client-0111199472 EAP keys per
+    // request and rewrites OpenAI bodies onto the Interactions API, so there is
+    // no client credential and no /models endpoint to read. auth "none" +
+    // staticModels is the honest shape; the previous keyEnv: GOOGLE_API_KEY
+    // named a secret that no longer exists and 401'd every request.
     baseUrl: "http://127.0.0.1:25109/gemini-eap-interactions",
-    keyEnv: "GOOGLE_API_KEY",
-    auth: "bearer",
-    adapter: "openai",
-    seeds: [
-      "models/gemini-2.5-flash",
-      "models/gemini-2.5-flash-lite",
-      "models/gemini-2.0-flash",
-      "models/gemma-4-31b-it",
+    keyEnv: "",
+    auth: "none",
+    adapter: "static",
+    staticModels: [
+      "models/gemini-flash-tool-retrieval",
+      "models/gemini-3.8-flash",
+      "models/gemini-3.7-flash",
+      "models/gemini-3.6-flash",
+      "models/gemini-3.5-flash",
+      "models/gemini-3.1-pro-preview",
       "models/gemini-3-flash-preview",
-      "models/gemini-3-pro-preview",
+      "models/gemini-2.5-flash",
     ],
+    seeds: [],
     contextLengths: {
-      "models/gemini-2.5-flash": 1000000,
-      "models/gemini-2.5-flash-lite": 1000000,
+      "models/gemini-flash-tool-retrieval": 1000000,
+      "models/gemini-3.8-flash": 1000000,
+      "models/gemini-3.7-flash": 1000000,
+      "models/gemini-3.6-flash": 1000000,
+      "models/gemini-3.5-flash": 1000000,
+      "models/gemini-3.1-pro-preview": 1000000,
       "models/gemini-3-flash-preview": 1000000,
-      "models/gemini-3-pro-preview": 1000000
+      "models/gemini-2.5-flash": 1000000,
     },
   },
   {
@@ -1036,10 +1048,17 @@ export const MODEL_ALIASES: Record<string, ModelAlias> = {
   "nim-gemma4-31b": ["nvidia", "google/gemma-4-31b-it"],
   "nim-glm5.2": ["nvidia", "z-ai/glm-5.2"],
   "nim-inkling": ["nvidia", "thinkingmachines/inkling"],
+  // google routes to the EAP interactions pool; gemini-2.0-flash,
+  // gemini-2.5-flash-lite and gemma-4-31b-it are NOT in that project's model
+  // list (verified 2026-10-02 against GET /v1beta/models) and were dropped.
+  "gemini-eap": ["google", "models/gemini-flash-tool-retrieval"],
+  "gemini-3.8-flash": ["google", "models/gemini-3.8-flash"],
+  "gemini-3.7-flash": ["google", "models/gemini-3.7-flash"],
+  "gemini-3.6-flash": ["google", "models/gemini-3.6-flash"],
+  "gemini-3.5-flash": ["google", "models/gemini-3.5-flash"],
+  "gemini-3.1-pro": ["google", "models/gemini-3.1-pro-preview"],
+  "gemini-3-flash": ["google", "models/gemini-3-flash-preview"],
   "gemini-2.5-flash": ["google", "models/gemini-2.5-flash"],
-  "gemini-2.5-flash-lite": ["google", "models/gemini-2.5-flash-lite"],
-  "gemini-2.0-flash": ["google", "models/gemini-2.0-flash"],
-  "gemma4-31b-google": ["google", "models/gemma-4-31b-it"],
   "mistral-small": ["mistral", "mistral-small-latest"],
   codestral: ["mistral", "codestral-latest"],
   "mistral-large": ["mistral", "mistral-large-latest"],

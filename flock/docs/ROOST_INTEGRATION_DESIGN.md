@@ -54,7 +54,7 @@ present) — keyless providers' static IDs are advertised anyway.
 ### 1.4 Roost ↔ flock provider overlap
 
 All 13 of flock's providers exist in Roost's 52 (verified by name):
-`llama-swap, openrouter, nvidia, groq, together, cerebras, fireworks,
+`herd, openrouter, nvidia, groq, together, cerebras, fireworks,
 hyperbolic, github, mistral, openai, perplexity, siliconflow`.
 The three flock-originated providers (**hyperbolic, github, perplexity**)
 are present with matching base URLs and seeds — no special-casing needed.
@@ -156,7 +156,7 @@ struct ProviderOverlay {
 // Hand-maintained: WHICH Roost providers flock serves + operational tuning.
 // Values carried over verbatim from the current hardcoded defaults.
 const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
-    // llama-swap (elo 1600), openrouter (1500), nvidia (1550, w 1.2,
+    // herd (elo 1600), openrouter (1500), nvidia (1550, w 1.2,
     // free_tier, model_map {"free" -> "nvidia/nemotron-3-ultra-550b-a55b"}),
     // groq (1580, w 1.5, free_tier), together (1520), cerebras (1560, w 1.3,
     // free_tier), fireworks (1510), hyperbolic (1490, free_tier),
@@ -200,7 +200,7 @@ pub fn default_providers() -> Vec<ProviderDef> {
 ```
 
 Notes:
-- `key_env` may be `""` (llama-swap): `resolve_key_material` returns `None`
+- `key_env` may be `""` (herd): `resolve_key_material` returns `None`
   for empty env names, and `no_auth`/`AuthScheme::None` keeps it usable —
   same as today.
 - `auth` values `x-api-key`/`query-key` map to `ApiKey` for now: flock's

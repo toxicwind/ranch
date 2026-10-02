@@ -7,7 +7,7 @@ use openfang_types::model_catalog::{
     AuthStatus, ModelCatalogEntry, ModelTier, ProviderInfo, AI21_BASE_URL, ANTHROPIC_BASE_URL,
     AZURE_OPENAI_BASE_URL, BEDROCK_BASE_URL, CEREBRAS_BASE_URL, CHUTES_BASE_URL, COHERE_BASE_URL,
     DEEPSEEK_BASE_URL, FIREWORKS_BASE_URL, GEMINI_BASE_URL, GITHUB_COPILOT_BASE_URL, GROQ_BASE_URL,
-    HUGGINGFACE_BASE_URL, KIMI_CODING_BASE_URL, LEMONADE_BASE_URL, LLAMA_SWAP_BASE_URL,
+    HUGGINGFACE_BASE_URL, KIMI_CODING_BASE_URL, LEMONADE_BASE_URL, HERD_BASE_URL,
     LMSTUDIO_BASE_URL, MINIMAX_BASE_URL, MISTRAL_BASE_URL, MOONSHOT_BASE_URL, NVIDIA_NIM_BASE_URL,
     OLLAMA_BASE_URL, OPENAI_BASE_URL, OPENROUTER_BASE_URL, PERPLEXITY_BASE_URL, QIANFAN_BASE_URL,
     QWEN_BASE_URL, REPLICATE_BASE_URL, REQUESTY_BASE_URL, SAMBANOVA_BASE_URL, TOGETHER_BASE_URL,
@@ -378,7 +378,7 @@ impl ModelCatalog {
     /// without requiring users to edit `config.toml` for remote local-LLM hosts
     /// (VPS, LXC, LAN). See issue #1154.
     pub fn apply_local_env_overrides(&mut self) {
-        for provider in ["ollama", "lmstudio", "vllm", "lemonade", "llama-swap"] {
+        for provider in ["ollama", "lmstudio", "vllm", "lemonade", "herd"] {
             if let Some(url) = crate::drivers::local_provider_url_from_env(provider) {
                 if let Some(p) = self.providers.iter_mut().find(|p| p.id == provider) {
                     p.base_url = url;
@@ -726,12 +726,12 @@ fn builtin_providers() -> Vec<ProviderInfo> {
             auth_status: AuthStatus::NotRequired,
             model_count: 0,
         },
-        // ── LlamaSwap: local model multiplexer (OpenAI-compatible /v1) ──
+        // ── Herd: local model multiplexer (OpenAI-compatible /v1) ──
         ProviderInfo {
-            id: "llama-swap".into(),
-            display_name: "LlamaSwap".into(),
-            api_key_env: "LLAMA_SWAP_API_KEY".into(),
-            base_url: LLAMA_SWAP_BASE_URL.into(),
+            id: "herd".into(),
+            display_name: "Herd".into(),
+            api_key_env: "HERD_API_KEY".into(),
+            base_url: HERD_BASE_URL.into(),
             key_required: false,
             auth_status: AuthStatus::NotRequired,
             model_count: 0,
@@ -2662,16 +2662,16 @@ fn builtin_models() -> Vec<ModelCatalogEntry> {
             aliases: vec![],
         },
         // ══════════════════════════════════════════════════════════════
-        // LlamaSwap (4) — local model multiplexer + dynamic discovery.
-        // Context windows verified live against the herd llama-swap
+        // Herd (4) — local model multiplexer + dynamic discovery.
+        // Context windows verified live against the herd herd
         // (127.0.0.1:25100/v1/models). supports_tools is conservative:
         // the 1.2B EXAONE cannot tool-call (verified); qwen/gemma entries
         // stay false until a live tool-call probe says otherwise.
         // ══════════════════════════════════════════════════════════════
         ModelCatalogEntry {
             id: "exaone-4-0-1-2b-iq4xs".into(),
-            display_name: "EXAONE 4.0 1.2B IQ4_XS (LlamaSwap)".into(),
-            provider: "llama-swap".into(),
+            display_name: "EXAONE 4.0 1.2B IQ4_XS (Herd)".into(),
+            provider: "herd".into(),
             tier: ModelTier::Local,
             context_window: 32_768,
             max_output_tokens: 4_096,
@@ -2684,8 +2684,8 @@ fn builtin_models() -> Vec<ModelCatalogEntry> {
         },
         ModelCatalogEntry {
             id: "exaone-4-0-1-2b-q4km".into(),
-            display_name: "EXAONE 4.0 1.2B Q4_K_M (LlamaSwap)".into(),
-            provider: "llama-swap".into(),
+            display_name: "EXAONE 4.0 1.2B Q4_K_M (Herd)".into(),
+            provider: "herd".into(),
             tier: ModelTier::Local,
             context_window: 32_768,
             max_output_tokens: 4_096,
@@ -2698,8 +2698,8 @@ fn builtin_models() -> Vec<ModelCatalogEntry> {
         },
         ModelCatalogEntry {
             id: "qwen-flash-256k".into(),
-            display_name: "Qwen Flash 256K (LlamaSwap)".into(),
-            provider: "llama-swap".into(),
+            display_name: "Qwen Flash 256K (Herd)".into(),
+            provider: "herd".into(),
             tier: ModelTier::Local,
             context_window: 262_144,
             max_output_tokens: 8_192,
@@ -2712,8 +2712,8 @@ fn builtin_models() -> Vec<ModelCatalogEntry> {
         },
         ModelCatalogEntry {
             id: "gemma-128k".into(),
-            display_name: "Gemma 128K (LlamaSwap)".into(),
-            provider: "llama-swap".into(),
+            display_name: "Gemma 128K (Herd)".into(),
+            provider: "herd".into(),
             tier: ModelTier::Local,
             context_window: 131_072,
             max_output_tokens: 8_192,
@@ -2728,13 +2728,13 @@ fn builtin_models() -> Vec<ModelCatalogEntry> {
         // -- toolcall-local: live-verified tool-capable local model --
         // Served by the toolcall-llm pitchfork daemon (llama-server b11059
         // CUDA, qwen3.5-9b-dflash-Q5_K_M, ngl 99, ctx 32k) and fronted by the
-        // herd llama-swap :25100 as `toolcall-local/qwen3.5-9b-tool`.
+        // herd herd :25100 as `toolcall-local/qwen3.5-9b-tool`.
         // Tool loop verified live 2026-09-20: sysinfo(gpu) -> calculator ->
         // correct answer in 3.6s (Agent2 pilot routing target).
         ModelCatalogEntry {
             id: "toolcall-local/qwen3.5-9b-tool".into(),
-            display_name: "Qwen3.5 9B Tool (LlamaSwap)".into(),
-            provider: "llama-swap".into(),
+            display_name: "Qwen3.5 9B Tool (Herd)".into(),
+            provider: "herd".into(),
             tier: ModelTier::Local,
             context_window: 32_768,
             max_output_tokens: 8_192,
@@ -4986,18 +4986,18 @@ mod tests {
         }
     }
 
-    // ── llama-swap: first-class local provider ──
+    // ── herd: first-class local provider ──
 
     #[test]
-    fn test_llama_swap_provider_registered() {
+    fn test_herd_provider_registered() {
         let catalog = ModelCatalog::new();
         let p = catalog
-            .get_provider("llama-swap")
-            .expect("llama-swap must be a first-class catalog provider");
-        assert_eq!(p.display_name, "LlamaSwap");
-        assert_eq!(p.api_key_env, "LLAMA_SWAP_API_KEY");
+            .get_provider("herd")
+            .expect("herd must be a first-class catalog provider");
+        assert_eq!(p.display_name, "Herd");
+        assert_eq!(p.api_key_env, "HERD_API_KEY");
         assert_eq!(p.base_url, "http://localhost:25100/v1");
-        assert!(!p.key_required, "llama-swap is local: no key required");
+        assert!(!p.key_required, "herd is local: no key required");
         assert_eq!(p.auth_status, AuthStatus::NotRequired);
     }
 
@@ -5005,23 +5005,23 @@ mod tests {
     fn test_has_model_for_provider_strict() {
         let catalog = ModelCatalog::new();
         // Positive: id, alias, and full peer id on the right provider.
-        assert!(catalog.has_model_for_provider("llama-swap", "fast"));
-        assert!(catalog.has_model_for_provider("llama-swap", "qwen3.5-9b-tool"));
-        assert!(catalog.has_model_for_provider("llama-swap", "toolcall-local/qwen3.5-9b-tool"));
+        assert!(catalog.has_model_for_provider("herd", "fast"));
+        assert!(catalog.has_model_for_provider("herd", "qwen3.5-9b-tool"));
+        assert!(catalog.has_model_for_provider("herd", "toolcall-local/qwen3.5-9b-tool"));
         // Negative: valid model, wrong provider (no cross-provider fallback).
-        assert!(!catalog.has_model_for_provider("llama-swap", "gpt-4o"));
+        assert!(!catalog.has_model_for_provider("herd", "gpt-4o"));
         assert!(!catalog.has_model_for_provider("openai", "fast"));
         // Negative: unknown model entirely.
-        assert!(!catalog.has_model_for_provider("llama-swap", "no-such-model"));
+        assert!(!catalog.has_model_for_provider("herd", "no-such-model"));
     }
 
     #[test]
-    fn test_llama_swap_toolcall_local_resolves() {
+    fn test_herd_toolcall_local_resolves() {
         let catalog = ModelCatalog::new();
-        // Full llama-swap peer id (what the driver sends to :25100)
+        // Full herd peer id (what the driver sends to :25100)
         let entry = catalog
-            .find_model_for_provider("toolcall-local/qwen3.5-9b-tool", "llama-swap")
-            .expect("toolcall-local peer must resolve on llama-swap");
+            .find_model_for_provider("toolcall-local/qwen3.5-9b-tool", "herd")
+            .expect("toolcall-local peer must resolve on herd");
         assert_eq!(entry.id, "toolcall-local/qwen3.5-9b-tool");
         assert!(
             entry.supports_tools,
@@ -5033,22 +5033,22 @@ mod tests {
     }
 
     #[test]
-    fn test_llama_swap_fast_alias_resolves() {
+    fn test_herd_fast_alias_resolves() {
         let catalog = ModelCatalog::new();
         let entry = catalog
             .find_model("fast")
-            .expect("alias 'fast' must resolve to a llama-swap model");
-        assert_eq!(entry.provider, "llama-swap");
+            .expect("alias 'fast' must resolve to a herd model");
+        assert_eq!(entry.provider, "herd");
         assert_eq!(entry.tier, ModelTier::Local);
     }
 
     #[test]
-    fn test_llama_swap_models_listed_by_provider() {
+    fn test_herd_models_listed_by_provider() {
         let catalog = ModelCatalog::new();
-        let models = catalog.models_by_provider("llama-swap");
+        let models = catalog.models_by_provider("herd");
         assert!(
             !models.is_empty(),
-            "llama-swap must ship builtin models like other local providers"
+            "herd must ship builtin models like other local providers"
         );
     }
 }

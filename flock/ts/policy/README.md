@@ -39,7 +39,7 @@ const circuit = new CircuitPolicy({
 // 4. Warm standby for local lanes → probe-only circuit updates (no Elo inflation).
 const warm = new WarmStandby(
   [
-    { name: "llama-swap", base: "http://127.0.0.1:25100/v1" },
+    { name: "herd", base: "http://127.0.0.1:25100/v1" },
     { name: "nim-local", base: "http://127.0.0.1:8000/v1", keyEnv: "NIM_PROXY_API_KEY" },
   ],
   { onProbe: (p, ok, err) => circuit.recordProbe(p, ok, err) },

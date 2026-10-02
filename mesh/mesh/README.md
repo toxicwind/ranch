@@ -72,7 +72,7 @@ curl -sf http://127.0.0.1:25100/v1/models  # herd (local inference)
 
 ## sovereign-router (:25104)
 
-The TypeScript router is the live multi-provider gateway: 7 providers (llama-swap, openrouter, nvidia, groq, cerebras, google, mistral), 7-strategy routing, built-in `/ui` dashboard. Override per request:
+The TypeScript router is the live multi-provider gateway: 7 providers (herd, openrouter, nvidia, groq, cerebras, google, mistral), 7-strategy routing, built-in `/ui` dashboard. Override per request:
 
 ```bash
 curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25104/v1/chat/completions
@@ -81,7 +81,7 @@ curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25104/v1/chat/completions
 | Strategy | Behavior |
 | -------- | -------- |
 | `hybrid` (default) | sticky → ast_race → circuit_chain |
-| `free` | races local llama-swap + every `:free` cloud model (zero-cost) |
+| `free` | races local herd + every `:free` cloud model (zero-cost) |
 | `ast_race` | parallel fan-out, first AST/code-shaped response wins |
 | `sticky_affinity` | session-pinned routing for multi-turn |
 | `weighted_elo` | ELO-weighted selection from success/latency history |

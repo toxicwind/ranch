@@ -7072,7 +7072,7 @@ fn is_known_provider_prefix(prefix: &str) -> bool {
             | "lmstudio"
             | "vllm"
             | "lemonade"
-            | "llama-swap"
+            | "herd"
             | "together"
             | "fireworks"
             | "perplexity"
@@ -7097,7 +7097,7 @@ fn is_known_provider_prefix(prefix: &str) -> bool {
 }
 
 /// Extract an explicit provider prefix from a model ID such as
-/// `"llama-swap/fast"`, `"openrouter/deepseek/deepseek-chat"` or
+/// `"herd/fast"`, `"openrouter/deepseek/deepseek-chat"` or
 /// `"qwen:qwen-plus"`.
 ///
 /// Returns `Some(provider_id)` only when the text before the first `/` or
@@ -9308,7 +9308,7 @@ mod tests {
             "vllm",
             "lmstudio",
             "lemonade",
-            "llama-swap",
+            "herd",
             "claude-code",
             "qwen-code",
         ] {
@@ -9663,27 +9663,27 @@ system_prompt = "You are a test agent."
         assert_eq!(contents, "hello", "must not overwrite user files");
     }
 
-    // -- agent-set provider/model parsing: explicit llama-swap prefix --
+    // -- agent-set provider/model parsing: explicit herd prefix --
 
     #[test]
-    fn test_infer_provider_llama_swap_explicit_prefix() {
-        // `openfang agent set <id> model llama-swap/fast` must resolve the
+    fn test_infer_provider_herd_explicit_prefix() {
+        // `openfang agent set <id> model herd/fast` must resolve the
         // provider from the explicit prefix (reported provider-parsing bug:
         // the unlisted prefix fell through and the agent kept its old provider).
         assert_eq!(
-            infer_provider_from_model("llama-swap/fast"),
-            Some("llama-swap".to_string())
+            infer_provider_from_model("herd/fast"),
+            Some("herd".to_string())
         );
         assert_eq!(
-            infer_provider_from_model("llama-swap/beellama/exaone-4-0-1-2b-iq4xs"),
-            Some("llama-swap".to_string())
+            infer_provider_from_model("herd/beellama/exaone-4-0-1-2b-iq4xs"),
+            Some("herd".to_string())
         );
     }
 
     #[test]
     fn test_explicit_provider_prefix_extraction() {
         let p = |m: &str| explicit_provider_prefix(m);
-        assert_eq!(p("llama-swap/fast").as_deref(), Some("llama-swap"));
+        assert_eq!(p("herd/fast").as_deref(), Some("herd"));
         assert_eq!(
             p("openrouter/deepseek/deepseek-chat").as_deref(),
             Some("openrouter")
@@ -9835,11 +9835,11 @@ system_prompt = "You are a test agent."
         write_agent_toml(
             &agents,
             "assistant",
-            "name = \"assistant\"\ndescription = \"disk assistant\"\n[model]\nprovider = \"llama-swap\"\nmodel = \"nex-agi/nex-n2.5-mini:free\"\nbase_url = \"http://127.0.0.1:25100/v1\"\n",
+            "name = \"assistant\"\ndescription = \"disk assistant\"\n[model]\nprovider = \"herd\"\nmodel = \"nex-agi/nex-n2.5-mini:free\"\nbase_url = \"http://127.0.0.1:25100/v1\"\n",
         );
         let dm = test_dm();
         let m = seed_manifest_from_disk(&agents, "assistant", &dm).expect("disk TOML should seed");
-        assert_eq!(m.model.provider, "llama-swap");
+        assert_eq!(m.model.provider, "herd");
         assert_eq!(m.model.model, "nex-agi/nex-n2.5-mini:free");
         assert_eq!(
             m.model.base_url.as_deref(),

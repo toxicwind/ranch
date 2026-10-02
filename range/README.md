@@ -49,7 +49,7 @@ upstream name. The local rename frees `shep` for the unrelated
 
 ## sovereign-router — TS multi-provider gateway (:25104)
 
-The live multi-provider gateway: 7 providers (llama-swap, openrouter, nvidia,
+The live multi-provider gateway: 7 providers (herd, openrouter, nvidia,
 groq, cerebras, google, mistral), 7 routing strategies, built-in `/ui`
 dashboard. Source: `tools/sovereign-router/sovereign-router-ts/` (estate root).
 
@@ -62,7 +62,7 @@ curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25104/v1/chat/completions
 | Strategy | Behavior |
 | -------- | -------- |
 | `hybrid` (default) | sticky → ast_race → circuit_chain |
-| `free` | races local llama-swap + every `:free` cloud model (zero-cost) |
+| `free` | races local herd + every `:free` cloud model (zero-cost) |
 | `ast_race` | parallel fan-out, first valid response wins |
 | `sticky_affinity` | session-pinned routing for multi-turn |
 | `weighted_elo` | ELO-weighted selection from success/latency history |

@@ -18,7 +18,7 @@ https://github.com/nilenso/autoresearch/blob/HEAD/docs/agent-friendly-cli-paper.
   silently; name the recovery path.
 
 **Implementation in this fork:**
-- `agent set --provider llama-swap --model <typo>` used to be *accepted
+- `agent set --provider herd --model <typo>` used to be *accepted
   silently* and fail later at inference time — textbook Class C. Now
   `set_agent_model` validates with a strict provider-scoped check
   (`ModelCatalog::has_model_for_provider`, no cross-provider fallback) and
@@ -56,9 +56,9 @@ the primary.
   `for … await` version would have paid 2s × N on the boot path.
 - `/api/providers` health probes are likewise concurrent with per-provider
   timeouts and cache.
-- llama-swap rides the same raced path as a first-class local provider
+- herd rides the same raced path as a first-class local provider
   (default `http://localhost:25100/v1`, the herd multiplexer; override via
-  `LLAMA_SWAP_BASE_URL` / `LLAMA_SWAP_HOST`), with dynamic model discovery
+  `HERD_BASE_URL` / `HERD_HOST`), with dynamic model discovery
   merged into the catalog.
 
 ## 3. Provider registry as an open plug-in boundary
@@ -72,7 +72,7 @@ with no changes to existing code.
 
 **Implementation in this fork:**
 - The provider registry + driver boundary is the connection point.
-  llama-swap was added **as a registered provider with a driver**, not as a
+  herd was added **as a registered provider with a driver**, not as a
   special-case shim: catalog entry, known-provider registration, local
   health support, dynamic discovery.
 - `set_agent_model` resolves `provider/model` prefixes through a **generic
@@ -80,5 +80,5 @@ with no changes to existing code.
   **no code changes** — a new provider registered tomorrow resolves the
   same way. The hardcoded prefix list is a fast path, not the mechanism.
 - Built-in tool-capable model metadata (e.g.
-  `toolcall-local/qwen3.5-9b-tool` on llama-swap) ships in the catalog so
+  `toolcall-local/qwen3.5-9b-tool` on herd) ships in the catalog so
   agents can select tool-use models without probing.

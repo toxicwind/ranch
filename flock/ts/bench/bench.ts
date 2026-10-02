@@ -56,11 +56,11 @@ const REFUSAL_MARKERS = [
 ];
 
 /**
- * Deliberately NOT benched: llama-swap (local compute not for tasks),
+ * Deliberately NOT benched: herd (local compute not for tasks),
  * kimi-auto (Moonshot 429 — no top-up, Chris's call), openrouter
  * (already has GuideLLM priors from benchlink).
  */
-export const BENCH_EXCLUDE = new Set(["llama-swap", "kimi-auto", "openrouter"]);
+export const BENCH_EXCLUDE = new Set(["herd", "kimi-auto", "openrouter"]);
 
 export interface BenchProviderDef {
   name: string;

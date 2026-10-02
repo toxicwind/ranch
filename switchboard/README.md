@@ -10,7 +10,7 @@ The estate has three kinds of routers and none of them route *capabilities*:
 
 | Router | Routes | Port |
 |---|---|---|
-| herd (`:25100`) | models → llama-swap backends | 25100 |
+| herd (`:25100`) | models → herd backends | 25100 |
 | sovereign-router (`:25104`) | model requests → providers (strategies, Elo, circuits) | 25104 |
 | flock (`:25193`) | (model routing variant) | 25193 |
 

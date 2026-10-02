@@ -150,7 +150,7 @@ No reverts. Additive only.
   /metrics (`sovereign_router_model_empty_strikes`). Flock's
   `flock_model_empty_strikes` mirrors that metric name family for cross-stack
   correlation.
-- **Herd / llama-swap (:25100)** — two defects observed during the audit, both
+- **Herd / herd (:25100)** — two defects observed during the audit, both
   out of scope for this patch but recorded here:
   - `GET /v1/v1/models` → 404: doubled path prefix in the herd client/config;
     the correct path is `/v1/models`.

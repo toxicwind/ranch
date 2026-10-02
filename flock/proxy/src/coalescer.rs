@@ -21,6 +21,9 @@ pub struct SharedResponse {
     pub status: u16,
     pub content_type: String,
     pub body: Bytes,
+    /// Upstream headers relayed to every coalesced client, e.g. keypool's
+    /// `x-interaction-id` (the Gemini Interactions turn handle).
+    pub extra: Vec<(String, String)>,
 }
 
 struct Entry {

@@ -28,7 +28,7 @@ export async function decide(
           headers: {
             ...(result.headers ?? {}),
             "X-Cuttinggate-Strategy": "longctx-2m-pin",
-            "X-Routed-Via": result.provider === "llama-swap" ? "herd" : "flock",
+            "X-Routed-Via": result.provider === "herd" ? "herd" : "flock",
           },
         };
       }
@@ -47,7 +47,7 @@ export async function decide(
           headers: {
             ...(result.headers ?? {}),
             "X-Cuttinggate-Strategy": "longctx-pin",
-            "X-Routed-Via": result.provider === "llama-swap" ? "herd" : "flock",
+            "X-Routed-Via": result.provider === "herd" ? "herd" : "flock",
           },
         };
       }
@@ -67,10 +67,10 @@ export async function decide(
   // Get appropriate candidates for the chosen backend
   let candidates: [string, string][] = [];
   if (isHerd) {
-    // Herd: local models via llama-swap
-    const servingModels = ctx.servingModels("llama-swap");
+    // Herd: local models via herd
+    const servingModels = ctx.servingModels("herd");
     for (const model of servingModels) {
-      candidates.push(["llama-swap", model]);
+      candidates.push(["herd", model]);
     }
     // Fallback to local roles if no serving models
     if (candidates.length === 0) {
@@ -78,25 +78,25 @@ export async function decide(
         const roles = await ctx.loadLocalRoleModels?.();
         if (roles) {
           candidates = [
-            ["llama-swap", roles.fast],
-            ["llama-swap", roles.quality],
-            ["llama-swap", roles.longctx],
+            ["herd", roles.fast],
+            ["herd", roles.quality],
+            ["herd", roles.longctx],
           ];
         }
       } catch (e) {
         // If loading roles fails, use hardcoded defaults
         candidates = [
-          ["llama-swap", "beellama/exaone-4-0-1-2b-iq4xs"],
-          ["llama-swap", "beellama/qwen-flash-64k"],
-          ["llama-swap", "beellama/qwen-flash-256k"],
+          ["herd", "beellama/exaone-4-0-1-2b-iq4xs"],
+          ["herd", "beellama/qwen-flash-64k"],
+          ["herd", "beellama/qwen-flash-256k"],
         ];
       }
     }
   } else {
-    // Flock: cloud providers (excluding llama-swap)
+    // Flock: cloud providers (excluding herd)
     const providers = ctx.providers();
     for (const provider of providers) {
-      if (provider.name === "llama-swap") continue; // Skip local provider for flock
+      if (provider.name === "herd") continue; // Skip local provider for flock
       if (!ctx.keyOk(provider.name)) continue;
       if (!ctx.circuitOk(provider.name)) continue;
       const models = ctx.servingModels(provider.name);
@@ -108,7 +108,7 @@ export async function decide(
     if (candidates.length === 0) {
       const allFree = ctx.freeCandidates();
       for (const [provider] of allFree) {
-        if (provider !== "llama-swap") {
+        if (provider !== "herd") {
           const models = ctx.servingModels(provider);
           for (const model of models) {
             candidates.push([provider, model]);
