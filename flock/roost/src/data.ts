@@ -820,6 +820,90 @@ export const PROVIDER_DEFS: ProviderDef[] = [
       "qwen3-coder-flash": 256000
     },
   },
+  {
+    name: "pzero",
+    displayName: "PZERO",
+    baseUrl: "https://api.pzero.studio/v1",
+    keyEnv: "PZERO_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models lists WITHOUT a key (verified live 2026-10-02, 343 models);
+    // completions need a key. Seeds are the live no-auth listing.
+    seeds: [
+      "kimi-k2-6",
+      "kimi-k2-5",
+      "llama-3.2-3b",
+      "llama-3.3-70b",
+      "deepseek-v3.2",
+      "deepseek-v4-flash",
+      "claude-opus-4-8",
+    ],
+  },
+  {
+    name: "sference",
+    displayName: "sference",
+    baseUrl: "https://api.sference.com/v1",
+    keyEnv: "SFERENCE_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models lists WITHOUT a key (verified live 2026-10-02); EU-hosted,
+    // three latency tiers. Seeds are the live no-auth listing.
+    seeds: [
+      "moonshotai/Kimi-K3",
+      "zai-org/GLM-5.2",
+      "zai-org/GLM-5.3-Flash",
+      "zai-org/GLM-5.3",
+      "deepseek-ai/DeepSeek-V4-Flash",
+    ],
+  },
+  {
+    name: "minara",
+    displayName: "Minara Cloud",
+    baseUrl: "https://api.minara.ai/v1",
+    keyEnv: "MINARA_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models lists WITHOUT a key (verified live 2026-10-02, 125 models);
+    // aggregator-style gateway with gateway-side failover.
+    seeds: [
+      "anthropic/claude-opus-5.5",
+      "anthropic/claude-sonnet-5.5",
+      "anthropic/claude-fable-5.1",
+    ],
+  },
+  {
+    name: "cometapi",
+    displayName: "CometAPI",
+    baseUrl: "https://api.cometapi.com/v1",
+    keyEnv: "COMETAPI_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models 401s without a key (verified live 2026-10-02); 500+ models
+    // claimed. Seeds empty until keyed.
+    seeds: [],
+  },
+  {
+    name: "inferx",
+    displayName: "InferX",
+    baseUrl: "https://model.inferx.net/v1",
+    keyEnv: "INFERX_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models 401s without a key (verified live 2026-10-02); tenant-scoped
+    // keys — adapter must handle tenant context. Seeds empty until keyed.
+    seeds: [],
+  },
+  {
+    name: "gpuai",
+    displayName: "GPU.ai",
+    baseUrl: "https://api.gpu.ai/v1",
+    keyEnv: "GPUAI_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models 401s without a key (verified live 2026-10-02); multimodal
+    // serverless (chat+image+video+embeddings). Seeds empty until keyed.
+    seeds: [],
+  },
 ];
 
 /**

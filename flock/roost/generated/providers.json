@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-roost/v1",
-  "generatedAt": "2026-10-01T09:03:44.215Z",
+  "generatedAt": "2026-09-30T13:10:25.000Z",
   "generator": "@ranch/roost codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/roost src/data.ts",
   "adapters": [
@@ -498,6 +498,54 @@
       "keyEnv": "DASHSCOPE_API_KEY",
       "adapter": "openai",
       "auth": "bearer"
+    },
+    {
+      "name": "pzero",
+      "displayName": "PZERO",
+      "baseUrl": "https://api.pzero.studio/v1",
+      "keyEnv": "PZERO_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "sference",
+      "displayName": "sference",
+      "baseUrl": "https://api.sference.com/v1",
+      "keyEnv": "SFERENCE_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "minara",
+      "displayName": "Minara Cloud",
+      "baseUrl": "https://api.minara.ai/v1",
+      "keyEnv": "MINARA_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "cometapi",
+      "displayName": "CometAPI",
+      "baseUrl": "https://api.cometapi.com/v1",
+      "keyEnv": "COMETAPI_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "inferx",
+      "displayName": "InferX",
+      "baseUrl": "https://model.inferx.net/v1",
+      "keyEnv": "INFERX_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "gpuai",
+      "displayName": "GPU.ai",
+      "baseUrl": "https://api.gpu.ai/v1",
+      "keyEnv": "GPUAI_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
     }
   ],
   "seeds": {
@@ -764,7 +812,31 @@
     "dashscope": [
       "qwen3-coder-plus",
       "qwen3-coder-flash"
-    ]
+    ],
+    "pzero": [
+      "kimi-k2-6",
+      "kimi-k2-5",
+      "llama-3.2-3b",
+      "llama-3.3-70b",
+      "deepseek-v3.2",
+      "deepseek-v4-flash",
+      "claude-opus-4-8"
+    ],
+    "sference": [
+      "moonshotai/Kimi-K3",
+      "zai-org/GLM-5.2",
+      "zai-org/GLM-5.3-Flash",
+      "zai-org/GLM-5.3",
+      "deepseek-ai/DeepSeek-V4-Flash"
+    ],
+    "minara": [
+      "anthropic/claude-opus-5.5",
+      "anthropic/claude-sonnet-5.5",
+      "anthropic/claude-fable-5.1"
+    ],
+    "cometapi": [],
+    "inferx": [],
+    "gpuai": []
   },
   "seedsContract": "Cold-start only: served while a provider has never had a successful discovery; inert afterwards. Never hand-edit model membership here — discovery owns it.",
   "aliases": {
