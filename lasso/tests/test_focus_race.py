@@ -30,7 +30,7 @@ def pin(monkeypatch, provider, broken):
 
 
 def make_run(monkeypatch, *, status=STATUS_LUA, eval_out="table",
-             on_dispatch=None, active=WANT, clients=()):
+             on_dispatch=None, active=WANT, clients=({"address": WANT},)):
     """Script hyprctl._run.
 
     on_dispatch(args) -> "ok" or raises HyprctlError. active is the address
@@ -80,6 +80,21 @@ def lua_dispatch_ok_but_legacy_syntax_error(args):
 
 
 # --- dry-run barrier ----------------------------------------------------------
+
+
+def test_stale_target_refuses_before_race(monkeypatch):
+    # Borrowed from the Hypr-Agent-Portal hunt: never race strategies
+    # against a window that already closed. The refusal fires before any
+    # dispatch, and carries the STALE_TARGET taxonomy.
+    pin(monkeypatch, hyprctl.LUA, False)
+    seen = []
+    make_run(monkeypatch, on_dispatch=lambda a: seen.append(a) or "ok",
+             clients=())
+    with pytest.raises(hyprctl.VerificationFailed) as ei:
+        hyprctl.focus_window(WANT)
+    assert ei.value.reason == hyprctl.VerificationFailed.STALE_TARGET
+    assert ei.value.strategy == "pre-race"
+    assert seen == []  # refusal precedes every strategy thread
 
 
 def test_dryrun_barrier_fires_before_any_strategy(monkeypatch):
@@ -147,7 +162,8 @@ def test_false_ok_is_not_a_win(monkeypatch):
 def test_legacy_wins_when_only_it_applies(monkeypatch):
     """Broken IPC Lua state + no app-id mapping: the last resort carries it."""
     pin(monkeypatch, hyprctl.LUA, True)
-    make_run(monkeypatch, on_dispatch=lambda args: "ok", clients=[])
+    make_run(monkeypatch, on_dispatch=lambda args: "ok",
+             clients=[{"address": WANT}])
     fake_wlrctl(monkeypatch, "fail")  # must not even run: no app-id
     assert hyprctl.focus_window(WANT) == "legacy"
 
@@ -159,7 +175,7 @@ def test_all_fail_raises_with_every_error_and_skip_reason(monkeypatch):
         on_dispatch=lambda args: (_ for _ in ()).throw(
             hyprctl.HyprctlError("error: <eof> expected near 'focuswindow'")
         ),
-        clients=[],
+        clients=[{"address": WANT}],
         active="0xother",
     )
     fake_wlrctl(monkeypatch, "fail")
@@ -169,7 +185,7 @@ def test_all_fail_raises_with_every_error_and_skip_reason(monkeypatch):
     msg = str(ei.value)
     assert "all strategies failed" in msg
     assert "hyprctl: skipped" in msg and "hl API table" in msg
-    assert "wlrctl: no app-id" in msg
+    assert "wlrctl:" in msg and "no app-id" in msg
     assert "legacy:" in msg
 
 

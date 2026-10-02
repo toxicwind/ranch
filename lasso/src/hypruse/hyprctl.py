@@ -35,6 +35,32 @@ class HyprctlError(RuntimeError):
     """hyprctl failed, returned an error, or is unreachable."""
 
 
+class VerificationFailed(HyprctlError):
+    """A focus strategy failed verification, with a machine-readable reason.
+
+    Borrowed idea (Hypr-Agent-Portal hunt, 2026-09-30): the Portal refuses
+    stale targets and reports an explicit VerificationFailed taxonomy
+    instead of stringly-typed errors. Ported here as our own implementation:
+    the race classifies every loss so the aggregated error — and any caller
+    catching this — can tell a closed window from a lying dispatcher from a
+    dispatch that raised, without parsing message strings.
+    """
+
+    STALE_TARGET = "stale_target"  # window gone from the clients list
+    UNVERIFIED = "unverified"      # dispatch ok, activewindow never matched
+    DISPATCH = "dispatch"          # the dispatch itself raised
+
+    def __init__(self, strategy: str, wanted: str, reason: str, detail: str = "") -> None:
+        self.strategy = strategy
+        self.wanted = wanted
+        self.reason = reason
+        self.detail = detail
+        msg = "%s: verification failed (%s)" % (strategy, reason)
+        if detail:
+            msg += ": %s" % detail
+        super().__init__(msg)
+
+
 def _run(*args: str) -> str:
     if shutil.which("hyprctl") is None:
         raise HyprctlError("hyprctl not found, hypruse needs a running Hyprland session")
@@ -409,6 +435,26 @@ def _app_id_for_address(address: str) -> str | None:
     return None
 
 
+def _target_live(address: str) -> bool:
+    """Is the target window still in the compositor's clients list?
+
+    A single fresh query — no retry on miss (a window that closed stays
+    closed; retrying only delays the refusal). If the query itself fails we
+    cannot tell, so fail OPEN and let the race decide: never refuse on
+    uncertainty.
+    """
+    addr = address.removeprefix("address:").lower()
+    try:
+        clients = query("clients")
+    except HyprctlError:
+        return True
+    return any(
+        isinstance(c, dict)
+        and str(c.get("address") or "").removeprefix("address:").lower() == addr
+        for c in clients
+    )
+
+
 def _wlrctl_focus(app_id: str, timeout: float = _FOCUS_DISPATCH_TIMEOUT_S) -> None:
     """Focus via wlrctl foreign-toplevel-management. Raises on failure."""
     if not shutil.which("wlrctl"):
@@ -492,7 +538,7 @@ def _race_focus_strategy(
     name: str,
     thunk: Callable[[], None],
     wanted: str,
-    outcomes: dict[str, tuple[bool, str]],
+    outcomes: dict[str, tuple[bool, str, VerificationFailed | None]],
     lock: threading.Lock,
     won: threading.Event,
 ) -> None:
@@ -500,13 +546,15 @@ def _race_focus_strategy(
 
     Any exception — dispatch failure, verify timeout, anything unexpected —
     is recorded as this strategy's loss, never as a dead thread: a worker
-    must never kill the race.
+    must never kill the race. Losses carry a VerificationFailed taxonomy
+    (None for unexpected exceptions) so the aggregation can classify.
     """
-    ok, err = False, ""
+    ok, err, failure = False, "", None
     try:
         thunk()
     except HyprctlError as exc:
-        err = f"{name}: {exc}"
+        failure = VerificationFailed(name, wanted, VerificationFailed.DISPATCH, str(exc))
+        err = str(failure)
     except Exception as exc:  # noqa: BLE001 — the race degrades, never dies
         err = f"{name}: unexpected {type(exc).__name__}: {exc}"
     else:
@@ -515,12 +563,25 @@ def _race_focus_strategy(
         if _verify_focus(wanted, timeout=_FOCUS_VERIFY_TIMEOUT_S):
             ok = True
         else:
-            err = (
-                f"{name}: dispatch claimed success but activewindow never "
-                f"showed {wanted}"
+            # Dispatch claimed success but the compositor never showed our
+            # window focused. Distinguish the window closing mid-race from a
+            # dispatcher that lied: one fresh liveness probe decides.
+            try:
+                active = query("activewindow")
+                observed = str((active or {}).get("address") or "?")
+            except HyprctlError:
+                observed = "?"
+            reason = (
+                VerificationFailed.STALE_TARGET
+                if not _target_live(wanted)
+                else VerificationFailed.UNVERIFIED
             )
+            failure = VerificationFailed(
+                name, wanted, reason, f"activewindow shows {observed}"
+            )
+            err = str(failure)
     with lock:
-        outcomes[name] = (ok, err)
+        outcomes[name] = (ok, err, failure)
 
 
 def focus_window(address: str) -> str:
@@ -541,15 +602,28 @@ def focus_window(address: str) -> str:
     Same-tick ties break hyprctl > wlrctl > legacy; otherwise
     first-valid-wins, period. Returns the winning strategy's name
     ("hyprctl", "wlrctl", "legacy"). Raises HyprctlError carrying every
-    strategy's error (and every skip reason) if all fail. The dry-run
+    strategy's error (and every skip reason) if all fail. Losses are
+    classified (VerificationFailed: stale_target / unverified / dispatch);
+    a target missing from the clients list is refused before the race
+    starts. The dry-run
     barrier fires before any strategy thread starts.
     """
     journal.refuse_if_dry(f"focus_window {address}")
     addr = address if address.startswith("address:") else f"address:{address}"
     wanted = addr.removeprefix("address:").lower()
+    # Stale-target refusal (borrowed from the Hypr-Agent-Portal hunt): never
+    # race three strategies against a window that already closed. Fail open —
+    # _target_live returns True when the clients query itself fails.
+    if not _target_live(address):
+        raise VerificationFailed(
+            "pre-race",
+            wanted,
+            VerificationFailed.STALE_TARGET,
+            f"target {address} not in clients list; refusing to race a closed window",
+        )
     runners, skipped = _applicable_focus_strategies(addr, address)
 
-    outcomes: dict[str, tuple[bool, str]] = {}
+    outcomes: dict[str, tuple[bool, str, VerificationFailed | None]] = {}
     lock = threading.Lock()
     won = threading.Event()
     for name, thunk in runners:
@@ -575,14 +649,20 @@ def focus_window(address: str) -> str:
         time.sleep(_FOCUS_RACE_QUANTUM_S)
 
     errors = [f"{name}: skipped ({reason})" for name, reason in skipped]
+    reasons: set[str] = set()
     for name, _thunk in runners:
         res = outcomes.get(name)
         if res is None:
             errors.append(f"{name}: timed out without reporting")
         elif not res[0]:
             errors.append(res[1])
+            if res[2] is not None:
+                reasons.add(res[2].reason)
+    headline = "all strategies failed"
+    if reasons == {VerificationFailed.STALE_TARGET}:
+        headline = "target went stale; all strategies failed"
     raise HyprctlError(
-        f"focus_window {address}: all strategies failed: " + "; ".join(errors)
+        f"focus_window {address}: {headline}: " + "; ".join(errors)
     )
 
 
