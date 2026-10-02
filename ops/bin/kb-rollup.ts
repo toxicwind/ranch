@@ -426,10 +426,18 @@ async function main(): Promise<void> {
     else { console.error(`unknown arg: ${a}`); usage(); process.exit(2); }
   }
   if (!kb) {
-    const proc = Bun.spawnSync(["git", "-C", dirname(new URL(import.meta.url).pathname), "rev-parse", "--show-toplevel"]);
-    const root = proc.stdout.toString().trim();
-    if (!root) { console.error("kb-rollup: cannot find repo root; pass --kb PATH."); process.exit(2); }
-    kb = join(root, "docs", "fleet-knowledgebase.md");
+    // Walk up from the script dir: the KB lives at <estate>/docs/fleet-knowledgebase.md,
+    // but this script now runs from inside the nested ranch repo (projects/ retirement),
+    // where git toplevel stops at ranch/. Probe upward instead of trusting git.
+    let dir = dirname(new URL(import.meta.url).pathname);
+    for (let i = 0; i < 8; i++) {
+      const cand = join(dir, "docs", "fleet-knowledgebase.md");
+      if (existsSync(cand)) { kb = cand; break; }
+      const parent = dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+    if (!kb) { console.error("kb-rollup: cannot find fleet-knowledgebase.md upward; pass --kb PATH."); process.exit(2); }
   }
   if (!existsSync(kb)) { console.error(`kb-rollup: KB not found at ${kb}`); process.exit(2); }
 
