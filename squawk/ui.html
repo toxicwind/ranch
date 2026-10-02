@@ -17,15 +17,25 @@
            display:flex; gap:10px; align-items:center; background:var(--panel); }
   header h1 { font-size:16px; margin:0; color:var(--accent); letter-spacing:2px; }
   header .spacer { flex:1; }
+  #connHead { color:var(--sealed); }
   input, button { font:inherit; background:#0f0c09; color:var(--ink);
                   border:1px solid var(--line); border-radius:6px; padding:6px 10px; }
   input:focus-visible, button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
   button { cursor:pointer; color:var(--accent); border-color:var(--accent); }
   button:disabled { opacity:.4; cursor:default; }
-  #gate { margin:auto; padding:28px; border:1px solid var(--line); border-radius:10px;
-          background:var(--panel); display:flex; flex-direction:column; gap:12px; width:min(420px,92vw); }
-  #gate p { margin:0 0 4px; color:var(--dim); font-size:12px; }
-  #app { display:none; flex-direction:column; flex:1; min-height:0; }
+
+  /* channel tab bar: squawk is the shell, each channel is a tab (fleet is one tab) */
+  #tabs { display:flex; gap:6px; align-items:flex-end; padding:8px 14px 0;
+          background:var(--panel); border-bottom:1px solid var(--line); overflow-x:auto; }
+  .tab { display:flex; gap:8px; align-items:center; padding:5px 10px;
+         border:1px solid var(--line); border-bottom:none; border-radius:8px 8px 0 0;
+         background:#0f0c09; color:var(--dim); white-space:nowrap; }
+  .tab.active { color:var(--accent); border-color:var(--accent); background:var(--bg); }
+  .tab .x { color:var(--faint); padding:0 4px; border-radius:4px; line-height:1.2; }
+  .tab .x:hover { color:#c46a5a; }
+  #addTab { margin-left:2px; margin-bottom:0; padding:4px 10px; align-self:center; }
+
+  #app { display:flex; flex-direction:column; flex:1; min-height:0; }
   #log { flex:1; overflow-y:auto; padding:12px 14px; display:flex; flex-direction:column; gap:10px; }
 
   /* message card: meta row on top, body below -- scannable at a glance */
@@ -71,42 +81,38 @@
     .msg .ts { margin-left:0; }           /* meta wraps: time drops below sender */
     .msg .body { font-size:15px; }        /* body stays readable on small screens */
     header h1 { font-size:14px; }
+    #tabs { padding:6px 8px 0; }
+    .tab { padding:4px 8px; }
   }
 </style>
 </head>
 <body>
 <header>
   <h1>SQUAWK</h1>
-  <input id="channel" value="fleet" size="10" title="channel" aria-label="channel">
   <button id="src" title="live source: click to switch poll/ws/nats" aria-label="live source">poll</button>
   <div class="spacer"></div>
-  <span id="connHead" aria-hidden="true">●</span>
+  <span id="connHead" aria-hidden="true">&#9679;</span>
 </header>
-
-
+<div id="tabs" role="tablist" aria-label="channels"></div>
 <div id="app">
-  <div id="log" role="log" aria-live="polite" aria-label="fleet messages"></div>
+  <div id="log" role="log" aria-live="polite" aria-label="squawk messages"></div>
   <div id="composer">
-    <input id="msg" placeholder="chat as chris…  (enter to send)" autocomplete="off" aria-label="message">
+    <input id="msg" placeholder="message #fleet&#8230;  (enter to send)" autocomplete="off" aria-label="message">
     <button id="send">send</button>
   </div>
-  <div id="status"><span><span class="dot" id="conn">●</span> <span id="connstat">loading…</span></span><span id="seq"></span><span id="lat"></span></div>
+  <div id="status"><span><span class="dot" id="conn">&#9679;</span> <span id="connstat">loading&#8230;</span></span><span id="seq"></span><span id="lat"></span></div>
 </div>
 
 <script>
+'use strict';
 const $ = id => document.getElementById(id);
-let token = sessionStorage.getItem('squawk-token') || '';
-// magic link: ?token=... auto-tunes, no paste needed (scrubbed from the bar after)
-try {
-  var q = new URLSearchParams(location.search).get('token');
-  if (q && !token) {
-    token = q.trim();
-    sessionStorage.setItem('squawk-token', token);
-    history.replaceState(null, '', location.pathname + location.hash);
-  }
-} catch (e) {}
-let since = 0, running = false, failures = 0, booted = false, gen = 0;
-let pollCtrl = null; // per-generation AbortController: a channel switch aborts in-flight polls
+
+// Server-auth only: squawk-ui.ts holds the feed token and injects it on
+// proxied feed requests and squawk-ws upgrades. The browser never holds,
+// pastes, or gates on a token -- there is no token UI anywhere in this file.
+
+let running = false, failures = 0, booted = false, gen = 0;
+let pollCtrl = null; // per-generation AbortController: a tab switch aborts in-flight polls
 // live source: 'poll' (long-poll, default), 'ws' (squawk-ws push server),
 // or 'nats' (JetStream mirror over websocket). ?src= selects; the header
 // button cycles poll -> ws -> nats at runtime.
@@ -121,15 +127,28 @@ const BATCH_CAP = 50;   // server MAX_MESSAGES: a full batch means backlog
 // API base: directory of this page, so the UI works under any mount point
 // (/, /fleet/, ...). Proxies strip the mount prefix before the backend.
 const APIBASE = location.pathname.replace(/[^/]*$/, '');
-function auth() { return { 'Authorization': 'Bearer ' + token }; }
-function chan() { return encodeURIComponent($('channel').value.trim() || 'fleet'); }
+function auth() { return {}; } // the server injects the feed token itself
+
+// --- channel tabs: each tab keeps its own message view, cursor, scroll ---
+// Squawk is the parent shell; fleet is one tab among channels.
+const tabs = {}; // name -> { name, since, html, scrollTop, snapshotted }
+let activeName = null;
+function validName(n) { return /^[a-z0-9_-]{1,32}$/.test(n); }
+function getTab(name) {
+  name = String(name || '').toLowerCase();
+  if (!validName(name)) name = 'fleet';
+  if (!tabs[name]) tabs[name] = { name: name, since: 0, html: '', scrollTop: 0, snapshotted: false };
+  return tabs[name];
+}
+function activeTab() { return tabs[activeName]; }
+function chan() { return encodeURIComponent(activeName || 'fleet'); }
 
 // --- connection state: loading / live / catching-up / reconnecting -----
 const STATES = {
-  'loading':     ['#e0a458', 'loading…'],
+  'loading':     ['#e0a458', 'loading\u2026'],
   'live':        ['var(--sealed)', 'live'],
-  'catching-up': ['#e0a458', 'catching up…'],
-  'reconnecting':['#c46a5a', 'reconnecting…'],
+  'catching-up': ['#e0a458', 'catching up\u2026'],
+  'reconnecting':['#c46a5a', 'reconnecting\u2026'],
 };
 function setState(name, extra) {
   const s = STATES[name] || STATES.live;
@@ -219,36 +238,114 @@ function render(m) {
     ? `<div class="body">${md(text)}</div>`
     : (m.sealed ? '' : '<div class="body empty">(no content)</div>');
   line(`<div class="meta"><span class="who">${esc(who)}</span>` +
-       `<span class="ch">#${esc(m.channel || $('channel').value)}</span>` +
+       `<span class="ch">#${esc(m.channel || activeName || 'fleet')}</span>` +
        `${badges(m)}${relayed}<span class="ts">${esc(ts)}</span></div>${bodyHtml}`, 'msg' + mine);
 }
 
 async function sendMsg() {
   const el = $('msg');
   const text = el.value.trim();
-  if (!text || !running) return;
+  if (!text || !running || !activeName) return;
   const btn = $('send');
   btn.disabled = true; el.disabled = true;
   try {
     const r = await fetch('send', {
       method: 'POST',
       headers: Object.assign(auth(), {'Content-Type': 'application/json'}),
-      body: JSON.stringify({ channel: $('channel').value.trim() || 'fleet', text }),
+      body: JSON.stringify({ channel: activeName, text }),
     });
     const d = await r.json().catch(() => ({}));
     if (!r.ok || !d.ok) throw new Error(d.error || ('http ' + r.status));
     el.value = '';
-    // the long-poll will render it live; no optimistic duplicate needed
+    // the live loop will render it; no optimistic duplicate needed
   } catch (e) {
     line('send failed: ' + esc(e.message || e) + ' — retrying is safe', 'sys');
   } finally {
     btn.disabled = false; el.disabled = false; el.focus();
   }
 }
-$('send').onclick = sendMsg;
-$('msg').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
-});
+
+// --- tab bar ------------------------------------------------------------
+function renderTabs() {
+  const bar = $('tabs');
+  bar.innerHTML = '';
+  const names = Object.keys(tabs);
+  for (const name of names) {
+    const b = document.createElement('button');
+    b.className = 'tab' + (name === activeName ? ' active' : '');
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', name === activeName ? 'true' : 'false');
+    const label = document.createElement('span');
+    label.textContent = '#' + name;
+    b.appendChild(label);
+    if (names.length > 1) {
+      const x = document.createElement('span');
+      x.className = 'x';
+      x.textContent = '\u00d7';
+      x.title = 'close #' + name;
+      x.setAttribute('role', 'button');
+      x.setAttribute('aria-label', 'close #' + name);
+      x.onclick = ev => { ev.stopPropagation(); closeTab(name); };
+      b.appendChild(x);
+    }
+    b.onclick = () => showTab(name);
+    bar.appendChild(b);
+  }
+  const add = document.createElement('button');
+  add.id = 'addTab';
+  add.textContent = '+';
+  add.title = 'add channel';
+  add.setAttribute('aria-label', 'add channel');
+  add.onclick = addTab;
+  bar.appendChild(add);
+}
+
+function stashTab() {
+  const t = tabs[activeName];
+  if (t) { t.html = $('log').innerHTML; t.scrollTop = $('log').scrollTop; }
+}
+
+function showTab(name) {
+  name = String(name || '').toLowerCase();
+  if (!tabs[name] || name === activeName) return;
+  stashTab(); // keep this tab's view, cursor, and scroll
+  activeName = name;
+  const t = tabs[name];
+  $('log').innerHTML = t.html;
+  requestAnimationFrame(() => { $('log').scrollTop = t.scrollTop; });
+  $('msg').placeholder = 'message #' + name + '\u2026  (enter to send)';
+  $('seq').textContent = 'seq ' + t.since;
+  renderTabs();
+  if (running) boot();
+}
+
+function addTab() {
+  const raw = prompt('channel name (a-z, 0-9, -, _):');
+  if (raw == null) return;
+  const name = raw.trim().toLowerCase();
+  if (!validName(name)) { alert('channel names are 1-32 chars: a-z 0-9 - _'); return; }
+  getTab(name);
+  renderTabs();
+  showTab(name);
+}
+
+function closeTab(name) {
+  if (!tabs[name]) return;
+  if (Object.keys(tabs).length <= 1) return; // never close the last tab
+  delete tabs[name];
+  if (name === activeName) {
+    activeName = null;
+    $('log').innerHTML = '';
+    showTab(Object.keys(tabs)[0]);
+  } else {
+    renderTabs();
+  }
+}
+
+function closeSockets() {
+  if (wsLive_sock) { try { wsLive_sock.close(); } catch (e) {} wsLive_sock = null; }
+  if (natsWs) { try { natsWs.close(); } catch (e) {} natsWs = null; }
+}
 
 // --- squawk-ws live source --------------------------------------------
 // Push feed from the squawk-ws server (first-class websocket, inotify-driven).
@@ -256,12 +353,13 @@ $('msg').addEventListener('keydown', e => {
 // live messages plus reconnect replay: we send our last seen `seq` as `since`
 // and the server replays everything missed (socket.io-style recovery).
 // Any failure falls back to the long-poll loop -- the file feed stays the fallback.
+// Server-auth: squawk-ui.ts injects the feed token into the upgrade request.
 let wsLive_sock = null;
 function wsUrl() {
   return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host
-       + APIBASE + 'squawk-ws?token=' + encodeURIComponent(token);
+       + APIBASE + 'squawk-ws';
 }
-function wsLive(myGen) {
+function wsLive(myGen, tab) {
   if (myGen !== gen || !running) return;
   setState('loading');
   let ws;
@@ -272,11 +370,11 @@ function wsLive(myGen) {
     try { ws.close(); } catch (e) {}
     if (myGen !== gen || !running) return;
     if (++fails > 3) return wsFallback(myGen, why);
-    line('squawk-ws hiccup — resuming from seq ' + since + '…', 'sys');
-    setTimeout(() => wsLive(myGen), Math.min(5000, 500 * fails));
+    line('squawk-ws hiccup — resuming #' + tab.name + ' from seq ' + tab.since + '…', 'sys');
+    setTimeout(() => wsLive(myGen, tab), Math.min(5000, 500 * fails));
   };
   ws.onopen = () => {
-    ws.send(JSON.stringify({ subscribe: [chan()], since: since }));
+    ws.send(JSON.stringify({ subscribe: [tab.name], since: tab.since }));
     setState('live', ' · ws');
     fails = 0;
   };
@@ -284,9 +382,9 @@ function wsLive(myGen) {
     if (myGen !== gen || !running) return;
     let m;
     try { m = JSON.parse(ev.data); } catch (e) { return; }
-    if ((m.seq || 0) > since) {
-      render(m); since = m.seq;
-      $('seq').textContent = 'seq ' + since;
+    if ((m.seq || 0) > tab.since) {
+      render(m); tab.since = m.seq;
+      $('seq').textContent = 'seq ' + tab.since;
     }
   };
   ws.onerror = () => dead('ws error');
@@ -297,13 +395,13 @@ function wsLive(myGen) {
       dead('ws closed' + (ev.code ? ' ' + ev.code : ''));
     }
   };
-};
+}
 function wsFallback(myGen, why) {
   wsLive_sock = null;
   srcMode = 'poll'; paintSrc();
   line('squawk-ws unavailable (' + esc(why || '?') + ') — back on long-poll, nothing lost', 'sys');
   setState('reconnecting');
-  poll(myGen);
+  poll(myGen, activeTab());
 }
 
 // --- NATS live source ------------------------------------------------
@@ -315,7 +413,7 @@ let natsWs = null;
 function natsUrl() {
   return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + APIBASE + 'nats-ws';
 }
-function natsLive(myGen) {
+function natsLive(myGen, tab) {
   if (myGen !== gen || !running) return;
   setState('loading');
   let ws;
@@ -329,7 +427,7 @@ function natsLive(myGen) {
     if (myGen !== gen || !running) return;
     if (++fails > 3) return pollFallback(myGen, why);
     line('nats hiccup — retrying…', 'sys');
-    setTimeout(() => natsLive(myGen), Math.min(5000, 500 * fails));
+    setTimeout(() => natsLive(myGen, tab), Math.min(5000, 500 * fails));
   };
   ws.onmessage = ev => {
     buf += ev.data;
@@ -338,9 +436,9 @@ function natsLive(myGen) {
       const ln = buf.slice(0, i); buf = buf.slice(i + 2);
       if (ln.startsWith('INFO')) {
         send('CONNECT {"verbose":false,"pedantic":false,"tls_required":false,'
-             + '"auth_token":' + JSON.stringify(token)
+             + '"auth_token":""'
              + ',"protocol":1,"echo":true,"name":"squawk-ui"}');
-        send('SUB ' + chan() + '.messages ' + sid);
+        send('SUB ' + tab.name + '.messages ' + sid);
         setState('live', ' · nats');
         fails = 0;
       } else if (ln === 'PING') { send('PONG'); }
@@ -352,9 +450,9 @@ function natsLive(myGen) {
         const payload = buf.slice(0, j); buf = buf.slice(j + 2);
         try {
           const m = JSON.parse(payload);
-          if ((m.seq || 0) > since) {
-            render(m); since = m.seq;
-            $('seq').textContent = 'seq ' + since;
+          if ((m.seq || 0) > tab.since) {
+            render(m); tab.since = m.seq;
+            $('seq').textContent = 'seq ' + tab.since;
           }
         } catch (e) { /* malformed envelope: skip */ }
       } else if (ln.startsWith('-ERR')) { line('nats: ' + esc(ln), 'sys'); }
@@ -362,134 +460,129 @@ function natsLive(myGen) {
   };
   ws.onerror = () => dead('ws error');
   ws.onclose = () => { if (natsWs === ws) dead('ws closed'); };
-};
+}
 function pollFallback(myGen, why) {
   natsWs = null;
   srcMode = 'poll'; paintSrc();
   line('nats unavailable (' + esc(why || '?') + ') — back on long-poll, nothing lost', 'sys');
   setState('reconnecting');
-  poll(myGen);
+  poll(myGen, activeTab());
 }
 
-async function poll(myGen) {
-  if (!running || myGen !== gen) return;
+async function poll(myGen, tab) {
+  if (!running || myGen !== gen || !tab) return;
   const t0 = performance.now();
   try {
-    const r = await fetch(`wait?since=${since}&channel=${chan()}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(30000)])} });
+    const r = await fetch(`wait?since=${tab.since}&channel=${encodeURIComponent(tab.name)}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(30000)]) });
     if (r.status === 401 || r.status === 404) throw new Error('unauthorized');
     const data = await r.json();
-    if (myGen !== gen) return; // channel switched mid-flight: drop the stale response
+    if (myGen !== gen) return; // tab switched mid-flight: drop the stale response
     failures = 0;
     if (Array.isArray(data.messages)) {
       // only render messages newer than our cursor (dedup across concurrent wakes)
-      const fresh = data.messages.filter(m => (m.seq || 0) > since).sort((a,b) => (a.seq||0) - (b.seq||0));
+      const fresh = data.messages.filter(m => (m.seq || 0) > tab.since).sort((a,b) => (a.seq||0) - (b.seq||0));
       fresh.forEach(render);
-      if (data.seq > since) since = data.seq;
+      if (data.seq > tab.since) tab.since = data.seq;
       // a full batch means the server still has backlog: drain visibly
       const catching = data.messages.length >= BATCH_CAP;
       setState(catching ? 'catching-up' : 'live');
-    } else if (data.seq > since) { since = data.seq; setState('live'); }
+    } else if (data.seq > tab.since) { tab.since = data.seq; setState('live'); }
     else setState('live');
-    $('seq').textContent = 'seq ' + since;
+    $('seq').textContent = 'seq ' + tab.since;
     $('lat').textContent = 'wake ' + Math.round(performance.now() - t0) + 'ms';
   } catch (e) {
     if (myGen !== gen) return; // superseded: the new generation owns the loop now
     if (e && e.message === 'unauthorized') return authFailed();
-    if (e && e.name === 'TimeoutError') { setState('live'); return poll(myGen); }
+    if (e && e.name === 'TimeoutError') { setState('live'); return poll(myGen, tab); }
     failures++;
     setState('reconnecting', failures > 1 ? ` · try ${failures}` : '');
     if (failures === 1) line('feed hiccup — retrying…', 'sys');
     await new Promise(r => setTimeout(r, Math.min(5000, 500 * failures)));
   }
-  poll(myGen);
+  poll(myGen, tab);
 }
 
-// Definitive auth rejection (401): the stored token is dead. Retrying the
-// snapshot forever shows "reconnecting..." and never loads -- surface the gate
-// so a fresh token can be pasted instead of spinning.
+// Definitive auth rejection (401): with server-auth the browser holds no
+// token, so a 401 means the server-side feed token is missing or rejected.
+// Surface it plainly and keep retrying -- there is nothing to paste.
 function authFailed() {
-  running = false; booted = false; failures = 0;
-  try { if (pollCtrl) pollCtrl.abort(); } catch (e) {}
-  if (wsLive_sock) { try { wsLive_sock.close(); } catch (e) {} wsLive_sock = null; }
-  if (natsWs) { try { natsWs.close(); } catch (e) {} natsWs = null; }
-  token = '';
-  try { sessionStorage.removeItem('squawk-token'); } catch (e) {}
-  const gp = document.querySelector('#gate p');
-  if (gp) gp.innerHTML = 'That token was <b>rejected</b> (401) -- paste a fresh feed token.';
-  $('app').style.display = 'none';
-  $('gate').style.display = 'block';
-  setState('loading');
+  closeSockets();
+  line('feed rejected the request (401) — the server-side feed token looks missing or invalid. Retrying…', 'sys');
+  setState('reconnecting');
+  const myGen = gen;
+  setTimeout(() => { if (myGen === gen && running) boot(); }, 5000);
 }
 
-// Initial load: one bounded snapshot (the TAIL most recent messages) lands
-// us at the live cursor immediately -- no full-history drain, no reload.
+// Initial load per tab: one bounded snapshot (the TAIL most recent messages)
+// lands us at the live cursor immediately -- no full-history drain, no reload.
+// Switching back to a tab that already snapshotted skips the snapshot and
+// resumes the live loop from that tab's own cursor.
 async function boot() {
   const myGen = ++gen;
   if (pollCtrl) { try { pollCtrl.abort(); } catch (e) {} } // kill the old generation in flight
   pollCtrl = new AbortController();
-  if (natsWs) { try { natsWs.close(); } catch (e) {} natsWs = null; }
+  closeSockets();
+  const tab = activeTab();
+  if (!tab) return;
   setState('loading');
-  if (!booted) line('tuned in — pulling the latest traffic…', 'sys');
-  try {
-    const r = await fetch(`wait?since=0&tail=${TAIL}&channel=${chan()}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(8000)])} });
-    if (r.status === 401 || r.status === 404) throw new Error('unauthorized');
-    const data = await r.json();
-    if (myGen !== gen) return; // superseded by a channel switch
-    if (Array.isArray(data.messages)) {
-      data.messages.filter(m => (m.seq || 0) > 0)
-                   .sort((a,b) => (a.seq||0) - (b.seq||0))
-                   .forEach(render);
-      if (data.seq > since) since = data.seq;
-      // land at the newest traffic: the snapshot is the tail, so start there
-      $('log').scrollTop = $('log').scrollHeight;
+  if (!tab.snapshotted) {
+    if (!booted) line('tuned in — pulling the latest traffic…', 'sys');
+    try {
+      const r = await fetch(`wait?since=0&tail=${TAIL}&channel=${encodeURIComponent(tab.name)}`, { headers: auth(), signal: AbortSignal.any([pollCtrl.signal, AbortSignal.timeout(8000)]) });
+      if (r.status === 401 || r.status === 404) throw new Error('unauthorized');
+      const data = await r.json();
+      if (myGen !== gen) return; // superseded by a tab switch
+      if (Array.isArray(data.messages)) {
+        data.messages.filter(m => (m.seq || 0) > tab.since)
+                     .sort((a,b) => (a.seq||0) - (b.seq||0))
+                     .forEach(render);
+        if (data.seq > tab.since) tab.since = data.seq;
+        // land at the newest traffic: the snapshot is the tail, so start there
+        $('log').scrollTop = $('log').scrollHeight;
+      }
+      tab.snapshotted = true;
+      $('seq').textContent = 'seq ' + tab.since;
+      setState('live');
+      booted = true;
+    } catch (e) {
+      if (myGen !== gen) return;
+      if (e && e.message === 'unauthorized') return authFailed();
+      setState('reconnecting');
+      await new Promise(r => setTimeout(r, 1500));
+      if (running && myGen === gen) return boot();
+      return;
     }
-    $('seq').textContent = 'seq ' + since;
-    setState('live');
-    booted = true;
-  } catch (e) {
-    if (myGen !== gen) return;
-    if (e && e.message === 'unauthorized') return authFailed();
-    setState('reconnecting');
-    await new Promise(r => setTimeout(r, 1500));
-    if (running && myGen === gen) return boot();
-    return;
   }
-  if (srcMode === 'nats') natsLive(myGen);
-  else if (srcMode === 'ws') wsLive(myGen);
-  else poll(myGen);
+  if (srcMode === 'nats') natsLive(myGen, tab);
+  else if (srcMode === 'ws') wsLive(myGen, tab);
+  else poll(myGen, tab);
 }
 
-$('go').onclick = () => {
-  token = $('token').value.trim();
-  if (!token) return;
-  sessionStorage.setItem('squawk-token', token);
-  $('gate').style.display = 'none';
-  $('app').style.display = 'flex';
-  running = true;
-  boot();
-};
+$('send').onclick = sendMsg;
+$('msg').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
 $('src').onclick = () => {
   srcMode = srcMode === 'poll' ? 'ws' : srcMode === 'ws' ? 'nats' : 'poll';
   paintSrc();
   if (!running || !booted) return;
-  $('log').innerHTML = '';
-  since = 0; failures = 0;
-  line(`live source → ${srcMode} — pulling the latest traffic…`, 'sys');
+  const tab = activeTab();
+  if (!tab) return;
+  line(`live source \u2192 ${srcMode} — resuming #${tab.name} from seq ${tab.since}…`, 'sys');
   boot();
 };
 paintSrc();
-// switching channels re-tunes live: clear, snapshot, resume -- no reload
-$('channel').onchange = () => {
-  if (!running || !booted) return;
-  $('log').innerHTML = '';
-  since = 0; failures = 0;
-  line(`switched to #${$('channel').value.trim() || 'fleet'} — pulling the latest traffic…`, 'sys');
+
+// server-auth: squawk-ui.ts injects window.SERVER_AUTH and proxies with the
+// feed token itself -- auto-boot, no gate, no token handling.
+document.addEventListener('DOMContentLoaded', () => {
+  getTab('fleet');
+  activeName = 'fleet';
+  renderTabs();
+  $('msg').placeholder = 'message #fleet\u2026  (enter to send)';
+  running = true;
   boot();
-};
-// server-auth mode: fleet-ui proxies with the feed token itself (injected as
-// window.SERVER_AUTH) -- skip the gate, the server tunes us in.
-if (window.SERVER_AUTH) { $('gate').style.display = 'none'; $('app').style.display = 'flex'; running = true; boot(); }
-else if (token) { $('token').value = token; $('go').click(); }
+});
 </script>
 </body>
 </html>

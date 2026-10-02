@@ -61,7 +61,7 @@ npm install && npm run build   # tsc -> dist/ (dist/ and node_modules/ are gitig
 ./mcp.sh                        # exec node dist/index.js on stdio
 ```
 
-Registered in the mesh MCP registry (`/home/toxic/projects/my-ai-tools/configs/mcp-registry.json`) as `browserless-mcp` → command `/home/toxic/estate/projects/mesh/browserless/mcp.sh`. The `persistent_*` tools attach to the keeper CDP at `127.0.0.1:9223` (override: `BROWSER_KEEPER_CDP`); keeper state file `/home/toxic/.browserless/keeper/status.json` (override: `BROWSER_KEEPER_STATUS`). E2E-verified 2026-09-21: 26 tools listed (11 `persistent_*`, first in the list), `persistent_status` → `cdpAlive: true` against the live keeper, and `npm test` (`smoke/keeper-smoke.mjs`) passes against the live keeper in a scratch tab: status → tabs → new_tab → activate → navigate → evaluate → pageText → screenshot → error codes → close_tab → status.
+Registered in the mesh MCP registry (`/home/toxic/projects/my-ai-tools/configs/mcp-registry.json`) as `browserless-mcp` → command `/home/toxic/estate/ranch/mesh/browserless/mcp.sh`. The `persistent_*` tools attach to the keeper CDP at `127.0.0.1:9223` (override: `BROWSER_KEEPER_CDP`); keeper state file `/home/toxic/.browserless/keeper/status.json` (override: `BROWSER_KEEPER_STATUS`). E2E-verified 2026-09-21: 26 tools listed (11 `persistent_*`, first in the list), `persistent_status` → `cdpAlive: true` against the live keeper, and `npm test` (`smoke/keeper-smoke.mjs`) passes against the live keeper in a scratch tab: status → tabs → new_tab → activate → navigate → evaluate → pageText → screenshot → error codes → close_tab → status.
 
 ## Keeper status.json
 
