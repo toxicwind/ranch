@@ -910,6 +910,87 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     // serverless (chat+image+video+embeddings). Seeds empty until keyed.
     seeds: [],
   },
+  {
+    name: "corvex",
+    displayName: "Corvex Token Factory",
+    baseUrl: "https://api.tokenfactory.corvex.cloud/v1",
+    keyEnv: "CORVEX_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models lists WITHOUT a key (verified live 2026-10-02, 2 models);
+    // completions need a key. Seeds are the live no-auth listing.
+    seeds: [
+      "deepseek-ai/DeepSeek-V4-Flash-0731",
+      "zai-org/GLM-5.3",
+    ],
+  },
+  {
+    name: "inferbase",
+    displayName: "Inferbase",
+    baseUrl: "https://api.inferbase.ai/v1",
+    keyEnv: "INFERBASE_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models lists WITHOUT a key (verified live 2026-10-02, 137 models);
+    // AI gateway with LLM routing. Seeds are flagship chat IDs from the live listing.
+    seeds: [
+      "auto",
+      "deepseek-v4-flash",
+      "deepseek-v4-flash-0731",
+      "deepseek-v3-2",
+      "zai-glm-5",
+      "zai-glm-5-2",
+    ],
+  },
+  {
+    name: "onde",
+    displayName: "Onde Cloud",
+    baseUrl: "https://cloud.ondeinference.com/v1",
+    keyEnv: "ONDE_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models lists WITHOUT a key (verified live 2026-10-02, 15 proprietary onde-* models).
+    seeds: [
+      "onde-large",
+      "onde-pro",
+      "onde-balanced",
+      "onde-fast",
+    ],
+  },
+  {
+    name: "inferen",
+    displayName: "Inferen",
+    baseUrl: "https://inferen.dev/v1",
+    keyEnv: "INFEREN_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models 401s without a key (verified live 2026-10-02). Seeds empty until keyed.
+    seeds: [],
+  },
+  {
+    name: "runware",
+    displayName: "Runware",
+    baseUrl: "https://api.runware.ai/v1",
+    keyEnv: "RUNWARE_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // /v1/models 401s without a key (verified live 2026-10-02). Seeds empty until keyed.
+    seeds: [],
+  },
+  {
+    name: "inception",
+    displayName: "Inception Labs",
+    baseUrl: "https://api.inceptionlabs.ai/v1",
+    keyEnv: "INCEPTION_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // Catch-up flagged by sweep-2: predates the window but verified alive 2026-10-02;
+    // /v1/models lists WITHOUT a key (mercury-2, mercury-2.5).
+    seeds: [
+      "mercury-2",
+      "mercury-2.5",
+    ],
+  },
 ];
 
 /**

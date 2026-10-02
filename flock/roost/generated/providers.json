@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-roost/v1",
-  "generatedAt": "2026-10-02T11:58:10.000Z",
+  "generatedAt": "2026-10-02T12:22:07.000Z",
   "generator": "@ranch/roost codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/roost src/data.ts",
   "adapters": [
@@ -546,6 +546,54 @@
       "keyEnv": "GPUAI_API_KEY",
       "adapter": "openai",
       "auth": "bearer"
+    },
+    {
+      "name": "corvex",
+      "displayName": "Corvex Token Factory",
+      "baseUrl": "https://api.tokenfactory.corvex.cloud/v1",
+      "keyEnv": "CORVEX_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "inferbase",
+      "displayName": "Inferbase",
+      "baseUrl": "https://api.inferbase.ai/v1",
+      "keyEnv": "INFERBASE_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "onde",
+      "displayName": "Onde Cloud",
+      "baseUrl": "https://cloud.ondeinference.com/v1",
+      "keyEnv": "ONDE_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "inferen",
+      "displayName": "Inferen",
+      "baseUrl": "https://inferen.dev/v1",
+      "keyEnv": "INFEREN_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "runware",
+      "displayName": "Runware",
+      "baseUrl": "https://api.runware.ai/v1",
+      "keyEnv": "RUNWARE_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "inception",
+      "displayName": "Inception Labs",
+      "baseUrl": "https://api.inceptionlabs.ai/v1",
+      "keyEnv": "INCEPTION_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
     }
   ],
   "seeds": {
@@ -836,7 +884,31 @@
     ],
     "cometapi": [],
     "inferx": [],
-    "gpuai": []
+    "gpuai": [],
+    "corvex": [
+      "deepseek-ai/DeepSeek-V4-Flash-0731",
+      "zai-org/GLM-5.3"
+    ],
+    "inferbase": [
+      "auto",
+      "deepseek-v4-flash",
+      "deepseek-v4-flash-0731",
+      "deepseek-v3-2",
+      "zai-glm-5",
+      "zai-glm-5-2"
+    ],
+    "onde": [
+      "onde-large",
+      "onde-pro",
+      "onde-balanced",
+      "onde-fast"
+    ],
+    "inferen": [],
+    "runware": [],
+    "inception": [
+      "mercury-2",
+      "mercury-2.5"
+    ]
   },
   "seedsContract": "Cold-start only: served while a provider has never had a successful discovery; inert afterwards. Never hand-edit model membership here — discovery owns it.",
   "aliases": {
