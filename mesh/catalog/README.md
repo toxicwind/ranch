@@ -110,7 +110,7 @@ bun run build     # regenerate generated/ from src/data.ts
 ```
 
 Part of the [ranch](../../README.md) monorepo (`toxicwind/ranch`), nested under
-`flock/roost/`, package `@ranch/roost`.
+`mesh/catalog/`, package `@ranch/roost`.
 
 ## Build
 
