@@ -25,11 +25,23 @@ const Schema = z.object({
   /** Per-provider request ceilings; absent means "do not throttle". */
   rpm: z.record(z.string(), Num).default({}),
 
-  /** Provider base URLs. */
+  /**
+   * Provider base URLs. Observed live on 2026-10-02 from the incumbent
+   * sovereign-router-ts /status: every provider the live catalog serves
+   * gets a base here, otherwise Router.call throws "no base url" at
+   * serve time. Local-first: herd (:25100), nim-local (:8000) and
+   * kimi-auto (:25153) stay on the box.
+   */
   bases: z.record(z.string(), z.string()).default({
+    "llama-swap": "http://127.0.0.1:25100/v1",
+    "nim-local": "http://127.0.0.1:8000/v1",
+    "kimi-auto": "http://127.0.0.1:25153/v1",
     "openrouter": "https://openrouter.ai/api/v1",
     "nvidia": "https://integrate.api.nvidia.com/v1",
     "groq": "https://api.groq.com/openai/v1",
+    "cerebras": "https://api.cerebras.ai/v1",
+    "google": "https://generativelanguage.googleapis.com/v1beta/openai",
+    "mistral": "https://api.mistral.ai",
   }),
 
   /** Hard ceiling on concurrent in-flight upstream calls. */

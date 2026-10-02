@@ -22,6 +22,7 @@ import { ProviderGate } from "./circuit.ts";
 import { Quarantine } from "./quarantine.ts";
 import { Ledger } from "./ledger.ts";
 import { Router } from "./router.ts";
+import { loadLiveCatalog, servingIds, DEFAULT_CATALOG_PATH } from "./catalog.ts";
 import { CredentialPlane, loadPoolsFromYaml } from "./keypool.ts";
 
 const log = pino({ level: process.env.CUTTINGGATE_LOG_LEVEL ?? "info" });
@@ -148,6 +149,31 @@ export async function main(): Promise<void> {
     console.error(`keypool config unreadable, running without the credential plane: ${(e as Error).message}`);
   }
   const router = new Router(config, gate, quarantine, ledger, credentials);
+
+  // Seed the serving catalog from the live catalog. Without this the router
+  // boots with an empty catalog: /v1/models is empty and every completion
+  // fails with "no provider serves X". Fail closed when the catalog is
+  // unreadable — a router with no catalog is worse than no router.
+  const catalogPath = process.env.CUTTINGGATE_CATALOG ?? DEFAULT_CATALOG_PATH;
+  const loaded = loadLiveCatalog(catalogPath);
+  if (!loaded.ok) {
+    process.stderr.write(`cuttinggate: catalog load failed: ${loaded.reason} (${loaded.path})\n`);
+    process.exit(1);
+  }
+  const pairs = servingIds(loaded.data);
+  for (const { id, provider } of pairs) router.register(id, provider);
+  for (const [provider, entry] of Object.entries(loaded.data.providers)) {
+    quarantine.observeListing(entry.serving, provider);
+  }
+  log.info(
+    {
+      catalog: loaded.path,
+      providers: Object.keys(loaded.data.providers).length,
+      serving: pairs.length,
+      contractMatched: loaded.contractMatched,
+    },
+    "cuttinggate catalog seeded",
+  );
 
   const app = buildApp({ config, gate, quarantine, ledger, router });
   app.listen({ port: config.port, hostname: config.host });
