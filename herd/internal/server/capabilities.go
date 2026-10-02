@@ -5,11 +5,11 @@ import (
 	"net/url"
 	"reflect"
 
-	"github.com/mostlygeek/llama-swap/internal/capcompat"
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/event"
-	"github.com/mostlygeek/llama-swap/internal/process"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/capcompat"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/event"
+	"github.com/mostlygeek/herd/internal/process"
+	"github.com/mostlygeek/herd/internal/swaputil"
 )
 
 // onProcessStateChange refreshes a model's discovered capabilities when its
@@ -52,7 +52,7 @@ func (s *Server) refreshCapabilities(modelID string, mc config.ModelConfig) {
 	before := s.resolveCapabilities(s.shutdownCtx, modelID, mc)
 
 	if err := s.capcompat.Refresh(s.shutdownCtx, key, client, name); err != nil {
-		// Debug, not warn. llama-swap also fronts image, speech and
+		// Debug, not warn. herd also fronts image, speech and
 		// transcription servers with no capability surface, and a model that
 		// stopped again mid-probe is normal. Neither is worth a warning on
 		// every model start.

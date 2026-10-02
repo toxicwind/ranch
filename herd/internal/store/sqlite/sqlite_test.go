@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/store"
+	"github.com/mostlygeek/herd/internal/store"
 )
 
 func TestStore_InsertListAndFilterActivity(t *testing.T) {
@@ -388,7 +388,7 @@ func TestStore_PruneActivity(t *testing.T) {
 
 func TestStore_NewFilePersistsActivity(t *testing.T) {
 	ctx := context.Background()
-	path := filepath.Join(t.TempDir(), "llama-swap.sqlite")
+	path := filepath.Join(t.TempDir(), "herd.sqlite")
 
 	st, err := New(path)
 	if err != nil {
@@ -423,7 +423,7 @@ func TestStore_NewFilePersistsActivity(t *testing.T) {
 }
 
 func TestStore_NewFileUsesWAL(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "llama-swap.sqlite")
+	path := filepath.Join(t.TempDir(), "herd.sqlite")
 	st, err := New(path)
 	if err != nil {
 		t.Fatalf("New file store: %v", err)

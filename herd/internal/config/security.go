@@ -8,7 +8,7 @@ import (
 
 // CORSWildcardOrigin allows any origin. It is the default when
 // security.cors.allowedOrigins is empty, which keeps an absent security block
-// behaving exactly like llama-swap did before the setting existed.
+// behaving exactly like herd did before the setting existed.
 const CORSWildcardOrigin = "*"
 
 // DefaultCORSMaxAge is the Access-Control-Max-Age value sent on preflight
@@ -35,22 +35,22 @@ func DefaultCORSAllowedHeaders() []string {
 	return []string{"Content-Type", "Authorization", "Accept", "X-Requested-With"}
 }
 
-// SecurityConfig groups settings that control who may talk to llama-swap.
+// SecurityConfig groups settings that control who may talk to herd.
 type SecurityConfig struct {
 	CORS CORSConfig `yaml:"cors"`
 }
 
-// CORSConfig controls the Access-Control-* headers llama-swap sends.
+// CORSConfig controls the Access-Control-* headers herd sends.
 //
 // AllowedOrigins selects between two modes. Leaving it empty keeps the
-// permissive policy llama-swap had before the setting existed, so configs
+// permissive policy herd had before the setting existed, so configs
 // written without it are unaffected. Setting it means taking charge of who may
-// reach llama-swap from a browser, and nothing then widens access beyond the
+// reach herd from a browser, and nothing then widens access beyond the
 // list; write "*" to allow any origin deliberately. The remaining fields
 // describe preflight mechanics rather than access, so each one left empty
 // still takes its default and a config naming only origins keeps working.
 //
-// See issues #85, #1121 and #1133 — llama-swap must be the only source of
+// See issues #85, #1121 and #1133 — herd must be the only source of
 // these headers, because upstreams such as llama-server set their own and
 // httputil.ReverseProxy adds rather than replaces them.
 type CORSConfig struct {
@@ -72,9 +72,9 @@ type CORSConfig struct {
 
 	// AllowPrivateNetwork answers Chrome's Private Network Access preflight
 	// with Access-Control-Allow-Private-Network: true, letting a page on a
-	// public origin reach llama-swap on a private address. Off by default,
+	// public origin reach herd on a private address. Off by default,
 	// and cannot be combined with a "*" origin: that pairing would let any
-	// page in any open tab drive a llama-swap on the user's own network,
+	// page in any open tab drive a herd on the user's own network,
 	// which is what Private Network Access exists to prevent.
 	AllowPrivateNetwork bool `yaml:"allowPrivateNetwork"`
 

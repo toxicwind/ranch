@@ -4,16 +4,16 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/config"
 )
 
 // TestHerdFQNEstateRegression — estate-shaped regression test for the
-// 2026-09-20 incident: a stale llama-swap binary registered only bare model
+// 2026-09-20 incident: a stale herd binary registered only bare model
 // names and silently dropped cross-peer duplicates ("already mapped to
 // another peer, skipping"), so OpenFang's qualified request
 // openrouter-free/nex-agi/nex-n2.5-mini:free died with "Model not found".
 // FQN keys (peerID + "/" + modelID) must ALWAYS resolve; bare names only
-// when unique across peers (upstream mostlygeek/llama-swap semantics).
+// when unique across peers (upstream mostlygeek/herd semantics).
 func TestHerdFQNEstateRegression(t *testing.T) {
 	mkPeers := func() config.PeerDictionaryConfig {
 		peers := config.PeerDictionaryConfig{}

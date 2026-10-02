@@ -9,11 +9,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/logmon"
-	"github.com/mostlygeek/llama-swap/internal/process"
-	"github.com/mostlygeek/llama-swap/internal/router/scheduler"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/logmon"
+	"github.com/mostlygeek/herd/internal/process"
+	"github.com/mostlygeek/herd/internal/router/scheduler"
+	"github.com/mostlygeek/herd/internal/swaputil"
 )
 
 type shutdownReq struct {

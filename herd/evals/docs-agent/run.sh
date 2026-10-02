@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Runs the Docs Agent eval against a llama-swap built from the working tree.
+# Runs the Docs Agent eval against a herd built from the working tree.
 #
 # The server has to be built from this branch: /api/mcp does not exist in
 # releases, and docs/kb is compiled in by //go:embed, so a KB edit is only
@@ -47,25 +47,25 @@ done
 
 if [[ -z "$BASE_URL" ]]; then
   if [[ ! -f "$CONFIG" ]]; then
-    echo "error: no llama-swap config at $CONFIG" >&2
+    echo "error: no herd config at $CONFIG" >&2
     echo "  Pass --config, or set DOCS_AGENT_CONFIG." >&2
     echo "  It needs the agent model reachable -- locally, or through a peers: block." >&2
     echo "  See config.example.yaml for the format." >&2
     exit 1
   fi
 
-  echo "==> building llama-swap"
+  echo "==> building herd"
   if [[ "$EMBED_UI" == "1" ]]; then
     make ui >/dev/null
-    go build -tags embed_ui -o build/llama-swap .
+    go build -tags embed_ui -o build/herd .
   else
     # No embed_ui: the eval never loads the UI, and skipping it keeps a
     # rebuild-per-iteration down to a few seconds.
-    go build -o build/llama-swap .
+    go build -o build/herd .
   fi
 
-  echo "==> starting llama-swap on 127.0.0.1:$PORT"
-  ./build/llama-swap -config "$CONFIG" -listen "127.0.0.1:$PORT" >"${TMPDIR:-/tmp}/docs-agent-swap.log" 2>&1 &
+  echo "==> starting herd on 127.0.0.1:$PORT"
+  ./build/herd -config "$CONFIG" -listen "127.0.0.1:$PORT" >"${TMPDIR:-/tmp}/docs-agent-swap.log" 2>&1 &
   SERVER_PID=$!
   trap 'kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true' EXIT
 
@@ -76,7 +76,7 @@ if [[ -z "$BASE_URL" ]]; then
   for _ in $(seq 1 60); do
     if curl -fsS -m 2 "$BASE_URL/health" >/dev/null 2>&1; then break; fi
     if ! kill -0 "$SERVER_PID" 2>/dev/null; then
-      echo "error: llama-swap exited during startup:" >&2
+      echo "error: herd exited during startup:" >&2
       tail -20 "${TMPDIR:-/tmp}/docs-agent-swap.log" >&2
       exit 1
     fi
@@ -84,7 +84,7 @@ if [[ -z "$BASE_URL" ]]; then
   done
 
   if ! curl -fsS -m 2 "$BASE_URL/health" >/dev/null 2>&1; then
-    echo "error: llama-swap did not become healthy within 30s" >&2
+    echo "error: herd did not become healthy within 30s" >&2
     exit 1
   fi
 fi

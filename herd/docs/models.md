@@ -9,7 +9,7 @@
 
 Aliases: `kimi-auto` -> K1.5, `kimi-long` -> 128K, `kimi-fast` -> 8K
 
-## Local (llama-swap)
+## Local (herd)
 | Model | ID | Context | Speed |
 |-------|-----|---------|-------|
 | Local Fast | local-fast | 32K | GPU |

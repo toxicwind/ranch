@@ -13,7 +13,7 @@ config:
         llms: (a | b)
         all: +llms & asr
   defaults:
-    image: ghcr.io/mostlygeek/llama-swap:unified-vulkan
+    image: ghcr.io/mostlygeek/herd:unified-vulkan
     gpu: [amd.com/gpu=1]
   models:
     - id: llm-a

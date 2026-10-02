@@ -1,6 +1,6 @@
 #!/bin/sh
-# This script uninstalls llama-swap on Linux.
-# It removes the binary, systemd service, config.yaml (optional), and llama-swap user and group.
+# This script uninstalls herd on Linux.
+# It removes the binary, systemd service, config.yaml (optional), and herd user and group.
 
 set -eu
 
@@ -23,28 +23,28 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 configure_systemd() {
-    status "Stopping llama-swap service..."
-    $SUDO systemctl stop llama-swap
+    status "Stopping herd service..."
+    $SUDO systemctl stop herd
 
-    status "Disabling llama-swap service..."
-    $SUDO systemctl disable llama-swap
+    status "Disabling herd service..."
+    $SUDO systemctl disable herd
 }
 if available systemctl; then
     configure_systemd
 fi
 
-if available llama-swap; then
-    status "Removing llama-swap binary..."
-    $SUDO rm $(which llama-swap)
+if available herd; then
+    status "Removing herd binary..."
+    $SUDO rm $(which herd)
 fi
 
-if [ -f "/usr/share/llama-swap/config.yaml" ]; then
+if [ -f "/usr/share/herd/config.yaml" ]; then
     while true; do
-        printf "Delete config.yaml (/usr/share/llama-swap/config.yaml)? [y/N] " >&2
+        printf "Delete config.yaml (/usr/share/herd/config.yaml)? [y/N] " >&2
         read answer
         case "$answer" in
             [Yy]* ) 
-                $SUDO rm -r /usr/share/llama-swap
+                $SUDO rm -r /usr/share/herd
                 break
                 ;;
             [Nn]* | "" ) 
@@ -57,12 +57,12 @@ if [ -f "/usr/share/llama-swap/config.yaml" ]; then
     done
 fi
 
-if id llama-swap >/dev/null 2>&1; then
-    status "Removing llama-swap user..."
-    $SUDO userdel llama-swap
+if id herd >/dev/null 2>&1; then
+    status "Removing herd user..."
+    $SUDO userdel herd
 fi
 
-if getent group llama-swap >/dev/null 2>&1; then
-    status "Removing llama-swap group..."
-    $SUDO groupdel llama-swap
+if getent group herd >/dev/null 2>&1; then
+    status "Removing herd group..."
+    $SUDO groupdel herd
 fi

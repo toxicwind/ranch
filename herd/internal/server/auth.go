@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/mostlygeek/llama-swap/internal/chain"
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/chain"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/swaputil"
 	"net/http"
 )
 
@@ -28,7 +28,7 @@ func CreateAuthMiddleware(cfg config.Config) chain.Middleware {
 				}
 			}
 			if !valid {
-				w.Header().Set("WWW-Authenticate", `Basic realm="llama-swap"`)
+				w.Header().Set("WWW-Authenticate", `Basic realm="herd"`)
 				swaputil.SendResponse(w, r, http.StatusUnauthorized, "unauthorized: invalid or missing API key")
 				return
 			}

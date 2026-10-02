@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/logmon"
-	"github.com/mostlygeek/llama-swap/internal/process"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/logmon"
+	"github.com/mostlygeek/herd/internal/process"
 )
 
 // groupRouting builds a normalized RoutingConfig for the group router, mirroring

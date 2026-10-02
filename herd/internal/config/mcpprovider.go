@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/mcptools"
+	"github.com/mostlygeek/herd/internal/mcptools"
 	"gopkg.in/yaml.v3"
 )
 
@@ -18,7 +18,7 @@ import (
 // setup, but it is still bounded so a full dump cannot swamp a small context.
 const maxConfigResultBytes = 32 * 1024
 
-// ConfigProvider serves the running llama-swap configuration so an agent can
+// ConfigProvider serves the running herd configuration so an agent can
 // give advice about the setup in front of it rather than in the abstract.
 //
 // The configuration is captured by value when the provider is built. A hot
@@ -49,8 +49,8 @@ func (p *ConfigProvider) Tools(context.Context) ([]mcptools.Tool, error) {
 	return []mcptools.Tool{
 		{
 			Name:  "get_config",
-			Title: "Show the current llama-swap configuration",
-			Description: "Return the configuration llama-swap is running right now, as YAML, with " +
+			Title: "Show the current herd configuration",
+			Description: "Return the configuration herd is running right now, as YAML, with " +
 				"API keys and other credentials redacted. Values are fully resolved: ${env.*} and " +
 				"macro references are already expanded, and values equal to their defaults are omitted. " +
 				"Pass \"path\" to narrow to a section, for example \"models\" or \"models.qwen3\" or " +
@@ -132,9 +132,9 @@ func (p *ConfigProvider) Call(_ context.Context, name string, args map[string]js
 
 	var b strings.Builder
 	if path == "" {
-		b.WriteString("Current llama-swap configuration (credentials redacted, values resolved):\n\n")
+		b.WriteString("Current herd configuration (credentials redacted, values resolved):\n\n")
 	} else {
-		fmt.Fprintf(&b, "Current llama-swap configuration at %q (credentials redacted, values resolved):\n\n", path)
+		fmt.Fprintf(&b, "Current herd configuration at %q (credentials redacted, values resolved):\n\n", path)
 	}
 	b.WriteString("```yaml\n")
 	b.WriteString(strings.TrimRight(yamlText, "\n"))

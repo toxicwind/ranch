@@ -7,13 +7,13 @@ bun = "1.4.2"
 _.file = "../../config/ports.env"
 
 [tasks]
-build = "go build -o build/llama-swap ./cmd/main.go"
+build = "go build -o build/herd ./cmd/main.go"
 dev = "go run ./cmd/main.go"
 test = "go test ./..."
 health = "curl -sf http://127.0.0.1:25100/health"
 models = "curl -sf http://127.0.0.1:25100/v1/models | python3 -c 'import sys,json; data=json.load(sys.stdin); print(len(data.get(\"data\",[])), \"models active\")'"
 # The dashboard is the single range-level app in ../../ui (a fork of
-# mostlygeek/llama-swap's ui/). It used to live here as ui-svelte, with
+# mostlygeek/herd's ui/). It used to live here as ui-svelte, with
 # mesh/ui-svelte as a byte-identical dead twin and ui/ as a third, diverged
 # copy. All three are gone; this task now points at the master.
 ui = "cd ../../ui && bun run dev"

@@ -11,7 +11,7 @@ func TestStripUpstreamCORSHeaders(t *testing.T) {
 		h.Set(name, "upstream-value")
 	}
 	// llama-server sends an empty Access-Control-Allow-Origin when the client
-	// sent no Origin; ReverseProxy would add it alongside llama-swap's own,
+	// sent no Origin; ReverseProxy would add it alongside herd's own,
 	// producing the "*, " that strict clients reject. See issue #85.
 	h.Add("Access-Control-Allow-Origin", "")
 	h.Set("Content-Type", "application/json")

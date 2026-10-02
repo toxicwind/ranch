@@ -1,4 +1,4 @@
-// Package store defines the data access contracts for llama-swap.
+// Package store defines the data access contracts for herd.
 package store
 
 import (

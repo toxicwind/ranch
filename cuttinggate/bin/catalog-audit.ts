@@ -65,8 +65,8 @@ function secretFrom(name: string): string {
 
 const flockToken = secretFrom("FLOCK_KEY");
 const auditResult = await audit({
-  herd: gatewayRoot(`http://127.0.0.1:${portFromEnv("LLAMA_SWAP_PORT", "25100")}`),
-  herdToken: secretFrom("LLAMA_SWAP_KEY") || "llama-swap",
+  herd: gatewayRoot(`http://127.0.0.1:${portFromEnv("HERD_PORT", "25100")}`),
+  herdToken: secretFrom("HERD_KEY") || "herd",
   flock: gatewayRoot(`http://127.0.0.1:${portFromEnv("FLOCK_ROUTER_PORT", "25193")}`),
   flockToken,
 });

@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "llama-swap.fullname" . }}
+  name: {{ include "herd.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "llama-swap.labels" . | nindent 4 }}
+    {{- include "herd.labels" . | nindent 4 }}
   {{- with .Values.service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -17,7 +17,7 @@ spec:
       targetPort: http
       protocol: TCP
   selector:
-    {{- include "llama-swap.selectorLabels" . | nindent 4 }}
+    {{- include "herd.selectorLabels" . | nindent 4 }}
   {{- if eq .Values.service.type "LoadBalancer" }}
   {{- with .Values.service.loadBalancerIP }}
   loadBalancerIP: {{ . }}

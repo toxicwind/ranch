@@ -8,7 +8,7 @@ import (
 )
 
 // TestConfig_SecurityCORSUnsetOriginsSelectLegacyPolicy pins that a config
-// naming no origins keeps the permissive behaviour llama-swap had before the
+// naming no origins keeps the permissive behaviour herd had before the
 // setting existed. Adding the setting must never change an existing
 // deployment, and every way of writing "nothing configured" means the same.
 func TestConfig_SecurityCORSUnsetOriginsSelectLegacyPolicy(t *testing.T) {
@@ -193,7 +193,7 @@ models:
 // TestConfig_SecurityCORSPrivateNetworkRequiresExplicitOrigins covers the two
 // ways of asking for private-network access without naming who gets it.
 // Granting it to every origin would let any page in any open tab drive a
-// llama-swap on the user's own network.
+// herd on the user's own network.
 func TestConfig_SecurityCORSPrivateNetworkRequiresExplicitOrigins(t *testing.T) {
 	const models = "models:\n  m1:\n    cmd: echo ${PORT}\n"
 	cases := map[string]struct {

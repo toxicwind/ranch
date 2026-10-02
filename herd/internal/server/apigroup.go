@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/event"
-	"github.com/mostlygeek/llama-swap/internal/perf"
-	"github.com/mostlygeek/llama-swap/internal/store"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/event"
+	"github.com/mostlygeek/herd/internal/perf"
+	"github.com/mostlygeek/herd/internal/store"
+	"github.com/mostlygeek/herd/internal/swaputil"
 )
 
 // apiModel is one entry in the /api/events modelStatus payload.

@@ -1,15 +1,15 @@
-llama-swap has been deployed to namespace "{{ .Release.Namespace }}".
+herd has been deployed to namespace "{{ .Release.Namespace }}".
 
 Head-end:
-  kubectl -n {{ .Release.Namespace }} get deploy {{ include "llama-swap.fullname" . }}
+  kubectl -n {{ .Release.Namespace }} get deploy {{ include "herd.fullname" . }}
 
 Backend workloads the head-end manages (kubeswap ships in the same image):
-  kubectl -n {{ .Release.Namespace }} exec deploy/{{ include "llama-swap.fullname" . }} \
+  kubectl -n {{ .Release.Namespace }} exec deploy/{{ include "herd.fullname" . }} \
     -- /usr/local/bin/kubeswap status --namespace {{ .Release.Namespace }}
 
 Try it (from a machine with cluster access):
   kubectl -n {{ .Release.Namespace }} port-forward \
-    svc/{{ include "llama-swap.fullname" . }} 8080:{{ .Values.service.port }}
+    svc/{{ include "herd.fullname" . }} 8080:{{ .Values.service.port }}
   curl http://localhost:8080/v1/models
   curl http://localhost:8080/v1/chat/completions \
     -H 'Content-Type: application/json' \
@@ -27,5 +27,5 @@ Ingress is enabled:
 {{- else if eq .Values.service.type "LoadBalancer" }}
 
 The service is a LoadBalancer; once the cloud provider assigns an address:
-  kubectl -n {{ .Release.Namespace }} get svc {{ include "llama-swap.fullname" . }}
+  kubectl -n {{ .Release.Namespace }} get svc {{ include "herd.fullname" . }}
 {{- end }}

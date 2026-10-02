@@ -14,7 +14,7 @@ func testConfig() *serveConfig {
 	cfg := &serveConfig{
 		Model:        "author/model:tag",
 		Sanitized:    "author-model-tag",
-		Namespace:    "llama-swap",
+		Namespace:    "herd",
 		Image:        "ghcr.io/ggml-org/llama.cpp:server-vulkan",
 		Args:         []string{"--model", "/models/m.gguf", "--port", "8080"},
 		Port:         8080,
@@ -27,7 +27,7 @@ func testConfig() *serveConfig {
 		NodeSel:      map[string]string{"feature.node.kubernetes.io/amd-gpu": "true"},
 		Tolerations:  []toleration{{Key: "dedicated", Operator: "Exists", Effect: "NoSchedule"}},
 		Volumes: []volumeSpec{
-			{Kind: volPVC, Name: "llama-swap-models", Path: "/models", ReadOnly: true},
+			{Kind: volPVC, Name: "herd-models", Path: "/models", ReadOnly: true},
 			{Kind: volEmptyDir, Name: "slots", Path: "/slots"},
 		},
 		ExtraLabels:  map[string]string{"team": "inference"},
@@ -48,7 +48,7 @@ func TestKubeswap_RenderDeployment(t *testing.T) {
 		t.Fatalf("renderDeployment: %v", err)
 	}
 
-	if dep.Name != cfg.DepName || dep.Namespace != "llama-swap" {
+	if dep.Name != cfg.DepName || dep.Namespace != "herd" {
 		t.Errorf("name/namespace: %s/%s", dep.Namespace, dep.Name)
 	}
 	if dep.Labels[labelModel] != "author-model-tag" || dep.Labels[labelManagedBy] != managedByValue {
@@ -124,7 +124,7 @@ func TestKubeswap_RenderDeployment(t *testing.T) {
 		t.Fatalf("expected 2 volumes, got %d", len(pod.Spec.Volumes))
 	}
 	if pod.Spec.Volumes[0].PersistentVolumeClaim == nil ||
-		pod.Spec.Volumes[0].PersistentVolumeClaim.ClaimName != "llama-swap-models" {
+		pod.Spec.Volumes[0].PersistentVolumeClaim.ClaimName != "herd-models" {
 		t.Errorf("pvc volume: %v", pod.Spec.Volumes[0])
 	}
 	if pod.Spec.Volumes[1].EmptyDir == nil {
@@ -163,7 +163,7 @@ func TestKubeswap_RenderDeploymentCPU(t *testing.T) {
 func TestKubeswap_RenderService(t *testing.T) {
 	cfg := testConfig()
 	svc := cfg.renderService()
-	if svc.Name != cfg.SvcName || svc.Namespace != "llama-swap" {
+	if svc.Name != cfg.SvcName || svc.Namespace != "herd" {
 		t.Errorf("service name/namespace: %s/%s", svc.Namespace, svc.Name)
 	}
 	if svc.Spec.Selector[labelModel] != "author-model-tag" {
@@ -362,7 +362,7 @@ func TestKubeswap_LivenessPathDefault(t *testing.T) {
 // TestKubeswap_RenderPVC Verifies the PVC rendered for a missing volume (size, class, access mode).
 func TestKubeswap_RenderPVC(t *testing.T) {
 	cfg := testConfig()
-	pvc, err := cfg.renderPVC("llama-swap-models")
+	pvc, err := cfg.renderPVC("herd-models")
 	if err != nil {
 		t.Fatalf("renderPVC: %v", err)
 	}

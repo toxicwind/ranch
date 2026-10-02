@@ -76,7 +76,7 @@ tuning failure.
 
 ## Notes
 
-- Prefer `${PORT}` over a hardcoded port so llama-swap manages it. If you do
+- Prefer `${PORT}` over a hardcoded port so herd manages it. If you do
   hardcode one, set `proxy` to match. See `guides/model-runtime/writing-cmd`.
 - Tune on your own hardware and your own workload. These numbers are specific
   to this GPU pair and these models.

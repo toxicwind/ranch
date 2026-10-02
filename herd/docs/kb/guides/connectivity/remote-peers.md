@@ -1,6 +1,6 @@
 ---
 title: Route to remote peers
-summary: Expose models from another llama-swap host through a peer connection.
+summary: Expose models from another herd host through a peer connection.
 category: guides
 tags: [peers, remote, networking]
 config_keys: [peers, peers.*.proxy, peers.*.apiKey, peers.*.models]
@@ -9,7 +9,7 @@ updated: 2026-08-28
 
 # Route to remote peers
 
-Declare a peer with the other llama-swap `proxy` URL and its model list. Its models are addressed as
+Declare a peer with the other herd `proxy` URL and its model list. Its models are addressed as
 `peer-name/model-id`, so a peer named `sippy` serving `gemma-4-12B` appears as
 `sippy/gemma-4-12B`.
 

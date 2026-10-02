@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/event"
-	"github.com/mostlygeek/llama-swap/internal/process"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/event"
+	"github.com/mostlygeek/herd/internal/process"
+	"github.com/mostlygeek/herd/internal/swaputil"
 )
 
 // modelRecord is one entry in the OpenAI-compatible /v1/models listing.
@@ -160,7 +160,7 @@ func (s *Server) handleListModels(w http.ResponseWriter, r *http.Request) {
 			ID:          id,
 			Object:      "model",
 			Created:     created,
-			OwnedBy:     "llama-swap",
+			OwnedBy:     "herd",
 			Name:        strings.TrimSpace(name),
 			Description: strings.TrimSpace(description),
 			Status:      map[string]any{"value": status},
@@ -182,7 +182,7 @@ func (s *Server) handleListModels(w http.ResponseWriter, r *http.Request) {
 		if len(llamaSwapMetadata) > 0 || rec.ContextLength > 0 {
 			rec.Meta = make(map[string]any)
 			if len(llamaSwapMetadata) > 0 {
-				rec.Meta["llamaswap"] = llamaSwapMetadata
+				rec.Meta["herd"] = llamaSwapMetadata
 			}
 			if rec.ContextLength > 0 {
 				rec.Meta["n_ctx"] = rec.ContextLength

@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/config"
 )
 
 // The fixtures under testdata/ are built from the documented response shapes:
@@ -265,8 +265,8 @@ func TestCapcompat_DetectVLLMCapture(t *testing.T) {
 		assert.Equal(t, 0, up.hits["/props"], "vllm has no /props to read")
 	})
 
-	t.Run("llama-swap model id that vllm does not know", func(t *testing.T) {
-		// A model llama-swap calls something else, with no useModelName set.
+	t.Run("herd model id that vllm does not know", func(t *testing.T) {
+		// A model herd calls something else, with no useModelName set.
 		// parent is null, so this entry is still the base model to read.
 		info, err := Detect(context.Background(), up.client(t), "my-local-name")
 		require.NoError(t, err)

@@ -12,7 +12,7 @@
 
 ## Overview
 
-flock is a first-class routing module for llama-swap that provides intelligent dispatch to cloud LLM providers with production-grade reliability features.
+flock is a first-class routing module for herd that provides intelligent dispatch to cloud LLM providers with production-grade reliability features.
 
 ## Architecture (Modular)
 
@@ -44,7 +44,7 @@ flock is a first-class routing module for llama-swap that provides intelligent d
 
 ## Built-in Providers (13)
 
-- llama-swap (local)
+- herd (local)
 - openrouter, nvidia, groq, together, cerebras, fireworks, hyperbolic
 - github (models.inference.ai), mistral, openai, perplexity, siliconflow
 
@@ -113,7 +113,7 @@ key; herd now reaches cloud models through the flock daemon (`flock:` key).
 ## Build
 
 ```bash
-cd llama-swap
+cd herd
 go build ./...
 ```
 

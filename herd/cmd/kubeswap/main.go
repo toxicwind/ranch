@@ -1,4 +1,4 @@
-// kubeswap is a cmd/cmdStop wrapper that lets llama-swap manage inference
+// kubeswap is a cmd/cmdStop wrapper that lets herd manage inference
 // backends in a Kubernetes namespace the same way it manages docker backends:
 // the model's cmd launches `kubeswap serve`, which creates (or adopts) a
 // Deployment + Service for the model and proxies a local port to it; the
@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	defaultNamespace      = "llama-swap"
+	defaultNamespace      = "herd"
 	containerName         = "server"
 	defaultPort           = 8080
 	defaultStartupTimeout = int64(600) // seconds of model loading the startup probe tolerates
@@ -55,13 +55,13 @@ func printVersion() {
 // managed-object labels/annotations. Every object kubeswap creates carries
 // these so `gc` and adoption can find them later.
 const (
-	labelManagedBy    = "llama-swap.io/managed-by"
-	labelModel        = "llama-swap.io/model"
-	labelDeployment   = "llama-swap.io/deployment"
+	labelManagedBy    = "herd.io/managed-by"
+	labelModel        = "herd.io/model"
+	labelDeployment   = "herd.io/deployment"
 	labelAppName      = "app.kubernetes.io/name"
-	managedByValue    = "llama-swap"
-	appNameValue      = "llama-swap-backend"
-	annotationModelID = "llama-swap.io/model-id"
+	managedByValue    = "herd"
+	appNameValue      = "herd-backend"
+	annotationModelID = "herd.io/model-id"
 )
 
 // main is the entry point: it parses the subcommand and its arguments and dispatches to serve, start, delete, gc, status, logs or version.
@@ -107,7 +107,7 @@ func main() {
 
 // usage Writes the command-line usage text to w.
 func usage(w *os.File) {
-	fmt.Fprint(w, `kubeswap - manage llama-swap inference backends in a Kubernetes namespace
+	fmt.Fprint(w, `kubeswap - manage herd inference backends in a Kubernetes namespace
 
 Usage:
   kubeswap serve [flags] -- <container args...>
@@ -130,7 +130,7 @@ Commands:
            --delete-volumes). Used as a model's cmdStop; a running serve
            process exits on its own when it observes the deletion.
   gc       Delete managed workloads whose model is not in the given list
-           (--models or --config pointing at a llama-swap config.yaml).
+           (--models or --config pointing at a herd config.yaml).
   status   Print the managed workloads in the namespace, including why a
            not-ready pod is not ready.
   logs     Print a model's backend container logs (--tail, --follow);

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/docagent"
-	"github.com/mostlygeek/llama-swap/internal/mcptools"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/docagent"
+	"github.com/mostlygeek/herd/internal/mcptools"
 )
 
 // mcpTestFS is a small stand-in for the repository layout.
@@ -407,8 +407,8 @@ func TestServer_APIMCP_Discover(t *testing.T) {
 	if result.Instructions == "" {
 		t.Error("instructions is empty")
 	}
-	if result.Meta.ServerInfo.Name != "llama-swap" {
-		t.Errorf("serverInfo.name = %q, want llama-swap", result.Meta.ServerInfo.Name)
+	if result.Meta.ServerInfo.Name != "herd" {
+		t.Errorf("serverInfo.name = %q, want herd", result.Meta.ServerInfo.Name)
 	}
 	if result.CacheScope != "public" {
 		t.Errorf("cacheScope = %q, want public", result.CacheScope)

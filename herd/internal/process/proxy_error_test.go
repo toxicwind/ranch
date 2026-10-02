@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mostlygeek/llama-swap/internal/logmon"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/logmon"
+	"github.com/mostlygeek/herd/internal/swaputil"
 )
 
 // markerRecorder stands in for the server package's response recorders: it

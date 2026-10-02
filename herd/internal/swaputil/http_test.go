@@ -16,7 +16,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/config"
 )
 
 func TestReplaceRequestModel(t *testing.T) {
@@ -904,8 +904,8 @@ func TestSendResponse_JSONEnvelope(t *testing.T) {
 	if envelope.Error.Type != ErrorTypeInvalidRequest {
 		t.Errorf("error.type = %q, want %q", envelope.Error.Type, ErrorTypeInvalidRequest)
 	}
-	if envelope.Src != "llama-swap" {
-		t.Errorf("src = %q, want llama-swap", envelope.Src)
+	if envelope.Src != "herd" {
+		t.Errorf("src = %q, want herd", envelope.Src)
 	}
 }
 
@@ -919,7 +919,7 @@ func TestSendResponse_TextFormats(t *testing.T) {
 		if got := w.Header().Get("Content-Type"); got != "text/plain" {
 			t.Fatalf("Content-Type = %q, want text/plain", got)
 		}
-		if got, want := w.Body.String(), "llama-swap: model not found"; got != want {
+		if got, want := w.Body.String(), "herd: model not found"; got != want {
 			t.Errorf("body = %q, want %q", got, want)
 		}
 	})

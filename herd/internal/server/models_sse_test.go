@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/logmon"
-	"github.com/mostlygeek/llama-swap/internal/process"
-	"github.com/mostlygeek/llama-swap/internal/router/scheduler"
+	"github.com/mostlygeek/herd/internal/logmon"
+	"github.com/mostlygeek/herd/internal/process"
+	"github.com/mostlygeek/herd/internal/router/scheduler"
 )
 
 func TestModelEvents_PrimeEmitsLoaded(t *testing.T) {

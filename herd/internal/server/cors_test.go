@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/config"
 )
 
 // corsHeaders are every response header the CORS policy may emit. Tests assert
@@ -54,7 +54,7 @@ func assertNoCORSHeaders(t *testing.T, w *httptest.ResponseRecorder, context str
 // TestServer_CORSNoOriginEmitsNoHeaders is the guard for issue #85. Clients
 // that send no Origin — curl, litellm, most SDKs — must get a response with no
 // CORS headers at all, so the upstream's copy can never be folded together
-// with llama-swap's into an invalid "*, ".
+// with herd's into an invalid "*, ".
 func TestServer_CORSNoOriginEmitsNoHeaders(t *testing.T) {
 	s := corsTestServer(t, config.CORSConfig{})
 
@@ -405,7 +405,7 @@ func TestServer_CORSDefaultPolicyMatchesLegacy(t *testing.T) {
 
 // TestServer_CORSDeclaredBlockKeepsPreflightDefaults is the runtime half of
 // the two-mode model. Declaring security.cors takes charge of which origins
-// may reach llama-swap, but not of preflight mechanics: a block that names
+// may reach herd, but not of preflight mechanics: a block that names
 // only origins must still answer a browser's preflight with usable methods,
 // headers and max-age, or a cross-origin POST would be blocked by a config
 // that looks complete.
@@ -503,7 +503,7 @@ func TestServer_CORSPrivateNetworkOnlyWhenRequested(t *testing.T) {
 }
 
 // TestServer_CORSPrivateNetworkOffByDefault is the backwards-compatibility
-// guard: llama-swap never sent this header, so a config that does not ask for
+// guard: herd never sent this header, so a config that does not ask for
 // it must not start, even when a browser requests it.
 func TestServer_CORSPrivateNetworkOffByDefault(t *testing.T) {
 	configs := map[string]config.CORSConfig{

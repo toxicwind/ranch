@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/cache"
-	"github.com/mostlygeek/llama-swap/internal/event"
-	"github.com/mostlygeek/llama-swap/internal/logmon"
-	"github.com/mostlygeek/llama-swap/internal/store"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/cache"
+	"github.com/mostlygeek/herd/internal/event"
+	"github.com/mostlygeek/herd/internal/logmon"
+	"github.com/mostlygeek/herd/internal/store"
+	"github.com/mostlygeek/herd/internal/swaputil"
 	"github.com/tidwall/gjson"
 )
 

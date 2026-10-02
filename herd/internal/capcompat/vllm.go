@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/config"
 )
 
 // vllmOwner is what vLLM reports in /v1/models.

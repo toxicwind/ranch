@@ -1,4 +1,4 @@
-# llama-swap config.yaml — Audit & Tuning Notes
+# herd config.yaml — Audit & Tuning Notes
 
 Audit date: 2026-07-28 · Auditor: agent deep-tune pass · Hardware: RTX 3090 24 GB / 62 GiB RAM
 
@@ -30,7 +30,7 @@ Audit date: 2026-07-28 · Auditor: agent deep-tune pass · Hardware: RTX 3090 24
 
 ## Verified healthy (no change needed)
 
-- All 4 fork binaries exist and are executable (beellama, turboquant, ik_llama, ik_turboquant); llama-swap binary OK.
+- All 4 fork binaries exist and are executable (beellama, turboquant, ik_llama, ik_turboquant); herd binary OK.
 - All 36 GGUF/mmproj paths referenced by macros exist in `/home/toxic/projects/models` (55 files present).
 - `routing.scheduler.settings.fifo.priority` — 36 entries, dense unique ladder 0–35, every key resolves to a defined model ID (load-time validated by the fork).
 - `routing.router.settings.matrix.vars` — all resolve to real model IDs; `exclusive` set is one giant OR-chain → every member expands to a singleton set → only one resident model at a time. No deadlock possible; maximally conservative for 24 GB.

@@ -103,7 +103,7 @@ func TestKubeswap_ParseTolerations(t *testing.T) {
 // TestKubeswap_ParseVolumes Verifies volume parsing for the pvc, emptydir and hostpath forms.
 func TestKubeswap_ParseVolumes(t *testing.T) {
 	got, err := parseVolumes([]string{
-		"pvc:llama-swap-models:/models:ro",
+		"pvc:herd-models:/models:ro",
 		"emptydir:slots:/slots",
 		"hostpath:/data/models:/models:ro",
 	})
@@ -111,7 +111,7 @@ func TestKubeswap_ParseVolumes(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	want := []volumeSpec{
-		{Kind: volPVC, Name: "llama-swap-models", Path: "/models", ReadOnly: true},
+		{Kind: volPVC, Name: "herd-models", Path: "/models", ReadOnly: true},
 		{Kind: volEmptyDir, Name: "slots", Path: "/slots"},
 		{Kind: volHostPath, Name: "/data/models", Path: "/models", ReadOnly: true},
 	}

@@ -1,8 +1,8 @@
-# llama-swap knowledge base
+# herd knowledge base
 
 Short, focused articles that the Playground's Docs agent can search and read.
 Every file here is indexed at build time and served over MCP at `/api/mcp`, so an
-LLM running on your own hardware can answer questions about llama-swap using
+LLM running on your own hardware can answer questions about herd using
 real text instead of guesswork.
 
 ## Layout

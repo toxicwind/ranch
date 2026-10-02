@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mostlygeek/llama-swap/internal/mcptools"
+	"github.com/mostlygeek/herd/internal/mcptools"
 )
 
 // mcpProtocolVersion is the only MCP revision this endpoint speaks.
@@ -107,12 +107,12 @@ type mcpImplementation struct {
 }
 
 const mcpInstructions = "Tools are namespaced by provider. The docs__* tools answer questions about " +
-	"llama-swap's own configuration: call docs__list_docs for an index, docs__search_docs to find " +
+	"herd's own configuration: call docs__list_docs for an index, docs__search_docs to find " +
 	"something by keyword, docs__get_doc to read a document in full, and docs__get_config_schema to " +
 	"check what a configuration key accepts. Document ids starting with 'reference/config/' return " +
 	"sections of config.example.yaml verbatim. config__get_config returns the configuration this " +
 	"server is running right now, with credentials redacted, for advice about the active setup. " +
-	"The sys__* tools report facts about the machine llama-swap is running on."
+	"The sys__* tools report facts about the machine herd is running on."
 
 func (s *Server) mcpDiscover() discoverResult {
 	// Computed rather than a literal so that unioning an upstream's
@@ -129,7 +129,7 @@ func (s *Server) mcpDiscover() discoverResult {
 		TTLMs:             toolListTTLMs,
 		CacheScope:        "public",
 		Meta: map[string]any{
-			metaKeyServerInfo: mcpImplementation{Name: "llama-swap", Version: s.build.Version},
+			metaKeyServerInfo: mcpImplementation{Name: "herd", Version: s.build.Version},
 		},
 	}
 }

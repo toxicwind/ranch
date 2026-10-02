@@ -21,7 +21,7 @@ to clients; it does not enable tool calling in llama-server.
 
 A minimal `llama-server` config must pass its assigned `${PORT}` to the
 server. Omitting `--port ${PORT}` makes llama-server listen somewhere other
-than llama-swap's default proxy target.
+than herd's default proxy target.
 
 ```yaml
 models:
@@ -30,7 +30,7 @@ models:
 ```
 
 Keep `${PORT}` in a minimal `llama-server` command. It is the host port that
-llama-swap assigns and the default `proxy` uses.
+herd assigns and the default `proxy` uses.
 
 ## Multi-line and comments
 
@@ -60,11 +60,11 @@ These names are reserved — you cannot define a macro called `PORT`, `PID` or
 
 ## `proxy`: when you need it
 
-`proxy` tells llama-swap where to send requests. It defaults to
+`proxy` tells herd where to send requests. It defaults to
 `http://localhost:${PORT}`.
 
 - **Used `${PORT}` in `cmd`?** Omit `proxy`. The default is correct.
-- **Hardcoded a port in `cmd`?** You *must* set `proxy` to match, or llama-swap
+- **Hardcoded a port in `cmd`?** You *must* set `proxy` to match, or herd
   proxies to the wrong place and every request times out.
 - **Running in a container?** Set it explicitly —
   `proxy: "http://127.0.0.1:${PORT}"` — because the port inside the container
@@ -76,7 +76,7 @@ successfully but requests hang or return connection errors, check it first.
 
 ## `checkEndpoint`: knowing when it's ready
 
-llama-swap polls `checkEndpoint` (default `/health`) until it returns HTTP 200,
+herd polls `checkEndpoint` (default `/health`) until it returns HTTP 200,
 and holds requests until then. Servers that don't expose `/health` need it
 changed:
 
@@ -84,7 +84,7 @@ changed:
 checkEndpoint: /v1/models
 ```
 
-Set `checkEndpoint: "none"` to skip health checking entirely — llama-swap then
+Set `checkEndpoint: "none"` to skip health checking entirely — herd then
 forwards the first request immediately, which usually means it fails while the
 server is still loading weights. Only use it for servers with no usable
 readiness endpoint.
@@ -106,7 +106,7 @@ of it.
 
 ## Model files
 
-llama-swap has no setting that downloads a missing GGUF from Hugging Face or
+herd has no setting that downloads a missing GGUF from Hugging Face or
 another model registry. The file must already exist, or the configured `cmd`
 must fetch it before starting the inference server.
 
@@ -114,9 +114,9 @@ must fetch it before starting the inference server.
 
 Nothing here is llama.cpp-specific. vLLM, SGLang, TabbyAPI, Ollama's OpenAI
 endpoint and anything else that speaks the API work the same way — start it,
-tell llama-swap the port, point `checkEndpoint` at something that returns 200.
+tell herd the port, point `checkEndpoint` at something that returns 200.
 
-If the upstream expects a different model name than your llama-swap ID, use
+If the upstream expects a different model name than your herd ID, use
 `useModelName` to rewrite it on the way out.
 
 ## Related

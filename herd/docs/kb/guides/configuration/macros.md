@@ -88,7 +88,7 @@ macros:
   model_dir: "${env.MODEL_DIR}"
 
 apiKeys:
-  - "${env.LLAMA_SWAP_KEY}"
+  - "${env.HERD_KEY}"
 ```
 
 Two things to know:

@@ -9,7 +9,7 @@ import (
 
 // sanitizeModelID translates a model ID into a DNS-1123 label: lowercase
 // alphanumerics and dashes, max 63 chars. The original ID is preserved in
-// the llama-swap.io/model-id annotation on every created object.
+// the herd.io/model-id annotation on every created object.
 func sanitizeModelID(id string) (string, error) {
 	var b strings.Builder
 	prevDash := false

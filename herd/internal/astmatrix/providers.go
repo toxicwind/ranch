@@ -139,13 +139,13 @@ var herdLocalAliases = map[string][2]string{
 	"auto": {},
 	"fcm":  {},
 	// Local-first ranked roles
-	"fast":          {"llama-swap", "local-fast"},
-	"local-fast":    {"llama-swap", "local-fast"},
-	"quality":       {"llama-swap", "local-quality"},
-	"local-quality": {"llama-swap", "local-quality"},
-	"longctx":       {"llama-swap", "local-longctx"},
-	"local-longctx": {"llama-swap", "local-longctx"},
-	"local-auto":    {"llama-swap", "local-quality"},
+	"fast":          {"herd", "local-fast"},
+	"local-fast":    {"herd", "local-fast"},
+	"quality":       {"herd", "local-quality"},
+	"local-quality": {"herd", "local-quality"},
+	"longctx":       {"herd", "local-longctx"},
+	"local-longctx": {"herd", "local-longctx"},
+	"local-auto":    {"herd", "local-quality"},
 	// OpenRouter free aliases (verified working 2026-07-28)
 	"gpt-oss-20b": {"openrouter", "openai/gpt-oss-20b:free"},
 	// NVIDIA NIM aliases
@@ -162,12 +162,12 @@ var herdLocalAliases = map[string][2]string{
 // localPatterns matches known local GGUF model ID prefixes.
 var localPatterns = regexp.MustCompile(`^(beellama|mradermacher|jackrong|turboquant|ik_llama|ik_turboquant|holo|qwen/|gemma-4|exaone)`)
 
-// isLocalSwapModelId returns true for model IDs that should route to the local llama-swap.
+// isLocalSwapModelId returns true for model IDs that should route to the local herd.
 func isLocalSwapModelId(model string) bool {
 	if model == "" || model == "auto" || model == "fcm" {
 		return false
 	}
-	if target, ok := codingAlias[model]; ok && len(target) > 0 && target[0] == "llama-swap" {
+	if target, ok := codingAlias[model]; ok && len(target) > 0 && target[0] == "herd" {
 		return true
 	}
 	return localPatterns.MatchString(model)
@@ -185,13 +185,13 @@ func resolveModel(model string, providers map[string]*provider) (string, string)
 	}
 	// Check if it's a local GGUF model ID
 	if isLocalSwapModelId(model) {
-		return "llama-swap", model
+		return "herd", model
 	}
 	// Auto/fcm: search all providers by weighted ELO
 	if model == "auto" || model == "fcm" {
 		// Find first provider with a key and circuit ok
 		for pname, p := range providers {
-			if pname == "llama-swap" {
+			if pname == "herd" {
 				continue
 			}
 			if p.noAuth || os.Getenv(p.keyEnv) != "" {
@@ -200,7 +200,7 @@ func resolveModel(model string, providers map[string]*provider) (string, string)
 				}
 			}
 		}
-		return "llama-swap", "local-quality"
+		return "herd", "local-quality"
 	}
 	// Search provider model lists
 	for pname, p := range providers {
@@ -210,14 +210,14 @@ func resolveModel(model string, providers map[string]*provider) (string, string)
 			}
 		}
 	}
-	// Fallback: openrouter -> nvidia -> llama-swap
+	// Fallback: openrouter -> nvidia -> herd
 	if _, ok := providers["openrouter"]; ok {
 		return "openrouter", model
 	}
 	if _, ok := providers["nvidia"]; ok {
 		return "nvidia", model
 	}
-	return "llama-swap", "local-quality"
+	return "herd", "local-quality"
 }
 
 // isExplicit returns true if the model maps to a specific provider via coding aliases.

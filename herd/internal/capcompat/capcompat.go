@@ -1,10 +1,10 @@
 // Package capcompat discovers what an upstream inference server can do and
-// maps the answer onto llama-swap's model capabilities.
+// maps the answer onto herd's model capabilities.
 //
 // Every supported server exposes /v1/models, and the owned_by field in that
 // listing identifies the server family. Detect fetches the listing once, picks
 // the matching Prober, and lets it query whatever else it needs. A server
-// nobody recognises is not an error worth shouting about: llama-swap also
+// nobody recognises is not an error worth shouting about: herd also
 // fronts image, speech and transcription servers that have no capability
 // surface at all.
 //
@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/config"
 )
 
 // ErrUnsupportedUpstream is returned by Detect when no prober recognises the
@@ -168,7 +168,7 @@ func defaultProbers() []Prober {
 
 // Detect identifies the upstream behind c and returns what it reports about
 // modelName. modelName is the name the upstream knows the model by, which is
-// useModelName when set and the llama-swap model ID otherwise; it only matters
+// useModelName when set and the herd model ID otherwise; it only matters
 // for servers that list more than one model.
 //
 // It returns ErrUnsupportedUpstream when no prober recognises the server.
@@ -217,7 +217,7 @@ const maxResponseBytes = 8 << 20
 
 // NewClient returns a Client for base, honouring the model's proxy timeouts.
 // A zero timeout in the config means no timeout, matching the rest of
-// llama-swap, but the overall request deadline still comes from the context.
+// herd, but the overall request deadline still comes from the context.
 func NewClient(base *url.URL, timeouts config.TimeoutsConfig) *Client {
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,

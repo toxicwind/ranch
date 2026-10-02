@@ -1,5 +1,5 @@
 # Local-only model config — no Anthropic credits needed
-# Uses Nemotron 3 Ultra Free + local llama-swap fleet
+# Uses Nemotron 3 Ultra Free + local herd fleet
 healthCheckTimeout: 300
 logLevel: debug
 logToStdout: both
@@ -11,7 +11,7 @@ includeAliasesInList: true
 sendLoadingState: true
 
 store:
-  path: /home/toxic/.local/share/llama-swap/store.db
+  path: /home/toxic/.local/share/herd/store.db
 
 performance:
   enable: true
@@ -22,9 +22,9 @@ hooks:
     preload:
       - beellama/exaone-4-0-1-2b-iq4xs
   on_model_loaded:
-    exec: 'echo "[$(date)] MODEL_LOADED: $MODEL" >> /tmp/llama-swap-events.log'
+    exec: 'echo "[$(date)] MODEL_LOADED: $MODEL" >> /tmp/herd-events.log'
   on_model_unloaded:
-    exec: 'echo "[$(date)] MODEL_UNLOADED: $MODEL" >> /tmp/llama-swap-events.log'
+    exec: 'echo "[$(date)] MODEL_UNLOADED: $MODEL" >> /tmp/herd-events.log'
 
 routing:
   scheduler:

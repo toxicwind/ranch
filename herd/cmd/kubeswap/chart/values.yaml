@@ -1,10 +1,10 @@
-# Default values for llama-swap.
+# Default values for herd.
 #
-# The chart installs the llama-swap head-end (the router + lifecycle manager)
+# The chart installs the herd head-end (the router + lifecycle manager)
 # and lets it manage inference backends in the same namespace through
 # kubeswap: each model in config.inline gets a pod on demand. The head-end
-# image must ship /usr/local/bin/llama-swap and /usr/local/bin/kubeswap —
-# the unified llama-swap images do (they also ship every backend server,
+# image must ship /usr/local/bin/herd and /usr/local/bin/kubeswap —
+# the unified herd images do (they also ship every backend server,
 # which the models in config.inline use as their backend image).
 
 nameOverride: ""
@@ -23,7 +23,7 @@ fullnameOverride: ""
 # package time). Override with any variant, date tag, or local build to
 # pin otherwise.
 image:
-  repository: ghcr.io/mostlygeek/llama-swap
+  repository: ghcr.io/mostlygeek/herd
   tag: unified-vulkan
   pullPolicy: IfNotPresent
 
@@ -44,7 +44,7 @@ strategy:
 config:
   # The head-end's config.yaml, rendered into the chart's ConfigMap. It is
   # processed as a Go template, so {{ .Release.Namespace }} works inside
-  # model commands. llama-swap's own ${PORT} macro is unaffected.
+  # model commands. herd's own ${PORT} macro is unaffected.
   #
   # The default below is a demo: one tiny model, downloaded on demand from
   # Hugging Face into a per-pod emptyDir (no PVC required). Point it at your
@@ -71,14 +71,14 @@ config:
 
     models:
       smollm2:
-        # No proxy: llama-swap defaults it to http://localhost:${PORT},
+        # No proxy: herd defaults it to http://localhost:${PORT},
         # where the wrapper listens.
         cmd: >-
           kubeswap serve
           --listen 127.0.0.1:${PORT}
           --model smollm2
           --namespace {{ .Release.Namespace }}
-          --image ghcr.io/mostlygeek/llama-swap:unified-vulkan
+          --image ghcr.io/mostlygeek/herd:unified-vulkan
           --command llama-server
           --volume emptydir:model-cache:/models
           --volume emptydir:slots:/slots
@@ -98,14 +98,14 @@ config:
   # from these three parts. This keeps large multi-model configs DRY: the
   # kubeswap serve boilerplate (listen/model/namespace/image/command/gpu/
   # volumes, the "--" separator and cmdStop) is generated per model; you only
-  # write the model ID, the backend args, and any llama-swap model fields.
-  # llama-swap's own ${...} macros keep working — define shared server flags
+  # write the model ID, the backend args, and any herd model fields.
+  # herd's own ${...} macros keep working — define shared server flags
   # in top.macros and reference them from each model's args.
   #
   #   top:      everything in config.yaml except models: (scalars, macros,
   #             routing, peers, ...). Templated like inline.
   #   defaults: per-model defaults for the kubeswap fields below, plus any
-  #             llama-swap model fields (ttl, checkEndpoint, ...) that most
+  #             herd model fields (ttl, checkEndpoint, ...) that most
   #             models share. A model's own entry always wins.
   #   models:   list of model entries. Kubeswap fields (consumed by the
   #             chart, not rendered into the model record): id (required,
@@ -117,7 +117,7 @@ config:
   #             "--", e.g. "--node-selector k=v" or "--request cpu=4"),
   #             startupTimeout, healthPath, livenessPath, checkPath,
   #             args (backend command line after "--"), proxy, cmdStop.
-  #             Every other key is rendered verbatim as a llama-swap model
+  #             Every other key is rendered verbatim as a herd model
   #             field (name, ttl, capabilities, macros, filters, aliases,
   #             unlisted, ...).
   #             args is rendered verbatim and is NOT Go-templated (unlike
@@ -127,7 +127,7 @@ config:
   #             for a CPU-only model).
   #
   #             Note: model maps are rendered with sorted keys, and
-  #             llama-swap expands macros in reverse declaration order,
+  #             herd expands macros in reverse declaration order,
   #             so a model macro must not reference another model macro of
   #             the same model — only global macros (top.macros) and
   #             literals. (config.inline has no such limit.)
@@ -188,7 +188,7 @@ config:
   # chart renders no ConfigMap of its own and mounts this one.
   existing: ""
   # Additional ConfigMap keys, mounted alongside config.yaml under
-  # /etc/llama-swap/config/ (e.g. an audio.cpp server JSON). Values are
+  # /etc/herd/config/ (e.g. an audio.cpp server JSON). Values are
   # templated like inline.
   extraFiles: {}
 
@@ -239,7 +239,7 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: llama-swap.local
+    - host: herd.local
       paths:
         - path: /
           pathType: Prefix
@@ -259,7 +259,7 @@ gateway:
       - name: http
         protocol: HTTP
         port: 80
-        # Add the singular `hostname: llama-swap.local` to restrict the
+        # Add the singular `hostname: herd.local` to restrict the
         # listener; omitted, it matches all hostnames. (The plural
         # `hostnames` array belongs to HTTPRoute, not Gateway listeners.)
   route:
@@ -334,7 +334,7 @@ extraResources: []
 #  - apiVersion: v1
 #    kind: PersistentVolumeClaim
 #    metadata:
-#      name: llama-swap-models
+#      name: herd-models
 #    spec:
 #      accessModes: [ReadWriteMany]
 #      storageClassName: longhorn

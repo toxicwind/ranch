@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mostlygeek/llama-swap/internal/chain"
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/chain"
+	"github.com/mostlygeek/herd/internal/config"
 )
 
 // corsPolicy is the resolved, immutable CORS configuration. Building it once
@@ -36,7 +36,7 @@ type corsPolicy struct {
 
 // newCORSPolicy resolves cfg into a corsPolicy.
 //
-// An empty AllowedOrigins selects the permissive policy llama-swap had before
+// An empty AllowedOrigins selects the permissive policy herd had before
 // security.cors existed: any origin allowed. Config validation rejects a
 // config that sets any other CORS field without naming its origins, so
 // reaching this with an empty list means nothing was configured at all, never
@@ -74,7 +74,7 @@ func newCORSPolicy(cfg config.CORSConfig) corsPolicy {
 	}
 	p.maxAge = strconv.Itoa(maxAge)
 
-	// llama-swap has never sent Access-Control-Allow-Private-Network, so the
+	// herd has never sent Access-Control-Allow-Private-Network, so the
 	// permissive legacy policy must not start. Config validation already
 	// rejects the setting without explicit origins, but gate it here too so a
 	// policy built directly in Go cannot pair wildcard origins with
@@ -86,7 +86,7 @@ func newCORSPolicy(cfg config.CORSConfig) corsPolicy {
 }
 
 // resolveOrigin returns the value for Access-Control-Allow-Origin and whether
-// the request is one llama-swap answers with CORS headers at all.
+// the request is one herd answers with CORS headers at all.
 //
 // A request without an Origin is never one: only browsers send it, and adding
 // the headers for everyone else is what reintroduced issue #85 — llama-server
@@ -171,7 +171,7 @@ func (p corsPolicy) writePreflightHeaders(h http.Header, r *http.Request) {
 // Headers are only written when the request carries an Origin. Clients that
 // send none — curl, litellm and most SDKs — get a response with no
 // Access-Control-* header at all. That, together with
-// swaputil.StripUpstreamCORSHeaders in the proxies, keeps llama-swap the only
+// swaputil.StripUpstreamCORSHeaders in the proxies, keeps herd the only
 // source of these headers and prevents the duplicate-header fold of issue #85.
 //
 // It must stay the outermost middleware after request logging so a preflight

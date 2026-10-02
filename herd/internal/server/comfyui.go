@@ -3,7 +3,7 @@ package server
 import (
 	"regexp"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/config"
 )
 
 // comfyUIIgnorePaths are the path patterns that ComfyUI serves as static

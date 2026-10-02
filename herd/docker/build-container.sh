@@ -49,16 +49,16 @@ SD_IMAGE=${BASE_SDCPP_IMAGE:-ghcr.io/leejet/stable-diffusion.cpp}
 # LS_REPO is the destination of the built container image — defaults to the
 # current GitHub repository so forked CI builds publish to the fork's own
 # ghcr.io namespace without code changes.
-LS_REPO=${GITHUB_REPOSITORY:-mostlygeek/llama-swap}
+LS_REPO=${GITHUB_REPOSITORY:-mostlygeek/herd}
 
-# LS_BINARY_REPO is where the llama-swap release tarball is downloaded
+# LS_BINARY_REPO is where the herd release tarball is downloaded
 # from. Decoupled from LS_REPO so forks (which usually have no releases of
 # their own) can still build a container by pulling the canonical binary
 # from upstream. Override via the LS_BINARY_REPO env var when you maintain
 # fork-side releases.
-LS_BINARY_REPO=${LS_BINARY_REPO:-mostlygeek/llama-swap}
+LS_BINARY_REPO=${LS_BINARY_REPO:-mostlygeek/herd}
 
-# the most recent llama-swap tag
+# the most recent herd tag
 # have to strip out the 'v' due to .tar.gz file naming.
 # Authenticated request — unauth'd github.com API is 60/hr per IP and GHA
 # runners share IPs, so the call regularly returns rate-limit JSON and
@@ -68,7 +68,7 @@ LS_VER=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
     | jq -r .tag_name | sed 's/v//')
 
 if [[ -z "$LS_VER" || "$LS_VER" == "null" ]]; then
-    log_info "Error: could not resolve latest llama-swap release tag from ${LS_BINARY_REPO}"
+    log_info "Error: could not resolve latest herd release tag from ${LS_BINARY_REPO}"
     exit 1
 fi
 
@@ -181,13 +181,13 @@ for CONTAINER_TYPE in non-root root; do
   log_info "Building $CONTAINER_TYPE $CONTAINER_TAG $LS_VER"
   if [ "$ARCH" == "cpu" ]; then
     docker buildx build $BUILDX_FLAGS --provenance=false \
-      -f llama-swap.Containerfile \
+      -f herd.Containerfile \
       --build-arg BASE_TAG=${BASE_TAG} --build-arg LS_VER=${LS_VER} --build-arg UID=${USER_UID} \
       --build-arg LS_REPO=${LS_BINARY_REPO} --build-arg GID=${USER_GID} --build-arg USER_HOME=${USER_HOME} \
       --build-arg BASE_IMAGE=${BASE_IMAGE} \
       -t ${CONTAINER_TAG} -t ${CONTAINER_LATEST} ..
   else
-    docker build --provenance=false -f llama-swap.Containerfile \
+    docker build --provenance=false -f herd.Containerfile \
       --build-arg BASE_TAG=${BASE_TAG} --build-arg LS_VER=${LS_VER} --build-arg UID=${USER_UID} \
       --build-arg LS_REPO=${LS_BINARY_REPO} --build-arg GID=${USER_GID} --build-arg USER_HOME=${USER_HOME} \
       -t ${CONTAINER_TAG} -t ${CONTAINER_LATEST} \
@@ -199,7 +199,7 @@ for CONTAINER_TYPE in non-root root; do
   case "$ARCH" in
     "musa" | "vulkan")
       log_info "Adding sd-server to $CONTAINER_TAG"
-      docker build --provenance=false -f llama-swap-sd.Containerfile \
+      docker build --provenance=false -f herd-sd.Containerfile \
         --build-arg BASE=${CONTAINER_TAG} \
         --build-arg SD_IMAGE=${SD_IMAGE} --build-arg SD_TAG=${SD_TAG} \
         --build-arg UID=${USER_UID} --build-arg GID=${USER_GID} \

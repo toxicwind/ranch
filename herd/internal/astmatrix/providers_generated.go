@@ -30,9 +30,9 @@ type CatalogProviderDef struct {
 // ProviderCatalogDefs is the canonical provider table.
 var ProviderCatalogDefs = []CatalogProviderDef{
 	{
-		Name:           "llama-swap",
+		Name:           "herd",
 		BaseURL:        "http://127.0.0.1:25100/v1",
-		KeyEnv:         "LLAMA_SWAP_API_KEY",
+		KeyEnv:         "HERD_API_KEY",
 		KeyEnvAlt:      "",
 		Adapter:        "openai",
 		Auth:           "none",
@@ -1161,7 +1161,7 @@ var ProviderCatalogDefs = []CatalogProviderDef{
 // membership — never add live models here. Seeds may name dead IDs; the
 // catalog filters deadIds everywhere (cold start included).
 var ProviderCatalogSeeds = map[string][]string{
-	"llama-swap": []string{
+	"herd": []string{
 		"local-fast",
 		"local-quality",
 		"local-longctx",

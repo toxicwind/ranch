@@ -28,7 +28,7 @@
 | `research/` | Go research | Inkling API research |
 | `benchmarks/` | moonbox trees | Benchmark snapshots + live runs |
 
-flock never serves local models. Local inference is herd/llama-swap's job.
+flock never serves local models. Local inference is herd/herd's job.
 flock is the whole API/routing surface. The Go router package `projects/herd/internal/flock`
 **owns the canonical provider definitions** (see `providers.go` — nvidia →
 `https://integrate.api.nvidia.com/v1`); the flock proxy daemon (:8000) is the local

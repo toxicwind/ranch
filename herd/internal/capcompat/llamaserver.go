@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/config"
 )
 
 // llamaServerOwner is what llama-server and its forks report in /v1/models.
@@ -38,7 +38,7 @@ type propsResponse struct {
 	ChatTemplate string `json:"chat_template"`
 }
 
-// modalityForProp maps a llama-server modality key onto a llama-swap input
+// modalityForProp maps a llama-server modality key onto a herd input
 // modality. Text is always supported and is added unconditionally.
 //
 // All three keys are confirmed against a running server, which reports

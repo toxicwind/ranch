@@ -1,4 +1,4 @@
-module github.com/mostlygeek/llama-swap
+module github.com/mostlygeek/herd
 
 go 1.27.1
 

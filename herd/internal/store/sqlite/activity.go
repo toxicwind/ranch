@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/store"
+	"github.com/mostlygeek/herd/internal/store"
 )
 
 // activityRepository implements store.ActivityRepository over the activity

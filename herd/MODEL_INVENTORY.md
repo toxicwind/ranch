@@ -9,7 +9,7 @@
 > - The deployment matrix below uses the pre-autoscan model-ID scheme
 >   (`beellama/qwen-flash-64k`, …); the current `config.yaml` (autoscan-regenerated)
 >   uses file-derived IDs (e.g. `gemma-4-12b-it-q4_k_m`) and none of the old IDs exist.
-> - Step 3's `go run ./llama-swap.go --config config.yaml` does not work: this
+> - Step 3's `go run ./herd.go --config config.yaml` does not work: this
 >   vendored tree is missing `internal/config` and does not build standalone.
 > The original audit body is kept below as history.
 
@@ -21,7 +21,7 @@
 
 ## 📋 MASTER INVENTORY TABLE
 
-| Model ID (llama-swap key)               | HF Repo / Source                                                                | Architecture                         | Size / Params         | Local File(s)                                                                                                                   | Quant(s) Available                               | Context      | Modality                      | Recommended Fork                 | Notes                                                                                            |
+| Model ID (herd key)               | HF Repo / Source                                                                | Architecture                         | Size / Params         | Local File(s)                                                                                                                   | Quant(s) Available                               | Context      | Modality                      | Recommended Fork                 | Notes                                                                                            |
 | --------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------ | ----------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | **EXAONE 4.0 1.2B**                     | LGAI-EXAONE/EXAONE-4.0-1.2B-GGUF                                                | Dense (Hybrid Attn)                  | 1.07B / 30L           | EXAONE-4.0-1.2B-{IQ4_XS,Q4_K_M,Q5_K_M,Q6_K,Q8_0}.gguf                                                                           | IQ4_XS, Q4_K_M, Q5_K_M, Q6_K, Q8_0               | 65,536       | Text (Korean/English/Spanish) | beellama                         | Hybrid reasoning (thinking on/off via `chat_template_kwargs`), needs custom jinja template       |
 | **Gemma 4 12B Unified (base)**          | unsloth/gemma-4-12b-it-GGUF                                                     | Dense (Unified multimodal)           | 11.95B / 48L          | gemma-4-12b-it-Q4_K_M.gguf, mtp-gemma-4-12b-it.gguf                                                                             | Q4_K_M, MTP drafter                              | 256K         | Text, Image, Audio            | beellama / turboquant            | Native MTP support, `--jinja` required, temp 1.0/top-p 0.95/top-k 64                             |
@@ -130,7 +130,7 @@
 
 ### 6. **LD_LIBRARY_PATH in cmd (not env)**
 
-- Every model has `LD_LIBRARY_PATH=...` in `cmd:` — llama-swap's `SanitizeCommand()` doesn't run shell
+- Every model has `LD_LIBRARY_PATH=...` in `cmd:` — herd's `SanitizeCommand()` doesn't run shell
 - Fix: Move all `LD_LIBRARY_PATH` to `env:` arrays (already done in my rewrite)
 
 ### 7. **Duplicate Macros**
@@ -162,7 +162,7 @@ Local files NOT in config:
 
 1. **Add all missing model entries** to config.yaml for every local .gguf file
 2. **Fix the 8 critical issues** above
-3. **Validate each model loads** with `go run ./llama-swap.go --config config.yaml --listen 127.0.0.1:25100` (dry-run)
+3. **Validate each model loads** with `go run ./herd.go --config config.yaml --listen 127.0.0.1:25100` (dry-run)
 4. **Test key models** actually start (beellama/qwen-flash-64k, turboquant/heretic-27b-128k, etc.)
 
 ---

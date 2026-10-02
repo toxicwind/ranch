@@ -11,7 +11,7 @@
 #   WHISPER_REF=v1.0.0 ./build-image.sh --vulkan         # Pin whisper.cpp to a tag
 #   SD_REF=master ./build-image.sh --cuda                # Pin stable-diffusion.cpp to a branch
 #   AUDIO_REF=main ./build-image.sh --cuda               # Pin audio.cpp to a branch
-#   LS_VERSION=170 ./build-image.sh --cuda               # Override llama-swap version
+#   LS_VERSION=170 ./build-image.sh --cuda               # Override herd version
 #   IK_LLAMA_REF=main ./build-image.sh --cuda            # Pin ik_llama.cpp to main branch (CUDA only)
 #
 # The build is one Dockerfile per piece:
@@ -51,16 +51,16 @@ CUDA_VERSION="${CUDA_VERSION:-12.9.1}"
 
 # Registry holding the base and artifacts images used by --stage/--assemble.
 #
-# Deliberately a different package from the published llama-swap images. These
+# Deliberately a different package from the published herd images. These
 # are build inputs, not releases: a new tag is minted per project per upstream
 # commit, so sharing the package would bury :unified-cuda under thousands of
 # :art-* tags. It also keeps them out of reach of the delete-untagged cleanup
-# in containers.yml, which is scoped to `package: llama-swap`.
+# in containers.yml, which is scoped to `package: herd`.
 #
 # The default is fork-aware: under CI it derives from GITHUB_REPOSITORY so a
 # fork pushes to its own ghcr.io namespace instead of upstream's (which 403s
 # with "permission_denied: The requested installation does not exist").
-ARTIFACT_REPO="${ARTIFACT_REPO:-ghcr.io/${GITHUB_REPOSITORY:-mostlygeek/llama-swap}-build}"
+ARTIFACT_REPO="${ARTIFACT_REPO:-ghcr.io/${GITHUB_REPOSITORY:-mostlygeek/herd}-build}"
 
 # Upstream projects compiled into the image. ik-llama is CUDA only.
 ALL_PROJECTS=(whisper sd audio llama ik-llama)
@@ -93,20 +93,20 @@ for arg in "$@"; do
             echo "  --assemble       Assemble the unified image from published artifacts"
             echo ""
             echo "Environment variables:"
-            echo "  DOCKER_IMAGE_TAG     Set custom image tag (default: llama-swap:unified-cuda or llama-swap:unified-vulkan)"
+            echo "  DOCKER_IMAGE_TAG     Set custom image tag (default: herd:unified-cuda or herd:unified-vulkan)"
             echo "  LLAMA_REF            Pin llama.cpp to a commit, tag, or branch"
             echo "  WHISPER_REF          Pin whisper.cpp to a commit, tag, or branch"
             echo "  SD_REF               Pin stable-diffusion.cpp to a commit, tag, or branch"
             echo "  AUDIO_REF            Pin audio.cpp to a commit, tag, or branch"
             echo "  IK_LLAMA_REF         Pin ik_llama.cpp to a commit, tag, or branch (CUDA only)"
-            echo "  LS_VERSION           Override llama-swap version (e.g., '170' or 'latest')"
+            echo "  LS_VERSION           Override herd version (e.g., '170' or 'latest')"
             echo "  WHISPER_FFMPEG       Enable whisper.cpp FFmpeg support (default: yes)"
             echo "  CMAKE_CUDA_ARCHITECTURES  CUDA compute capabilities to compile natively"
             echo "                       (default: 60;61;75;86;89, CUDA only)"
             echo "  CUDA_VERSION         CUDA toolkit/runtime version as an nvidia/cuda image tag"
             echo "                       (default: 12.9.1, CUDA only)"
             echo "  ARTIFACT_REPO        Registry for base and artifacts images"
-            echo "                       (default: ghcr.io/mostlygeek/llama-swap-build)"
+            echo "                       (default: ghcr.io/mostlygeek/herd-build)"
             exit 0
             ;;
     esac
@@ -134,7 +134,7 @@ log() {
     fi
 }
 
-DOCKER_IMAGE_TAG="${DOCKER_IMAGE_TAG:-llama-swap:unified-${BACKEND}}"
+DOCKER_IMAGE_TAG="${DOCKER_IMAGE_TAG:-herd:unified-${BACKEND}}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -144,7 +144,7 @@ LLAMA_REPO="https://github.com/ggml-org/llama.cpp.git"
 WHISPER_REPO="https://github.com/ggml-org/whisper.cpp.git"
 SD_REPO="https://github.com/leejet/stable-diffusion.cpp.git"
 AUDIO_REPO="https://github.com/0xShug0/audio.cpp.git"
-LLAMA_SWAP_REPO="https://github.com/mostlygeek/llama-swap.git"
+HERD_REPO="https://github.com/mostlygeek/herd.git"
 IK_LLAMA_REPO="https://github.com/ikawrakow/ik_llama.cpp.git"
 
 # Resolve a git ref (commit hash, tag, or branch) to a full commit hash.
@@ -263,9 +263,9 @@ image_exists() {
 
 log "=========================================="
 case "$MODE" in
-    stage)    log "llama-swap Build (${STAGE_TARGET}, ${BACKEND})" ;;
-    assemble) log "llama-swap Unified Assemble (${BACKEND})" ;;
-    *)        log "llama-swap Unified Build (${BACKEND})" ;;
+    stage)    log "herd Build (${STAGE_TARGET}, ${BACKEND})" ;;
+    assemble) log "herd Unified Assemble (${BACKEND})" ;;
+    *)        log "herd Unified Build (${BACKEND})" ;;
 esac
 log "=========================================="
 log ""
@@ -341,12 +341,12 @@ else
 fi
 
 if [[ -n "${LS_VERSION:-}" ]]; then
-    LS_HASH=$(resolve_ref "${LLAMA_SWAP_REPO}" "${LS_VERSION}") || exit 1
-    log "llama-swap: ${LS_VERSION} -> ${LS_HASH}"
+    LS_HASH=$(resolve_ref "${HERD_REPO}" "${LS_VERSION}") || exit 1
+    log "herd: ${LS_VERSION} -> ${LS_HASH}"
 else
-    LS_HASH=$(get_latest_hash "${LLAMA_SWAP_REPO}")
-    [[ -n "${LS_HASH}" ]] || { echo "ERROR: Could not determine latest commit for llama-swap" >&2; exit 1; }
-    log "llama-swap: latest HEAD: ${LS_HASH}"
+    LS_HASH=$(get_latest_hash "${HERD_REPO}")
+    [[ -n "${LS_HASH}" ]] || { echo "ERROR: Could not determine latest commit for herd" >&2; exit 1; }
+    log "herd: latest HEAD: ${LS_HASH}"
 fi
 
 if [[ "$MODE" == "resolve" ]]; then
@@ -519,7 +519,7 @@ echo "Verifying build artifacts..."
 echo "=========================================="
 echo ""
 
-EXPECTED_BINARIES=(llama-server llama-cli llama-bench whisper-server whisper-cli sd-server sd-cli audiocpp_server audiocpp_cli llama-swap vllm-wrapper)
+EXPECTED_BINARIES=(llama-server llama-cli llama-bench whisper-server whisper-cli sd-server sd-cli audiocpp_server audiocpp_cli herd vllm-wrapper)
 if [[ "$BACKEND" == "cuda" ]]; then
     EXPECTED_BINARIES+=(ik-llama-server)
 fi
@@ -542,7 +542,7 @@ if [[ ${#MISSING_BINARIES[@]} -gt 0 ]]; then
     exit 1
 fi
 
-VERIFIED_LIST="llama-server, llama-cli, llama-bench, whisper-server, whisper-cli, sd-server, sd-cli, audiocpp_server, audiocpp_cli, llama-swap, vllm-wrapper"
+VERIFIED_LIST="llama-server, llama-cli, llama-bench, whisper-server, whisper-cli, sd-server, sd-cli, audiocpp_server, audiocpp_cli, herd, vllm-wrapper"
 if [[ "$BACKEND" == "cuda" ]]; then
     VERIFIED_LIST="${VERIFIED_LIST}, ik-llama-server"
 fi
@@ -593,10 +593,10 @@ ROOTLESS_TAG="${DOCKER_IMAGE_TAG}-rootless"
 docker build -t "${ROOTLESS_TAG}" - <<EOF
 FROM ${DOCKER_IMAGE_TAG}
 USER root
-RUN groupadd --system --gid 10001 llama-swap && \\
+RUN groupadd --system --gid 10001 herd && \\
     useradd --system --uid 10001 --gid 10001 \\
-      --home /app --shell /sbin/nologin llama-swap && \\
-    chown -R 10001:10001 /etc/llama-swap /models
+      --home /app --shell /sbin/nologin herd && \\
+    chown -R 10001:10001 /etc/herd /models
 USER 10001
 EOF
 
@@ -621,7 +621,7 @@ if [[ "$BACKEND" == "cuda" ]]; then
     echo "  CUDA version:         ${CUDA_VERSION}"
     echo "  CUDA architectures:   ${CMAKE_CUDA_ARCHITECTURES}"
 fi
-echo "  llama-swap:           $(docker run --rm --entrypoint cat "${DOCKER_IMAGE_TAG}" /versions.txt | grep llama-swap | cut -d' ' -f2-)"
+echo "  herd:           $(docker run --rm --entrypoint cat "${DOCKER_IMAGE_TAG}" /versions.txt | grep herd | cut -d' ' -f2-)"
 echo ""
 if [[ "$BACKEND" == "vulkan" ]]; then
     echo "Run with:"

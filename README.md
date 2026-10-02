@@ -192,7 +192,7 @@ flowchart TD
     herd -->|cloud via flock: key| flock["flock :25193<br/>external provider router"]
     flock -->|Strategy::Free| free["NIM → OpenRouter-free → …"]
     flock -->|Strategy::Hybrid| elo["Elo-ranked providers"]
-    flock -->|provider = llama-swap| herd
+    flock -->|provider = herd| herd
 ```
 
 ---
@@ -202,7 +202,7 @@ flowchart TD
 - **Flat.** Every animal lives at the ranch root, one directory per component — with two deliberate exceptions: `barn/`, the utility pen for small single-purpose tools (gatehouse, chute, lookout, …), and gitignored nested checkouts (`tau/`, …) that are independent repos with their own remotes.
 - **tau is the primary operator.** herd serves what's local; flock routes what's cloud; the rest of the estate (gateway, builds, chat, decisions, telemetry) exists so the agent can work.
 - **herd serves what's local;** anything cloud goes to the flock daemon via its `flock:` config key
-- **flock's `llama-swap` provider points back at herd `:25100`** for local models
+- **flock's `herd` provider points back at herd `:25100`** for local models
 - **Strategy names are routing directives, not model names:** `free` → `Strategy::Free` → free-tier external providers (NIM first — the best damn free endpoint — then OpenRouter-free, …)
 - **The provider registry lives in roost** (`@ranch/roost`, nested under flock/)
 - **No monkeypatches.** Fixes land in the owning animal's files, never as overlays.
@@ -237,7 +237,7 @@ One paragraph: pick an animal, read its README, keep the contract (flat, no monk
 
 Distributed under the **Apache-2.0 License**. See [LICENSE](LICENSE) for more information.
 
-Component licenses differ and win for their own code: `herd/` is MIT (upstream llama-swap fork, see `herd/LICENSE.md`), the flock proxy is MIT (see the standalone [`toxicwind/flock`](https://github.com/toxicwind/flock) repo).
+Component licenses differ and win for their own code: `herd/` is MIT (upstream herd fork, see `herd/LICENSE.md`), the flock proxy is MIT (see the standalone [`toxicwind/flock`](https://github.com/toxicwind/flock) repo).
 
 ---
 
@@ -249,7 +249,7 @@ toxicwind — [@toxicwind](https://github.com/toxicwind). Bugs and feature reque
 
 ## 🙏 Acknowledgments
 
-- [llama-swap](https://github.com/mostlygeek/llama.cpp) lineage for herd's serving core
+- [herd](https://github.com/mostlygeek/llama.cpp) lineage for herd's serving core
 - [hypruse](https://github.com/hypruse) — lasso's upstream
 - [oh-my-pi](https://github.com/can1357/oh-my-pi) — tau's upstream
 - [smart-mcp-proxy/mcpproxy-go](https://github.com/smart-mcp-proxy/mcpproxy-go) — gatehouse's upstream

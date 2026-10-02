@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mostlygeek/llama-swap/internal/mcptools"
+	"github.com/mostlygeek/herd/internal/mcptools"
 )
 
 const configProviderFixture = `

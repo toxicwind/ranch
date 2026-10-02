@@ -9,17 +9,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "llama-swap.fullname" . }}
+  name: {{ include "herd.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "llama-swap.labels" . | nindent 4 }}
+    {{- include "herd.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicas }}
   strategy:
     type: {{ .Values.strategy.type }}
   selector:
     matchLabels:
-      {{- include "llama-swap.selectorLabels" . | nindent 6 }}
+      {{- include "herd.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- /* Restart the head-end when the rendered config changes. The
@@ -43,7 +43,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "llama-swap.selectorLabels" . | nindent 8 }}
+        {{- include "herd.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -52,7 +52,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "llama-swap.serviceAccountName" . }}
+      serviceAccountName: {{ include "herd.serviceAccountName" . }}
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
@@ -66,7 +66,7 @@ spec:
         # One-shot gc per head-end start: deletes backend workloads whose
         # models are no longer in the config.
         - name: kubeswap-gc
-          image: {{ include "llama-swap.image" . }}
+          image: {{ include "herd.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /usr/local/bin/kubeswap
@@ -74,10 +74,10 @@ spec:
             - --namespace
             - {{ .Release.Namespace }}
             - --config
-            - /etc/llama-swap/config/config.yaml
+            - /etc/herd/config/config.yaml
           volumeMounts:
             - name: config
-              mountPath: /etc/llama-swap/config
+              mountPath: /etc/herd/config
               readOnly: true
           {{- with .Values.gcInitContainer.securityContext }}
           securityContext:
@@ -89,17 +89,17 @@ spec:
         {{- end }}
       {{- end }}
       containers:
-        - name: llama-swap
-          image: {{ include "llama-swap.image" . }}
+        - name: herd
+          image: {{ include "herd.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          command: ["/usr/local/bin/llama-swap"]
+          command: ["/usr/local/bin/herd"]
           args:
             - -config
-            - /etc/llama-swap/config/config.yaml
+            - /etc/herd/config/config.yaml
             - -watch-config
           ports:
             - name: http
@@ -122,7 +122,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: config
-              mountPath: /etc/llama-swap/config
+              mountPath: /etc/herd/config
               readOnly: true
             {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -145,7 +145,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ include "llama-swap.configMapName" . }}
+            name: {{ include "herd.configMapName" . }}
         {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

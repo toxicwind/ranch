@@ -49,7 +49,7 @@ export function isAst(text: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Local role models (llama-swap)
+// Local role models (herd)
 // ---------------------------------------------------------------------------
 export interface LocalRoles {
   fast: string;
@@ -143,14 +143,14 @@ export function buildCoding(
     fcm: null,
     // free: route through the `free` strategy (local + all :free cloud models)
     free: null,
-    // Local-first ranked roles (llama-swap exclusive matrix)
-    fast: ["llama-swap", roles.fast],
-    "local-fast": ["llama-swap", roles.fast],
-    quality: ["llama-swap", roles.quality],
-    "local-quality": ["llama-swap", roles.quality],
-    longctx: ["llama-swap", roles.longctx],
-    "local-longctx": ["llama-swap", roles.longctx],
-    "local-auto": ["llama-swap", roles.quality],
+    // Local-first ranked roles (herd exclusive matrix)
+    fast: ["herd", roles.fast],
+    "local-fast": ["herd", roles.fast],
+    quality: ["herd", roles.quality],
+    "local-quality": ["herd", roles.quality],
+    longctx: ["herd", roles.longctx],
+    "local-longctx": ["herd", roles.longctx],
+    "local-auto": ["herd", roles.quality],
     ...pkgAliases,
   };
 }
@@ -171,7 +171,7 @@ export function firstModelFor(
   q: CatalogQuery,
   roles: LocalRoles = LOCAL_ROLES,
 ): string {
-  if (p === "llama-swap") return roles.quality;
+  if (p === "herd") return roles.quality;
   return q.servingModels(p)[0] || "";
 }
 
@@ -181,7 +181,7 @@ export function isLocalSwapModelId(
   roles: LocalRoles = LOCAL_ROLES,
 ): boolean {
   if (!model || model === "auto" || model === "fcm") return false;
-  if (model in coding && coding[model]?.[0] === "llama-swap") return true;
+  if (model in coding && coding[model]?.[0] === "herd") return true;
   if (model === roles.fast || model === roles.quality || model === roles.longctx) {
     return true;
   }
@@ -287,18 +287,18 @@ export function resolveModel(
     // the healthy field instead of burning a 404 on a known-bad id.
     if (!q.deadIds().has(m) && !q.isQuarantined(p, m)) return [p, m];
   }
-  // Prefer llama-swap for any local GGUF id so hybrid never sends GPU models to Gemini
-  if (isLocalSwapModelId(model, coding, roles)) return ["llama-swap", model];
+  // Prefer herd for any local GGUF id so hybrid never sends GPU models to Gemini
+  if (isLocalSwapModelId(model, coding, roles)) return ["herd", model];
   if (model === "auto" || model === "fcm") {
     // local-first auto: quality role on swap
-    return ["llama-swap", roles.quality];
+    return ["herd", roles.quality];
   }
   for (const p of q.providerNames()) {
     if (q.servingModels(p).includes(model)) return [p, model];
   }
   if (q.keyOk("openrouter")) return ["openrouter", model];
   if (q.keyOk("nvidia")) return ["nvidia", model];
-  return ["llama-swap", roles.quality];
+  return ["herd", roles.quality];
 }
 
 // ---------------------------------------------------------------------------

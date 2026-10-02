@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/process"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/process"
+	"github.com/mostlygeek/herd/internal/swaputil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
@@ -385,8 +385,8 @@ func TestServer_Selector_ModelListings(t *testing.T) {
 	assert.Equal(t, "Public Model", public.Name)
 	assert.Equal(t, "Public selector", public.Description)
 	assert.Equal(t, "loaded", public.Status["value"])
-	require.Contains(t, public.Meta, "llamaswap")
-	metadata, ok := public.Meta["llamaswap"].(map[string]any)
+	require.Contains(t, public.Meta, "herd")
+	metadata, ok := public.Meta["herd"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, "testing", metadata["purpose"])
 	assert.Equal(t, "selector", metadata["type"])
@@ -396,7 +396,7 @@ func TestServer_Selector_ModelListings(t *testing.T) {
 
 	balanced, found := byID["balanced"]
 	require.True(t, found)
-	balancedMetadata, ok := balanced.Meta["llamaswap"].(map[string]any)
+	balancedMetadata, ok := balanced.Meta["herd"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, config.SelectorStrategySpillover, balancedMetadata["strategy"])
 	assert.Equal(t, []any{"a", "b", "c"}, balancedMetadata["targets"])

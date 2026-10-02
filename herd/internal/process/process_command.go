@@ -14,10 +14,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/event"
-	"github.com/mostlygeek/llama-swap/internal/logmon"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/event"
+	"github.com/mostlygeek/herd/internal/logmon"
+	"github.com/mostlygeek/herd/internal/swaputil"
 )
 
 var ErrStartAborted = fmt.Errorf("aborted")
@@ -536,7 +536,7 @@ func (p *ProcessCommand) doStart(startCtx context.Context, healthCheckTimeout ti
 			// Expected: we force-terminated the process. A forced kill exits
 			// the child with a non-zero code (e.g. taskkill /f on Windows
 			// yields exit status 1), so this is not an error.
-			p.proxyLogger.Debugf("<%s> process stopped by llama-swap: %v", p.id, waitErr)
+			p.proxyLogger.Debugf("<%s> process stopped by herd: %v", p.id, waitErr)
 		default:
 			if exitErr, ok := waitErr.(*exec.ExitError); ok {
 				p.proxyLogger.Debugf("<%s> process exited: code=%d, err=%v", p.id, exitErr.ExitCode(), waitErr)

@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/swaputil"
 )
 
 // newLlamaServerStub returns an upstream that behaves like llama-server: it
@@ -129,7 +129,7 @@ func TestServer_CORSProxiedResponseIsSingleValued(t *testing.T) {
 }
 
 // TestServer_CORSProxiedResponseHasNoEmptyHeaders guards the subtler half of
-// #85: an upstream header that is present but empty. Folded with llama-swap's
+// #85: an upstream header that is present but empty. Folded with herd's
 // own it produces a value with trailing whitespace, which RFC 9110 forbids.
 func TestServer_CORSProxiedResponseHasNoEmptyHeaders(t *testing.T) {
 	upstream := newLlamaServerStub(t)
@@ -156,7 +156,7 @@ func TestServer_CORSProxiedResponseHasNoEmptyHeaders(t *testing.T) {
 // TestServer_CORSReverseProxyWouldDuplicateWithoutStrip documents why
 // swaputil.StripUpstreamCORSHeaders is load-bearing rather than defensive.
 // httputil.ReverseProxy merges upstream headers with Header.Add, so without the
-// strip a cross-origin response carries both llama-swap's value and the
+// strip a cross-origin response carries both herd's value and the
 // upstream's. If this test ever stops reproducing the duplicate, Go's proxy
 // semantics changed and the strip's justification should be revisited.
 func TestServer_CORSReverseProxyWouldDuplicateWithoutStrip(t *testing.T) {

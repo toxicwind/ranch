@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/logmon"
-	"github.com/mostlygeek/llama-swap/internal/process"
+	"github.com/mostlygeek/herd/internal/logmon"
+	"github.com/mostlygeek/herd/internal/process"
 )
 
 // ModelEvent is the exact envelope Zed's llama.cpp provider expects from
@@ -54,7 +54,7 @@ type modelEventClient struct {
 }
 
 // modelEventBroadcaster fans model lifecycle events out to all subscribed
-// /models/sse clients. The proxy owns the truth: llama-swap starts and
+// /models/sse clients. The proxy owns the truth: herd starts and
 // stops every backend process, so it can emit loaded/unloaded/loading
 // events regardless of whether the backend itself supports /models/sse.
 type modelEventBroadcaster struct {

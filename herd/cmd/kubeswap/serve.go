@@ -84,7 +84,7 @@ func waitForDeploymentGone(ctx context.Context, client kubernetes.Interface, nam
 
 // verifyOwnership checks that obj was created by kubeswap for modelID.
 // Every object kubeswap creates carries the ORIGINAL model ID in the
-// llama-swap.io/model-id annotation, so two distinct IDs that sanitize to
+// herd.io/model-id annotation, so two distinct IDs that sanitize to
 // the same string can never be confused. Objects without the annotation
 // (an older kubeswap) fall back to the sanitized model label.
 func verifyOwnership(obj metav1.Object, modelID string) error {
@@ -464,14 +464,14 @@ func (f *serveFlags) toConfig() (*serveConfig, error) {
 // everything that shapes the backend resources (the serve-only proxy
 // flags are registered by the callers).
 func addServeFlags(fs *flag.FlagSet, f *serveFlags) {
-	fs.StringVar(&f.model, "model", "", "llama-swap model ID (required)")
+	fs.StringVar(&f.model, "model", "", "herd model ID (required)")
 	addKubeFlags(fs, &f.namespace, &f.kubeconfig)
 	fs.StringVar(&f.image, "image", "", "container image (required)")
 	fs.IntVar(&f.port, "port", defaultPort, "port the backend container listens on (must match the backend's --port)")
 	fs.StringVar(&f.healthPath, "health-path", "/health", "backend health endpoint (drives the pod readiness probe)")
 	fs.StringVar(&f.livenessPath, "liveness-path", "", "backend liveness probe endpoint (default: same as --health-path)")
 	fs.DurationVar(&f.probeTimeout, "probe-timeout", 5*time.Second, "timeout for the readiness/liveness probe requests")
-	fs.DurationVar(&f.startupTimeout, "startup-timeout", 10*time.Minute, "model loading time the startup probe tolerates before the pod restarts; llama-swap's global healthCheckTimeout should be at least this long")
+	fs.DurationVar(&f.startupTimeout, "startup-timeout", 10*time.Minute, "model loading time the startup probe tolerates before the pod restarts; herd's global healthCheckTimeout should be at least this long")
 	fs.Var(&f.command, "command", "container command token (repeatable; overrides the image entrypoint)")
 	fs.Var(&f.requests, "request", "resource request name=quantity, e.g. cpu=2 or memory=4Gi (repeatable)")
 	fs.Var(&f.limits, "limit", "resource limit name=quantity, e.g. cpu=4 (repeatable)")
@@ -597,7 +597,7 @@ func serveCmd(args []string) error {
 	}
 	if crashed {
 		// exitError carries the backend's exit code so main exits with it
-		// instead of a blanket 1: llama-swap (and anyone else running the
+		// instead of a blanket 1: herd (and anyone else running the
 		// wrapper) sees the command fail the way the backend failed.
 		return &exitError{code: crashCode, msg: shutdownReason}
 	}
@@ -692,7 +692,7 @@ func newServer(cfg *serveConfig, client kubernetes.Interface, upstreamOverride s
 				KeepAlive: 30 * time.Second,
 			}).DialContext,
 			TLSHandshakeTimeout: 10 * time.Second,
-			// Bounds a wedged backend, not model loading: llama-swap
+			// Bounds a wedged backend, not model loading: herd
 			// only forwards once the check path reports the pod ready
 			// (startup probe passed), so this caps how long a ready
 			// backend may stall before producing response headers.
@@ -708,7 +708,7 @@ func newServer(cfg *serveConfig, client kubernetes.Interface, upstreamOverride s
 		FlushInterval: -1, // stream responses (SSE) without buffering
 		// Upstream CORS headers are deliberately left in place: kubeswap has no
 		// CORS middleware of its own, so stripping them would leave browsers
-		// with none. Only llama-swap's own proxies strip them; see issue #85.
+		// with none. Only herd's own proxies strip them; see issue #85.
 		ModifyResponse: func(resp *http.Response) error {
 			if strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "text/event-stream") {
 				resp.Header.Set("X-Accel-Buffering", "no")
@@ -759,7 +759,7 @@ func (s *server) upstreamDescription() string {
 
 // handler gates requests on backend readiness, then proxies. The check
 // path (--check-path, default /health) is answered by the wrapper itself
-// from pod readiness state, so consumers (llama-swap's health check) never
+// from pod readiness state, so consumers (herd's health check) never
 // depend on the backend's own health endpoint existing or behaving.
 func (s *server) handler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == s.cfg.CheckPath {
@@ -975,7 +975,7 @@ func podCrashState(p *corev1.Pod) (code int, desc string, failed bool) {
 // crash output is flushed to stderr, deletes the objects kubeswap manages
 // for the model, and signals serveCmd to exit with the backend's exit code.
 // A crashed backend needs intervention, not time - waiting out
-// llama-swap's health-check timeout would only delay the same error.
+// herd's health-check timeout would only delay the same error.
 func (s *server) fail(code int, desc string) {
 	log.Printf("model %q: backend failing (%s); cleaning up and exiting with code %d", s.cfg.Model, desc, code)
 	s.setReady(false, "backend failing: "+desc)
@@ -1001,7 +1001,7 @@ func (s *server) fail(code int, desc string) {
 // cleanupOwned deletes the model's Deployment and Service when they are
 // verified to be kubeswap-managed for this model (adoption guarantees this;
 // foreign objects are never touched). Errors are logged, not returned: the
-// exit is already decided and llama-swap's subsequent cmdStop (kubeswap
+// exit is already decided and herd's subsequent cmdStop (kubeswap
 // delete) is an idempotent second pass.
 func (s *server) cleanupOwned() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)

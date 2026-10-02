@@ -9,9 +9,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/logmon"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/logmon"
+	"github.com/mostlygeek/herd/internal/swaputil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
@@ -251,8 +251,8 @@ func TestServer_Profile_ModelListings(t *testing.T) {
 	assert.Empty(t, records["expose"].Name)
 	assert.NotContains(t, records, "disabled")
 	assert.NotContains(t, records, "hidden")
-	require.Contains(t, records["public"].Meta, "llamaswap")
-	metadata, ok := records["public"].Meta["llamaswap"].(map[string]any)
+	require.Contains(t, records["public"].Meta, "herd")
+	metadata, ok := records["public"].Meta["herd"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, "profile", metadata["type"])
 

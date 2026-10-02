@@ -15,10 +15,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "llama-swap.fullname" . }}
+  name: {{ include "herd.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "llama-swap.labels" . | nindent 4 }}
+    {{- include "herd.labels" . | nindent 4 }}
 data:
   config.yaml: |
 {{- if .Values.config.models }}
@@ -240,7 +240,7 @@ data:
 {{- /* merged = defaults with the model entry on top; a key present on
       the model wins, including an empty list (e.g. gpu: [] for a
       CPU-only model). Kube keys are consumed by the chart, every other
-      merged key renders as a llama-swap model field. */}}
+      merged key renders as a herd model field. */}}
 {{- $merged := mergeOverwrite (deepCopy $defaults) $m }}
 {{- $kubeKeys := list "id" "image" "command" "gpu" "volumes" "port" "extraKubeArgs" "startupTimeout" "healthPath" "livenessPath" "checkPath" "args" "proxy" "cmdStop" "pool" }}
       {{ $id | quote }}:

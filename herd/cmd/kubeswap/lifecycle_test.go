@@ -46,24 +46,24 @@ func TestKubeswap_EnsureResourcesCreates(t *testing.T) {
 	for _, c := range res.Created {
 		created[c] = true
 	}
-	for _, want := range []string{"pvc/llama-swap-models", "deployment/" + cfg.DepName, "service/" + cfg.SvcName} {
+	for _, want := range []string{"pvc/herd-models", "deployment/" + cfg.DepName, "service/" + cfg.SvcName} {
 		if !created[want] {
 			t.Errorf("expected %q to be created, got %v", want, res.Created)
 		}
 	}
 
 	// Objects exist with the right labels.
-	dep, err := client.AppsV1().Deployments("llama-swap").Get(context.Background(), cfg.DepName, metav1.GetOptions{})
+	dep, err := client.AppsV1().Deployments("herd").Get(context.Background(), cfg.DepName, metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("deployment: %v", err)
 	}
 	if dep.Labels[labelModel] != "author-model-tag" {
 		t.Errorf("labels: %v", dep.Labels)
 	}
-	if _, err := client.CoreV1().Services("llama-swap").Get(context.Background(), cfg.SvcName, metav1.GetOptions{}); err != nil {
+	if _, err := client.CoreV1().Services("herd").Get(context.Background(), cfg.SvcName, metav1.GetOptions{}); err != nil {
 		t.Errorf("service: %v", err)
 	}
-	if _, err := client.CoreV1().PersistentVolumeClaims("llama-swap").Get(context.Background(), "llama-swap-models", metav1.GetOptions{}); err != nil {
+	if _, err := client.CoreV1().PersistentVolumeClaims("herd").Get(context.Background(), "herd-models", metav1.GetOptions{}); err != nil {
 		t.Errorf("pvc: %v", err)
 	}
 }
@@ -98,9 +98,9 @@ func TestKubeswap_EnsureResourcesStrictReplace(t *testing.T) {
 
 	// Simulate drift: someone changed the image.
 	ctx := context.Background()
-	dep, _ := client.AppsV1().Deployments("llama-swap").Get(ctx, cfg.DepName, metav1.GetOptions{})
+	dep, _ := client.AppsV1().Deployments("herd").Get(ctx, cfg.DepName, metav1.GetOptions{})
 	dep.Spec.Template.Spec.Containers[0].Image = "someone-else:latest"
-	if _, err := client.AppsV1().Deployments("llama-swap").Update(ctx, dep, metav1.UpdateOptions{}); err != nil {
+	if _, err := client.AppsV1().Deployments("herd").Update(ctx, dep, metav1.UpdateOptions{}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -122,7 +122,7 @@ func TestKubeswap_EnsureResourcesStrictReplace(t *testing.T) {
 	if res.Adopted {
 		t.Error("strict should replace drifted deployment")
 	}
-	got, err := client.AppsV1().Deployments("llama-swap").Get(ctx, cfg.DepName, metav1.GetOptions{})
+	got, err := client.AppsV1().Deployments("herd").Get(ctx, cfg.DepName, metav1.GetOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,9 +191,9 @@ func TestKubeswap_EnsureResourcesAdoptsExistingPVC(t *testing.T) {
 	client := newFakeClient()
 	// Pre-create the PVC without kubeswap labels (user-managed shared cache).
 	userPVC := &corev1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{Name: "llama-swap-models", Namespace: "llama-swap"},
+		ObjectMeta: metav1.ObjectMeta{Name: "herd-models", Namespace: "herd"},
 	}
-	if _, err := client.CoreV1().PersistentVolumeClaims("llama-swap").Create(context.Background(), userPVC, metav1.CreateOptions{}); err != nil {
+	if _, err := client.CoreV1().PersistentVolumeClaims("herd").Create(context.Background(), userPVC, metav1.CreateOptions{}); err != nil {
 		t.Fatal(err)
 	}
 	cfg := testConfig()
@@ -201,7 +201,7 @@ func TestKubeswap_EnsureResourcesAdoptsExistingPVC(t *testing.T) {
 		t.Fatalf("ensureResources: %v", err)
 	}
 	// The user's PVC must not be relabeled or replaced.
-	pvc, err := client.CoreV1().PersistentVolumeClaims("llama-swap").Get(context.Background(), "llama-swap-models", metav1.GetOptions{})
+	pvc, err := client.CoreV1().PersistentVolumeClaims("herd").Get(context.Background(), "herd-models", metav1.GetOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -215,12 +215,12 @@ func TestKubeswap_EnsureResourcesAdoptsExistingPVC(t *testing.T) {
 func TestKubeswap_EnsureResourcesRejectsReadOnlyPVCForWritableMount(t *testing.T) {
 	client := newFakeClient()
 	roPVC := &corev1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{Name: "cache", Namespace: "llama-swap"},
+		ObjectMeta: metav1.ObjectMeta{Name: "cache", Namespace: "herd"},
 		Spec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadOnlyMany},
 		},
 	}
-	if _, err := client.CoreV1().PersistentVolumeClaims("llama-swap").Create(context.Background(), roPVC, metav1.CreateOptions{}); err != nil {
+	if _, err := client.CoreV1().PersistentVolumeClaims("herd").Create(context.Background(), roPVC, metav1.CreateOptions{}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -243,12 +243,12 @@ func TestKubeswap_EnsureResourcesRejectsReadOnlyPVCForWritableMount(t *testing.T
 	for _, mode := range []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce, corev1.ReadWriteOncePod, corev1.ReadWriteMany} {
 		client2 := newFakeClient()
 		rwPVC := &corev1.PersistentVolumeClaim{
-			ObjectMeta: metav1.ObjectMeta{Name: "cache", Namespace: "llama-swap"},
+			ObjectMeta: metav1.ObjectMeta{Name: "cache", Namespace: "herd"},
 			Spec: corev1.PersistentVolumeClaimSpec{
 				AccessModes: []corev1.PersistentVolumeAccessMode{mode},
 			},
 		}
-		if _, err := client2.CoreV1().PersistentVolumeClaims("llama-swap").Create(context.Background(), rwPVC, metav1.CreateOptions{}); err != nil {
+		if _, err := client2.CoreV1().PersistentVolumeClaims("herd").Create(context.Background(), rwPVC, metav1.CreateOptions{}); err != nil {
 			t.Fatal(err)
 		}
 		cfg2 := testConfig()
@@ -267,22 +267,22 @@ func TestKubeswap_DeleteModel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := deleteModel(context.Background(), client, "llama-swap", "author/model:tag", true, 0); err != nil {
+	if err := deleteModel(context.Background(), client, "herd", "author/model:tag", true, 0); err != nil {
 		t.Fatalf("deleteModel: %v", err)
 	}
 	ctx := context.Background()
-	if _, err := client.AppsV1().Deployments("llama-swap").Get(ctx, cfg.DepName, metav1.GetOptions{}); !apierrors.IsNotFound(err) {
+	if _, err := client.AppsV1().Deployments("herd").Get(ctx, cfg.DepName, metav1.GetOptions{}); !apierrors.IsNotFound(err) {
 		t.Errorf("deployment should be gone, err=%v", err)
 	}
-	if _, err := client.CoreV1().Services("llama-swap").Get(ctx, cfg.SvcName, metav1.GetOptions{}); !apierrors.IsNotFound(err) {
+	if _, err := client.CoreV1().Services("herd").Get(ctx, cfg.SvcName, metav1.GetOptions{}); !apierrors.IsNotFound(err) {
 		t.Errorf("service should be gone, err=%v", err)
 	}
-	if _, err := client.CoreV1().PersistentVolumeClaims("llama-swap").Get(ctx, "llama-swap-models", metav1.GetOptions{}); !apierrors.IsNotFound(err) {
+	if _, err := client.CoreV1().PersistentVolumeClaims("herd").Get(ctx, "herd-models", metav1.GetOptions{}); !apierrors.IsNotFound(err) {
 		t.Errorf("kubeswap-created PVC should be gone, err=%v", err)
 	}
 
 	// Idempotent: deleting again is not an error.
-	if err := deleteModel(context.Background(), client, "llama-swap", "author/model:tag", true, 0); err != nil {
+	if err := deleteModel(context.Background(), client, "herd", "author/model:tag", true, 0); err != nil {
 		t.Errorf("second deleteModel: %v", err)
 	}
 }
@@ -294,18 +294,18 @@ func TestKubeswap_DeleteModelKeepsUserPVC(t *testing.T) {
 	// A user-managed PVC with a name NOT referenced by the config survives;
 	// also one referenced but pre-existing (unlabeled) must survive.
 	preExisting := &corev1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{Name: "llama-swap-models", Namespace: "llama-swap"},
+		ObjectMeta: metav1.ObjectMeta{Name: "herd-models", Namespace: "herd"},
 	}
-	if _, err := client.CoreV1().PersistentVolumeClaims("llama-swap").Create(context.Background(), preExisting, metav1.CreateOptions{}); err != nil {
+	if _, err := client.CoreV1().PersistentVolumeClaims("herd").Create(context.Background(), preExisting, metav1.CreateOptions{}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := ensureResources(client, cfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := deleteModel(context.Background(), client, "llama-swap", "author/model:tag", true, 0); err != nil {
+	if err := deleteModel(context.Background(), client, "herd", "author/model:tag", true, 0); err != nil {
 		t.Fatalf("deleteModel: %v", err)
 	}
-	if _, err := client.CoreV1().PersistentVolumeClaims("llama-swap").Get(context.Background(), "llama-swap-models", metav1.GetOptions{}); err != nil {
+	if _, err := client.CoreV1().PersistentVolumeClaims("herd").Get(context.Background(), "herd-models", metav1.GetOptions{}); err != nil {
 		t.Errorf("pre-existing PVC must survive deletion: %v", err)
 	}
 }
@@ -460,24 +460,24 @@ func TestKubeswap_WaitForDeploymentGone(t *testing.T) {
 	ctx := context.Background()
 
 	// Absent: returns immediately.
-	if err := waitForDeploymentGone(ctx, client, "llama-swap", "nope", time.Second); err != nil {
+	if err := waitForDeploymentGone(ctx, client, "herd", "nope", time.Second); err != nil {
 		t.Fatalf("absent: %v", err)
 	}
 
 	// Present and never deleted: times out.
-	stuck := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "stuck", Namespace: "llama-swap"}}
-	if _, err := client.AppsV1().Deployments("llama-swap").Create(ctx, stuck, metav1.CreateOptions{}); err != nil {
+	stuck := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "stuck", Namespace: "herd"}}
+	if _, err := client.AppsV1().Deployments("herd").Create(ctx, stuck, metav1.CreateOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := waitForDeploymentGone(ctx, client, "llama-swap", "stuck", 700*time.Millisecond); err == nil {
+	if err := waitForDeploymentGone(ctx, client, "herd", "stuck", 700*time.Millisecond); err == nil {
 		t.Fatal("expected timeout for a deployment that is never deleted")
 	}
 
 	// Deleted: the wait completes.
-	if err := client.AppsV1().Deployments("llama-swap").Delete(ctx, "stuck", metav1.DeleteOptions{}); err != nil {
+	if err := client.AppsV1().Deployments("herd").Delete(ctx, "stuck", metav1.DeleteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := waitForDeploymentGone(ctx, client, "llama-swap", "stuck", time.Second); err != nil {
+	if err := waitForDeploymentGone(ctx, client, "herd", "stuck", time.Second); err != nil {
 		t.Fatalf("deleted: %v", err)
 	}
 }
@@ -491,7 +491,7 @@ func TestKubeswap_WaitForPodsGone(t *testing.T) {
 	depName := "kubeswap-m-abcd1234"
 
 	// Absent: returns immediately.
-	if err := waitForPodsGone(ctx, client, "llama-swap", sanitized, depName, time.Second); err != nil {
+	if err := waitForPodsGone(ctx, client, "herd", sanitized, depName, time.Second); err != nil {
 		t.Fatalf("absent: %v", err)
 	}
 
@@ -502,22 +502,22 @@ func TestKubeswap_WaitForPodsGone(t *testing.T) {
 	now := metav1.Now()
 	terminating := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
 		Name:              "p1",
-		Namespace:         "llama-swap",
+		Namespace:         "herd",
 		Labels:            podSelectorLabels(sanitized, depName),
 		DeletionTimestamp: &now,
 	}}
-	if _, err := client.CoreV1().Pods("llama-swap").Create(ctx, terminating, metav1.CreateOptions{}); err != nil {
+	if _, err := client.CoreV1().Pods("herd").Create(ctx, terminating, metav1.CreateOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := waitForPodsGone(ctx, client, "llama-swap", sanitized, depName, 700*time.Millisecond); err == nil {
+	if err := waitForPodsGone(ctx, client, "herd", sanitized, depName, 700*time.Millisecond); err == nil {
 		t.Fatal("expected timeout for a pod that is only terminating, not gone")
 	}
 
 	// Object removed: the wait completes.
-	if err := client.CoreV1().Pods("llama-swap").Delete(ctx, "p1", metav1.DeleteOptions{}); err != nil {
+	if err := client.CoreV1().Pods("herd").Delete(ctx, "p1", metav1.DeleteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := waitForPodsGone(ctx, client, "llama-swap", sanitized, depName, time.Second); err != nil {
+	if err := waitForPodsGone(ctx, client, "herd", sanitized, depName, time.Second); err != nil {
 		t.Fatalf("removed: %v", err)
 	}
 }
@@ -699,7 +699,7 @@ func TestKubeswap_GCAllowedModels(t *testing.T) {
 	}
 }
 
-// TestKubeswap_GCAllowedModelsFromConfig Verifies gc derives the allowed model set from a llama-swap config file.
+// TestKubeswap_GCAllowedModelsFromConfig Verifies gc derives the allowed model set from a herd config file.
 func TestKubeswap_GCAllowedModelsFromConfig(t *testing.T) {
 	cfgFile := t.TempDir() + "/config.yaml"
 	data := []byte("models:\n  model-a:\n    cmd: sleep 1\n  model-b:\n    cmd: sleep 2\n")
@@ -738,20 +738,20 @@ func TestKubeswap_GCCollectsStaleWorkloads(t *testing.T) {
 	// model-b was removed from config: only model-a survives.
 	allowed := map[string]bool{"model-a": true}
 	ctx := context.Background()
-	deleted, err := gcCollect(client, "llama-swap", allowed, false, false)
+	deleted, err := gcCollect(client, "herd", allowed, false, false)
 	if err != nil {
 		t.Fatalf("gcCollect: %v", err)
 	}
 	if len(deleted) != 1 || deleted[0] != "model-b" {
 		t.Errorf("deleted: %v", deleted)
 	}
-	if _, err := client.AppsV1().Deployments("llama-swap").Get(ctx, cfgA.DepName, metav1.GetOptions{}); err != nil {
+	if _, err := client.AppsV1().Deployments("herd").Get(ctx, cfgA.DepName, metav1.GetOptions{}); err != nil {
 		t.Errorf("model-a should survive: %v", err)
 	}
-	if _, err := client.AppsV1().Deployments("llama-swap").Get(ctx, cfgB.DepName, metav1.GetOptions{}); !apierrors.IsNotFound(err) {
+	if _, err := client.AppsV1().Deployments("herd").Get(ctx, cfgB.DepName, metav1.GetOptions{}); !apierrors.IsNotFound(err) {
 		t.Errorf("model-b should be collected, err=%v", err)
 	}
-	if _, err := client.CoreV1().Services("llama-swap").Get(ctx, cfgB.SvcName, metav1.GetOptions{}); !apierrors.IsNotFound(err) {
+	if _, err := client.CoreV1().Services("herd").Get(ctx, cfgB.SvcName, metav1.GetOptions{}); !apierrors.IsNotFound(err) {
 		t.Errorf("model-b service should be collected, err=%v", err)
 	}
 
@@ -762,17 +762,17 @@ func TestKubeswap_GCCollectsStaleWorkloads(t *testing.T) {
 	stale.Name = "stale-no-annotation"
 	stale.Annotations = map[string]string{}
 	stale.Labels = map[string]string{labelManagedBy: managedByValue, labelModel: "stale"}
-	if _, err := client.AppsV1().Deployments("llama-swap").Create(ctx, stale, metav1.CreateOptions{}); err != nil {
+	if _, err := client.AppsV1().Deployments("herd").Create(ctx, stale, metav1.CreateOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	deleted, err = gcCollect(client, "llama-swap", allowed, false, false)
+	deleted, err = gcCollect(client, "herd", allowed, false, false)
 	if err != nil {
 		t.Fatalf("gcCollect (second pass): %v", err)
 	}
 	if len(deleted) != 0 {
 		t.Errorf("second pass should collect nothing, got %v", deleted)
 	}
-	if _, err := client.AppsV1().Deployments("llama-swap").Get(ctx, "stale-no-annotation", metav1.GetOptions{}); err != nil {
+	if _, err := client.AppsV1().Deployments("herd").Get(ctx, "stale-no-annotation", metav1.GetOptions{}); err != nil {
 		t.Errorf("unannotated deployment should be skipped, not deleted: %v", err)
 	}
 }
@@ -794,13 +794,13 @@ func TestKubeswap_FindPod(t *testing.T) {
 	// Pending pod.
 	pending := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "p1", Namespace: "llama-swap",
+			Name: "p1", Namespace: "herd",
 			Labels: podLabels(cfg.Sanitized, cfg.DepName),
 			UID:    types.UID("u1"),
 		},
 		Status: corev1.PodStatus{Phase: corev1.PodPending},
 	}
-	if _, err := client.CoreV1().Pods("llama-swap").Create(ctx, pending, metav1.CreateOptions{}); err != nil {
+	if _, err := client.CoreV1().Pods("herd").Create(ctx, pending, metav1.CreateOptions{}); err != nil {
 		t.Fatal(err)
 	}
 	st = s.findPod(ctx, dep)
@@ -811,7 +811,7 @@ func TestKubeswap_FindPod(t *testing.T) {
 	// Ready pod with an IP.
 	ready := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "p1", Namespace: "llama-swap",
+			Name: "p1", Namespace: "herd",
 			Labels: podLabels(cfg.Sanitized, cfg.DepName),
 			UID:    types.UID("u1"),
 		},
@@ -824,7 +824,7 @@ func TestKubeswap_FindPod(t *testing.T) {
 			}},
 		},
 	}
-	if _, err := client.CoreV1().Pods("llama-swap").Update(ctx, ready, metav1.UpdateOptions{}); err != nil {
+	if _, err := client.CoreV1().Pods("herd").Update(ctx, ready, metav1.UpdateOptions{}); err != nil {
 		t.Fatal(err)
 	}
 	st = s.findPod(ctx, dep)
@@ -891,7 +891,7 @@ func TestKubeswap_PollOnceRequestsStopOnDeletion(t *testing.T) {
 	}
 
 	// Delete the deployment: serve must request a stop.
-	if err := client.AppsV1().Deployments("llama-swap").Delete(ctx, cfg.DepName, metav1.DeleteOptions{}); err != nil {
+	if err := client.AppsV1().Deployments("herd").Delete(ctx, cfg.DepName, metav1.DeleteOptions{}); err != nil {
 		t.Fatal(err)
 	}
 	s.pollOnce(ctx)
@@ -1055,31 +1055,31 @@ func TestKubeswap_RunLogs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := runLogs(context.Background(), client, "llama-swap", cfg.Model, 10, false); err == nil || !strings.Contains(err.Error(), "no pod") {
+	if err := runLogs(context.Background(), client, "herd", cfg.Model, 10, false); err == nil || !strings.Contains(err.Error(), "no pod") {
 		t.Fatalf("expected a no-pod error, got %v", err)
 	}
 
 	pod := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
-		Name: "m1", Namespace: "llama-swap",
+		Name: "m1", Namespace: "herd",
 		Labels: podSelectorLabels(cfg.Sanitized, cfg.DepName),
 	}}
-	if _, err := client.CoreV1().Pods("llama-swap").Create(context.Background(), pod, metav1.CreateOptions{}); err != nil {
+	if _, err := client.CoreV1().Pods("herd").Create(context.Background(), pod, metav1.CreateOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := runLogs(context.Background(), client, "llama-swap", cfg.Model, 10, false); err != nil {
+	if err := runLogs(context.Background(), client, "herd", cfg.Model, 10, false); err != nil {
 		t.Fatalf("runLogs with a pod: %v", err)
 	}
 
 	// A pod carrying only the coarse model label for a DIFFERENT deployment
 	// must not be picked up.
 	sibling := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
-		Name: "m2", Namespace: "llama-swap",
+		Name: "m2", Namespace: "herd",
 		Labels: podSelectorLabels(cfg.Sanitized, "some-other-deployment"),
 	}}
-	if _, err := client.CoreV1().Pods("llama-swap").Create(context.Background(), sibling, metav1.CreateOptions{}); err != nil {
+	if _, err := client.CoreV1().Pods("herd").Create(context.Background(), sibling, metav1.CreateOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	found, err := findModelPod(context.Background(), client, "llama-swap", cfg.Sanitized, cfg.DepName)
+	found, err := findModelPod(context.Background(), client, "herd", cfg.Sanitized, cfg.DepName)
 	if err != nil || found == nil || found.Name != "m1" {
 		t.Fatalf("findModelPod: got %v, err %v; want pod m1", found, err)
 	}
@@ -1091,7 +1091,7 @@ func TestKubeswap_RunLogs(t *testing.T) {
 		time.Sleep(20 * time.Millisecond)
 		fcancel()
 	}()
-	if err := runLogs(fctx, client, "llama-swap", cfg.Model, 10, true); err != nil {
+	if err := runLogs(fctx, client, "herd", cfg.Model, 10, true); err != nil {
 		t.Errorf("canceled follow should exit quietly, got %v", err)
 	}
 	fcancel()
@@ -1108,28 +1108,28 @@ func TestKubeswap_GCDryRunKeepsWorkloads(t *testing.T) {
 	allowed := map[string]bool{} // the model is not allowed: gc would collect it
 	ctx := context.Background()
 
-	got, err := gcCollect(client, "llama-swap", allowed, false, true)
+	got, err := gcCollect(client, "herd", allowed, false, true)
 	if err != nil {
 		t.Fatalf("gcCollect dry-run: %v", err)
 	}
 	if len(got) != 1 || got[0] != cfg.Model {
 		t.Errorf("dry-run should report the model, got %v", got)
 	}
-	if _, err := client.AppsV1().Deployments("llama-swap").Get(ctx, cfg.DepName, metav1.GetOptions{}); err != nil {
+	if _, err := client.AppsV1().Deployments("herd").Get(ctx, cfg.DepName, metav1.GetOptions{}); err != nil {
 		t.Fatalf("dry-run must not delete the deployment: %v", err)
 	}
-	if _, err := client.CoreV1().Services("llama-swap").Get(ctx, cfg.SvcName, metav1.GetOptions{}); err != nil {
+	if _, err := client.CoreV1().Services("herd").Get(ctx, cfg.SvcName, metav1.GetOptions{}); err != nil {
 		t.Fatalf("dry-run must not delete the service: %v", err)
 	}
 
-	got, err = gcCollect(client, "llama-swap", allowed, false, false)
+	got, err = gcCollect(client, "herd", allowed, false, false)
 	if err != nil {
 		t.Fatalf("gcCollect: %v", err)
 	}
 	if len(got) != 1 || got[0] != cfg.Model {
 		t.Errorf("collect should report the model, got %v", got)
 	}
-	if _, err := client.AppsV1().Deployments("llama-swap").Get(ctx, cfg.DepName, metav1.GetOptions{}); !apierrors.IsNotFound(err) {
+	if _, err := client.AppsV1().Deployments("herd").Get(ctx, cfg.DepName, metav1.GetOptions{}); !apierrors.IsNotFound(err) {
 		t.Errorf("the real run should delete the deployment, err=%v", err)
 	}
 }
@@ -1154,7 +1154,7 @@ func TestKubeswap_StatusWatchSurvivesTransientError(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
 	go func() {
-		done <- runStatusWithClient(ctx, client, "llama-swap", true, 10*time.Millisecond)
+		done <- runStatusWithClient(ctx, client, "herd", true, 10*time.Millisecond)
 	}()
 	time.Sleep(100 * time.Millisecond)
 	cancel()

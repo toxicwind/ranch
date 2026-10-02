@@ -21,8 +21,8 @@ astMatrix:
       weight: 2.0
       elo: 1700
 
-    # Local llama-swap
-    llama-swap:
+    # Local herd
+    herd:
       baseUrl: http://127.0.0.1:25100/v1
       noAuth: true
       models: [local-fast, local-quality, local-longctx]

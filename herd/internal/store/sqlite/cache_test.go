@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mostlygeek/llama-swap/internal/store"
+	"github.com/mostlygeek/herd/internal/store"
 )
 
 // newCacheStore returns an in-memory store with its cache repository.

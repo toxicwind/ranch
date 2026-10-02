@@ -1,4 +1,4 @@
-# AGENTS.md — Herd / llama-swap (`/home/toxic/projects/llama-swap`)
+# AGENTS.md — Herd / herd (`/home/toxic/projects/herd`)
 
 **Role**: Lightweight, transparent proxy server providing dynamic model swapping to llama.cpp and sovereign backends.
 **Stack**: Go (1.23+), TypeScript / Vite / Svelte 5 (`ui-svelte/`).
@@ -7,7 +7,7 @@
 
 ## Project Description:
 
-llama-swap is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
+herd is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
 
 ## Tech stack
 
@@ -181,9 +181,9 @@ sovereign (`pitchfork start mcpproxy` / `mise run restart-mcpproxy` -> `mcpproxy
 --config=/home/toxic/.mcpproxy/mcp_config.json`). 43 real upstreams (ghas + 42 others).
 - **pi MUST list ONLY `mcpproxy`** in `~/.pi/agent/mcp.json` (no duplicate direct `ghas`/
   `nvidia-nim` entries). All MCP tools reach pi through the proxy via `retrieve_tools`.
-- **nvidia-nim is NOT an MCP server.** It is a llama-swap/sovereign-router **completions API**
+- **nvidia-nim is NOT an MCP server.** It is a herd/sovereign-router **completions API**
   (OpenAI-compatible, on `:25100`). NVIDIA models are first-class via pi-agent's `nvidia`
-  provider (`packages/ai/src/providers/`) -> sovereign-router/llama-swap, not an MCP upstream.
+  provider (`packages/ai/src/providers/`) -> sovereign-router/herd, not an MCP upstream.
 - **Subagents**: `config.yaml` `can_spawn_subagents:true` + whitelist + `subagents.defaultModel:
   opencode/hy3-free`. The `subagent` spawn tool is a LIVE-PI builtin (not callable from a
   plain assistant context) — fanout only works inside an interactive pi session.

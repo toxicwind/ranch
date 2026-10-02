@@ -38,8 +38,8 @@ func TestErrorEnvelope_OpenAIShape(t *testing.T) {
 	if !parsed.Get("error.param").Exists() || parsed.Get("error.param").Type != gjson.Null {
 		t.Errorf("error.param = %v, want null", parsed.Get("error.param"))
 	}
-	if got := parsed.Get("src").String(); got != "llama-swap" {
-		t.Errorf("src = %q, want llama-swap", got)
+	if got := parsed.Get("src").String(); got != "herd" {
+		t.Errorf("src = %q, want herd", got)
 	}
 }
 
@@ -88,8 +88,8 @@ func TestErrorEnvelope_MarshalFallbackIsValid(t *testing.T) {
 	if err := json.Unmarshal([]byte(marshalFallback), &envelope); err != nil {
 		t.Fatalf("marshalFallback does not decode into an ErrorEnvelope: %v", err)
 	}
-	if envelope.Src != "llama-swap" || envelope.Error.Message == "" || envelope.Error.Type != ErrorTypeServer {
-		t.Errorf("marshalFallback = %+v, want a filled llama-swap server error", envelope)
+	if envelope.Src != "herd" || envelope.Error.Message == "" || envelope.Error.Type != ErrorTypeServer {
+		t.Errorf("marshalFallback = %+v, want a filled herd server error", envelope)
 	}
 }
 

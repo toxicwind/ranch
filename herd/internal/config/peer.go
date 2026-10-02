@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"sort"
 
-	"github.com/mostlygeek/llama-swap/internal/tailcat"
+	"github.com/mostlygeek/herd/internal/tailcat"
 )
 
 type PeerDictionaryConfig map[string]PeerConfig

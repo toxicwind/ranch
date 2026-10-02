@@ -1,7 +1,7 @@
 package flock
 
 // CloudRouter routes tool calls across upstream MCP servers using health,
-// latency, and ELO-based provider selection. Neither mcpproxy-go nor llama-swap
+// latency, and ELO-based provider selection. Neither mcpproxy-go nor herd
 // owns this package; both embed it as a first-class peer dependency.
 
 import (

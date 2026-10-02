@@ -1,5 +1,5 @@
 {{- if .Values.gateway.enabled }}
-{{- $fullname := include "llama-swap.fullname" . -}}
+{{- $fullname := include "herd.fullname" . -}}
 {{- $gwName := .Values.gateway.gateway.name -}}
 {{- $parentRefs := .Values.gateway.route.parentRefs -}}
 {{- if and (not $gwName) (not $parentRefs) }}
@@ -15,7 +15,7 @@ metadata:
   name: {{ $gwName }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "llama-swap.labels" . | nindent 4 }}
+    {{- include "herd.labels" . | nindent 4 }}
 spec:
   gatewayClassName: {{ .Values.gateway.gateway.className }}
   listeners:
@@ -34,7 +34,7 @@ metadata:
   name: {{ .Values.gateway.route.name | default $fullname }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "llama-swap.labels" . | nindent 4 }}
+    {{- include "herd.labels" . | nindent 4 }}
 spec:
   parentRefs:
     {{- toYaml $parentRefs | nindent 4 }}

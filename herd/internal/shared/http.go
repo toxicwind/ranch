@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/config"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -75,22 +75,22 @@ func SendResponse(w http.ResponseWriter, r *http.Request, status int, message st
 	if strings.Contains(acceptHeader, "text/plain") {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(status)
-		w.Write([]byte(fmt.Sprintf("llama-swap: %s", message)))
+		w.Write([]byte(fmt.Sprintf("herd: %s", message)))
 		return
 	}
 
 	if strings.Contains(acceptHeader, "text/html") {
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(status)
-		w.Write([]byte(fmt.Sprintf(`<html><body><h1>llama-swap</h1><p>%s</p></body></html>`, html.EscapeString(message))))
+		w.Write([]byte(fmt.Sprintf(`<html><body><h1>herd</h1><p>%s</p></body></html>`, html.EscapeString(message))))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	resp, err := json.Marshal(map[string]string{"src": "llama-swap", "error": message})
+	resp, err := json.Marshal(map[string]string{"src": "herd", "error": message})
 	if err != nil {
-		w.Write([]byte(`{"src":"llama-swap", "error": "failed to marshal response"}`))
+		w.Write([]byte(`{"src":"herd", "error": "failed to marshal response"}`))
 		return
 	}
 	w.Write(resp)

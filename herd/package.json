@@ -1,15 +1,15 @@
 {
-  "name": "herd-llama-swap",
+  "name": "herd-herd",
   "version": "18.1.14",
-  "description": "Maximal sovereign herd \u2014 llama-swap engine with mesh orchestration",
-  "main": "llama-swap.go",
+  "description": "Maximal sovereign herd \u2014 herd engine with mesh orchestration",
+  "main": "herd.go",
   "scripts": {
     "start": "go run ./cmd/main.go",
     "test": "go test ./...",
     "lint": "gofmt -l ./internal ./cmd",
     "go-mod": "go mod download && go mod tidy",
     "full-install": "go mod download",
-    "docker-build": "docker build -t llama-swap ./docker/unified",
+    "docker-build": "docker build -t herd ./docker/unified",
     "benchmark": "go test -bench=. ./internal/bench/..."
   },
   "dependencies": {},
@@ -33,7 +33,7 @@
     "url": "https://github.com/toxicwind/herd.git"
   },
   "keywords": [
-    "llama-swap",
+    "herd",
     "herd",
     "mesh",
     "sovereign",

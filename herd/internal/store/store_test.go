@@ -2,8 +2,8 @@ package store_test
 
 import (
 	"context"
-	"github.com/mostlygeek/llama-swap/internal/store"
-	"github.com/mostlygeek/llama-swap/internal/store/sqlite"
+	"github.com/mostlygeek/herd/internal/store"
+	"github.com/mostlygeek/herd/internal/store/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"

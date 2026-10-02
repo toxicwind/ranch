@@ -112,7 +112,7 @@ trap cleanup EXIT
 # ---- binary ------------------------------------------------------------
 if [ -z "$HERD_BIN" ]; then
   HERE="$(cd "$(dirname "$0")/.." && pwd)"
-  HERD_BIN="$WORKDIR/llama-swap"
+  HERD_BIN="$WORKDIR/herd"
   (cd "$HERE" && go build -o "$HERD_BIN" .) || fail "go build failed"
 fi
 [ -x "$HERD_BIN" ] || fail "binary not executable: $HERD_BIN"

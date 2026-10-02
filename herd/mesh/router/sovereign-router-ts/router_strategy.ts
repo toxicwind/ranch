@@ -315,7 +315,7 @@ export const ROUTERS: Record<
 };
 
 // freeCandidates: every ":free" model across keyed providers, plus the local
-// llama-swap (always zero-cost). This is the pool the `free` strategy races.
+// herd (always zero-cost). This is the pool the `free` strategy races.
 export function freeCandidates(): [string, string][] {
   const out: [string, string][] = [];
   for (const [name, conf] of Object.entries(PROVIDERS)) {
@@ -324,10 +324,10 @@ export function freeCandidates(): [string, string][] {
       if (mid.includes(":free")) out.push([name, mid]);
     }
   }
-  if (keyOk("llama-swap")) {
-    out.push(["llama-swap", LOCAL_ROLES.fast]);
-    out.push(["llama-swap", LOCAL_ROLES.quality]);
-    out.push(["llama-swap", LOCAL_ROLES.longctx]);
+  if (keyOk("herd")) {
+    out.push(["herd", LOCAL_ROLES.fast]);
+    out.push(["herd", LOCAL_ROLES.quality]);
+    out.push(["herd", LOCAL_ROLES.longctx]);
   }
   return out;
 }

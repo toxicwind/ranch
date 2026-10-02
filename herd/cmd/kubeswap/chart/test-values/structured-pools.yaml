@@ -8,7 +8,7 @@ config:
         budget: 1
       - name: audio
   defaults:
-    image: ghcr.io/mostlygeek/llama-swap:unified-vulkan
+    image: ghcr.io/mostlygeek/herd:unified-vulkan
     gpu: [amd.com/gpu=1]
   models:
     - id: llm-a

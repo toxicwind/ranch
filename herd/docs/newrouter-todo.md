@@ -1,10 +1,10 @@
 # New Router Migration TODO
 
-This document tracks the work needed for [cmd/newrouter/main.go](../cmd/newrouter/main.go [dead — scaffold removed]) [dead — migration scaffold removed] and [internal/router/](../internal/router/) to reach feature parity with the legacy entrypoint at [llama-swap.go](../llama-swap.go) plus [proxy/proxymanager.go](../proxy/proxymanager.go [dead — package removed]) [dead — package retired and removed].
+This document tracks the work needed for [cmd/newrouter/main.go](../cmd/newrouter/main.go [dead — scaffold removed]) [dead — migration scaffold removed] and [internal/router/](../internal/router/) to reach feature parity with the legacy entrypoint at [herd.go](../herd.go) plus [proxy/proxymanager.go](../proxy/proxymanager.go [dead — package removed]) [dead — package retired and removed].
 
 > **NOTE 2026-09-19.** The migration this document tracked is complete:
 > `proxy/` was retired and removed, `internal/server` is the live mux, and the
-> entrypoint remains `llama-swap.go`. The phase history below is kept as a record.
+> entrypoint remains `herd.go`. The phase history below is kept as a record.
 
 The work is split into phases so each can land and be tested independently. Earlier phases unblock later ones.
 
@@ -66,7 +66,7 @@ The package is split by concern across stub files already in place:
 | `log.go`     | `muxlog` combined logger; `/logs` handlers      | 4a                     |
 | `auth.go`    | `CreateAuthMiddleware`                          | 4d                     |
 | `filters.go` | request-body filter middleware                  | 4c                     |
-| `api.go`     | llama-swap-specific API handlers                | 4b / Phase 5 / Phase 6 |
+| `api.go`     | herd-specific API handlers                | 4b / Phase 5 / Phase 6 |
 | `ui.go`      | embedded UI serving                             | Phase 7                |
 
 ### Phase 4a — package scaffolding -- Completed.
@@ -217,7 +217,7 @@ The functions previously at 0 % (`handleListModels`, `handleMetrics`,
 ## Phase 8c - Review Part II (entrypoint comparison)
 
 A second pass comparing [cmd/newrouter/main.go](../cmd/newrouter/main.go [dead — scaffold removed]) against
-the legacy [llama-swap.go](../llama-swap.go) + [proxy.New](../proxy/proxymanager.go [dead — package removed]#L104)
+the legacy [herd.go](../herd.go) + [proxy.New](../proxy/proxymanager.go [dead — package removed]#L104)
 surfaced four more gaps, all in logger setup.
 
 **Gap 4 — `LogToStdout` config ignored -- Resolved.**
@@ -246,13 +246,13 @@ priority — left open.
 **Gap 7 — PID debug log missing -- Resolved.**
 
 `cmd/newrouter/main.go` now logs `PID: %d` at debug level after `applyLogSettings`,
-matching [llama-swap.go:71](../llama-swap.go#L71).
+matching [herd.go:71](../herd.go#L71).
 
 ---
 
-## Phase X (tbd) — Cutover [OBSOLETE 2026-09-19: migration complete, `cmd/newrouter` scaffold removed, entrypoint remains `llama-swap.go`]
+## Phase X (tbd) — Cutover [OBSOLETE 2026-09-19: migration complete, `cmd/newrouter` scaffold removed, entrypoint remains `herd.go`]
 
-- [x] ~~Swap `llama-swap.go` to delegate to `cmd/newrouter` (or rename newrouter to be the primary entrypoint)~~ — not needed; `proxy/` retired directly into `internal/server`
+- [x] ~~Swap `herd.go` to delegate to `cmd/newrouter` (or rename newrouter to be the primary entrypoint)~~ — not needed; `proxy/` retired directly into `internal/server`
 - [x] ~~Update `Makefile` build targets~~
 - [x] ~~Update docs / README references to the legacy binary~~
 - [x] ~~Remove `proxy/proxymanager*.go` and `gin-gonic` dependency once nothing imports them~~ — `proxy/` no longer exists in the tree

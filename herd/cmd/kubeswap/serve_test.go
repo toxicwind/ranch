@@ -27,7 +27,7 @@ func newTestServer(cfg *serveConfig, upstreamOverride string) *server {
 func TestKubeswap_StartModel(t *testing.T) {
 	client := newFakeClient()
 	f := &serveFlags{
-		model: "m", namespace: "llama-swap", image: "img", port: 8080,
+		model: "m", namespace: "herd", image: "img", port: 8080,
 		healthPath: "/health", probeTimeout: 5 * time.Second,
 		startupTimeout: 10 * time.Minute, grace: 30 * time.Second,
 		pvcSize: "1Gi", pvcMode: "rwo",
@@ -42,10 +42,10 @@ func TestKubeswap_StartModel(t *testing.T) {
 	depName, _ := deploymentName("m")
 	svcName, _ := serviceName("m")
 	ctx := context.Background()
-	if _, err := client.AppsV1().Deployments("llama-swap").Get(ctx, depName, metav1.GetOptions{}); err != nil {
+	if _, err := client.AppsV1().Deployments("herd").Get(ctx, depName, metav1.GetOptions{}); err != nil {
 		t.Errorf("deployment should exist: %v", err)
 	}
-	if _, err := client.CoreV1().Services("llama-swap").Get(ctx, svcName, metav1.GetOptions{}); err != nil {
+	if _, err := client.CoreV1().Services("herd").Get(ctx, svcName, metav1.GetOptions{}); err != nil {
 		t.Errorf("service should exist: %v", err)
 	}
 	if err := startModel(client, f, fs); err != nil {

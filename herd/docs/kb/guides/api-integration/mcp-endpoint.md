@@ -1,16 +1,16 @@
 ---
-title: Connecting an MCP client to llama-swap
-summary: Point any MCP client at /api/mcp to search and read llama-swap's documentation.
+title: Connecting an MCP client to herd
+summary: Point any MCP client at /api/mcp to search and read herd's documentation.
 category: guides
 tags: [mcp, tools, agent, api, integration]
 config_keys: [apiKeys]
 updated: 2026-08-27
 ---
 
-# Connecting an MCP client to llama-swap
+# Connecting an MCP client to herd
 
-llama-swap serves its own documentation as an MCP server at `/api/mcp`. Any
-MCP client can point at a running instance and ask about llama-swap
+herd serves its own documentation as an MCP server at `/api/mcp`. Any
+MCP client can point at a running instance and ask about herd
 configuration — the same tools the web UI's Playground Docs tab uses.
 
 ```
@@ -21,7 +21,7 @@ http://localhost:8080/api/mcp
 
 The endpoint speaks **MCP revision 2026-07-28 and nothing else.** That is the
 revision which removed the `initialize`/`initialized` handshake and the
-`Mcp-Session-Id` header, which is what lets llama-swap serve MCP from a single
+`Mcp-Session-Id` header, which is what lets herd serve MCP from a single
 stateless POST route with no session bookkeeping.
 
 A client pinned to an older revision gets a clear JSON-RPC error rather than
@@ -35,27 +35,27 @@ mysterious behaviour:
 ```
 
 If you see that, the client needs updating; there is nothing to configure on
-the llama-swap side.
+the herd side.
 
 ## Authentication
 
 If your config sets `apiKeys`, the MCP endpoint requires one like every other
-llama-swap API. Present it as a bearer token:
+herd API. Present it as a bearer token:
 
 ```
 Authorization: Bearer sk-your-key
 ```
 
 `x-api-key` and HTTP Basic work too. With no `apiKeys` configured the endpoint
-is open, so treat it the same way you treat the rest of llama-swap — see
+is open, so treat it the same way you treat the rest of herd — see
 `guides/api-integration/api-keys-and-auth`.
 
 ## The tools
 
 Tool names are namespaced `<provider>__<tool>`. The prefix says where a tool comes
-from, which keeps names unique once llama-swap starts proxying other MCP servers.
+from, which keeps names unique once herd starts proxying other MCP servers.
 
-**`docs__*` — llama-swap's own documentation**
+**`docs__*` — herd's own documentation**
 
 | tool | what it does |
 | --- | --- |

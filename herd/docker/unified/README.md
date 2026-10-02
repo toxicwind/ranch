@@ -1,6 +1,6 @@
 # Unified Docker Container
 
-These scripts create a custom llama-swap container that contains:
+These scripts create a custom herd container that contains:
 
 - llama-server for LLMs, rerank and embedding model support
 - sd-server (stable-diffusion.cpp) for image generation
@@ -8,7 +8,7 @@ These scripts create a custom llama-swap container that contains:
 - audiocpp_server (audio.cpp) for TTS and audio tasks (`/audioapi/v1/tasks/run`)
 - vllm-wrapper for vLLM sleep mode support (see [cmd/vllm-wrapper](../../cmd/vllm-wrapper/README.md))
 
-`vllm-wrapper` is built from the same llama-swap revision as the `llama-swap`
+`vllm-wrapper` is built from the same herd revision as the `herd`
 binary in the image. It expects a vLLM server started with `--enable-sleep-mode`
 that is reachable from the container; vLLM itself is not included in the image.
 
@@ -86,15 +86,15 @@ recompiling anything.
 ```
 
 `--stage` and `--assemble` push to and read from `ARTIFACT_REPO` (default
-`ghcr.io/mostlygeek/llama-swap-build`), so they need registry credentials and a
+`ghcr.io/mostlygeek/herd-build`), so they need registry credentials and a
 buildx container driver.
 
-That is a separate GHCR package from the published `llama-swap` images on
+That is a separate GHCR package from the published `herd` images on
 purpose. Artifacts are build inputs rather than releases — a new tag per project
 per upstream commit, most nights — so keeping them in the release package would
 bury `:unified-cuda` under thousands of `:art-*` tags. It also keeps them
 clear of the `delete-untagged` cleanup in `containers.yml`, which is scoped to
-`package: llama-swap`, so the two never interact and the build package can be
+`package: herd`, so the two never interact and the build package can be
 given its own retention policy. They are for CI; use plain `./build-image.sh --cuda` locally
 and under `act`. The local path chains the images through the docker image
 store, so it wants buildx's default `docker` driver (the default) rather than a
@@ -109,8 +109,8 @@ BuildKit cache tags are no longer written and can be deleted from the registry.
 image ships a starter with the backend it was built for already set:
 
 ```bash
-docker run --rm --entrypoint cat llama-swap:unified-cuda \
-  /etc/llama-swap/audiocpp-server.example.json > /path/to/models/audiocpp-server.json
+docker run --rm --entrypoint cat herd:unified-cuda \
+  /etc/herd/audiocpp-server.example.json > /path/to/models/audiocpp-server.json
 ```
 
 Replace the example entries with your models, then point the `audio` entry in

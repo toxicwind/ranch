@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mostlygeek/llama-swap/internal/logmon"
-	"github.com/mostlygeek/llama-swap/internal/swaputil"
+	"github.com/mostlygeek/herd/internal/logmon"
+	"github.com/mostlygeek/herd/internal/swaputil"
 )
 
 var loadingPaths = []string{
@@ -89,7 +89,7 @@ func newLoadingWriter(logger *logmon.Monitor, modelName string, w http.ResponseW
 	// (Zed's untagged ResponseStreamResult) can't match.
 	s.sendRoleChunk()
 	s.sendLine("━━━━━")
-	s.sendLine(fmt.Sprintf("llama-swap loading model: %s", modelName))
+	s.sendLine(fmt.Sprintf("herd loading model: %s", modelName))
 	return s
 }
 

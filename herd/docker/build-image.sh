@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Build script for llama-swap-docker with commit hash pinning
+# Build script for herd-docker with commit hash pinning
 #
 # Usage:
 #   ./build-image.sh --cuda                    # Build CUDA image
@@ -13,7 +13,7 @@
 #
 # Features:
 #   - Auto-detects latest commit hashes from git repos
-#   - Builds llama-swap from local source code
+#   - Builds herd from local source code
 #   - Allows environment variable overrides for reproducible builds
 #   - Cache-friendly: changing commit hash busts cache appropriately
 #   - Supports both CUDA and Vulkan backends (requires explicit flag)
@@ -37,7 +37,7 @@ if [[ $# -eq 0 ]]; then
     echo "  --help, -h  Show this help message"
     echo ""
     echo "Environment variables:"
-    echo "  DOCKER_IMAGE_TAG     Set custom image tag (default: llama-swap:cuda or llama-swap:vulkan)"
+    echo "  DOCKER_IMAGE_TAG     Set custom image tag (default: herd:cuda or herd:vulkan)"
     echo "  LLAMA_COMMIT_HASH    Override llama.cpp commit hash"
     echo "  WHISPER_COMMIT_HASH  Override whisper.cpp commit hash"
     echo "  SD_COMMIT_HASH       Override stable-diffusion.cpp commit hash"
@@ -65,7 +65,7 @@ for arg in "$@"; do
             echo "  --help, -h  Show this help message"
             echo ""
             echo "Environment variables:"
-            echo "  DOCKER_IMAGE_TAG     Set custom image tag (default: llama-swap:cuda or llama-swap:vulkan)"
+            echo "  DOCKER_IMAGE_TAG     Set custom image tag (default: herd:cuda or herd:vulkan)"
             echo "  LLAMA_COMMIT_HASH    Override llama.cpp commit hash"
             echo "  WHISPER_COMMIT_HASH  Override whisper.cpp commit hash"
             echo "  SD_COMMIT_HASH       Override stable-diffusion.cpp commit hash"
@@ -85,9 +85,9 @@ if [[ -n "${DOCKER_IMAGE_TAG:-}" ]]; then
     # User provided a custom tag, use it as-is
     :
 elif [[ "$BACKEND" == "vulkan" ]]; then
-    DOCKER_IMAGE_TAG="llama-swap:vulkan"
+    DOCKER_IMAGE_TAG="herd:vulkan"
 else
-    DOCKER_IMAGE_TAG="llama-swap:cuda"
+    DOCKER_IMAGE_TAG="herd:cuda"
 fi
 DOCKER_BUILDKIT="${DOCKER_BUILDKIT:-1}"
 
@@ -135,7 +135,7 @@ get_latest_release_tag() {
 }
 
 echo "=========================================="
-echo "llama-swap-docker Build Script"
+echo "herd-docker Build Script"
 echo "=========================================="
 echo ""
 
@@ -222,7 +222,7 @@ fi
 # Use docker buildx with a custom builder for parallelism control
 # The legacy DOCKER_BUILDKIT=1 docker build doesn't respect BUILDKIT_MAX_PARALLELISM env var
 # We need to use a custom builder with a buildkitd.toml config file
-BUILDER_NAME="llama-swap-builder"
+BUILDER_NAME="herd-builder"
 
 # Check if our custom builder exists with the right config, create/update if needed
 if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
@@ -261,7 +261,7 @@ echo ""
 # Verify all expected binaries exist in the image
 MISSING_BINARIES=()
 
-for binary in llama-server llama-cli whisper-server whisper-cli sd-server sd-cli llama-swap; do
+for binary in llama-server llama-cli whisper-server whisper-cli sd-server sd-cli herd; do
     if ! docker run --rm "${DOCKER_IMAGE_TAG}" which "${binary}" >/dev/null 2>&1; then
         MISSING_BINARIES+=("${binary}")
     fi
@@ -278,7 +278,7 @@ if [[ ${#MISSING_BINARIES[@]} -gt 0 ]]; then
     exit 1
 fi
 
-echo "All expected binaries verified: llama-server, llama-cli, whisper-server, whisper-cli, sd-server, sd-cli, llama-swap"
+echo "All expected binaries verified: llama-server, llama-cli, whisper-server, whisper-cli, sd-server, sd-cli, herd"
 
 echo ""
 echo "=========================================="
@@ -291,7 +291,7 @@ echo "Built with:"
 echo "  llama.cpp:           ${LLAMA_HASH}"
 echo "  whisper.cpp:         ${WHISPER_HASH}"
 echo "  stable-diffusion.cpp: ${SD_HASH}"
-echo "  llama-swap:          $(docker run --rm "${DOCKER_IMAGE_TAG}" cat /versions.txt | grep llama-swap | cut -d' ' -f2-)"
+echo "  herd:          $(docker run --rm "${DOCKER_IMAGE_TAG}" cat /versions.txt | grep herd | cut -d' ' -f2-)"
 echo ""
 if [[ "$BACKEND" == "vulkan" ]]; then
     echo "Run with:"

@@ -7,9 +7,9 @@ Scans:
     for `FROM golang:<tag>` pins (including ARG-indirected tags), and
   * the maximum `go` directive across ALL go.mod files in the repo tree,
     including vendored deps and submodule checkouts, and
-  * the upstream llama-swap go.mod that docker/unified/install-vllm-wrapper.sh
+  * the upstream herd go.mod that docker/unified/install-vllm-wrapper.sh
     fetches at image build time (the exact failure class that broke
-    vulkan/assemble + cuda/assemble: golang:1.26 vs llama-swap v255
+    vulkan/assemble + cuda/assemble: golang:1.26 vs herd v255
     requiring Go >= 1.27.1).
 
 Usage:
@@ -34,7 +34,7 @@ import re
 import sys
 import urllib.request
 
-UPSTREAM_REPO = "mostlygeek/llama-swap"
+UPSTREAM_REPO = "mostlygeek/herd"
 DEFAULT_VARIANT = "-bookworm"  # repo convention for Go builder images
 
 FROM_RE = re.compile(
@@ -198,7 +198,7 @@ def main():
     ap.add_argument("--ls-version", default="main",
                     help="LS_VERSION build arg (default: main)")
     ap.add_argument("--no-upstream", action="store_true",
-                    help="skip the upstream llama-swap go.mod check")
+                    help="skip the upstream herd go.mod check")
     args = ap.parse_args()
     root = os.path.abspath(args.root)
     failures = []

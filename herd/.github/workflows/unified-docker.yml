@@ -26,8 +26,8 @@ on:
         description: "ik_llama.cpp commit hash, tag, or branch (CUDA only)"
         required: false
         default: "main"
-      llama_swap_version:
-        description: "llama-swap version (e.g. v198, latest, main)"
+      herd_version:
+        description: "herd version (e.g. v198, latest, main)"
         required: false
         default: "main"
       build_cuda:
@@ -68,9 +68,9 @@ permissions:
 jobs:
   # Fail fast (seconds, not hours): verify every Dockerfile's `FROM golang:`
   # pin covers the maximum `go` directive required by any go.mod in the repo
-  # AND by the upstream llama-swap source the vllm-wrapper build stage
+  # AND by the upstream herd source the vllm-wrapper build stage
   # fetches. This is the guard for the 2026-09-17 incident where
-  # golang:1.26 met llama-swap v255 (go 1.27.1) and killed
+  # golang:1.26 met herd v255 (go 1.27.1) and killed
   # vulkan/assemble + cuda/assemble after hours of compiling.
   toolchain-guard:
     runs-on: ubuntu-latest
@@ -80,7 +80,7 @@ jobs:
 
       - name: Toolchain drift guard
         env:
-          LS_VERSION: ${{ inputs.llama_swap_version || 'main' }}
+          LS_VERSION: ${{ inputs.herd_version || 'main' }}
         run: python3 scripts/toolchain-drift-guard.py --ls-version "$LS_VERSION"
 
   setup:
@@ -113,7 +113,7 @@ jobs:
           SD_REF: ${{ inputs.sd_ref || 'master' }}
           AUDIO_REF: ${{ inputs.audio_ref || 'main' }}
           IK_LLAMA_REF: ${{ inputs.ik_llama_ref || 'main' }}
-          LS_VERSION: ${{ inputs.llama_swap_version || 'main' }}
+          LS_VERSION: ${{ inputs.herd_version || 'main' }}
         run: |
           chmod +x docker/unified/build-image.sh
           docker/unified/build-image.sh --cuda --resolve | tee -a "$GITHUB_OUTPUT"

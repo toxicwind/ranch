@@ -17,7 +17,7 @@ Strategies decide *how* candidates are selected:
 | Strategy | Behavior |
 |----------|-----------|
 | `hybrid` (default) | sticky → ast_race → circuit_chain |
-| `free` | **races local llama-swap + every `:free` cloud model** (zero-cost) |
+| `free` | **races local herd + every `:free` cloud model** (zero-cost) |
 | `ast_race` | parallel N providers, first AST/code-shaped response wins |
 | `sticky_affinity` | 30-min session pinning for multi-turn |
 | `weighted_elo` | dynamic Elo from success/latency |
@@ -40,15 +40,15 @@ tools/sovereign-router/
 └── *.py / *.json           # provider-discovery catalogs (research inputs)
 ```
 
-The **canonical/primary** implementation is the Go port inside llama-swap:
-`~/projects/llama-swap-main/internal/flock/` (mirrors this router; the
+The **canonical/primary** implementation is the Go port inside herd:
+`~/projects/herd-main/internal/flock/` (mirrors this router; the
 `free` strategy + `/ui` page were added there too).
 
 ## Free providers (maximal integration)
 
 The `free` strategy is the zero-cost path. It builds a candidate pool of:
 
-- **local llama-swap** (always free — `local-fast` / `local-quality` / `local-longctx`)
+- **local herd** (always free — `local-fast` / `local-quality` / `local-longctx`)
 - **every `:free` model** across keyed cloud providers (OpenRouter's
   `tencent/hy3:free`, `poolside/laguna-*`, `qwen3-coder:free`,
   `gemma-4-31b-it:free`, `nemotron-*`, `hermes-3-*`, `gpt-oss-20b:free`, …)

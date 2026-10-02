@@ -41,7 +41,7 @@ import type { ChatBody, ProviderView, RouteResult, StrategyDeps } from "./types.
 // Fixture catalog
 // ---------------------------------------------------------------------------
 const MODELS: Record<string, string[]> = {
-  "llama-swap": ["beellama/qwen-flash-64k", "beellama/exaone-4-0-1-2b-iq4xs"],
+  "herd": ["beellama/qwen-flash-64k", "beellama/exaone-4-0-1-2b-iq4xs"],
   nvidia: ["nvidia/nemotron-3-super-120b-a12b", "nvidia/gpt-oss-20b"],
   openrouter: [
     "inclusionai/ling-3.0-flash-fin:free",
@@ -50,7 +50,7 @@ const MODELS: Record<string, string[]> = {
   ],
 };
 const VIEWS: ProviderView[] = [
-  { name: "llama-swap", baseUrl: "http://127.0.0.1:25100", keyEnv: "X", noAuth: true },
+  { name: "herd", baseUrl: "http://127.0.0.1:25100", keyEnv: "X", noAuth: true },
   { name: "nvidia", baseUrl: "https://integrate.api.nvidia.com", keyEnv: "NVIDIA_API_KEY", keyEnvAlt: "NVIDIA_API_KEYS" },
   { name: "openrouter", baseUrl: "https://openrouter.ai/api", keyEnv: "OPENROUTER_API_KEY" },
 ];
@@ -63,7 +63,7 @@ const META: Record<string, Record<string, Record<string, unknown>>> = {
 };
 const CODING: Record<string, [string, string] | null> = {
   auto: null,
-  fast: ["llama-swap", "beellama/exaone-4-0-1-2b-iq4xs"],
+  fast: ["herd", "beellama/exaone-4-0-1-2b-iq4xs"],
   free: null,
 };
 
@@ -290,12 +290,12 @@ describe("isRoutableModelId", () => {
 // pickWeighted / freeCandidates / firstUsableModelFor
 // ---------------------------------------------------------------------------
 describe("candidate selection", () => {
-  test("pickWeighted appends the llama-swap bonus lane", () => {
+  test("pickWeighted appends the herd bonus lane", () => {
     const deps = stubDeps();
     try {
       const cands = pickWeighted(deps, 4);
       const names = cands.map(([p]) => p);
-      expect(names).toContain("llama-swap");
+      expect(names).toContain("herd");
       // no duplicate providers in the cut
       expect(new Set(names).size).toBe(names.length);
     } finally {
@@ -315,7 +315,7 @@ describe("candidate selection", () => {
       const names = cands.map(([p]) => p);
       // Degraded mode: dead lanes race anyway rather than 503.
       expect(cands.length).toBeGreaterThan(0);
-      expect(names).toContain("llama-swap");
+      expect(names).toContain("herd");
     } finally {
       (deps as unknown as { _cleanup: () => void })._cleanup();
     }
@@ -335,9 +335,9 @@ describe("candidate selection", () => {
       // local roles always join (zero cost) — asserted against the real
       // LOCAL_ROLES (reads /home/toxic/estate/.state/best-models.json on
       // yote, defaults elsewhere), so this holds in any environment
-      expect(cands).toContainEqual(["llama-swap", LOCAL_ROLES.fast]);
-      expect(cands).toContainEqual(["llama-swap", LOCAL_ROLES.quality]);
-      expect(cands).toContainEqual(["llama-swap", LOCAL_ROLES.longctx]);
+      expect(cands).toContainEqual(["herd", LOCAL_ROLES.fast]);
+      expect(cands).toContainEqual(["herd", LOCAL_ROLES.quality]);
+      expect(cands).toContainEqual(["herd", LOCAL_ROLES.longctx]);
     } finally {
       (deps as unknown as { _cleanup: () => void })._cleanup();
     }

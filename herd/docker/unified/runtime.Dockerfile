@@ -26,17 +26,17 @@ FROM ubuntu:24.04 AS ik-llama-empty
 RUN mkdir -p /install/bin
 FROM ${IK_LLAMA_IMAGE} AS ik-llama-src
 
-# ── llama-swap release binary ─────────────────────────────────────────
+# ── herd release binary ─────────────────────────────────────────
 
-FROM ${BUILDER_BASE} AS llama-swap-download
+FROM ${BUILDER_BASE} AS herd-download
 ARG LS_VERSION=latest
-COPY install-llama-swap.sh /build/
-RUN bash /build/install-llama-swap.sh "${LS_VERSION}"
+COPY install-herd.sh /build/
+RUN bash /build/install-herd.sh "${LS_VERSION}"
 
 # ── vllm-wrapper ──────────────────────────────────────────────────────
 #
-# vllm-wrapper is not shipped in the llama-swap release archives, so it is
-# compiled from the same revision as the llama-swap binary above.
+# vllm-wrapper is not shipped in the herd release archives, so it is
+# compiled from the same revision as the herd binary above.
 
 FROM golang:1.27-bookworm AS vllm-wrapper-build
 ARG LS_VERSION=latest
@@ -101,12 +101,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Create non-root user when RUN_UID != 0
 RUN if [ "$RUN_UID" != "0" ]; then \
-      groupadd --system --gid $RUN_UID llama-swap && \
+      groupadd --system --gid $RUN_UID herd && \
       useradd --system --uid $RUN_UID --gid $RUN_UID \
-        --home /app --shell /sbin/nologin llama-swap; \
+        --home /app --shell /sbin/nologin herd; \
     fi && \
-    mkdir -p /etc/llama-swap/config && \
-    chown -R ${RUN_UID}:${RUN_UID} /etc/llama-swap
+    mkdir -p /etc/herd/config && \
+    chown -R ${RUN_UID}:${RUN_UID} /etc/herd
 
 WORKDIR /app
 
@@ -139,9 +139,9 @@ COPY --from=ik-llama-src /install/bin/ /usr/local/bin/
 # Install uv
 RUN pip install uv --break-system-packages
 
-# Copy llama-swap binary
-COPY --from=llama-swap-download /install/bin/llama-swap /usr/local/bin/
-COPY --from=llama-swap-download /install/llama-swap-version /tmp/
+# Copy herd binary
+COPY --from=herd-download /install/bin/herd /usr/local/bin/
+COPY --from=herd-download /install/herd-version /tmp/
 
 # Copy vllm-wrapper binary
 COPY --from=vllm-wrapper-build /install/bin/vllm-wrapper /usr/local/bin/
@@ -150,15 +150,15 @@ RUN ldconfig
 
 # config.example.yaml lives at the repo root (docs/), outside this build
 # context, so build-image.sh passes it as a named build context.
-COPY --from=repo-docs config.example.yaml /etc/llama-swap/config/config.yaml
+COPY --from=repo-docs config.example.yaml /etc/herd/config/config.yaml
 
 # audiocpp_server takes its own JSON config. Ship a starter with this image's
 # backend baked in -- the binary defaults to "cuda", so a vulkan image that
 # copies an unedited example would try to load every model on a backend it was
 # not built with.
-COPY audiocpp-server.example.json /etc/llama-swap/audiocpp-server.example.json
-RUN sed -i "s/__BACKEND__/${BACKEND}/" /etc/llama-swap/audiocpp-server.example.json && \
-    chown -R ${RUN_UID}:${RUN_UID} /etc/llama-swap
+COPY audiocpp-server.example.json /etc/herd/audiocpp-server.example.json
+RUN sed -i "s/__BACKEND__/${BACKEND}/" /etc/herd/audiocpp-server.example.json && \
+    chown -R ${RUN_UID}:${RUN_UID} /etc/herd
 
 # Version tracking
 RUN echo "llama.cpp: ${LLAMA_COMMIT_HASH}" > /versions.txt && \
@@ -166,12 +166,12 @@ RUN echo "llama.cpp: ${LLAMA_COMMIT_HASH}" > /versions.txt && \
     echo "stable-diffusion.cpp: ${SD_COMMIT_HASH}" >> /versions.txt && \
     echo "ik_llama.cpp: ${IK_LLAMA_COMMIT_HASH}" >> /versions.txt && \
     echo "audio.cpp: ${AUDIO_COMMIT_HASH}" >> /versions.txt && \
-    echo "llama-swap: $(cat /tmp/llama-swap-version)" >> /versions.txt && \
+    echo "herd: $(cat /tmp/herd-version)" >> /versions.txt && \
     echo "backend: ${BACKEND}" >> /versions.txt && \
     echo "build_timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> /versions.txt
 
 RUN mkdir -p /models && chown ${RUN_UID}:${RUN_UID} /models
 WORKDIR /models
 USER ${RUN_UID}
-ENTRYPOINT ["llama-swap"]
-CMD ["-config", "/etc/llama-swap/config/config.yaml", "-listen", "0.0.0.0:8080", "-watch-config"]
+ENTRYPOINT ["herd"]
+CMD ["-config", "/etc/herd/config/config.yaml", "-listen", "0.0.0.0:8080", "-watch-config"]

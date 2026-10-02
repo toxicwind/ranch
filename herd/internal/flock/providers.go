@@ -94,8 +94,8 @@ func (pr *ProviderRegistry) All() []Provider {
 
 func defaultProviders() map[string]Provider {
 	return map[string]Provider{
-		"llama-swap": {
-			ID: "llama-swap", BaseURL: "http://127.0.0.1:25100/v1",
+		"herd": {
+			ID: "herd", BaseURL: "http://127.0.0.1:25100/v1",
 			NoAuth: true, Models: []string{"local-fast", "local-quality", "local-longctx"},
 			Weight: 1.0, ELO: 1600,
 		},

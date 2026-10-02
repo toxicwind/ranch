@@ -13,7 +13,7 @@
 
 **One OpenAI-compatible front door for every cloud model you can reach — with the rate-limit brains to stay inside every provider's speed limit.**
 
-flock is the herd's sky counterpart: not local models, APIs. It routes `chat/completions` across **13 providers** — NVIDIA NIM, OpenRouter, Groq, Cerebras, Together, Fireworks, Hyperbolic, GitHub Models, Mistral, OpenAI, Perplexity, SiliconFlow, and back to local models via the llama-swap provider — using named **strategies** instead of model names.
+flock is the herd's sky counterpart: not local models, APIs. It routes `chat/completions` across **13 providers** — NVIDIA NIM, OpenRouter, Groq, Cerebras, Together, Fireworks, Hyperbolic, GitHub Models, Mistral, OpenAI, Perplexity, SiliconFlow, and back to local models via the herd provider — using named **strategies** instead of model names.
 
 Built for agents that hammer the API at 3am: per-key sliding-window pacing, a global FIFO dispatcher, 429 ride-out with `Retry-After` honored, circuit breakers, and Elo health scoring that learns which provider is actually fast tonight.
 
@@ -45,7 +45,7 @@ flowchart LR
     strat --> free["free → NIM · OpenRouter-free · …"]
     strat --> elo["hybrid / weighted_elo → Elo-ranked"]
     strat --> race["ast_race → first usable response wins"]
-    free --> prov["13 providers + local llama-swap"]
+    free --> prov["13 providers + local herd"]
     elo --> prov
     race --> prov
     prov -. "429/5xx: circuit breaker + Retry-After" .-> prov
@@ -86,7 +86,7 @@ Prefer Docker? `docker compose up -d` in `proxy/` works too (multi-arch image, l
 | Health | Live Elo + latency tracking feeding `weighted_elo` / `least_latency` | `proxy/src/health.rs` |
 | Observation | Prometheus series, history store, dashboard data | `proxy/src/observation.rs`, `history/` |
 
-Strategy names intentionally match the herd's configured strategy identifiers, so existing herd/router configs keep meaning them. `flock:` is the herd config key that sends cloud traffic here; flock's own `llama-swap` provider points back at herd `:25100` for local models.
+Strategy names intentionally match the herd's configured strategy identifiers, so existing herd/router configs keep meaning them. `flock:` is the herd config key that sends cloud traffic here; flock's own `herd` provider points back at herd `:25100` for local models.
 
 ### The tree
 

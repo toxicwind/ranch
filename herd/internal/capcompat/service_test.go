@@ -15,8 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
-	"github.com/mostlygeek/llama-swap/internal/store"
+	"github.com/mostlygeek/herd/internal/config"
+	"github.com/mostlygeek/herd/internal/store"
 )
 
 // countingCache is an in-memory store.CacheRepository that records how often
@@ -167,7 +167,7 @@ func TestCapcompat_RefreshDropsStaleEntryOnUnsupportedUpstream(t *testing.T) {
 	}
 	require.NoError(t, cache.Set(context.Background(), store.CacheEntry{Key: "k", Data: mustJSON(t, stale)}))
 
-	// A server can be swapped for one llama-swap does not recognise without
+	// A server can be swapped for one herd does not recognise without
 	// cmd, proxy or useModelName changing, so the key stays the same. The
 	// memo would hide the old row until a restart emptied it.
 	require.NoError(t, New(cache, nil).Refresh(context.Background(), "k", up.client(t), "model-a"))

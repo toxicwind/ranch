@@ -1,6 +1,6 @@
 ---
 title: Peers - splitting models across machines and providers
-summary: Route to another llama-swap, a remote OpenAI-compatible server, or a hosted provider under one endpoint.
+summary: Route to another herd, a remote OpenAI-compatible server, or a hosted provider under one endpoint.
 category: examples
 tags: [peers, remote, multi-host, openrouter, spillover]
 config_keys: [peers, peers.*.proxy, peers.*.models, peers.*.apiKey, peers.*.filters, peers.*.timeouts]
@@ -9,13 +9,13 @@ updated: 2026-08-25
 
 # Peers: splitting models across machines and providers
 
-Peers let one llama-swap instance serve models that live somewhere else — a
+Peers let one herd instance serve models that live somewhere else — a
 second box on your LAN, or a hosted API. Clients see one endpoint and one model
 list.
 
 ```yaml
 peers:
-  # another llama-swap on the LAN
+  # another herd on the LAN
   workstation:
     proxy: http://192.168.1.23
     models:
@@ -32,8 +32,8 @@ peers:
       - deepseek/deepseek-v3.2
 ```
 
-A peer can be another llama-swap or **any** server providing the `/v1/`
-endpoints llama-swap supports. The request path is appended to `proxy`, so
+A peer can be another herd or **any** server providing the `/v1/`
+endpoints herd supports. The request path is appended to `proxy`, so
 `proxy: https://openrouter.ai/api` plus `/v1/chat/completions` gives
 `https://openrouter.ai/api/v1/chat/completions`.
 
@@ -56,8 +56,8 @@ you have two peers serving the same model name, qualify it.
 `Authorization: Bearer <key>` and `x-api-key: <key>`. Blank means no key added.
 Use an env macro — see `guides/api-integration/api-keys-and-auth`.
 
-This is the key llama-swap presents *to* the peer, unrelated to the top-level
-`apiKeys` clients present to llama-swap.
+This is the key herd presents *to* the peer, unrelated to the top-level
+`apiKeys` clients present to herd.
 
 ## Timeouts
 
@@ -128,7 +128,7 @@ Clients request `llama` and get the cheapest target with capacity. See
   reports.
 - Selectors are not supported on `/upstream/<model>` paths, so peer models are
   not reachable through the upstream passthrough.
-- llama-swap does not manage the peer's lifecycle. It cannot start, stop or
+- herd does not manage the peer's lifecycle. It cannot start, stop or
   TTL-unload anything on the other side.
 
 ## Related

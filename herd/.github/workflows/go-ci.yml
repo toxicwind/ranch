@@ -38,7 +38,7 @@ on:
 jobs:
   # Guard for the 2026-09-17 incident: a Dockerfile's `FROM golang:` pin
   # lagging the `go` directive of what it builds (here, upstream
-  # llama-swap's go.mod fetched at build time) fails here in seconds
+  # herd's go.mod fetched at build time) fails here in seconds
   # instead of after hours of compiling in the unified image workflow.
   toolchain-drift-guard:
     runs-on: ubuntu-latest

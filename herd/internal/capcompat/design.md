@@ -6,9 +6,9 @@ doc comments carry the detail.
 ## Goal
 
 Fill `models.*.capabilities` automatically instead of making every user type
-it. llama-swap already renders that block into `/v1/models` as
+it. herd already renders that block into `/v1/models` as
 `architecture`, `capabilities`, `supported_parameters` and `context_length`.
-The upstream servers already know the answers, so llama-swap asks them.
+The upstream servers already know the answers, so herd asks them.
 
 The obstacle is that a server has to be running to be asked. Discovery runs
 when a model reaches the ready state, and the answer is cached in the SQLite
@@ -64,7 +64,7 @@ ignores case.
 
 A server nobody recognises returns `ErrUnsupportedUpstream`, which is logged
 at debug and cached as a miss. That is the normal outcome for the image,
-speech and transcription servers llama-swap also fronts. To check what a
+speech and transcription servers herd also fronts. To check what a
 given server will be detected as:
 
 ```bash
@@ -187,9 +187,9 @@ points at. Peer, selector and profile-pin records are unchanged.
 
 ## Not done: peers
 
-A peer is usually another llama-swap, whose `/v1/models` already carries
+A peer is usually another herd, whose `/v1/models` already carries
 rendered capability fields, so the peer path needs a prober that reverses
-`renderCapabilities`, matched on `owned_by: llama-swap`. A peer pointed
+`renderCapabilities`, matched on `owned_by: herd`. A peer pointed
 straight at llama-server or vLLM works through the existing probers unchanged.
 
 It also needs an accessor on `router.Peer` to expose each peer's transport,

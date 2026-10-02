@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mostlygeek/llama-swap/internal/config"
+	"github.com/mostlygeek/herd/internal/config"
 )
 
 func TestAuth_SanitizeAccessControlRequestHeaders(t *testing.T) {

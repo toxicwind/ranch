@@ -496,7 +496,7 @@ func routeFree(ctx context.Context, m *Matrix, body map[string]interface{}, sess
 	model := getModel(body)
 	if isExplicit(model) {
 		p, mid := resolveModel(model, m.providers)
-		if strings.Contains(mid, ":free") || p == "llama-swap" {
+		if strings.Contains(mid, ":free") || p == "herd" {
 			r := callOne(ctx, m, p, mid, body)
 			if r.OK {
 				m.StickySet(session, p, mid)
@@ -516,8 +516,8 @@ func routeFree(ctx context.Context, m *Matrix, body map[string]interface{}, sess
 			}
 		}
 	}
-	if m.KeyOk("llama-swap") {
-		cands = append(cands, [2]string{"llama-swap", "local-quality"})
+	if m.KeyOk("herd") {
+		cands = append(cands, [2]string{"herd", "local-quality"})
 	}
 	if len(cands) == 0 {
 		return RouteResult{Status: 503, Err: "no_free_providers"}

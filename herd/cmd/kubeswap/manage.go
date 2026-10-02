@@ -157,7 +157,7 @@ func deleteCmd(args []string) error {
 		f     manageFlags
 	)
 	fs := newFlagSet("delete")
-	fs.StringVar(&model, "model", "", "llama-swap model ID (required)")
+	fs.StringVar(&model, "model", "", "herd model ID (required)")
 	addKubeFlags(fs, &f.namespace, &f.kubeconfig)
 	fs.BoolVar(&f.deleteVolumes, "delete-volumes", false, "also delete PVCs that kubeswap created for this model")
 	fs.DurationVar(&f.wait, "wait", 30*time.Second, "how long to wait for pods to terminate (0 = do not wait)")
@@ -183,7 +183,7 @@ type gcFlags struct {
 }
 
 // gcAllowedModels builds the set of model IDs from --models entries and,
-// optionally, the keys of the models map in a llama-swap config.yaml.
+// optionally, the keys of the models map in a herd config.yaml.
 // --models is repeatable and each value may be comma-separated
 // (model-a,model-b); the entries are split so both forms work.
 func gcAllowedModels(models []string, configPath string) (map[string]bool, error) {
@@ -222,7 +222,7 @@ func gcCmd(args []string) error {
 	fs := newFlagSet("gc")
 	addKubeFlags(fs, &f.namespace, &f.kubeconfig)
 	fs.Var(&f.models, "models", "comma-separated model IDs that should survive GC (repeatable)")
-	fs.StringVar(&f.config, "config", "", "path to a llama-swap config.yaml; its models keep surviving GC")
+	fs.StringVar(&f.config, "config", "", "path to a herd config.yaml; its models keep surviving GC")
 	fs.BoolVar(&f.deleteVolumes, "delete-volumes", false, "also delete PVCs that kubeswap created for collected models")
 	fs.BoolVar(&f.dryRun, "dry-run", false, "report what would be collected without deleting anything")
 	fs.Parse(args)
@@ -524,7 +524,7 @@ func logsCmd(args []string) error {
 		follow bool
 	)
 	fs := newFlagSet("logs")
-	fs.StringVar(&model, "model", "", "llama-swap model ID (required)")
+	fs.StringVar(&model, "model", "", "herd model ID (required)")
 	addKubeFlags(fs, &f.namespace, &f.kubeconfig)
 	fs.IntVar(&tail, "tail", 100, "number of lines to start from (0 = all lines)")
 	fs.BoolVar(&follow, "follow", false, "keep streaming until the pod or container stops")
