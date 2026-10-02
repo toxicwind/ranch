@@ -7,8 +7,8 @@ bun = "1.4.2"
 _.file = "../../config/ports.env"
 
 [tasks]
-build = "go build -o build/herd ./cmd/main.go"
-dev = "go run ./cmd/main.go"
+build = "go build -o build/herd ./cmd/herd-plane"
+dev = "go run ./cmd/herd-plane"
 test = "go test ./..."
 health = "curl -sf http://127.0.0.1:25100/health"
 models = "curl -sf http://127.0.0.1:25100/v1/models | python3 -c 'import sys,json; data=json.load(sys.stdin); print(len(data.get(\"data\",[])), \"models active\")'"
