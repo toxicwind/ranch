@@ -94,3 +94,8 @@ __pycache__/
 # The same 11 projects also arrive as source archives, unpacked on demand.
 # 49 MB of vendored tarballs duplicating the checkouts above.
 /android-fleet/nuvio/nuvio-platform/*.tar.gz
+
+# shell/ii is a nested standalone checkout (ex-submodule; its gitdir
+# ranch/.git/modules/shell/sovereign-end4 is gone and .gitmodules no
+# longer declares it). Not ranch content - keep it out of the tree.
+shell/ii/
