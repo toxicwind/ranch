@@ -1,7 +1,7 @@
 # GuideLLM-based OpenRouter free-model eval plan
 
 Date: 2026-09-20. Standing order: ranking runs THROUGH the GuideLLM fork
-(`projects/range/ranch/roundup/fork`, upstream vllm-project/guidellm @ 4601968, remote
+(`ranch/roundup/fork`, upstream vllm-project/guidellm @ 4601968, remote
 toxicwind/roundup). No parallel harness.
 
 ## 1. Verdict: probe_abstract.py is KEPT (fixed), not superseded
@@ -72,7 +72,7 @@ guidellm run \
   --disable-progress
 
 Repeat per model, swapping model + tokenizer repo from the table above.
-Sweep outputs land in projects/range/ranch/roundup/results/*.json (gitignored).
+Sweep outputs land in ranch/roundup/results/*.json (gitignored).
 
 ## 5. Open items
 

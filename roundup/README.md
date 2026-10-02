@@ -92,10 +92,15 @@ cat results/herd/ranking.md
 | [`roundup-bench.sh`](./sweeps/roundup-bench.sh) | Which **provider** is best, using the fork's `instruction_following` scorer via scenario YAML? | flock + NIM + vLLM remote |
 | [`roundup-bench-v3.sh`](./sweeps/roundup-bench-v3.sh) | Same, with capability probing so unsupported backends fail loudly instead of silently. | flock + NIM + vLLM remote |
 | [`roundup_sweep.sh`](./sweeps/roundup_sweep.sh) | Quick sanity pass over working OpenRouter models. | OpenRouter |
+| [`roundup-estate-sweep.ts`](./sweeps/roundup-estate-sweep.ts) | **One-command estate sweep**: discovers models live from herd, flock, and the sovereign router; benchmarks each with the fork's `instruction_following` scorer; emits `roundup-bench/1` JSONL (`results.jsonl`), `roundup-weights/1` (`weights.json`), and `ranking.md`. | herd `:25100` · flock `:25193` · sov `:25104` |
+| [`emit-router-weights.ts`](./sweeps/emit-router-weights.ts) | Converts sweep `results.jsonl` into the sovereign router's `schema_version: 2` weight contract (`provider_priors` + `model_priors`), which the router hot-reloads. | — |
 | [`dump-roundup.sh`](./sweeps/dump-roundup.sh) | Give me everything in this directory as one readable dump. | — |
 
-All of them rank the same way and write the same shape:
-`results/{herd,bench,sweeps}/ranking.md`.
+All of them rank the same way — quality desc, p50 latency asc — and the
+`.sh` sweeps write `results/{herd,bench,sweeps}/ranking.md`. The estate sweep
+additionally writes router-consumable `results.jsonl` + `weights.json`, and
+`emit-router-weights.ts` produces the router's native weight file. See
+[docs/ROUTER-WEIGHTS.md](./docs/ROUTER-WEIGHTS.md).
 
 ### Ranking
 

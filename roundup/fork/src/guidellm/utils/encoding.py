@@ -639,7 +639,16 @@ class Serializer:
             type specified
         """
         if current is not None and type(payload) is not type(current):
-            raise ValueError("Payload and current must be of the same type")
+            # Mixed str/bytes payloads (e.g. a collection holding plain
+            # JSON-serialized items alongside bytes-serialized pydantic
+            # models): normalize to the current sequence type instead of
+            # failing. The unpack side handles both types.
+            if isinstance(payload, str) and isinstance(current, bytes):
+                payload = payload.encode()
+            elif isinstance(payload, bytes) and isinstance(current, str):
+                payload = payload.decode()
+            else:
+                raise ValueError("Payload and current must be of the same type")
 
         payload_len = len(payload)
         payload_len_output: str | bytes

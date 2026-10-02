@@ -501,11 +501,21 @@ class TestSerializer:
         inst = Serializer("sequence")
         first_payload = inst.to_sequence_python(1)
         first = inst.pack_next_sequence("python", first_payload, None)
-        bad_payload: Any = (
-            first_payload.decode() if isinstance(first_payload, bytes) else b"1"
-        )
-        with pytest.raises(ValueError):
-            inst.pack_next_sequence("python", bad_payload, first)
+        # Mixed str/bytes payloads normalize to the current sequence's type
+        # instead of raising, so mixed collections (plain items + pydantic
+        # models) round-trip.
+        if isinstance(first, bytes):
+            mixed = inst.pack_next_sequence("python", "2", first)
+            assert isinstance(mixed, bytes)
+            type_, payload, _ = inst.unpack_next_sequence(mixed[len(first):])
+            assert type_ == "python"
+            assert payload == b"2"
+        else:
+            mixed = inst.pack_next_sequence("python", b"2", first)
+            assert isinstance(mixed, str)
+            type_, payload, _ = inst.unpack_next_sequence(mixed[len(first):])
+            assert type_ == "python"
+            assert payload == "2"
 
     @pytest.mark.sanity
     def test_unpack_invalid(self):
