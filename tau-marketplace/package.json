@@ -1,0 +1,29 @@
+{
+  "name": "@toxicwind/tau-marketplace",
+  "version": "1.0.0",
+  "description": "Official Sovereign Estate Marketplace for Tau & Oh-My-Pi extensions and plugins",
+  "type": "module",
+  "scripts": {
+    "validate": "bun run bin/validate.ts",
+    "test": "bun test",
+    "lint": "oxlint bin/*.ts plugins/*/index.ts"
+  },
+  "keywords": [
+    "marketplace",
+    "tau",
+    "oh-my-pi",
+    "omp",
+    "plugins",
+    "extensions",
+    "sovereign",
+    "ranch"
+  ],
+  "author": "toxicwind",
+  "license": "MIT",
+  "peerDependencies": {
+    "@oh-my-pi/pi-coding-agent": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@oh-my-pi/pi-coding-agent": "18.3.0"
+  }
+}
