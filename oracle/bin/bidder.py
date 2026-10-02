@@ -55,7 +55,7 @@ RALPH_CAP_S = 1740  # 29 min ceiling: Super Ralph runs are slow (~11 min
                     # observed for a trivial run)
 RALPH_MODEL = os.environ.get("RALPH_MODEL", "kimi-k3-nim")
 RALPH_BASE_URL = os.environ.get("RALPH_BASE_URL",
-                                "https://integrate.api.nvidia.com/v1")
+                                "http://127.0.0.1:25104/v1")  # herd router (yote-local); NVIDIA NIM 401s since 2026-10-01
 OUT_CAP = 8000
 ERR_CAP = 2000
 PARTIAL_CAP = 65536  # bound for the on-disk partial-output evidence file
@@ -148,9 +148,7 @@ def _summarize_ralph_nodes(workdir):
 # against the router with a live probe, falling back down a priority chain.
 RALPH_MODEL_CANDIDATES = [
     os.environ.get("RALPH_MODEL") or "",  # explicit operator override
-    "meta/llama-3.2-11b-vision-instruct", # 337ms live on NVIDIA NIM
-    "nvidia/nemotron-3-super-120b-a12b",  # 417ms live on NVIDIA NIM
-    "openai/gpt-oss-20b",                 # 1147ms live on NVIDIA NIM
+    "gemini-eap-openai/gemini-3.8-flash",  # 0.6-0.7s live on herd :25104 (2026-10-02; NVIDIA NIM 401s, retired)
 ]
 _ralph_model_cache = {"model": None, "ts": 0.0}
 RALPH_MODEL_CACHE_S = 300
