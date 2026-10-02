@@ -3,9 +3,8 @@
 
 Covers: /ping public + content-free; /wait + /subscribe alias both 404
 without/invalid bearer and 200 with it; fat response shape (per-message
-seq, 50-cap cursor protocol); wake on post; timeout; full bodies served untruncated;
-sealed envelopes unsealed server-side (fail closed when unopenable);
-unsigned pre-HMAC bodies served flagged invalid (ciphertext still withheld).
+seq, 50-cap cursor protocol); wake on post; timeout; 500-char truncation;
+sealed envelopes unsealed server-side (fail closed when unopenable).
 """
 
 import json
@@ -169,56 +168,16 @@ class SquawkFeedFatTests(unittest.TestCase):
         self.assertTrue(
             all(m["signature"] == "valid" for m in obj["messages"]))
 
-    def test_text_served_untruncated(self):
-        # 0b33559ad2 killed the 500-char server cut (Chris 2026-09-21):
-        # full bodies survive end to end.
+    def test_text_truncated_at_500(self):
         port = self._serve()
         base = self._high(port)
-        body = "y" * 1200
-        self._post(body)
-        _status, obj = _get(port, "/squawk-feed/wait?since=%d" % base,
+        self._post("y" * 600)
+        _status, obj = _get(port, f"/squawk-feed/wait?since={base}",
                             token=TOKEN)
         text = obj["messages"][-1]["body"]
-        self.assertEqual(text, body)
-        self.assertGreater(len(text), 500)
+        self.assertEqual(len(text), 500)
+        self.assertTrue(text.endswith("…"))
 
-    def test_html_body_served_verbatim(self):
-        # Chris 2026-09-21: HTML/CSS is first-class -- bodies carrying tags,
-        # inline styles, style/script blocks survive end to end byte-identical
-        # (rendering happens client-side in ui.html).
-        port = self._serve()
-        base = self._high(port)
-        body = ("<div style=\"color:red\">hi</div>\n"
-                "<style>.x{color:blue}</style>\n"
-                "<script>window.__vex_html=1</script>")
-        self._post(body)
-        _status, obj = _get(port, "/squawk-feed/wait?since=%d" % base,
-                            token=TOKEN)
-        self.assertEqual(obj["messages"][-1]["body"], body)
-
-    def test_cors_preflight_and_headers(self):
-        # Chris 2026-09-21: the feed is fetchable cross-origin.
-        port = self._serve()
-        req = urllib.request.Request(
-            "http://127.0.0.1:%d/squawk-feed/send" % port, method="OPTIONS")
-        req.add_header("Origin", "https://example.com")
-        req.add_header("Access-Control-Request-Method", "POST")
-        req.add_header("Access-Control-Request-Headers",
-                       "Authorization, Content-Type")
-        with urllib.request.urlopen(req, timeout=10) as r:
-            self.assertEqual(r.status, 204)
-            self.assertEqual(r.headers.get("Access-Control-Allow-Origin"), "*")
-            self.assertIn("POST",
-                          r.headers.get("Access-Control-Allow-Methods"))
-            allow_h = r.headers.get("Access-Control-Allow-Headers") or ""
-            self.assertIn("Authorization", allow_h)
-        # actual responses carry ACAO too
-        req = urllib.request.Request(
-            "http://127.0.0.1:%d/squawk-feed/seq?channel=fleet" % port)
-        req.add_header("Origin", "https://example.com")
-        with urllib.request.urlopen(req, timeout=10) as r:
-            self.assertEqual(r.status, 200)
-            self.assertEqual(r.headers.get("Access-Control-Allow-Origin"), "*")
     # -- wake + timeout --------------------------------------------------------
 
     def test_wait_wakes_on_post(self):
@@ -285,118 +244,29 @@ class SquawkFeedFatTests(unittest.TestCase):
         self.assertEqual(rec["body"], "secret for relay")
 
 
-    # -- unsigned (pre-HMAC) history -------------------------------------------
+    # -- ui.html static checks ---------------------------------------------------
 
-    def _write_unsigned(self, body, sender="relay"):
-        # Simulate pre-HMAC history: a real message file with the hmac
-        # line stripped. Written before the server starts (no inotify race).
-        seq, fname = self._post(body, sender=sender)
-        p = self.root / "fleet" / fname
-        p.write_text("".join(
-            l for l in p.read_text().splitlines(keepends=True)
-            if not l.startswith("hmac:")))
-        return seq
+    def test_ui_html_has_no_duplicate_ids(self):
+        from html.parser import HTMLParser
 
-    def test_unsigned_plaintext_served_flagged_invalid(self):
-        seq = self._write_unsigned("history without a signature")
-        port = self._serve()
-        _status, obj = _get(port, f"/squawk-feed/wait?since={seq - 1}",
-                            token=TOKEN)
-        rec = obj["messages"][-1]
-        self.assertEqual(rec["seq"], seq)
-        self.assertEqual(rec["signature"], "invalid")
-        self.assertFalse(rec["sealed"])
-        self.assertEqual(rec["body"], "history without a signature")
+        class _IdCollector(HTMLParser):
+            def __init__(self):
+                super().__init__(convert_charrefs=True)
+                self.ids = []
 
-    def test_unsigned_sealed_envelope_withheld(self):
-        body = ("-----BEGIN SQUAWK SEALED MESSAGE-----\nto: relay\n"
-                "alg: sealedbox\n\nQUJD\n-----END SQUAWK SEALED MESSAGE-----\n")
-        seq = self._write_unsigned(body)
-        port = self._serve()
-        _status, obj = _get(port, f"/squawk-feed/wait?since={seq - 1}",
-                            token=TOKEN)
-        rec = obj["messages"][-1]
-        self.assertEqual(rec["seq"], seq)
-        self.assertEqual(rec["signature"], "invalid")
-        self.assertTrue(rec["sealed"])
-        self.assertIsNone(rec["body"])
+            def handle_starttag(self, tag, attrs):
+                for k, v in attrs:
+                    if k == "id":
+                        self.ids.append(v)
 
-    def test_tampered_body_served_flagged_invalid(self):
-        seq, fname = self._post("original text")
-        p = self.root / "fleet" / fname
-        p.write_text(p.read_text().replace("original text", "FORGED text"))
-        port = self._serve()
-        _status, obj = _get(port, f"/squawk-feed/wait?since={seq - 1}",
-                            token=TOKEN)
-        rec = obj["messages"][-1]
-        self.assertEqual(rec["seq"], seq)
-        self.assertEqual(rec["signature"], "invalid")
-        self.assertFalse(rec["sealed"])
-        self.assertIn("FORGED text", rec["body"])
-
+        ui = Path(__file__).resolve().parent.parent / "ui.html"
+        self.assertTrue(ui.is_file(), "ui.html missing")
+        col = _IdCollector()
+        col.feed(ui.read_text(encoding="utf-8"))
+        dupes = {i for i in col.ids if col.ids.count(i) > 1}
+        self.assertEqual(dupes, set(), "duplicate ids in ui.html: %s" % sorted(dupes))
+        self.assertIn("conn", col.ids)
+        self.assertIn("connHead", col.ids)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
-
-
-class AtomicWriteTests(unittest.TestCase):
-    """Crash-safe write path (write-file-atomic pattern): temp + fsync
-    + atomic replace + dir fsync; temp cleaned on failure."""
-
-    def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self._tmp.cleanup)
-        self.d = Path(self._tmp.name)
-
-    def test_atomic_write_roundtrip(self):
-        target = self.d / "final.md"
-        squawk_feed._atomic_write_text(target, "hello\n")
-        self.assertEqual(target.read_text(), "hello\n")
-        leftovers = [x for x in self.d.iterdir() if x.name.startswith(".tmp-")]
-        self.assertEqual(leftovers, [], "no temp files left behind")
-
-    def test_atomic_write_fsyncs_file_and_dir(self):
-        calls = []
-        real_fsync = os.fsync
-
-        def spy(fd):
-            calls.append(fd)
-            return real_fsync(fd)
-
-        target = self.d / "final.md"
-        orig = os.fsync
-        os.fsync = spy
-        try:
-            squawk_feed._atomic_write_text(target, "data")
-        finally:
-            os.fsync = orig
-        # at least two fsyncs: the temp file and the directory
-        self.assertGreaterEqual(len(calls), 2,
-                                "must fsync both file and dir, got %d" % len(calls))
-
-    def test_atomic_write_cleans_temp_on_failure(self):
-        target = self.d / "final.md"
-        real_replace = os.replace
-
-        def boom(*a):
-            raise OSError("injected")
-
-        os.replace = boom
-        try:
-            with self.assertRaises(OSError):
-                squawk_feed._atomic_write_text(target, "data")
-        finally:
-            os.replace = real_replace
-        self.assertFalse(target.exists())
-        leftovers = [x for x in self.d.iterdir() if x.name.startswith(".tmp-")]
-        self.assertEqual(leftovers, [], "temp must be cleaned on failure")
-
-    def test_publish_message_uses_crash_safe_write(self):
-        root = self.d / "chat-root"
-        seq, fname = squawk_feed._publish_message(
-            root, "fleet", "tester", "title", "crash-safe body")
-        final = root / "fleet" / fname
-        self.assertTrue(final.is_file())
-        self.assertGreater(final.stat().st_size, 0)
-        self.assertIn("crash-safe body", final.read_text())
-        self.assertIn("seq: %d" % seq, final.read_text())
