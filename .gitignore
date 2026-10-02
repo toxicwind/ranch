@@ -99,3 +99,7 @@ __pycache__/
 # ranch/.git/modules/shell/sovereign-end4 is gone and .gitmodules no
 # longer declares it). Not ranch content - keep it out of the tree.
 shell/ii/
+
+# ranch-analyze/config/ holds swept-in tau runtime log dumps (http-400-request
+# JSONs). Runtime state with live credentials - never committed.
+ranch-analyze/config/
