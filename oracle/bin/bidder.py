@@ -55,7 +55,10 @@ RALPH_CAP_S = 1740  # 29 min ceiling: Super Ralph runs are slow (~11 min
                     # observed for a trivial run)
 RALPH_MODEL = os.environ.get("RALPH_MODEL", "kimi-k3-nim")
 RALPH_BASE_URL = os.environ.get("RALPH_BASE_URL",
-                                "http://127.0.0.1:25104/v1")  # herd router (yote-local); NVIDIA NIM 401s since 2026-10-01
+                                "http://127.0.0.1:25200/v1")  # cuttinggate (canonical router); cut over 2026-10-02
+# cuttinggate's auth gate requires a "Bearer " prefix (any non-empty value;
+# the upstream key comes from cuttinggate's own credential plane).
+RALPH_API_KEY = os.environ.get("RALPH_API_KEY", "oracle-market-bidder")
 OUT_CAP = 8000
 ERR_CAP = 2000
 PARTIAL_CAP = 65536  # bound for the on-disk partial-output evidence file
@@ -148,7 +151,10 @@ def _summarize_ralph_nodes(workdir):
 # against the router with a live probe, falling back down a priority chain.
 RALPH_MODEL_CANDIDATES = [
     os.environ.get("RALPH_MODEL") or "",  # explicit operator override
-    "gemini-eap-openai/gemini-3.8-flash",  # 0.6-0.7s live on herd :25104 (2026-10-02; NVIDIA NIM 401s, retired)
+    # 2026-10-02 cutover: :25104 retired, :25200 (cuttinggate) is canonical.
+    # gemini-eap-openai/gemini-3.8-flash is not served on :25200
+    # (google/gemini-3.8-flash there is openrouter-only, 402 no-credit).
+    "openai/gpt-oss-20b",  # groq via cuttinggate :25200, verified live 2026-10-02 (GROQ-OK)
 ]
 _ralph_model_cache = {"model": None, "ts": 0.0}
 RALPH_MODEL_CACHE_S = 300
@@ -174,11 +180,15 @@ def _resolve_ralph_model(base_url, timeout=15):
             body = json.dumps({
                 "model": cand,
                 "messages": [{"role": "user", "content": "Reply with: ok"}],
-                "max_tokens": 5,
+                # 2026-10-02: 64, not 5 -- reasoning models (gpt-oss-20b)
+                # spend the first tokens thinking; max_tokens=5 yields a
+                # 200 with empty content, which the router scores as failure.
+                "max_tokens": 64,
             }).encode()
             req = urllib.request.Request(
                 base + "/chat/completions", data=body,
                 headers={"Content-Type": "application/json",
+                         "Authorization": "Bearer " + RALPH_API_KEY,
                          "User-Agent": "oracle-market-bidder"})
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 payload = json.loads(r.read().decode("utf-8", "replace"))
