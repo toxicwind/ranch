@@ -1,0 +1,115 @@
+#!/usr/bin/env bun
+/**
+ * lane-resume — death-of-a-lane recovery driver (Cinder, subagent-control).
+ *
+ * When a lane dies mid-turn (pi_check classifier kill, runtime kill, stale
+ * heartbeat), the replacement RESUMES from a checkpoint instead of starting
+ * over. This script finds the dead and recovers them; agent-checkpoint.ts
+ * does the classification + capture + kill-aware brief.
+ *
+ *   lane-resume scan [--since-hours 24]     list dead-mid-turn agents
+ *   lane-resume recover <agent-id> [--name N] [--lane L] [--brief B]
+ *                     [--pending P] [--force]
+ *                     capture checkpoint + print respawn brief
+ *                     (paste the brief into subagent.spawn)
+ *
+ * Fail-closed: recover refuses agents whose session was modified <10m ago
+ * (probably still alive); --force overrides for known-dead agents.
+ * The actual subagent.spawn stays with the coordinator — this script never
+ * spawns on its own.
+ */
+
+import { join, dirname } from "path";
+
+const SCRIPT_DIR = dirname(new URL(import.meta.url).pathname);
+const CHECKPOINT_SCRIPT = join(SCRIPT_DIR, "agent-checkpoint.ts");
+const AGENTS_DIR = process.env.CHECKPOINT_AGENTS_DIR ?? "/home/hatch/agents";
+
+function usage(exitCode = 2): never {
+  process.stderr.write(`lane-resume — death-of-a-lane recovery driver.
+
+  scan [--since-hours 24]     classify agents with recent session activity;
+                              shows which died mid-turn and how
+  recover <agent-id> [flags]  capture checkpoint + print kill-aware respawn
+                              brief (paste into subagent.spawn)
+      flags: --name --lane --brief --pending --kb-row --fleet-note --force
+`);
+  process.exit(exitCode);
+}
+
+interface ScanRow {
+  id: string;
+  lines: number;
+  ageMin: number;
+  kind: string;
+  lastStep: string;
+}
+
+async function classifyOne(id: string): Promise<ScanRow | null> {
+  const f = Bun.file(join(AGENTS_DIR, `agent-${id}`, "sessions", `${id}.jsonl`));
+  if (!(await f.exists())) return null;
+  const stat = await f.stat();
+  const ageMin = (Date.now() - stat.mtime.getTime()) / 60000;
+  const lines = (await f.text()).split("\n").filter((l) => l.trim().length > 0);
+  if (lines.length === 0) return null;
+  // classifyKill is exported from agent-checkpoint.ts; import it directly.
+  const mod = await import(CHECKPOINT_SCRIPT);
+  const ev = mod.classifyKill(lines) as { kind: string; last_verified_step: string };
+  return { id, lines: lines.length, ageMin, kind: ev.kind, lastStep: ev.last_verified_step };
+}
+
+async function cmdScan(args: string[]): Promise<void> {
+  let sinceHours = 24;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--since-hours" && args[i + 1]) sinceHours = parseFloat(args[i + 1]);
+  }
+  const cutoff = Date.now() - sinceHours * 3600 * 1000;
+  const rows: ScanRow[] = [];
+  const glob = new Bun.Glob("agent-*/sessions/*.jsonl");
+  for await (const p of glob.scan({ cwd: AGENTS_DIR })) {
+    const m = p.match(/agent-([0-9a-f-]{36})\/sessions/);
+    if (!m) continue;
+    const f = Bun.file(join(AGENTS_DIR, p));
+    const stat = await f.stat().catch(() => null);
+    if (!stat || stat.mtime.getTime() < cutoff) continue;
+    const row = await classifyOne(m[1]);
+    if (row) rows.push(row);
+  }
+  rows.sort((a, b) => b.ageMin - a.ageMin);
+  console.log(`agent-id(8)  lines  age     kind           last verified step`);
+  for (const r of rows) {
+    const age = r.ageMin < 60 ? `${r.ageMin.toFixed(0)}m` : `${(r.ageMin / 60).toFixed(1)}h`;
+    console.log(
+      `${r.id.slice(0, 8)}  ${String(r.lines).padStart(5)}  ${age.padStart(6)}  ${r.kind.padEnd(13)} ${(r.lastStep || "—").slice(0, 70)}`
+    );
+  }
+  const dead = rows.filter((r) => r.kind === "runtime-kill" || r.kind === "refusal-kill");
+  console.log(`\n${rows.length} agents scanned, ${dead.length} dead mid-turn (recoverable).`);
+}
+
+async function cmdRecover(args: string[]): Promise<void> {
+  const id = args[0];
+  if (!id) {
+    process.stderr.write("recover needs <agent-id>\n");
+    process.exit(2);
+  }
+  const proc = Bun.spawnSync(["bun", CHECKPOINT_SCRIPT, "recover", "--agent-id", id, ...args.slice(1)], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const out = (proc.stdout?.toString() ?? "") + (proc.stderr?.toString() ?? "");
+  process.stdout.write(out);
+  process.exit(proc.exitCode ?? 1);
+}
+
+async function main(): Promise<void> {
+  const [cmd, ...rest] = process.argv.slice(2);
+  if (cmd === "scan") await cmdScan(rest);
+  else if (cmd === "recover") await cmdRecover(rest);
+  else usage();
+}
+
+main().catch((e) => {
+  process.stderr.write(`lane-resume: ${e?.message ?? e}\n`);
+  process.exit(1);
+});

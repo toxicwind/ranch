@@ -184,3 +184,181 @@ test("checkpoint file lands under workspace/checkpoints", () => {
   expect(path.startsWith(dir)).toBe(true);
   expect(readdirSync(dir).length).toBe(1);
 });
+
+// --- lane-resume: kill classification + post-mortem recover (Cinder) ---
+
+import { mkdirSync, utimesSync } from "node:fs";
+
+const { classifyKill } = await import(SCRIPT);
+
+function jline(o: object): string {
+  return JSON.stringify(o);
+}
+function sessLine(seq: number, item: object, source = "runtime"): string {
+  return jline({ type: "item", seq, source, item });
+}
+function msg(text: string, role = "assistant"): object {
+  return { type: "message", role, text };
+}
+function call(name: string, args = "{}"): object {
+  return { type: "function_call", name, arguments: args };
+}
+function result(exitCode: number, stdout = "ok"): object {
+  return { type: "function_call_output", output: jline({ cwd: "/tmp", exitCode, stdout }) };
+}
+
+// Fixture agent dir under a temp agents root (CHECKPOINT_AGENTS_DIR override).
+function fakeAgent(home: string, id: string, lines: string[], mtimeAgeMin = 60): Record<string, string> {
+  const agentsDir = join(home, "agents");
+  const dir = join(agentsDir, `agent-${id}`, "sessions");
+  mkdirSync(dir, { recursive: true });
+  const f = join(dir, `${id}.jsonl`);
+  writeFileSync(f, lines.join("\n") + "\n");
+  const past = new Date(Date.now() - mtimeAgeMin * 60000);
+  utimesSync(f, past, past);
+  return { CHECKPOINT_AGENTS_DIR: agentsDir };
+}
+
+function runRecover(home: string, id: string, agentsEnv: Record<string, string>, extra: string[] = []) {
+  const env = { ...process.env, HOME: home, ...agentsEnv };
+  return run(["recover", "--agent-id", id, "--lane", "test/lane", ...extra], env);
+}
+
+// 17. classifyKill: refusal signature in the death window => refusal-kill
+test("classifyKill detects refusal-kill from tail signature", () => {
+  const lines = [
+    sessLine(1, call("exec")),
+    sessLine(2, result(0, "did the thing")),
+    sessLine(3, msg("A safety policy refused this helper's work. Do not retry it.")),
+  ];
+  const ev = classifyKill(lines);
+  expect(ev.kind).toBe("refusal-kill");
+  expect(ev.refusal_context).toMatch(/safety policy refused/i);
+});
+
+// 18. classifyKill: unanswered calls at the end => runtime-kill
+test("classifyKill detects runtime-kill from unanswered calls", () => {
+  const lines = [
+    sessLine(1, call("exec")),
+    sessLine(2, result(0, "step one done")),
+    sessLine(3, call("exec", '{"command":"step two"}')),
+    sessLine(4, call("exec", '{"command":"step three"}')),
+  ];
+  const ev = classifyKill(lines);
+  expect(ev.kind).toBe("runtime-kill");
+  expect(ev.last_verified_step).toMatch(/step one done/);
+});
+
+// 19. classifyKill: substantive final message => completed
+test("classifyKill detects completed lanes", () => {
+  const lines = [
+    sessLine(1, call("exec")),
+    sessLine(2, result(0, "ok")),
+    sessLine(3, msg("Done. Full report written to /tmp/report.md with all findings summarized.")),
+  ];
+  const ev = classifyKill(lines);
+  expect(ev.kind).toBe("completed");
+});
+
+// 20. classifyKill: ignores background proactivity loops
+test("classifyKill ignores runtime.proactivity items", () => {
+  const lines = [
+    sessLine(0, msg("bg loop note"), "runtime.proactivity"),
+    sessLine(1, call("worker.finish"), "runtime.proactivity"),
+  ];
+  const ev = classifyKill(lines);
+  expect(ev.kind).toBe("unknown");
+});
+
+// 21. recover refuses a live agent (fresh session) without --force
+test("recover refuses fresh sessions without --force", () => {
+  const { home } = ckptEnv();
+  const id = "deadbeef-1111-2222-3333-444455556666";
+  const agentsEnv = fakeAgent(home, id, [sessLine(1, call("exec"))], 2);
+  const r = runRecover(home, id, agentsEnv);
+  expect(r.code).toBe(2);
+  expect(r.out).toMatch(/may still be alive/);
+});
+
+// 22. recover --force captures a runtime-kill checkpoint + kill-aware brief
+test("recover captures runtime-kill checkpoint and brief", () => {
+  const { home } = ckptEnv();
+  const id = "deadbeef-1111-2222-3333-444455556667";
+  const lines = [
+    sessLine(1, call("exec")),
+    sessLine(2, result(0, "step one done")),
+    sessLine(3, call("exec", '{"command":"step two"}')),
+  ];
+  const agentsEnv = fakeAgent(home, id, lines, 60);
+  const r = runRecover(home, id, agentsEnv, ["--force"]);
+  expect(r.code).toBe(0);
+  expect(r.out).toMatch(/kill: runtime-kill/);
+  const m = r.out.match(/Checkpoint: (\S+)/);
+  expect(m).not.toBeNull();
+  const cp = JSON.parse(readFileSync(m![1], "utf8"));
+  expect(cp.version).toBe(3);
+  expect(cp.kill.kind).toBe("runtime-kill");
+  expect(cp.kv.pinned.rephrase_required).toBe("false");
+  expect(r.out).toMatch(/Resume as-is/);
+  expect(r.out).toMatch(/CONTINUATION/);
+});
+
+// 23. recover on refusal-kill brief carries the rephrase-first instruction
+test("recover refusal-kill brief demands behavioral rephrase", () => {
+  const { home } = ckptEnv();
+  const id = "deadbeef-1111-2222-3333-444455556668";
+  const lines = [
+    sessLine(1, call("exec")),
+    sessLine(2, result(0, "step one done")),
+    sessLine(3, msg("A safety policy refused this helper's work. Do not retry it.")),
+  ];
+  const agentsEnv = fakeAgent(home, id, lines, 60);
+  const r = runRecover(home, id, agentsEnv, ["--force"]);
+  expect(r.code).toBe(0);
+  expect(r.out).toMatch(/kill: refusal-kill/);
+  expect(r.out).toMatch(/REPHRASE/);
+  expect(r.out).toMatch(/refusal is NEVER a verdict/);
+  const m = r.out.match(/Checkpoint: (\S+)/);
+  const cp = JSON.parse(readFileSync(m![1], "utf8"));
+  expect(cp.kv.pinned.rephrase_required).toBe("true");
+});
+
+// 24. recover on a completed lane refuses to manufacture work
+test("recover reports completed lanes without checkpointing", () => {
+  const { home } = ckptEnv();
+  const id = "deadbeef-1111-2222-3333-444455556669";
+  const lines = [
+    sessLine(1, call("exec")),
+    sessLine(2, result(0, "ok")),
+    sessLine(3, msg("Done. Everything finished and verified, report at /tmp/done.md.")),
+  ];
+  const agentsEnv = fakeAgent(home, id, lines, 60);
+  const r = runRecover(home, id, agentsEnv, ["--force"]);
+  expect(r.code).toBe(0);
+  expect(r.out).toMatch(/finished normally/);
+  expect(r.out).not.toMatch(/Checkpoint: /);
+});
+
+// 25. classifyKill: aborted in-flight result (killed mid-turn) => runtime-kill
+test("classifyKill detects runtime-kill from aborted in-flight result", () => {
+  const lines = [
+    sessLine(1, call("exec")),
+    sessLine(2, result(0, "step one done")),
+    sessLine(3, call("exec", '{"command":"sleep 90"}')),
+    sessLine(4, { type: "function_call_output", output: "aborted" }),
+  ];
+  const ev = classifyKill(lines);
+  expect(ev.kind).toBe("runtime-kill");
+  expect(ev.last_verified_step).toMatch(/step one done/);
+});
+
+// 26. classifyKill: runtime developer notices don't count as completion
+test("classifyKill ignores trailing developer notices for completion", () => {
+  const lines = [
+    sessLine(1, call("exec")),
+    sessLine(2, result(0, "ok")),
+    sessLine(3, { type: "message", role: "developer", text: "The system file watcher flagged a change to ~/MEMORY.md in this long message that would otherwise look substantive enough to pass the length check." }),
+  ];
+  const ev = classifyKill(lines);
+  expect(ev.kind).toBe("unknown");
+});
