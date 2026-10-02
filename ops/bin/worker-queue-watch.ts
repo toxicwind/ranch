@@ -252,7 +252,18 @@ function readPid(): number | null {
   }
 }
 
+function ensureQueueDir() {
+  // The queue dir may not exist yet (fresh box, or first run). The worker-queue
+  // CLI self-heals with mkdir -p; the watcher must do the same instead of
+  // crashing on PID-file write (ENOENT). Fix-forward 2026-10-02 (Cinder).
+  const fs = require("node:fs");
+  for (const sub of ["", "pending", "active", "completed", "failed"]) {
+    fs.mkdirSync(sub ? path.join(QUEUE_DIR, sub) : QUEUE_DIR, { recursive: true });
+  }
+}
+
 async function cmdEnsure() {
+  ensureQueueDir();
   const pid = readPid();
   if (pid && pidRunning(pid)) {
     console.log(`watcher already running (pid ${pid})`);
@@ -291,6 +302,7 @@ function cmdStatus() {
 }
 
 async function cmdWatch() {
+  ensureQueueDir();
   require("node:fs").writeFileSync(PID_FILE, String(process.pid) + "\n");
   log(`watcher started (pid ${process.pid}) dir=${QUEUE_DIR}`);
   const dirs = ["pending", "active", "failed"].map((d) => path.join(QUEUE_DIR, d));
