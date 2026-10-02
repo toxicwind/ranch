@@ -466,6 +466,7 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     name: "nanogpt",
     baseUrl: "https://nano-gpt.com/api/v1",
     keyEnv: "NANO_GPT_API_KEY",
+    keyEnvAlt: "NANOGPT_API_KEY",
     auth: "bearer",
     adapter: "openai",
     seeds: ["openai/gpt-5.5"],

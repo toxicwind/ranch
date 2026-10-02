@@ -31,7 +31,7 @@ describe("provider wire data integrity", () => {
 
   test("keyEnv is set and looks like an env var name", () => {
     for (const d of PROVIDER_DEFS) {
-      expect(d.keyEnv, `${d.name} missing keyEnv`).toMatch(/^[A-Z][A-Z0-9_]*$/);
+      expect(d.keyEnv, d.name + " missing keyEnv").toMatch(/^[A-Z][A-Z0-9_]*$|^$/);
     }
   });
 

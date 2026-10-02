@@ -8,7 +8,7 @@
  * imports the canonical @ranch/roost package DIRECTLY instead of
  * porting providers_generated.go — same data, one source of truth.
  *
- * Cold start: providers carry Tack's seeds, dead-ID filtered. The Matrix
+ * Cold start: providers carry Roost's seeds, dead-ID filtered. The Matrix
  * overlays the LIVE serving sets from the TS-exported live catalog file
  * (live-catalog.ts) — the answer, which is data. No discovery or
  * quarantine logic lives here.
@@ -33,7 +33,7 @@ export interface Provider {
 /**
  * Build the default provider table.
  *
- * Core catalog (Tack PROVIDER_DEFS, router-local/disabled skipped) wins;
+ * Core catalog (Roost PROVIDER_DEFS, router-local/disabled skipped) wins;
  * the extended registry (registry.ts) merges in afterwards in deterministic
  * (sorted) order: core catalog wins on collision, non-openai formats and
  * empty BaseURLs are skipped.
@@ -68,7 +68,7 @@ export function defaultProviders(): Record<string, Provider> {
   return providers;
 }
 
-/** Permanent dead-tier set from Tack's DEAD_MODEL_IDS. */
+/** Permanent dead-tier set from Roost's DEAD_MODEL_IDS. */
 export function deadIDSet(): Set<string> {
   return new Set(DEAD_MODEL_IDS);
 }
@@ -81,7 +81,7 @@ export function filterDeadIDs(ids: string[], dead: Set<string>): string[] {
 /**
  * Whether an alias target is currently servable: not on the permanent dead
  * list, and present in the provider's current serving set (which comes from
- * the live catalog file, or Tack seeds at cold start). Quarantined models
+ * the live catalog file, or Roost seeds at cold start). Quarantined models
  * are absent from the serving set, so this single membership check covers
  * both guards. Data check, not logic.
  */
@@ -96,7 +96,7 @@ export function aliasTargetServable(
   return p.models.includes(model);
 }
 
-/** Herd-specific aliases with NO canonical equivalent. Canonical aliases live in Tack. */
+/** Herd-specific aliases with NO canonical equivalent. Canonical aliases live in Roost. */
 export const herdLocalAliases: Record<string, ModelAlias> = {
   // Auto routing (empty tuple means use strategy)
   auto: [] as unknown as ModelAlias,
@@ -123,7 +123,7 @@ export const herdLocalAliases: Record<string, ModelAlias> = {
 };
 
 /**
- * The merged alias table: Tack's canonical MODEL_ALIASES plus herd-local
+ * The merged alias table: Roost's canonical MODEL_ALIASES plus herd-local
  * extras. Herd-local wins on key collision.
  */
 export const codingAlias: Record<string, ModelAlias> = (() => {

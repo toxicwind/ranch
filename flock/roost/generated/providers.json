@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-roost/v1",
-  "generatedAt": "2026-10-02T12:23:35.000Z",
+  "generatedAt": "2026-10-02T22:09:34.000Z",
   "generator": "@ranch/roost codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/roost src/data.ts",
   "adapters": [
@@ -223,6 +223,7 @@
       "name": "nanogpt",
       "baseUrl": "https://nano-gpt.com/api/v1",
       "keyEnv": "NANO_GPT_API_KEY",
+      "keyEnvAlt": "NANOGPT_API_KEY",
       "adapter": "openai",
       "auth": "bearer"
     },
