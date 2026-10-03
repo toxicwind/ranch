@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # flock build entry: submit build+test to flicker, the estate build-job system.
 #
-# flock's real component is flock/proxy (the in-tree Rust crate "flock";
-# bin/flock-run.sh execs its binary). Canonical per its CI
-# (flock/proxy/.github/workflows/ci.yml, "Tests (unit + integration)"):
+# The real component is the in-tree Rust crate "flock", now at
+# mesh/proxy/flock-proxy. Canonical per its CI
+# (mesh/proxy/flock-proxy/.github/workflows/ci.yml, "Tests (unit + integration)"):
 #   cargo build && cargo test
-# The job runs in flock/proxy (WORKDIR_REL below).
+# The job runs in mesh/proxy/flock-proxy (WORKDIR_REL below).
 #
 # Usage: scripts/flicker-build.sh
 # Env:   FLICKER_URL (default http://127.0.0.1:25148)
@@ -17,7 +17,7 @@ set -euo pipefail
 FLICKER_URL="${FLICKER_URL:-http://127.0.0.1:25148}"
 NAME="flock-build"
 BUILD_CMD="cargo build && cargo test"
-WORKDIR_REL="proxy"
+WORKDIR_REL="../mesh/proxy/flock-proxy"
 TIMEOUT=600
 POLL=2
 SUBMIT_ATTEMPTS=5

@@ -110,13 +110,13 @@ pattern of the existing Go codegen for herd:
 ### 3.1 Data flow
 
 ```
-roost/src/data.ts ──bun run build──▶ roost/generated/providers.rs
+mesh/catalog/src/data.ts ──bun run build──▶ mesh/catalog/generated/providers.rs
         │                                    │  (checked-in, sync-tested)
         │ sync script (bun)                  ▼
-        │                     flock/proxy/src/roost_providers.rs
+        │            mesh/proxy/flock-proxy/src/roost_providers.rs
         │                              (byte-identical copy)
         ▼                                    │
-flock/proxy/src/providers.rs ◀── merges ─────┘
+mesh/proxy/flock-proxy/src/providers.rs ◀── merges ─────┘
    │  hand-written: types, ProviderSet, routing logic,
    │  FLOCK_PROVIDER_OVERLAY (13 names + elo/weight/free_tier/
    │  model_map/default_rpm/display_name), default_providers()
@@ -125,9 +125,9 @@ config.rs (defaults, migrate_v1) — comments updated, logic unchanged
 ```
 
 Sync mechanism: `flock/scripts/sync-roost-providers.ts` (bun) copies
-`roost/generated/providers.rs` → `flock/proxy/src/roost_providers.rs` and
+`mesh/catalog/generated/providers.rs` → `mesh/proxy/flock-proxy/src/roost_providers.rs` and
 fails non-zero on drift; a Rust unit test in `providers.rs` re-checks the
-copy against `../../../roost/generated/providers.rs` (normalized timestamp)
+copy against `../../../catalog/generated/providers.rs` (normalized timestamp)
 so `cargo test` catches a stale copy. This mirrors the herd Go-consumer
 pattern (roost's own test asserts herd's `providers_generated.go` is
 byte-identical).

@@ -17,7 +17,7 @@ self-contained dashboard UI.
 
 - **Not a reimplementation of the catalog.** `providers_generated.go`
   (the generated Go artifact) is NOT ported. The catalog's source of
-  truth is `@ranch/roost` (`flock/roost/`); this package imports it
+  truth is `@ranch/roost` (`mesh/catalog/`); this package imports it
   directly. Provider definitions, seeds, aliases, and dead IDs all come
   live from Roost.
 - **Not the discovery brain.** Roost owns discovery, quarantine, and the
@@ -58,16 +58,16 @@ Endpoints: `GET /health`, `GET /v1/models`, `POST /v1/chat/completions`
 
 ## Deployment contract (sidecar)
 
-The Rust flock proxy (`flock/proxy`, live on :25193) should route
-cloud-model requests to this sidecar over localhost HTTP, replacing the
-embedded Go ASTMatrix in herd. Until herd delegates, the Go package
+The Rust flock proxy (`mesh/proxy/flock-proxy`, `:25193` retired 2026-10-02 —
+preserved, not live) was designed to route cloud-model requests to this
+sidecar over localhost HTTP, replacing the embedded Go ASTMatrix in herd.
 stays untouched — removal happens only after the sidecar is deployed,
 supervised, and verified end-to-end.
 
 - `SOVEREIGN_LIVE_CATALOG` — live catalog file path
   (default `/home/toxic/estate/.state/provider-catalog.live.json`)
 - `SOVEREIGN_CATALOG_404_URL` — Roost's serve-404 intake
-  (default `http://127.0.0.1:25104/admin/catalog/serve-404`)
+  (default `http://127.0.0.1:25200/admin/catalog/serve-404`)
 - `ASTMATRIX_STRATEGY` — default routing strategy (default `hybrid`)
 
 ## Porting notes (Go → Bun)

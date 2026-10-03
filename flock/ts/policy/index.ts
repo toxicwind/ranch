@@ -1,7 +1,7 @@
 /**
  * flock/ts/policy — sovereign-router policy engine, ported to TypeScript.
  *
- * The Rust proxy (flock/proxy/src) owns the hot path: per-request circuit
+ * The Rust proxy (mesh/proxy/flock-proxy/src) owns the hot path: per-request circuit
  * breaking (circuit.rs), persisted health/Elo store (health.rs), routing
  * decisions (decision.rs), model-pressure governing (governor.rs). This
  * package is the POLICY tier above it — the rating math, quarantine

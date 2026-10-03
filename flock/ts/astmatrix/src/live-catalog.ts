@@ -155,7 +155,7 @@ export class LiveCatalogReader {
 function serve404Endpoint(): string {
   return (
     process.env.SOVEREIGN_CATALOG_404_URL ||
-    "http://127.0.0.1:25104/admin/catalog/serve-404"
+    "http://127.0.0.1:25200/admin/catalog/serve-404"
   );
 }
 

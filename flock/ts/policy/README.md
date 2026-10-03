@@ -5,7 +5,7 @@ into Flock as the **policy tier**. Bun/TypeScript throughout.
 
 ## The boundary (read before touching)
 
-The Rust proxy (`flock/proxy/src/`) owns the **hot path** — per-request decisions at
+The Rust proxy (`mesh/proxy/flock-proxy/src/`) owns the **hot path** — per-request decisions at
 microsecond scale. This package owns the **policy math** — things that change on
 human timescales. They complement; they do not duplicate:
 
