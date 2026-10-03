@@ -22,7 +22,7 @@ unchanged — this is presentation, not renaming.
 
 | Ranch term | What it is |
 |---|---|
-| **The corral** | This component: `ranch/oracle/` — where the Oracle lives and works |
+| **The corral** | This component: `ranch/squawk/oracle/` — where the Oracle lives and works |
 | **The roundup** | The decision engine — gathers judge opinions, drives them to a single verdict |
 | **The remuda** | The judge panel — the string of judges the roundup draws from |
 | **The auction yard** | The work market — tasks posted, bids taken, Vickrey auctions clear |
@@ -142,7 +142,7 @@ Replay guard: the watch re-arm path re-ingests recent files with
 |---|---|
 | `ORACLE_INTAKE=1` | enables the intake wiring in `oracle_loop.py`; exported by `bin/run.sh` (daemon entrypoint) and pinned in `pitchfork.toml` `[daemons.oracle-market]` env for the next supervisor boot |
 | `work/` | calibration state, verdict ledgers, escalation flags — all on disk |
-| `ranch/oracle/` | the corral's location in the ranch (moved from `sovereign/agents/oracle-market`) |
+| `ranch/squawk/oracle/` | the corral's location in the ranch (moved from `sovereign/agents/oracle-market`) |
 
 ## Durability
 
