@@ -1241,26 +1241,42 @@ impl RouterHandle {
                     // so every chat request failed in 0 ms. Its model list is
                     // carried in the definition, so there is nothing to
                     // discover — record health directly and skip the fetch.
-                    let (name, probe_url) = {
+                    // The probe must carry the provider's own credentials.
+                    // It used to fire a bare GET, so every key-requiring
+                    // upstream answered 401/403, was marked unhealthy, had
+                    // its circuit opened, and the router was left with no
+                    // upstream at all. Reserve a lane so the probe uses a real
+                    // key, then release it — a health probe is not customer
+                    // traffic and must not spend the provider's RPM window.
+                    let (name, probe_url, no_auth) = {
                         let def = rt.def.read().unwrap();
                         let probe = if def.no_auth && !def.models.is_empty() {
                             None
                         } else {
-                            Some(format!("{}/v1/models", def.base_url.trim_end_matches('/')))
+                            Some(crate::providers::models_url(&def.base_url))
                         };
-                        (def.name.clone(), probe)
+                        (def.name.clone(), probe, def.no_auth)
                     };
                     let Some(url) = probe_url else {
                         this.inner.health.record_health(&name, true, now_unix);
                         return;
                     };
+                    let slot = rt.pool.read().unwrap().reserve(None);
+                    let crate::pool::Reservation::Ready { lane, key, stamp, .. } = slot else {
+                        // Every lane is rate-limited. That is not evidence the
+                        // provider is down, so skip the probe rather than
+                        // record a health verdict we cannot substantiate.
+                        return;
+                    };
                     let started = Instant::now();
                     // 15s per-probe ceiling: a hanging provider doesn't stall the loop.
-                    let resp = tokio::time::timeout(
-                        Duration::from_secs(15),
-                        this.inner.client.get(&url).send(),
-                    )
-                    .await;
+                    let mut req = this.inner.client.get(&url);
+                    if !no_auth {
+                        req = req.bearer_auth(&key);
+                    }
+                    let resp = tokio::time::timeout(Duration::from_secs(15), req.send()).await;
+                    // Hand the slot back: the probe spent no customer budget.
+                    rt.pool.read().unwrap().release(lane, stamp);
                     match resp {
                         Ok(Ok(r)) if r.status().is_success() => {
                             if let Ok(bytes) = r.bytes().await {
@@ -1631,7 +1647,7 @@ impl RouterHandle {
                 Err(e) => return Err(e),
             };
             let req_body = rewrite_body_model(&body, &acq.model);
-            let url = format!("{}{}", acq.base_url, path_query);
+            let url = crate::providers::upstream_url(&acq.base_url, &path_query);
             let mut req = http.request(method.clone(), &url);
             if !acq.no_auth {
                 req = req.header(

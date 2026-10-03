@@ -25,6 +25,45 @@ use utoipa::ToSchema;
 /// real and the coalescer sits on the buffered request path.
 pub const COALESCER_TTL: Duration = Duration::from_secs(5);
 
+/// Compose the upstream model-catalog URL for a provider base URL.
+///
+/// Roost carries OpenAI-compatible base URLs in two shapes: already-versioned
+/// (`https://api.groq.com/openai/v1`, `https://api.cerebras.ai/v1`) and
+/// bare-host (`https://api.mistral.ai`). Naively appending `/v1/models`
+/// produced `/v1/v1/models` for the former — a 404 that silently marked every
+/// such provider unhealthy, opened its circuit, and left the router with no
+/// upstream at all. Strip a trailing `/v1` before appending, so both shapes
+/// resolve to the same catalog URL.
+pub fn models_url(base_url: &str) -> String {
+    let base = base_url.trim().trim_end_matches('/');
+    let base = base.strip_suffix("/v1").unwrap_or(base);
+    format!("{base}/v1/models")
+}
+
+/// Join a provider base URL with the incoming request path + query.
+///
+/// The incoming path already carries its own `/v1` segment, and Roost bases are
+/// frequently versioned too (`https://api.groq.com/openai/v1`), so a plain
+/// concatenation produced `/openai/v1/v1/chat/completions` — a 404
+/// `unknown_url` from groq, which the router then read as an empty completion
+/// and quarantined. Drop the base's trailing `/v1` when the path supplies its
+/// own, and leave bare-host bases (`https://api.mistral.ai`) alone so they keep
+/// gaining the prefix they need.
+pub fn upstream_url(base_url: &str, path_and_query: &str) -> String {
+    let base = base_url.trim().trim_end_matches('/');
+    let path = if path_and_query.starts_with('/') {
+        path_and_query
+    } else {
+        return format!("{base}/{path_and_query}");
+    };
+    let base = if path == "/v1" || path.starts_with("/v1/") {
+        base.strip_suffix("/v1").unwrap_or(base)
+    } else {
+        base
+    };
+    format!("{base}{path}")
+}
+
 /// How a provider authenticates upstream requests.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
@@ -708,6 +747,102 @@ pub type SharedSet = Arc<ProviderSet>;
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn models_url_never_doubles_the_v1_segment() {
+        // Versioned base URLs (the common Roost shape) must not become
+        // /v1/v1/models — that 404 marked providers unhealthy and opened
+        // their circuits, starving the router of every upstream.
+        assert_eq!(
+            models_url("https://api.groq.com/openai/v1"),
+            "https://api.groq.com/openai/v1/models"
+        );
+        assert_eq!(
+            models_url("https://api.cerebras.ai/v1"),
+            "https://api.cerebras.ai/v1/models"
+        );
+        // Bare hosts still get the /v1 prefix appended.
+        assert_eq!(
+            models_url("https://api.mistral.ai"),
+            "https://api.mistral.ai/v1/models"
+        );
+        // Trailing slashes are normalized away, with or without the segment.
+        assert_eq!(
+            models_url("https://api.mistral.ai/"),
+            "https://api.mistral.ai/v1/models"
+        );
+        assert_eq!(
+            models_url("https://api.cerebras.ai/v1/"),
+            "https://api.cerebras.ai/v1/models"
+        );
+    }
+
+    #[test]
+    fn upstream_url_never_doubles_the_v1_segment() {
+        // The double-/v1 404 surfaced as groq `unknown_url` on the serving
+        // path, not just the probe path.
+        assert_eq!(
+            upstream_url(
+                "https://api.groq.com/openai/v1",
+                "/v1/chat/completions"
+            ),
+            "https://api.groq.com/openai/v1/chat/completions"
+        );
+        // Bare-host bases keep gaining the prefix they need.
+        assert_eq!(
+            upstream_url("https://api.mistral.ai", "/v1/chat/completions"),
+            "https://api.mistral.ai/v1/chat/completions"
+        );
+        // Query strings survive.
+        assert_eq!(
+            upstream_url("https://api.groq.com/openai/v1", "/v1/models?limit=5"),
+            "https://api.groq.com/openai/v1/models?limit=5"
+        );
+        // A non-/v1 path must not have the base's /v1 stripped.
+        assert_eq!(
+            upstream_url("https://api.cerebras.ai/v1", "/embeddings"),
+            "https://api.cerebras.ai/v1/embeddings"
+        );
+        // Missing leading slash is tolerated.
+        assert_eq!(
+            upstream_url("https://api.groq.com/openai/v1", "v1/chat/completions"),
+            "https://api.groq.com/openai/v1/chat/completions"
+        );
+        // Bare "/v1" is the boundary case, not just "/v1/...".
+        assert_eq!(
+            upstream_url("https://api.groq.com/openai/v1", "/v1"),
+            "https://api.groq.com/openai/v1"
+        );
+    }
+
+    #[test]
+    fn builtin_providers_serve_the_chat_path() {
+        // Every built-in provider must resolve /v1/chat/completions without a
+        // doubled /v1 — the regression these helpers exist to prevent.
+        for def in default_providers() {
+            let url = upstream_url(&def.base_url, "/v1/chat/completions");
+            assert!(
+                !url.contains("/v1/v1/"),
+                "provider {} composes a doubled /v1: {url}",
+                def.name
+            );
+        }
+    }
+
+    #[test]
+    fn builtin_provider_catalog_urls_are_reachable() {
+        // Every built-in provider must resolve to a catalog URL without a
+        // doubled /v1 — the regression this module exists to prevent.
+        for def in default_providers() {
+            let url = models_url(&def.base_url);
+            assert!(
+                !url.contains("/v1/v1/"),
+                "provider {} composes a doubled /v1: {url}",
+                def.name
+            );
+            assert!(url.ends_with("/v1/models"), "provider {}: {url}", def.name);
+        }
+    }
 
     #[test]
     fn thirteen_builtin_providers() {

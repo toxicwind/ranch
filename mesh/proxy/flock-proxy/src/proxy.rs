@@ -1295,7 +1295,7 @@ pub async fn fetch_models(
     base_url: &str,
     key: &str,
 ) -> reqwest::Result<reqwest::Response> {
-    http.get(format!("{base_url}/v1/models"))
+    http.get(crate::providers::models_url(base_url))
         .bearer_auth(key)
         .send()
         .await
