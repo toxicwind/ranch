@@ -7,7 +7,7 @@
  */
 import { describe, test, expect } from "bun:test";
 
-const SCRIPTS = ["./src/index.ts", "./scripts/flicker-build.ts"];
+const SCRIPTS = ["./src/index.ts", "./scripts/mise-build.sh"];
 
 describe("stream-broker scripts compile", () => {
 	for (const script of SCRIPTS) {

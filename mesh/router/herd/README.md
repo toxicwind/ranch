@@ -129,12 +129,12 @@ graph TD
 go build -v -ldflags="-s -w" -o herd ./cmd
 ./herd --config /home/toxic/estate/config/herd.yaml
 ```
-The main build entry is `scripts/flicker-build.ts` — it submits the canonical
+The main build entry is `scripts/mise-build.sh` — it submits the canonical
 build+test (`go build ./... && go test -short -count=1 ./internal/...`, matching
-the Makefile `test` target) as a job to the flicker build daemon (HTTP API, http://127.0.0.1:25148) and streams the result:
+the Makefile `test` target) directly through mise. Eligible task artifacts restore through mbx-cache:
 
 ```sh
-bun scripts/flicker-build.ts
+./scripts/mise-build.sh
 ```
 
 (The `ui/` frontend build, `make ui`, is a separate release step and is not part
@@ -144,7 +144,7 @@ Note: run the script with the direct bun binary — `herd/mise.toml` is not
 mise-trusted, and the `bun` mise shim silently no-ops inside `herd/`:
 
 ```sh
-/home/toxic/.bun/bin/bun scripts/flicker-build.ts
+/home/toxic/.bun/bin/./scripts/mise-build.sh
 ```
 
 

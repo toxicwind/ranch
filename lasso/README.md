@@ -83,14 +83,13 @@ uv run hypruse binds --json | head -c 400      # keybinds
 
 ## Build
 
-The main build entry is `scripts/flicker-build.py` — it submits the canonical
+The main build entry is `scripts/mise-build.sh`. It runs the canonical
 build+test (`uv run pytest`, per CONTRIBUTING; unit tests, e2e deselected via
-pyproject addopts since e2e needs a live Hyprland session) as a job to
-flicker, the estate build-job system, and streams the log:
+pyproject addopts since e2e needs a live Hyprland session) directly through
+mise. Eligible task artifacts restore through mbx-cache:
 
 ```bash
-./scripts/flicker-build.py
+./scripts/mise-build.sh
 ```
 
-Honors `FLICKER_URL` (default `http://127.0.0.1:25148`). Exit 0 on success
-(or cached identical success), 1 on failure/timeout.
+Exit status comes directly from pytest; no queue, polling loop, or fixed timeout.

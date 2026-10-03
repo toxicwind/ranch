@@ -1,13 +1,13 @@
 {
-  "description": "Ranch monorepo \u2014 every animal on the spread: herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), flicker (Go), corral (TS), drover (TS), roost (TS), and the Bun/TS herd",
+  "description": "Ranch monorepo — herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), corral (TS), drover (TS), roost (TS), and shared Bun/TS packages. Estate owns the mise build cache.",
   "name": "ranch",
   "private": true,
   "scripts": {
-    "build": "moon run :build",
+    "build": "mise exec -- moon run :build",
     "build:drover": "bun run --cwd drover build",
-    "ci": "moon ci",
-    "lint": "moon run :lint",
-    "test": "moon run :test",
+    "ci": "mise exec -- moon ci",
+    "lint": "mise exec -- moon run :lint",
+    "test": "mise exec -- moon run :test",
     "typecheck": "bun run --filter '*' typecheck"
   },
   "version": "1.0.0",
@@ -33,5 +33,9 @@
     "effect": "4.0.0-beta.102",
     "@effect/platform-node-shared": "4.0.0-beta.102",
     "@effect/platform-node": "4.0.0-beta.102"
+  },
+  "dependencies": {
+    "preact": "^11.0.0",
+    "svelte": "5"
   }
 }

@@ -58,12 +58,12 @@ no dashboard touched.
 ## Roadmap
 
 - [ ] Persistent skill index (sqlite, reindex on inotify — no polling)
-- [ ] `infra_image_build(name, context)` — local builds (flicker-backed)
+- [ ] `infra_image_build(name, context)` — local mise builds with mbx-cache artifacts
 - [ ] `infra_rollback(name)` — previous-image instant rollback
 - [ ] HTTP/SSE transport alongside stdio (for the :25xxx serve map)
 - [ ] Wire `agent.toml` `skills`/`mcp_servers` resolution through switchboard
 - [ ] OpenFang kernel: repair model-name 404 so completions tool-calling works
-- [ ] Effusion deploy: Burrow's flicker-native pipeline can call
+- [ ] Effusion deploy: Burrow's mise-native pipeline can call
       `infra_deploy` instead of shelling docker directly
 
 ## Why not Portainer v3 / Coolify / Dokploy

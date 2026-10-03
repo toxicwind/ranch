@@ -17,11 +17,6 @@ node_modules/
 target/
 dist/
 .cache/
-# moon's task-hash cache is build output keyed to toolchain versions. It was
-# tracked (168 files, 2.7 MB) and re-materializes on every run, so it churned
-# diffs for nothing. toolchain.yml and workspace.yml above it stay tracked:
-# those are the actual orchestration config.
-.moon/cache/
 .bun/
 
 # mcpproxy-go (barn/gatehouse) rewrites its EFFECTIVE config on every start,

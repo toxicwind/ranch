@@ -114,9 +114,9 @@ Part of the [ranch](../../README.md) monorepo (`toxicwind/ranch`), nested under
 
 ## Build
 
-The main build entry is `scripts/flicker-build.ts` — it submits the canonical
-build+test (`bun run build && bun test`) as a job to the flicker build daemon (HTTP API, http://127.0.0.1:25148) and streams the result:
+The main build entry is `scripts/mise-build.sh` — it submits the canonical
+build+test (`bun run build && bun test`) directly through mise. Eligible task artifacts restore through mbx-cache:
 
 ```sh
-bun scripts/flicker-build.ts
+./scripts/mise-build.sh
 ```

@@ -4,13 +4,13 @@
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![stars](https://img.shields.io/github/stars/toxicwind/ranch)](https://github.com/toxicwind/ranch/stargazers)
 [![bun](https://img.shields.io/badge/bun-1.4.2-f9f1e1?logo=bun)](https://bun.sh)
-[![moon](https://img.shields.io/badge/monorepo-moon-6E56CF)](https://moonrepo.dev)
+[![mise](https://img.shields.io/badge/toolchains-mise-ffd55a)](https://mise.jdx.dev)
 [![go](https://img.shields.io/badge/Go-1.23-00ADD8?logo=go&logoColor=white)](https://go.dev)
 [![rust](https://img.shields.io/badge/Rust-orange?logo=rust)](https://www.rust-lang.org)
 
 # 🤠 ranch
 
-**The whole self-hosted AI estate in one monorepo.** Local model serving (**herd**), cloud provider routing (**flock**), the canonical router (**cuttinggate**), the coding agent (**tau**), the MCP gateway (**gatehouse**), the build-job system (**flicker**), fleet chat (**squawk**), and the provider catalog (**roost**) they all share — one directory per component, the full mesh on one box, everything OpenAI-compatible.
+**The AI estate's project monorepo.** Local model serving (**herd**), cloud provider routing (**flock**), the guard router (**cuttinggate**), the still-serving TS router (**sovereign-router**), the coding agent (**tau**), the MCP gateway (**gatehouse**), fleet chat (**squawk**), and the provider catalog (**roost**) live here — one directory per component, OpenAI-compatible at the edges.
 
 > The decision engine (**oracle**) used to live here at `oracle/` — it moved out on 2026-10-02 (commit [`92bb79c`](https://github.com/toxicwind/ranch/commit/92bb79c)) to [toxicwind/squawk](https://github.com/toxicwind/squawk) (`oracle/`, verified live). Don't go looking for it in the ranch anymore.
 
@@ -46,7 +46,7 @@
 
 If you run models on a box **and** call cloud APIs, this is the shape of the answer: local traffic stays local, cloud traffic goes through one rate-limit-aware router, and **strategy names — not model names — decide the route**. Any client that speaks the OpenAI API just works — `curl`, the OpenAI SDK, your agent framework of choice.
 
-The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](https://bun.sh) link the TypeScript animals, [moon](https://moonrepo.dev) orchestrates polyglot tasks (Bun/TS, Go, Python, Rust) with pinned toolchains, and CI runs only what your change touches (`moon ci`). One directory per animal, no pens inside pens — this README is the map.
+The ranch is a **real monorepo**, not a folder of checkouts: Bun workspaces link the TypeScript animals. Tool versions and build tasks resolve through mise; estate owns the shared build cache (`mbx-cache`), while each project owns its build command. One directory per animal, no pens inside pens — this README is the map.
 
 ### The agent this estate serves
 
@@ -54,12 +54,12 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 
 ## 🛠️ Built with
 
-- [Go](https://go.dev) — herd (local front door), flicker (build jobs), gatehouse (MCP gateway)
+- [Go](https://go.dev) — herd (local front door), gatehouse (MCP gateway)
 - [Rust](https://www.rust-lang.org) — flock proxy (provider router), rig (OpenFang kernel), tau's native hot path
 - [Bun](https://bun.sh) + [TypeScript](https://www.typescriptlang.org) — workspaces, cuttinggate, fleet-ui, windmill, stream-broker, roost, tau's agent brain
 - [Python](https://www.python.org) — squawk (fleet chat), squawk-ws, lasso (desktop control)
-- [moon](https://moonrepo.dev) — polyglot task orchestration with pinned toolchains (`.moon/toolchain.yml`)
-- **pitchfork** — the daemon supervisor: 82 supervised services on the live estate
+- [mise](https://mise.jdx.dev) — toolchains and build tasks; estate owns the Moon project graph
+- **pitchfork** — the daemon supervisor: 81 configured services on the live estate
 
 ---
 
@@ -69,8 +69,8 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 
 | Tool | Version | Check |
 |---|---|---|
-| [Bun](https://bun.sh) | `1.4.2` (pinned in `.moon/toolchain.yml`) | `bun --version` |
-| [moon](https://moonrepo.dev) | provisioned via proto | `moon --version` |
+| [Bun](https://bun.sh) | `1.4.2` (pinned in `estate/mise/conf.d/00-toolchain.toml`) | `bun --version` |
+| [mise](https://mise.jdx.dev) | `2026.10.0` | `mise --version` |
 | [Go](https://go.dev) | `1.23.1` | `go version` |
 | [Rust](https://www.rust-lang.org) | stable | `rustc --version` |
 | [Python](https://www.python.org) | `3.12` | `python3 --version` |
@@ -157,12 +157,12 @@ flowchart LR
     subgraph ranch["the ranch"]
         CG["cuttinggate :25200<br/>canonical router"]
         HERD["herd :25100<br/>local front door"]
-        FLOCK["flock-proxy :25193 (retired)<br/>preserved, not live"]
+        FLOCK["flock-proxy :25193<br/>cloud provider router"]
         ENG["llama.cpp :25001+"]
         CLOUD["NIM · OpenRouter · Groq<br/>Cerebras · Mistral · …"]
         TAU["tau via chute :25111"]
         GH["gatehouse :25127<br/>MCP gateway"]
-        SUP["squawk · flicker<br/>fleet & build plane"]
+        SUP["squawk · mbx-cache<br/>fleet & task-cache plane"]
     end
     A --> CG
     TAU --> CG
@@ -187,8 +187,8 @@ Every animal first-class — no "secondary" framing. 🟢 = port verified listen
 | **flock-proxy** | — | `mesh/proxy/flock-proxy/` (Rust) | **Preserved, not live.** External provider router: strategies, key pools, 429 rotation, circuit breakers, health/Elo. `:25193` retired 2026-10-02; cuttinggate fronts its role. |
 | **keypool** | `25109` | `mesh/keypool/` (Bun/TS) | API key pool sidecar: health-probed key routing with failover + racing for the mesh routers. **DOWN as of 2026-10-02.** |
 
-| 🟢 **cuttinggate** | `25200` | `mesh/proxy/cuttinggate/` (Bun/TS) | **Canonical router.** The estate front door: fronts cloud providers, gates herd-local traffic, quarantine + ledger. Replaced `:25104` (sovereign-router-ts). |
-| ~~**sovereign-router**~~ | — | ~~`mesh/router/sovereign-router/`~~ | ~~Retired 2026-10-02 — the TS router on `:25104`; replaced by cuttinggate. Code preserved for reference.~~ |
+| 🟢 **cuttinggate** | `25200` | `mesh/proxy/cuttinggate/` (Bun/TS) | **Guard router.** Quarantine, circuit breaker, credential rotation, winner ledger. |
+| 🟢 **sovereign-router** | `25104` | `mesh/router/sovereign-router/` | TS strategy router v3.2, still serving beside cuttinggate; not retired. |
 
 | 🟢 **gatehouse** | `25127` | `barn/gatehouse` (Go) | **MCP gateway.** Tool serving — a peer of the others, not their parent. |
 | 🟢 **chute** | `25111` | `barn/chute` | **Tau engine, TCP-exposed.** stdio→TCP ACP passage — the tau coding-agent engine as a daemon on a real port. |
@@ -197,12 +197,11 @@ Every animal first-class — no "secondary" framing. 🟢 = port verified listen
 | 🟢 **stream-broker** | `25215` | `stream-broker/` (Bun) | Event-streaming backbone for the estate. |
 | 🟢 **windmill** | `25219` | `windmill/` (Bun) | GPU / PCIe telemetry — tells you which way the wind blows. |
 | **ledger** | — | `ledger/` (Bun) | 📒 The ranch account book — multi-provider token/cost accounting. Every provider key's tokens counted, dollars from verified per-token pricing, unpriced models surfaced — never guessed. |
-| 🟢 **flicker** | `25148` | `flicker/` (Go) | **Fleet build-job system.** Disk-backed queue, streaming logs, content-hash artifact cache. Brand consolidated into flicker. |
+| 🧰 **mbx-cache** | `25148` | `estate/ops/mbx-cache/` | Estate-owned mise remote task cache. Direct Rust binary; no queue or container runtime. |
 | ~~**oracle**~~ | — | ~~`oracle/`~~ | 🔮 **Moved 2026-10-02** — the decision corral left the ranch (commit [`92bb79c`](https://github.com/toxicwind/ranch/commit/92bb79c)) and now lives in [toxicwind/squawk](https://github.com/toxicwind/squawk) at `oracle/`. |
 | 🟢 **browserless** | `25130` | `barn/browserless` | Browser automation: browserless.io MCP server + native-launcher deployment. |
 | 🟢 **lookout** | `6080` | `barn/lookout` | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower. |
-| **roost** | — | `mesh/catalog/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: 75 provider definitions the estate perches on, one registry. Feeds tau, herd generated Go, flock-proxy generated Rust, the router. |
-| **tack** | — | `tack/` (`@ranch/tack`, Bun/TS) | 🔌 Sovereign provider wire-data authority: base URLs, key env vars, auth schemes for the tau catalog. |
+| **roost** | — | `mesh/catalog/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: wire data, live discovery, aliases, cold-start seeds and quarantine. Feeds Tau, herd generated Go and flock-proxy generated Rust. |
 | **squawk** | — | `squawk/` (Python) | File-based multi-agent chat: signed, sequenced message files. |
 | **corral** | — | `corral/` (in-tree, Bun/TS) | The super-ralph agent framework — the mission runner. Absorbed in-tree 2026-09-30 with full history; **no submodules, ever.** |
 | **roundup** | — | `roundup/` | Benchmark estate — gathers and assesses every head. |
@@ -223,7 +222,7 @@ Every animal first-class — no "secondary" framing. 🟢 = port verified listen
 | **classifier-preflight** | — | `classifier-preflight/` | 🔧 Preflight task bodies, briefs, docs against known classifier trigger shapes. |
 | **metaaivm** | — | `metaaivm/` | 📡 Incremental GitHub harvester for metaaivm keywords (daily cron on yote). |
 | **metaaivm-profile** | — | `metaaivm-profile/` | 📡 First-class agent profile for the Meta AI VM estate. |
-| ~~**brand**~~ | — | `brand/` | The branding iron — git hooks. **Deprecated 2026-09-30:** consolidated into flicker. |
+| ~~**brand / flicker**~~ | — | — | Retired. The estate replaced their arbitrary command queue with `mbx-cache` plus direct mise builds. |
 
 ---
 

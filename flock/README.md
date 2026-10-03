@@ -161,9 +161,9 @@ cargo test          # unit + end-to-end vs a scripted mock NIM
 
 ## Build
 
-The main build entry is `scripts/flicker-build.sh` — it submits the canonical
-build+test as a job to flicker, the estate build-job system, and streams
-the log. The job runs in `flock/proxy` (the in-tree Rust crate):
+The main build entry is `scripts/mise-build.sh`. It runs the canonical
+build+test locally through mise in `mesh/proxy/flock-proxy` (the in-tree Rust
+crate); eligible task artifacts restore through mbx-cache:
 
 ```bash
 cargo build && cargo test
@@ -172,8 +172,7 @@ cargo build && cargo test
 Run it via:
 
 ```bash
-./scripts/flicker-build.sh
+./scripts/mise-build.sh
 ```
 
-Honors `FLICKER_URL` (default `http://127.0.0.1:25148`). Exit 0 on success
-(or cached identical success), 1 on failure/timeout.
+Exit status comes directly from cargo; no queue, polling loop, or fixed timeout.

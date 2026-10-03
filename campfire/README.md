@@ -70,9 +70,9 @@ bun run src/index.ts             # tend the fire
 
 ## Build
 
-The main build entry is `scripts/flicker-build.ts` — it submits the canonical
-build+test (`bun install && bun test`) as a job to the flicker build daemon (HTTP API, http://127.0.0.1:25148) and streams the result:
+The main build entry is `scripts/mise-build.sh` — it submits the canonical
+build+test (`bun install && bun test`) directly through mise. Eligible task artifacts restore through mbx-cache:
 
 ```sh
-bun scripts/flicker-build.ts
+./scripts/mise-build.sh
 ```

@@ -93,12 +93,11 @@ workspace — do not assume it works.
 
 ## Build
 
-The main build entry is `scripts/flicker-build.ts` — it submits the canonical
-build as a job to the flicker build daemon (HTTP API, http://127.0.0.1:25148) and streams the
-result:
+The main build entry is `scripts/mise-build.sh`. It runs the canonical build
+locally through mise; eligible task artifacts restore through mbx-cache:
 
 ```sh
-bun scripts/flicker-build.ts
+./scripts/mise-build.sh
 ```
 
 The build is a compile check (`bun build src/index.ts`); there is no test suite

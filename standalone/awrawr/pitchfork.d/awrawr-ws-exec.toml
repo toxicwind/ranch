@@ -13,6 +13,5 @@ mise = false
 retry = true
 auto = ["start"]
 
-# RESTORED 2026-09-30 (peregrine): [daemons.brand] pointed at deleted
-# ranch/branding/ on :25148 (brand deprecated -> flicker per 2026-09-30 cutover).
-# Flicker is the live build daemon on :25148; blocks restored from origin/main.
+# Historical note: the old brand/flicker build queue used :25148. It was
+# replaced by estate/ops/mbx-cache, the mise remote task-cache server.

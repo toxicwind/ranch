@@ -14,10 +14,10 @@ has its own stack and its own lane; this directory is the pen, not a project.
 
 ## Build
 
-`scripts/flicker-build.sh` is the main build entry. It submits the native
-build+test above to flicker (the estate build daemon, http://127.0.0.1:25148),
+`scripts/mise-build.sh` is the main build entry. It submits the native
+build+test above directly through mise,
 streams the job log, and exits 0 on success:
 
 ```sh
-./scripts/flicker-build.sh
+./scripts/mise-build.sh
 ```

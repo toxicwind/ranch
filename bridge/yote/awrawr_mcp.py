@@ -956,142 +956,39 @@ def bg_kill(handle: str) -> str:
 # --- end mcp-smith ------------------------------------------------------------
 
 
-# --- flicker tools ------------------------------------------------------------
-# Added 2026-09-30. Native MCP surface for flicker, the local build daemon
-# on 127.0.0.1:25148. Replaces buildsrv/brand (retired 2026-09-30).
-# Direct HTTP API via urllib (stdlib only, never shell=True, never raw
-# interpolation). Submit returns after queueing; the build runs async in
-# flicker-server. Identical job specs return CACHED on resubmit.
-
-_FLICKER_BASE = "http://127.0.0.1:25148"
-_FLICKER_JOB_RX = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
-_FLICKER_MAX_CMD = 4000
-_FLICKER_OUT_CAP = 8000
+# --- mbx-cache tools ----------------------------------------------------------
+# The cache accepts only immutable artifact protocol operations. It never
+# executes an arbitrary command; builds are `mise run <task>` in the caller.
+_MBX_CACHE_BASE = "http://127.0.0.1:25148"
+_MBX_CACHE_OUT_CAP = 8000
 
 
-def _flicker_call(method, path, payload=None, timeout=90):
-    import urllib.request
+def _mbx_cache_call(path):
     import urllib.error
-    url = _FLICKER_BASE + path
-    data = json.dumps(payload).encode("utf-8") if payload is not None else None
-    req = urllib.request.Request(url, data=data, method=method,
-                                 headers={"Content-Type": "application/json"})
+    import urllib.request
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with urllib.request.urlopen(_MBX_CACHE_BASE + path, timeout=15) as r:
             body = r.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
-        return "HTTP %d: %s" % (e.code,
-                                e.read().decode("utf-8", "replace")[:500])
+        return "HTTP %d: %s" % (e.code, e.read().decode("utf-8", "replace")[:500])
     except Exception as e:
         return "error: %s: %s" % (type(e).__name__, e)
-    if not body:
-        return "[empty response]"
-    return body[:_FLICKER_OUT_CAP]
-
-
-def _flicker_check_id(job_id):
-    jid = str(job_id or "")
-    if not _FLICKER_JOB_RX.match(jid):
-        return None, "bad job_id: must match ^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
-    return jid, None
+    return body[:_MBX_CACHE_OUT_CAP] if body else "[empty response]"
 
 
 @mcp.tool()
-def flicker_submit(name: str, command: str, workdir: str = "",
-                   env_json: str = "", timeout: int = 300) -> str:
-    """Submit a build job to flicker (local build daemon on :25148).
-
-    Queues the job and returns immediately with the job id; the build runs
-    async in flicker-server. Poll with flicker_status / flicker_logs.
-    Jobs run via bash login shells (mise toolchains resolve). command is
-    capped at 4000 chars. env_json is an optional JSON object of env vars.
-    Re-submitting an identical spec returns CACHED instead of re-running.
-    """
-    if not (name or "").strip():
-        return "error: name required"
-    if not (command or "").strip():
-        return "error: command required"
-    if len(command) > _FLICKER_MAX_CMD:
-        return "error: command too long (%d > %d)" % (len(command),
-                                                      _FLICKER_MAX_CMD)
-    try:
-        timeout = int(timeout)
-    except (TypeError, ValueError):
-        return "error: timeout must be an integer"
-    timeout = max(10, min(timeout, 7200))
-    env = {}
-    if (env_json or "").strip():
-        try:
-            env = json.loads(env_json)
-        except Exception as e:
-            return "error: env_json is not valid JSON: %s" % e
-        if not isinstance(env, dict):
-            return "error: env_json must decode to an object"
-    payload = {"name": name.strip(), "command": command,
-               "workdir": (workdir or "").strip() or "/tmp",
-               "env": env, "timeout": timeout}
-    return _flicker_call("POST", "/api/jobs", payload)
+def mbx_cache_status() -> str:
+    """Show the local mise remote-cache status at :25148."""
+    return _mbx_cache_call("/v1/status")
 
 
 @mcp.tool()
-def flicker_status(job_id: str) -> str:
-    """Show flicker job status (pending/running/success/failure/canceled)."""
-    jid, err = _flicker_check_id(job_id)
-    if err:
-        return err
-    return _flicker_call("GET", "/api/jobs/" + jid)
+def mbx_cache_capabilities() -> str:
+    """Show the mise remote-cache protocol, action kinds, and limits."""
+    return _mbx_cache_call("/v1/capabilities")
 
 
-@mcp.tool()
-def flicker_logs(job_id: str, tail: int = 50) -> str:
-    """Show the last N lines of a flicker job's log (default 50, max 500)."""
-    jid, err = _flicker_check_id(job_id)
-    if err:
-        return err
-    try:
-        n = int(tail)
-    except (TypeError, ValueError):
-        return "error: tail must be an integer"
-    n = max(1, min(n, 500))
-    out = _flicker_call("GET", "/api/jobs/" + jid + "/logs")
-    if out.startswith("error:") or out.startswith("HTTP"):
-        return out
-    lines = out.splitlines()
-    return "\n".join(lines[-n:])
-
-
-@mcp.tool()
-def flicker_list(limit: int = 10) -> str:
-    """List recent flicker jobs (default 10, max 50): id, name, status."""
-    try:
-        n = int(limit)
-    except (TypeError, ValueError):
-        return "error: limit must be an integer"
-    n = max(1, min(n, 50))
-    out = _flicker_call("GET", "/api/jobs")
-    if out.startswith("error:") or out.startswith("HTTP"):
-        return out
-    try:
-        jobs = json.loads(out)
-    except Exception:
-        return out[:_FLICKER_OUT_CAP]
-    if not isinstance(jobs, list):
-        return out[:_FLICKER_OUT_CAP]
-    rows = []
-    for j in jobs[-n:]:
-        rows.append("id=%s name=%s status=%s%s" % (
-            j.get("id"), j.get("name"), j.get("status"),
-            " CACHED" if j.get("cached") else ""))
-    return "\n".join(rows) if rows else "(no jobs)"
-
-
-@mcp.tool()
-def flicker_health() -> str:
-    """Health probe for the flicker daemon (:25148): uptime, queue, cache."""
-    return _flicker_call("GET", "/api/health")
-
-
-# --- end flicker tools -------------------------------------------------------
+# --- end mbx-cache tools ------------------------------------------------------
 # --- hft race tool ----------------------------------------------------------
 RACE_WINNERS_LOG = '/home/toxic/hatch/cache-shingle/hft_race_winners.jsonl'
 
