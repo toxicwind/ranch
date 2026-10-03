@@ -1,6 +1,34 @@
 #!/usr/bin/env python3
 """yote-conn -- CLI for the yote-connector daemon (127.0.0.1:18301).
 
+Live sessions are first-class: every long-running command gets a session
+ID you can detach from and reattach to. Think tmux, but the terminal
+lives on yote.
+
+Quick commands (block until done):
+  yote-conn exec "<cmd>" [workdir] [timeout_s]
+  yote-conn health
+
+Sessions (detached, reattachable -- the main workflow):
+  yote-conn session "<cmd>" [workdir] [timeout_s]
+                                     # start detached -> prints session ID
+  yote-conn sessions                 # list all sessions + live state
+  yote-conn attach <id>              # stream a session's output live
+  yote-conn status <id>              # one-shot status + output tails
+  yote-conn kill <id>                # SIGTERM the session's process group
+  yote-conn run "<cmd>" [workdir]    # session + immediate attach in one step
+
+Interactive terminal:
+  yote-conn shell                    # live REPL shell on yote (cd persists)
+
+Batch / misc:
+  yote-conn multi <cmds.json | ->
+  yote-conn herd <METHOD> <path> [body.json | -]
+  yote-conn flock <METHOD> <path> [body.json | -]
+
+Legacy aliases (still work): bg, bg-list, bg-status, bg-tail, bg-kill.
+exec --bg also dispatches detached.
+
 The exec subcommand takes the unix-socket fast path (ws_daemon, same
 protocol as yote-conn-fast) when available, falling back to the HTTP
 daemon transparently -- including when the daemon reports its bridge down
@@ -9,26 +37,7 @@ may have executed remotely ("bridge response timeout", "bridge
 reconnecting") stay final: no double-exec. All other subcommands use the
 daemon directly.
 
-Usage:
-  yote-conn health
-  yote-conn exec "<cmd>" [workdir] [timeout_s] [--bg]
-                                     # --bg: dispatch detached, print handle, return immediately
-  yote-conn run "<cmd>" [workdir]    # auto-backgrounding: dispatch detached, then stream
-                                     # output until the remote job reaches a terminal
-                                     # state. No timeout ceiling. Fail-fast on dispatch
-                                     # errors; the remote exit code propagates.
-  yote-conn multi <cmds.json | ->    # JSON array of {cmd, workdir?, timeout?, tag?}
-  yote-conn bg "long-cmd" [workdir] [timeout_s]
-                                     # detached background dispatch -> handle
-  yote-conn bg-status <handle>        # live status + log tails
-  yote-conn bg-tail <handle> [soff] [eoff]
-                                     # incremental output attach from offsets
-  yote-conn bg-list                   # known handles + live state
-  yote-conn bg-kill <handle>          # SIGTERM the job's process group
-  yote-conn herd <METHOD> <path> [body.json | -]
-  yote-conn flock <METHOD> <path> [body.json | -]
-
-Canonical source: projects/bridge/hatch/yote-conn in toxicwind/sovereign-projects.
+Canonical source: ranch/bridge/hatch/yote-conn in toxicwind/estate.
 """
 import json
 import os
@@ -40,6 +49,49 @@ import urllib.error
 
 class ConnectorDown(Exception):
     """The local connector daemon (127.0.0.1:18301) is unreachable."""
+
+
+def _is_retryable_exec_error(msg):
+    """True if an exec failure is safe to retry (pre-dispatch, never ran)."""
+    # "bridge not connected" = daemon never sent the frame (see exec_fast).
+    # ConnectorDown = daemon unreachable, nothing dispatched.
+    # Anything mentioning "timeout" or "reconnecting" may have executed:
+    # NEVER retry those (double-exec risk).
+    if not msg:
+        return False
+    low = msg.lower()
+    if "timeout" in low or "reconnecting" in low:
+        return False
+    return ("bridge not connected" in low
+            or "connector down" in low
+            or "connect failure" in low
+            or "all lanes down" in low)
+
+
+def with_exec_retry(fn, max_retries=3):
+    """Retry an exec callable on pre-dispatch failures with backoff.
+
+    fn() must raise on failure. Only retries when the failure proves the
+    command never reached yote. May-have-executed failures propagate
+    immediately.
+    """
+    import random
+    import time as _time
+    last = None
+    for attempt in range(max_retries + 1):
+        try:
+            return fn()
+        except Exception as e:
+            last = e
+            msg = str(e)
+            if not _is_retryable_exec_error(msg) or attempt == max_retries:
+                raise
+            delay = (2 ** attempt) + random.uniform(0, 0.5)
+            print(f"yote-conn: transient failure (attempt "
+                  f"{attempt + 1}/{max_retries + 1}), retrying in "
+                  f"{delay:.1f}s", file=sys.stderr)
+            _time.sleep(delay)
+    raise last
 
 try:
     from bridge_sem import bridge_slot
@@ -167,10 +219,20 @@ def main():
             print("dispatch failed: %s" % d.get("error"), file=sys.stderr)
             return 1
         with bridge_slot():
-            fast_code = exec_fast(spec)
-            if fast_code is not None:
-                return fast_code
-            code, body = req("POST", "/exec", json.dumps(spec).encode())
+            def _do_exec():
+                fast_code = exec_fast(spec)
+                if fast_code is not None:
+                    return ("fast", fast_code)
+                code, body = req("POST", "/exec", json.dumps(spec).encode())
+                return ("http", code, body)
+            try:
+                res = with_exec_retry(_do_exec)
+            except ConnectorDown as e:
+                print("connector down: %s" % e, file=sys.stderr)
+                return 1
+            if res[0] == "fast":
+                return res[1]
+            _, code, body = res
             d = json.loads(body.decode())
             sys.stdout.write(d.get("stdout", ""))
             sys.stderr.write(d.get("stderr", ""))
@@ -328,13 +390,13 @@ def main():
             print("%s  %-9s %s" % (h.get("handle"), h.get("state") or "?",
                                    (h.get("cmd") or "")[:70]))
         return 0
-    if cmd == "bg-kill":
+    if cmd in ("bg-kill", "kill"):
         if len(sys.argv) < 3:
-            print("usage: yote-conn bg-kill <handle>", file=sys.stderr)
+            print("usage: yote-conn kill <id>", file=sys.stderr)
             return 2
         code, body = req("POST", "/bg/%s/kill" % sys.argv[2])
         d = json.loads(body.decode())
-        print("handle   : %s" % d.get("handle"))
+        print("session  : %s" % d.get("handle"))
         print("state    : %s" % (d.get("state") or
                                  ("signaled pid %s" % d.get("signaled"))))
         if d.get("note"):
@@ -342,6 +404,214 @@ def main():
         if d.get("error"):
             print("error    : %s" % d.get("error"), file=sys.stderr)
         return 0 if d.get("signaled") else 1
+    # --- Session-first aliases (intuitive names for the bg system) ---
+    if cmd == "session":
+        # Start a detached session, print its ID. Same as `bg`.
+        if len(sys.argv) < 3:
+            print("usage: yote-conn session \"<cmd>\" [workdir] [timeout_s]",
+                  file=sys.stderr)
+            return 2
+        spec = {"cmd": sys.argv[2]}
+        if len(sys.argv) > 3:
+            spec["workdir"] = sys.argv[3]
+        if len(sys.argv) > 4:
+            try:
+                spec["timeout_s"] = int(sys.argv[4])
+            except ValueError:
+                print("timeout_s must be an integer", file=sys.stderr)
+                return 2
+        code, body = req("POST", "/exec-bg", json.dumps(spec).encode())
+        d = json.loads(body.decode())
+        if d.get("handle"):
+            print(d["handle"])
+            print("attach with: yote-conn attach %s" % d["handle"],
+                  file=sys.stderr)
+            return 0
+        print("dispatch failed: %s" % d.get("error"), file=sys.stderr)
+        return 1
+    if cmd == "sessions":
+        # List all sessions. Same as `bg-list`, prettier header.
+        code, body = req("GET", "/bg")
+        d = json.loads(body.decode())
+        handles = d.get("handles", [])
+        if not handles:
+            print("(no sessions)")
+            return 0
+        print("%-16s %-9s %s" % ("SESSION", "STATE", "COMMAND"))
+        for h in handles:
+            print("%-16s %-9s %s" % (h.get("handle"), h.get("state") or "?",
+                                    (h.get("cmd") or "")[:60]))
+        return 0
+    if cmd == "status":
+        # One-shot session status. Same as `bg-status`.
+        if len(sys.argv) < 3:
+            print("usage: yote-conn status <id>", file=sys.stderr)
+            return 2
+        code, body = req("GET", "/bg/%s" % sys.argv[2])
+        d = json.loads(body.decode())
+        print("session: %s" % d.get("handle"))
+        print("state  : %s" % d.get("state"))
+        if d.get("code") is not None:
+            print("exit   : %s" % d.get("code"))
+        if d.get("cmd"):
+            print("cmd    : %s" % d.get("cmd"))
+        if d.get("stdout_tail"):
+            print("--- stdout (tail) ---")
+            sys.stdout.write(d["stdout_tail"])
+        if d.get("stderr_tail"):
+            print("--- stderr (tail) ---")
+            sys.stdout.write(d["stderr_tail"])
+        if d.get("error"):
+            print("error  : %s" % d.get("error"), file=sys.stderr)
+        return 0
+    if cmd == "attach":
+        # Stream a session's output live until it finishes.
+        # Like `run`, but attaches to an existing session instead of
+        # starting a new one. Ctrl-C detaches (session keeps running).
+        if len(sys.argv) < 3:
+            print("usage: yote-conn attach <id>", file=sys.stderr)
+            return 2
+        import base64 as _b64
+        import time as _time
+        handle = sys.argv[2]
+        soff, eoff = 0, 0
+        print("attached to %s (Ctrl-C to detach, session keeps running)"
+              % handle, file=sys.stderr)
+        try:
+            while True:
+                code, body = req("GET", "/bg/%s?soff=%d&eoff=%d"
+                                 % (handle, soff, eoff))
+                try:
+                    d = json.loads(body.decode())
+                except ValueError:
+                    print("attach: bad status frame from connector",
+                          file=sys.stderr)
+                    return 1
+                state = d.get("state")
+                if state in ("unknown", "bad-handle"):
+                    print("attach: %s" % d.get("error"), file=sys.stderr)
+                    return 1
+                so = d.get("stdout_b64") or ""
+                eo = d.get("stderr_b64") or ""
+                if so:
+                    nso = d.get("stdout_soff")
+                    sys.stdout.write(_b64.b64decode(so.encode()).decode(
+                        "utf-8", "replace"))
+                    sys.stdout.flush()
+                    soff = nso if nso is not None else soff + len(
+                        _b64.b64decode(so.encode()))
+                if eo:
+                    neo = d.get("stderr_eoff")
+                    sys.stderr.write(_b64.b64decode(eo.encode()).decode(
+                        "utf-8", "replace"))
+                    sys.stderr.flush()
+                    eoff = neo if neo is not None else eoff + len(
+                        _b64.b64decode(eo.encode()))
+                if state in ("done", "timeout", "stale"):
+                    final_code = d.get("code")
+                    try:
+                        final_code = int(final_code)
+                    except (TypeError, ValueError):
+                        final_code = 1
+                    print("attach: %s (exit %d)" % (state, final_code),
+                          file=sys.stderr)
+                    return final_code
+                _time.sleep(2)
+        except KeyboardInterrupt:
+            print("\ndetached from %s (session still running)" % handle,
+                  file=sys.stderr)
+            print("reattach: yote-conn attach %s" % handle, file=sys.stderr)
+            return 0
+    if cmd == "shell":
+        # Interactive live terminal on yote. A REPL: each line is exec'd
+        # remotely, cd persists across commands, Ctrl-C cancels the
+        # current command, `exit` leaves.
+        import readline  # noqa: F401  (history + line editing)
+        workdir = "/home/toxic"
+        print("yote shell -- live terminal on yote (type 'exit' to leave)",
+              file=sys.stderr)
+        while True:
+            try:
+                prompt = "yote:%s$ " % (workdir.replace("/home/toxic", "~"))
+                line = input(prompt).strip()
+            except (EOFError, KeyboardInterrupt):
+                print(file=sys.stderr)
+                break
+            if not line:
+                continue
+            if line in ("exit", "quit", "logout"):
+                break
+            # Track cd locally so the workdir persists.
+            if line == "cd" or line.startswith("cd "):
+                target = line[2:].strip() or "/home/toxic"
+                # Resolve remotely to handle ~, .., symlinks truthfully.
+                spec = {"cmd": "cd %s && pwd" % workdir,
+                        "workdir": workdir, "timeout": 10}
+                # Actually: cd into current, then cd to target, then pwd.
+                spec["cmd"] = "cd %s && cd %s && pwd" % (workdir, target)
+                with bridge_slot():
+                    def _do_cd():
+                        fast_code = exec_fast(spec)
+                        if fast_code is not None:
+                            return ("fast", fast_code)
+                        code, body = req("POST", "/exec",
+                                         json.dumps(spec).encode())
+                        return ("http", code, body)
+                    try:
+                        res = with_exec_retry(_do_cd)
+                    except Exception as e:
+                        print("cd failed: %s" % e, file=sys.stderr)
+                        continue
+                if res[0] == "fast":
+                    # Fast path streams directly; can't capture pwd.
+                    # Fall back to HTTP for cd.
+                    code, body = req("POST", "/exec",
+                                     json.dumps(spec).encode())
+                    d = json.loads(body.decode())
+                else:
+                    _, code, body = res
+                    d = json.loads(body.decode())
+                if d.get("code") == 0:
+                    workdir = d.get("stdout", "").strip() or workdir
+                else:
+                    sys.stderr.write(d.get("stderr", "cd failed\n"))
+                continue
+            spec = {"cmd": line, "workdir": workdir, "timeout": 600}
+            with bridge_slot():
+                def _do_shell():
+                    fast_code = exec_fast(spec)
+                    if fast_code is not None:
+                        return ("fast", fast_code)
+                    code, body = req("POST", "/exec",
+                                     json.dumps(spec).encode())
+                    return ("http", code, body)
+                try:
+                    res = with_exec_retry(_do_shell)
+                except KeyboardInterrupt:
+                    print("^C", file=sys.stderr)
+                    continue
+                except Exception as e:
+                    print("error: %s" % e, file=sys.stderr)
+                    continue
+            if res[0] == "fast":
+                # Fast path already streamed output; exit code is res[1].
+                if res[1] != 0:
+                    print("[exit %d]" % res[1], file=sys.stderr)
+                continue
+            _, code, body = res
+            try:
+                d = json.loads(body.decode())
+            except ValueError:
+                print("bad response from connector", file=sys.stderr)
+                continue
+            sys.stdout.write(d.get("stdout", ""))
+            sys.stderr.write(d.get("stderr", ""))
+            if d.get("code") not in (0, None):
+                print("[exit %d]" % d.get("code"), file=sys.stderr)
+            if d.get("error"):
+                print("error: %s" % d["error"], file=sys.stderr)
+        print("shell closed", file=sys.stderr)
+        return 0
     if cmd == "run":
         # Auto-backgrounding entrypoint for long runners.
         # Dispatches fully detached (survives this process dying), then
