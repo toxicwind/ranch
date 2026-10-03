@@ -20,6 +20,7 @@ import { ProviderGate } from "./circuit.ts";
 import { Quarantine } from "./quarantine.ts";
 import type { CredentialPlane } from "./keypool.ts";
 import { Ledger } from "./ledger.ts";
+import { COPILOT_PROVIDER, CopilotClient, copilotHeaders } from "./copilot.ts";
 
 export type KnownModel = { id: string; provider: string };
 
@@ -74,6 +75,22 @@ export class Router {
     private readonly credentials?: CredentialPlane,
   ) {
     this.ledger = ledger ?? new Ledger();
+  }
+
+  /**
+   * Copilot client, when an account token is configured.
+   *
+   * Copilot cannot ride the generic path: its credential is a short-lived
+   * session token minted by an exchange (not the pool key), and its host
+   * depends on the tenant's account class. Both are resolved per attempt in
+   * [`call`]. Absent, the Copilot provider is simply not routable.
+   */
+  private copilot?: CopilotClient;
+
+  /** Attaches the Copilot client. Kept separate from the constructor so a
+   * deployment without an account token never constructs one. */
+  setCopilot(client: CopilotClient): void {
+    this.copilot = client;
   }
 
   /**
@@ -137,6 +154,8 @@ export class Router {
 
   /** The upstream call for one provider. Overridden in tests. */
   protected async call(provider: string, req: ChatRequest, signal: AbortSignal): Promise<Response> {
+    if (provider === COPILOT_PROVIDER) return this.callCopilot(req, signal);
+
     const base = this.config.bases[provider];
     if (!base) throw new Error(`no base url for provider ${provider}`);
     // Prefer a pool key; fall back to the single configured key when there is
@@ -145,6 +164,28 @@ export class Router {
     return fetch(`${base}/chat/completions`, {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+      body: JSON.stringify({ model: req.model, messages: req.messages, temperature: req.temperature, max_tokens: req.max_tokens }),
+      signal,
+    });
+  }
+
+  /**
+   * Copilot's upstream call.
+   *
+   * Split from the generic path because Copilot differs in two ways that the
+   * bearer-key model cannot express: the credential is a short-lived session
+   * token minted by an exchange rather than the pool key, and the host depends
+   * on the tenant's account class. The exchange runs *after* `claimKey`, so the
+   * pool sees a normal attempt and cools the lane on failure exactly like any
+   * other provider.
+   */
+  private async callCopilot(req: ChatRequest, signal: AbortSignal): Promise<Response> {
+    const client = this.copilot;
+    if (!client) throw new Error("copilot is routed but no account token is configured");
+    const [credential, host] = await Promise.all([client.credential(), client.host()]);
+    return fetch(`${host}/chat/completions`, {
+      method: "POST",
+      headers: copilotHeaders(credential),
       body: JSON.stringify({ model: req.model, messages: req.messages, temperature: req.temperature, max_tokens: req.max_tokens }),
       signal,
     });

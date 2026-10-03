@@ -46,6 +46,12 @@ export function buildApp(deps: AppDeps) {
 
     const stream = new ReadableStream({
       async start(controller) {
+        // Declared per-connection, not per-process: each SSE client owns its own
+        // keep-alive timer, and they must be cleared independently. It was
+        // previously undeclared, so the fallback path below threw
+        // `ReferenceError: timer is not defined` instead of arming the timer —
+        // which is exactly the path taken whenever herd is down.
+        let timer: Timer | undefined;
         const reloadEv = {
           model: "*",
           event: "models_reload",

@@ -87,9 +87,17 @@ Override per request:
 curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25200/v1/chat/completions
 ```
 
-## sovereign-router (:25104, RETIRED 2026-10-02)
+## sovereign-router (:25104) — retired on paper, still serving
 
-The TypeScript router is retired: :25104 has nothing listening, the pitchfork stanza is `pitchfork.d/sovereign-router.toml.retired-20261002`, and `config/ports.env` records the retirement. The code is preserved at `router/sovereign-router/` for reference. Use cuttinggate on :25200 instead.
+The TypeScript router was retired **2026-10-02 by renaming its pitchfork stanza** to `router/sovereign-router/pitchfork.d/sovereign-router.toml.retired-20261002`. That removed it from supervision; it did **not** stop the process. As of 2026-10-02 the daemon is still bound to :25104 (`bun router.ts`, pid 4045943) and still answering `/health`.
+
+The code is preserved at `router/sovereign-router/` for reference. Use cuttinggate on :25200 instead — but note that until the orphan is actually stopped, :25104 is a **fourth live mesh port**, not a retired one.
+
+## Why processes outlive their retirement
+
+Renaming a pitchfork stanza to `*.retired-*` is a *supervision* change, not a *lifecycle* change. It stops pitchfork from restarting the daemon and stops it appearing in `pitchfork status`, which makes the port look gone in every status command while the process keeps serving. The 2026-10-02 retirement of :25104 and :25193 both went this way, which is why this README previously reported two live ports as retired.
+
+**Rule:** retiring a daemon means stopping the process and verifying the port is closed. Verify with `ss -ltnp | grep :<port>`, not with `pitchfork status`.
 
 
 ## Sovereign MCP gateway (not live)
@@ -115,11 +123,31 @@ openai-compatible:
 The Gemini API Early Access Program for Tool Retrieval is directly relevant to gatehouse: `defer_loading: true` offloads tool schemas server-side and a retrieval meta-tool lets the model search a large tool catalog dynamically — designed for 30+ tool catalogs, exactly gatehouse's shape (30 upstream MCP servers). Docs: <https://ai.google.dev/gemini-api/docs/tool-retrieval>
 
 - Platform fixes confirmed by Google (2026-09-07): HTTP 400 on deferred tools with parameters fixed fleet-wide; token-accounting fix for uncalled deferred tools rolling out.
-- Integration target: NATIVE Gemini path — POST `/v1beta/interactions` on `gemini-flash-tool-retrieval` with the EAP key, server-side mode with gatehouse's 30-server union as `mcp_server` entries + `defer_loading: true`. NOT the OpenAI-compat `/v1beta/openai` path (no EAP semantics there), and NOT nim-proxy. Full spec in `docs/gemini-tool-retrieval.md`; LLM-friendly API reference in `docs/gemini-tool-retrieval-reference.md`. BLOCKED on depleted prepay credits.
+- Integration target: NATIVE Gemini path — POST `/v1beta/interactions` on `gemini-flash-tool-retrieval` with the EAP key, server-side mode with gatehouse's 30-server union as `mcp_server` entries + `defer_loading: true`. NOT the OpenAI-compat `/v1beta/openai` path (no EAP semantics there), and NOT nim-proxy. Full spec in `estate/docs/gemini-tool-retrieval.md`; LLM-friendly API reference in `estate/docs/gemini-tool-retrieval-reference.md`. BLOCKED on depleted prepay credits.
 
 ## Member roster
 
-Status verified 2026-10-02 ~19:00 MDT via ss + curl.
+Status verified 2026-10-02 by `ss -ltnp` + `curl /health` against every port. Where a row disagrees with an earlier revision of this file, this table is the one to trust — it was regenerated from observation, not from the stanzas.
+
+| Member | Path | Port | Status |
+| ------ | ---- | ---- | ------ |
+| cuttinggate | `proxy/cuttinggate/` | :25200 | **LIVE** — canonical router (`{"ok":true,"quarantined":0}`) |
+| flock-proxy | `proxy/flock-proxy/` | :25193 | **LIVE** — Rust, `flock` pid 940727, returns `ok`. Not retired: `estate/pitchfork.d/flock.toml` still sets `auto = ["start"]` |
+| sovereign-router | `router/sovereign-router/` | :25104 | **LIVE** — `bun router.ts` pid 4045943, reports `sovereign-router-ts v3.2`. Retired *on paper only* |
+| keypool | `keypool/` | :25109 | **LIVE** — `bun keypool/src/index.ts` pid 4045921, returns `{"ok":true,"service":"keypool"}` |
+| herd | `router/herd/` | :25100 | DOWN — nothing bound. Binary intact at `router/herd/herd` |
+| sovereign-mcp-gateway | `router/sovereign-mcp-gateway/` | :25120 | not live; code default collides with sovereign-chat's canonical port |
+| browserless | `browserless/` | :25130 / :9223 | keeper **LIVE** on :9223 (chromium pid 4050796); MCP server :25130 down |
+| catalog (roost) | `catalog/` | — | TS provider SSOT library, no port |
+| flock-py | `router/flock-py/` | — | Python FastAPI router variant (reference) |
+| flock-router | `router/flock-router/` | — | TS/Bun AST router variant (4-way AST race) |
+| free_zed_gateway | `router/free_zed_gateway/` | — | free-LLM gateway concept |
+| gateway | `gateway/` | — | vendored mcpproxy-go engine + estate CloudRouter Go package |
+| secretsmith | `secretsmith/` | — | Secret Service CLI, no port |
+| gemini-mcp | `gemini-mcp/` | :25202 | DOWN — Gemini API MCP server |
+| mesh-landing | `bin/landing.py` | :25207 | DOWN — mesh landing service |
+| bin/ | `bin/` | — | operator scripts + launchers (see bin/README.md) |
+| pitchfork.d/ | `pitchfork.d/` | — | mesh-landing.toml, per-component daemon stanzas |
 
 | Member | Path | Port | Status |
 | ------ | ---- | ---- | ------ |
@@ -181,5 +209,5 @@ The mesh is an estate component — contributions land as commits in the toxicwi
 
 ## License & Security
 
-- Mesh-native code follows the toxicwind/ranch repo licensing. Vendored `gateway/` is MIT (upstream smart-mcp-proxy/mcpproxy-go) — see `gateway/LICENSE`.
+- Mesh-native code follows the toxicwind/ranch repo licensing. Vendored `gateway/` is MIT (upstream [smart-mcp-proxy/mcpproxy-go](https://github.com/smart-mcp-proxy/mcpproxy-go)).
 - Security posture: gatehouse quarantines unapproved MCP servers and runs Docker-based security scanners (Snyk, Semgrep, Trivy) against quarantined servers before approval; tool-call intent is validated against annotations (`call_tool_read` can never reach a destructive tool); the sovereign-mcp-gateway is a trust boundary with per-upstream circuit breakers. API keys and tokens live only in 0600 files under `/home/toxic/` (`~/.secrets`, `~/.browserless/.env`, `~/.gemini_mcp_token`) — never in this repo, never in logs.

@@ -19,13 +19,15 @@
     "drover/sidecar",
     "flock/client",
     "flock/dashboard",
-    "herd",
     "stream-broker",
     "switchboard",
-    "flock/roost",
     "windmill",
     "task-launch",
-    "metaaivm-profile"
+    "metaaivm-profile",
+    "mesh/catalog",
+    "mesh/keypool",
+    "mesh/proxy/cuttinggate",
+    "mesh/router/herd"
   ],
   "overrides": {
     "effect": "4.0.0-beta.102",
