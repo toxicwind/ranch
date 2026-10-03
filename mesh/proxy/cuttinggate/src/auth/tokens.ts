@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 /**
  * Core crypto primitives ported from flock/proxy/src/auth.rs.
  * These are pure (no I/O) functions that form the foundation
@@ -10,22 +11,17 @@
 export function ct_eq(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let result = 0;
-  const aBytes = new Uint8Array(TextEncoder().encode(a));
-  const bBytes = new Uint8Array(TextEncoder().encode(b));
+  const aBytes = new TextEncoder().encode(a);
+  const bBytes = new TextEncoder().encode(b);
   for (let i = 0; i < aBytes.length; i++) {
-    result |= aBytes[i] ^ bBytes[i];
+    result |= (aBytes[i] ?? 0) ^ (bBytes[i] ?? 0);
   }
   return result === 0;
 }
 
 /** SHA-256 hash of a string, returned as lowercase hex. */
 export function sha256_hex(s: string): string {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(s);
-  const hash = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hash))
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
+  return createHash("sha256").update(s, "utf8").digest("hex");
 }
 
 /** PBKDF2-HMAC-SHA256 iteration count for newly minted hashes (OWASP's
@@ -85,11 +81,11 @@ export async function verify_password(
   if (prefix !== "pbkdf2-sha256") return false;
   if (extra !== "") return false; // reject extra fields
 
-  const iters = parseInt(itersStr, 10);
+  const iters = parseInt(itersStr ?? "", 10);
   if (isNaN(iters) || iters <= 0) return false;
 
   // Validate salt hex format (32 hex chars = 16 bytes)
-  if (saltHex.length !== 32) return false;
+  if (!saltHex || saltHex.length !== 32) return false;
   for (let i = 0; i < 32; i++) {
     const c = saltHex.charCodeAt(i);
     if (!((c >= 48 && c <= 57) || (c >= 97 && c <= 102) || (c >= 65 && c <= 70))) return false;
@@ -104,7 +100,7 @@ export async function verify_password(
     .map(b => b.toString(16).padStart(2, "0"))
     .join("");
 
-  return ct_eq(computedHash, storedHash);
+  return ct_eq(computedHash, storedHash ?? "");
 }
 
 /** First 8 hex chars of SHA-256(password_hash): enough to bind a session to
@@ -125,7 +121,7 @@ export function base64_decode(s: string): Uint8Array | null {
   function val(c: number): number | null {
     if (c >= 65 && c <= 90) return c - 65; // A-Z
     if (c >= 97 && c <= 122) return c - 71; // a-z (26 + (c - 97))
-    if (c >= 48 && c <= 57) return c - 44; // 0-9 (52 + (c - 48))
+    if (c >= 48 && c <= 57) return c + 4; // 0-9 -> 52..61
     if (c === 43) return 62; // +
     if (c === 47) return 63; // /
     return null;
@@ -140,42 +136,42 @@ export function base64_decode(s: string): Uint8Array | null {
   }
 
   const len = clean.length;
-  let out = new Uint8Array(Math.ceil(len / 4) * 3);
-  let outLen = 0;
+  if (len % 4 === 1) return null;          // one leftover sextet is impossible
+  const quads = Math.floor(len / 4);
+  const rem = len % 4;
+  const out = new Uint8Array(quads * 3 + (rem === 2 ? 1 : rem === 3 ? 2 : 0));
+  let o = 0;
 
-  for (let i = 0; i + 3 <= len; i += 4) {
-    let acc = 0;
-    for (let j = 0; j < 4; j++) {
-      acc = (acc << 6) | val(clean.charCodeAt(i + j));
-    }
-    acc <<= 6 * (4 - 3); // shift for 3-byte output
-    out[outLen++] = (acc >> 16) & 255;
-    out[outLen++] = (acc >> 8) & 255;
-    out[outLen++] = acc & 255;
+  // Full quads: four sextets -> exactly three bytes, no shifting.
+  for (let q = 0; q < quads; q++) {
+    const i = q * 4;
+    const acc =
+      ((val(clean.charCodeAt(i)) ?? 0) << 18) |
+      ((val(clean.charCodeAt(i + 1)) ?? 0) << 12) |
+      ((val(clean.charCodeAt(i + 2)) ?? 0) << 6) |
+      (val(clean.charCodeAt(i + 3)) ?? 0);
+    out[o++] = (acc >> 16) & 255;
+    out[o++] = (acc >> 8) & 255;
+    out[o++] = acc & 255;
   }
 
-  // Handle remaining 2 or 1 chars
-  const remaining = len % 4;
-  if (remaining === 2) {
-    // 2-char chunk produces 1 byte
-    acc = 0;
-    for (let j = 0; j < 2; j++) {
-      acc = (acc << 6) | val(clean.charCodeAt(len - 2 + j));
-    }
-    acc <<= 6 * (4 - 2); // shift for 1 byte
-    out[outLen++] = acc & 255;
-  } else if (remaining === 3) {
-    // 3-char chunk produces 2 bytes
-    acc = 0;
-    for (let j = 0; j < 3; j++) {
-      acc = (acc << 6) | val(clean.charCodeAt(len - 3 + j));
-    }
-    acc <<= 6 * (4 - 1); // shift for 2 bytes
-    out[outLen++] = (acc >> 8) & 255;
-    out[outLen++] = acc & 255;
+  // Tail: two sextets -> one byte, three sextets -> two bytes.
+  if (rem === 2) {
+    const i = quads * 4;
+    out[o++] =
+      ((val(clean.charCodeAt(i)) ?? 0) << 2) |
+      ((val(clean.charCodeAt(i + 1)) ?? 0) >> 4);
+  } else if (rem === 3) {
+    const i = quads * 4;
+    const acc =
+      ((val(clean.charCodeAt(i)) ?? 0) << 12) |
+      ((val(clean.charCodeAt(i + 1)) ?? 0) << 6) |
+      (val(clean.charCodeAt(i + 2)) ?? 0);
+    out[o++] = (acc >> 10) & 255;
+    out[o++] = (acc >> 2) & 255;
   }
 
-  return out.slice(0, outLen);
+  return out;
 }
 
 /** Value of a single ASCII hex digit, or None. */
@@ -188,7 +184,7 @@ export function hex_val(b: number): number | null {
 
 /** Extend Uint8Array with fromHex helper */
 if (!Uint8Array.fromHex) {
-  Uint8Array.fromHex = function (hex: string): Uint8Array {
+  Uint8Array.fromHex = function (hex: string): Uint8Array<ArrayBuffer> {
     const bytes = new Uint8Array(hex.length / 2);
     for (let i = 0; i < hex.length; i += 2) {
       bytes[i / 2] = ((hex_val(hex.charCodeAt(i)) ?? 0) << 4) | (hex_val(hex.charCodeAt(i + 1)) ?? 0);
