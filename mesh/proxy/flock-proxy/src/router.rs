@@ -503,6 +503,12 @@ impl RouterHandle {
         // configured default strategy.
         let strategy = if model == "free" {
             Strategy::Free
+        } else if model == "auto" {
+            // "auto" is the sovereign router's intelligent-lane directive
+            // (routeAuto): the caller classifies the task from the prompt
+            // text and passes the lane's Strategy as the override. Fall back
+            // to Free (zero-cost first) when no override was supplied.
+            strategy_override.unwrap_or(Strategy::Free)
         } else {
             strategy_override.unwrap_or_else(|| self.routing_config().strategy)
         };
@@ -545,7 +551,8 @@ impl RouterHandle {
         // The Free strategy itself is the selector; each candidate's
         // upstream model resolves to the provider's default below.
         let free_directive = model == "free";
-        if !free_directive {
+        let auto_directive = model == "auto";
+        if !free_directive && !auto_directive {
             rts.retain(|rt| rt.def.read().unwrap().serves_model(model));
         }
         if rts.is_empty() {
@@ -569,7 +576,18 @@ impl RouterHandle {
             .map(|rt| {
                 let (provider, m) = {
                     let def = rt.def.read().unwrap();
-                    let upstream = if free_directive {
+                    let upstream = if auto_directive {
+                        // "auto": the provider's default model. An explicit
+                        // model_map["auto"] wins, then the free default
+                        // (zero-cost first for free-tier lanes), then the
+                        // provider's first listed model.
+                        def.model_map
+                            .get("auto")
+                            .cloned()
+                            .or_else(|| def.model_map.get("free").cloned())
+                            .or_else(|| def.models.first().cloned())
+                            .unwrap_or_else(|| model.to_string())
+                    } else if free_directive {
                         // "free" -> this provider's default free model: an
                         // explicit model_map entry wins, else the first
                         // listed model, else the directive itself (upstream
@@ -1546,12 +1564,62 @@ impl RouterHandle {
         // requested max_tokens. Models that provably cannot hold the request
         // are demoted (not dropped) in the candidate chain.
         let budget = crate::router::needed_tokens(&body);
-        let (candidates, decision) = self.select_with_decision(
-            &model,
-            session.as_deref().unwrap_or(""),
-            None,
-            budget,
-        );
+        // Sovereign `routeAuto` intelligence: model="auto" classifies the
+        // task from the prompt text and picks the lane (code -> ast race,
+        // reasoning -> hybrid chain, default -> free race then hybrid
+        // fallback). This is the TS ROUTERS["auto"] path, natively.
+        let auto_lane: Option<crate::routing_intel::AutoLane> = if model == "auto" {
+            let text = crate::routing_intel::prompt_text(&body);
+            let task = crate::routing_intel::classify_task(&text);
+            let lane = crate::routing_intel::auto_lane(task);
+            tracing::info!(
+                task = task.as_str(),
+                lane = ?lane,
+                "auto routing directive: task classified"
+            );
+            Some(lane)
+        } else {
+            None
+        };
+        let auto_strategy = auto_lane.map(|lane| match lane {
+            crate::routing_intel::AutoLane::AstRace => Strategy::AstRace,
+            crate::routing_intel::AutoLane::HybridChain => Strategy::Hybrid,
+            crate::routing_intel::AutoLane::FreeThenHybrid => Strategy::Free,
+        });
+        let (candidates, decision) = match auto_lane {
+            Some(crate::routing_intel::AutoLane::FreeThenHybrid) => {
+                // Free race first, then the ordered free chain, then the
+                // hybrid fallback -- the request degrades, never fails hard.
+                // The execute loop below walks the combined list in order,
+                // so every free candidate is exhausted before hybrid ones
+                // are tried.
+                let session_str = session.as_deref().unwrap_or("");
+                let (mut cands, decision) = self.select_with_decision(
+                    &model,
+                    session_str,
+                    Some(Strategy::Free),
+                    budget,
+                );
+                let (hybrid_cands, _) = self.select_with_decision(
+                    &model,
+                    session_str,
+                    Some(Strategy::Hybrid),
+                    budget,
+                );
+                for hc in hybrid_cands {
+                    if !cands.iter().any(|c| c.provider == hc.provider) {
+                        cands.push(hc);
+                    }
+                }
+                (cands, decision)
+            }
+            _ => self.select_with_decision(
+                &model,
+                session.as_deref().unwrap_or(""),
+                auto_strategy,
+                budget,
+            ),
+        };
         // Per-attempt ledger (Phase D): the decision record gains one entry
         // per upstream attempt as the retry loop runs below. The RwLock +
         // DecisionEmit pair emits the completed record (selection, skips,

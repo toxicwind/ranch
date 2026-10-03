@@ -1,5 +1,6 @@
 mod api;
 mod auth;
+mod bodybuilder;
 mod circuit;
 mod coalescer;
 mod config;
@@ -16,6 +17,7 @@ mod proxy;
 mod ratelimit;
 mod router;
 mod routes;
+mod routing_intel;
 mod settings;
 mod roost_providers;
 
@@ -781,6 +783,7 @@ pub async fn run() {
             routes::SETUP_VALIDATE_KEY,
             post(settings::setup_validate_key),
         )
+        .route(routes::V1_BODYBUILDER, post(bodybuilder::bodybuilder))
         .route(routes::V1_WILDCARD, any(proxy::handle))
         .layer(axum::middleware::from_fn(security_headers))
         .layer(DefaultBodyLimit::max(64 * 1024 * 1024))

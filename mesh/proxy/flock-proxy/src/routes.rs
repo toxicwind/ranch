@@ -45,6 +45,7 @@ pub const LOGIN: &str = "/login";
 pub const LOGOUT: &str = "/logout";
 pub const SETUP: &str = "/setup";
 pub const SETUP_VALIDATE_KEY: &str = "/setup/validate-key";
+pub const V1_BODYBUILDER: &str = "/v1/bodybuilder";
 pub const V1_WILDCARD: &str = "/v1/{*path}";
 
 #[cfg(test)]
@@ -376,6 +377,14 @@ const ROUTES: &[RouteContract] = &[
     },
     RouteContract {
         access: Access::Client,
+        method: "POST",
+        openapi: false,
+        path: V1_BODYBUILDER,
+        phase: Phase::PostSetup,
+        probe_path: V1_BODYBUILDER,
+    },
+    RouteContract {
+        access: Access::Client,
         method: "ANY",
         openapi: false,
         path: V1_WILDCARD,
@@ -440,7 +449,7 @@ mod tests {
             serde_json::from_str(&crate::api::openapi_json()).expect("generated OpenAPI JSON");
         let paths = spec["paths"].as_object().expect("OpenAPI paths");
 
-        assert_eq!(ROUTES.len(), 38, "route-contract:inventory");
+        assert_eq!(ROUTES.len(), 39, "route-contract:inventory");
         assert_eq!(
             ROUTES
                 .iter()
@@ -487,7 +496,7 @@ mod tests {
                 .iter()
                 .filter(|route| route.phase == Phase::PostSetup)
                 .count(),
-            25,
+            26,
             "route-contract:phase: operator, operator assets, and client routes"
         );
         assert!(
