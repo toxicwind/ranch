@@ -34,9 +34,29 @@ import hmac
 import json
 import os
 import re
+import signal
 import struct
+import sys
 import zipfile
 from pathlib import Path
+
+# Graceful-stop mixin for blue-green deploys (estate/hotreload/graceful.py).
+# hotreload/ lives at the estate root, three levels up from relay/.
+_HOTRELOAD_DIR = Path(__file__).resolve().parents[3] / "hotreload"
+if str(_HOTRELOAD_DIR) not in sys.path:
+    sys.path.insert(0, str(_HOTRELOAD_DIR))
+try:
+    from graceful import ShutdownFlag
+    _HAVE_GRACEFUL = True
+except ImportError:
+    _HAVE_GRACEFUL = False
+    print("squawk-ws: graceful.py not found, SIGTERM will be abrupt", flush=True)
+
+# Drain state for blue-green deploys. Set on SIGTERM; /health returns 503
+# while draining. Active connections are tracked so we can close them.
+_draining = False
+_active_connections = set()  # asyncio.Task per handle_client
+_connection_writers = set()  # asyncio.StreamWriter per active connection
 
 PORT = int(os.environ.get("SQUAWK_WS_PORT", "25147"))
 CHAT_ROOT = Path(os.environ.get("SQUAWK_CHAT_ROOT", "/home/toxic/.shingle/squawk-root"))
@@ -329,6 +349,8 @@ async def ws_read_message(reader):
 # ---------------- connection handling ----------------
 async def handle_client(reader, writer):
     peer = writer.get_extra_info("peername")
+    _active_connections.add(asyncio.current_task())
+    _connection_writers.add(writer)
     try:
         # --- HTTP request ---
         raw = b""
@@ -347,6 +369,21 @@ async def handle_client(reader, writer):
             if ":" in line:
                 k, v = line.split(":", 1)
                 headers[k.strip().lower()] = v.strip()
+
+        if method == "GET" and path.split("?")[0].rstrip("/").endswith("/health"):
+            # Blue-green health probe: 200 when serving, 503 when draining.
+            if _draining:
+                body = b'{"ok": false, "draining": true}'
+                status = b"503 Service Unavailable"
+            else:
+                body = json.dumps({"ok": True, "seq": gseq,
+                                   "clients": len(subscribers)}).encode()
+                status = b"200 OK"
+            writer.write(b"HTTP/1.1 " + status + b"\r\nContent-Type: application/json\r\n"
+                         b"Content-Length: " + str(len(body)).encode() +
+                         b"\r\nConnection: close\r\n\r\n" + body)
+            await writer.drain()
+            return
 
         if method == "GET" and path.split("?")[0].rstrip("/").endswith("/ping"):
             body = json.dumps({"ok": True, "seq": gseq,
@@ -441,6 +478,8 @@ async def handle_client(reader, writer):
     except Exception as e:
         print("client error %s: %s" % (peer, e), flush=True)
     finally:
+        _active_connections.discard(asyncio.current_task())
+        _connection_writers.discard(writer)
         try:
             writer.close()
         except Exception:
@@ -490,8 +529,48 @@ async def main():
 
     server = await asyncio.start_server(handle_client, "127.0.0.1", PORT)
     print("squawk-ws listening on 127.0.0.1:%d" % PORT, flush=True)
+
+    # Graceful-stop signal handlers for blue-green deploys.
+    stop_event = asyncio.Event()
+
+    def _on_signal():
+        global _draining
+        if not _draining:
+            _draining = True
+            stop_event.set()
+
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        loop.add_signal_handler(sig, _on_signal)
+
     async with server:
-        await server.serve_forever()
+        serve_task = asyncio.create_task(server.serve_forever())
+        await stop_event.wait()
+        # SIGTERM/SIGINT received: graceful stop.
+        print("squawk-ws: signal received, draining...", flush=True)
+        server.close()
+        await server.wait_closed()
+        serve_task.cancel()
+        try:
+            await serve_task
+        except asyncio.CancelledError:
+            pass
+        # Close all active connection writers to unblock their tasks.
+        # Each handle_client cleans up via its finally blocks.
+        for w in list(_connection_writers):
+            try:
+                w.close()
+            except Exception:
+                pass
+        # Wait for connections to drain (max 15s).
+        deadline = asyncio.get_running_loop().time() + 15
+        while _active_connections:
+            if asyncio.get_running_loop().time() >= deadline:
+                print("squawk-ws: drain timeout, %d connections still active" %
+                      len(_active_connections), flush=True)
+                break
+            await asyncio.sleep(0.1)
+        save_state()
+        print("squawk-ws: stop complete", flush=True)
 
 
 if __name__ == "__main__":
