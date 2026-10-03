@@ -6,7 +6,7 @@ new messages to subscribed websocket clients in real time. Replaces all
 polling (vault pulls, long-poll, digest crons) for the Chris-facing feed.
 
 Sources:
-  - /home/toxic/.shingle/squawk-root/<channel>/*.md  (chat.py channel files)
+  - /home/toxic/.fleet-bus/squawk-root/<channel>/*.md  (chat.py channel files)
   - zipfs-vault local zip manifest (unsealed relay envelopes)
 
 Protocol:
@@ -59,7 +59,7 @@ _active_connections = set()  # asyncio.Task per handle_client
 _connection_writers = set()  # asyncio.StreamWriter per active connection
 
 PORT = int(os.environ.get("SQUAWK_WS_PORT", "25147"))
-CHAT_ROOT = Path(os.environ.get("SQUAWK_CHAT_ROOT", "/home/toxic/.shingle/squawk-root"))
+CHAT_ROOT = Path(os.environ.get("SQUAWK_CHAT_ROOT", "/home/toxic/.fleet-bus/squawk-root"))
 CHANNELS = [c for c in os.environ.get("SQUAWK_WS_CHANNELS", "fleet,leads").split(",") if c]
 VAULT_ZIP = Path(os.environ.get("SQUAWK_WS_VAULT",
                                "/home/toxic/workspace/skills/zipfs-vault/store/vault.zip"))
@@ -78,7 +78,7 @@ ALIAS_RE = re.compile(r"^(fleet|leads)/(\d+)$")
 IN_CLOSE_WRITE = 0x00000008
 IN_MOVED_TO = 0x00000080
 IN_CREATE = 0x00000100
-IN_NONBLOCK = 0o2000
+IN_NONBLOCK = 0o4000  # O_NONBLOCK
 
 _libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
 
@@ -273,7 +273,8 @@ def scan_vault(initial=False):
                 if num <= vault_last:
                     continue
                 try:
-                    env = json.loads(z.read("blobs/" + blob))
+                    blob_name = blob["blob"] if isinstance(blob, dict) else blob
+                    env = json.loads(z.read("blobs/" + blob_name))
                 except (KeyError, ValueError):
                     continue
                 items.append((num, ch, env))
@@ -435,6 +436,7 @@ async def handle_client(reader, writer):
         except (asyncio.TimeoutError, ConnectionResetError):
             return
 
+        want = frozenset(want)  # tuple elements must be hashable
         q = asyncio.Queue(maxsize=256)
         subscribers.add((q, want))
         print("subscriber %s channels=%s" % (peer, sorted(want)), flush=True)
