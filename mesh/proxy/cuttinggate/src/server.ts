@@ -38,6 +38,63 @@ export type AppDeps = {
 export function buildApp(deps: AppDeps) {
   const { quarantine, ledger, router } = deps;
 
+  const handleModelsSse = () => {
+    const herdUrl = deps.config.bases["llama-swap"]
+      ? deps.config.bases["llama-swap"].replace(/\/v1\/?$/, "/models/sse")
+      : "http://127.0.0.1:25100/models/sse";
+    const encoder = new TextEncoder();
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reloadEv = {
+          model: "*",
+          event: "models_reload",
+          data: { status: "loaded", count: router.known().length },
+        };
+        controller.enqueue(encoder.encode(`: keep-alive\n\ndata: ${JSON.stringify(reloadEv)}\n\n`));
+        try {
+          const upstream = await fetch(herdUrl, { headers: { Accept: "text/event-stream" } });
+          if (upstream.ok && upstream.body) {
+            const reader = upstream.body.getReader();
+            (async () => {
+              try {
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  controller.enqueue(value);
+                }
+              } catch {
+                // Upstream disconnected
+              } finally {
+                if (timer) clearInterval(timer);
+                try { controller.close(); } catch {}
+              }
+            })();
+            return;
+          }
+        } catch {
+          // Upstream herd unavailable; fall back to keep-alive timer
+        }
+
+        timer = setInterval(() => {
+          try {
+            controller.enqueue(encoder.encode(": keep-alive\n\n"));
+          } catch {
+            clearInterval(timer);
+          }
+        }, 15000);
+      },
+    });
+
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      },
+    });
+  };
   return new Elysia()
     .get("/health", () => ({ ok: true, quarantined: quarantine.count }))
 
@@ -72,6 +129,13 @@ export function buildApp(deps: AppDeps) {
       })),
     }))
 
+    /**
+     * Model events SSE feed (matches llama.cpp & herd GET /models/sse).
+     * Connects clients (like Zed / editors) to live model load/unload/reload state.
+     */
+    .get("/models/sse", () => handleModelsSse())
+    .get("/v1/models/sse", () => handleModelsSse())
+
     .post(
       "/v1/chat/completions",
       async ({ body, set, headers }) => {
@@ -103,6 +167,61 @@ export function buildApp(deps: AppDeps) {
 
         ledger.record(body.model, attempt.provider, attempt.latencyMs, true);
         if (!attempt.content.trim()) deps.gate.noteEmpty(body.model);
+
+        if (body.stream) {
+          const id = `cg_${crypto.randomUUID()}`;
+          const created = Math.floor(Date.now() / 1000);
+          const encoder = new TextEncoder();
+
+          const stream = new ReadableStream({
+            start(controller) {
+              const chunk1 = {
+                id,
+                object: "chat.completion.chunk",
+                created,
+                model: body.model,
+                choices: [{ index: 0, delta: { role: "assistant", content: "" }, finish_reason: null }],
+              };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk1)}\n\n`));
+
+              const text = attempt.content;
+              const chunkSize = 64;
+              for (let i = 0; i < text.length; i += chunkSize) {
+                const slice = text.slice(i, i + chunkSize);
+                const chunk = {
+                  id,
+                  object: "chat.completion.chunk",
+                  created,
+                  model: body.model,
+                  choices: [{ index: 0, delta: { content: slice }, finish_reason: null }],
+                };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
+              }
+
+              const chunkDone = {
+                id,
+                object: "chat.completion.chunk",
+                created,
+                model: body.model,
+                choices: [{ index: 0, delta: {}, finish_reason: attempt.finishReason ?? "stop" }],
+                usage: attempt.usage,
+              };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunkDone)}\n\n`));
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              controller.close();
+            },
+          });
+
+          return new Response(stream, {
+            status: 200,
+            headers: {
+              "Content-Type": "text/event-stream; charset=utf-8",
+              "Cache-Control": "no-cache",
+              "Connection": "keep-alive",
+              "X-Routed-Via": attempt.provider,
+            },
+          });
+        }
 
         return {
           id: `cg_${crypto.randomUUID()}`,

@@ -201,3 +201,65 @@ describe("winner ledger", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 });
+describe("cuttinggate server sse endpoints", () => {
+  test("GET /models/sse returns text/event-stream with keep-alive and reload event", async () => {
+    const { buildApp } = await import("../src/server.ts");
+    const r = new Router(cfg, new ProviderGate(cfg), new Quarantine(), ledgerAt(scratch("cg-s-")));
+    r.register("m/mock", "alpha");
+    const app = buildApp({
+      config: cfg,
+      gate: new ProviderGate(cfg),
+      quarantine: new Quarantine(),
+      ledger: ledgerAt(scratch("cg-s2-")),
+      router: r,
+    });
+
+    const res = await app.handle(new Request("http://localhost/models/sse"));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("text/event-stream");
+
+    const reader = res.body?.getReader();
+    expect(reader).toBeDefined();
+    const { value } = await reader!.read();
+    const text = new TextDecoder().decode(value);
+    expect(text).toContain(": keep-alive");
+    expect(text).toContain("models_reload");
+  });
+
+  test("POST /v1/chat/completions with stream: true returns SSE chunks", async () => {
+    const { buildApp } = await import("../src/server.ts");
+    const r = new Router(cfg, new ProviderGate(cfg), new Quarantine(), ledgerAt(scratch("cg-s3-")));
+    r.register("m/stream", "alpha");
+    (r as unknown as { call: unknown }).call = async () => reply("streaming tokens here");
+
+    const app = buildApp({
+      config: cfg,
+      gate: new ProviderGate(cfg),
+      quarantine: new Quarantine(),
+      ledger: ledgerAt(scratch("cg-s4-")),
+      router: r,
+    });
+
+    const res = await app.handle(
+      new Request("http://localhost/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "authorization": "Bearer cg-test-token",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "m/stream",
+          messages: [{ role: "user", content: "hello" }],
+          stream: true,
+        }),
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("text/event-stream");
+
+    const text = await res.text();
+    expect(text).toContain("chat.completion.chunk");
+    expect(text).toContain("data: [DONE]");
+  });
+});
