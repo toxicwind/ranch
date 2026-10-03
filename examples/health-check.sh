@@ -6,14 +6,13 @@ set -euo pipefail
 
 declare -A NAMES=(
   [25100]="herd — local front door"
-  [25193]="flock — cloud provider router"
   [25127]="gatehouse — MCP gateway"
   [25151]="oracle — decision engine"
   [25200]="cuttinggate — canonical router"
 )
 
 fail=0
-for p in 25100 25193 25127 25151 25200; do
+for p in 25100 25127 25151 25200; do
   code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' "http://127.0.0.1:${p}/health" || echo "000")
   printf '%s %s  %s\n' "$p" "$code" "${NAMES[$p]}"
   [ "$code" = "200" ] || fail=1

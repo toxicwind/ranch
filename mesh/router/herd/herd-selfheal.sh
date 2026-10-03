@@ -2,7 +2,7 @@
 # herd-selfheal.sh — one-shot herd health check + safe auto-repair.
 #
 # Run this before asking "is herd broken?":
-#   /home/toxic/estate/ranch/herd/herd-selfheal.sh
+#   /home/toxic/estate/ranch/mesh/router/herd/herd-selfheal.sh
 #
 # What it does:
 #   1. Verifies the engines/ symlink target is live (3 engine binaries);

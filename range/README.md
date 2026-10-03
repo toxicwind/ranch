@@ -73,7 +73,7 @@ curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25104/v1/chat/completions
 
 ## Sovereign MCP gateway (:25120)
 
-`ranch/herd/mesh/router/sovereign-mcp-gateway/` is a trust boundary in
+`ranch/mesh/router/sovereign-mcp-gateway/` is a trust boundary in
 front of upstream MCP servers: per-upstream circuit breakers quarantine
 poisoned servers, `notifications/initialized` pins sticky sessions, and
 `tools/list` is served as a provenance-namespaced union (`<upstream>__<tool>`)

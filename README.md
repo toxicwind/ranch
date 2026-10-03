@@ -106,11 +106,10 @@ curl -s http://127.0.0.1:25100/v1/models | jq -r '.data[].id' | head -4
 
 # every core service answers (the oracle decision engine moved out of the
 # ranch on 2026-10-02 — it now lives in toxicwind/squawk, see repo topology)
-for p in 25100 25193 25127 25200; do
+for p in 25100 25127 25200; do
   printf '%s %s\n' "$p" "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$p/health)"
 done
 # 25100 200   herd — local front door
-# 25193 200   flock — cloud provider router
 # 25127 200   gatehouse — MCP gateway
 # 25200 200   cuttinggate — canonical router
 ```
@@ -127,11 +126,11 @@ curl -s http://127.0.0.1:25100/v1/chat/completions \
   -d '{"model":"beellama/exaone-4-0-1-2b-q4km","messages":[{"role":"user","content":"moo"}]}'
 ```
 
-**2. Route by strategy, not by model** — ask flock for `free` and it picks the best free-tier provider (NIM first, then OpenRouter-free, …) with 429 rotation and circuit breakers inside:
+**2. Route by strategy, not by model** — ask cuttinggate for "free" and it picks the best free-tier provider (NIM first, then OpenRouter-free, …) with 429 rotation and circuit breakers inside:
 
 ```sh
-curl -s http://127.0.0.1:25193/v1/chat/completions \
-  -H "Authorization: Bearer $FLOCK_KEY" \
+curl -s http://127.0.0.1:25200/v1/chat/completions \
+  -H "Authorization: Bearer $CUTTINGGATE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"free","messages":[{"role":"user","content":"moo"}]}'
 ```
@@ -158,7 +157,7 @@ flowchart LR
     subgraph ranch["the ranch"]
         CG["cuttinggate :25200<br/>canonical router"]
         HERD["herd :25100<br/>local front door"]
-        FLOCK["flock :25193<br/>cloud provider router"]
+        FLOCK["flock-proxy :25193 (retired)<br/>preserved, not live"]
         ENG["llama.cpp :25001+"]
         CLOUD["NIM · OpenRouter · Groq<br/>Cerebras · Mistral · …"]
         TAU["tau via chute :25111"]
@@ -184,9 +183,9 @@ Every animal first-class — no "secondary" framing. 🟢 = port verified listen
 | Component | Port | Path | Role |
 |---|---|---|---|
 | 🟢 **tau** | `25111` | `tau/` (nested checkout → [toxicwind/tau](https://github.com/toxicwind/tau), gitignored — absent in a fresh clone) | **The coding agent.** Terminal coding agent (fork of oh-my-pi): `omp` CLI + SDK, 30+ tools, subagents, native Rust hot path, dozens of providers via the roost-sourced catalog. Served as a TCP daemon through **chute**; its model traffic rides herd/flock. |
-| 🟢 **herd** | `25100` | `herd/` (Go) | **LOCAL front door.** 52 models live over llama.cpp engines (`:25001+`). Anything cloud goes to the flock daemon via its `flock:` config key. |
-| 🟢 **flock** | `25193` | `flock/` (Rust proxy + TS client/dashboard) | **EXTERNAL provider router.** Strategies, key pools, 429 rotation, circuit breakers, health/Elo. NIM · OpenRouter · Groq · Cerebras · … |
-| 🟢 **cuttinggate** | `25200` | `cuttinggate/` (Bun/TS) | **Canonical router.** The estate's front door: fronts flock, gates herd-local traffic, quarantine + ledger. Replacing `:25104` (sovereign-router-ts). |
+| 🟢 **herd** | `25100` | `mesh/router/herd/` (Go) | **LOCAL front door.** 52 models live over llama.cpp engines (`:25001+`). Anything cloud goes to the flock daemon via its `flock:` config key. |
+| **flock-proxy** | — | `mesh/proxy/flock-proxy/` (Rust) | **Preserved, not live.** External provider router: strategies, key pools, 429 rotation, circuit breakers, health/Elo. `:25193` retired 2026-10-02; cuttinggate fronts its role. |
+| 🟢 **cuttinggate** | `25200` | `mesh/proxy/cuttinggate/` (Bun/TS) | **Canonical router.** The estate front door: fronts cloud providers, gates herd-local traffic, quarantine + ledger. Replaced `:25104` (sovereign-router-ts). |
 | 🟢 **gatehouse** | `25127` | `barn/gatehouse` (Go) | **MCP gateway.** Tool serving — a peer of the others, not their parent. |
 | 🟢 **chute** | `25111` | `barn/chute` | **Tau engine, TCP-exposed.** stdio→TCP ACP passage — the tau coding-agent engine as a daemon on a real port. |
 | 🟢 **squawk-ws** | `25147` | `squawk-ws/` (Python) | Squawk websocket server — the fleet channel's live socket. |
@@ -198,7 +197,7 @@ Every animal first-class — no "secondary" framing. 🟢 = port verified listen
 | ~~**oracle**~~ | — | ~~`oracle/`~~ | 🔮 **Moved 2026-10-02** — the decision corral left the ranch (commit [`92bb79c`](https://github.com/toxicwind/ranch/commit/92bb79c)) and now lives in [toxicwind/squawk](https://github.com/toxicwind/squawk) at `oracle/`. |
 | 🟢 **browserless** | `25130` | `barn/browserless` | Browser automation: browserless.io MCP server + native-launcher deployment. |
 | 🟢 **lookout** | `6080` | `barn/lookout` | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower. |
-| **roost** | — | `flock/roost/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: 43 provider definitions the estate perches on, one registry. Feeds tau, herd's generated Go, flock's generated Rust, the router. |
+| **roost** | — | `mesh/catalog/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: 43 provider definitions the estate perches on, one registry. Feeds tau, herd generated Go, flock-proxy generated Rust, the router. |
 | **tack** | — | `tack/` (`@ranch/tack`, Bun/TS) | 🔌 Sovereign provider wire-data authority: base URLs, key env vars, auth schemes for the tau catalog. |
 | **squawk** | — | `squawk/` (Python) | File-based multi-agent chat: signed, sequenced message files. |
 | **corral** | — | `corral/` (in-tree, Bun/TS) | The super-ralph agent framework — the mission runner. Absorbed in-tree 2026-09-30 with full history; **no submodules, ever.** |
@@ -240,12 +239,12 @@ The rule is simple: project work lives in the ranch, control-plane work in the e
 ## 📜 The contract
 
 - **herd is local.** On-box models (GGUFs via llama.cpp engines), served at `:25100`. Cloud keys never touch it.
-- **flock is external.** Cloud providers — NIM, OpenRouter, Groq, Cerebras, … — routed at `:25193` with strategies, key pools, 429 rotation, circuit breakers, health/Elo.
-- **cuttinggate is the front door.** `:25200` fronts flock and gates herd-local traffic, with quarantine and a ledger. It is replacing `:25104` (sovereign-router-ts).
+- **flock-proxy is preserved, not live.** The Rust external provider router (strategies, key pools, 429 rotation, circuit breakers, health/Elo) lives at `mesh/proxy/flock-proxy/`; `:25193` retired 2026-10-02 — cuttinggate now fronts cloud traffic.
+- **cuttinggate is the front door.** `:25200` fronts cloud providers and gates herd-local traffic, with quarantine and a ledger. It replaced `:25104` (sovereign-router-ts, retired 2026-10-02) and absorbed the flock-proxy role.
 - **Strategy names route; they are not models.** `free`, `auto`, etc. select routing strategies. Nothing advertises a literal model named `free`.
 - **Everything is OpenAI-compatible.** `/v1/models`, `/v1/chat/completions` — any OpenAI client just works.
 - **One directory per animal.** No pens inside pens, no submodules — corral was absorbed in-tree 2026-09-30 with full history.
-- **roost is the single provider-data authority.** 43 provider definitions in `flock/roost/src/data.ts`; tau's catalog, herd's generated Go, and flock's generated Rust all derive from it.
+- **roost is the single provider-data authority.** 43 provider definitions in `mesh/catalog/src/data.ts`; tau catalog, herd generated Go, and flock-proxy generated Rust all derive from it.
 - **No monkeypatches.** Fixes land in the owning repo, never as local overlays. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full contract.
 
 ## 🗺️ Roadmap
