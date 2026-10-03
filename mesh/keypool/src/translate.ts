@@ -21,7 +21,7 @@ function isObj(v: unknown): v is Json {
 
 /**
  * Roost provider aliases -> real Gemini model IDs.
- * Source of truth for the alias side: ranch/flock/roost/src/data.ts
+ * Source of truth for the alias side: ranch/mesh/catalog/src/data.ts
  * modelAliases (google.*). The Interactions API 404s unknown model names,
  * and the translation used to pass the alias straight through, so a caller
  * sending `gemini-eap` died with an upstream 404. Native Google IDs

@@ -10,7 +10,7 @@
     "typecheck": "bun x tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@ranch/roost": "file:../../roost"
+    "@ranch/roost": "file:../../../mesh/catalog"
   },
   "devDependencies": {
     "bun-types": "^1.4.2"

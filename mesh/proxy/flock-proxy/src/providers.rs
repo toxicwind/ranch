@@ -923,10 +923,10 @@ mod tests {
 
     #[test]
     fn roost_providers_copy_in_sync() {
-        // flock/proxy/src/roost_providers.rs must be byte-identical to
-        // flock/roost/generated/providers.rs modulo the Generated-at stamp.
-        // Regenerate with: bun scripts/sync-roost-providers.ts --write
-        let generated = include_str!("../../roost/generated/providers.rs");
+        // mesh/proxy/flock-proxy/src/roost_providers.rs must be byte-identical to
+        // mesh/catalog/generated/providers.rs modulo the Generated-at stamp.
+        // Regenerate with: bun ../../../flock/scripts/sync-roost-providers.ts --write
+        let generated = include_str!("../../../catalog/generated/providers.rs");
         let copy = include_str!("roost_providers.rs");
         fn normalize(s: &str) -> String {
             s.lines()
@@ -943,7 +943,7 @@ mod tests {
         assert_eq!(
             normalize(copy),
             normalize(generated),
-            "roost_providers.rs drifted from flock/roost/generated/providers.rs"
+            "roost_providers.rs drifted from mesh/catalog/generated/providers.rs"
         );
     }
 

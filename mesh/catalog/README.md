@@ -36,9 +36,9 @@ refreshes — no human in the loop.
 | Consumer | How it consumes | Status |
 |---|---|---|
 | **tau** (`ranch/tau`, `toxicwind/tau`) | Main-class provider system — replaces `pi-catalog`'s KDL provider entries, `provider-models` data, and discovery | THE provider authority for the coding-agent engine |
-| **herd** (Go, `ranch/herd`) | `internal/astmatrix/providers_generated.go` — generated, checked in, never hand-edited; `live_catalog.go` reads the live-catalog export | Provenance `@ranch/roost` |
+| **herd** (Go, `ranch/mesh/router/herd`) | `internal/astmatrix/providers_generated.go` — generated, checked in, never hand-edited; `live_catalog.go` reads the live-catalog export | Provenance `@ranch/roost` |
 | **sovereign-router** (TS) | Direct Bun import of `roost/src/index.ts` | Same-filesystem import |
-| **flock** (Rust) | `proxy/src/roost_providers.rs` — generated Rust module, synced by `scripts/sync-roost-providers.ts` (CI drift gate) | Direct, Phase 2 |
+| **flock-proxy** (Rust) | `mesh/proxy/flock-proxy/src/roost_providers.rs` — generated Rust module, synced by `flock/scripts/sync-roost-providers.ts` (CI drift gate) | Direct, Phase 2 |
 | Python research scripts | `generated/providers.json` — canonical data artifact | Stable schema `ranch-roost/v1` |
 
 The rule: **if it names a provider or a model id, it reads the roost.**
@@ -86,8 +86,8 @@ tests/          adapter shapes, prune/quarantine paths, concurrency, artifact sy
 4. Copy `generated/providers.go` over herd's
    `internal/astmatrix/providers_generated.go` (the test tells you the exact
    path when it's stale).
-5. Run `bun scripts/sync-roost-providers.ts --write` in `flock/` to refresh
-   flock's Rust copy (CI gates on drift).
+5. Run `bun flock/scripts/sync-roost-providers.ts --write` from `ranch/` (or `bun scripts/sync-roost-providers.ts --write` in `flock/`) to refresh
+   the flock-proxy Rust copy (CI gates on drift).
 
 ## Adding an endpoint shape
 
