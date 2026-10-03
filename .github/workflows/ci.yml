@@ -30,6 +30,8 @@ jobs:
 
       - name: Install JS workspaces
         run: bun install
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
 
       - name: Affected tasks (PR)
         if: github.event_name == 'pull_request'
