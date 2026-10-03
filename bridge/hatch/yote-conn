@@ -185,8 +185,13 @@ def req(method, path, data=None, ctype="application/json"):
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
-        print(__doc__.strip())
-        return 0
+        if len(sys.argv) < 2:
+            # No args: drop straight into the live shell. This is the
+            # human path -- just `yote-conn` and you're on yote.
+            sys.argv.append("shell")
+        else:
+            print(__doc__.strip())
+            return 0
     cmd = sys.argv[1]
     if cmd == "health":
         code, body = req("GET", "/health")
