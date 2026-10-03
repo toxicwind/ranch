@@ -20,14 +20,23 @@
 
 import { readdirSync, readFileSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 
 const SKILL_DIRS = [
   "/home/toxic/estate/skills",
   "/home/toxic/hatch/skills",
 ].filter((d) => existsSync(d));
 
-const STACKS_ROOT = "/home/toxic/switchboard/stacks";
-mkdirSync(STACKS_ROOT, { recursive: true });
+const STACKS_ROOT =
+  process.env.SWITCHBOARD_STACKS_ROOT ??
+  (process.env.HOME === "/home/toxic"
+    ? "/home/toxic/switchboard/stacks"
+    : join(process.env.HOME ?? tmpdir(), ".switchboard-stacks"));
+try {
+  mkdirSync(STACKS_ROOT, { recursive: true });
+} catch {
+  // CI-safe: created lazily on first infra_* use instead.
+}
 
 export type Skill = { name: string; description: string; path: string };
 
