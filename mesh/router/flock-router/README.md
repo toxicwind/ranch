@@ -9,6 +9,7 @@
 - **Same brain, faster runtime** — a faithful port of `../flock-py/router.py`'s race semantics into Bun/TypeScript, module by module, so the fleet gets the AST race without a Python process.
 - **Code-shaped wins, not fastest bytes** — the winner is the first response carrying AST/code signals (`def/class/import/function/const/fn/struct`, code fences), so slow-but-right beats fast-but-chatty.
 - **Multi-turn stays coherent** — sticky sessions pin a conversation to its provider for 30 minutes; the FIFO matrix bounds concurrency under burst load.
+- **Synthesized lineage** — merges the earlier free_zed_gateway, 9Router concepts (RTK-style token awareness, 3-tier sub/cheap/free thinking), the free-llm-gateway / freellmapi / free-coding-models architectures, and the ULTIMATE modular helpers (llm_client, curlx fallbacks, orchestrator, env_dump, switchover robustness).
 
 ```mermaid
 flowchart LR

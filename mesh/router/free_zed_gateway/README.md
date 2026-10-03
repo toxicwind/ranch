@@ -9,6 +9,15 @@
 - **Free coding models, one endpoint** — Zed (or any OpenAI-compatible client) points at `:19280/v1` and gets `auto` routing across every free-tier provider, with no per-provider wiring.
 - **Survives rate limits** — fallback on 429/5xx (up to 8 fallbacks), a sqlite rate/usage ledger for rate-aware selection, and sticky 30-minute sessions so multi-turn stays coherent.
 - **Runs anywhere** — pure stdlib plus optional `httpx`/`openai`; no framework, no build step, one file.
+## Lineage
+
+Synthesized from full analysis of three upstream projects:
+
+- MrFadiAi/free-llm-gateway — Python gateway, 24+ providers, fallback, rate tracking, dashboard concepts
+- tashfeenahmed/freellmapi — TS proxy, 28 providers, sticky sessions, routing strategies (priority/balanced/smartest/fastest/reliable), context handoff, encrypted keys, catalog
+- vava-nessa/free-coding-models — CLI + daemon OpenAI endpoint at :19280, ~191 coding models, tool config patching, health probes
+
+This is the functional merge of their core designs (OpenAI-compat single endpoint, multi-provider fallback chains, sticky sessions, rate-aware selection, coding-model preference) without losing the architectural intent. Expand the PROVIDERS dict with more adapters from the freellmapi list as needed.
 
 ```mermaid
 flowchart LR
