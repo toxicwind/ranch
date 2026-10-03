@@ -16,7 +16,8 @@
 // The funnel only listens on tailnet addresses, so this is not a public
 // exposure. A pasted/magic-link token is still forwarded as-is when present.
 //
-// Hot-reload (2026-09-30): the TSX UI is rebuilt via Bun.build when ui/App.tsx
+// Hot-reload (2026-10-03): the Svelte 5 UI is prebuilt via `mise run build`
+// (mbx-cache) to ui/dist/bundle.js. The server re-reads it when the mtime
 // changes, so UI edits land without a daemon restart.
 //
 // Channel-aware (2026-10-03): /wait and /send are served directly from the
@@ -28,7 +29,7 @@ import { join } from "node:path";
 
 const FEED = "http://127.0.0.1:25135";
 const SQUAWK_DIR = "/home/toxic/estate/ranch/squawk";
-const UI_ENTRY = join(SQUAWK_DIR, "ui", "App.tsx");
+const UI_ENTRY = join(SQUAWK_DIR, "ui", "dist", "bundle.js");
 const FEED_TOKEN_PATH = "/home/toxic/hatch/agents/ember/squawk-relay/feed-token";
 const SQUAWK_ROOT = "/home/toxic/.fleet-bus/squawk-root";
 
@@ -188,19 +189,16 @@ async function handleSend(req: Request): Promise<Response> {
   return Response.json({ ok: true, seq: ts });
 }
 
-// --- UI bundle: Bun.build the Preact TSX app, cached by entry mtime (hot-reload) ---
+// --- UI bundle: prebuilt Svelte 5 bundle, cached by mtime (hot-reload) ---
+// Build with: mise run build  (or: bun ui/build.ts)
 let bundleJs = "";
 let bundleMtimeMs = 0;
 async function uiBundle(): Promise<string> {
   let mtime = 0;
   try { mtime = statSync(UI_ENTRY).mtimeMs; } catch { /* fall through to error below */ }
+  if (!mtime) throw new Error("ui bundle missing: run `mise run build` in squawk/");
   if (mtime !== bundleMtimeMs || !bundleJs) {
-    const result = await Bun.build({ entrypoints: [UI_ENTRY], minify: false });
-    if (!result.success) {
-      const errs = result.logs.map(l => l.message).join("\n");
-      throw new Error("ui build failed:\n" + errs);
-    }
-    bundleJs = await result.outputs[0].text();
+    bundleJs = readFileSync(UI_ENTRY, "utf8");
     bundleMtimeMs = mtime;
   }
   return bundleJs;
@@ -215,8 +213,8 @@ body { margin:0; background:var(--bg); color:var(--txt); font:14px/1.45 system-u
 header { padding:10px 14px; border-bottom:1px solid var(--line); display:flex;
   align-items:center; gap:12px; }
 header h1 { margin:0; font-size:18px; letter-spacing:2px; color:var(--accent); }
-#srcbtn { margin-left:auto; background:var(--panel); color:var(--dim);
-  border:1px solid var(--line); border-radius:6px; padding:6px 10px; cursor:pointer; }
+.transport { margin-left:auto; font-size:11px; color:var(--faint);
+  border:1px solid var(--line); border-radius:6px; padding:4px 8px; }
 #tabs { display:flex; gap:6px; align-items:flex-end; padding:8px 14px 0; flex-wrap:wrap; }
 .tab { display:flex; gap:8px; align-items:center; padding:5px 10px; cursor:pointer;
   border:1px solid var(--line); border-bottom:none; border-radius:8px 8px 0 0;
