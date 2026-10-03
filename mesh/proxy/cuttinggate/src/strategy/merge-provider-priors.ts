@@ -45,7 +45,8 @@ interface RunResult {
 function median(xs: number[]): number | null {
   if (xs.length === 0) return null;
   const s = [...xs].sort((a, b) => a - b);
-  return s[Math.floor(s.length / 2)];
+  const mid = s[Math.floor(s.length / 2)];
+  return mid === undefined ? null : mid;
 }
 
 async function main(): Promise<void> {

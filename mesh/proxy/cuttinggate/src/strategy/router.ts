@@ -12,7 +12,7 @@
 
 import { createHash } from "node:crypto";
 import { watch, readFileSync, existsSync } from "node:fs";
-import { handleMeshRequest } from "../../../../estate/src/lib/ghas-mesh-features.ts";
+import { handleMeshRequest } from "../../../../../../src/lib/ghas-mesh-features.ts";
 import type { ChatBody } from "./router_types.ts";
 import { CODING, PROVIDERS, keyOk, getKey, STRATEGY, MAX_PARALLEL, PORT, json, log, DB_PATH, isExplicit, normalizeModelSpec, resolveModel, loadEnvFile, catalog, catalogModelsFor } from "./router_config.ts";
 import { LIVE_MODEL_META, modelFree } from "./router_config.ts";
@@ -281,10 +281,10 @@ const server = Bun.serve({
       const dbSummary = state.health.getProviderSummary();
       const pct = state.health.getLatencyPercentiles();
       const providers: Record<string, unknown> = {};
-      for (const p of Object.keys(PROVIDERS)) {
+      for (const [p, conf] of Object.entries(PROVIDERS)) {
         providers[p] = {
           keys: keyOk(p) ? "configured" : "no_key",
-          base_url: PROVIDERS[p].base,
+          base_url: conf.base,
           circuit: state.circuitInfo(p),
           lane_dead: state.laneDead(p),
           elo: Math.round((state.elo.get(p) || 1000) * 10) / 10,
@@ -536,7 +536,7 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
       const pinned2m = await tryLongctx2MPin(body, sid, false);
       if (pinned2m && substantive(pinned2m)) {
         const t2 = pinned2m.timings;
-        return new Response(pinned2m.data as BodyInit, {
+        return new Response(pinned2m.data, {
           status: 200,
           headers: {
             "Content-Type": "application/json",
@@ -559,7 +559,7 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
       const pinned = await tryLongctxPin(body, sid, false);
       if (pinned && substantive(pinned)) {
         const t = pinned.timings;
-        return new Response(pinned.data as BodyInit, {
+        return new Response(pinned.data, {
           status: 200,
           headers: {
             "Content-Type": "application/json",
@@ -580,7 +580,7 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
       const r = await fn(body, sid);
       if (r.ok) {
         const t = r.timings;
-        return new Response(r.data as BodyInit, {
+        return new Response(r.data, {
           status: 200,
           headers: {
             "Content-Type": "application/json",
@@ -700,6 +700,7 @@ function startWarmStandby(): void {
       try {
         if (!keyOk(p)) continue;
         const conf = PROVIDERS[p];
+        if (!conf) continue;
         const headers: Record<string, string> = {
           Accept: "application/json",
           "User-Agent": "SovereignRouter/3.2 warm-standby",

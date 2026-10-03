@@ -142,7 +142,7 @@ export async function verifyPassword(
 ): Promise<boolean> {
   const parts = stored.split("$");
   if (parts.length !== 4) return false;
-  const [scheme, itersS, saltHex, hashHex] = parts;
+  const [scheme = "", itersS = "", saltHex = "", hashHex = ""] = parts;
   if (scheme !== "pbkdf2-sha256") return false;
   if (!/^\d+$/.test(itersS)) return false;
   const iters = parseInt(itersS, 10);
@@ -164,7 +164,8 @@ export function base64DecodeStrict(s: string): Uint8Array | null {
   return Buffer.from(clean, "base64");
 }
 
-function hexVal(b: number): number | undefined {
+function hexVal(b: number | undefined): number | undefined {
+  if (b === undefined) return undefined; // out-of-range index read
   if (b >= 0x30 && b <= 0x39) return b - 0x30;
   if (b >= 0x61 && b <= 0x66) return b - 0x61 + 10;
   if (b >= 0x41 && b <= 0x46) return b - 0x41 + 10;
@@ -178,7 +179,9 @@ export function urlDecode(s: string): string {
   const out: number[] = [];
   let i = 0;
   while (i < bytes.length) {
-    if (bytes[i] === 0x25 && i + 2 < bytes.length) {
+    const cur = bytes[i];
+    if (cur === undefined) break; // unreachable: i < bytes.length
+    if (cur === 0x25 && i + 2 < bytes.length) {
       const h = hexVal(bytes[i + 1]);
       const l = hexVal(bytes[i + 2]);
       if (h !== undefined && l !== undefined) {
@@ -187,7 +190,7 @@ export function urlDecode(s: string): string {
         continue;
       }
     }
-    out.push(bytes[i]);
+    out.push(cur);
     i++;
   }
   return Buffer.from(out).toString("utf8");
@@ -355,7 +358,7 @@ export class Admin {
   ): string | null {
     const parts = token.split(".");
     if (parts.length !== 4) return null;
-    const [expHex, userHex, frag, tagHex] = parts;
+    const [expHex = "", userHex = "", frag = "", tagHex = ""] = parts;
     if (!/^[0-9a-fA-F]+$/.test(expHex)) return null;
     const expiry = parseInt(expHex, 16);
     if (!Number.isSafeInteger(expiry) || expiry < nowS) return null;

@@ -27,7 +27,7 @@ import {
   keyOk,
   log,
 } from "./router_config.ts";
-import { discover } from "../../../packages/providers/src/index.ts";
+import { discover } from "../../../../../../packages/providers/src/index.ts";
 import { applySigmaBackfill, sigmaCatalogInfo } from "./sigma-enrich.ts";
 
 const META_STATE_PATH = "/home/toxic/estate/.state/live-models.json";
@@ -89,8 +89,9 @@ type RawModel = Record<string, unknown>;
 // Drop the long prose description — it bloats the persisted state and the
 // /v1/models payload without helping routing. Everything else (pricing,
 // context_length, architecture, limits...) is live metadata worth keeping.
-function slimMeta(raw: RawModel): Record<string, unknown> {
-  const { description, ...rest } = raw;
+function slimMeta(raw: object): Record<string, unknown> {
+  const rest: RawModel = { ...raw };
+  delete rest.description;
   return rest;
 }
 
@@ -123,13 +124,15 @@ async function refreshLiveModelsInner(): Promise<void> {
       const result = await discover(def, { timeoutMs: 15000 });
       catalog.applyDiscovery(p, result);
       const meta: Record<string, Record<string, unknown>> = {};
-      for (const [id, raw] of Object.entries(result.meta ?? {})) {
-        if (raw && typeof raw === "object") meta[id] = slimMeta(raw);
+      if (result.ok) {
+        for (const [id, raw] of Object.entries(result.meta)) {
+          if (raw && typeof raw === "object") meta[id] = slimMeta(raw);
+        }
       }
       LIVE_MODEL_META[p] = meta;
       LIVE_STATUS[p] = {
         ok: result.ok,
-        count: (result.ids ?? []).length,
+        count: result.ok ? result.ids.length : 0,
         fetchedAt: new Date().toISOString(),
         ...(result.ok ? {} : { error: (result.error ?? "unknown").slice(0, 120) }),
       };

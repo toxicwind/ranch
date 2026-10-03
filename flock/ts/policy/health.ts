@@ -308,7 +308,9 @@ export class PolicyHealthDB {
         out[provider] = { p50_ms: null, p95_ms: null, n: 0 };
         continue;
       }
-      const q = (p: number) => rows[Math.min(rows.length - 1, Math.floor(p * rows.length))].latency_ms;
+      // `rows` is non-empty (guarded above) and the index is clamped into
+      // [0, rows.length - 1], so the lookup is always in range.
+      const q = (p: number) => rows[Math.min(rows.length - 1, Math.floor(p * rows.length))]!.latency_ms;
       const r2 = (v: number) => Math.round(v * 10) / 10;
       out[provider] = { p50_ms: r2(q(0.5)), p95_ms: r2(q(0.95)), n: rows.length };
     }
