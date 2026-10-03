@@ -13,7 +13,7 @@
 import { createHash } from "node:crypto";
 import { watch, readFileSync, existsSync } from "node:fs";
 import { handleMeshRequest } from "../../../../../../estate/src/lib/ghas-mesh-features.ts";
-import type { ChatBody } from "./router_types.ts";
+import type { ChatBody, RequestCtx, RouteResult } from "./router_types.ts";
 import { CODING, PROVIDERS, keyOk, getKey, STRATEGY, MAX_PARALLEL, PORT, json, log, DB_PATH, isExplicit, normalizeModelSpec, resolveModel, loadEnvFile, catalog, catalogModelsFor, parseStickyOpt } from "./router_config.ts";
 import { LIVE_MODEL_META, modelFree } from "./router_config.ts";
 import { startLiveDiscovery, refreshLiveModels, LIVE_STATUS } from "./router_live_models.ts";
@@ -27,22 +27,47 @@ import {
   handleLogout,
 } from "./router_auth.ts";
 
+import { Coalescer, coalesceKey, isLead, sharedToResponse, Lead } from "./coalescer.ts";
+import { RoutingDecision } from "./decision.ts";
+import { flockMetrics } from "./flock-metrics.ts";
+import {
+  DEADLINE_HEADER,
+  parseFlockDeadline,
+  InflightGate,
+  digestClientKeys,
+  presentedClientKey,
+  clientKeyAuthorized,
+  AUTH_FAILURE_DELAY_MS,
+  sleep,
+} from "./request-gates.ts";
+import { isProxyableV1Path, proxyV1Path } from "./v1paths.ts";
+import { rebuildRateLimiter } from "./router_strategy.ts";
+
 // ---------------------------------------------------------------------------
 // Optional client auth (absorbed from the retired :8000 key-proxy).
 // Set SOVEREIGN_CLIENT_KEYS=comman,separated,keys to require a client key.
 // Unset = open (daemon binds 127.0.0.1; localhost is the trust boundary).
 // ---------------------------------------------------------------------------
-const CLIENT_KEYS = (process.env.SOVEREIGN_CLIENT_KEYS || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+// ---------------------------------------------------------------------------
+// Flock-port request gates: client-key digests (G18), the global in-flight
+// cap (G5), and the request coalescer (G1). Client keys are compared as
+// SHA-256 digests with a constant-time compare — the runtime never holds a
+// usable token (flock proxy.rs client auth).
+// ---------------------------------------------------------------------------
+const CLIENT_KEY_DIGESTS = digestClientKeys(
+  (process.env.SOVEREIGN_CLIENT_KEYS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+const inflightGate = new InflightGate();
+const coalescer = new Coalescer(
+  parseInt(process.env.SOVEREIGN_COALESCE_TTL_MS || "5000", 10) || 5000,
+);
+const COALESCE_ENABLED = process.env.SOVEREIGN_COALESCE !== "0";
 
 function clientAuthorized(req: Request): boolean {
-  if (!CLIENT_KEYS.length) return true;
-  const h = req.headers.get("authorization") || "";
-  const bearer = h.startsWith("Bearer ") ? h.slice(7).trim() : "";
-  const key = bearer || req.headers.get("x-api-key") || "";
-  return key !== "" && CLIENT_KEYS.includes(key);
+  return clientKeyAuthorized(CLIENT_KEY_DIGESTS, presentedClientKey(req));
 }
 
 // ---------------------------------------------------------------------------
@@ -84,99 +109,200 @@ function sessionId(req: Request, body: ChatBody): string {
 async function handleStream(
   body: ChatBody,
   sid: string,
-  _strat: string,
+  strat: string,
+  rctx: RequestCtx,
+  releaseSlot: () => void,
 ): Promise<Response> {
-  // 2M-context tier (2026-10-01): >1M est tokens -> direct keyed
-  // openrouter lane (x-ai/grok-4.20, 2M context), skipping the race.
-  // Ineligible or pinned failure falls through to the 1M pin below.
-  const pinned2mStream = await tryLongctx2MPin(body, sid, true);
-  if (pinned2mStream?.ok && pinned2mStream.stream) {
-    const pst2 = pinned2mStream.timings;
-    return new Response(pinned2mStream.stream, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-        "X-Routed-Via": `${pinned2mStream.provider}/${pinned2mStream.model}`,
-        "X-Longctx-Pin": "2m",
-        ...(pst2
-          ? {
-              "X-Sovereign-Timings": `connect_ms=${pst2.connect_ms};ttft_ms=${pst2.ttft_ms ?? "-"};total_ms=${pst2.total_ms}`,
-            }
-          : {}),
-      },
-    });
-  }
-
-  // 1M-context pin (DECISION 12187): >200k est tokens -> direct keyed
-  // nvidia lane, skipping the race. Ineligible or pinned failure falls
-  // through to the normal stream logic below (single race fallback).
-  const pinnedStream = await tryLongctxPin(body, sid, true);
-  if (pinnedStream?.ok && pinnedStream.stream) {
-    const pst = pinnedStream.timings;
-    return new Response(pinnedStream.stream, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-        "X-Routed-Via": `${pinnedStream.provider}/${pinnedStream.model}`,
-        "X-Longctx-Pin": "1",
-        ...(pst
-          ? {
-              "X-Sovereign-Timings": `connect_ms=${pst.connect_ms};ttft_ms=${pst.ttft_ms ?? "-"};total_ms=${pst.total_ms}`,
-            }
-          : {}),
-      },
-    });
-  }
-
-  const model = String(body.model || "auto");
-  const tryStream = async (p: string, mid: string) => {
-    const r = await callOne(p, mid, body, true);
-    if (!r.ok || !r.stream) return null;
-    state.stickySet(sid, p, mid);
-    const st = r.timings;
-    return new Response(r.stream, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-        "X-Routed-Via": `${p}/${mid}`,
-        ...(st
-          ? {
-              "X-Sovereign-Timings": `connect_ms=${st.connect_ms};ttft_ms=${st.ttft_ms ?? "-"};total_ms=${st.total_ms}`,
-            }
-          : {}),
-      },
-    });
-  };
-
-  // Explicit model: resolved lane first, then fail over to the weighted
-  // field (mirrors routeHybrid). resolveModel covers CODING aliases,
-  // provider:model slash/colon specs, and local model ids.
-  const routed = isRoutableModelId(model) ? resolveModel(model) : null;
-  if (routed) {
-    const resp = await tryStream(routed[0], routed[1]);
-    if (resp) return resp;
-  } else {
-    const [sp, sm] = state.stickyGet(sid);
-    if (sp && keyOk(sp) && state.circuitOk(sp) && !state.laneDead(sp)) {
-      const resp = await tryStream(sp, sm || model);
-      if (resp) return resp;
+  // G3: commit 200 immediately and heartbeat while waiting/retrying (flock
+  // proxy.rs streaming()). Clients see `: connected`, then `: heartbeat`
+  // every SOVEREIGN_SSE_HEARTBEAT_MS while routing, `: retrying` between
+  // attempts, and routed-via/strategy/timings comments on the first chunk.
+  // SOVEREIGN_STREAM_IDLE_MS kills a stalled upstream; client hangup closes
+  // everything promptly and frees the in-flight slot.
+  const enc = new TextEncoder();
+  const hbMs =
+    parseInt(process.env.SOVEREIGN_SSE_HEARTBEAT_MS || "10000", 10) || 10000;
+  const idleMs =
+    parseInt(process.env.SOVEREIGN_STREAM_IDLE_MS || "300000", 10) || 300000;
+  let controller: ReadableStreamDefaultController<Uint8Array> | null = null;
+  let done = false;
+  let hb: ReturnType<typeof setInterval> | undefined;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    if (hb) clearInterval(hb);
+    try {
+      controller?.close();
+    } catch {
+      /* noop */
     }
-  }
+    releaseSlot();
+  };
+  const send = (s: string): boolean => {
+    if (done || !controller) return false;
+    try {
+      controller.enqueue(enc.encode(s));
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const stream = new ReadableStream<Uint8Array>({
+    start(c) {
+      controller = c;
+    },
+    cancel() {
+      finish();
+    },
+  });
+  hb = setInterval(() => {
+    send(": heartbeat\n\n");
+  }, hbMs);
+  const onAbort = () => {
+    send(
+      `data: ${JSON.stringify({ error: { message: "deadline_exceeded", type: "proxy_error", code: 504 } })}\n\n`,
+    );
+    finish();
+  };
+  rctx.signal?.addEventListener("abort", onAbort, { once: true });
 
-  const cands: [string, string][] = routed
-    ? [routed, ...pickWeighted(MAX_PARALLEL).filter(([cp]) => cp !== routed[0])]
-    : pickWeighted(MAX_PARALLEL);
-  for (const [p, mid] of cands) {
-    const resp = await tryStream(p, mid);
-    if (resp) return resp;
-  }
-  return json({ error: "all_stream_providers_exhausted" }, 503);
+  const response = new Response(stream, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
+
+  void (async () => {
+    try {
+      send(": connected\n\n");
+      const onRetry = () => {
+        send(": retrying\n\n");
+      };
+      // tryStream: one candidate lane. callOne already TTFT-gates the
+      // upstream stream and injects stream_options (G2); a null return
+      // means that lane failed — the heartbeat keeps going.
+      const tryStream = async (
+        p: string,
+        mid: string,
+      ): Promise<RouteResult | null> => {
+        const r = await callOne(p, mid, body, true, undefined, rctx);
+        if (!r.ok || !r.stream) return null;
+        state.stickySet(sid, p, mid);
+        return r;
+      };
+      let winner: RouteResult | null = null;
+      // 2M-context tier, then 1M pin, then the candidate walk.
+      const pinned2mStream = await tryLongctx2MPin(body, sid, true, rctx);
+      if (pinned2mStream?.ok && pinned2mStream.stream) winner = pinned2mStream;
+      if (!winner) {
+        const pinnedStream = await tryLongctxPin(body, sid, true, rctx);
+        if (pinnedStream?.ok && pinnedStream.stream) winner = pinnedStream;
+      }
+      if (!winner) {
+        const model = String(body.model || "auto");
+        const routed = isRoutableModelId(model) ? resolveModel(model) : null;
+        if (routed) {
+          winner = await tryStream(routed[0], routed[1]);
+          if (!winner) onRetry();
+        } else {
+          const [sp, sm] = state.stickyGet(sid);
+          if (sp && keyOk(sp) && state.circuitOk(sp) && !state.laneDead(sp)) {
+            winner = await tryStream(sp, sm || model);
+            if (!winner) onRetry();
+          }
+        }
+        if (!winner) {
+          const cands: [string, string][] = routed
+            ? [routed, ...pickWeighted(MAX_PARALLEL).filter(([cp]) => cp !== routed[0])]
+            : pickWeighted(MAX_PARALLEL);
+          for (const [p, mid] of cands) {
+            winner = await tryStream(p, mid);
+            if (winner) break;
+            onRetry();
+          }
+        }
+      }
+      if (done) return;
+      if (!winner || !winner.stream) {
+        flockMetrics.recordRequest(
+          "none",
+          String(body.model || "auto"),
+          "/v1/chat/completions",
+          503,
+        );
+        send(
+          `data: ${JSON.stringify({ error: { message: "all_stream_providers_exhausted", type: "proxy_error", code: 503 } })}\n\n`,
+        );
+        return;
+      }
+      const wst = winner.timings;
+      flockMetrics.recordRequest(
+        winner.provider || "none",
+        winner.model || String(body.model || "auto"),
+        "/v1/chat/completions",
+        200,
+      );
+      // Pipe the winner with the stream_idle stall cutoff; heartbeats stop
+      // at the first chunk.
+      const reader = winner.stream.getReader();
+      let idleTimer: ReturnType<typeof setTimeout> | undefined;
+      const armIdle = () => {
+        if (idleTimer) clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+          send(
+            `data: ${JSON.stringify({ error: { message: "stream_idle_timeout", type: "proxy_error", code: 504 } })}\n\n`,
+          );
+          try {
+            reader.cancel();
+          } catch {
+            /* noop */
+          }
+        }, idleMs);
+        (idleTimer as unknown as { unref?: () => void }).unref?.();
+      };
+      let firstChunk = true;
+      armIdle();
+      try {
+        for (;;) {
+          const { done: d, value } = await reader.read();
+          if (d || done) break;
+          armIdle();
+          if (firstChunk) {
+            firstChunk = false;
+            if (hb) {
+              clearInterval(hb);
+              hb = undefined;
+            }
+            send(`: routed-via ${winner.provider}/${winner.model}\n`);
+            send(`: strategy ${strat}\n`);
+            if (wst) {
+              send(
+                `: timings connect_ms=${wst.connect_ms};ttft_ms=${wst.ttft_ms ?? "-"};total_ms=${wst.total_ms}\n`,
+              );
+            }
+          }
+          try {
+            controller!.enqueue(value);
+          } catch {
+            break;
+          }
+        }
+      } finally {
+        if (idleTimer) clearTimeout(idleTimer);
+        try {
+          reader.releaseLock();
+        } catch {
+          /* noop */
+        }
+      }
+    } finally {
+      finish();
+    }
+  })();
+  return response;
 }
 
 const server = Bun.serve({
@@ -194,11 +320,71 @@ const server = Bun.serve({
       if (m) return m;
     }
 
+    // G5: global in-flight cap (flock proxy.rs) — shed past the cap with 429
+    // "overloaded". The release is scope-guarded: buffered paths release in
+    // the finally at the end of fetch; stream paths set streamOwnsSlot and
+    // release when the SSE stream closes or the client hangs up.
+    const releaseInflight = inflightGate.enter();
+    if (!releaseInflight) {
+      flockMetrics.shed++;
+      return json({ error: "overloaded", max_inflight: inflightGate.limit }, 429);
+    }
+    let streamOwnsSlot = false;
+    try {
+
     // Client-key gate (only when SOVEREIGN_CLIENT_KEYS is set). /health stays
     // open for liveness probes; everything else requires a key.
+    // G18: constant-time digest auth (flock proxy.rs) with a 250ms failure
+    // delay. Unset SOVEREIGN_CLIENT_KEYS = open (localhost trust boundary);
+    // /health stays open for liveness probes.
     if (path !== "/health" && !clientAuthorized(req)) {
+      flockMetrics.unauthorized++;
+      await sleep(AUTH_FAILURE_DELAY_MS);
       return json({ error: "unauthorized" }, 401);
     }
+
+    // G4: x-flock-deadline-ms — absolute client deadline (malformed = 400).
+    // Enforced on every attempt via the request AbortSignal; the buffered
+    // path additionally races the routing promise so the 504 lands promptly.
+    const acceptedMs = Date.now();
+    const dlParsed = parseFlockDeadline(req.headers.get(DEADLINE_HEADER), acceptedMs);
+    if (dlParsed && !dlParsed.ok) {
+      return json({ error: "invalid_x_flock_deadline_ms" }, 400);
+    }
+    const deadlineMs = dlParsed && dlParsed.ok ? dlParsed.atMs : undefined;
+
+    // Per-request context (G4/G8/G9/G12): deadline+hangup signal, request
+    // headers for the turn-handle relay, path for labels/coalescing, and a
+    // fresh routing-decision ledger.
+    const mkCtx = (model?: string): RequestCtx => {
+      const dc = new AbortController();
+      if (deadlineMs !== undefined) {
+        const ms = deadlineMs - Date.now();
+        if (ms <= 0) {
+          dc.abort(new Error("deadline_exceeded"));
+        } else {
+          const t = setTimeout(() => dc.abort(new Error("deadline_exceeded")), ms);
+          (t as unknown as { unref?: () => void }).unref?.();
+        }
+      }
+      return {
+        signal: AbortSignal.any([req.signal, dc.signal]),
+        deadlineMs,
+        reqHeaders: req.headers,
+        path,
+        model,
+        decision: new RoutingDecision(),
+      };
+    };
+    // G12: compact decision header for the response + optional full JSON
+    // debug log.
+    const emitDecision = (rctx: RequestCtx): string => {
+      const d = rctx.decision!;
+      if (process.env.SOVEREIGN_DECISION_LOG === "1") {
+        log("routing decision", rctx.model, JSON.stringify(d.toJSON()));
+      }
+      return d.compact();
+    };
 
     // Auth endpoints (only reachable when users are configured).
     if (AUTH && req.method === "POST" && path === "/auth/login") {
@@ -356,9 +542,18 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
           `sovereign_governor_worker_exhausted_total{provider="${p}",model="${m}"} ${s.exhaustedTotal}`,
         );
       }
+      L.push(
+        `sovereign_router_inflight_requests ${inflightGate.count}`,
+        `sovereign_router_max_inflight ${inflightGate.limit}`,
+        ...flockMetrics.render(),
+      );
       return new Response(
         "# HELP sovereign_router_requests_total Total chat completion requests per provider\n" +
           "# TYPE sovereign_router_requests_total counter\n" +
+          "# HELP sovereign_router_inflight_requests Current in-flight requests (flock max_inflight)\n" +
+          "# TYPE sovereign_router_inflight_requests gauge\n" +
+          "# HELP sovereign_router_max_inflight Configured in-flight cap\n" +
+          "# TYPE sovereign_router_max_inflight gauge\n" +
           L.join("\n") +
           "\n",
         { headers: { "Content-Type": "text/plain; version=0.0.4" } },
@@ -503,10 +698,21 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
       return json(await runBodybuilderAutonomous(job, bbOpts));
     }
 
+    // G9: multi-path /v1/* proxying (flock V1_WILDCARD) — embeddings,
+    // completions, and rankings proxy with model rewrite + ordered failover
+    // instead of 404ing. Chat-specific machinery (substance guard, stream
+    // injection, coalescing) is skipped inside proxyV1Path.
+    if (req.method === "POST" && isProxyableV1Path(path)) {
+      const rawText = await req.text();
+      const rctx = mkCtx();
+      return proxyV1Path(path, rawText, rctx);
+    }
+
     if (req.method === "POST" && path.includes("/chat/completions")) {
+      const rawText = await req.text();
       let body: ChatBody;
       try {
-        body = (await req.json()) as ChatBody;
+        body = JSON.parse(rawText) as ChatBody;
       } catch {
         return json({ error: "invalid_json" }, 400);
       }
@@ -529,17 +735,79 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
       }
       log(`${req.method} ${path} model=${body.model} strat=${strat}`);
 
+      const rctx = mkCtx(String(body.model || "auto"));
+
       if (body.stream) {
-        return handleStream(body, sid, strat);
+        streamOwnsSlot = true;
+        return handleStream(body, sid, strat, rctx, releaseInflight);
       }
+
+      // G1: request coalescing — identical in-flight buffered POSTs share
+      // one upstream call (flock coalescer.rs). The leader routes; followers
+      // receive the leader's response. A leader whose answer lacks
+      // substance drops the lead instead of publishing emptiness.
+      let lead: Lead | null = null;
+      if (COALESCE_ENABLED) {
+        const reg = coalescer.register(
+          coalesceKey(req.method, path, JSON.stringify(body)),
+        );
+        if (isLead(reg)) {
+          lead = reg.lead;
+          flockMetrics.coalescedLeader++;
+        } else {
+          const shared = await reg.follower;
+          if (shared) {
+            flockMetrics.coalescedFollower++;
+            flockMetrics.recordRequest(
+              "coalesced",
+              String(body.model || "auto"),
+              path,
+              shared.status,
+            );
+            return sharedToResponse(shared);
+          }
+          // Leader vanished without publishing (or the wait hit TTL) —
+          // proceed alone.
+        }
+      }
+      const settleLead = (r: RouteResult) => {
+        if (!lead) return;
+        const l = lead;
+        lead = null;
+        if (r.ok && r.data) {
+          const bytes =
+            typeof r.data === "string"
+              ? new TextEncoder().encode(r.data)
+              : (r.data as Uint8Array);
+          if (bytes.length > 0 && substantive(r)) {
+            l.complete({
+              status: 200,
+              contentType: "application/json",
+              body: bytes,
+              extra: r.interactionId
+                ? [["x-interaction-id", r.interactionId]]
+                : [],
+            });
+            return;
+          }
+        }
+        l.drop();
+      };
 
       // 2M-context tier (2026-10-01): est tokens >1M -> direct keyed
       // openrouter lane (x-ai/grok-4.20, 2M context), skipping the race.
       // Ineligible or pinned failure falls through to the 1M pin, then the
       // normal strategy dispatch.
-      const pinned2m = await tryLongctx2MPin(body, sid, false);
+      const pinned2m = await tryLongctx2MPin(body, sid, false, rctx);
       if (pinned2m && substantive(pinned2m)) {
+        settleLead(pinned2m);
         const t2 = pinned2m.timings;
+        flockMetrics.recordRequest(
+          pinned2m.provider || "none",
+          pinned2m.model || String(body.model || "auto"),
+          path,
+          200,
+        );
         return new Response(pinned2m.data as BodyInit, {
           status: 200,
           headers: {
@@ -548,6 +816,10 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
             "X-Latency": String(Math.round((pinned2m.lat || 0) * 1000) / 1000),
             "X-Strategy": strat,
             "X-Longctx-Pin": "2m",
+            "X-Routing-Decision": emitDecision(rctx),
+            ...(pinned2m.interactionId
+              ? { "x-interaction-id": pinned2m.interactionId }
+              : {}),
             ...(t2
               ? {
                   "X-Sovereign-Timings": `connect_ms=${t2.connect_ms};ttft_ms=${t2.ttft_ms ?? "-"};total_ms=${t2.total_ms}`,
@@ -560,9 +832,16 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
       // 1M-context pin (DECISION 12187): est tokens >200k -> direct keyed
       // nvidia lane, skipping the race. Ineligible or pinned failure falls
       // through to the normal strategy dispatch (single race fallback).
-      const pinned = await tryLongctxPin(body, sid, false);
+      const pinned = await tryLongctxPin(body, sid, false, rctx);
       if (pinned && substantive(pinned)) {
+        settleLead(pinned);
         const t = pinned.timings;
+        flockMetrics.recordRequest(
+          pinned.provider || "none",
+          pinned.model || String(body.model || "auto"),
+          path,
+          200,
+        );
         return new Response(pinned.data as BodyInit, {
           status: 200,
           headers: {
@@ -571,6 +850,10 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
             "X-Latency": String(Math.round((pinned.lat || 0) * 1000) / 1000),
             "X-Strategy": strat,
             "X-Longctx-Pin": "1",
+            "X-Routing-Decision": emitDecision(rctx),
+            ...(pinned.interactionId
+              ? { "x-interaction-id": pinned.interactionId }
+              : {}),
             ...(t
               ? {
                   "X-Sovereign-Timings": `connect_ms=${t.connect_ms};ttft_ms=${t.ttft_ms ?? "-"};total_ms=${t.total_ms}`,
@@ -581,9 +864,38 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
       }
 
       const fn = ROUTERS[strat] || routeHybrid;
-      const r = await fn(body, sid);
+      let r: RouteResult;
+      if (deadlineMs !== undefined) {
+        // G4: race routing against the client deadline so the 504 lands
+        // promptly; the abort signal still cancels the upstream work.
+        const waitMs = Math.max(0, deadlineMs - Date.now());
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        const onDeadline: Promise<RouteResult> = new Promise((resolve) => {
+          timer = setTimeout(
+            () => resolve({ ok: false, status: 504, err: "deadline_exceeded" }),
+            waitMs,
+          );
+          (timer as unknown as { unref?: () => void }).unref?.();
+        });
+        r = await Promise.race([fn(body, sid, rctx), onDeadline]);
+        if (timer) clearTimeout(timer);
+        if (r.status === 504 && r.err === "deadline_exceeded") {
+          flockMetrics.deadlineExceeded++;
+          settleLead(r);
+          return json({ error: "deadline_exceeded" }, 504);
+        }
+      } else {
+        r = await fn(body, sid, rctx);
+      }
       if (r.ok) {
+        settleLead(r);
         const t = r.timings;
+        flockMetrics.recordRequest(
+          r.provider || "none",
+          r.model || String(body.model || "auto"),
+          path,
+          200,
+        );
         return new Response(r.data as BodyInit, {
           status: 200,
           headers: {
@@ -591,6 +903,8 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
             "X-Routed-Via": `${r.provider}/${r.model}`,
             "X-Latency": String(Math.round((r.lat || 0) * 1000) / 1000),
             "X-Strategy": strat,
+            "X-Routing-Decision": emitDecision(rctx),
+            ...(r.interactionId ? { "x-interaction-id": r.interactionId } : {}),
             ...(r.switches
               ? { "X-Sovereign-Switches": String(r.switches) }
               : {}),
@@ -604,6 +918,13 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
           },
         });
       }
+      settleLead(r);
+      flockMetrics.recordRequest(
+        r.provider || "none",
+        String(body.model || "auto"),
+        path,
+        r.status || 503,
+      );
       return json(
         { error: r.err || "exhausted", status: r.status },
         r.status || 503,
@@ -611,6 +932,9 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
     }
 
     return new Response("Not Found", { status: 404 });
+    } finally {
+      if (!streamOwnsSlot) releaseInflight();
+    }
   },
 });
 
@@ -630,6 +954,7 @@ function hotReload(source: string): Record<string, unknown> {
   // re-admits revived providers on its next window.
   refreshLiveModels().catch((e) => log("post-reload live refresh failed:", e));
   const priors = state.applyBenchPriors();
+  rebuildRateLimiter();
   log(`hot reload (${source}): priors=${JSON.stringify(priors)}`);
   return { source, keys, priors };
 }
