@@ -355,7 +355,7 @@ export function buildProvidersTauYaml(input: CodegenInput): string {
     "",
     "providers:",
     "  flock:",
-    '    baseUrl: http://127.0.0.1:25193/v1',
+    '    baseUrl: http://127.0.0.1:25104/v1',
     "    api: openai-completions",
     '    apiKey: "!cat /home/toxic/.tau/flock.key"',
     "    discovery:",

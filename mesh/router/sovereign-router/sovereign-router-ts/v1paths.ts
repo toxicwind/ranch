@@ -42,7 +42,7 @@ interface V1Candidate {
   model: string;
 }
 
-function candidatesFor(model: string): V1Candidate[] {
+function candidatesFor(model: string, path: string): V1Candidate[] {
   // Explicit model: pin its provider (resolveModel covers aliases,
   // provider:model specs, and catalog ids).
   if (model && isRoutableModelId(model)) {
@@ -50,6 +50,11 @@ function candidatesFor(model: string): V1Candidate[] {
     if (keyOk(p) && state.circuitOk(p)) return [{ provider: p, model: mid }];
   }
   const out: V1Candidate[] = [];
+  // /v1/embeddings must ride an embedding-capable model id: sending a chat
+  // model id to a provider's embeddings endpoint 404s/501s upstream, so the
+  // whole G9 path degrades to an upstream error. Prefer catalog ids matching
+  // /embed/i per provider; fall back to the first usable model otherwise.
+  const wantEmbed = path === "/v1/embeddings";
   for (const p of Object.keys(PROVIDERS)) {
     if (!keyOk(p) || !state.circuitOk(p) || state.laneDead(p)) continue;
     // Prefer a provider whose catalog actually lists the requested model
@@ -58,8 +63,19 @@ function candidatesFor(model: string): V1Candidate[] {
     const mid = listed
       ? model
       : (() => {
-          for (const m of catalogModelsFor(p)) {
-            if (!state.flapBanned(p, m) && !state.isEntitlementDead(p, m)) return m;
+          const usable = (m: string) =>
+            !state.flapBanned(p, m) && !state.isEntitlementDead(p, m);
+          const cat = catalogModelsFor(p);
+          if (wantEmbed) {
+            for (const m of cat) {
+              if (/embed/i.test(m) && usable(m)) return m;
+            }
+            // No embedding-capable model on this provider: sit out instead of
+            // burning a chat model id against its embeddings endpoint.
+            return undefined;
+          }
+          for (const m of cat) {
+            if (usable(m)) return m;
           }
           return undefined;
         })();
@@ -86,7 +102,7 @@ export async function proxyV1Path(
     return Response.json({ error: "invalid_json" }, { status: 400 });
   }
   const model = String(parsed["model"] || "auto");
-  const cands = candidatesFor(model);
+  const cands = candidatesFor(model, path);
   if (!cands.length) {
     return Response.json({ error: "no_providers_for_path", path }, { status: 503 });
   }
@@ -140,7 +156,10 @@ export async function proxyV1Path(
       };
       lastStatus = resp.status;
       lastErr = probe.err || lastErr;
-      if (shouldFailover(probe)) continue;
+      // On the embeddings path an upstream 404 means "this model id does not
+      // serve embeddings here" — the next candidate (different
+      // provider/model) may. Don't let one bad catalog id end the race.
+      if (shouldFailover(probe) || (path === "/v1/embeddings" && resp.status === 404)) continue;
       return v1PathResponse(resp.status, data, resp.headers.get("content-type"), interactionId);
     }
     if (state.circuit.get(provider) === "half") state.circuit.set(provider, "closed");

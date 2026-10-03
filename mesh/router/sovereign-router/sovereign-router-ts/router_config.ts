@@ -170,7 +170,42 @@ function effectiveDefs(): ProviderDef[] {
             "/v1",
       };
     return d;
-  });
+  }).concat([
+    // Rust-parity (flock roost_providers.rs "google"): keypool :25109 owns
+    // the Google EAP key and translates OpenAI bodies onto the Interactions
+    // API. This is the only upstream that answers with x-interaction-id,
+    // which the strategy layer captures and relays (G8) so Gemini tool
+    // loops survive turn 2.
+    {
+      name: "google-eap",
+      displayName: "google (EAP interactions via keypool)",
+      baseUrl: "http://127.0.0.1:25109/gemini-eap-interactions",
+      keyEnv: "",
+      auth: "none",
+      adapter: "static",
+      staticModels: [
+        "models/gemini-flash-tool-retrieval",
+        "models/gemini-3.8-flash",
+        "models/gemini-3.7-flash",
+        "models/gemini-3.6-flash",
+        "models/gemini-3.5-flash",
+        "models/gemini-3.1-pro-preview",
+        "models/gemini-3-flash-preview",
+        "models/gemini-2.5-flash",
+      ],
+      seeds: [
+        "models/gemini-flash-tool-retrieval",
+        "models/gemini-3.8-flash",
+        "models/gemini-3.7-flash",
+        "models/gemini-3.6-flash",
+        "models/gemini-3.5-flash",
+        "models/gemini-3.1-pro-preview",
+        "models/gemini-3-flash-preview",
+        "models/gemini-2.5-flash",
+      ],
+      routerLocal: true,
+    },
+  ]);
 }
 
 const EFFECTIVE_DEFS = effectiveDefs();

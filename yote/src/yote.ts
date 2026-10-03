@@ -67,7 +67,7 @@ const CHS = (process.env.YOTE_TELEGRAM_CHANNELS ?? "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
-const LLM = process.env.LLM_PROXY_URL ?? "http://127.0.0.1:25193/v1";
+const LLM = process.env.LLM_PROXY_URL ?? "http://127.0.0.1:25104/v1";
 const OF_URL = process.env.OPENFANG_URL ?? "http://127.0.0.1:25103";
 const DEFAULT_AGENT = (
   process.env.YOTE_OPENFANG_AGENT ||

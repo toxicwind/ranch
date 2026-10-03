@@ -30,7 +30,7 @@ Persistent cell-side daemon (runs as root), listening on a local TCP port
                        SIGTERM the job's process group (pid verified via
                        /proc cmdline; a reused pid is never signaled)
   /herd/*              proxied to yote 127.0.0.1:25100 (prefix stripped)
-  /flock/*             proxied to yote 127.0.0.1:25193 (prefix stripped)
+  /flock/*             proxied to yote 127.0.0.1:25104 (prefix stripped)
 
 Service proxying is HTTP-over-exec via /home/toxic/.cache/yote_svc_proxy.py
 on yote: one exec call per proxied request, no new yote ports, no server
@@ -57,7 +57,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # The cell-side copy at ~/workspace/awrawr-bridge/exec.py must be synced from there.
 BRIDGE_EXEC = os.path.expanduser("~/workspace/awrawr-bridge/exec.py")
 YOTE_HELPER = "/home/toxic/.cache/yote_svc_proxy.py"
-SVC_PORTS = {"herd": 25100, "flock": 25193}
+SVC_PORTS = {"herd": 25100, "flock": 25104}
 MAX_BODY = 10 * 1024 * 1024
 
 # --- bridge-max: background dispatch ---------------------------------------
