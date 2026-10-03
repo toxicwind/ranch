@@ -52,7 +52,14 @@ class ConnectorDown(Exception):
 
 
 def _is_retryable_exec_error(msg):
-    """True if an exec failure is safe to retry (pre-dispatch, never ran)."""
+    """True if an exec failure is safe to retry (pre-dispatch, never ran).
+
+    ONLY fast pre-dispatch failures are retryable. "all lanes down" means
+    the bridge burned the full lane timeouts (150s+) trying and failing --
+    retrying it 3x is what piled 142 stuck processes during the 2026-10-03
+    flap (4 attempts x 150s = 10 min hang per invocation). A bridge outage
+    is not fixed by immediate retry; the circuit breaker handles it.
+    """
     # "bridge not connected" = daemon never sent the frame (see exec_fast).
     # ConnectorDown = daemon unreachable, nothing dispatched.
     # Anything mentioning "timeout" or "reconnecting" may have executed:
@@ -62,10 +69,14 @@ def _is_retryable_exec_error(msg):
     low = msg.lower()
     if "timeout" in low or "reconnecting" in low:
         return False
+    # "all lanes down" / "connect failure": the bridge ATTEMPTED the
+    # command through all lanes and failed slowly. Not retryable -- the
+    # circuit breaker (below) fails these fast instead of burning
+    # another full timeout cycle per retry.
+    if "all lanes down" in low or "connect failure" in low:
+        return False
     return ("bridge not connected" in low
-            or "connector down" in low
-            or "connect failure" in low
-            or "all lanes down" in low)
+            or "connector down" in low)
 
 
 def with_exec_retry(fn, max_retries=3):
@@ -92,6 +103,51 @@ def with_exec_retry(fn, max_retries=3):
                   f"{delay:.1f}s", file=sys.stderr)
             _time.sleep(delay)
     raise last
+
+
+# --- bridge circuit breaker: fail fast when the bridge is known down ---
+# The transport layer (awrawr-bridge/exec.py) marks degraded lanes via
+# flag files: ~/.cache/awrawr-ws-down (15s TTL) and
+# ~/.cache/awrawr-https-down (60s TTL). When BOTH lanes are down, any exec
+# attempt will burn the full timeout (150s+) before failing. Check the
+# flags first and fail in milliseconds instead of minutes.
+_WS_DOWN_FLAG = os.path.expanduser("~/.cache/awrawr-ws-down")
+_HTTPS_DOWN_FLAG = os.path.expanduser("~/.cache/awrawr-https-down")
+_WS_DOWN_TTL = 15
+_HTTPS_DOWN_TTL = 60
+
+
+def _bridge_known_down():
+    """(down, reason): True if both lanes are marked degraded.
+
+    Fail-fast gate for the exec path. A single bridge flap used to
+    cascade into 142 stuck yote-conn processes (2026-10-03): each
+    invocation burned 150s+ per attempt x 4 retries = 10 min hang,
+    while crons/watchdogs kept spawning more. The circuit breaker
+    ensures only the first process pays the timeout; the rest fail
+    in <100ms until the lanes recover.
+    """
+    import time as _time
+    ws_down = False
+    https_down = False
+    try:
+        ws_down = (_time.time() - os.path.getmtime(_WS_DOWN_FLAG)
+                   < _WS_DOWN_TTL)
+    except OSError:
+        pass
+    try:
+        with open(_HTTPS_DOWN_FLAG) as _f:
+            _rec = json.load(_f)
+        https_down = (_time.time() - float(_rec.get("ts", 0))
+                      < _HTTPS_DOWN_TTL)
+    except (OSError, ValueError, TypeError):
+        pass
+    if ws_down and https_down:
+        return True, ("both lanes marked down "
+                      "(ws %ds TTL, https %ds TTL)" % (_WS_DOWN_TTL,
+                                                        _HTTPS_DOWN_TTL))
+    return False, ""
+
 
 try:
     from bridge_sem import bridge_slot
@@ -172,7 +228,9 @@ def req(method, path, data=None, ctype="application/json"):
     if data:
         r.add_header("Content-Type", ctype)
     try:
-        with urllib.request.urlopen(r, timeout=300) as resp:
+        # 180s: the daemon's worst case is ~160s (race 5s + HTTPS 150s).
+        # Was 300s; during a flap every caller blocked the full 5 min.
+        with urllib.request.urlopen(r, timeout=180) as resp:
             return resp.status, resp.read()
     except urllib.error.HTTPError as e:
         return e.code, e.read()
@@ -222,6 +280,14 @@ def main():
                 print(d["handle"])
                 return 0
             print("dispatch failed: %s" % d.get("error"), file=sys.stderr)
+            return 1
+        # Circuit breaker: fail fast if the bridge is known down.
+        # Don't burn 120s waiting for a slot + 150s per attempt when
+        # the lanes are already marked degraded.
+        _down, _why = _bridge_known_down()
+        if _down:
+            print("yote-conn: bridge down (circuit breaker): %s" % _why,
+                  file=sys.stderr)
             return 1
         with bridge_slot():
             def _do_exec():
