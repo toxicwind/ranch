@@ -278,6 +278,14 @@ Bun.serve<SockData>({
   hostname: "0.0.0.0",
   async fetch(req, server) {
     const url = new URL(req.url);
+    // --- funnel mount prefix: the UI loads under /fleet on the funnel, so
+    // relative fetches arrive as /fleet/wait, /fleet/send, /fleet/squawk-ws...
+    // Strip the /fleet segment so both lanes (funnel + tailnet-direct) hit
+    // the same handlers below. Anchored to the leading segment only, so
+    // /fleet-ui (a different daemon) and similarly-prefixed paths are untouched.
+    if (url.pathname === "/fleet" || url.pathname.startsWith("/fleet/")) {
+      url.pathname = url.pathname.slice("/fleet".length) || "/";
+    }
     // --- websocket upgrade: shuttle to the real backend, don't fetch-proxy ---
     if (req.headers.get("upgrade")?.toLowerCase() === "websocket") {
       const target = wsTarget(url.pathname, url.search);
