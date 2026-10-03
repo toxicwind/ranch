@@ -5,9 +5,17 @@
  * Implements the shared primitives contract for authentication services
  */
 
-import { Result, attempt, COOKIE, SESSION_TTL_SECS, THROTTLE_WINDOW_SECS, THROTTLE_MAX_FAILURES, PBKDF2_ITERS, HASH_PREFIX, now } from "../shared";
-import { User, StoredConfig, Admin, createAdmin, parseStoredConfig, form_field, url_decode } from "./users";
-import { base64_decode } from "./tokens";
+import { base64_decode, form_field as form_field_impl, url_decode, now, verify_password } from "./tokens";
+import type { User, StoredConfig } from "./users";
+import { Admin, createAdmin, parseStoredConfig } from "./users";
+
+// Session constants. Canonical definitions live in src/strategy/router_auth.ts;
+// mirrored here because src/auth/ is a leaf module.
+const COOKIE = "sovereign_session";
+const SESSION_TTL_SECS = 12 * 3600;
+
+/** Discriminated result envelope returned by attemptAuth. */
+export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 
 /** Auth request containing token and optional context. */
 export interface AuthRequest {
@@ -63,6 +71,7 @@ export async function attemptAuth(
       const parts = req.token.split(".");
       if (parts.length === 4) {
         const [expHex, userHex, frag, tagHex] = parts;
+        if (!userHex) return Promise.reject(new Error("Malformed session token"));
         const decoder = new TextDecoder();
         const userBytes = Uint8Array.fromHex(userHex);
         const parsedUsername = decoder.decode(userBytes);
@@ -101,6 +110,7 @@ export async function attemptAuth(
       }
 
       const user = config.users[0];
+      if (!user) return Promise.reject(new Error("User not found"));
       const verified = await verify_password(passwordPart, user.password_hash);
 
       if (!verified) {
@@ -116,8 +126,11 @@ export async function attemptAuth(
     if (username) {
       return Promise.resolve({
         ok: true,
-        token: req.token, // session token already
-        metadata: { username, authenticated: true },
+        value: {
+          ok: true,
+          token: req.token, // session token already
+          metadata: { username, authenticated: true },
+        },
       });
     }
 
@@ -159,7 +172,7 @@ export async function getTokenInfo(tokenId: string): Promise<{
         const parts = token.split(".");
         if (parts.length >= 2) {
           try {
-            const expiry = parseInt(parts[0], 16);
+            const expiry = parseInt(parts[0] ?? "", 16);
             return {
               id: tokenId,
               expiresAt: expiry > 0 ? expiry * 1000 : Date.now(),
@@ -209,7 +222,7 @@ export function mint_session_cookie(
 
 /** Parse a single field from an application/x-www-form-urlencoded body. */
 export function form_field(body: string, field: string): string | null {
-  return form_field(body, field);
+  return form_field_impl(body, field);
 }
 
 /** URL-decode a string, surviving multibyte and malformed escapes. */
