@@ -20,6 +20,6 @@
   "type": "module",
   "version": "0.1.0",
   "dependencies": {
-    "@google/genai": "/home/toxic/stage/eap-sdk/google-genai-2.22.0.tgz"
+    "@google/genai": "2.22.0"
   }
 }
