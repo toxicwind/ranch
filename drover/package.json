@@ -350,7 +350,7 @@
     "compile": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "typecheck": "tsc --noEmit",
-    "install": "code-insiders --install-extension drover-1.0.0-sovereign.vsix --force",
+    "install-extension": "code-insiders --install-extension drover-1.0.0-sovereign.vsix --force",
     "sidecar:build": "cd sidecar && node esbuild.js",
     "sidecar:package": "cd sidecar && node esbuild.js && npx --no-install @vscode/vsce package --no-dependencies --out drover-eap-0.1.0.vsix",
     "sidecar:install": "code-insiders --install-extension sidecar/drover-eap-0.1.0.vsix --force"
