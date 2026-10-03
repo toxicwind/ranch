@@ -1,11 +1,21 @@
 name: corral CI
 
-# Package-local CI contract for @sovereign/corral.
-# NOTE: GitHub only runs workflows from the repo ROOT .github/workflows/.
-# The live workflow is .github/workflows/corral.yml (path-filtered to corral/**);
-# this file mirrors it so the package stays self-describing.
+# GitHub runs workflows from the repo ROOT only. This is the live CI for the
+# corral package (ranch/corral): bun install + typecheck + test, path-filtered
+# so it only fires when corral or this workflow changes.
+# (corral/.github/workflows/ci.yml mirrors these same gates as the
+# package-local contract.)
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+    paths:
+      - "corral/**"
+      - ".github/workflows/corral.yml"
+  pull_request:
+    paths:
+      - "corral/**"
+      - ".github/workflows/corral.yml"
 
 permissions:
   contents: read

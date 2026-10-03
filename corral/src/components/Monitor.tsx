@@ -59,7 +59,7 @@ export function Monitor({
 
         // Create renderer
         const renderer = await createCliRenderer({
-          useAlternateScreen: true,
+          screenMode: "alternate-screen",
           useMouse: false,
           exitOnCtrlC: false,
         });
