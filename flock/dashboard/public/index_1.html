@@ -12,7 +12,7 @@
 <body class="bg-[#07070a] text-zinc-100">
 <div class="max-w-[1800px] mx-auto p-6">
   <!-- Header MODEL FOCUS -->
-  <div class="flex justify-between items-start mb-6">
+  <div class="flex flex-wrap gap-4 justify-between items-start mb-6">
     <div>
       <h1 class="text-5xl font-black tracking-tighter">MODEL <span class="text-lime-400">INTEL</span> — NVIDIA NIM</h1>
       <p class="text-zinc-400 mt-2 text-sm">All forks history.db consolidated — Sept 13 2026 — 28 repos • 57 files • 25,222 runs • 610,090 results • raw.githubusercontent.com</p>
@@ -32,17 +32,17 @@
   </div>
 
   <!-- Stats MODEL focus -->
-  <div class="grid grid-cols-6 gap-3 mb-6">
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4"><div class="text-[10px] text-zinc-500 uppercase">Unique Models</div><div class="text-2xl font-bold" id="s-models">-</div><div class="text-[10px] text-zinc-600">across all forks</div></div>
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4"><div class="text-[10px] text-zinc-500 uppercase">Avg Response</div><div class="text-2xl font-bold" id="s-avg">-</div><div class="text-[10px] text-zinc-600">ms all models</div></div>
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4"><div class="text-[10px] text-zinc-500 uppercase">Fastest LLM</div><div class="text-lg font-bold text-lime-400" id="s-fast">-</div><div class="text-[10px] text-zinc-600" id="s-fast-ms">-</div></div>
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4"><div class="text-[10px] text-zinc-500 uppercase">Slowest LLM</div><div class="text-lg font-bold text-red-400" id="s-slow">-</div><div class="text-[10px] text-zinc-600" id="s-slow-ms">-</div></div>
-    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4"><div class="text-[10px] text-zinc-500 uppercase">Anomalous Embed</div><div class="text-lg font-bold text-amber-400" id="s-embed">-</div><div class="text-[10px] text-zinc-600"><500ms</div></div>
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4"><div class="text-[10px] text-zinc-500 uppercase">Anomalous Embed</div><div class="text-lg font-bold text-amber-400" id="s-embed">-</div><div class="text-[10px] text-zinc-600">&lt;500ms</div></div>
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4"><div class="text-[10px] text-zinc-500 uppercase">Total Runs</div><div class="text-2xl font-bold" id="s-runs">25,222</div><div class="text-[10px] text-zinc-600">610,090 results</div></div>
   </div>
 
   <!-- Model Comparison -->
-  <div class="grid grid-cols-3 gap-4 mb-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 col-span-2">
       <h3 class="font-bold mb-1">Model Head-to-Head — deepseek-v4-pro-0813 vs minimax-m3 vs nemotron-3-ultra vs super-120b vs nano-omni</h3>
       <p class="text-xs text-zinc-500 mb-4">Lower ms = faster, but check tokens & success. Anomaly: nvclip 81ms is embedding, not LLM.</p>
@@ -56,7 +56,7 @@
   </div>
 
   <!-- Deep Dive Requested Models -->
-  <div class="grid grid-cols-3 gap-4 mb-6">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-gradient-to-br from-lime-900/20 to-zinc-900 border border-lime-800/30 rounded-2xl p-5">
       <h3 class="font-bold text-lime-300">deepseek-v4-pro-0813</h3>
       <div class="text-xs text-zinc-400 mt-1">Best coding / reasoning — maurodruwel 9861ms, i3t2y 11263ms</div>
@@ -79,9 +79,9 @@
 
   <!-- All Models Table MODEL FOCUS -->
   <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-6">
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex flex-wrap gap-3 justify-between items-center mb-4">
       <h3 class="font-bold">All Models — Digging & Anomaly Comparison (model-first, not repo-first)</h3>
-      <input id="searchModel" placeholder="search model, provider, anomaly..." class="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-sm w-80 mono">
+      <input id="searchModel" placeholder="search model, provider, anomaly..." class="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-sm w-80 max-w-full mono">
     </div>
     <div class="overflow-auto max-h-[600px]">
       <table class="w-full text-sm mono">
@@ -95,7 +95,7 @@
   <div class="bg-amber-950/20 border border-amber-800/30 rounded-2xl p-5">
     <h3 class="font-bold text-amber-300">Anomalous Models Detected</h3>
     <p class="text-xs text-zinc-400 mt-1">Models that don't behave like normal LLMs — embedding, translation, or broken benchmarks</p>
-    <div id="anomalyList" class="mt-4 grid grid-cols-2 gap-3 text-xs mono"></div>
+    <div id="anomalyList" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs mono"></div>
   </div>
 </div>
 

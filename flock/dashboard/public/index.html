@@ -6,15 +6,11 @@
 <title>MODEL INTEL MAXIMAL — NVIDIA NIM — 95 models • 610k results • 28 repos</title>
 <!-- MAXIMAL IMPORTS -->
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.1/dist/ag-grid-community.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-<script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@300;400;600;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.1/styles/ag-theme-alpine.css">
 <style>
   *{font-family: 'Space Grotesk', Inter, sans-serif}
   .mono{font-family: 'JetBrains Mono', monospace}
@@ -23,21 +19,19 @@
   .neon{box-shadow:0 0 20px rgba(163,230,53,0.3), inset 0 1px 0 rgba(255,255,255,0.1)}
   .gradient-text{background:linear-gradient(90deg,#a3e635,#22d3ee,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
   .grid-pattern{background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px); background-size:20px 20px}
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-  .float{animation:float 6s ease-in-out infinite}
 </style>
 </head>
 <body class="grid-pattern">
 <!-- HEADER MAXIMAL -->
 <div class="sticky top-0 z-50 glass border-b border-zinc-800">
-  <div class="max-w-[2000px] mx-auto px-6 py-4 flex justify-between items-center">
+  <div class="max-w-[2000px] mx-auto px-6 py-4 flex flex-wrap gap-4 justify-between items-center">
     <div class="flex items-center gap-6">
       <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-lime-400 to-cyan-400 flex items-center justify-center font-black text-black text-xl">NIM</div>
       <div>
         <h1 class="text-3xl font-black tracking-tighter">MODEL INTEL <span class="gradient-text">MAXIMAL</span></h1>
         <p class="text-[10px] mono text-zinc-500">28 repos • 57 files • 25,222 runs • 610,090 results • 95 unique models • raw.githubusercontent.com</p>
       </div>
-      <div class="flex gap-2 ml-6">
+      <div class="flex flex-wrap gap-2 ml-6">
         <span class="px-3 py-1 rounded-full bg-lime-400 text-black text-[10px] font-bold mono animate-pulse">deepseek-v4-pro-0813</span>
         <span class="px-3 py-1 rounded-full glass text-[10px] mono">minimax-m3 • 30/9</span>
         <span class="px-3 py-1 rounded-full glass text-[10px] mono">nemotron-3-ultra-550b</span>
@@ -54,26 +48,26 @@
 
 <div class="max-w-[2000px] mx-auto p-6 space-y-6">
   <!-- STATS MAXIMAL -->
-  <div class="grid grid-cols-7 gap-3">
+  <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-3">
     <div class="glass rounded-2xl p-4 neon"><div class="text-[9px] text-zinc-500 uppercase tracking-widest">Unique Models</div><div class="text-3xl font-black mt-1" id="s-models">95</div><div class="text-[10px] mono text-zinc-600">95 from 28 forks</div><div class="mt-2 h-1 w-full bg-zinc-800 rounded-full overflow-hidden"><div class="h-full bg-lime-400" style="width:95%"></div></div></div>
     <div class="glass rounded-2xl p-4"><div class="text-[9px] text-zinc-500 uppercase">Avg Response</div><div class="text-3xl font-black" id="s-avg">16132ms</div><div class="text-[10px] mono text-zinc-600">all 95 models</div><div class="text-[10px] text-amber-400 mt-1">↑ includes ultra 154s</div></div>
     <div class="glass rounded-2xl p-4"><div class="text-[9px] text-zinc-500 uppercase">Fastest Real LLM</div><div class="text-lg font-bold text-lime-400" id="s-fast">mistral-small</div><div class="text-[10px] mono text-zinc-500" id="s-fast-ms">3336ms EastArctica</div><div class="text-[10px] mono text-zinc-600">not nvclip 81ms embed</div></div>
     <div class="glass rounded-2xl p-4"><div class="text-[9px] text-zinc-500 uppercase">Slowest</div><div class="text-lg font-bold text-red-400" id="s-slow">llama-3.3-70b</div><div class="text-[10px] mono" id="s-slow-ms">154154ms</div><div class="text-[10px] text-zinc-600">heavy ultra failing</div></div>
-    <div class="glass rounded-2xl p-4"><div class="text-[9px] text-zinc-500 uppercase">Embed Anomalies</div><div class="text-3xl font-black text-amber-400" id="s-embed">51</div><div class="text-[10px] mono"><500ms fake LLM</div><div class="text-[10px] text-zinc-500">nvclip, arctic-embed</div></div>
+    <div class="glass rounded-2xl p-4"><div class="text-[9px] text-zinc-500 uppercase">Embed Anomalies</div><div class="text-3xl font-black text-amber-400" id="s-embed">51</div><div class="text-[10px] mono">&lt;500ms fake LLM</div><div class="text-[10px] text-zinc-500">nvclip, arctic-embed</div></div>
     <div class="glass rounded-2xl p-4"><div class="text-[9px] text-zinc-500 uppercase">Reliable King</div><div class="text-sm font-bold">super-120b-a12b</div><div class="text-[10px] mono text-zinc-500">1063 runs • 23024 results</div><div class="text-[10px] text-lime-400">pretty reliable</div></div>
     <div class="glass rounded-2xl p-4"><div class="text-[9px] text-zinc-500 uppercase">Total Intelligence</div><div class="text-2xl font-black">14.9</div><div class="text-[10px] mono">nano-omni reasoning</div><div class="text-[10px] text-zinc-600">163.3 tps • 90.6% uptime</div></div>
   </div>
 
   <!-- MAXIMAL CHARTS ROW 1 -->
-  <div class="grid grid-cols-12 gap-4">
-    <div class="col-span-8 glass rounded-2xl p-5">
-      <div class="flex justify-between items-center mb-4">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+    <div class="lg:col-span-8 glass rounded-2xl p-5">
+      <div class="flex flex-wrap gap-3 justify-between items-center mb-4">
         <h3 class="font-black">Head-to-Head — Speed vs Intelligence vs Reliability (bubble = results)</h3>
         <div class="flex gap-2 text-[10px] mono"><span class="px-2 py-1 rounded bg-lime-400 text-black">● Requested</span><span class="px-2 py-1 rounded glass">● Anomaly</span></div>
       </div>
       <div id="plotCompare" style="height:400px"></div>
     </div>
-    <div class="col-span-4 glass rounded-2xl p-5">
+    <div class="lg:col-span-4 glass rounded-2xl p-5">
       <h3 class="font-bold mb-2">Provider Dominance</h3>
       <div id="chartProvider" style="height:180px"></div>
       <div class="mt-3 space-y-1 text-[10px] mono" id="providerList"></div>
@@ -85,7 +79,7 @@
   </div>
 
   <!-- MAXIMAL CHARTS ROW 2 -->
-  <div class="grid grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <div class="glass rounded-2xl p-5">
       <h3 class="font-bold">deepseek-v4-pro-0813 — Coding King</h3>
       <p class="text-[10px] text-zinc-500">maurodruwel 9861ms • i3t2y 11263ms • 25 runs • 9428 results • 7 repos</p>
@@ -115,10 +109,10 @@
 
   <!-- MAXIMAL DATAFRAME — AG GRID -->
   <div class="glass rounded-2xl p-5">
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex flex-wrap gap-3 justify-between items-center mb-4">
       <h3 class="font-black text-xl">MAXIMAL DATAFRAME — 95 Models • Digging & Anomaly • What User Wants: Speed, Intelligence, Uptime, Throughput, Cost</h3>
       <div class="flex gap-2">
-        <input id="searchModel" placeholder="🔍 model, provider, anomaly, verdict, category..." class="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-xs w-96 mono">
+        <input id="searchModel" placeholder="🔍 model, provider, anomaly, verdict, category..." class="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-xs w-96 max-w-full mono">
         <select id="filterCat" class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs mono"><option value="">All Categories</option><option>Embedding</option><option>Translation</option><option>Fast LLM</option><option>Standard LLM</option><option>Ultra LLM</option><option>Anomalous Fast</option></select>
       </div>
     </div>
@@ -126,7 +120,7 @@
   </div>
 
   <!-- ANOMALY MAXIMAL -->
-  <div class="grid grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="glass rounded-2xl p-5 border-amber-800/20">
       <h3 class="font-black text-amber-300">🚨 57 Anomalies — Why nvclip 81ms is NOT LLM</h3>
       <p class="text-[10px] text-zinc-500 mt-1">Embedding models report 80-130ms but are not comparable to 3k-15k LLM. llama-3_3-70b @ 89ms is TTFB not full. Llama-3.3-70b @ 154s is failing ultra.</p>
@@ -142,7 +136,7 @@
   <!-- RALPH CORRECT SELECTIONS -->
   <div class="glass rounded-2xl p-5 neon">
     <h3 class="font-black">✅ CORRECT SELECTIONS FOR RALPH WORKFLOW — FROM 610k RESULTS</h3>
-    <div class="grid grid-cols-4 gap-4 mt-4 mono text-xs">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mt-4 mono text-xs">
       <div class="bg-zinc-950 rounded-xl p-4"><div class="text-lime-400 font-bold">planning → claude + nanocoder</div><div class="mt-2 text-zinc-400">nano-omni 3335ms fast reasoning (90.6% uptime, 14.9 intel, 163.3 tps) + minimax-m3 balanced</div><div class="mt-2 px-2 py-1 rounded bg-zinc-900">nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</div></div>
       <div class="bg-zinc-950 rounded-xl p-4"><div class="text-cyan-400 font-bold">development → opencode</div><div class="mt-2 text-zinc-400">deepseek-v4-pro-0813 coding king 9861ms maurodruwel, 11263ms i3t2y, 25 runs</div><div class="mt-2 px-2 py-1 rounded bg-zinc-900">deepseek-ai/deepseek-v4-pro-0813</div></div>
       <div class="bg-zinc-950 rounded-xl p-4"><div class="text-amber-400 font-bold">review → ultra-550b</div><div class="mt-2 text-zinc-400">max capability, 31907ms avg, 29 runs, 14731 results, 8 repos</div><div class="mt-2 px-2 py-1 rounded bg-zinc-900">nvidia/nemotron-3-ultra-550b-a55b</div></div>
@@ -282,7 +276,7 @@ async function load() {
 
   // D3 Network
   const width=600, height=400;
-  const svg=d3.select('#network').append('svg').attr('width',width).attr('height',height);
+  const svg=d3.select('#network').append('svg').attr('viewBox','0 0 '+width+' '+height).style('width','100%').style('height','auto');
   const nodes=models.slice(0,30).map((m,i)=>({id:m.model, r:Math.log(m.totalResults+1)*3+5, cat:m.cat}));
   const links=[];
   // link models that share repo
@@ -309,8 +303,6 @@ async function load() {
     gridOptions.api.exportDataAsCsv();
   });
 
-  // animejs float
-  anime({targets:'.float', translateY:[-5,5], direction:'alternate', loop:true, duration:3000, easing:'easeInOutSine'});
 }
 load();
 </script>
