@@ -2,7 +2,7 @@
  * flock/ts/strategy/catalog — provider catalog helpers for the strategy tier.
  *
  * Adapted from sovereign-router's router_config.ts. The master provider
- * definitions live in the Roost package (../../roost/src); this module
+ * definitions live in the estate providers package; this module
  * projects them into routing-relevant ProviderViews and ports the pure
  * catalog functions the strategies need: key resolution, model-spec
  * normalization ("provider:model" / "provider/model" / bare / alias),
@@ -13,7 +13,7 @@
  * overlay — same contract as the original.
  */
 import { existsSync, readFileSync } from "node:fs";
-import type { ProviderDef } from "../../roost/src/types.ts";
+import type { ProviderDef } from "../../../../../../packages/providers/src/index.ts";
 import type { ProviderView } from "./types.ts";
 
 // ---------------------------------------------------------------------------
@@ -212,10 +212,16 @@ export function matchModelOnProvider(
   if (!r) return null;
   const cat = q.servingModels(p);
   if (cat.includes(r)) return r;
-  const stripTag = (m: string) => m.split(":")[0];
-  const rBase = stripTag(r).split("/").pop()!.toLowerCase();
+  // split() always yields >=1 element, so [0] is never undefined; indexOf/
+  // slice says that to the type system without a non-null assertion.
+  const stripTag = (m: string): string => {
+    const i = m.indexOf(":");
+    return i === -1 ? m : m.slice(0, i);
+  };
+  const lastSeg = (s: string): string => s.slice(s.lastIndexOf("/") + 1);
+  const rBase = lastSeg(stripTag(r)).toLowerCase();
   for (const m of cat) {
-    if (stripTag(m).split("/").pop()!.toLowerCase() === rBase) return m;
+    if (lastSeg(stripTag(m)).toLowerCase() === rBase) return m;
   }
   return null;
 }

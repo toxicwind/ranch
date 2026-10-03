@@ -168,7 +168,7 @@ export function livenessVerdict(text: string | null): { healthy: boolean; reason
 export function p50(xs: number[]): number | null {
   if (xs.length === 0) return null;
   const s = [...xs].sort((a, b) => a - b);
-  return s[Math.floor(s.length / 2)];
+  return s[Math.floor(s.length / 2)] ?? null;
 }
 
 export function resolveKey(def: ProviderDef): string | undefined {

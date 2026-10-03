@@ -1,6 +1,7 @@
 import type { ChatBody, RouteResult } from "./router_types.ts";
+import type { ReadableStreamReadResult } from "node:stream/web";
 import { state, isWorkerExhausted } from "./router_matrix.ts";
-import { PROVIDERS, PROVIDER_MODELS, catalogModelsFor, modelFree, LOCAL_ROLES, CODING, MAX_PARALLEL, FIFO_MAX, STRATEGY, UA, AST_RE, getKey, keyOk, firstModelFor, resolveModel, isLocalSwapModelId, isAst, isExplicit, json, normalizeModelSpec, CONNECT_MS, TTFT_MS, ATTEMPT_MS, ATTEMPT_STREAM_MS, HEDGE_MS } from "./router_config.ts";
+import { PROVIDERS, catalogModelsFor, modelFree, LOCAL_ROLES, CODING, MAX_PARALLEL, FIFO_MAX, STRATEGY, UA, AST_RE, getKey, keyOk, firstModelFor, resolveModel, isLocalSwapModelId, isAst, isExplicit, json, normalizeModelSpec, CONNECT_MS, TTFT_MS, ATTEMPT_MS, ATTEMPT_STREAM_MS, HEDGE_MS } from "./router_config.ts";
 // 📒 ledger — the ranch account book: durable Gemini cost accounting.
 import { recordUsage } from "./ledger.ts";
 
@@ -221,6 +222,9 @@ export async function callOne(
         // TTFT failfast: first chunk must arrive within the TTFT budget.
         const ttftRemain = TTFT_MS - (performance.now() - start);
         const reader = resp.body.getReader();
+        // Named from the module that owns the declaration: this project
+        // compiles with lib=ESNext (no DOM lib), so the global
+        // ReadableStreamReadResult simply does not exist here.
         let first: ReadableStreamReadResult<Uint8Array> | "ttft_timeout";
         if (ttftRemain <= 0) {
           first = "ttft_timeout";
@@ -452,7 +456,10 @@ export async function routeAstRace(
   // pace (previously Promise.allSettled waited for every lane). Losers are
   // aborted; their aborts are not circuit strikes. An isAst (code-shaped)
   // finisher still takes priority over a plain substantive one.
-  const ctrls = cands.map(() => new AbortController());
+  // Each candidate carries its own controller, paired at construction: the
+  // race wiring then needs no index lookup into a parallel array, and finish
+  // still aborts every lane off the same list.
+  const jobs = cands.map(([p, mid]) => ({ p, mid, ctrl: new AbortController() }));
   return new Promise<RouteResult>((resolve) => {
     let settled = false;
     let pending = cands.length;
@@ -461,9 +468,9 @@ export async function routeAstRace(
     const finish = (r: RouteResult) => {
       if (settled) return;
       settled = true;
-      for (const c of ctrls) {
+      for (const { ctrl } of jobs) {
         try {
-          c.abort(new Error("hedged_loser"));
+          ctrl.abort(new Error("hedged_loser"));
         } catch { /* noop */ }
       }
       resolve(r);
@@ -473,8 +480,8 @@ export async function routeAstRace(
       state.record(r.model!, r.provider!, 200, r.lat || 0, 1, "ast_race");
       finish(r);
     };
-    cands.forEach(([p, mid], i) => {
-      callOne(p, mid, body, false, ctrls[i].signal).then((r) => {
+    jobs.forEach(({ p, mid, ctrl }) => {
+      callOne(p, mid, body, false, ctrl.signal).then((r) => {
         pending--;
         if (settled) return;
         if (!r.ok) {
@@ -529,8 +536,9 @@ export async function routeWeighted(
   session: string,
 ): Promise<RouteResult> {
   const cands = pickWeighted(1);
-  if (!cands.length) return { ok: false, status: 503, err: "no_providers" };
-  const [p, mid] = cands[0];
+  const first = cands[0];
+  if (!first) return { ok: false, status: 503, err: "no_providers" };
+  const [p, mid] = first;
   const r = await callOne(p, mid, body);
   if (substantive(r)) {
     state.stickySet(session, p, mid);
@@ -680,8 +688,11 @@ export async function hedgedChain(
       resolve(r);
     };
     const fire = (): void => {
-      if (settled || idx >= live.length) return;
-      const [p, mid] = live[idx++];
+      if (settled) return;
+      const cand = live[idx];
+      if (!cand) return; // pool exhausted
+      idx++;
+      const [p, mid] = cand;
       const ctrl = new AbortController();
       ctrls.push(ctrl);
       pending++;
@@ -1032,7 +1043,11 @@ export async function buildBodybuilderRequests(
         .replace(/^```(?:json)?\s*/i, "")
         .replace(/\s*```\s*$/, "");
       const parsed = JSON.parse(cleaned);
-      const reqs = Array.isArray(parsed?.requests) ? parsed.requests : [];
+      // JSON.parse hands back `any`; annotate the array so the element type
+      // flows (the per-element cast below stays the single unchecked hop).
+      const reqs: unknown[] = Array.isArray(parsed?.requests)
+        ? parsed.requests
+        : [];
       if (reqs.length > 0) {
         // Sanitize: rewrite any hallucinated model ID to a live pool member
         // (round-robin) rather than emitting a body that routes nowhere.
@@ -1054,10 +1069,15 @@ export async function buildBodybuilderRequests(
   // of emitting the decomposition JSON. Fan out N parallel requests across
   // the live free pool, each carrying the full job text.
   const cands = pool;
-  if (!cands.length) return { requests: [] };
+  const poolSize = cands.length;
+  if (!poolSize) return { requests: [] };
   const requests: Array<Record<string, unknown>> = [];
   for (let i = 0; i < maxRequests; i++) {
-    const [provider, mid] = cands[i % cands.length];
+    const cand = cands[i % poolSize];
+    // Unreachable for a non-empty pool (i % poolSize is always in range);
+    // kept so the lookup stays total under the unchecked-index rule.
+    if (!cand) continue;
+    const [provider, mid] = cand;
     requests.push({
       model: `${provider}/${mid}`,
       messages: [{ role: "user", content: job }],

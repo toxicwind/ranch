@@ -7,14 +7,27 @@ import {
   longctx2MEnabled,
   estPromptTokens,
 } from "../strategy/router_strategy.ts";
-import { isLocalSwapModelId } from "../strategy/catalog.ts";
+import { isLocalSwapModelId, LOCAL_ROLES } from "../strategy/catalog.ts";
+import { freeCandidates } from "../strategy/strategy.ts";
 import type { RaceOptions } from "./strategy.ts";
 import { pickStrategy, raceCandidates } from "./strategy.ts";
+
+/**
+ * decide()'s return value: the route result plus the routing metadata the
+ * serving layer turns into response headers (X-Cuttinggate-Strategy /
+ * X-Routed-Via). RouteResult itself stays header-free on purpose — providers
+ * yield status/body/timings only, and the serving layer owns the HTTP
+ * envelope (see strategy/router.ts), so the header bag is declared here
+ * rather than bolted onto the shared RouteResult contract.
+ */
+export type Decision = RouteResult & {
+  headers: Record<string, string>;
+};
 
 export async function decide(
   body: ChatBody,
   ctx: StrategyDeps
-): Promise<RouteResult> {
+): Promise<Decision> {
   // Honor long-context pins by trying them first
   // 2M context pin (higher priority)
   if (longctx2MEnabled()) {
@@ -26,7 +39,6 @@ export async function decide(
         return {
           ...result,
           headers: {
-            ...(result.headers ?? {}),
             "X-Cuttinggate-Strategy": "longctx-2m-pin",
             "X-Routed-Via": result.provider === "herd" ? "herd" : "flock",
           },
@@ -45,7 +57,6 @@ export async function decide(
         return {
           ...result,
           headers: {
-            ...(result.headers ?? {}),
             "X-Cuttinggate-Strategy": "longctx-pin",
             "X-Routed-Via": result.provider === "herd" ? "herd" : "flock",
           },
@@ -74,23 +85,11 @@ export async function decide(
     }
     // Fallback to local roles if no serving models
     if (candidates.length === 0) {
-      try {
-        const roles = await ctx.loadLocalRoleModels?.();
-        if (roles) {
-          candidates = [
-            ["herd", roles.fast],
-            ["herd", roles.quality],
-            ["herd", roles.longctx],
-          ];
-        }
-      } catch (e) {
-        // If loading roles fails, use hardcoded defaults
-        candidates = [
-          ["herd", "beellama/exaone-4-0-1-2b-iq4xs"],
-          ["herd", "beellama/qwen-flash-64k"],
-          ["herd", "beellama/qwen-flash-256k"],
-        ];
-      }
+      candidates = [
+        ["herd", LOCAL_ROLES.fast],
+        ["herd", LOCAL_ROLES.quality],
+        ["herd", LOCAL_ROLES.longctx],
+      ];
     }
   } else {
     // Flock: cloud providers (excluding herd)
@@ -106,7 +105,7 @@ export async function decide(
     }
     // Fallback to free candidates if no cloud providers available
     if (candidates.length === 0) {
-      const allFree = ctx.freeCandidates();
+      const allFree = freeCandidates(ctx);
       for (const [provider] of allFree) {
         if (provider !== "herd") {
           const models = ctx.servingModels(provider);
@@ -129,7 +128,6 @@ export async function decide(
   return {
     ...result,
     headers: {
-      ...(result.headers ?? {}),
       "X-Cuttinggate-Strategy": strategyName,
       "X-Routed-Via": isHerd ? "herd" : "flock",
     },

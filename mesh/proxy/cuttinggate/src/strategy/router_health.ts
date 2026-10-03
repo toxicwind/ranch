@@ -290,7 +290,7 @@ export class HealthDB {
         out[provider] = { p50_ms: null, p95_ms: null, n: 0 };
         continue;
       }
-      const q = (p: number) => rows[Math.min(rows.length - 1, Math.floor(p * rows.length))].latency_ms;
+      const q = (p: number) => rows[Math.min(rows.length - 1, Math.floor(p * rows.length))]!.latency_ms;
       const r2 = (v: number) => Math.round(v * 10) / 10;
       out[provider] = { p50_ms: r2(q(0.5)), p95_ms: r2(q(0.95)), n: rows.length };
     }

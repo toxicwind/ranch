@@ -345,8 +345,12 @@ export class Matrix {
     const keys = nvidiaKeys();
     if (!keys.length) return null;
     const now = Date.now() / 1000;
-    for (let i = 0; i < keys.length; i++) {
-      const k = keys[(this.nvidiaIdx + i) % keys.length];
+    // Visit order is the pool rotated to begin at nvidiaIdx (round-robin
+    // across keys). Iterating that rotated view keeps every access in bounds.
+    const start = this.nvidiaIdx % keys.length;
+    const order = [...keys.slice(start), ...keys.slice(0, start)];
+    let scanned = 0;
+    for (const k of order) {
       let b = this.nvidiaBuckets.get(k);
       if (!b) {
         b = { tokens: Matrix.NVIDIA_RPM, last: now };
@@ -362,9 +366,10 @@ export class Matrix {
       }
       if (b.tokens >= 1) {
         b.tokens -= 1;
-        this.nvidiaIdx = (this.nvidiaIdx + i + 1) % keys.length;
+        this.nvidiaIdx = (start + scanned + 1) % keys.length;
         return k;
       }
+      scanned++;
     }
     return null;
   }

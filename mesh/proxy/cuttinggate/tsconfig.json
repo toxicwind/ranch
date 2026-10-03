@@ -19,5 +19,5 @@
   // ../policy/*, ../../roost/*) reported zero errors. Recursive globs are the
   // whole point of the check.
   "include": ["src/**/*.ts", "tests/**/*.ts"],
-  "exclude": ["node_modules", "src/strategy"]
+  "exclude": ["node_modules"]
 }

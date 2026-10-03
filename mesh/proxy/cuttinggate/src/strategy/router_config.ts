@@ -11,7 +11,7 @@ import {
   MODEL_ALIASES as PKG_MODEL_ALIASES,
   DEAD_MODEL_IDS as PKG_DEAD_MODEL_IDS,
   type ProviderDef,
-} from "../../../packages/providers/src/index.ts";
+} from "../../../../../../packages/providers/src/index.ts";
 
 // ---------------------------------------------------------------------------
 // Secrets + local stack env (mise loads these; standalone bun needs them too)
@@ -423,7 +423,10 @@ export function matchModelOnProvider(p: string, rest: string): string | null {
   if (!r) return null;
   const cat = catalogModelsFor(p);
   if (cat.includes(r)) return r;
-  const stripTag = (m: string) => m.split(":")[0];
+  // `split` always yields >= 1 element, so [0] is never actually undefined;
+  // pin the return type so noUncheckedIndexedAccess does not leak
+  // `string | undefined` into every caller.
+  const stripTag = (m: string): string => m.split(":")[0]!;
   const rBase = stripTag(r).split("/").pop()!.toLowerCase();
   for (const m of cat) {
     if (stripTag(m).split("/").pop()!.toLowerCase() === rBase) return m;

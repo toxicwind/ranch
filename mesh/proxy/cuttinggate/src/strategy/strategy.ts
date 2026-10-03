@@ -21,7 +21,7 @@
  * function here takes StrategyDeps first; bindStrategies(deps) returns the
  * classic ROUTERS record of (body, session) => Promise<RouteResult>.
  */
-import { recordUsage } from "../../../ledger/ledger.ts";
+import { recordUsage } from "./ledger.ts";
 import {
   ATTEMPT_MS,
   ATTEMPT_STREAM_MS,

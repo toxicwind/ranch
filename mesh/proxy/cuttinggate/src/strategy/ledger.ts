@@ -246,7 +246,9 @@ export function resolvePricing(provider: string, rawModel: string): ResolvedPric
 
   // ---- static per-provider rules (ordered: specific before general) ----
   const key = matchStatic(p, m);
-  if (key) return { key, pricing: PRICING[key], free: false };
+  // ?? null: a matcher key missing from PRICING is table drift — record it
+  // unpriced, never guess a rate (pricing honesty rule above).
+  if (key) return { key, pricing: PRICING[key] ?? null, free: false };
   return { key: `${p}/${m}`, pricing: null, free: false };
 }
 

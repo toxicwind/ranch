@@ -1,3 +1,5 @@
+> **Historical note (2026-10-02).** This comparison was written 2026-09-17, before the mesh consolidation — paths and "live" claims below describe the estate as it was then. The sovereign-router (`:25104`) was retired 2026-10-02 and replaced by cuttinggate (`:25200`, `mesh/proxy/cuttinggate/`); the router code now lives at `mesh/router/sovereign-router/`. Preserved unchanged for the record.
+
 # Router comparison — all forms (2026-09-17)
 
 Live router: `tools/sovereign-router/sovereign-router-ts/` on `:25104`.
