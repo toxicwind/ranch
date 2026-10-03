@@ -21,7 +21,13 @@ closest to the child and must own the respawn.
 
 No-shadow guarantees (so a stale supervisor can never fight a fresh one):
   - before every (re)spawn, the supervisor probes 127.0.0.1:18301. If the
-    port is bound, it logs and exits -- someone else owns the slot.
+    port is bound AND serving (connect probe succeeds), it logs and exits --
+    someone else owns the slot.
+  - if the port is bound but NOT serving, the holder is wedged (holds the
+    bind, refuses connects -- observed 2026-10-03: backlog full, EADDRINUSE
+    death spiral). reclaim_port() kills it with exact-PID discipline
+    (verified connector.py + connector cwd) before respawning. A holder
+    that is not our connector is never touched.
   - start-detached.py refuses to launch when the port is bound.
   - SIGTERM to the supervisor is honored promptly: it stops the child
     (if still ours) and exits without respawning. The deploy path
@@ -107,6 +113,99 @@ def port_serving():
         s.close()
 
 
+def _port_inode(port):
+    """Socket inode bound to 127.0.0.1:port in LISTEN state, via /proc/net/tcp."""
+    try:
+        with open("/proc/net/tcp") as f:
+            lines = f.readlines()[1:]
+    except OSError:
+        return None
+    want = "0100007F:%04X" % port  # 127.0.0.1:port, hex
+    for line in lines:
+        parts = line.split()
+        if len(parts) > 9 and parts[1] == want and parts[3] == "0A":
+            return parts[9]
+    return None
+
+
+def _holder_pids(inode):
+    """PIDs holding the socket inode (via /proc/<pid>/fd)."""
+    pids = []
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit():
+            continue
+        fd_dir = "/proc/%s/fd" % pid
+        try:
+            fds = os.listdir(fd_dir)
+        except OSError:
+            continue
+        for fd in fds:
+            try:
+                if os.readlink(os.path.join(fd_dir, fd)) == "socket:[%s]" % inode:
+                    pids.append(int(pid))
+                    break
+            except OSError:
+                continue
+    return pids
+
+
+def _is_our_connector(pid):
+    """Exact-PID discipline: cmdline must be our connector.py AND cwd the
+    connector dir. Anything else is never touched, no matter what."""
+    try:
+        with open("/proc/%d/cmdline" % pid, "rb") as f:
+            parts = f.read().decode("utf-8", "replace").split("\x00")
+        if len(parts) < 2 or not parts[1].endswith("/connector.py"):
+            return False
+        cwd = os.readlink("/proc/%d/cwd" % pid)
+        return os.path.abspath(cwd) == HERE
+    except OSError:
+        return False
+
+
+def reclaim_port():
+    """Kill a wedged holder of our port. Returns True when the port is free.
+
+    Wedge shape (observed 2026-10-03): child holds the 18301 bind but stops
+    accept()ing -- backlog fills, connects get refused, supervisor's
+    connect probe says "not serving", respawn hits EADDRINUSE, child gives
+    up after retries: death spiral. Reclaim breaks it: SIGTERM the verified
+    holder, SIGKILL if it ignores TERM, then the port is free to bind.
+    A holder that fails the exact-PID check is never signaled.
+    """
+    inode = _port_inode(PORT)
+    if inode is None:
+        return True  # not bound at all
+    if port_serving():
+        return False  # live owner -- not wedged, do not touch
+    me = os.getpid()
+    for pid in _holder_pids(inode):
+        if pid == me:
+            continue
+        if not _is_our_connector(pid):
+            slog("port %d held by foreign pid=%d (not our connector) -- "
+                 "will not signal, backing off" % (PORT, pid))
+            return False
+        slog("wedged holder pid=%d owns port %d but is not serving -- "
+             "SIGTERM" % (pid, PORT))
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            continue
+        for _ in range(10):  # up to 5s for the bind to release
+            time.sleep(0.5)
+            if _port_inode(PORT) is None:
+                break
+        else:
+            slog("wedged holder pid=%d ignored SIGTERM -- SIGKILL" % pid)
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except OSError:
+                pass
+            time.sleep(1)
+    return _port_inode(PORT) is None
+
+
 def ensure_scheduler():
     """Best-effort mutual watch: keep the watchdog scheduler alive.
 
@@ -171,6 +270,19 @@ def main():
             slog("port %s:%d is serving -- another owner holds the slot, "
                  "exiting without respawn" % (HOST, PORT))
             return 0
+        # Bound but not serving: wedged holder (2026-10-03 edge case).
+        # Reclaim with exact-PID discipline; back off and retry if a
+        # foreign process holds it.
+        if _port_inode(PORT) is not None and not reclaim_port():
+            slog("port %s:%d still held after reclaim -- backing off 10s"
+                 % (HOST, PORT))
+            deadline = time.time() + 10
+            while time.time() < deadline:
+                if _shutdown:
+                    slog("received SIGTERM during reclaim backoff -- exiting")
+                    return 0
+                time.sleep(0.5)
+            continue
         proc = spawn_child()
         slog("child started pid=%d cmd=%s" % (proc.pid, CHILD))
         started = time.time()
