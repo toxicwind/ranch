@@ -41,4 +41,45 @@ export {
   parseRateLimitReset,
 } from "./ratelimit.ts";
 export { Router, strategies, type RouteResult } from "./router.ts";
+export {
+  CopilotClient,
+  TenantClass,
+  apiHost,
+  chatEndpoint,
+  messagesEndpoint,
+  responsesEndpoint,
+  copilotHeaders,
+  exchangeToken,
+  isCredentialValid,
+  tenantClassFromEndpoints,
+  CREDENTIAL_GRACE_SECS,
+  type SessionCredential,
+} from "./copilot.ts";
+export {
+  accountTokenFromEnv,
+  orchestratorModel,
+  delegationProfiles,
+  DEFAULT_COPILOT_TOKEN_ENV,
+  COPILOT_REFRESH_MARGIN_SECS,
+  type CopilotConfig,
+} from "./copilot-config.ts";
+export {
+  BASELINE_MODELS,
+  ELEVATED_MODELS,
+  applyDelegation,
+  defaultDelegationProfiles,
+  delegateToolSchema,
+  isBaseline,
+  isElevated,
+  resolveDelegation,
+  type DelegationProfile,
+  type DelegationRoute,
+  type SessionContext,
+} from "./delegation.ts";
+export {
+  injectDelegationTools,
+  routeDelegated,
+  routeFirstDelegation,
+  type ToolCall,
+} from "./delegation-router.ts";
 export { uiHTML, serveUI, uiData } from "./ui.ts";

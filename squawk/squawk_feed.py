@@ -38,6 +38,8 @@ import json
 import os
 import re
 import select
+import signal
+import socket
 import socketserver
 import sys
 import threading
@@ -265,6 +267,13 @@ class FeedServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True
     allow_reuse_address = True
 
+    def server_bind(self):
+        # SO_REUSEPORT: allow a new process to bind the same port for
+        # zero-downtime hot reload. The kernel load-balances between old
+        # and new; the old drains and exits on SIGTERM.
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        super().server_bind()
+
     def __init__(self, addr, state: FeedState, token: str,
                  hold: float = HOLD_SECONDS):
         self.state = state
@@ -335,6 +344,14 @@ def main(argv=None) -> None:
     print(f"squawk-feed: serving #{a.channel} on {sa[0]}:{sa[1]} "
           f"(hold={a.hold}s, bearer auth on /wait + /subscribe)",
           flush=True)
+    def _on_term(signum, frame):
+        # Graceful shutdown: stop accepting new connections, finish
+        # in-flight requests, then exit. For hot reload, the new process
+        # is already bound via SO_REUSEPORT and serving.
+        print("squawk-feed: SIGTERM, draining...", flush=True)
+        server.shutdown()
+
+    signal.signal(signal.SIGTERM, _on_term)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

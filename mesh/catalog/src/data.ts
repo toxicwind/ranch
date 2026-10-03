@@ -2,9 +2,9 @@
  * Canonical provider data — the single source of truth for the estate.
  *
  * Reconciled 2026-09-30 from:
- * - tools/sovereign-router/sovereign-router-ts/router_config.ts
+ * - ranch/mesh/router/sovereign-router/sovereign-router-ts/router_config.ts
  *   (PROVIDERS, PROVIDER_MODELS, CODING, DEAD_MODEL_IDS)
- * - projects/range/ranch/stockyard/herd/internal/astmatrix/providers.go
+ * - ranch/mesh/router/herd/internal/astmatrix/providers.go
  *   (defaultProviders, codingAlias)
  *
  * Reconciliation notes (newer audit wins on conflict):

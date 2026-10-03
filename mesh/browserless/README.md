@@ -2,7 +2,7 @@
 
 *Headed browser automation for the fleet: one MCP server, one persistent Chromium, zero dead sessions.*
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-browser-purple?style=for-the-badge) ![typescript](https://img.shields.io/badge/typescript-3178C6?style=for-the-badge) ![port 25130](https://img.shields.io/badge/port-25130-orange?style=for-the-badge)
+![ranch](https://img.shields.io/badge/toxicwind-ranch-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-browser-purple?style=for-the-badge) ![typescript](https://img.shields.io/badge/typescript-3178C6?style=for-the-badge) ![port 25130](https://img.shields.io/badge/port-25130-orange?style=for-the-badge)
 
 ## Why this exists
 
@@ -121,11 +121,11 @@ Working against the live server: content extraction (`/content`), PDF generation
 
 ## Dev / contributing
 
-Changes land as commits in the sovereign-projects repo. The vendored npm app is never patched — if a behavior needs changing, it goes into `src/` (the MCP server) or the launcher layer, not into `/home/toxic/.browserless/app`. Test against the live keeper before pushing; the smoke suite is the gate.
+Changes land as commits in the toxicwind/ranch repo. The vendored npm app is never patched — if a behavior needs changing, it goes into `src/` (the MCP server) or the launcher layer, not into `/home/toxic/.browserless/app`. Test against the live keeper before pushing; the smoke suite is the gate.
 
 ## License & Security
 
-- MCP server source follows the sovereign-projects repo licensing; the browserless.io server itself is SSPL (stock npm install, untouched).
+- MCP server source follows the toxicwind/ranch repo licensing; the browserless.io server itself is SSPL (stock npm install, untouched).
 - Security: the server token lives only in `/home/toxic/.browserless/.env` (0600), sourced at launch and never logged; gitignore scrubs token-shaped files; the MCP server refuses to start without a live keeper rather than serving degraded. See also the isolated display in `keeper/README.md` — the agent Chromium never renders in the user's own desktop session.
 
 ## Links

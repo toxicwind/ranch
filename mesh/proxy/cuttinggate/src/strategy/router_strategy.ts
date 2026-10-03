@@ -359,7 +359,7 @@ export function firstUsableModelFor(p: string): string | undefined {
 // jitter — it nudges ties, never overrides the breaker or elo.
 // Reversible: SOVEREIGN_MODEL_BONUS=0. Cites: health DB rows
 // strategy='longctx-probe' (session 1m-probe-20260921-1745), commit
-// 7f4f79a48c, tools/sovereign-router/probes/RESULTS-2026-09-21.md.
+// 7f4f79a48c, ranch/mesh/router/sovereign-router/probes/RESULTS-2026-09-21.md.
 const PROBE_VERIFIED_MODELS: Record<string, Set<string>> = {
   nvidia: new Set([
     // 1M needle retrieval verified at 100k/500k/1M, exact every time.
@@ -752,7 +752,7 @@ export async function routeCascade(
 // 1M-context pin — oracle DECISION 12187, verdict A (CONDITIONAL).
 // Evidence: probe session 1m-probe-20260921-1745 (13 rows,
 // strategy='longctx-probe' in the health DB; artifacts committed in
-// 7f4f79a48c; analysis in tools/sovereign-router/probes/RESULTS-2026-09-21.md)
+// 7f4f79a48c; analysis in ranch/mesh/router/sovereign-router/probes/RESULTS-2026-09-21.md)
 // verified EXACT 1M-token needle retrieval on the KEYED lane below
 // (100k/500k/1M at 3.4/9.2/18.2/41.4s) plus the verified negative:
 // OpenRouter :free caps at 262144 tokens (HTTP 400 at 500k) — no free lane

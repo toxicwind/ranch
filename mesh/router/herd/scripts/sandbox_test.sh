@@ -5,7 +5,7 @@
 # =============================================================================
 set -euo pipefail
 
-REPO="${HOME}/sovereign/projects/herd"
+REPO="${HOME}/estate/ranch/mesh/router/herd"
 cd "$REPO"
 
 echo "=== [1/5] BUILD ==="

@@ -1,10 +1,10 @@
 # MCPProxy — vendored gateway engine (shep)
 
-*One safe endpoint in front of every MCP server. Vendored upstream source for **shep**, the sovereign mesh's MCP federation daemon (`:25127`).*
+*One safe endpoint in front of every MCP server. Vendored upstream source for **shep**, the mesh's former MCP federation daemon (`:25127`, retired 2026-10-02).*
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge) ![vendored](https://img.shields.io/badge/vendored-upstream-orange?style=for-the-badge) ![go](https://img.shields.io/badge/go-00ADD8?style=for-the-badge)
+![ranch](https://img.shields.io/badge/toxicwind-ranch-blue?style=for-the-badge) ![vendored](https://img.shields.io/badge/vendored-upstream-orange?style=for-the-badge) ![go](https://img.shields.io/badge/go-00ADD8?style=for-the-badge)
 
-> **Mesh context.** This directory is the vendored source of [smart-mcp-proxy/mcpproxy-go](https://github.com/smart-mcp-proxy/mcpproxy-go) — the engine behind **shep**, which fronts 30 upstream MCP servers on the mesh. The sovereign deployment is configured in `sovereign-projects/mesh/gateway/mcp_config.json` and runs as the pitchfork `shep` daemon on `:25127`. Vendored code tracks upstream; keep local diffs minimal so re-vends stay clean.
+> **Mesh context.** This directory is the vendored source of [smart-mcp-proxy/mcpproxy-go](https://github.com/smart-mcp-proxy/mcpproxy-go) — the engine behind **shep**, which fronted 30 upstream MCP servers on the mesh until shep was retired 2026-10-02 (`:25127` is dark). Vendored code tracks upstream; keep local diffs minimal so re-vends stay clean.
 
 <div align="center">
 
@@ -38,6 +38,8 @@
 - **Works offline & cross-platform** – A single core binary for macOS (Intel & Apple Silicon), Windows (x64 & ARM64), and Linux (x64 & ARM64), with the **web UI embedded**. macOS additionally ships an optional menu-bar app.
 
 ## shep on the mesh
+> **Historical (2026-10-02):** shep was retired — the diagram and config notes below describe the deployment as it last ran. Nothing listens on `:25127`.
+
 
 ```mermaid
 flowchart LR
@@ -280,7 +282,7 @@ curl -k https://localhost:8080/api/v1/status   # test HTTPS connection
 
 ## Dev / contributing
 
-We welcome issues, feature ideas, and PRs! (Upstream: contribute to [smart-mcp-proxy/mcpproxy-go](https://github.com/smart-mcp-proxy/mcpproxy-go); mesh-local fixes go to the sovereign-projects repo with minimal local diffs.)
+We welcome issues, feature ideas, and PRs! (Upstream: contribute to [smart-mcp-proxy/mcpproxy-go](https://github.com/smart-mcp-proxy/mcpproxy-go); mesh-local fixes go to the toxicwind/ranch repo with minimal local diffs.)
 
 ### Development Setup
 
@@ -318,5 +320,5 @@ make lint           # Run linters
 
 ## License & Security
 
-- **License:** MIT — see [LICENSE](LICENSE). (Vendored copy carries the upstream license; the sovereign deployment config around it follows the sovereign-projects repo licensing.)
+- **License:** MIT — see [LICENSE](LICENSE). (Vendored copy carries the upstream license; the sovereign deployment config around it follows the toxicwind/ranch repo licensing.)
 - **Security posture:** automatic quarantine blocks tool-poisoning attacks until new servers are manually approved; pluggable Docker-based security scanners (Snyk, Semgrep, Trivy, Cisco) scan quarantined servers with findings normalized to SARIF + a composite risk score; intent is validated against tool annotations on every call; arguments and responses are scanned for sensitive data; every call lands in the local activity log with a request ID. Report upstream vulnerabilities to the [smart-mcp-proxy/mcpproxy-go](https://github.com/smart-mcp-proxy/mcpproxy-go) maintainers.

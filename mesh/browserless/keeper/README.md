@@ -2,7 +2,7 @@
 
 *One persistent headed Chromium for the whole mesh — logins, tabs, and state that survive across every agent task.*
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-browser--keeper-purple?style=for-the-badge) ![typescript](https://img.shields.io/badge/typescript-3178C6?style=for-the-badge) ![cdp 9223](https://img.shields.io/badge/CDP-9223-orange?style=for-the-badge)
+![ranch](https://img.shields.io/badge/toxicwind-ranch-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-browser--keeper-purple?style=for-the-badge) ![typescript](https://img.shields.io/badge/typescript-3178C6?style=for-the-badge) ![cdp 9223](https://img.shields.io/badge/CDP-9223-orange?style=for-the-badge)
 
 ## Why this exists
 
@@ -86,5 +86,5 @@ Restart/rollback: `pitchfork-restart agent-viewer --reregister` (picks up `pitch
 
 ## License & Security
 
-- Follows the sovereign-projects repo licensing.
+- Follows the toxicwind/ranch repo licensing.
 - Security: the keeper binds CDP to loopback only; the VNC password lives in a 0600 file and is never committed or rotated into code; the noVNC viewer is loopback-only and exposed externally only over the tailnet (no public funnel, no token gate per Chris's call — tailscale identity is the gate). Agent browser windows are physically incapable of touching the user's desktop session thanks to the isolated Xvnc display.

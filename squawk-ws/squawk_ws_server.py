@@ -40,6 +40,7 @@ duplicate. The map is backfilled on first boot after upgrade (one-time
 renumber of pre-map history); afterwards every file keeps a stable gseq.
 """
 import asyncio
+import signal
 import base64
 import ctypes
 import ctypes.util
@@ -739,10 +740,26 @@ async def main():
     _loop = asyncio.get_running_loop()
     _loop.add_reader(_inotify_fd, on_inotify)
 
-    server = await asyncio.start_server(handle_client, "127.0.0.1", PORT)
+    server = await asyncio.start_server(handle_client, "127.0.0.1", PORT, reuse_port=True)
     print("squawk-ws listening on 127.0.0.1:%d" % PORT, flush=True)
+
+    # Graceful shutdown on SIGTERM: stop accepting, finish in-flight,
+    # then exit. For hot reload, the new process is already bound via
+    # SO_REUSEPORT and serving.
+    _shutdown = asyncio.Event()
+
+    def _on_term():
+        print("squawk-ws: SIGTERM, draining...", flush=True)
+        _shutdown.set()
+
+    _loop.add_signal_handler(signal.SIGTERM, _on_term)
+
     async with server:
-        await server.serve_forever()
+        # Run until SIGTERM, then close gracefully
+        await _shutdown.wait()
+        server.close()
+        await server.wait_closed()
+        print("squawk-ws: drained, exiting", flush=True)
 
 
 if __name__ == "__main__":

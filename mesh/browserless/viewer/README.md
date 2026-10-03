@@ -2,7 +2,7 @@
 
 *The token-gated front door for the agent's noVNC viewer. Retired 2026-09-21 — kept as reference only.*
 
-![status](https://img.shields.io/badge/status-retired-red?style=for-the-badge) ![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge) ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge)
+![status](https://img.shields.io/badge/status-retired-red?style=for-the-badge) ![ranch](https://img.shields.io/badge/toxicwind-ranch-blue?style=for-the-badge) ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge)
 
 > **Retired 2026-09-21 (Forge).** Chris: the token gate was not wanted — the viewer is tailscale/network/agent access only. `/agent-browser` is now served tailnet-only via `tailscale serve` on `:8443`, straight from websockify `:6080` (see `projects/yote/ops/funnel-map.sh` SERVE_MAP). This script is no longer a pitchfork daemon and `:6081` no longer listens.
 
@@ -40,5 +40,5 @@ This file is frozen as historical reference. Any future viewer-front-door work s
 
 ## License & Security
 
-- Follows the sovereign-projects repo licensing.
+- Follows the toxicwind/ranch repo licensing.
 - Security note (historical): even when live, this gate never saw the VNC password — VNC auth stayed between noVNC and Xvnc. The current live route relies on tailnet identity as the access control, per Chris's explicit call; there is no public exposure of the viewer.

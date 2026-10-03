@@ -1,10 +1,12 @@
+> **SUPERSEDED 2026-10-02 — STILL SERVING ON :25104.** cuttinggate on `:25200` is the canonical live router. The sovereign-router on `:25104` was marked retired in docs, but `[daemons.sovereign-router]` still composes it in `estate/pitchfork.toml` with `auto = ["start"]`, and `bun router.ts` is bound and answering `/health` (verified 2026-10-02). This directory is preserved as a reference implementation; the strategy tables and endpoint docs below describe the router as it last ran as canonical.
+
 # Sovereign Router
 
 *Multi-provider LLM routing gateway (OpenAI-compatible `/v1/chat/completions`): one request fans out across many upstream providers with strategy-based failover, circuit breakers, sticky sessions, and a WAL health DB.*
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-router-purple?style=for-the-badge) ![bun](https://img.shields.io/badge/bun-black?style=for-the-badge) ![port 25104](https://img.shields.io/badge/port-25104-orange?style=for-the-badge)
+![ranch](https://img.shields.io/badge/toxicwind-ranch-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-router-purple?style=for-the-badge) ![bun](https://img.shields.io/badge/bun-black?style=for-the-badge) ![port 25104](https://img.shields.io/badge/port-25104-orange?style=for-the-badge)
 
-> Naming note: this was historically called "ast-matrix" / "ast-router" (a codename from the original research angle). It is a **provider router**, not a matrix — the directory is `projects/mesh/router/`.
+> Naming note: this was historically called "ast-matrix" / "ast-router" (a codename from the original research angle). It is a **provider router**, not a matrix — the directory is `mesh/router/`.
 
 ## Why this exists
 
@@ -65,7 +67,7 @@ Set per request with the `X-Sovereign-Strategy` header.
 
 ```text
 projects/mesh/router/
-├── sovereign-router-ts/   # ← THE LIVE ROUTER (run by pitchfork :25104)
+├── sovereign-router-ts/   # legacy router, still bound on :25104 (cuttinggate :25200 is canonical)
 │   └── router.ts          # Bun/TS, self-contained + /ui dashboard
 ├── sovereign-mcp-gateway/ # MCP trust boundary: circuit breakers, sticky affinity (:25120)
 ├── flock-py/              # v2 Python router (reference / source-of-truth)
@@ -98,9 +100,9 @@ and races them through the *same* parallel/AST-preference/circuit machinery as `
 
 ## Dev / contributing
 
-Changes land as commits in the sovereign-projects repo. The live router is `sovereign-router-ts/router.ts` (Bun); `flock-py/` is the Python reference implementation and `flock-router/` the TS/Bun variant — keep the strategy table above consistent across all three when you change routing behavior. Never run two live routers on `:25104` at once; the pitchfork daemon owns the port.
+Changes land as commits in the toxicwind/ranch repo. **Superseded 2026-10-02:** the canonical live router is cuttinggate on `:25200` (`mesh/proxy/cuttinggate/`); `sovereign-router-ts/` is still bound on `:25104` as the preserved Bun implementation and `flock-py/` / `flock-router/` the reference variants — the strategy tables above describe the router as it last ran as canonical.
 
 ## License & Security
 
-- Follows the sovereign-projects repo licensing.
+- Follows the toxicwind/ranch repo licensing.
 - Security: upstream provider keys live only in 0600 files under `/home/toxic/` (e.g. `~/.secrets`) and are never logged or committed; the router binds loopback and is reached externally only via tailnet/funnel routes; `/debug/sqlite` exposes raw health-DB aggregates — treat it as internal. Circuit breakers quarantine misbehaving upstreams automatically.

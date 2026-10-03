@@ -1064,6 +1064,10 @@ class OracleLoop:
         a.winner, a.price_paid, a.assign_ts = winner, price_paid, now
         bond = mech.BOND
         try:
+            # Profiles file is the source of truth: reload before locking
+            # so externally released bonds (stale-lock admin release)
+            # are visible. (nightjar-debug 2026-10-02)
+            self.profiles = mech.load_profiles()
             mech.lock_bond(self.profiles, winner.removeprefix("bidder-"),
                            tid, bond)
         except (KeyError, ValueError) as e:

@@ -143,7 +143,7 @@ def call_model(prompt):
 
 def direct_model_call(prompt):
     """Direct OpenAI-compatible chat call; merges content and reasoning."""
-    base = os.environ.get("NIM_BASE_URL", "http://127.0.0.1:25193/v1").rstrip("/")
+    base = os.environ.get("NIM_BASE_URL", "http://127.0.0.1:25200/v1").rstrip("/")
     key = os.environ.get("NVIDIA_API_KEY", "")
     model = os.environ.get("NIM_MODEL", "")
     body = json.dumps({

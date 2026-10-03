@@ -4,7 +4,7 @@
 
 The same hardcoded provider→models lists existed in four places:
 
-1. `tools/sovereign-router/sovereign-router-ts/router_config.ts` — `PROVIDER_MODELS`
+1. `ranch/mesh/router/sovereign-router/sovereign-router-ts/router_config.ts` — `PROVIDER_MODELS`
    (curated arrays) unioned with `LIVE_MODELS` (discovery), curated first.
    Discovery could only ADD; dead curated ids stayed routable forever.
 2. `herd/internal/astmatrix/providers.go` (Go) — hardcoded

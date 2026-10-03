@@ -5,8 +5,8 @@
 > **Orchestrate fleets of LLM inference engines. Zero downtime, zero friction.**  
 > Canonical Lineage: **[toxicwind/herd](https://github.com/toxicwind/herd)** & **[toxicwind/herd](https://github.com/toxicwind/herd)** (Upstream: [mostlygeek/herd](https://github.com/mostlygeek/herd))
 
-[![CI](https://github.com/toxicwind/herd/actions/workflows/ci.yml/badge.svg)](https://github.com/toxicwind/herd/actions)
-[![Test](https://github.com/toxicwind/herd/actions/workflows/test.yml/badge.svg)](https://github.com/toxicwind/herd/actions)
+[![CI](https://github.com/toxicwind/herd/actions/workflows/go-ci.yml/badge.svg)](https://github.com/toxicwind/herd/actions)
+[![CI (Windows)](https://github.com/toxicwind/herd/actions/workflows/go-ci-windows.yml/badge.svg)](https://github.com/toxicwind/herd/actions)
 [![License: SOL / MIT](https://img.shields.io/badge/License-SOL%20v1.0%20%2F%20MIT-blue.svg)](./LICENSE.md)
 
 ---

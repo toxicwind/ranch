@@ -1,17 +1,18 @@
 # Sovereign Router v3.2 — Resilient Multi-Provider LLM Router
 
-> **STATUS: RETIRED 2026-10-02.** The :25104 port is retired per
-> config/ports.env (line 80: sovereign-router was merged into flock
-> (:25193); the :25104 port is retired); the pitchfork stanza lives on as
-> pitchfork.d/sovereign-router.toml.retired-20261002 and no daemon is
-> composed or running (verified 2026-10-02: nothing listening on :25104).
+> **STATUS: SUPERSEDED 2026-10-02, STILL RUNNING.** The :25104 port was marked
+> retired (config/ports.env line 80; this directory's
+> pitchfork.d/sovereign-router.toml.retired-20261002), but the composing stanza
+> `[daemons.sovereign-router]` in estate/pitchfork.toml still sets
+> auto = ["start"]: `bun router.ts` is bound to :25104 and /health answers 200
+> (verified 2026-10-02). cuttinggate on :25200 is canonical.
 > This doc describes the router as it last ran. Code retained here for
 > reference at ranch/mesh/router/sovereign-router/sovereign-router-ts.
 > router_config.ts requires SOVEREIGN_ROUTER_PORT (fallback SOVEREIGN_PORT)
 > if this code is ever revived.
 
 OpenAI-compatible chat router on `http://127.0.0.1:25104`, supervised by
-pitchfork (sovereign/sovereign-router, stanza retired 2026-10-02). Bun/TypeScript single binary
+pitchfork (`estate/pitchfork.toml [daemons.sovereign-router]`, `auto = ["start"]`). Bun/TypeScript single binary
 (ranch/mesh/router/sovereign-router/sovereign-router-ts/).
 
 ## Architecture

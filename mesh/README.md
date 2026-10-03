@@ -9,7 +9,7 @@
 ## Why this exists
 
 - **One gateway for tools** — gatehouse at ranch/barn/gatehouse fronts the estate's MCP servers with quarantine, BM25 tool discovery, and security scanning, so agents see one `retrieve_tools` call instead of hundreds of schemas.
-- **One gateway for models** — cuttinggate on :25200 is the canonical live router: one OpenAI-compatible request fans out across providers with strategy-based failover, circuit breakers, and sticky sessions. The sovereign-router on :25104 is retired.
+- **One gateway for models** — cuttinggate on :25200 is the canonical live router: one OpenAI-compatible request fans out across providers with strategy-based failover, circuit breakers, and sticky sessions. The sovereign-router on :25104 is superseded but still serving (see below).
 - **Zero-cost by default** — the `free` strategy races local GPU inference against every `:free` cloud model; cost-sensitive agents never touch a paid endpoint by accident.
 - **A browser that remembers** — the browser-keeper is one persistent headed Chromium; logins, tabs, and state survive across tasks instead of being respawned per call.
 
@@ -19,7 +19,7 @@
 mesh/
 ├── router/                     # model-routing plane
 │   ├── herd/                   # Go inference backplane (:25100) — DOWN as of 2026-10-02
-│   ├── sovereign-router/       # retired TS router (:25104 retired 2026-10-02, preserved)
+│   ├── sovereign-router/       # legacy TS router (:25104 LIVE + pitchfork auto-start; cuttinggate is canonical)
 │   ├── sovereign-mcp-gateway/  # MCP trust boundary (code default :25120, not live)
 │   ├── flock-py/               # Python FastAPI router variant (reference)
 │   ├── flock-router/           # TS/Bun AST router variant (4-way AST race)
@@ -87,15 +87,15 @@ Override per request:
 curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25200/v1/chat/completions
 ```
 
-## sovereign-router (:25104) — retired on paper, still serving
+## sovereign-router (:25104) — still live, superseded by cuttinggate
 
-The TypeScript router was retired **2026-10-02 by renaming its pitchfork stanza** to `router/sovereign-router/pitchfork.d/sovereign-router.toml.retired-20261002`. That removed it from supervision; it did **not** stop the process. As of 2026-10-02 the daemon is still bound to :25104 (`bun router.ts`, pid 4045943) and still answering `/health`.
+The TypeScript router was marked retired 2026-10-02 (this directory's `pitchfork.d/sovereign-router.toml.retired-20261002`, plus the ports.env note), but the retirement never reached the supervisor: `[daemons.sovereign-router]` still composes it in `estate/pitchfork.toml` with `auto = ["start"]`, and `pitchfork status` reports it running. Verified 2026-10-02: `bun router.ts` (pid 1872162) is bound to :25104 and `/health` answers 200 with `sovereign-router-ts v3.2`.
 
-The code is preserved at `router/sovereign-router/` for reference. Use cuttinggate on :25200 instead — but note that until the orphan is actually stopped, :25104 is a **fourth live mesh port**, not a retired one.
+Use cuttinggate on :25200 instead — but until the :25104 daemon is actually stopped, :25104 is a **second live mesh port**.
 
 ## Why processes outlive their retirement
 
-Renaming a pitchfork stanza to `*.retired-*` is a *supervision* change, not a *lifecycle* change. It stops pitchfork from restarting the daemon and stops it appearing in `pitchfork status`, which makes the port look gone in every status command while the process keeps serving. The 2026-10-02 retirement of :25104 and :25193 both went this way, which is why this README previously reported two live ports as retired.
+Renaming a local pitchfork stanza to `*.retired-*` is a *supervision* change, not a *lifecycle* change, and it only takes effect when no other stanza composes the daemon. :25104 is the live example: the in-tree copy was renamed, but `estate/pitchfork.toml [daemons.sovereign-router]` still composes it with `auto = ["start"]`, so `pitchfork status` reports it running and the process keeps serving. Marking a port retired in a doc changes nothing about the listener.
 
 **Rule:** retiring a daemon means stopping the process and verifying the port is closed. Verify with `ss -ltnp | grep :<port>`, not with `pitchfork status`.
 
@@ -116,7 +116,7 @@ openai-compatible:
 ## Ops notes (2026-10-02)
 
 - herd (:25100) died 2026-10-02 ~18:40 MDT; binary intact at `router/herd/herd`. Restart via the herd pitchfork stanza or `stack/services/herd.sh` on the estate side — do not start a second instance if pitchfork shows it errored but the port serves 200 (stale supervisor ownership).
-- cuttinggate (:25200) is the only live mesh port as of 2026-10-02 ~19:00 MDT. :25104 (sovereign-router) retired, :25193 (flock) retired, :25109 (keypool) down, :25120 (sovereign-mcp-gateway) never live, :25127 (gatehouse) down.
+- Two live mesh ports as of 2026-10-02 (`ss -ltnp`): cuttinggate :25200 and sovereign-router :25104. :25193 (flock) down, :25109 (keypool) down, :25100 (herd) down, :25120 (sovereign-mcp-gateway) never live, :25127 (gatehouse/shep) down.
 
 ## Gemini API Tool Retrieval EAP
 
@@ -132,12 +132,12 @@ Status verified 2026-10-02 by `ss -ltnp` + `curl /health` against every port. Wh
 | Member | Path | Port | Status |
 | ------ | ---- | ---- | ------ |
 | cuttinggate | `proxy/cuttinggate/` | :25200 | **LIVE** — canonical router (`{"ok":true,"quarantined":0}`) |
-| flock-proxy | `proxy/flock-proxy/` | :25193 | **LIVE** — Rust, `flock` pid 940727, returns `ok`. Not retired: `estate/pitchfork.d/flock.toml` still sets `auto = ["start"]` |
-| sovereign-router | `router/sovereign-router/` | :25104 | **LIVE** — `bun router.ts` pid 4045943, reports `sovereign-router-ts v3.2`. Retired *on paper only* |
-| keypool | `keypool/` | :25109 | **LIVE** — `bun keypool/src/index.ts` pid 4045921, returns `{"ok":true,"service":"keypool"}` |
+| flock-proxy | `proxy/flock-proxy/` | :25193 | DOWN — nothing bound. `estate/pitchfork.d/flock.toml` still sets `auto = ["start"]`; `pitchfork status` shows it stopped |
+| sovereign-router | `router/sovereign-router/` | :25104 | **LIVE** — `bun router.ts` pid 1872162, `/health` answers `sovereign-router-ts v3.2`. Superseded by cuttinggate; never actually stopped |
+| keypool | `keypool/` | :25109 | DOWN — nothing bound. Stanza `estate/pitchfork.d/keypool.toml` still sets `auto = ["start"]` |
 | herd | `router/herd/` | :25100 | DOWN — nothing bound. Binary intact at `router/herd/herd` |
 | sovereign-mcp-gateway | `router/sovereign-mcp-gateway/` | :25120 | not live; code default collides with sovereign-chat's canonical port |
-| browserless | `browserless/` | :25130 / :9223 | keeper **LIVE** on :9223 (chromium pid 4050796); MCP server :25130 down |
+| browserless | `browserless/` | :25130 / :9223 | keeper.js process runs but CDP :9223 is dark (chromium exits: `Missing X server or $DISPLAY`, pitchfork log 2026-10-02 23:11); MCP server :25130 down |
 | catalog (roost) | `catalog/` | — | TS provider SSOT library, no port |
 | flock-py | `router/flock-py/` | — | Python FastAPI router variant (reference) |
 | flock-router | `router/flock-router/` | — | TS/Bun AST router variant (4-way AST race) |
@@ -156,7 +156,7 @@ Status verified 2026-10-02 by `ss -ltnp` + `curl /health` against every port. Wh
 | flock-proxy | `proxy/flock-proxy/` | :25193 | retired, preserved not live (Rust) |
 | catalog (roost) | `catalog/` | — | TS provider SSOT library, no port |
 | keypool | `keypool/` | :25109 | DOWN — key pool sidecar |
-| sovereign-router | `router/sovereign-router/` | :25104 | retired 2026-10-02, preserved |
+| sovereign-router | `router/sovereign-router/` | :25104 | **LIVE** — `bun router.ts`, pitchfork `auto = ["start"]`; superseded by cuttinggate, not stopped |
 | sovereign-mcp-gateway | `router/sovereign-mcp-gateway/` | :25120 | not live; code default :25120 collides with sovereign-chat's canonical port |
 | flock-py | `router/flock-py/` | — | Python FastAPI router variant (reference) |
 | flock-router | `router/flock-router/` | — | TS/Bun AST router variant (4-way AST race) |
@@ -200,8 +200,10 @@ catalog → generated providers.{go,rs,json,yml} → cuttinggate, herd, flock-pr
 - `/home/toxic/workspace/skills` → `/home/toxic/estate/skills` — skills shortcut
 - Dots (.tau, .omp, .ripgreprc, .bashrc, .config, …) → estate-controlled targets
 
-Deprecated but load-bearing: `/home/toxic/sovereign` → `estate`. Still resolves ~190 references
-in the skills-hub submodule and estate docs; remove only after those consumers are fixed.
+Deprecated but load-bearing: `/home/toxic/sovereign` is a real directory again, not a
+symlink to `estate` (distinct inode as of 2026-10-02; it holds `data/` and `skills/`).
+~190 references in the skills-hub submodule and estate docs still name the old path;
+don't collapse it until those consumers are fixed.
 
 ## Dev / contributing
 

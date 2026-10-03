@@ -1,3 +1,5 @@
+> **Mesh note.** This is the preserved copy of the Rust provider proxy, relocated to `mesh/proxy/flock-proxy/` in [toxicwind/ranch](https://github.com/toxicwind/ranch) during the 2026-10-02 mesh consolidation. The `:25193` port was retired 2026-10-02 — this proxy is **not live**; the canonical live router is **cuttinggate** on `:25200` (`mesh/proxy/cuttinggate/`). Everything below is the upstream README, kept for reference.
+
 <div align="center">
 
 <img src="docs/assets/logo.png" alt="nim-proxy" width="140">

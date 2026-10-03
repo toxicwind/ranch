@@ -6,7 +6,7 @@
  * Strategies: fifo_matrix (alias fifo_flock) | ast_race (alias flock_race) | sticky_affinity | weighted_elo | circuit_chain | hybrid
  * Default hybrid: sticky → ast_race → circuit_chain; explicit CODING aliases go direct.
  *
- * Env SSOT: sovereign/config/ports.env (mise _.file) + ~/.secrets
+ * Env SSOT: estate/config/ports.env (mise _.file) + ~/.secrets
  *   SOVEREIGN_ROUTER_PORT / SOVEREIGN_PORT — never invent non-25xxx ports
  */
 

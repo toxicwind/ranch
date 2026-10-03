@@ -24,7 +24,7 @@
  * Stats and errors use opaque "key#N" labels only.
  */
 
-const DEFAULT_ROUTER_PORT = process.env.SOVEREIGN_ROUTER_PORT || "25104";
+const DEFAULT_ROUTER_PORT = process.env.CUTTINGGATE_PORT || process.env.SOVEREIGN_ROUTER_PORT || "25200";
 export const DEFAULT_PROXY_BASE_URL =
   process.env.SOVEREIGN_ROUTER_URL ||
   process.env.FLOCK_BASE_URL ||

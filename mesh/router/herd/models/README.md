@@ -1,4 +1,4 @@
-TODO improve these docs
+# Model downloads
 
 1. Download a llama-server suitable for your architecture
 1. Fetch some small models for testing / swapping between

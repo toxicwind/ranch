@@ -2,7 +2,7 @@
 
 *The Python reference implementation of the sovereign provider router — 6 routing strategies, OpenAI-compatible serving, and a health DB with per-provider Elo.*
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-router--v2-purple?style=for-the-badge) ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge) ![port 25104](https://img.shields.io/badge/port-25104-orange?style=for-the-badge)
+![ranch](https://img.shields.io/badge/toxicwind-ranch-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-router--v2-purple?style=for-the-badge) ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge) ![port 25104](https://img.shields.io/badge/port-25104-orange?style=for-the-badge)
 
 ## Why this exists
 
@@ -90,9 +90,9 @@ Get a free key at <https://build.nvidia.com> (starts with `nvapi-`), export `NVI
 
 ## Dev / contributing
 
-Changes land as commits in the sovereign-projects repo. This is the reference implementation — when you change strategy behavior here, mirror it in `../flock-router/` (Bun port) and keep the strategy table in `../README.md` consistent. Keep provider keys out of the repo; `key_ok` gates providers on key presence.
+Changes land as commits in the toxicwind/ranch repo. This is the reference implementation — when you change strategy behavior here, mirror it in `../flock-router/` (Bun port) and keep the strategy table in `../README.md` consistent. Keep provider keys out of the repo; `key_ok` gates providers on key presence.
 
 ## License & Security
 
-- Follows the sovereign-projects repo licensing.
+- Follows the toxicwind/ranch repo licensing.
 - Security: provider API keys come from the environment only — never committed, never logged; the server binds loopback (`127.0.0.1`); the health DB path is configurable so test runs don't touch the live DB. Circuit breakers isolate failing providers automatically.

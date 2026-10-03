@@ -44,7 +44,7 @@ _load_secrets()
 
 
 
-# Port SSOT: sovereign/.env.local AST_MATRIX_PORT=25104
+# Port SSOT: estate/.env.local AST_MATRIX_PORT=25104
 # process-compose sets SOVEREIGN_PORT=${AST_MATRIX_PORT}; Zed hits :25104/v1
 PORT = int(
     os.getenv("SOVEREIGN_PORT")

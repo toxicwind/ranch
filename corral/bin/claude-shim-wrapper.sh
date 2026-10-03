@@ -15,7 +15,7 @@ if [[ "${1:-}" == "auth" && "${2:-}" == "status" ]]; then
 fi
 # Caller-provided proxy routing wins over the static secrets file.
 # (2026-10-01: the corral CLI injects per-run NIM_BASE_URL / NVIDIA_API_KEY /
-# NIM_MODEL / ANTHROPIC_BASE_URL pointing at the flock router :25193.
+# NIM_MODEL / ANTHROPIC_BASE_URL pointing at the cuttinggate router :25200.
 # Sourcing /home/toxic/.secrets unconditionally used to clobber them with
 # the retired pre-flock :8000 endpoint whose upstream NVIDIA credentials 401,
 # so every shim-spawned agent died with nim_kimi_UPSTREAM_401. The secrets
@@ -35,7 +35,7 @@ fi
 [[ -n "$_keep_nim_model" ]] && export NIM_MODEL="$_keep_nim_model"
 [[ -n "$_keep_anthropic_base_url" ]] && export ANTHROPIC_BASE_URL="$_keep_anthropic_base_url"
 unset _keep_nim_base_url _keep_nvidia_api_key _keep_nim_model _keep_anthropic_base_url
-export NIM_BASE_URL="${NIM_BASE_URL:-http://127.0.0.1:25193/v1}"
+export NIM_BASE_URL="${NIM_BASE_URL:-http://127.0.0.1:25200/v1}"
 # Shim reads NVIDIA_API_KEY; map the deprecated NIM_PROXY_API_KEY alias onto
 # it ONLY as a fallback. 2026-10-01: the unconditional mapping clobbered the
 # caller-provided 36-char flock key with the stale 55-char alias, so agents

@@ -183,9 +183,13 @@ Every animal first-class — no "secondary" framing. 🟢 = port verified listen
 | Component | Port | Path | Role |
 |---|---|---|---|
 | 🟢 **tau** | `25111` | `tau/` (nested checkout → [toxicwind/tau](https://github.com/toxicwind/tau), gitignored — absent in a fresh clone) | **The coding agent.** Terminal coding agent (fork of oh-my-pi): `omp` CLI + SDK, 30+ tools, subagents, native Rust hot path, dozens of providers via the roost-sourced catalog. Served as a TCP daemon through **chute**; its model traffic rides herd/flock. |
-| 🟢 **herd** | `25100` | `mesh/router/herd/` (Go) | **LOCAL front door.** 52 models live over llama.cpp engines (`:25001+`). Anything cloud goes to the flock daemon via its `flock:` config key. |
+| **herd** | `25100` | `mesh/router/herd/` (Go) | **LOCAL front door — DOWN as of 2026-10-02.** The daemon died ~18:40 MDT (binary intact at `mesh/router/herd/herd`). Cloud traffic goes through cuttinggate on `:25200`. |
 | **flock-proxy** | — | `mesh/proxy/flock-proxy/` (Rust) | **Preserved, not live.** External provider router: strategies, key pools, 429 rotation, circuit breakers, health/Elo. `:25193` retired 2026-10-02; cuttinggate fronts its role. |
+| **keypool** | `25109` | `mesh/keypool/` (Bun/TS) | API key pool sidecar: health-probed key routing with failover + racing for the mesh routers. **DOWN as of 2026-10-02.** |
+
 | 🟢 **cuttinggate** | `25200` | `mesh/proxy/cuttinggate/` (Bun/TS) | **Canonical router.** The estate front door: fronts cloud providers, gates herd-local traffic, quarantine + ledger. Replaced `:25104` (sovereign-router-ts). |
+| ~~**sovereign-router**~~ | — | ~~`mesh/router/sovereign-router/`~~ | ~~Retired 2026-10-02 — the TS router on `:25104`; replaced by cuttinggate. Code preserved for reference.~~ |
+
 | 🟢 **gatehouse** | `25127` | `barn/gatehouse` (Go) | **MCP gateway.** Tool serving — a peer of the others, not their parent. |
 | 🟢 **chute** | `25111` | `barn/chute` | **Tau engine, TCP-exposed.** stdio→TCP ACP passage — the tau coding-agent engine as a daemon on a real port. |
 | 🟢 **squawk-ws** | `25147` | `squawk-ws/` (Python) | Squawk websocket server — the fleet channel's live socket. |
@@ -197,7 +201,7 @@ Every animal first-class — no "secondary" framing. 🟢 = port verified listen
 | ~~**oracle**~~ | — | ~~`oracle/`~~ | 🔮 **Moved 2026-10-02** — the decision corral left the ranch (commit [`92bb79c`](https://github.com/toxicwind/ranch/commit/92bb79c)) and now lives in [toxicwind/squawk](https://github.com/toxicwind/squawk) at `oracle/`. |
 | 🟢 **browserless** | `25130` | `barn/browserless` | Browser automation: browserless.io MCP server + native-launcher deployment. |
 | 🟢 **lookout** | `6080` | `barn/lookout` | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower. |
-| **roost** | — | `mesh/catalog/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: 43 provider definitions the estate perches on, one registry. Feeds tau, herd generated Go, flock-proxy generated Rust, the router. |
+| **roost** | — | `mesh/catalog/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: 75 provider definitions the estate perches on, one registry. Feeds tau, herd generated Go, flock-proxy generated Rust, the router. |
 | **tack** | — | `tack/` (`@ranch/tack`, Bun/TS) | 🔌 Sovereign provider wire-data authority: base URLs, key env vars, auth schemes for the tau catalog. |
 | **squawk** | — | `squawk/` (Python) | File-based multi-agent chat: signed, sequenced message files. |
 | **corral** | — | `corral/` (in-tree, Bun/TS) | The super-ralph agent framework — the mission runner. Absorbed in-tree 2026-09-30 with full history; **no submodules, ever.** |
@@ -244,7 +248,7 @@ The rule is simple: project work lives in the ranch, control-plane work in the e
 - **Strategy names route; they are not models.** `free`, `auto`, etc. select routing strategies. Nothing advertises a literal model named `free`.
 - **Everything is OpenAI-compatible.** `/v1/models`, `/v1/chat/completions` — any OpenAI client just works.
 - **One directory per animal.** No pens inside pens, no submodules — corral was absorbed in-tree 2026-09-30 with full history.
-- **roost is the single provider-data authority.** 43 provider definitions in `mesh/catalog/src/data.ts`; tau catalog, herd generated Go, and flock-proxy generated Rust all derive from it.
+- **roost is the single provider-data authority.** 75 provider definitions in `mesh/catalog/src/data.ts`; tau catalog, herd generated Go, and flock-proxy generated Rust all derive from it.
 - **No monkeypatches.** Fixes land in the owning repo, never as local overlays. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full contract.
 
 ## 🗺️ Roadmap
@@ -253,7 +257,7 @@ The rule is simple: project work lives in the ranch, control-plane work in the e
 - [x] **Moon monorepo** — every animal a first-class moon project, pinned toolchains (2026-09-30)
 - [x] **corral in-tree** — super-ralph framework absorbed with full history, no submodules (2026-09-30)
 - [x] **brand → flicker** — build-job system consolidated (2026-09-30)
-- [ ] **cuttinggate cutover** — `:25200` finishes replacing `:25104`; sovereign-router-ts retires after caller migration
+- [x] **cuttinggate cutover** — `:25200` replaced `:25104`; sovereign-router-ts retired 2026-10-02
 - [ ] **herd live cutover** — the `:25100` process moves to the renamed herd binary
 - [ ] **flock probe fix** — provider probes stop appending `/v1/models` to bases that already carry it
 

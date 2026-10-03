@@ -2,7 +2,7 @@
 
 *First-class Gemini API MCP server for the mesh: a self-healing multi-key pool with round-robin + automatic failover, behind one token-gated MCP endpoint.*
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-gemini-purple?style=for-the-badge) ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge) ![port 25202](https://img.shields.io/badge/port-25202-orange?style=for-the-badge)
+![ranch](https://img.shields.io/badge/toxicwind-ranch-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-gemini-purple?style=for-the-badge) ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge) ![port 25202](https://img.shields.io/badge/port-25202-orange?style=for-the-badge)
 
 ## Why this exists
 
@@ -71,9 +71,9 @@ projects/mesh/gemini-mcp/
 
 ## Dev / contributing
 
-Changes land as commits in the sovereign-projects repo. Adding a key = exporting one more `GEMINI_API_KEY_N` (with `_NAME`/`_PROJECT`/`_EAP` metadata) into `~/.secrets` — no code change needed; the pool picks it up on restart. Test with `keys_status` before declaring a new key live.
+Changes land as commits in the toxicwind/ranch repo. Adding a key = exporting one more `GEMINI_API_KEY_N` (with `_NAME`/`_PROJECT`/`_EAP` metadata) into `~/.secrets` — no code change needed; the pool picks it up on restart. Test with `keys_status` before declaring a new key live.
 
 ## License & Security
 
-- Follows the sovereign-projects repo licensing.
+- Follows the toxicwind/ranch repo licensing.
 - Security: key values live only in 0600 `~/.secrets`; auth is a shared `X-MCP-Token` against a 0600 token file; all MCP traffic is loopback-bound (`127.0.0.1:25202`) with the external tailnet funnel as the only outside route; logs and `keys_status` expose labels and fingerprints, never values. Never paste a key value into chat, logs, or issues.
