@@ -282,7 +282,7 @@ def exec(cmd: str, workdir: str = "/home/toxic") -> str:
 
 # --- bridge-max: multitask + background dispatch ---------------------------
 # Added 2026-09-20 by bridge-max. Canonical source:
-# projects/bridge/yote/awrawr_mcp.py in toxicwind/sovereign-projects
+# bridge/yote/awrawr_mcp.py in toxicwind/ranch
 # (live file /home/toxic/awrawr_mcp.py is deployed from there).
 import threading as _threading
 import uuid as _uuid
@@ -466,8 +466,8 @@ def bg_status(handle: str) -> str:
 # Added 2026-09-20 by mcp-smith. Extends the bridge-max bg registry
 # (~/.cache/mcp-bg) with bg_list/bg_kill; adds native fleet (squawk),
 # yote_load, port_map, pitchfork_daemon tools so the fleet stops shelling
-# out for them. Canonical source: projects/bridge/yote/ in
-# toxicwind/sovereign-projects (deployed to /home/toxic/awrawr_mcp.py via
+# out for them. Canonical source: bridge/yote/ in
+# toxicwind/ranch (deployed to /home/toxic/awrawr_mcp.py via
 # apply_mcp_patch_mcp_smith.py — same idempotent pattern as bridge-max).
 import signal as _signal
 import shutil as _shutil
@@ -1093,7 +1093,7 @@ def flicker_health() -> str:
 
 # --- end flicker tools -------------------------------------------------------
 # --- hft race tool ----------------------------------------------------------
-RACE_WINNERS_LOG = os.path.expanduser('/home/toxic/estate/hatch/cache-shingle/hft_race_winners.jsonl')
+RACE_WINNERS_LOG = '/home/toxic/hatch/cache-shingle/hft_race_winners.jsonl'
 
 def _race_one(strategy, timeout):
     name = strategy['name']
@@ -1517,12 +1517,27 @@ def mesh_call_tool(tool_name: str, arguments_json: str = "{}",
 
 # ---------------------------------------------------------------------------
 # Sidechat shim tools (2026-10-02)
-# Pure functions from /home/toxic/estate/hatch/sidechat_shim.py (stdlib-only,
-# import-safe). These SHAPE, CHECK, and VERIFY lane messages -- the actual
-# chat.send_message dispatch stays in the agent runtime (yote has no chat
-# tools). Single source of truth is the shim file; these are thin wrappers.
+# Pure functions from sidechat_shim.py (stdlib-only, import-safe). These
+# SHAPE, CHECK, and VERIFY lane messages -- the actual chat.send_message
+# dispatch stays in the agent runtime (yote has no chat tools). Single source
+# of truth is the shim file; these are thin wrappers.
+#
+# Hatch moved 2026-10-02: /home/toxic/estate/hatch -> /home/toxic/hatch.
+# The shim dir is resolved at runtime (canonical first, legacy fallback) --
+# no hardcoded host paths.
 # ---------------------------------------------------------------------------
-_SHIM_DIR = "/home/toxic/estate/hatch"
+def _resolve_shim_dir() -> str:
+    for candidate in ("/home/toxic/hatch", "/home/toxic/estate/hatch"):
+        try:
+            if os.path.isfile(os.path.join(candidate, "sidechat_shim.py")):
+                return candidate
+        except OSError:
+            continue
+    return "/home/toxic/hatch"  # canonical; keeps errors legible if missing
+
+
+_SHIM_DIR = _resolve_shim_dir()
+_SHIM_PATH = os.path.join(_SHIM_DIR, "sidechat_shim.py")
 _shim = None
 _shim_err = ""
 try:
@@ -1582,11 +1597,10 @@ def shim_info() -> str:
     """Shim provenance: sha256 of the canonical shim source plus load state.
     Use to verify which shim build backs the other shim_* answers."""
     info = {"ok": _shim is not None,
-            "source": "/home/toxic/estate/hatch/sidechat_shim.py",
+            "source": _SHIM_PATH,
             "error": _shim_err}
     try:
-        info["sha256"] = _shim.sha256_file(
-            "/home/toxic/estate/hatch/sidechat_shim.py")
+        info["sha256"] = _shim.sha256_file(_SHIM_PATH)
     except Exception as e:
         info["sha256_error"] = str(e)[:120]
     return json.dumps(info)
@@ -1602,7 +1616,7 @@ def shim_send_chat(chat_id: str, message: str, lane: str = "") -> str:
         return err
     try:
         safe_text = _shim.format_safe(message)
-        queue_dir = "/home/toxic/estate/hatch/pollers/nudge-queue"
+        queue_dir = os.path.join(_SHIM_DIR, "pollers", "nudge-queue")
         os.makedirs(queue_dir, exist_ok=True)
         ts = time.time()
         lane_tag = lane or "mcp"
