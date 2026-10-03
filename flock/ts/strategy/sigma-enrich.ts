@@ -11,12 +11,15 @@
  * Attribution: https://github.com/wintermi/sigma — catalog.json is
  * generated upstream; we re-snapshot it here on a refresh cadence.
  */
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync, renameSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CATALOG_PATH = join(HERE, "sigma-catalog.json");
+const SIGMA_UPSTREAM_URL =
+  "https://raw.githubusercontent.com/wintermi/sigma/main/internal/modeldata/catalog.json";
+const SIGMA_MAX_AGE_DAYS = 14;
 
 export interface SigmaModel {
   id: string;
@@ -82,6 +85,13 @@ function loadIndex(): Map<string, SigmaModel> {
   return index;
 }
 
+/** Resolve a loose model alias against the sigma catalog variants
+ * ("grok-4.7" -> "x-ai/grok-4.7"). Returns the catalog id or null. */
+export function resolveSigmaAlias(id: string): string | null {
+  const hit = sigmaLookup("", id);
+  return hit ? hit.id : null;
+}
+
 /** Look up sigma metadata for an estate (provider, modelId) pair. */
 export function sigmaLookup(
   _provider: string,
@@ -132,6 +142,69 @@ export function applySigmaBackfill(
     }
   }
   return enriched;
+}
+
+/**
+ * refreshSigmaCatalog — fetch the upstream sigma catalog, validate its
+ * shape (provenance check), and atomically replace the local snapshot.
+ * Returns { ok, rows, snapshot } — ok:false on any fetch/validation
+ * failure, leaving the existing snapshot untouched.
+ */
+export async function refreshSigmaCatalog(): Promise<{
+  ok: boolean;
+  rows: number;
+  snapshot: string;
+  reason?: string;
+}> {
+  let res: Response;
+  try {
+    res = await fetch(SIGMA_UPSTREAM_URL, {
+      headers: { "user-agent": "sovereign-router/sigma-refresh" },
+    });
+  } catch (e) {
+    return { ok: false, rows: 0, snapshot: snapshotDate, reason: "fetch_error" };
+  }
+  if (!res.ok)
+    return { ok: false, rows: 0, snapshot: snapshotDate, reason: `http_${res.status}` };
+  let d: any;
+  try {
+    d = await res.json();
+  } catch {
+    return { ok: false, rows: 0, snapshot: snapshotDate, reason: "bad_json" };
+  }
+  // Provenance/shape validation: upstream must carry both model arrays
+  const text = d.textModels;
+  const image = d.imageModels;
+  if (!Array.isArray(text) || !Array.isArray(image) || text.length < 100)
+    return { ok: false, rows: 0, snapshot: snapshotDate, reason: "bad_shape" };
+  const snap = String(d.snapshotDate || new Date().toISOString().slice(0, 10));
+  const payload = JSON.stringify(
+    { snapshotDate: snap, textModels: text, imageModels: image },
+    null,
+    1,
+  );
+  // Atomic replace: write temp then rename
+  const tmp = CATALOG_PATH + ".tmp";
+  writeFileSync(tmp, payload, "utf8");
+  renameSync(tmp, CATALOG_PATH);
+  // Reset in-memory index so the next lookup loads the fresh snapshot
+  index = null;
+  snapshotDate = "";
+  const idx = loadIndex();
+  return { ok: true, rows: idx.size, snapshot: snap };
+}
+
+/** Days since the loaded snapshot; Infinity when no snapshot is loaded. */
+export function sigmaStalenessDays(): number {
+  if (!snapshotDate) loadIndex();
+  if (!snapshotDate) return Infinity;
+  const ms = Date.now() - new Date(snapshotDate + "T00:00:00Z").getTime();
+  return Math.max(0, ms / 86400000);
+}
+
+/** True when the snapshot is older than SIGMA_MAX_AGE_DAYS. */
+export function sigmaNeedsRefresh(): boolean {
+  return sigmaStalenessDays() > SIGMA_MAX_AGE_DAYS;
 }
 
 export function sigmaCatalogInfo(): { rows: number; snapshot: string } {
