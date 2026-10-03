@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { sigmaLookup } from "./sigma-enrich.ts";
 
 // Master providers package — the single source of truth for provider
 // definitions, live model discovery, aliases, seeds, and quarantine.
@@ -12,7 +11,7 @@ import {
   MODEL_ALIASES as PKG_MODEL_ALIASES,
   DEAD_MODEL_IDS as PKG_DEAD_MODEL_IDS,
   type ProviderDef,
-} from "../../../../../../estate/packages/providers/src/index.ts";
+} from "../../../packages/providers/src/index.ts";
 
 // ---------------------------------------------------------------------------
 // Secrets + local stack env (mise loads these; standalone bun needs them too)
@@ -59,7 +58,7 @@ if (!_portRaw) {
 export const PORT = parseInt(_portRaw, 10);
 
 export const DB_PATH =
-  process.env.SOVEREIGN_DB || "/home/toxic/estate/data/sovereign_router.db";
+  process.env.SOVEREIGN_DB || "/home/toxic/estate/var/data/sovereign_router.db";
 
 export const MAX_PARALLEL = 4;
 
@@ -104,11 +103,11 @@ export const STRATEGY = process.env.SOVEREIGN_STRATEGY || "auto";
 export const UA = "Mozilla/5.0 (compatible; Sovereign-Flock/3.1)";
 
 // ---------------------------------------------------------------------------
-// LLAMA_SWAP_V1 (must come before PROVIDERS that uses it)
+// HERD_V1 (must come before PROVIDERS that uses it)
 // ---------------------------------------------------------------------------
-export const LLAMA_SWAP_V1 =
+export const HERD_V1 =
   process.env.LLM_BASE_URL ||
-  process.env.LLAMA_SWAP_V1 ||
+  process.env.HERD_V1 ||
   "http://127.0.0.1:25100/v1";
 
 export function loadLocalRoleModels(): {
@@ -151,7 +150,7 @@ export const LOCAL_ROLES = loadLocalRoleModels();
 function effectiveDefs(): ProviderDef[] {
   return PKG_PROVIDER_DEFS.map((d) => {
     // Local SSOT — always first-class for sovereign GPU path
-    if (d.name === "llama-swap") return { ...d, baseUrl: LLAMA_SWAP_V1 };
+    if (d.name === "herd") return { ...d, baseUrl: HERD_V1 };
     // Local NIM proxy (:8000, nim-consolidation track). Shows dead in
     // /status until the proxy key lands — the router then picks it up via
     // hot reload (/admin/reload, SIGHUP).
@@ -219,7 +218,7 @@ catalog.loadFromFileSync(CATALOG_STATE_PATH);
 // so they live in the catalog's overlay tier — served always, never
 // pruned by discovery, never persisted — instead of a hardcoded
 // provider->models list.
-catalog.setOverlay("llama-swap", [
+catalog.setOverlay("herd", [
   LOCAL_ROLES.fast,
   LOCAL_ROLES.quality,
   LOCAL_ROLES.longctx,
@@ -300,39 +299,21 @@ export function modelFree(p: string, mid: string): boolean {
   return mid.includes(":free");
 }
 
-/**
- * modelContextWindow — context window for a provider/model from live
- * discovery metadata (populated by the per-model adapter fix + sigma
- * backfill). Checks context_window, context_length, max_context in order.
- * Returns 0 when unknown (caller treats as "no constraint", not "tiny").
- */
-export function modelContextWindow(p: string, mid: string): number {
-  const meta = (LIVE_MODEL_META[p] || {})[mid] as
-    | Record<string, unknown>
-    | undefined;
-  if (!meta) return 0;
-  for (const k of ["context_window", "context_length", "max_context"]) {
-    const v = meta[k];
-    if (typeof v === "number" && v > 0) return v;
-  }
-  return 0;
-}
-
 export const CODING: Record<string, [string, string] | null> = {
   auto: null,
   fcm: null,
   // free: route through the `free` strategy (local + all :free cloud models)
   free: null,
-  // Local-first ranked roles (llama-swap exclusive matrix) — runtime-dynamic
+  // Local-first ranked roles (herd exclusive matrix) — runtime-dynamic
   // from best-models.json. These overlay the package's static alias map;
   // everything below comes from the master providers package.
-  fast: ["llama-swap", LOCAL_ROLES.fast],
-  "local-fast": ["llama-swap", LOCAL_ROLES.fast],
-  quality: ["llama-swap", LOCAL_ROLES.quality],
-  "local-quality": ["llama-swap", LOCAL_ROLES.quality],
-  longctx: ["llama-swap", LOCAL_ROLES.longctx],
-  "local-longctx": ["llama-swap", LOCAL_ROLES.longctx],
-  "local-auto": ["llama-swap", LOCAL_ROLES.quality],
+  fast: ["herd", LOCAL_ROLES.fast],
+  "local-fast": ["herd", LOCAL_ROLES.fast],
+  quality: ["herd", LOCAL_ROLES.quality],
+  "local-quality": ["herd", LOCAL_ROLES.quality],
+  longctx: ["herd", LOCAL_ROLES.longctx],
+  "local-longctx": ["herd", LOCAL_ROLES.longctx],
+  "local-auto": ["herd", LOCAL_ROLES.quality],
   ...PKG_MODEL_ALIASES,
 };
 
@@ -356,7 +337,7 @@ export function getKey(p: string): string {
 }
 
 export function keyOk(p: string): boolean {
-  if (p === "llama-swap" || PROVIDERS[p]?.no_auth) return true;
+  if (p === "herd" || PROVIDERS[p]?.no_auth) return true;
   if (p === "nvidia") return nvidiaKeys().length > 0;
   const conf = PROVIDERS[p];
   if (!conf) return false;
@@ -367,13 +348,13 @@ export function keyOk(p: string): boolean {
 }
 
 export function firstModelFor(p: string): string {
-  if (p === "llama-swap") return LOCAL_ROLES.quality;
+  if (p === "herd") return LOCAL_ROLES.quality;
   return catalog.servingModels(p)[0] || "";
 }
 
 export function isLocalSwapModelId(model: string): boolean {
   if (!model || model === "auto" || model === "fcm") return false;
-  if (model in CODING && CODING[model]?.[0] === "llama-swap") return true;
+  if (model in CODING && CODING[model]?.[0] === "herd") return true;
   if (
     model === LOCAL_ROLES.fast ||
     model === LOCAL_ROLES.quality ||
@@ -459,74 +440,24 @@ export function resolveModel(model: string): [string, string] {
     // the healthy field instead of burning a 404 on a known-bad id.
     if (!DEAD_MODEL_IDS.has(m) && !catalog.isQuarantined(p, m)) return [p, m];
   }
-  // Prefer llama-swap for any local GGUF id so hybrid never sends GPU models to Gemini
-  if (isLocalSwapModelId(model)) return ["llama-swap", model];
+  // Prefer herd for any local GGUF id so hybrid never sends GPU models to Gemini
+  if (isLocalSwapModelId(model)) return ["herd", model];
   if (model === "auto" || model === "fcm") {
     // local-first auto: quality role on swap
-    return ["llama-swap", LOCAL_ROLES.quality];
+    return ["herd", LOCAL_ROLES.quality];
   }
   for (const p of Object.keys(PROVIDERS)) {
     if (catalogModelsFor(p).includes(model)) return [p, model];
   }
   if (keyOk("openrouter")) return ["openrouter", model];
   if (keyOk("nvidia")) return ["nvidia", model];
-  return ["llama-swap", LOCAL_ROLES.quality];
+  return ["herd", LOCAL_ROLES.quality];
 }
 
 export function isAst(text: string): boolean {
   return Boolean(
     text && (AST_RE.test(text.slice(0, 5000)) || text.includes("```")),
   );
-}
-
-// ---------------------------------------------------------------------------
-// Task-type classification (router-max): finer than the old isAst boolean.
-// code -> ast_race lane; reasoning -> deliberative hybrid lane; chat -> free
-// race. Keep the detector cheap and deterministic (regex, no LLM).
-// ---------------------------------------------------------------------------
-export type TaskType = "code" | "reasoning" | "chat";
-
-const REASONING_RE =
-  /(\bprove\b|\btheorem\b|\bderive\b|\bderivation\b|\bcalculate\b|\bcomputation\b|step[- ]by[- ]step|chain[- ]of[- ]thought|\bwhy does\b|\bexplain why\b|\balgorithm\b|\bcomplexity\b|trade[- ]?off|\bdesign decision\b|\boptimiz(e|ation)\b|\bdebug\b)/i;
-
-export function classifyTask(text: string): TaskType {
-  if (isAst(text)) return "code";
-  if (text && REASONING_RE.test(text.slice(0, 5000))) return "reasoning";
-  return "chat";
-}
-
-// ---------------------------------------------------------------------------
-// Cost-tier awareness (router-max): what this (provider, model) costs us.
-// free  — modelFree: live metadata prices it at 0 (or :free convention).
-// cheap — sigma cost metadata <= $1/1M input tokens.
-// standard — anything else with a price we know.
-// ---------------------------------------------------------------------------
-export type CostTier = "free" | "cheap" | "standard";
-
-export function costTier(p: string, mid: string): CostTier {
-  // Local zero-cost lanes are always free, even when live metadata carries
-  // no pricing (modelFree's ":free"-suffix fallback misses local GGUF ids).
-  if (p === "llama-swap" || PROVIDERS[p]?.no_auth || modelFree(p, mid))
-    return "free";
-  const hit = sigmaLookup(p, mid);
-  if (hit?.cost) {
-    if (hit.cost.inputPerMillion <= 1.0) return "cheap";
-    return "standard";
-  }
-  return "standard";
-}
-
-/**
- * parseStickyOpt — X-Sovereign-Sticky header parsing (router-max).
- * "1"/"true"/"yes"/"on" -> explicit opt-in; "0"/"false"/"no"/"off" ->
- * explicit opt-out; absent/unparseable -> null (legacy behavior).
- */
-export function parseStickyOpt(h: string | null): boolean | null {
-  if (h === null || h === undefined) return null;
-  const v = h.trim().toLowerCase();
-  if (v === "1" || v === "true" || v === "yes" || v === "on") return true;
-  if (v === "0" || v === "false" || v === "no" || v === "off") return false;
-  return null;
 }
 
 export function isExplicit(model: string): boolean {
@@ -548,34 +479,4 @@ export function json(
     status,
     headers: { "Content-Type": "application/json", ...headers },
   });
-}
-
-// ---------------------------------------------------------------------------
-// Chat-capability filter (Chris 2026-10-02).
-//
-// Guard, embedding, reranker, moderation, reward, and classifier models
-// return scores, labels, or vectors -- not chat text. On 2026-10-01
-// meta-llama/llama-prompt-guard-2-86m was selected for an ordinary
-// `model=auto` chat and its "completion" was the bare scalar
-// "0.0007095712935552001". These IDs must never enter chat candidate pools
-// (freeCandidates) and their scalar outputs must never pass the substance
-// gate. Pattern-based: live catalogs constantly add new guard/embedding
-// variants, so an explicit ID list would rot.
-const NON_CHAT_MODEL_PATTERNS: RegExp[] = [
-  /prompt-guard/i,
-  /llama-guard/i,
-  /\bguard\b/i,
-  /safeguard/i,
-  /embedding/i,
-  /embedder/i,
-  /rerank/i,
-  /moderation/i,
-  /toxicity/i,
-  /reward-model/i,
-  /\breward\b/i,
-  /classifier/i,
-  /nsfw/i,
-];
-export function isChatCapable(mid: string): boolean {
-  return !NON_CHAT_MODEL_PATTERNS.some((re) => re.test(mid));
 }
