@@ -1,5 +1,26 @@
-import { ct_eq, PBKDF2_ITERS, now, pw_fragment, base64_decode, form_field, url_decode, hex_val, SHA256 } from "./tokens";
-import { Result, attempt, COOKIE, SESSION_TTL_SECS, THROTTLE_WINDOW_SECS, THROTTLE_MAX_FAILURES, PBKDF2_ITERS_CONST, HASH_PREFIX } from "../shared";
+import { createHmac } from "node:crypto";
+import { ct_eq, PBKDF2_ITERS, now, pw_fragment, base64_decode, form_field, url_decode, hex_val } from "./tokens";
+// Session/throttle constants. Canonical definitions live in
+// src/strategy/router_auth.ts; mirrored here because src/auth/ is a leaf
+// module and must not depend on the strategy tree.
+const COOKIE = "sovereign_session";
+const SESSION_TTL_SECS = 12 * 3600;
+const THROTTLE_WINDOW_SECS = 60;
+const THROTTLE_MAX_FAILURES = 10;
+
+/** Memoized scraper credential: the tag for the last verified user:pass. */
+export interface Memo {
+  valid: boolean;
+  tagHex: string;
+  username: string;
+}
+
+/** Big-endian 8-byte encoding of a 64-bit value. */
+function be64(v: bigint): Buffer {
+  const b = Buffer.alloc(8);
+  b.writeBigUInt64BE(v);
+  return b;
+}
 
 // Session/throttle state: a random per-boot signing key (sessions don't
 // survive restarts — deliberate, see the auth-posture ADR), the login
@@ -54,7 +75,7 @@ export class Admin {
     };
     this.scraper_memo = {
       valid: false,
-      tag: new Uint8Array(32),
+      tagHex: "",
       username: "",
     };
     this.setup_required = true;
@@ -62,8 +83,7 @@ export class Admin {
 
   /** HMAC-SHA256 over length-prefixed parts. */
   mac(parts: Uint8Array[]): Uint8Array {
-    const crypto = await import("crypto");
-    const hmac = crypto.createHmac("sha256", this.signing_key);
+    const hmac = createHmac("sha256", this.signing_key);
     for (const p of parts) {
       const lenBuf = Buffer.alloc(8);
       lenBuf.writeBigUInt64BE(BigInt(p.length));
@@ -79,7 +99,7 @@ export class Admin {
   sign_session(expiry: number, username: string, password_hash: string): string {
     const frag = pw_fragment(password_hash);
     const tag = this.mac([
-      Buffer.fromBigInt(BigInt(expiry)),
+      be64(BigInt(expiry)),
       Buffer.from(username, "utf8"),
       Buffer.from(frag, "utf8"),
     ]);
@@ -100,11 +120,16 @@ export class Admin {
     if (parts.length !== 4) return null;
 
     const [expHex, userHex, frag, tagHex] = parts;
+    if (!expHex || !userHex || !frag || !tagHex) return null;
 
     // Parse expiry
+    // sign_session emits expiry.toString(16), so this is a hex string.
+    // BigInt() parses a bare string as DECIMAL: without the 0x prefix every
+    // real token threw here, so verification never succeeded for anyone.
+    if (!/^[0-9a-f]+$/i.test(expHex)) return null;
     let expiry: bigint;
     try {
-      expiry = BigInt(expHex);
+      expiry = BigInt("0x" + expHex);
     } catch {
       return null;
     }
@@ -115,16 +140,12 @@ export class Admin {
     // Parse username from hex
     const userBytes = Uint8Array.fromHex(userHex);
     if (userBytes.length === 0) return null;
-    const username = typeof decoder === "undefined"
-      ? new TextDecoder().decode(userBytes)
-      : decoder.decode(userBytes);
-    // Actually, use TextDecoder directly
     const decoder = new TextDecoder();
     const userName = decoder.decode(userBytes);
 
     // Recompute expected tag
     const expectedTag = this.mac([
-      Buffer.fromBigInt(expiry),
+      be64(expiry),
       Buffer.from(userName, "utf8"),
       Buffer.from(frag, "utf8"),
     ]);
@@ -196,7 +217,7 @@ export class Admin {
   clear_scraper_memo(): void {
     this.scraper_memo = {
       valid: false,
-      tag: new Uint8Array(32),
+      tagHex: "",
       username: "",
     };
   }
