@@ -1,10 +1,49 @@
-import type { ChatBody, RouteResult } from "./router_types.ts";
+import type { ChatBody, RouteResult, RequestCtx } from "./router_types.ts";
 import { state, isWorkerExhausted } from "./router_matrix.ts";
 import { PROVIDERS, PROVIDER_MODELS, catalogModelsFor, modelFree, modelContextWindow, LOCAL_ROLES, CODING, MAX_PARALLEL, FIFO_MAX, STRATEGY, UA, AST_RE, getKey, keyOk, firstModelFor, resolveModel, isLocalSwapModelId, isAst, isExplicit, classifyTask, costTier, json, normalizeModelSpec, isChatCapable, log, CONNECT_MS, TTFT_MS, ATTEMPT_MS, ATTEMPT_STREAM_MS, HEDGE_MS } from "./router_config.ts";
 import { resolveSigmaAlias } from "./sigma-enrich.ts";
 import { benchModelBonus } from "./bench-priors.ts";
 // 📒 ledger — the ranch account book: durable Gemini cost accounting.
 import { recordUsage } from "./ledger.ts";
+import type { RoutingDecision } from "./decision.ts";
+import { dispatcherFor } from "./dispatcher.ts";
+import { ProviderRateLimiter } from "./ratelimit.ts";
+import { flockMetrics } from "./flock-metrics.ts";
+import { injectStreamOptions, noteInjectRejected } from "./streamopts.ts";
+
+// ---------------------------------------------------------------------------
+// Flock-port shared state (G6/G7): per-provider FIFO dispatchers are created
+// lazily by dispatcherFor(); the per-provider token-bucket rate limiter is
+// built here from the registry and rebuilt on hot reload.
+// ---------------------------------------------------------------------------
+export const providerRateLimiter = new ProviderRateLimiter();
+
+export function rebuildRateLimiter(): void {
+  providerRateLimiter.build(
+    Object.keys(PROVIDERS).map((name) => {
+      const models = catalogModelsFor(name);
+      let freeCount = 0;
+      for (const m of models) {
+        try {
+          if (modelFree(name, m)) freeCount++;
+        } catch {
+          /* metadata failure -> treat as paid */
+        }
+      }
+      return {
+        name,
+        freeTier: models.length > 0 && freeCount * 2 >= models.length,
+        keyRpms: [],
+      };
+    }),
+  );
+}
+rebuildRateLimiter();
+
+function dispatchWaitMs(): number {
+  const raw = parseInt(process.env.SOVEREIGN_DISPATCH_WAIT_MS || "30000", 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : 30000;
+}
 
 // ---------------------------------------------------------------------------
 // Substance guard: a completion is servable only if it carries non-empty
@@ -67,7 +106,9 @@ export async function callOne(
   body: ChatBody,
   stream = false,
   externalSignal?: AbortSignal,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
+  const decision = rctx?.decision;
   // 404-entitlement bench (503-forensics 2026-09-21): fail fast with ZERO
   // attempt burn — this model id 404'd before (delisted or not entitled
   // for our key) and never heals by retrying. Every path funnels through
@@ -82,6 +123,7 @@ export async function callOne(
     };
   }
   if (!state.circuitOk(provider)) {
+    decision?.push_skip(provider, "circuit_open");
     return {
       ok: false,
       status: 503,
@@ -100,18 +142,37 @@ export async function callOne(
       err: "unknown_provider",
     };
   }
+  // G7: per-provider token bucket (flock ratelimit.rs). A drained bucket
+  // fails the attempt over to the next candidate — never a circuit strike.
+  if (!providerRateLimiter.allow(provider)) {
+    decision?.push_skip(provider, "rate_limited");
+    return {
+      ok: false,
+      status: 429,
+      provider,
+      lat: 0,
+      err: "rate_limited",
+    };
+  }
   const url = conf.base.replace(/\/$/, "") + "/chat/completions";
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     "User-Agent": UA,
     "Accept-Encoding": "identity",
   };
+  // G8: relay the Gemini Interactions turn handle upstream. keypool
+  // (:25109) reads x-previous-interaction-id to build
+  // previous_interaction_id and answers with x-interaction-id; without the
+  // relay every tool loop through the router dies with a 400 on turn 2.
+  const prevInteractionId = rctx?.reqHeaders?.get("x-previous-interaction-id");
+  if (prevInteractionId) headers["x-previous-interaction-id"] = prevInteractionId;
   if (!conf.no_auth) {
     // NVIDIA rotates across the multi-key pool (40 rpm token bucket per
     // key). All buckets dry is an honest 429 — falling back to the default
     // key would just burn a rate-limited key.
     const rk = provider === "nvidia" ? state.nextNvidiaKey() : null;
     if (provider === "nvidia" && !rk) {
+      decision?.push_skip(provider, "rate_limited");
       return {
         ok: false,
         status: 429,
@@ -133,6 +194,7 @@ export async function callOne(
   const govKey = `${provider}/${model}`;
   const permit = state.governor.admit(govKey);
   if (!permit) {
+    decision?.push_skip(provider, "rate_limited");
     return {
       ok: false,
       status: 429,
@@ -141,10 +203,41 @@ export async function callOne(
       err: "governor_limited",
     };
   }
-  const payload = { ...body, model, stream };
+  // G2: stream_options injection (flock proxy.rs usage injection). Streamed
+  // chat completions only report exact token usage when asked — ask on the
+  // client's behalf unless they set stream_options or the model opted out
+  // after a 400 (NO_INJECT).
+  let payloadBody: ChatBody = body;
+  let injectedKey: string | null = null;
+  if (stream && (rctx?.path ?? "/v1/chat/completions") === "/v1/chat/completions") {
+    const key = rctx?.model || String((body as Record<string, unknown>)["model"] || "auto");
+    const inj = injectStreamOptions(body, key);
+    payloadBody = inj.body;
+    if (inj.injected) injectedKey = key;
+  }
+  // G6: FIFO dispatcher slot (flock dispatch.rs). Every attempt funnels
+  // through the per-provider queue — strict arrival order under contention.
+  // Fail fast past the deadline so a stalled queue fails over.
+  const dispatchDeadline = rctx?.deadlineMs ?? Date.now() + dispatchWaitMs();
+  const slot = await dispatcherFor(provider).acquire(dispatchDeadline);
+  if (!slot) {
+    flockMetrics.dispatchTimeout++;
+    decision?.push_attempt(provider, 429, 0);
+    permit.release();
+    return {
+      ok: false,
+      status: 429,
+      provider,
+      lat: 0,
+      err: "dispatch_queue_timeout",
+    };
+  }
+  flockMetrics.recordQueueWait(slot.waitedMs / 1000);
+  const payload = { ...payloadBody, model, stream };
   const start = performance.now();
   // Failfast signal stack: connect (headers) < TTFT (first byte, stream) <
-  // total attempt cap. AbortSignal.any keeps each layer independent.
+  // total attempt cap < client deadline / hangup. AbortSignal.any keeps
+  // each layer independent.
   const connectCtrl = new AbortController();
   const connectTimer = setTimeout(
     () => connectCtrl.abort(new Error("connect_timeout")),
@@ -153,9 +246,20 @@ export async function callOne(
   const totalSignal = AbortSignal.timeout(
     stream ? ATTEMPT_STREAM_MS : ATTEMPT_MS,
   );
-  const signals = externalSignal
-    ? [totalSignal, connectCtrl.signal, externalSignal]
-    : [totalSignal, connectCtrl.signal];
+  const signals: AbortSignal[] = [totalSignal, connectCtrl.signal];
+  if (externalSignal) signals.push(externalSignal);
+  if (rctx?.signal) signals.push(rctx.signal);
+  // Per-attempt ledger (G12) + latency histograms (G11). status 0 =
+  // connection-level failure (no response), mirroring Rust.
+  const noteAttempt = (status: number, ttftMs: number | null) => {
+    const latMs = performance.now() - start;
+    decision?.push_attempt(provider, status, latMs);
+    flockMetrics.recordUpstream(latMs / 1000);
+    if (ttftMs != null) flockMetrics.recordTtft(ttftMs / 1000);
+  };
+  let interactionId: string | undefined;
+  const withIid = <T extends RouteResult>(r: T): T =>
+    interactionId ? { ...r, interactionId } : r;
   let resp: Response;
   try {
     resp = await fetch(url, {
@@ -164,13 +268,18 @@ export async function callOne(
       body: JSON.stringify(payload),
       signal: AbortSignal.any(signals),
     });
+    // G8: capture the upstream turn handle for the client echo.
+    interactionId = resp.headers.get("x-interaction-id") || undefined;
   } catch (e) {
     clearTimeout(connectTimer);
+    slot.release();
+    permit.release();
     const lat = (performance.now() - start) / 1000;
     const msg = e instanceof Error ? e.message : String(e);
     // A hedged loser abort is NOT a provider failure: no circuit strike,
     // no error note, no DB row. The winner already served the client.
     if (/hedged_loser/.test(msg)) {
+      noteAttempt(499, null);
       return {
         ok: false,
         status: 499,
@@ -191,6 +300,7 @@ export async function callOne(
         : "fetch_error:" + msg.slice(0, 120);
     state.noteError(provider, 504, err);
     state.record(model, provider, 504, lat, 0, STRATEGY);
+    noteAttempt(0, null);
     const t = {
       connect_ms: Math.round((performance.now() - start) * 10) / 10,
       ttft_ms: null as number | null,
@@ -216,14 +326,23 @@ export async function callOne(
       if (isWorkerExhausted(errText)) state.governor.noteExhausted(govKey);
       state.noteError(provider, resp.status, errText.slice(0, 200));
       state.record(model, provider, resp.status, lat, 0, STRATEGY);
-      return {
+      noteAttempt(resp.status, null);
+      // G2: the injected body was rejected — memoize the model and retry
+      // once with the untouched body. NO_INJECT makes the recursive call
+      // skip injection, so this cannot loop.
+      if (resp.status === 400 && injectedKey) {
+        noteInjectRejected(injectedKey);
+        log(`stream_options injection rejected by ${provider}/${model}; retrying unmodified`);
+        return callOne(provider, model, body, stream, externalSignal, rctx);
+      }
+      return withIid({
         ok: false,
         status: resp.status,
         provider,
         lat,
         err: errText,
         timings: mkTimings(null),
-      };
+      });
     }
     if (stream) {
       if (resp.body) {
@@ -248,8 +367,10 @@ export async function callOne(
           } catch { /* noop */ }
           state.noteError(provider, 504, "ttft_timeout");
           state.record(model, provider, 504, tlat, 0, STRATEGY);
+          noteAttempt(504, null);
           return { ok: false, status: 504, provider, lat: tlat, err: "ttft_timeout", timings: mkTimings(null) };
         }
+        const ttftMs = Math.round((performance.now() - start) * 10) / 10;
         // Re-emit the consumed first chunk, then pipe the rest.
         const firstChunk = first.value;
         const rest = new ReadableStream<Uint8Array>({
@@ -270,27 +391,29 @@ export async function callOne(
         state.record(model, provider, 200, lat, 0, STRATEGY);
         if (state.circuit.get(provider) === "half")
           state.circuit.set(provider, "closed");
-        return {
+        noteAttempt(200, ttftMs);
+        return withIid({
           ok: true,
           status: resp.status,
           provider,
           model,
           lat,
           stream: rest,
-          timings: mkTimings(Math.round((performance.now() - start) * 10) / 10),
-        };
+          timings: mkTimings(ttftMs),
+        });
       }
       state.record(model, provider, 200, lat, 0, STRATEGY);
       if (state.circuit.get(provider) === "half")
         state.circuit.set(provider, "closed");
-      return {
+      noteAttempt(200, null);
+      return withIid({
         ok: true,
         status: resp.status,
         provider,
         model,
         lat,
         stream: resp.body,
-      };
+      });
     }
     const data = await resp.arrayBuffer();
     // 📒 ledger: record token usage for cost accounting — ALL providers.
@@ -321,7 +444,8 @@ export async function callOne(
     state.record(model, provider, resp.status, lat, 0, STRATEGY);
     if (state.circuit.get(provider) === "half")
       state.circuit.set(provider, "closed");
-    return {
+    noteAttempt(resp.status, null);
+    return withIid({
       ok: true,
       status: resp.status,
       data: new Uint8Array(data),
@@ -329,10 +453,11 @@ export async function callOne(
       model,
       lat,
       timings: mkTimings(Math.round((performance.now() - start) * 10) / 10),
-    };
+    });
   } catch (e) {
     const lat = (performance.now() - start) / 1000;
     state.record(model, provider, 500, lat, 0, STRATEGY);
+    noteAttempt(500, null);
     return {
       ok: false,
       status: 500,
@@ -342,6 +467,7 @@ export async function callOne(
     };
   } finally {
     permit.release();
+    slot.release();
   }
 }
 
@@ -441,14 +567,17 @@ export async function routeAstRace(
   body: ChatBody,
   session: string,
   candsOverride?: [string, string][],
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
+  const decision = rctx?.decision;
   const model = String(body.model || "auto");
   if (isRoutableModelId(model) && !candsOverride) {
     // Direct-addressable id (alias, local id, or any curated/live catalog
     // id): go straight to its provider instead of racing.
     const [p, mid] = resolveModel(model);
-    const r = await callOne(p, mid, body);
+    const r = await callOne(p, mid, body, false, undefined, rctx);
     if (substantive(r)) {
+      decision?.select("priority");
       state.stickySet(session, p, mid);
       state.record(mid, p, 200, r.lat || 0, 1, "ast_race");
       return r;
@@ -457,7 +586,11 @@ export async function routeAstRace(
     // v3.2: explicit model failed -> fail over to the full candidate race
     // (resilience over strictness; the direct attempt stays the fast path).
   }
-  const cands = candsOverride || pickWeighted(MAX_PARALLEL);
+  const cands = demoteByContext(
+    candsOverride || pickWeighted(MAX_PARALLEL),
+    body,
+    decision,
+  );
   if (!cands.length)
     return { ok: false, status: 503, err: "ast_race_exhausted" };
   // HFT: first substantive finisher wins — the slowest lane must not set the
@@ -481,12 +614,13 @@ export async function routeAstRace(
       resolve(r);
     };
     const win = (r: RouteResult) => {
+      decision?.select("priority");
       state.stickySet(session, r.provider!, r.model!);
       state.record(r.model!, r.provider!, 200, r.lat || 0, 1, "ast_race");
       finish(r);
     };
     cands.forEach(([p, mid], i) => {
-      callOne(p, mid, body, false, ctrls[i].signal).then((r) => {
+      callOne(p, mid, body, false, ctrls[i].signal, rctx).then((r) => {
         pending--;
         if (settled) return;
         if (!r.ok) {
@@ -524,27 +658,30 @@ export async function routeAstRace(
 export async function routeSticky(
   body: ChatBody,
   session: string,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
   const model = String(body.model || "auto");
-  if (isRoutableModelId(model)) return routeAstRace(body, session);
+  if (isRoutableModelId(model)) return routeAstRace(body, session, undefined, rctx);
   const [p, m] = state.stickyGet(session);
   if (p && keyOk(p) && state.circuitOk(p) && !state.laneDead(p)) {
-    const r = await callOne(p, m || model, body);
-    if (substantive(r)) return r;
+    const r = await callOne(p, m || model, body, false, undefined, rctx);
+    if (substantive(r)) { rctx?.decision?.select("session_binding"); return r; }
     if (r.ok) state.recordEmpty(p, m || model);
   }
-  return routeAstRace(body, session);
+  return routeAstRace(body, session, undefined, rctx);
 }
 
 export async function routeWeighted(
   body: ChatBody,
   session: string,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
-  const cands = pickWeighted(1);
+  const cands = demoteByContext(pickWeighted(1), body, rctx?.decision);
   if (!cands.length) return { ok: false, status: 503, err: "no_providers" };
   const [p, mid] = cands[0];
-  const r = await callOne(p, mid, body);
+  const r = await callOne(p, mid, body, false, undefined, rctx);
   if (substantive(r)) {
+    rctx?.decision?.select("priority");
     state.stickySet(session, p, mid);
     return r;
   }
@@ -560,19 +697,21 @@ export async function routeWeighted(
       err: r.ok ? "empty_completion" : r.err,
     };
   }
-  return routeCircuitChain(body, session);
+  return routeCircuitChain(body, session, rctx);
 }
 
 export async function routeCircuitChain(
   body: ChatBody,
   session: string,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
   const model = String(body.model || "auto");
   if (isRoutableModelId(model)) {
     const [p, mid] = resolveModel(model);
     if (keyOk(p) && state.circuitOk(p)) {
-      const r = await callOne(p, mid, body);
+      const r = await callOne(p, mid, body, false, undefined, rctx);
       if (substantive(r)) {
+        rctx?.decision?.select("priority");
         state.stickySet(session, p, mid);
         return r;
       }
@@ -589,19 +728,21 @@ export async function routeCircuitChain(
     const mid = firstUsableModelFor(p);
     if (mid) cands.push([p, mid]);
   }
-  return hedgedChain(cands, body, session, "circuit_chain");
+  const dc = demoteByContext(cands, body, rctx?.decision);
+  return hedgedChain(dc, body, session, "circuit_chain", rctx);
 }
 
 export async function routeFifo(
   body: ChatBody,
   session: string,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
   if (state.fifoDepth >= FIFO_MAX) {
     return { ok: false, status: 429, err: "fifo_full" };
   }
   state.fifoDepth++;
   try {
-    return await routeAstRace(body, session);
+    return await routeAstRace(body, session, undefined, rctx);
   } finally {
     state.fifoDepth = Math.max(0, state.fifoDepth - 1);
   }
@@ -610,6 +751,7 @@ export async function routeFifo(
 export async function routeHybrid(
   body: ChatBody,
   session: string,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
   const model = String(body.model || "auto");
   if (isRoutableModelId(model)) {
@@ -618,21 +760,25 @@ export async function routeHybrid(
     // HEDGE_MS, the weighted field races in parallel and first substantive
     // wins. A hanging explicit backend no longer costs the client its
     // full connect timeout before failover begins.
-    const field = pickWeighted(MAX_PARALLEL).filter(([cp]) => cp !== p);
-    const r = await hedgedChain([[p, mid], ...field], body, session, "hybrid_direct");
+    const field = demoteByContext(
+      pickWeighted(MAX_PARALLEL).filter(([cp]) => cp !== p),
+      body,
+      rctx?.decision,
+    );
+    const r = await hedgedChain([[p, mid], ...field], body, session, "hybrid_direct", rctx);
     if (r.ok) return r;
     // v3.2: total explicit+field failure -> fall through to chain failover.
-    return routeCircuitChain(body, session);
+    return routeCircuitChain(body, session, rctx);
   }
   const [p, m] = state.stickyGet(session);
   if (p && keyOk(p) && state.circuitOk(p) && !state.laneDead(p)) {
-    const r = await callOne(p, m || model, body);
-    if (substantive(r)) return r;
+    const r = await callOne(p, m || model, body, false, undefined, rctx);
+    if (substantive(r)) { rctx?.decision?.select("session_binding"); return r; }
     if (r.ok) state.recordEmpty(p, m || model);
   }
-  const r2 = await routeAstRace(body, session);
+  const r2 = await routeAstRace(body, session, undefined, rctx);
   if (r2.ok) return r2;
-  return routeCircuitChain(body, session);
+  return routeCircuitChain(body, session, rctx);
 }
 
 /**
@@ -649,13 +795,19 @@ export async function hedgedChain(
   body: ChatBody,
   session: string,
   stratName: string,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
   // Dead-lane exclusion (503-forensics 2026-09-21): lanes whose recent
   // attempts all failed sit out of the chain. Degraded fallback: if that
   // empties the set, try every circuitOk lane anyway rather than 503.
-  let live = cands.filter(
-    ([p]) => keyOk(p) && state.circuitOk(p) && !state.laneDead(p),
-  );
+  // Exclusions are recorded on the decision ledger (G12).
+  const decision = rctx?.decision;
+  let live = cands.filter(([p]) => {
+    if (!keyOk(p)) { decision?.push_skip(p, "not_connected"); return false; }
+    if (!state.circuitOk(p)) { decision?.push_skip(p, "circuit_open"); return false; }
+    if (state.laneDead(p)) { decision?.push_skip(p, "risk_paused"); return false; }
+    return true;
+  });
   if (!live.length) {
     live = cands.filter(([p]) => keyOk(p) && state.circuitOk(p));
   }
@@ -668,9 +820,11 @@ export async function hedgedChain(
   );
   if (HEDGE_MS <= 0) {
     let lastErr = stratName + "_exhausted";
-    for (const [p, mid] of live) {
-      const r = await callOne(p, mid, body);
+    for (let li = 0; li < live.length; li++) {
+      const [p, mid] = live[li]!;
+      const r = await callOne(p, mid, body, false, undefined, rctx);
       if (substantive(r)) {
+        decision?.select(li === 0 ? "priority" : "failover");
         state.stickySet(session, p, mid);
         state.record(mid, p, 200, r.lat || 0, 1, stratName);
         return r;
@@ -698,7 +852,10 @@ export async function hedgedChain(
     };
     const fire = (): void => {
       if (settled || idx >= live.length) return;
-      const [p, mid] = live[idx++];
+      const laneEntry = live[idx]!;
+      const laneIdx = idx;
+      idx++;
+      const [p, mid] = laneEntry;
       const ctrl = new AbortController();
       ctrls.push(ctrl);
       pending++;
@@ -708,11 +865,12 @@ export async function hedgedChain(
           while (idx < live.length) fire();
         }
       }, HEDGE_MS);
-      callOne(p, mid, body, false, ctrl.signal).then((r) => {
+      callOne(p, mid, body, false, ctrl.signal, rctx).then((r) => {
         clearTimeout(hedgeTimer);
         pending--;
         if (settled) return;
         if (substantive(r)) {
+          decision?.select(laneIdx === 0 ? "priority" : "failover");
           state.stickySet(session, p, mid);
           state.record(mid, p, 200, r.lat || 0, 1, stratName);
           settle(r);
@@ -733,6 +891,7 @@ export async function hedgedChain(
 export async function routeCascade(
   body: ChatBody,
   session: string,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
   const localFirst = ["llama-swap", "kimi-auto", "nim-local"];
   const order = Object.keys(PROVIDERS).sort((a, b) => {
@@ -751,7 +910,8 @@ export async function routeCascade(
     const mid = firstUsableModelFor(p);
     if (mid) cands.push([p, mid]);
   }
-  return hedgedChain(cands, body, session, "cascade");
+  const dc = demoteByContext(cands, body, rctx?.decision);
+  return hedgedChain(dc, body, session, "cascade", rctx);
 }
 
 // ---------------------------------------------------------------------------
@@ -872,10 +1032,11 @@ export async function tryLongctxPin(
   body: ChatBody,
   sid: string,
   stream = false,
+  rctx?: RequestCtx,
 ): Promise<RouteResult | null> {
   const v = longctxPinEligible(body);
   if (!v.ok) return null;
-  const r = await callOne(LONGCTX_PIN_PROVIDER, LONGCTX_PIN_MODEL, body, stream);
+  const r = await callOne(LONGCTX_PIN_PROVIDER, LONGCTX_PIN_MODEL, body, stream, undefined, rctx);
   state.record(
     LONGCTX_PIN_MODEL,
     LONGCTX_PIN_PROVIDER,
@@ -968,11 +1129,12 @@ export async function tryLongctx2MPin(
   body: ChatBody,
   sid: string,
   stream = false,
+  rctx?: RequestCtx,
 ): Promise<RouteResult | null> {
   const v = longctx2MPinEligible(body);
   if (!v.ok) return null;
   const [lp, lm] = resolveLongctx2MModel();
-  const r = await callOne(lp, lm, body, stream);
+  const r = await callOne(lp, lm, body, stream, undefined, rctx);
   state.record(
     lm,
     lp,
@@ -1035,9 +1197,49 @@ export function filterByContext(
   return kept.length ? kept : cands;
 }
 
+/**
+ * G13 — context-window auto-demotion (flock router.rs `needed_tokens` +
+ * `select_with_budget`, borrowed from fastllm-proxy): candidates whose
+ * declared window cannot hold the needed tokens (estimated prompt +
+ * requested max_tokens) are DEMOTED (stable) to the back, not dropped.
+ * Undeclared windows (0) are never demoted — unknown is not evidence of
+ * small. If demotion would empty the pool the unfiltered pool is kept
+ * (degraded mode: a demoted candidate can still serve; truncation beats
+ * 503). Demoted candidates are recorded on the decision ledger.
+ */
+export function neededTokens(body: ChatBody): number {
+  const prompt = estPromptTokens(body);
+  const b = body as Record<string, unknown>;
+  const mt = Number(b["max_tokens"] ?? b["max_completion_tokens"] ?? 0);
+  return Math.ceil(prompt) + (Number.isFinite(mt) && mt > 0 ? Math.floor(mt) : 0);
+}
+
+export function demoteByContext(
+  cands: [string, string][],
+  body: ChatBody,
+  decision?: RoutingDecision,
+): [string, string][] {
+  const need = neededTokens(body);
+  if (need <= 0) return cands;
+  const ok: [string, string][] = [];
+  const small: [string, string][] = [];
+  for (const [p, mid] of cands) {
+    const ctx = modelContextWindow(p, mid);
+    if (ctx > 0 && ctx < need) {
+      small.push([p, mid]);
+      decision?.push_skip(`${p}/${mid}`, "context_too_small");
+    } else {
+      ok.push([p, mid]);
+    }
+  }
+  if (!ok.length) return cands;
+  return [...ok, ...small];
+}
+
 export async function routeAuto(
   body: ChatBody,
   session: string,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
   const estTokens = estPromptTokens(body);
   const taskType = classifyTask(bodyPromptText(body));
@@ -1045,15 +1247,15 @@ export async function routeAuto(
   if (taskType === "code") {
     // code-shaped: AST-priority race over the context-filtered field.
     const cands = filterByContext(pickWeighted(MAX_PARALLEL), estTokens);
-    r = await routeAstRace(body, session, cands);
+    r = await routeAstRace(body, session, cands, rctx);
   } else if (taskType === "reasoning") {
     // deliberative: ordered hybrid chain with failover.
-    r = await routeHybrid(body, session);
+    r = await routeHybrid(body, session, rctx);
   } else {
     // default: free race first (zero cost), then ordered auto-switch chain,
     // then the hybrid fallback — the request degrades, never fails hard.
     const freeCands = filterByContext(freeCandidates(), estTokens);
-    const free = await routeAstRace(body, session, freeCands);
+    const free = await routeAstRace(body, session, freeCands, rctx);
     if (free.ok) {
       r = free;
     } else {
@@ -1062,8 +1264,10 @@ export async function routeAuto(
         body,
         session,
         "free_chain",
+        undefined,
+        rctx,
       );
-      r = chained.ok ? chained : await routeHybrid(body, session);
+      r = chained.ok ? chained : await routeHybrid(body, session, rctx);
     }
   }
   r.task_type = taskType;
@@ -1401,7 +1605,7 @@ export async function runBodybuilderAutonomous(
 
 export const ROUTERS: Record<
   string,
-  (body: ChatBody, session: string) => Promise<RouteResult>
+  (body: ChatBody, session: string, rctx?: RequestCtx) => Promise<RouteResult>
 > = {
   fifo_matrix: routeFifo,
   fifo_flock: routeFifo,
@@ -1490,11 +1694,12 @@ export function freeCandidates(): [string, string][] {
 export async function routeFree(
   body: ChatBody,
   session: string,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
-  const cands = freeCandidates();
+  const cands = demoteByContext(freeCandidates(), body, rctx?.decision);
   if (!cands.length)
     return { ok: false, status: 503, err: "no_free_providers" };
-  return routeAstRace(body, session, cands);
+  return routeAstRace(body, session, cands, rctx);
 }
 
 // ---------------------------------------------------------------------------
@@ -1506,13 +1711,24 @@ export async function routeFree(
 // Terminal failures (400 malformed) stop the chain — retrying the same body
 // everywhere would just burn the pool.
 // ---------------------------------------------------------------------------
+// Explicit status classification (flock proxy.rs `retryable` + router.rs
+// `retryable_status`): 401/403/429/5xx fail over — the key or provider is at
+// fault and another lane may work. 400/404/413/422 surface: the request is
+// bad (404 additionally feeds the entitlement bench). Connection-level
+// failures (no status) fall through to the transient-error regex.
+const RETRYABLE_STATUS = new Set([401, 403, 429, 500, 502, 503, 504]);
+const TERMINAL_STATUS = new Set([400, 404, 413, 422]);
 const FAILOVER_ERR_RE =
-  /timeout|rate_limit|rate limited|governor_limited|buckets_exhausted|fetch_error|worker.?exhaust|resource.?exhaust|temporar|entitlement_benched|circuit_open|overloaded|too many/i;
+  /timeout|rate_limit|rate limited|governor_limited|dispatch_queue_timeout|buckets_exhausted|fetch_error|worker.?exhaust|resource.?exhaust|temporar|entitlement_benched|circuit_open|overloaded|too many|deadline_exceeded/i;
 
 export function shouldFailover(r: RouteResult): boolean {
   if (r.ok) return false;
-  if ((r.status || 0) >= 429) return true;
-  if (r.status === 404 && /entitlement_benched/.test(r.err || "")) return true;
+  const st = r.status || 0;
+  if (RETRYABLE_STATUS.has(st)) return true;
+  if (TERMINAL_STATUS.has(st)) {
+    return st === 404 && /entitlement_benched/.test(r.err || "");
+  }
+  if (st >= 500) return true;
   return FAILOVER_ERR_RE.test(r.err || "");
 }
 
@@ -1522,12 +1738,17 @@ export async function sequentialFailover(
   session: string,
   stratName: string,
   callFn: typeof callOne = callOne,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
+  const decision = rctx?.decision;
   // Dead-lane exclusion, same rule as hedgedChain: dead lanes sit out unless
-  // nothing else is alive.
-  let pool = cands.filter(
-    ([p]) => keyOk(p) && state.circuitOk(p) && !state.laneDead(p),
-  );
+  // nothing else is alive. Exclusions are recorded on the decision ledger.
+  let pool = cands.filter(([p]) => {
+    if (!keyOk(p)) { decision?.push_skip(p, "not_connected"); return false; }
+    if (!state.circuitOk(p)) { decision?.push_skip(p, "circuit_open"); return false; }
+    if (state.laneDead(p)) { decision?.push_skip(p, "risk_paused"); return false; }
+    return true;
+  });
   if (!pool.length) pool = cands.filter(([p]) => keyOk(p) && state.circuitOk(p));
   if (!pool.length)
     return { ok: false, status: 503, err: stratName + "_exhausted" };
@@ -1537,8 +1758,9 @@ export async function sequentialFailover(
   for (let i = 0; i < pool.length; i++) {
     const [p, mid] = pool[i]!;
     const t0 = performance.now();
-    const r = await callFn(p, mid, body, false);
+    const r = await callFn(p, mid, body, false, undefined, rctx);
     if (substantive(r)) {
+      decision?.select(switchLog.length > 0 ? "failover" : "priority");
       state.stickySet(session, p, mid);
       state.record(mid, p, 200, r.lat || 0, 1, stratName);
       r.switches = switchLog.length;
@@ -1581,6 +1803,7 @@ export async function sequentialFailover(
 export async function routeFreeChain(
   body: ChatBody,
   session: string,
+  rctx?: RequestCtx,
 ): Promise<RouteResult> {
-  return sequentialFailover(freeCandidates(), body, session, "free_chain");
+  return sequentialFailover(freeCandidates(), body, session, "free_chain", undefined, rctx);
 }
