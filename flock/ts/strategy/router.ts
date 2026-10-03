@@ -6,15 +6,15 @@
  * Strategies: fifo_matrix (alias fifo_flock) | ast_race (alias flock_race) | sticky_affinity | weighted_elo | circuit_chain | hybrid
  * Default hybrid: sticky → ast_race → circuit_chain; explicit CODING aliases go direct.
  *
- * Env SSOT: sovereign/config/ports.env (mise _.file) + ~/.secrets
+ * Env SSOT: estate/config/ports.env (mise _.file) + ~/.secrets
  *   SOVEREIGN_ROUTER_PORT / SOVEREIGN_PORT — never invent non-25xxx ports
  */
 
 import { createHash } from "node:crypto";
 import { watch, readFileSync, existsSync } from "node:fs";
-import { handleMeshRequest } from "../../../../src/lib/ghas-mesh-features.ts";
+import { handleMeshRequest } from "../../../../../../estate/src/lib/ghas-mesh-features.ts";
 import type { ChatBody } from "./router_types.ts";
-import { CODING, PROVIDERS, keyOk, getKey, STRATEGY, MAX_PARALLEL, PORT, json, log, DB_PATH, isExplicit, normalizeModelSpec, resolveModel, loadEnvFile, catalog, catalogModelsFor } from "./router_config.ts";
+import { CODING, PROVIDERS, keyOk, getKey, STRATEGY, MAX_PARALLEL, PORT, json, log, DB_PATH, isExplicit, normalizeModelSpec, resolveModel, loadEnvFile, catalog, catalogModelsFor, parseStickyOpt } from "./router_config.ts";
 import { LIVE_MODEL_META, modelFree } from "./router_config.ts";
 import { startLiveDiscovery, refreshLiveModels, LIVE_STATUS } from "./router_live_models.ts";
 import { state, startQuarantineProber } from "./router_matrix.ts";
@@ -512,6 +512,10 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
       }
       const sid = sessionId(req, body);
       const strat = req.headers.get("X-Sovereign-Strategy") || STRATEGY;
+      // Router-max: session stickiness is client-controlled.
+      // X-Sovereign-Sticky: 1 -> pin this session; 0 -> never pin.
+      // Absent -> legacy behavior (races pin the winner).
+      state.setStickyOpt(sid, parseStickyOpt(req.headers.get("X-Sovereign-Sticky")));
       // openfang shim: canonicalize "provider:model" / "provider/model"
       // mangled specs before routing.
       const rawModel = String(body.model || "auto");
@@ -587,6 +591,11 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
             "X-Routed-Via": `${r.provider}/${r.model}`,
             "X-Latency": String(Math.round((r.lat || 0) * 1000) / 1000),
             "X-Strategy": strat,
+            ...(r.switches
+              ? { "X-Sovereign-Switches": String(r.switches) }
+              : {}),
+            ...(r.cost_tier ? { "X-Cost-Tier": r.cost_tier } : {}),
+            ...(r.task_type ? { "X-Task-Type": r.task_type } : {}),
             ...(t
               ? {
                   "X-Sovereign-Timings": `connect_ms=${t.connect_ms};ttft_ms=${t.ttft_ms ?? "-"};total_ms=${t.total_ms}`,
@@ -693,7 +702,7 @@ try {
 // for LOCAL providers only (no cloud spend). A dead local backend earns
 // circuit strikes here so quarantine can engage before user traffic hits it;
 // consecutive successes keep the TCP path warm.
-const LOCAL_WARM = ["herd", "kimi-auto", "nim-local"];
+const LOCAL_WARM = ["llama-swap", "kimi-auto", "nim-local"];
 function startWarmStandby(): void {
   const tick = async () => {
     for (const p of LOCAL_WARM) {
