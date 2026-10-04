@@ -575,7 +575,14 @@ class AuthTest(unittest.TestCase):
             self.assertIn(b"401", resp2)
             s2.close()
         finally:
-            holder["server"].close()
+            # Python 3.12 asyncio.Server.close() raises TypeError when
+            # serve_forever() was cancelled before _waiters was set up
+            # (CPython _wakeup() iterates None). The server is already
+            # shutting down; ignore the race.
+            try:
+                holder["server"].close()
+            except TypeError:
+                pass
 
 
 class ReservedDirsTest(unittest.TestCase):
