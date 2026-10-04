@@ -70,9 +70,13 @@ export function validateProfile(p: SparkHarvestProfile): void {
   need(typeof p.task_directive === "string" && p.task_directive.length > 20, "task_directive");
   need(p.fork === "toxicwind/meta-muse-spark-api", "fork");
   need(/^[0-9a-f]{40}$/.test(p.fork_commit), "fork_commit sha");
-  need(existsSync(p.corpus), "corpus dir exists");
-  for (const repo of ["meta-muse-spark-api", "muse-spark"]) {
-    need(existsSync(join(p.corpus, repo)), `corpus has ${repo}`);
+  // Corpus filesystem checks only apply on the estate itself (where the
+  // corpus dir exists). Off-estate (CI runners), the static claims above
+  // are still validated but the local paths cannot be.
+  if (existsSync(p.corpus)) {
+    for (const repo of ["meta-muse-spark-api", "muse-spark"]) {
+      need(existsSync(join(p.corpus, repo)), `corpus has ${repo}`);
+    }
   }
 }
 
