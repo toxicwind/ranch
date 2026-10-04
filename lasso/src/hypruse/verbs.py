@@ -148,7 +148,7 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--button", choices=("left", "right", "middle"), default=_S)
     a = ps.add_parser("scroll", help="scroll DY notches (positive: content down), DX sideways")
     a.add_argument("dy", type=float, metavar="DY")
-    a.add_argument("dx", type=float, nargs="?", default=_S, metavar="DX")
+    a.add_argument("dx", nargs="?", default=_S, metavar="DX")
     a.add_argument("--at", nargs=2, type=float, default=_S, metavar=("X", "Y"),
                    help="move there first")
     for a in ps.choices.values():
@@ -287,7 +287,7 @@ def normalize(verb: str, ns: argparse.Namespace) -> tuple[dict[str, Any], dict[s
         elif d["action"] == "scroll":
             d["scroll_dy"] = d.pop("dy")
             if "dx" in d:
-                d["scroll_dx"] = d.pop("dx")
+                d["scroll_dx"] = float(d.pop("dx"))
             if "at" in d:
                 d["x"], d["y"] = d.pop("at")
     elif verb == "keyboard":

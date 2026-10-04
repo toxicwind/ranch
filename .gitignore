@@ -103,3 +103,6 @@ shell/ii/
 # ranch-analyze/config/ holds swept-in tau runtime log dumps (http-400-request
 # JSONs). Runtime state with live credentials - never committed.
 ranch-analyze/config/
+
+# wezterm/ is a local 6.8GB vendored build tree - never committed.
+wezterm/

@@ -460,7 +460,7 @@ def _wlrctl_focus(app_id: str, timeout: float = _FOCUS_DISPATCH_TIMEOUT_S) -> No
     if not shutil.which("wlrctl"):
         raise HyprctlError("wlrctl not on PATH")
     env = dict(os.environ)
-    env.setdefault("XDG_RUNTIME_DIR", "/run/user/1000")
+    env.setdefault("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
     env.setdefault("WAYLAND_DISPLAY", "wayland-1")
     try:
         proc = subprocess.run(

@@ -7,6 +7,7 @@ window: full IPC round-trip, zero visual disruption), never in this suite.
 """
 
 import json
+import os
 import shutil
 import subprocess
 import threading
@@ -271,6 +272,9 @@ def test_app_id_gives_up_after_refresh(monkeypatch):
 
 def test_wlrctl_focus_builds_exact_argv(monkeypatch):
     monkeypatch.setattr(shutil, "which", lambda name: "/usr/local/bin/wlrctl")
+    monkeypatch.delenv("XDG_RUNTIME_DIR", raising=False)
+    monkeypatch.delenv("WAYLAND_DISPLAY", raising=False)
+    monkeypatch.setattr(os, "getuid", lambda: 1000)
     seen = {}
 
     class Proc:
