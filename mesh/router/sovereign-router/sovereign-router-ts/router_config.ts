@@ -455,6 +455,9 @@ export function normalizeModelSpec(spec: string): {
       const rest = s.slice(ci + 1);
       const mid = matchModelOnProvider(pre, rest);
       if (mid) return { provider: pre, model: mid };
+      // llama-swap serves arbitrary local GGUF ids (its catalog overlay is
+      // role aliases only) — a catalog miss must not null the provider.
+      if (pre === "llama-swap" && rest) return { provider: pre, model: rest };
     }
   }
   // "provider/rest/of/id" slash form, e.g. "openrouter/openai/gpt-oss-20b:free".

@@ -1,5 +1,5 @@
 {
-  "generated_ts": "2026-10-01T19:15:01.420Z",
+  "generated_ts": "2026-10-04T00:07:09.960Z",
   "sources": {
     "guidellm": {
       "path": "projects/openrouter-probe/ranking-eval-20260920-final.json",
@@ -32,6 +32,15 @@
         "nim-local@2026-10-01"
       ],
       "instrument": "liveness: 1 real completion/model (semantic-failure aware); quality: deterministic instruction-following exact=2/contains=1/empty=0, N reqs/model; latency p50; fail-fast, no retries"
+    },
+    "roundup": {
+      "path": "roundup-weights.json",
+      "run_id": "2026-10-02",
+      "generated_ts": "2026-10-02T12:15:27.078Z",
+      "n_providers": 2,
+      "n_models": 8,
+      "instrument": "roundup estate sweep: deterministic instruction-following exact=2/contains=1/empty=0, latency p50, liveness-aware; provider elo 1000+(q-1)*80",
+      "folded_ts": "2026-10-04T00:07:09.960Z"
     }
   },
   "priors": {
@@ -139,5 +148,95 @@
       "basis": "provider-bench (outage: rate-limited during bench run, 2026-10-01)"
     }
   },
-  "elo_rule": "quality_mean(0-2)->1000+(q-1)*80; local-lane healthy_frac->1000+(hf-0.5)*120; router-proof local-lane availability +10; latency excluded from priors (live candidateScore owns it); live outcomes keep updating Elo; provider-bench quality_mean(0-2)->1000+(q-1)*80; outage runs keep flat 1000 with basis text"
+  "elo_rule": "quality_mean(0-2)->1000+(q-1)*80; local-lane healthy_frac->1000+(hf-0.5)*120; router-proof local-lane availability +10; latency excluded from priors (live candidateScore owns it); live outcomes keep updating Elo; provider-bench quality_mean(0-2)->1000+(q-1)*80; outage runs keep flat 1000 with basis text",
+  "provider_priors": {
+    "llama-swap": {
+      "elo": 1080,
+      "quality_mean": 2,
+      "latency_p50_ms": 27.7,
+      "healthy_frac": 1,
+      "basis": "roundup 2026-10-02"
+    },
+    "sov": {
+      "elo": 1080,
+      "quality_mean": 2,
+      "latency_p50_ms": 35.6,
+      "healthy_frac": 1,
+      "basis": "roundup 2026-10-02"
+    }
+  },
+  "model_priors": [
+    {
+      "provider": "llama-swap",
+      "model": "beellama/exaone-4-0-1-2b-iq4xs",
+      "quality_mean": 2,
+      "latency_p50_ms": 27.7,
+      "healthy_frac": 1,
+      "n": 5,
+      "basis": "roundup 2026-10-02"
+    },
+    {
+      "provider": "llama-swap",
+      "model": "beellama/exaone-4-0-1-2b-q4km",
+      "quality_mean": 2,
+      "latency_p50_ms": 27.7,
+      "healthy_frac": 1,
+      "n": 5,
+      "basis": "roundup 2026-10-02"
+    },
+    {
+      "provider": "llama-swap",
+      "model": "beellama/exaone-4-0-1-2b-q5km",
+      "quality_mean": 2,
+      "latency_p50_ms": 26.7,
+      "healthy_frac": 1,
+      "n": 5,
+      "basis": "roundup 2026-10-02"
+    },
+    {
+      "provider": "llama-swap",
+      "model": "beellama/exaone-4-0-1-2b-q6k",
+      "quality_mean": 2,
+      "latency_p50_ms": 31.8,
+      "healthy_frac": 1,
+      "n": 5,
+      "basis": "roundup 2026-10-02"
+    },
+    {
+      "provider": "sov",
+      "model": "beellama/exaone-4-0-1-2b-iq4xs",
+      "quality_mean": 2,
+      "latency_p50_ms": 28.9,
+      "healthy_frac": 1,
+      "n": 5,
+      "basis": "roundup 2026-10-02"
+    },
+    {
+      "provider": "sov",
+      "model": "beellama/exaone-4-0-1-2b-q4km",
+      "quality_mean": 2,
+      "latency_p50_ms": 27.2,
+      "healthy_frac": 1,
+      "n": 5,
+      "basis": "roundup 2026-10-02"
+    },
+    {
+      "provider": "sov",
+      "model": "beellama/exaone-4-0-1-2b-q5km",
+      "quality_mean": 2,
+      "latency_p50_ms": 46.8,
+      "healthy_frac": 1,
+      "n": 5,
+      "basis": "roundup 2026-10-02"
+    },
+    {
+      "provider": "sov",
+      "model": "beellama/exaone-4-0-1-2b-q6k",
+      "quality_mean": 2,
+      "latency_p50_ms": 42.2,
+      "healthy_frac": 1,
+      "n": 5,
+      "basis": "roundup 2026-10-02"
+    }
+  ]
 }

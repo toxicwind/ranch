@@ -79,9 +79,9 @@ pub type BbResult<T> = Result<T, BodybuilderError>;
 
 /// Free-tier `provider/model` IDs from the live config, for the decomposer
 /// allow-list. Mirrors TS `freeCandidates()`.
-pub fn free_pool_ids(cfg: &crate::Config) -> Vec<String> {
+pub fn free_pool_ids(providers: &[crate::providers::ProviderDef]) -> Vec<String> {
 	let mut ids = Vec::new();
-	for p in &cfg.providers {
+	for p in providers {
 		if !p.enabled || !p.free_tier {
 			continue;
 		}
@@ -516,8 +516,7 @@ pub async fn build_bodybuilder_requests(
     if job.len() / 4 > DECOMPOSER_BUDGET_TOKENS {
         return Ok(chunked_request_bodies(job, max_requests));
     }
-    let cfg = state.cfg();
-    let allow_ids = free_pool_ids(&cfg);
+    let allow_ids = free_pool_ids(&state.store.lock().unwrap().providers);
     if allow_ids.is_empty() {
         // No free pool: deterministic fan-out with `auto` routing.
         return Ok(deterministic_fanout(job, max_requests));
