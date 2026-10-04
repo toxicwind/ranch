@@ -216,14 +216,25 @@ function effectiveDefs(): ProviderDef[] {
        keyEnv: "OPENCODE_API_KEY",
        auth: "bearer",
       adapter: "static",
-       // Live-verified 2026-10-03 via SSE: 6/45 catalog models stream OK
+       // Live-verified 2026-10-04: 16/16 models serve OK via router
+       // (10 quarantined "delisted" models re-verified live, restored)
        staticModels: [
          "ling-3.1-flash-free",
          "fledge-alpha-free",
          "mimo-v2.5-free",
          "mimo-v2.6-flash-free",
          "nemotron-3.5-lightning-free",
+         "nemotron-3-ultra-free",
          "longcat-2.5-preview-free",
+         "deepseek-v4-flash-free",
+         "qwen3.6-plus-free",
+         "minimax-m3-free",
+         "north-mini-code-free",
+         "big-pickle",
+         "jev-1.13-free",
+         "muse-spark-1.2-contributor-free",
+         "muse-spark-1.3-contributor-free",
+         "space-bunny-free",
        ],
        seeds: [
          "mimo-v2.5-free",
