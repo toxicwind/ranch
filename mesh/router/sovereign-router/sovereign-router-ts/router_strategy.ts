@@ -22,10 +22,10 @@ export const providerRateLimiter = new ProviderRateLimiter();
 // opencurro-ai/opencodeZen, lidge-jun/opencodex#2160).
 // Stable for the process lifetime — mimics one long-lived CLI session/project.
 // ---------------------------------------------------------------------------
- const OPENCODE_UA = "opencode/1.18.32 ai-sdk/provider-utils/4.0.23 runtime/bun/1.3.14";
+export const OPENCODE_UA = "opencode/1.18.32 ai-sdk/provider-utils/4.0.23 runtime/bun/1.3.14";
  // Zen free-tier gate checks ID format: ses_/msg_ + 26 chars (12 hex ts + 14 base62).
  // Borrowed: denysvitali/llm-proxy newOpenCodeID, 12errh/zen-proxy.
- function openCodeID(prefix: string): string {
+export function openCodeID(prefix: string): string {
    const ts = Date.now().toString(16).padStart(12, "0").slice(-12);
    const b62 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
    let r = "";
@@ -35,6 +35,39 @@ export const providerRateLimiter = new ProviderRateLimiter();
  const OPENCODE_SESSION_ID = openCodeID("ses_");
  const OPENCODE_PROJECT_ID = "global";
  const OPENCODE_PUBLIC_TOKEN = "public";
+
+// ---------------------------------------------------------------------------
+// Zen upstream contract — exported pure for tests (tests/zen_fingerprint.test.ts).
+// Verified live 2026-10-04 against https://opencode.ai/zen/v1: GET /v1/models
+// -> 200 (86 models); chat/completions serves with the exact fingerprint below
+// plus a valid key. The anonymous token gets 500/400 on completions regardless
+// of fingerprint, and /v1/responses does not exist (404) — no per-model
+// endpoint split is warranted; everything zen goes to /chat/completions.
+// ---------------------------------------------------------------------------
+export function zenFingerprintHeaders(): Record<string, string> {
+  // Auth: Chris-provided OPENCODE_API_KEY via secrets; fallback to public anonymous.
+  return {
+    "Authorization": "Bearer " + (getKey("zen") || OPENCODE_PUBLIC_TOKEN),
+    "User-Agent": OPENCODE_UA,
+    "x-opencode-client": "cli",
+    "x-opencode-session": OPENCODE_SESSION_ID,
+    "x-opencode-project": OPENCODE_PROJECT_ID,
+    "x-opencode-request": openCodeID("msg_"),
+  };
+}
+
+export function applyZenFreeTierBody(payload: Record<string, unknown>): void {
+  payload.stream = true;
+  const need = ["bash", "glob", "grep", "read"];
+  const tools = payload.tools as Array<{ function?: { name?: string }; name?: string }> | undefined;
+  const have = new Set((tools || []).map((t) => (t?.function?.name || t?.name || "").toLowerCase()));
+  const missing = need.filter((n) => !have.has(n));
+  if (missing.length > 0) {
+    const mk = (n: string) => ({ type: "function", function: { name: n, description: n + " tool", parameters: { type: "object", properties: {}, required: [] } } });
+    payload.tools = [...(tools || []), ...missing.map(mk)];
+    if (!payload.tool_choice) payload.tool_choice = "none";
+  }
+}
 
 export function rebuildRateLimiter(): void {
   providerRateLimiter.build(
@@ -207,18 +240,12 @@ export async function callOne(
     headers["HTTP-Referer"] = "https://zed.dev";
     headers["X-Title"] = "Sovereign-Router";
   }
-   if (provider === "zen") {
-     // OpenCode Zen free-tier gate (borrowed: denysvitali/llm-proxy, 12errh/zen-proxy).
-     // Format-checked, not app-attested: Bearer public + opencode/ UA + ses_/msg_ IDs
-     // (26 chars: 12 hex ts + 14 base62) + stream:true + bash/glob/grep/read tools.
-     // Without the exact format: 403 FreeTierError.
-     // Chris-provided OPENCODE_API_KEY via secrets; fallback to public anonymous.
-     headers["Authorization"] = "Bearer " + (getKey("zen") || OPENCODE_PUBLIC_TOKEN);
-     headers["User-Agent"] = OPENCODE_UA;
-     headers["x-opencode-client"] = "cli";
-     headers["x-opencode-session"] = OPENCODE_SESSION_ID;
-     headers["x-opencode-project"] = OPENCODE_PROJECT_ID;
-     headers["x-opencode-request"] = openCodeID("msg_");
+  if (provider === "zen") {
+    // OpenCode Zen free-tier gate (borrowed: denysvitali/llm-proxy, 12errh/zen-proxy).
+    // Format-checked, not app-attested: opencode/ UA + ses_/msg_ IDs
+    // (26 chars: 12 hex ts + 14 base62) + stream:true + bash/glob/grep/read tools.
+    // Without the exact format: 403 FreeTierError.
+    Object.assign(headers, zenFingerprintHeaders());
   }
   // Model-pressure governor (flock governor.rs AIMD, per provider/model):
   // refused fast with 429 when the model is at its worker cap or draining.
@@ -265,19 +292,9 @@ export async function callOne(
   }
   flockMetrics.recordQueueWait(slot.waitedMs / 1000);
   const payload = { ...payloadBody, model, stream };
-   // Zen free-tier body gate (borrowed: denysvitali/llm-proxy prepareFreeTierBody).
-   // Requires stream:true + bash/glob/grep/read tool signatures, else 403.
-   if (provider === "zen") {
-     payload.stream = true;
-     const need = ["bash", "glob", "grep", "read"];
-     const have = new Set(((payload as any).tools || []).map((t: any) => (t?.function?.name || t?.name || "").toLowerCase()));
-     const missing = need.filter((n) => !have.has(n));
-     if (missing.length > 0) {
-       const mk = (n: string) => ({ type: "function", function: { name: n, description: n + " tool", parameters: { type: "object", properties: {}, required: [] } } });
-       (payload as any).tools = [...((payload as any).tools || []), ...missing.map(mk)];
-       if (!(payload as any).tool_choice) (payload as any).tool_choice = "none";
-     }
-   }
+  // Zen free-tier body gate (borrowed: denysvitali/llm-proxy prepareFreeTierBody).
+  // Requires stream:true + bash/glob/grep/read tool signatures, else 403.
+  if (provider === "zen") applyZenFreeTierBody(payload);
   const start = performance.now();
   // Failfast signal stack: connect (headers) < TTFT (first byte, stream) <
   // total attempt cap < client deadline / hangup. AbortSignal.any keeps
@@ -397,8 +414,15 @@ export async function callOne(
         if (ttftRemain <= 0) {
           first = "ttft_timeout";
         } else {
+          // The race loser must never reject unhandled: if the TTFT timer
+          // wins and the upstream connection later closes, the orphaned
+          // read() rejects with AbortError and Bun surfaces it as an uncaught
+          // exception, killing the process (pitchfork respawned us after the
+          // 2026-10-04 22:06:07 MDT crash).
+          const readP = reader.read();
+          readP.catch(() => {});
           first = await Promise.race([
-            reader.read(),
+            readP,
             new Promise<"ttft_timeout">((res) =>
               setTimeout(() => res("ttft_timeout"), ttftRemain),
             ),
