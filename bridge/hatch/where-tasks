@@ -1,89 +1,652 @@
-#!/bin/bash
-# where-tasks: timestamped snapshot of where work is running (cell vs yote).
-# Every measurement carries a real datetime so lag is visible, not vibes.
-# Usage: where-tasks
-set -u
-NOW_UTC=$(date -u +%FT%TZ)
-NOW_LOCAL=$(date +"%F %T %Z")
-echo "=== where-tasks @ ${NOW_UTC} (local ${NOW_LOCAL}) ==="
-echo
-echo "--- cell ---"
-echo "datetime: $(date -u +%FT%TZ)"
-echo "load: $(cut -d' ' -f1-3 /proc/loadavg) (2 vCPU box)"
-echo
-echo "--- bridge round-trip (this is the lag number) ---"
-T0_EPOCH=$(date +%s%3N)
-T0_ISO=$(date -u +%FT%TZ)
-RT_OUT=$(~/workspace/bin/yote-conn exec 'date -u +%FT%TZ; cut -d" " -f1-3 /proc/loadavg' 2>&1)
-RT_RC=$?
-T1_EPOCH=$(date +%s%3N)
-T1_ISO=$(date -u +%FT%TZ)
-echo "sent:     ${T0_ISO}"
-echo "returned: ${T1_ISO}"
-echo "round-trip: $((T1_EPOCH - T0_EPOCH)) ms (rc=${RT_RC})"
-if [ $RT_RC -eq 0 ]; then
-  echo "yote datetime: $(echo "$RT_OUT" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z' | head -1)"
-  echo "yote load: $(echo "$RT_OUT" | tail -1) (16-core box)"
-else
-  echo "yote exec FAILED:"
-  echo "$RT_OUT" | head -5
-fi
-echo
-echo "--- pitchfork daemons (yote) ---"
-~/workspace/bin/yote-conn exec 'pitchfork list 2>/dev/null' 2>&1 | head -45
-echo
-echo "--- cell: top CPU processes (where cell tasks run) ---"
-echo "datetime: $(date -u +%FT%TZ)"
-ps -eo pid,pcpu,pmem,etime,args --sort=-pcpu | head -12 | cut -c1-170
-echo
-echo "--- my known tasks: race lanes + bridge calls in flight ---"
-echo "datetime: $(date -u +%FT%TZ)"
-LANES=$(pgrep -f 'opt-race/lane.py' | wc -l)
-LANERSS=$(ps -o rss= -C python3 2>/dev/null | awk '{s+=$1} END{printf "%.0f", s/1024}')
-echo "race lanes alive: ${LANES} (cell python RSS total ~${LANERSS} MB)"
-echo "yote-conn exec procs alive: $(pgrep -f 'bin/yote-conn exec' | wc -l) (each = one bridge call in flight)"
-echo "recent bridge commands:"
-pgrep -af 'bin/yote-conn exec' | head -6 | cut -c1-170
-echo
-echo "--- yote: top CPU processes (where bridge tasks run) ---"
-~/workspace/bin/yote-conn exec 'echo "datetime: $(date -u +%FT%TZ)"; ps -eo pid,pcpu,pmem,etime,args --sort=-pcpu | head -11 | cut -c1-150' 2>&1
-echo
-echo "--- cell hot procs (top CPU) ---"
-echo "datetime: $(date -u +%FT%TZ)"
-ps -eo pid,ppid,etimes,pcpu,comm,args --sort=-pcpu 2>/dev/null | head -8
-echo
-echo "--- agent tree (hatch-execd) ---"
-echo "datetime: $(date -u +%FT%TZ)"
-python3 -c "
+#!/usr/bin/env python3
+"""where-tasks: timestamped snapshot of where work is running (cell vs yote).
+
+Canonical source: ranch/bridge/hatch/where-tasks in toxicwind/ranch.
+The live copy at ~/workspace/bin/where-tasks is cell-mirrored; land
+changes in the repo copy and let the mirror carry them.
+
+AUTO-FIX IS THE DEFAULT. Every run pauses deterministically-stale processes
+with exact-PID SIGSTOP + verification -- stop, don't kill, so paused work
+can continue where it left off. `--check` is observation-only. `--resume`
+SIGCONTs everything this helper paused, from the stop log.
+
+Pause rules -- all decided from /proc identity ONLY (never pgrep, never
+substring matching, never truncated output):
+
+  1. Canonical mirror daemon: a python3 process whose argv is EXACTLY
+     [python*, <cell-mirror-daemon.py>] with no --repair-only flag.
+     If more than one canonical daemon exists, KEEP the pidfile-designated
+     instance (the daemon single-instances itself via the pidfile; the most
+     recent starter overwrites it, so the pidfile names the operator's latest
+     intent) and SIGSTOP the others. If the pidfile is missing or names no
+     live candidate, the set is ambiguous: report, pause nothing. Never
+     "earliest start wins" -- on 2026-10-04 keep-oldest paused a live mirror
+     behind a wedged older instance.
+  2. --repair-only transient: paused ONLY when a healthy canonical daemon
+     (state not Z, starttime older than the transient) is confirmed running.
+  3. opt-race/lane.py worker: paused ONLY when a winner file exists for its
+     OWN piece (opt-race/winners/<piece>) AND the worker's starttime is older
+     than the winner file's mtime -- i.e. its piece already has a declared
+     winner recorded after the worker started, and the worker missed its
+     exit. A live race coordinator's workers are never touched.
+
+Shell wrappers are NEVER pause targets -- only exact-argv python processes.
+Never touched, ever: the bridge :18301 fast path (ws_daemon.py), the
+yote-connector supervisor, death-watch, the Hatch platform daemon,
+hatch-execd and its whole tree except the two deterministic patterns above.
+When in doubt the helper reports and does NOT pause.
+Live work is never destroyed: SIGSTOP freezes a process where it stands;
+nothing here SIGKILLs. Paused PIDs go to ~/.cache/where-tasks/stopped.log
+with UTC timestamp + reason, and --resume continues them.
+
+Postgres route: the runtime DB socket is probed via the pg-route sibling
+helper (every obtuse route tried with timestamps; raw connect impossible
+from the cell, muse.db is the sanctioned read path).
+
+Every measurement and every action carries a real UTC + America/Denver
+datetime so lag is visible, not vibes.
+"""
 import os
-roots=[]
-for p in filter(str.isdigit, os.listdir('/proc')):
+import sys
+import time
+import signal
+import socket
+import subprocess
+import urllib.request
+from datetime import datetime, timezone
+try:
+    from zoneinfo import ZoneInfo
+    DENVER = ZoneInfo("America/Denver")
+except Exception:
+    DENVER = None
+
+# ---------------------------------------------------------------- paths ----
+HELPER_DIR = os.path.dirname(os.path.realpath(__file__))
+# Env overrides exist ONLY so the self-test can point the shapes at synthetic
+# /tmp processes. In production they default to the real paths.
+DAEMON_SCRIPT = os.environ.get(
+    "WT_DAEMON_SCRIPT", os.path.join(HELPER_DIR, "cell-mirror-daemon.py"))
+LANE_SCRIPT = os.environ.get(
+    "WT_LANE_SCRIPT",
+    os.path.realpath(os.path.join(HELPER_DIR, "..", "opt-race", "lane.py")))
+WINNERS_DIR = os.environ.get(
+    "WT_WINNERS_DIR",
+    os.path.realpath(os.path.join(HELPER_DIR, "..", "opt-race", "winners")))
+# The mirror daemon single-instances itself via this pidfile: the most recent
+# starter overwrites it. It names the operator's latest intent, so it picks
+# the keeper when duplicates exist. Never "earliest start wins" (2026-10-04:
+# keep-oldest paused a live mirror behind a wedged older instance).
+PIDFILE = os.environ.get(
+    "WT_PIDFILE",
+    os.path.join(os.path.dirname(HELPER_DIR), ".tmpdir", "cell-mirror.pid"))
+HELPER_PATH = os.path.realpath(__file__)
+ME = os.getpid()
+HZ = os.sysconf(os.sysconf_names["SC_CLK_TCK"])
+try:
+    with open("/proc/stat") as f:
+        BOOT_EPOCH = next(int(l.split()[1]) for l in f if l.startswith("btime"))
+except Exception:
+    BOOT_EPOCH = int(time.time())
+
+ALIVE_STATES = set("RSD")          # runnable / sleeping / disk-wait: healthy
+NEVER_TOUCH_MARKERS = (            # report-only shapes; exact-element match
+    "ws_daemon.py", "supervise-connector.py", "death-watch.py",
+    "hatch-execd", "yote-conn", "/opt/hatch/bin/hatch",
+)
+
+def now_stamps():
+    utc = datetime.now(timezone.utc)
+    local = utc.astimezone(DENVER) if DENVER else utc
+    return utc.strftime("%Y-%m-%dT%H:%M:%SZ"), local.strftime("%Y-%m-%d %H:%M:%S %Z")
+
+# ---------------------------------------------------------------- /proc -----
+class Proc:
+    __slots__ = ("pid", "comm", "argv", "state", "ppid", "start_jiffies",
+                 "utime", "stime", "start_epoch", "io_r", "io_w", "cgroup")
+
+    def __init__(self, pid):
+        self.pid = pid
+        self.comm = ""
+        self.argv = []
+        self.state = "?"
+        self.ppid = 0
+        self.start_jiffies = 0
+        self.utime = 0
+        self.stime = 0
+        self.start_epoch = 0.0
+        self.io_r = 0
+        self.io_w = 0
+        self.cgroup = ""
+
+    @property
+    def cpu_jiffies(self):
+        return self.utime + self.stime
+
+def read_proc(pid):
+    p = Proc(pid)
+    base = "/proc/%d" % pid
     try:
-        if open('/proc/%s/comm'%p).read().strip()=='hatch-execd': roots.append(p)
-    except Exception: pass
-children={}
-for p in filter(str.isdigit, os.listdir('/proc')):
+        with open(base + "/comm") as f:
+            p.comm = f.read().strip()
+    except OSError:
+        return None
     try:
-        parts=open('/proc/%s/stat'%p).read().rsplit(')',1)[1].split()
-        children.setdefault(parts[1],[]).append((p,parts[0]))
-    except Exception: pass
-seen=set(); stack=list(roots); live=frozen=0
-while stack:
-    p=stack.pop()
-    if p in seen: continue
-    seen.add(p)
-    for c,st in children.get(p,[]):
-        stack.append(c); live+=1
-        if st=='T': frozen+=1
-print('execd_roots=%d live_desc=%d T-state_frozen=%d'%(len(roots),live,frozen))
-"
-echo
-echo "--- yote hot procs (top CPU) ---"
-echo "datetime: $(date -u +%FT%TZ)"
-~/workspace/bin/yote-conn exec 'ps -eo pid,etimes,pcpu,comm,args --sort=-pcpu | head -8' 2>&1
-echo
-echo "--- bridge :18301 ---"
-echo "datetime: $(date -u +%FT%TZ)"
-~/workspace/bin/yote-conn exec 'curl -s -m 6 -o /dev/null -w "health=%{http_code} time=%{time_total}s\n" http://127.0.0.1:18301/health || echo "bridge DOWN"' 2>&1
-echo
-echo "=== end @ $(date -u +%FT%TZ) ==="
+        with open(base + "/cmdline", "rb") as f:
+            raw = f.read()
+        p.argv = [a.decode("utf-8", "replace") for a in raw.split(b"\0") if a]
+    except OSError:
+        return None
+    try:
+        with open(base + "/stat") as f:
+            st = f.read()
+        parts = st.rsplit(")", 1)[1].split()
+        p.state = parts[0]
+        p.ppid = int(parts[1])
+        p.utime = int(parts[11])
+        p.stime = int(parts[12])
+        p.start_jiffies = int(parts[19])
+        p.start_epoch = BOOT_EPOCH + p.start_jiffies / HZ
+    except (OSError, IndexError, ValueError):
+        return None
+    try:
+        with open(base + "/status") as f:
+            for line in f:
+                if line.startswith("State:"):
+                    p.state = line.split()[1]
+                    break
+    except OSError:
+        pass
+    try:
+        with open(base + "/io") as f:
+            for line in f:
+                if line.startswith("read_bytes:"):
+                    p.io_r = int(line.split()[1])
+                elif line.startswith("write_bytes:"):
+                    p.io_w = int(line.split()[1])
+    except OSError:
+        pass
+    try:
+        with open(base + "/cgroup") as f:
+            p.cgroup = f.read().strip().replace("\n", ";")
+    except OSError:
+        pass
+    return p
+
+def scan():
+    procs = []
+    try:
+        names = os.listdir("/proc")
+    except OSError:
+        return procs
+    for name in names:
+        if not name.isdigit():
+            continue
+        pid = int(name)
+        if pid == ME or pid <= 1:
+            continue
+        p = read_proc(pid)
+        if p is not None:
+            procs.append(p)
+    return procs
+
+# ------------------------------------------------------------- identity ----
+def is_python(p):
+    return p.comm == "python3" or os.path.basename(p.argv[0] if p.argv else "").startswith("python")
+
+def is_self_or_probe(p):
+    """Our own PID is already skipped in scan(); this also skips any probe
+    shell whose argv references this helper's own resolved path, so probes
+    never match themselves."""
+    if p.pid == ME:
+        return True
+    for a in p.argv:
+        if not a or a.startswith("-"):
+            continue
+        try:
+            if os.path.realpath(a) == HELPER_PATH:
+                return True
+        except OSError:
+            pass
+    return False
+
+def is_canonical_daemon(p):
+    return (is_python(p) and len(p.argv) == 2
+            and os.path.realpath(p.argv[1]) == os.path.realpath(DAEMON_SCRIPT)
+            and "--repair-only" not in p.argv)
+
+def is_repair_transient(p):
+    return (is_python(p) and len(p.argv) == 3
+            and os.path.realpath(p.argv[1]) == os.path.realpath(DAEMON_SCRIPT)
+            and p.argv[2] == "--repair-only")
+
+def is_lane_worker(p):
+    return (is_python(p) and len(p.argv) >= 3
+            and os.path.realpath(p.argv[1]) == os.path.realpath(LANE_SCRIPT))
+
+def lane_piece(p):
+    return p.argv[2] if len(p.argv) >= 3 else "?"
+
+def is_never_touch(p):
+    return any(any(m == a or a.endswith("/" + m) or m in a.split("/") for a in p.argv)
+               for m in NEVER_TOUCH_MARKERS)
+
+def fmt_epoch(e):
+    utc = datetime.fromtimestamp(e, timezone.utc)
+    local = utc.astimezone(DENVER) if DENVER else utc
+    return "%s / %s" % (utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        local.strftime("%Y-%m-%d %H:%M:%S %Z"))
+
+def describe(p):
+    return ("pid=%d comm=%s state=%s ppid=%d started=%s cpu_jiffies=%d "
+            "io_r=%d io_w=%d argv=%r" % (
+                p.pid, p.comm, p.state, p.ppid, fmt_epoch(p.start_epoch),
+                p.cpu_jiffies, p.io_r, p.io_w, p.argv))
+
+# -------------------------------------------------------------- decisions --
+def decide(procs):
+    """Return (stops, report). stops = [(pid, reason, proc)]. Deterministic
+    only: anything ambiguous lands in report, never in stops."""
+    stops = []
+    report = []
+    canonical = [p for p in procs if not is_self_or_probe(p) and is_canonical_daemon(p)]
+    transients = [p for p in procs if not is_self_or_probe(p) and is_repair_transient(p)]
+    lanes = [p for p in procs if not is_self_or_probe(p) and is_lane_worker(p)]
+
+    # --- mirror daemons: keep the pidfile-designated instance -----------
+    # The daemon single-instances itself: the most recent starter overwrites
+    # the pidfile, so the pidfile names the operator's latest intent. That is
+    # the keeper. (2026-10-04: "earliest start wins" paused a live mirror that
+    # had been restarted behind a wedged older instance.) If the pidfile is
+    # missing/corrupt or names no live candidate, the set is ambiguous:
+    # report it, pause nothing.
+    if len(canonical) > 1:
+        keeper = None
+        try:
+            with open(PIDFILE) as f:
+                pf_pid = int(f.read().strip())
+            for c in canonical:
+                if c.pid == pf_pid:
+                    keeper = c
+                    break
+        except (OSError, ValueError):
+            keeper = None
+        if keeper is None:
+            report.append("mirror: %d canonical daemons, pidfile unusable -- AMBIGUOUS, pausing nothing: %s"
+                          % (len(canonical), ", ".join(
+                              "pid=%d (started %s)" % (c.pid, fmt_epoch(c.start_epoch))
+                              for c in sorted(canonical, key=lambda p: p.start_jiffies))))
+        else:
+            report.append("mirror: %d canonical daemons; KEEPER pid=%d (pidfile-designated, started %s)"
+                          % (len(canonical), keeper.pid, fmt_epoch(keeper.start_epoch)))
+            for dup in canonical:
+                if dup.pid != keeper.pid:
+                    stops.append((dup.pid,
+                                  "duplicate mirror daemon (keeper pid=%d per pidfile, started %s)" % (
+                                      keeper.pid, fmt_epoch(keeper.start_epoch)), dup))
+    elif len(canonical) == 1:
+        report.append("mirror: single canonical daemon pid=%d (started %s) -- keeping"
+                      % (canonical[0].pid, fmt_epoch(canonical[0].start_epoch)))
+    else:
+        report.append("mirror: NO canonical daemon running")
+
+    healthy = [p for p in canonical
+               if p.state in ALIVE_STATES and p.state != "Z"]
+    # --- repair-only transients: only when STALE (>600s old) with a healthy
+    # older canonical. The cell-mirror-supervisor cron spawns a --repair-only
+    # sweep every 5min with a 300s ceiling -- a young sweep is legitimate
+    # live work (the mirror's inotify-blind-spot safety net), never a pause
+    # target. Only a sweep that outlived 2x its own ceiling is wedged.
+    # (2026-10-04: the ungated rule paused live supervisor sweeps.)
+    now_e = time.time()
+    for t in sorted(transients, key=lambda p: p.start_jiffies):
+        age = now_e - t.start_epoch
+        if age <= 600:
+            report.append("repair-only pid=%d NOT paused: age %.0fs <= 600s "
+                          "(live supervisor sweep, started %s)"
+                          % (t.pid, age, fmt_epoch(t.start_epoch)))
+            continue
+        if healthy and any(c.start_epoch < t.start_epoch for c in healthy):
+            k = min([c for c in healthy if c.start_epoch < t.start_epoch],
+                    key=lambda c: c.start_jiffies)
+            stops.append((t.pid,
+                          "--repair-only transient STALE (age %.0fs > 600s); healthy canonical pid=%d confirmed (started %s)" % (
+                              age, k.pid, fmt_epoch(k.start_epoch)), t))
+        else:
+            report.append("repair-only pid=%d NOT paused: no healthy older canonical daemon (%s)"
+                          % (t.pid, describe(t)))
+
+    # --- race lanes: stale only if own piece has a newer winner record -----
+    for lane in sorted(lanes, key=lambda p: p.start_jiffies):
+        piece = lane_piece(lane)
+        winf = os.path.join(WINNERS_DIR, piece)
+        try:
+            wmtime = os.path.getmtime(winf)
+            have_winner = True
+        except OSError:
+            have_winner = False
+            wmtime = 0
+        if have_winner and lane.start_epoch < wmtime:
+            stops.append((lane.pid,
+                          "stale lane: piece %r has winner recorded %s, worker started %s (missed its exit)" % (
+                              piece, fmt_epoch(wmtime), fmt_epoch(lane.start_epoch)), lane))
+        elif have_winner:
+            report.append("lane pid=%d piece=%r NOT paused: worker started %s AFTER winner %s (current race)"
+                          % (lane.pid, piece, fmt_epoch(lane.start_epoch), fmt_epoch(wmtime)))
+        else:
+            report.append("lane pid=%d piece=%r NOT paused: no winner record (live worker)"
+                          % (lane.pid, piece))
+    return stops, report
+
+# ------------------------------------------------------------------ act ---
+STOPLOG = os.path.join(os.path.expanduser("~"), ".cache", "where-tasks",
+                       "stopped.log")
+
+def pid_gone(pid):
+    return not os.path.exists("/proc/%d" % pid)
+
+def proc_state(pid):
+    p = read_proc(pid)
+    return p.state if p else None
+
+def log_stop(pid, reason):
+    utc, _ = now_stamps()
+    try:
+        os.makedirs(os.path.dirname(STOPLOG), exist_ok=True)
+        with open(STOPLOG, "a") as f:
+            f.write("%s %d %s\n" % (utc, pid, reason))
+    except OSError:
+        pass
+
+def act(stops, check_only):
+    utc, local = now_stamps()
+    log = []
+    if check_only:
+        log.append("[%s / %s] --check: observation only, nothing paused" % (utc, local))
+        for pid, reason, p in stops:
+            log.append("WOULD-STOP pid=%d: %s" % (pid, reason))
+            log.append("    %s" % describe(p))
+        return log
+    for pid, reason, p in stops:
+        utc, local = now_stamps()
+        log.append("[%s / %s] SIGSTOP pid=%d: %s" % (utc, local, pid, reason))
+        try:
+            os.kill(pid, signal.SIGSTOP)
+        except ProcessLookupError:
+            log.append("pid=%d already gone" % pid)
+            continue
+        except PermissionError:
+            log.append("pid=%d PERMISSION DENIED -- left alone, operator needed" % pid)
+            continue
+        deadline = time.time() + 5.0
+        while time.time() < deadline:
+            if proc_state(pid) in ("T", "t"):
+                break
+            time.sleep(0.2)
+        utc, local = now_stamps()
+        st = proc_state(pid)
+        if st in ("T", "t"):
+            log_stop(pid, reason)
+            log.append("[%s / %s] VERIFIED pid=%d paused (state=%s); --resume to continue"
+                       % (utc, local, pid, st))
+        elif st is None:
+            log.append("[%s / %s] pid=%d exited on its own while pausing" % (utc, local, pid))
+        else:
+            log.append("[%s / %s] pid=%d NOT paused (state=%s) -- left for operator, NOT escalated"
+                       % (utc, local, pid, st))
+    return log
+
+def resume_stopped():
+    """SIGCONT everything this helper paused, from the stop log."""
+    utc, local = now_stamps()
+    log = ["--- RESUME @ %s (local %s) ---" % (utc, local)]
+    try:
+        with open(STOPLOG) as f:
+            entries = [l.split(None, 2) for l in f if l.strip()]
+    except OSError:
+        entries = []
+    if not entries:
+        log.append("nothing paused by this helper (no %s)" % STOPLOG)
+        log.append("--- RESUME done ---")
+        return log
+    remaining = []
+    for ts, pid_s, reason in entries:
+        try:
+            pid = int(pid_s)
+        except ValueError:
+            continue
+        st = proc_state(pid)
+        if st is None:
+            log.append("pid=%d already gone (paused %s: %s)" % (pid, ts, reason))
+            continue
+        try:
+            os.kill(pid, signal.SIGCONT)
+            log.append("continued pid=%d (paused %s: %s)" % (pid, ts, reason))
+        except (ProcessLookupError, PermissionError) as e:
+            log.append("pid=%d CONT failed (%r) -- kept in log" % (pid, e))
+            remaining.append((ts, pid_s, reason))
+    try:
+        if remaining:
+            with open(STOPLOG, "w") as f:
+                for ts, pid_s, reason in remaining:
+                    f.write("%s %s %s\n" % (ts, pid_s, reason))
+        else:
+            os.remove(STOPLOG)
+    except OSError:
+        pass
+    log.append("--- RESUME done ---")
+    return log
+
+# ------------------------------------------------------------- observe ----
+def section(title):
+    utc, local = now_stamps()
+    print("\n--- %s ---" % title)
+    print("datetime: %s (local %s)" % (utc, local))
+
+def observe_cell_pressure():
+    section("cell pressure")
+    try:
+        with open("/proc/loadavg") as f:
+            l1, l5, l15 = f.read().split()[:3]
+    except OSError:
+        l1 = l5 = l15 = "?"
+    try:
+        vcpu = os.sysconf(os.sysconf_names["SC_NPROCESSORS_ONLN"])
+    except Exception:
+        vcpu = 2
+    try:
+        r = float(l1) / vcpu
+    except (ValueError, ZeroDivisionError):
+        r = 0.0
+    print("load: %s %s %s on %d vCPUs" % (l1, l5, l15, vcpu))
+    print("pressure: %.1fx  %s" % (r, "OVER 4x - LAGGING" if r > 4 else ("warm" if r > 2 else "ok")))
+
+def yote_exec(cmd, timeout=60):
+    try:
+        out = subprocess.run(
+            [os.path.expanduser("~/workspace/bin/yote-conn"), "exec", cmd],
+            capture_output=True, text=True, timeout=timeout)
+        return out.returncode, (out.stdout or "") + (out.stderr or "")
+    except Exception as e:
+        return -1, "yote-conn failed: %r" % e
+
+def observe_bridge():
+    section("bridge round-trip (this is the lag number)")
+    t0 = time.time()
+    t0s, _ = now_stamps()
+    # ONE compound call: batching, not one exec per probe.
+    rc, out = yote_exec("date -u +%FT%TZ; cut -d' ' -f1-3 /proc/loadavg; "
+                        "ps -eo pid,pcpu,pmem,etime,args --sort=-pcpu")
+    t1 = time.time()
+    t1s, _ = now_stamps()
+    print("sent:     %s" % t0s)
+    print("returned: %s" % t1s)
+    print("round-trip: %d ms (rc=%d)" % (int((t1 - t0) * 1000), rc))
+    if rc == 0:
+        lines = out.splitlines()
+        print("yote datetime: %s" % (lines[0] if lines else "?"))
+        print("yote load: %s (16-core box)" % (lines[1] if len(lines) > 1 else "?"))
+        print("yote: all processes by CPU (full list, no truncation):")
+        for line in lines[2:]:
+            print("  " + line)
+    else:
+        print("yote exec FAILED:")
+        print(out)
+
+def observe_shapes(procs):
+    section("process census (exact /proc identity, no pgrep, no substring)")
+    groups = {}
+    for p in procs:
+        if is_self_or_probe(p):
+            key = "SELF/PROBE (skipped)"
+        elif is_canonical_daemon(p):
+            key = "canonical mirror daemon"
+        elif is_repair_transient(p):
+            key = "mirror --repair-only transient"
+        elif is_lane_worker(p):
+            key = "opt-race lane worker (piece=%s)" % lane_piece(p)
+        elif is_never_touch(p):
+            key = "NEVER-TOUCH shape"
+        else:
+            continue
+        groups.setdefault(key, []).append(p)
+    for key in sorted(groups):
+        ps = sorted(groups[key], key=lambda p: p.start_jiffies)
+        print("%s: %d" % (key, len(ps)))
+        for p in ps:
+            print("    %s" % describe(p))
+
+def observe_never_touch(procs):
+    section("never-touch verification (bridge/connector/death-watch/platform)")
+    for p in sorted(procs, key=lambda p: p.pid):
+        if is_self_or_probe(p):
+            continue
+        if is_never_touch(p):
+            print("untouched: %s" % describe(p))
+
+def observe_top_cpu(procs):
+    section("cell: all processes by cumulative CPU (full list, no truncation)")
+    for p in sorted(procs, key=lambda p: p.cpu_jiffies, reverse=True):
+        print("pid=%d cpu_jiffies=%d state=%s comm=%s argv=%r" % (
+            p.pid, p.cpu_jiffies, p.state, p.comm, p.argv))
+
+def observe_execd(procs):
+    section("agent tree (hatch-execd)")
+    by_ppid = {}
+    roots = []
+    for p in procs:
+        by_ppid.setdefault(p.ppid, []).append(p)
+        if p.comm == "hatch-execd":
+            roots.append(p)
+    seen = set()
+    stack = list(roots)
+    live = 0
+    frozen = 0
+    while stack:
+        p = stack.pop()
+        if p.pid in seen:
+            continue
+        seen.add(p.pid)
+        for c in by_ppid.get(p.pid, []):
+            stack.append(c)
+            live += 1
+            if c.state == "T":
+                frozen += 1
+    print("execd_roots=%d live_descendants=%d T-state_frozen=%d" % (len(roots), live, frozen))
+
+def observe_bridge_health():
+    section("bridge :18301 (cell-local daemon)")
+    # obtuse layer first: confirm the listener exists at the socket layer
+    # even if HTTP is wedged (bound-but-not-serving is the wedge shape).
+    # 0x477D = 18301, state 0A = LISTEN, read straight from /proc/net/tcp.
+    sock_listeners = 0
+    try:
+        with open("/proc/net/tcp") as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) > 3 and parts[3] == "0A" and parts[1].endswith(":477D"):
+                    sock_listeners += 1
+    except OSError:
+        pass
+    print("tcp :18301 LISTEN sockets (via /proc/net/tcp): %d" % sock_listeners)
+    try:
+        t0 = time.time()
+        with urllib.request.urlopen("http://127.0.0.1:18301/health", timeout=6) as r:
+            print("health=%s time=%.2fs" % (r.status, time.time() - t0))
+    except Exception as e:
+        print("bridge DOWN: %r" % e)
+
+def observe_postgres():
+    section("runtime postgres route (obtuse probe via pg-route helper)")
+    helper = os.path.join(HELPER_DIR, "pg-route")
+    try:
+        out = subprocess.run([helper], capture_output=True, text=True, timeout=20)
+        txt = (out.stdout or "").strip()
+        print(txt if txt else "(pg-route produced no output)")
+        if out.returncode != 0:
+            print("pg-route rc=%d stderr=%s" % (out.returncode, (out.stderr or "").strip()[:200]))
+    except Exception as e:
+        print("pg-route probe failed: %r" % e)
+
+def observe_yoteconn_pressure(procs):
+    section("bridge exec pressure (each yote-conn = fresh python3 + WS handshake)")
+    n_exec = n_multi = 0
+    for p in procs:
+        if is_self_or_probe(p):
+            continue
+        argv = p.argv
+        hit = [i for i, a in enumerate(argv)
+               if a == "yote-conn" or a.endswith("/yote-conn")]
+        if not hit:
+            continue
+        rest = argv[hit[0] + 1:]
+        if "exec" in rest:
+            n_exec += 1
+        if "multi" in rest:
+            n_multi += 1
+    print("yote-conn exec procs alive: %d" % n_exec)
+    print("yote-conn multi procs alive: %d" % n_multi)
+
+# ------------------------------------------------------------------ main --
+def main(argv):
+    check_only = "--check" in argv
+    do_resume = "--resume" in argv
+    utc, local = now_stamps()
+    print("=== where-tasks @ %s (local %s) ===" % (utc, local))
+    if do_resume:
+        print("mode: RESUME (SIGCONT everything this helper paused)")
+        for line in resume_stopped():
+            print(line)
+        utc, local = now_stamps()
+        print("\n=== end @ %s (local %s) ===" % (utc, local))
+        return 0
+    print("mode: %s" % ("CHECK-ONLY (no pauses)" if check_only else "AUTO-FIX (exact-PID SIGSTOP + verify; --resume to continue)"))
+    procs = scan()
+    print("procs scanned: %d" % len(procs))
+    observe_cell_pressure()
+    observe_bridge()
+    observe_shapes(procs)
+    observe_never_touch(procs)
+    observe_yoteconn_pressure(procs)
+    observe_top_cpu(procs)
+    observe_execd(procs)
+    observe_bridge_health()
+    observe_postgres()
+
+    stops, report = decide(procs)
+    section("decisions")
+    for line in report:
+        print(line)
+    print("pause candidates: %d" % len(stops))
+    for line in act(stops, check_only):
+        print(line)
+    # post-action verification census: confirm paused PIDs are in T-state
+    if stops and not check_only:
+        section("post-fix verification")
+        for pid, reason, _p in stops:
+            print("pid=%d state=%s (T = paused where it stands)" % (pid, proc_state(pid)))
+    utc, local = now_stamps()
+    print("\n=== end @ %s (local %s) ===" % (utc, local))
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
