@@ -212,6 +212,12 @@ providers:
     apiKey: ZAI_API_KEY
     discovery:
       type: openai-models-list
+  zen:
+    baseUrl: https://opencode.ai/zen/v1
+    api: openai-completions
+    apiKey: OPENCODE_API_KEY
+    discovery:
+      type: openai-models-list
   zenmux:
     baseUrl: https://zenmux.ai/api/v1
     api: openai-completions

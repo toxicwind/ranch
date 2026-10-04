@@ -510,6 +510,21 @@ var ProviderCatalogDefs = []CatalogProviderDef{
 		Enabled:        true,
 	},
 	{
+		Name:           "zen",
+		BaseURL:        "https://opencode.ai/zen/v1",
+		KeyEnv:         "OPENCODE_API_KEY",
+		KeyEnvAlt:      "",
+		Adapter:        "openai",
+		Auth:           "bearer",
+		HeaderName:     "",
+		QueryParam:     "",
+		ModelsPath:     "",
+		NoModelsReason: "",
+		NoAuth:         false,
+		RouterLocal:    false,
+		Enabled:        true,
+	},
+	{
 		Name:           "zenmux",
 		BaseURL:        "https://zenmux.ai/api/v1",
 		KeyEnv:         "ZENMUX_API_KEY",
@@ -1315,6 +1330,9 @@ var ProviderCatalogSeeds = map[string][]string{
 		"glm-5.3-flash",
 		"glm-5.3",
 		"glm-5.2",
+	},
+	"zen": []string{
+		"mimo-v2.5-free",
 	},
 	"zenmux": []string{
 		"anthropic/claude-opus-5",

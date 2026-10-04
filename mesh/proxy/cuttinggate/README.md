@@ -65,6 +65,12 @@ applies the full shape per request (`src/zen.ts`, via `Router.call`):
   such as `inference-cost` are stripped) so the race engine's contract holds
 
 Auth: `ZEN_API_KEY`, or `OPENCODE_API_KEY` (mirrors sovereign-router-ts).
+The provider is also registered in the mesh catalog
+(`mesh/catalog/src/data.ts`, adapter `openai`), so generated artifacts
+(`providers.json`/`.go`/`.rs`, `tau-models.yml`) carry it. The vendored
+strategy layer (`src/strategy/router_strategy.ts`) applies the same
+client-identity headers and body gate as `src/zen.ts` for requests routed
+through the strategy engine.
 The 17-model seed in `src/zen.ts` is always registered at boot, so the set
 below stays routable even when the live catalog lags an upstream rotation.
 

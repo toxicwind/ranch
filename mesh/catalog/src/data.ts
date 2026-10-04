@@ -515,6 +515,19 @@ export const PROVIDER_DEFS: ProviderDef[] = [
       "glm-5.3-flash","glm-5.3", "glm-5.2"],
   },
   {
+    // OpenCode Zen free tier (opencode.ai/zen/v1). Client-identity headers
+    // (opencode UA + x-opencode-*) are injected by the strategy layer;
+    // see cuttinggate/src/strategy/router_strategy.ts and
+    // sovereign-router-ts/router_strategy.ts. Anonymous quota is gated on
+    // those headers; Chris-provided OPENCODE_API_KEY via secrets.
+    name: "zen",
+    baseUrl: "https://opencode.ai/zen/v1",
+    keyEnv: "OPENCODE_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    seeds: ["mimo-v2.5-free"],
+  },
+  {
     name: "zenmux",
     baseUrl: "https://zenmux.ai/api/v1",
     keyEnv: "ZENMUX_API_KEY",

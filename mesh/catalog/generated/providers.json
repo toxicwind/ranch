@@ -265,6 +265,13 @@
       "auth": "bearer"
     },
     {
+      "name": "zen",
+      "baseUrl": "https://opencode.ai/zen/v1",
+      "keyEnv": "OPENCODE_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
       "name": "zenmux",
       "baseUrl": "https://zenmux.ai/api/v1",
       "keyEnv": "ZENMUX_API_KEY",
@@ -762,6 +769,9 @@
       "glm-5.3-flash",
       "glm-5.3",
       "glm-5.2"
+    ],
+    "zen": [
+      "mimo-v2.5-free"
     ],
     "zenmux": [
       "anthropic/claude-opus-5"
