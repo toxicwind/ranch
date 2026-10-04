@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""yote-fast: lean client for yote-fastd (the persistent fast-path proxy).
+
+Usage: yote-fast '<cmd>' [workdir] [timeout_s]
+Prints stdout; stderr passes through; exit code mirrors the remote command.
+If the daemon isn't running, starts it detached and retries once.
+"""
+import json
+import os
+import socket
+import subprocess
+import sys
+import time
+
+CACHE = os.path.expanduser("~/.cache")
+FAST_SOCK = os.path.join(CACHE, "yote-fast.sock")
+DAEMON = os.path.join(os.path.expanduser("~"), "workspace", "bin", "yote-fastd")
+
+
+def ensure_daemon():
+    try:
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s.settimeout(2)
+        s.connect(FAST_SOCK)
+        s.close()
+        return True
+    except OSError:
+        pass
+    subprocess.Popen(
+        [sys.executable, DAEMON],
+        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL, start_new_session=True)
+    for _ in range(50):
+        time.sleep(0.1)
+        try:
+            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            s.settimeout(2)
+            s.connect(FAST_SOCK)
+            s.close()
+            return True
+        except OSError:
+            continue
+    return False
+
+
+def main():
+    if len(sys.argv) < 2:
+        sys.stderr.write("usage: yote-fast '<cmd>' [workdir] [timeout_s]\n")
+        return 2
+    cmd = sys.argv[1]
+    workdir = sys.argv[2] if len(sys.argv) > 2 else "/home/toxic"
+    timeout = int(sys.argv[3]) if len(sys.argv) > 3 else 120
+    if not ensure_daemon():
+        sys.stderr.write("yote-fast: daemon failed to start\n")
+        return 99
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.settimeout(timeout + 15)
+    try:
+        s.connect(FAST_SOCK)
+    except OSError as e:
+        sys.stderr.write("yote-fast: connect failed: %s\n" % e)
+        return 99
+    s.sendall((json.dumps(
+        {"cmd": cmd, "workdir": workdir, "timeout": timeout}) + "\n").encode())
+    code = 124
+    buf = b""
+    t0 = time.time()
+    try:
+        while time.time() - t0 < timeout + 15:
+            try:
+                d = s.recv(65536)
+            except socket.timeout:
+                break
+            if not d:
+                break
+            buf += d
+            while b"\n" in buf:
+                line, buf = buf.split(b"\n", 1)
+                try:
+                    m = json.loads(line)
+                except Exception:
+                    continue
+                t = m.get("type")
+                if t == "chunk":
+                    out = sys.stdout if m.get("stream") == "stdout" \
+                        else sys.stderr
+                    out.write(m.get("data", ""))
+                    out.flush()
+                elif t == "done":
+                    code = m.get("code", 0)
+                    buf = b""
+                    break
+                elif t == "error":
+                    sys.stderr.write("yote-fast: %s\n"
+                                     % m.get("message", "unknown"))
+                    return 98
+            else:
+                continue
+            break
+    finally:
+        s.close()
+    return code if isinstance(code, int) else 124
+
+
+if __name__ == "__main__":
+    sys.exit(main())

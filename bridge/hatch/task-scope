@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+"""task-scope: WHERE are tasks running, WHO is burning the box, WHEN.
+
+Chris 2026-10-04: "you keep saying there's no thrash but ... there's
+extreme lag you aren't noticing ... see where tasks are running ...
+you must use datetime."
+
+Unlike load-audit (aggregate load only), this attributes CPU to TASKS:
+every direct child of hatch-execd is one task (one exec call tree), and
+long-lived daemons are listed separately. Every section is stamped with
+a UTC ISO-8601 datetime so lag can be correlated across cell and yote.
+
+Usage: task-scope [--no-bridge]   (bridge probe adds ~1s; skip if wedged)
+Exit 0 always; the VERDICT line is the machine-readable summary.
+"""
+import datetime
+import os
+import subprocess
+import sys
+
+SKIP_BRIDGE = "--no-bridge" in sys.argv
+CELL_CPUS = 2
+YOTE_CPUS = 16
+
+
+def ts():
+    return datetime.datetime.now(datetime.timezone.utc).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
+
+
+def ps_table():
+    """pid -> (ppid, etime, pcpu, args) via one ps call."""
+    out = {}
+    try:
+        r = subprocess.run(
+            ["ps", "-eo", "pid,ppid,etime,pcpu,args"],
+            capture_output=True, text=True, timeout=10)
+    except Exception:
+        return out
+    for line in r.stdout.splitlines()[1:]:
+        parts = line.split(None, 4)
+        if len(parts) < 5:
+            continue
+        try:
+            out[int(parts[0])] = (int(parts[1]), parts[2],
+                                  float(parts[3]), parts[4][:160])
+        except ValueError:
+            continue
+    return out
+
+
+def children_map(table):
+    m = {}
+    for pid, (ppid, _, _, _) in table.items():
+        m.setdefault(ppid, []).append(pid)
+    return m
+
+
+def subtree_pids(root, cmap):
+    seen, stack = set(), [root]
+    while stack:
+        p = stack.pop()
+        if p in seen:
+            continue
+        seen.add(p)
+        stack.extend(cmap.get(p, []))
+    seen.discard(root)
+    return seen
+
+
+def short_args(args, n=110):
+    a = " ".join(args.split())
+    return a if len(a) <= n else a[:n] + "…"
+
+
+def container_psi():
+    """Ground truth for contention: cgroupv2 PSI, not host loadavg.
+
+    /proc/loadavg inside this container is HOST-global (126-core EPYC:
+    load 12 = ~10% busyness). The v1 watchdog froze our workers for the
+    host's weather. PSI is the kernel's direct stall accounting for OUR
+    cgroup. Zero pressure = healthy, regardless of loadavg.
+    """
+    out = {}
+    for res in ("cpu", "memory", "io"):
+        try:
+            txt = open(f"/sys/fs/cgroup/{res}.pressure").read()
+            some10 = float(txt.split("some")[1].split("avg10=")[1].split()[0])
+            full10 = float(txt.split("full")[1].split("avg10=")[1].split()[0])
+            out[res] = (some10, full10)
+        except Exception:
+            out[res] = (None, None)
+    return out
+
+
+def main():
+    t0 = ts()
+    print(f"[{t0}] task-scope :: cell + yote task attribution")
+    table = ps_table()
+    cmap = children_map(table)
+
+    # load: PSI is ground truth, host loadavg is context only
+    try:
+        la = open("/proc/loadavg").read().split()[:3]
+        l1, l5, l15 = float(la[0]), float(la[1]), float(la[2])
+    except Exception:
+        l1 = l5 = l15 = -1.0
+    psi = container_psi()
+    cpu_some = psi["cpu"][0]
+    stalled = cpu_some is not None and cpu_some > 5.0
+    print(f"[{ts()}] CELL host-loadavg {l1:.1f}/{l5:.1f}/{l15:.1f} "
+          f"(host-global, NOT container contention)")
+    psitxt = " ".join(
+        f"{r}=some:{v[0]:.2f}/full:{v[1]:.2f}" if v[0] is not None
+        else f"{r}=?" for r, v in psi.items())
+    print(f"[{ts()}] CELL cgroup PSI avg10: {psitxt}  "
+          f"{'STALLED' if stalled else 'no contention (healthy)'})")
+
+    # find hatch-execd roots
+    roots = [p for p, (_, _, _, a) in table.items()
+             if a.startswith("hatch-execd") or "/hatch-execd" in a]
+    # tasks = direct children of the exececutord (excluding this probe itself)
+    me = os.getpid()
+    my_parent = os.getppid()
+    tasks = []
+    for r in roots:
+        for c in cmap.get(r, []):
+            if c in (me, my_parent):
+                continue
+            _, etime, _, args = table.get(c, (0, "?", 0.0, "?"))
+            sub = subtree_pids(c, cmap)
+            cpu = sum(table.get(p, (0, "?", 0.0, "?"))[2] for p in sub)
+            cpu += table.get(c, (0, "?", 0.0, "?"))[2]
+            tasks.append((cpu, c, etime, len(sub), args))
+    tasks.sort(reverse=True)
+    print(f"[{ts()}] TASKS under hatch-execd (cpu% = task + subtree):")
+    for cpu, pid, etime, nsub, args in tasks[:12]:
+        flag = " HOT" if cpu > 10 else ""
+        print(f"  [{ts()}] {cpu:6.1f}% pid={pid} elapsed={etime} "
+              f"procs={nsub}{flag} :: {short_args(args)}")
+    if not tasks:
+        print("  (none)")
+
+    # daemons: long-lived, not under hatch-execd task tree
+    task_pids = set()
+    for _, pid, _, _, _ in tasks:
+        task_pids.add(pid)
+        task_pids |= subtree_pids(pid, cmap)
+    daemon_names = ("supervise-connector", "connector.py", "ws_daemon",
+                    "hatch daemon", "swarm-throttle", "cell-squawk",
+                    "worker-queue-watch", "death-watch")
+    print(f"[{ts()}] DAEMONS (outside task trees):")
+    seen = 0
+    for pid, (ppid, etime, cpu, args) in sorted(
+            table.items(), key=lambda kv: -kv[1][2]):
+        if pid in task_pids or ppid in task_pids:
+            continue
+        if any(d in args for d in daemon_names):
+            print(f"  [{ts()}] {cpu:6.1f}% pid={pid} elapsed={etime} :: "
+                  f"{short_args(args)}")
+            seen += 1
+            if seen >= 10:
+                break
+    if not seen:
+        print("  (none matched)")
+
+    # bridge latency probe (timestamped both ends)
+    if not SKIP_BRIDGE:
+        yc = os.path.expanduser("~/workspace/bin/yote-conn")
+        s = datetime.datetime.now(datetime.timezone.utc)
+        try:
+            r = subprocess.run(
+                [yc, "exec", "date -u +%Y-%m-%dT%H:%M:%SZ; cat /proc/loadavg"],
+                capture_output=True, text=True, timeout=60)
+            e = datetime.datetime.now(datetime.timezone.utc)
+            ms = (e - s).total_seconds() * 1000
+            lines = [ln for ln in r.stdout.splitlines() if ln.strip()]
+            yote_ts = lines[0] if lines else "?"
+            yote_la = lines[1] if len(lines) > 1 else "?"
+            try:
+                yl1 = float(yote_la.split()[0])
+                yflag = "OVERLOAD" if yl1 > YOTE_CPUS * 2.5 else "ok"
+            except Exception:
+                yl1, yflag = -1.0, "?"
+            print(f"[{ts()}] BRIDGE roundtrip {ms:.0f}ms "
+                  f"(sent {s.strftime('%H:%M:%SZ')}, "
+                  f"yote-clock {yote_ts})  "
+                  f"{'LAGGY' if ms > 3000 else 'ok'}")
+            print(f"[{ts()}] YOTE load {yote_la} on {YOTE_CPUS} cores :: "
+                  f"{yflag}")
+        except Exception as ex:
+            print(f"[{ts()}] BRIDGE probe FAILED: "
+                  f"{type(ex).__name__}: {ex}")
+
+    # verdict
+    hot = [f"pid={p} {c:.0f}%" for c, p, _, _, _ in tasks[:3] if c > 10]
+    state = "STALLED" if stalled else "healthy"
+    print(f"[{ts()}] VERDICT cell={state} psi_cpu_some10={cpu_some} "
+          f"top_tasks=[{'; '.join(hot) if hot else 'none >10%'}]")
+
+    print(f"[{ts()}] done")
+
+
+if __name__ == "__main__":
+    main()
