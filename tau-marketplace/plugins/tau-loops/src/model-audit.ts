@@ -381,4 +381,10 @@ export function describeRun(report: AuditReport): string {
 	return `audited ${report.references.length} refs: ${ok} live, ${report.probes.length - ok} dead, ${report.undefinedRoles.length} undefined roles`;
 }
 
-export const TOOL_ORIGIN_HINT = basename(dirname(resolveConfigPath()));
+export const TOOL_ORIGIN_HINT = (() => {
+	try {
+		return basename(dirname(resolveConfigPath()));
+	} catch {
+		return "unknown";
+	}
+})();

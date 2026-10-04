@@ -39,6 +39,12 @@ jobs:
         run: bun install
         env:
           PUPPETEER_SKIP_DOWNLOAD: "true"
+      - name: Install tau-marketplace deps
+        run: |
+          (cd tau-marketplace && bun install)
+          for d in tau-marketplace/plugins/*/; do
+            if [ -f "$d/package.json" ]; then (cd "$d" && bun install); fi
+          done
 
       - name: Setup Python test env
         run: |
