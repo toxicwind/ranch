@@ -48,3 +48,42 @@ non-compliant clients. Required: exact `User-Agent` (opencode/1.18.32...),
 `x-opencode-session`/`x-opencode-request` IDs in `ses_`/`msg_` + 26 char format
 (12 hex ts + 14 base62), `x-opencode-client: cli`, and Bearer <redacted> The router
 implements this in `router_strategy.ts`.
+
+## Zen live verification, second pass (2026-10-04, ~22:15 MDT)
+
+Full SSE sweep of all 16 zen entries through `:25104/v1/chat/completions`
+(`stream:true`, `max_tokens:24`): **11 full text**, 4 headers-only
+(ling-3.1-flash-free, longcat-2.5-preview-free, deepseek-v4-flash-free,
+jev-1.13-free), 1 empty stream (mimo-v2.6-flash-free). Second pass with the
+gate fingerprint (session header, opencode UA, decoy tools) flipped two
+entries in opposite directions — **upstream-side flakiness/quota, not a
+request-shape problem**. No hidden models: the router 200s unknown IDs and
+resolves bare variants by substring; community confirms `hy3-free` /
+`laguna-s-2.1-free` withdrawn.
+
+**Contraindicated:** upstream `/v1/responses` 404s for listed models — there
+is no Responses-API surface on Zen; the muse-spark pair serves via
+`/chat/completions`. Anonymous-token probes die upstream (500/400); the
+fingerprint only matters alongside the real key.
+
+**More community projects (beyond the list above):**
+- fly143/OpenCode-Zen-free-api — `zen_relay.py` reverse proxy + `zen_check.py`
+  ablation self-test; measured the exact gate fingerprint conditions
+- 12errh/zen-proxy — fallback routing, aliases, self-updating model list
+- mmkeeper/opencode-free-proxy — auto-discovers catalog from
+  `models.opencode.ai/api.json`
+- duolahypercho/codex-router#882 — documents mimo-v2.6-flash-free FreeTierError
+  outside the opencode client
+- router-for-me/CLIProxyAPI#6018 — native responses protocol + gate bypass
+- samosa-ai-com/opencode-go-multi-auth, rahlplx/codex `zenProxy.ts`,
+  oka4henry/opencode, ismaelsoilet/jev-harness
+
+**Crash fix (commit `9060784`):** the 22:06 MDT router death was an uncaught
+`AbortError: The connection was closed.` — the TTFT
+`Promise.race([reader.read(), timeout])` in `router_strategy.ts` let the race
+loser reject unhandled, which Bun treats as fatal. Hardened with
+`readP.catch(() => {})` before the race; fingerprint construction extracted
+into exported pure `zenFingerprintHeaders()` / `applyZenFreeTierBody()` with
+`tests/zen_fingerprint.test.ts` (5 pass). Deployed to the live `:25104`
+daemon via pitchfork restart (verified `/v1/models` + `/health` 200,
+live zen probe streams).
