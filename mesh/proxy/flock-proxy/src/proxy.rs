@@ -410,6 +410,17 @@ fn finalize_sse_observer(
     record_observations(ctx, &observations)
 }
 
+/// Compose the final upstream request URL for the /v1/* proxy path.
+///
+/// The single choke point every proxied request flows through: `handle` hands
+/// it the raw configured base URL plus the incoming path+query. Versioned
+/// bases (`https://api.groq.com/openai/v1`) would otherwise concatenate into
+/// `/v1/v1/...` 404s, so this delegates to the canonical normalizer instead of
+/// a naive string concat.
+pub(crate) fn upstream_target_url(base_url: &str, path_query: &str) -> String {
+    crate::providers::upstream_url(base_url, path_query)
+}
+
 fn upstream_request(
     http: &reqwest::Client,
     base_url: &str,
@@ -419,7 +430,7 @@ fn upstream_request(
     key: &str,
     body: &Bytes,
 ) -> reqwest::RequestBuilder {
-    let url = format!("{base_url}{path_query}");
+    let url = upstream_target_url(base_url, path_query);
     let mut req = http
         .request(method.clone(), url)
         .header(header::AUTHORIZATION, format!("Bearer {key}"));
@@ -1517,6 +1528,33 @@ mod tests {
         ));
         assert!(!is_json_mode(&serde_json::json!({"model": "x"})));
     }
+    #[test]
+    fn upstream_target_url_never_doubles_the_v1_segment() {
+        // Regression: handle() forwards the raw configured base URL; a
+        // versioned base must resolve to a single /v1, never /v1/v1.
+        assert_eq!(
+            super::upstream_target_url(
+                "https://api.groq.com/openai/v1",
+                "/v1/chat/completions"
+            ),
+            "https://api.groq.com/openai/v1/chat/completions"
+        );
+        assert_eq!(
+            super::upstream_target_url("https://api.cerebras.ai/v1/", "/v1/models?limit=5"),
+            "https://api.cerebras.ai/v1/models?limit=5"
+        );
+        // Bare-host bases still gain the /v1 they need.
+        assert_eq!(
+            super::upstream_target_url("https://api.mistral.ai", "/v1/chat/completions"),
+            "https://api.mistral.ai/v1/chat/completions"
+        );
+        // Trailing slash on the base never yields a doubled separator.
+        assert_eq!(
+            super::upstream_target_url("https://api.mistral.ai/", "/v1/embeddings"),
+            "https://api.mistral.ai/v1/embeddings"
+        );
+    }
+
 }
 
 /// Fuzzing-only surface (see fuzz/). Thin wrappers so the fuzz targets can
@@ -1555,4 +1593,5 @@ pub mod fuzz {
             "sanitized label must stay in the safe charset"
         );
     }
+
 }
