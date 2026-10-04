@@ -26,11 +26,22 @@ export const ZEN_PROVIDER = "zen";
 export const ZEN_BASE_URL = "https://opencode.ai/zen/v1";
 
 /**
- * Live-verified 2026-10-04 via :25104/v1/chat/completions: 17/17 serve real
- * completions (0.1–2.4s). qwen3.6-plus-free, minimax-m3-free,
+ * First verified 2026-10-04 via :25104/v1/chat/completions: 17/17 returned
+ * HTTP 200 (0.1–2.4s). qwen3.6-plus-free, minimax-m3-free,
  * north-mini-code-free and big-pickle no longer appear in
  * https://opencode.ai/zen/v1/models but still serve upstream — kept live.
  * ling-3.0-flash-fin-free joined the upstream catalog 2026-10-04.
+ *
+ * Re-probe 2026-10-04 ~04:27Z direct to https://opencode.ai/zen/v1 (auth +
+ * tool-signature bundle): 8/17 answer with the requested model
+ * (mimo-v2.6-flash-free, nemotron-3-ultra-free, space-bunny-free,
+ * mimo-v2.5-free, fledge-alpha-free, big-pickle, longcat-2.5-preview-free,
+ * nemotron-3.5-lightning-free — reasoning models need a real max_tokens
+ * budget; a 30-token probe burns it on chain-of-thought). The other 9 return
+ * 400/403/404 upstream; through :25104 strategy-auto degrades to a local
+ * fallback (herd/beellama/exaone-4-0-1-2b) with HTTP 200, so a 200 there does
+ * not prove the Zen model answered — check the routed-via SSE comment.
+ * ling-3.0-flash-fin-free now 404s (delisted upstream).
  */
 export const ZEN_MODELS: readonly string[] = [
   "ling-3.1-flash-free",

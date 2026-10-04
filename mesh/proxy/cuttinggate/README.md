@@ -94,7 +94,9 @@ below stays routable even when the live catalog lags an upstream rotation.
 | muse-spark-1.2-contributor-free | listed | serves | 0.1s |
 | muse-spark-1.3-contributor-free | listed | serves | 0.1s |
 | space-bunny-free | listed | serves | 0.1s |
-| ling-3.0-flash-fin-free | listed (new 2026-10-04) | serves | 0.1s |
+| ling-3.0-flash-fin-free | listed (new 2026-10-04) | 404 upstream on re-probe 2026-10-04 ~04:27Z (delisted) | — |
+
+**Re-probe 2026-10-04 ~04:27Z** (direct `https://opencode.ai/zen/v1/chat/completions`, authenticated, tool-signature bundle, 86-model sweep): 8 of the 17 answer with the requested model — mimo-v2.6-flash-free, nemotron-3-ultra-free, space-bunny-free, mimo-v2.5-free, fledge-alpha-free, big-pickle, longcat-2.5-preview-free, nemotron-3.5-lightning-free (reasoning models need a real `max_tokens` budget; a 30-token probe burns it on chain-of-thought). deepseek-v4-flash-free, qwen3.6-plus-free, minimax-m3-free, north-mini-code-free, jev-1.13-free and muse-spark-1.2/1.3-contributor-free return 400; ling-3.1-flash-free returns 403; ling-3.0-flash-fin-free returns 404. Through `:25104` strategy-auto degrades these to a local fallback (`herd/beellama/exaone-4-0-1-2b`) with HTTP 200 — a 200 there does not prove the Zen model answered. Check the `routed-via` SSE comment before trusting a completion. Full per-model results: `/home/toxic/zen-sweep-results.json` on yote (86 models, authenticated).
 
 ### Community projects taking zen further
 

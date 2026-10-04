@@ -77,7 +77,7 @@ describe("zen request shape (OpenCode free-tier gate)", () => {
     expect(finishReason).toBe("stop");
   });
 
-  test("ZEN_MODELS is the 17-model verified set, no dupes", () => {
+  test("ZEN_MODELS is the 17-model set, no dupes", () => {
     expect(ZEN_PROVIDER).toBe("zen");
     expect(ZEN_MODELS.length).toBe(17);
     expect(new Set(ZEN_MODELS).size).toBe(17);
