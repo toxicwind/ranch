@@ -57,10 +57,9 @@ LOG_PATH = os.path.join(CACHE, "exec-ws-supervise.log")
 LOCK_PATH = os.path.join(CACHE, "exec-ws-supervise.lock")
 PID_PATH = os.path.join(CACHE, "exec-ws-server.pid")
 
-# The server script. Prefer the ranch-tracked copy; fall back to the
-# estate bridge copy (the live pitchfork toml still names the estate path).
+# The server script. The canonical live copy is the estate-tracked
+# bridge/awrawr_ws_exec.py (that is what runs on :25204 today).
 CANDIDATES = [
-    "/home/toxic/estate/ranch/yote/bridge/bin/awrawr_ws_exec.py",
     "/home/toxic/estate/bridge/awrawr_ws_exec.py",
 ]
 PORT = 25204
