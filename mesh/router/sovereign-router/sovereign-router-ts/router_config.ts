@@ -443,6 +443,10 @@ export function normalizeModelSpec(spec: string): {
   // CODING aliases pass through untouched.
   if (s in CODING) return { provider: null, model: s };
   const provNames = Object.keys(PROVIDERS);
+  // "llama-swap" is first-class in router logic (LOCAL_ROLES, resolveModel,
+  // callOne) even when the master package def is disabled -- the shim must
+  // recognize it as a provider prefix.
+  const isProviderName = (q: string) => provNames.includes(q) || q === "llama-swap";
   const inCatalog = (p: string, m: string) => catalogModelsFor(p).includes(m);
   const anyCatalogHas = (m: string) => provNames.some((p) => inCatalog(p, m));
   // Bare model id already in some catalog: provider-agnostic.
@@ -451,7 +455,7 @@ export function normalizeModelSpec(spec: string): {
   const ci = s.indexOf(":");
   if (ci > 0) {
     const pre = s.slice(0, ci).toLowerCase();
-    if (provNames.includes(pre)) {
+    if (isProviderName(pre)) {
       const rest = s.slice(ci + 1);
       const mid = matchModelOnProvider(pre, rest);
       if (mid) return { provider: pre, model: mid };
@@ -464,11 +468,14 @@ export function normalizeModelSpec(spec: string): {
   const si = s.indexOf("/");
   if (si > 0) {
     const pre = s.slice(0, si).toLowerCase();
-    if (provNames.includes(pre)) {
+    if (isProviderName(pre)) {
       const rest = s.slice(si + 1);
       if (inCatalog(pre, rest)) return { provider: pre, model: rest };
       const mid = matchModelOnProvider(pre, rest);
       if (mid) return { provider: pre, model: mid };
+      // llama-swap serves arbitrary local GGUF ids -- same passthrough
+      // as the colon form above.
+      if (pre === "llama-swap" && rest) return { provider: pre, model: rest };
     }
   }
   return { provider: null, model: s };

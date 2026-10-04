@@ -924,6 +924,13 @@ async function main() {
   // Write prompt to file
   await writeFile(promptSpecPath, `${promptText.trim()}\n`, "utf8");
 
+  const runId = typeof parsed.flags["run-id"] === "string"
+    ? String(parsed.flags["run-id"])
+    : `sr-${Date.now().toString(36)}-${randomUUID().slice(0, 8)}`;
+
+  // HFT: per-stage timing for the whole run (JSONL at ~/.corral/timings/<runId>.jsonl).
+  const timer = new CorralTimer(runId);
+
   // Step 1: Clarifying questions (unless --skip-questions).
   // Non-interactive stdin can't answer questions: auto-skip instead of hanging.
   let clarificationSession: any = null;
@@ -985,13 +992,6 @@ async function main() {
   }
 
   await writeFile(bunfigPath, `preload = ["./preload.ts"]\n`, "utf8");
-
-  const runId = typeof parsed.flags["run-id"] === "string"
-    ? String(parsed.flags["run-id"])
-    : `sr-${Date.now().toString(36)}-${randomUUID().slice(0, 8)}`;
-
-  // HFT: per-stage timing for the whole run (JSONL at ~/.corral/timings/<runId>.jsonl).
-  const timer = new CorralTimer(runId);
 
   const maxConcurrencyOverride = typeof parsed.flags["max-concurrency"] === "string"
     ? Math.max(1, parseFinite(parsed.flags["max-concurrency"], fallbackConfig.maxConcurrency))

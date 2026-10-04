@@ -2,6 +2,7 @@ import React from "react";
 import { Task } from "smithers-orchestrator";
 import { z } from "zod";
 import type { ClarificationSession } from "../cli/clarifications";
+import { colors, statusMeta, toRunStatus, type RunStatus } from "../ui/tokens";
 
 export const monitorOutputSchema = z.object({
   started: z.boolean(),
@@ -29,14 +30,23 @@ interface TaskInfo {
   output?: string;
 }
 
+/** Map engine task status → semantic RunStatus for token colors. */
+function toSemantic(s: TaskStatus): RunStatus {
+  switch (s) {
+    case "completed": return "success";
+    case "failed": return "failed";
+    case "running": return "running";
+    case "blocked": return "blocked";
+    default: return "pending";
+  }
+}
+
 /**
- * Monitor Smithers Component - OpenTUI Dashboard
- * 
- * Features:
- * - Real-time task list with status indicators  
- * - Navigate tasks with arrow keys
- * - View task details
- * - Overall workflow progress
+ * Monitor — OpenTUI live dashboard for a Smithers run.
+ *
+ * Design-token driven: brand header with progress bar, colored status chips,
+ * per-status task icons, selected-row highlight, responsive layout (stacks
+ * the detail pane below the task list on narrow terminals < 100 columns).
  */
 export function Monitor({
   dbPath,
@@ -51,203 +61,246 @@ export function Monitor({
       continueOnFail={true}
     >
       {async () => {
-        // Import OpenTUI
         const ot = await import("@opentui/core");
-        const { createCliRenderer, BoxRenderable, TextRenderable, ScrollBoxRenderable } = ot;
+        const { createCliRenderer, BoxRenderable, TextRenderable, ScrollBoxRenderable, StyledText, fg, bg, bold, dim } = ot as any;
         const RGBA = ot.RGBA;
         const { Database } = await import("bun:sqlite");
 
-        // Create renderer
+        const rgba = (t: { rgb: [number, number, number] }) => RGBA.fromInts(t.rgb[0], t.rgb[1], t.rgb[2]);
+
+        // Token palette
+        const pal = {
+          brand: rgba(colors.brand),
+          brandSoft: rgba(colors.brandSoft),
+          border: rgba(colors.border),
+          text: rgba(colors.text),
+          textDim: rgba(colors.textDim),
+          textFaint: rgba(colors.textFaint),
+          bgCard: rgba(colors.bgCard),
+          success: rgba(colors.success),
+          error: rgba(colors.error),
+          warning: rgba(colors.warning),
+          info: rgba(colors.info),
+          pending: rgba(colors.pending),
+          blocked: rgba(colors.blocked),
+        };
+
+        const narrow = (process.stdout.columns ?? 120) < 100;
+
         const renderer = await createCliRenderer({
           screenMode: "alternate-screen",
           useMouse: false,
           exitOnCtrlC: false,
         });
 
-        // State
         let tasks: TaskInfo[] = [];
         let selectedIndex = 0;
         let focus: "list" | "detail" = "list";
         let isRunning = true;
+        let startedAt = Date.now();
 
-        // Colors
-        const c = {
-          running: RGBA.fromInts(59, 130, 246),
-          completed: RGBA.fromInts(34, 197, 94),
-          failed: RGBA.fromInts(239, 68, 68),
-          blocked: RGBA.fromInts(234, 179, 8),
-          pending: RGBA.fromInts(128, 128, 128),
-          border: RGBA.fromInts(75, 85, 99),
-          selected: RGBA.fromInts(6, 182, 212),
-        };
-
-        // Root
+        // -- Root -----------------------------------------------------------
         const root = new BoxRenderable(renderer, {
           id: "root",
           border: true,
-          title: ` Super Ralph: ${config.projectName || "Workflow"} `,
+          title: ` ◈ corral · ${config.projectName || "Workflow"} `,
+          titleAlignment: "left",
+          borderColor: pal.border,
           width: "100%",
           height: "100%",
           flexDirection: "column",
+          paddingLeft: 1,
+          paddingRight: 1,
         });
         renderer.root.add(root);
 
-        // Header
+        // -- Header: run id + prompt ---------------------------------------
         const header = new TextRenderable(renderer, {
           id: "header",
-          content: `Run: ${runId.slice(0, 20)}... | ${prompt.slice(0, 40)}${prompt.length > 40 ? "..." : ""}`,
           height: 1,
         });
         root.add(header);
 
-        // Stats line
-        const statsText = new TextRenderable(renderer, {
-          id: "stats",
-          content: "Loading...",
-          height: 1,
-        });
+        // -- Progress bar line ----------------------------------------------
+        const progressText = new TextRenderable(renderer, { id: "progress", height: 1 });
+        root.add(progressText);
+
+        // -- Stat chips line -------------------------------------------------
+        const statsText = new TextRenderable(renderer, { id: "stats", height: 1 });
         root.add(statsText);
 
-        // Main content
+        // -- Main content: list + detail ------------------------------------
         const content = new BoxRenderable(renderer, {
           id: "content",
           border: false,
-          flexDirection: "row",
+          flexDirection: narrow ? "column" : "row",
           flexGrow: 1,
           gap: 1,
         });
         root.add(content);
 
-        // Task list
         const listBox = new BoxRenderable(renderer, {
           id: "listBox",
           border: true,
           title: " Tasks ",
-          width: "45%",
+          width: narrow ? "100%" : "45%",
+          height: narrow ? "55%" : "100%",
           flexDirection: "column",
-          borderColor: c.border,
+          borderColor: pal.border,
         });
         content.add(listBox);
 
-        const listScroll = new ScrollBoxRenderable(renderer, {
-          id: "listScroll",
-          flexGrow: 1,
-          scrollY: true,
-        });
+        const listScroll = new ScrollBoxRenderable(renderer, { id: "listScroll", flexGrow: 1, scrollY: true });
         listBox.add(listScroll);
-
-        const listContent = new TextRenderable(renderer, {
-          id: "listContent",
-          content: "Loading...",
-        });
+        const listContent = new TextRenderable(renderer, { id: "listContent" });
         listScroll.add(listContent);
 
-        // Detail panel
         const detailBox = new BoxRenderable(renderer, {
           id: "detailBox",
           border: true,
           title: " Details ",
           flexGrow: 1,
+          width: narrow ? "100%" : undefined,
           flexDirection: "column",
-          borderColor: c.border,
+          borderColor: pal.border,
         });
         content.add(detailBox);
 
-        const detailScroll = new ScrollBoxRenderable(renderer, {
-          id: "detailScroll",
-          flexGrow: 1,
-          scrollY: true,
-        });
+        const detailScroll = new ScrollBoxRenderable(renderer, { id: "detailScroll", flexGrow: 1, scrollY: true });
         detailBox.add(detailScroll);
-
-        const detailContent = new TextRenderable(renderer, {
-          id: "detailContent",
-          content: "Select a task",
-        });
+        const detailContent = new TextRenderable(renderer, { id: "detailContent" });
         detailScroll.add(detailContent);
 
-        // Footer
-        const footer = new TextRenderable(renderer, {
-          id: "footer",
-          content: "↑↓: Navigate | Tab: Switch | Q: Quit",
-          height: 1,
-        });
+        // -- Footer ----------------------------------------------------------
+        const footer = new TextRenderable(renderer, { id: "footer", height: 1 });
         root.add(footer);
 
-        // Status icons
-        const icon = (s: TaskStatus) => {
-          switch (s) {
-            case "pending": return "○";
-            case "running": return "◐";
-            case "completed": return "✓";
-            case "failed": return "✗";
-            case "blocked": return "⊘";
-          }
-        };
+        // -- Render helpers ---------------------------------------------------
+        const st = (...chunks: any[]) => new StyledText(chunks);
 
-        // Update display
-        function update() {
-          listBox.borderColor = focus === "list" ? c.selected : c.border;
-          detailBox.borderColor = focus === "detail" ? c.selected : c.border;
+        function headerContent(): any {
+          const shortId = runId.length > 24 ? runId.slice(0, 24) + "…" : runId;
+          const p = prompt.length > 60 ? prompt.slice(0, 57) + "…" : prompt;
+          return st(
+            bold(fg(pal.brand)("◈ ")),
+            dim(fg(pal.textFaint)("run ")),
+            fg(pal.text)(shortId),
+            dim(fg(pal.textFaint)("  ·  ")),
+            fg(pal.textDim)(p),
+          );
+        }
 
-          // Task list
-          listContent.content = tasks.length 
-            ? tasks.map((t, i) => {
-                const sel = i === selectedIndex ? "> " : "  ";
-                const name = t.nodeId.length > 30 ? t.nodeId.slice(0, 27) + "..." : t.nodeId;
-                return `${sel}${icon(t.status)} ${name}`;
-              }).join("\n")
-            : "No tasks yet...";
-
-          // Detail
-          const task = tasks[selectedIndex];
-          detailContent.content = task
-            ? `Task: ${task.nodeId}\nStatus: ${task.status.toUpperCase()}\n\n${task.output || "No output"}`
-            : "Select a task";
-
-          // Stats
+        function progressContent(): any {
           const total = tasks.length;
-          const running = tasks.filter(t => t.status === "running").length;
-          const completed = tasks.filter(t => t.status === "completed").length;
-          const failed = tasks.filter(t => t.status === "failed").length;
-          statsText.content = `Total: ${total} | Running: ${running} | Completed: ${completed} | Failed: ${failed}`;
+          const done = tasks.filter((t) => t.status === "completed").length;
+          const frac = total === 0 ? 0 : done / total;
+          const w = Math.max(12, Math.min(40, (process.stdout.columns ?? 120) - 30));
+          const filled = Math.round(frac * w);
+          return st(
+            fg(pal.textDim)("progress "),
+            fg(pal.brand)("█".repeat(filled)),
+            fg(pal.border)("░".repeat(w - filled)),
+            fg(pal.textDim)(` ${done}/${total} `),
+            bold(fg(pal.text)(`${Math.round(frac * 100)}%`)),
+          );
+        }
 
+        function statsContent(): any {
+          const total = tasks.length;
+          const n = (s: TaskStatus) => tasks.filter((t) => t.status === s).length;
+          const chip = (label: string, count: number, color: any) =>
+            st(fg(color)("● "), fg(pal.textDim)(`${label} `), bold(fg(pal.text)(String(count))));
+          const elapsed = Math.round((Date.now() - startedAt) / 1000);
+          return st(
+            chip("running", n("running"), pal.info), fg(pal.textFaint)("   "),
+            chip("done", n("completed"), pal.success), fg(pal.textFaint)("   "),
+            chip("failed", n("failed"), pal.error), fg(pal.textFaint)("   "),
+            chip("blocked", n("blocked"), pal.blocked), fg(pal.textFaint)("   "),
+            chip("pending", n("pending"), pal.pending), fg(pal.textFaint)("   "),
+            dim(fg(pal.textFaint)(`total ${total} · ${elapsed}s elapsed`)),
+          );
+        }
+
+        function listContentStyled(): any {
+          if (tasks.length === 0) return st(dim(fg(pal.textFaint)("No tasks yet — waiting for the run to report…")));
+          const chunks: any[] = [];
+          tasks.forEach((t, i) => {
+            const meta = statusMeta[toSemantic(t.status)];
+            const sel = i === selectedIndex;
+            const name = t.nodeId.length > 34 ? t.nodeId.slice(0, 31) + "…" : t.nodeId;
+            const row = [
+              fg(pal.textFaint)(sel ? "▸ " : "  "),
+              fg(rgba(meta.color))(`${meta.icon} `),
+              sel ? bold(fg(pal.text)(name)) : fg(pal.textDim)(name),
+            ];
+            if (sel) {
+              chunks.push(bg(pal.brandSoft)(new StyledText(row as any) as any));
+            } else {
+              chunks.push(...row);
+            }
+            if (i < tasks.length - 1) chunks.push("\n");
+          });
+          return st(...chunks);
+        }
+
+        function detailContentStyled(): any {
+          const task = tasks[selectedIndex];
+          if (!task) return st(dim(fg(pal.textFaint)("Select a task to inspect it")));
+          const meta = statusMeta[toSemantic(task.status)];
+          return st(
+            dim(fg(pal.textFaint)("task    ")), fg(pal.text)(task.nodeId), "\n",
+            dim(fg(pal.textFaint)("status  ")), fg(rgba(meta.color))(`${meta.icon} ${meta.label}`), "\n",
+            task.iteration ? st(dim(fg(pal.textFaint)("iter    ")), fg(pal.text)(String(task.iteration)), "\n") : "",
+            dim(fg(pal.textFaint)("─".repeat(40))), "\n",
+            fg(pal.textDim)(task.output || "No output recorded yet"),
+          );
+        }
+
+        function footerContent(): any {
+          const key = (k: string, d: string) => st(bold(fg(pal.textDim)(k)), dim(fg(pal.textFaint)(` ${d}  `)));
+          return st(
+            key("↑↓", "navigate"), key("tab", "switch pane"),
+            key("enter", "inspect"), key("q", "quit"),
+            narrow ? dim(fg(pal.textFaint)(" · narrow mode: panes stacked")) : "",
+          );
+        }
+
+        function update() {
+          listBox.borderColor = focus === "list" ? pal.brand : pal.border;
+          detailBox.borderColor = focus === "detail" ? pal.brand : pal.border;
+          header.content = headerContent();
+          progressText.content = progressContent();
+          statsText.content = statsContent();
+          listContent.content = listContentStyled();
+          detailContent.content = detailContentStyled();
+          footer.content = footerContent();
           renderer.requestRender();
         }
 
-        // Poll database
+        // -- Poll database ----------------------------------------------------
         async function poll() {
           try {
             const db = new Database(dbPath, { readonly: true });
             const taskMap = new Map<string, TaskInfo>();
 
-            // Query reports
             try {
               const rows = db.query(`SELECT node_id, status, summary FROM report WHERE run_id = ?`).all(runId) as any[];
               for (const row of rows) {
-                const status: TaskStatus = row.status === "complete" ? "completed" : 
-                                          row.status === "blocked" ? "blocked" : "running";
+                const status: TaskStatus = row.status === "complete" ? "completed" :
+                                          row.status === "blocked" ? "blocked" :
+                                          row.status === "failed" ? "failed" : "running";
                 taskMap.set(row.node_id, {
-                  id: row.node_id,
-                  nodeId: row.node_id,
-                  status,
-                  iteration: 0,
-                  output: row.summary,
+                  id: row.node_id, nodeId: row.node_id, status, iteration: 0, output: row.summary,
                 });
               }
             } catch {}
 
-            // Query land
             try {
               const rows = db.query(`SELECT node_id, merged, evicted, summary FROM land WHERE run_id = ?`).all(runId) as any[];
               for (const row of rows) {
                 const status: TaskStatus = row.merged ? "completed" : row.evicted ? "failed" : "running";
                 taskMap.set(row.node_id, {
-                  id: row.node_id,
-                  nodeId: row.node_id,
-                  status,
-                  iteration: 0,
-                  output: row.summary,
+                  id: row.node_id, nodeId: row.node_id, status, iteration: 0, output: row.summary,
                 });
               }
             } catch {}
@@ -255,16 +308,15 @@ export function Monitor({
             db.close();
 
             tasks = Array.from(taskMap.values()).sort((a, b) => {
-              if (a.status === "running" && b.status !== "running") return -1;
-              if (a.status !== "running" && b.status === "running") return 1;
-              return a.nodeId.localeCompare(b.nodeId);
+              const rank = (s: TaskStatus) => s === "running" ? 0 : s === "failed" ? 1 : s === "blocked" ? 2 : 3;
+              return rank(a.status) - rank(b.status) || a.nodeId.localeCompare(b.nodeId);
             });
 
             if (selectedIndex >= tasks.length) selectedIndex = Math.max(0, tasks.length - 1);
           } catch {}
         }
 
-        // Input handler
+        // -- Input --------------------------------------------------------------
         renderer.addInputHandler((seq: string) => {
           if (!isRunning) return false;
 
@@ -282,11 +334,11 @@ export function Monitor({
 
           if (focus === "list") {
             switch (seq) {
-              case "\x1b[A": // Up
+              case "\x1b[A":
                 selectedIndex = Math.max(0, selectedIndex - 1);
                 update();
                 return true;
-              case "\x1b[B": // Down
+              case "\x1b[B":
                 selectedIndex = Math.min(tasks.length - 1, selectedIndex + 1);
                 update();
                 return true;
@@ -313,14 +365,12 @@ export function Monitor({
           return false;
         });
 
-        // Initial render
         await poll();
         update();
         renderer.start();
 
-        // Keep alive with polling
         while (isRunning) {
-          await new Promise(r => setTimeout(r, 2000));
+          await new Promise((r) => setTimeout(r, 2000));
           if (!isRunning) break;
           await poll();
           update();
