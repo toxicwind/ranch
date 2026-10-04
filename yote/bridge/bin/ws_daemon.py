@@ -19,7 +19,9 @@ import base64
 import hashlib
 import json
 import os
+import re
 import secrets
+import signal
 import socket
 import ssl
 import sys
@@ -42,6 +44,29 @@ SOCK_PATH = os.path.join(CACHE, "awrawr-ws-bridge.sock")
 LOG_PATH = os.path.join(CACHE, "awrawr-ws-bridge.log")
 PING_INTERVAL = 25
 LOG_MAX = 2_000_000  # rotate past 2MB; one spare generation kept
+# Lane state published for local observers (race pre-dispatch, humans).
+# Advisory: readers must tolerate a missing or stale file.
+STATE_PATH = os.path.join(CACHE, "awrawr-ws-bridge.state")
+# A nudge wakes maintain() from backoff early. Under constant caller
+# traffic (mirror daemon, health probes) every waiter nudging would
+# defeat backoff entirely and hot-loop a dead backend — so nudges are
+# admitted at most this often. Recovery stays fast: the first caller
+# after the backend returns still cuts the sleep short within this bound.
+NUDGE_MIN_INTERVAL = 15.0
+# Origin-side 5xx (funnel 502/503/504: the yote backend is down, not our
+# link) escalates like auth failures: 30, 60, 120, ... capped at 600s.
+# The far side needs a restart, not our retries.
+BACKEND_DOWN_BASE = 30.0
+BACKEND_DOWN_CAP = 600.0
+ORIGIN_5XX = re.compile(r"\b(502|503|504)\b")
+# One request is one newline-delimited JSON line; cap it so a buggy client
+# can't OOM the daemon by streaming an unbounded line (chunked transfers
+# are ~1.6KB per call, so 8MB is generous).
+MAX_REQUEST = 8 * 1024 * 1024
+
+# Local NDJSON protocol version. Bumped on breaking changes; the daemon
+# includes it in every error response so clients can detect skew.
+PROTOCOL_VERSION = 1
 
 
 def log(*a):
@@ -57,10 +82,32 @@ def log(*a):
             f.write(line)
     except OSError:
         pass
+    # A manual run should be visible on the terminal too. Under the
+    # spawner stdout is the log file (not a tty), so this never duplicates.
+    try:
+        if sys.stdout.isatty():
+            sys.stdout.write(line)
+            sys.stdout.flush()
+    except OSError:
+        pass
 
 
 # --- websocket framing lives in wsframe.py (shared with xfer.py) -----------
 # (read_frame / send_frame imported above)
+
+
+def _socket_live(path):
+    """True if a live daemon answers on the unix socket."""
+    try:
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s.settimeout(2)
+        try:
+            s.connect(path)
+            return True
+        finally:
+            s.close()
+    except OSError:
+        return False
 
 
 def proxy_target():
@@ -90,14 +137,51 @@ class Bridge:
         # Set by handle_local when a caller waits on a down bridge: lets
         # maintain() cut one backoff sleep short (see note_client_activity).
         self._nudge = asyncio.Event()
+        self._last_nudge = 0.0  # monotonic time of last admitted nudge
+        self._state_sig = None  # last published (connected, last_error)
+        # Wall-clock daemon start, published in the state file. The spawner
+        # (exec.py) compares it against the source mtime: edit the file and
+        # the next exec retires this daemon and boots the new code —
+        # hot-reload with no watcher process.
+        self._started = time.time()
+        # Active local clients. Published in the state file so the spawner
+        # never retires a busy daemon mid-request (hot-reload defers).
+        self._in_flight = 0
+
+    def _write_state(self):
+        """Publish lane state for local observers (race, humans).
+
+        Advisory only: readers must tolerate a missing or stale file.
+        Writes on transitions, not per attempt (signature-guarded).
+        """
+        sig = (self.connected.is_set(), self.last_error, self._in_flight)
+        if sig == self._state_sig:
+            return
+        self._state_sig = sig
+        try:
+            tmp = STATE_PATH + ".tmp"
+            with open(tmp, "w") as f:
+                json.dump({"connected": sig[0], "last_error": sig[1],
+                           "ts": time.time(), "pid": os.getpid(),
+                           "started": self._started,
+                           "in_flight": self._in_flight}, f)
+            os.replace(tmp, STATE_PATH)
+        except OSError:
+            pass
 
     def note_client_activity(self):
         """A local caller is waiting on a down bridge: retry soon.
 
         Called from handle_local's not-connected path. Wakes a single
         maintain() backoff sleep; it does not reset the escalation counters,
-        so a nudge only ever shortens one sleep.
+        so a nudge only ever shortens one sleep. Rate-limited: under
+        constant caller traffic every waiter nudging would defeat backoff
+        entirely and hot-loop a dead backend.
         """
+        now = time.monotonic()
+        if now - self._last_nudge < NUDGE_MIN_INTERVAL:
+            return
+        self._last_nudge = now
         self._nudge.set()
 
     def _surrogate(self):
@@ -183,6 +267,7 @@ class Bridge:
     async def maintain(self):
         backoff = 1.0
         auth_fails = 0  # consecutive credential rejections (401/403)
+        backend_down_streak = 0  # consecutive origin 502/503/504
         while True:
             is_auth = False
             try:
@@ -193,8 +278,10 @@ class Bridge:
                 log("bridge connected")
                 backoff = 1.0
                 auth_fails = 0
+                backend_down_streak = 0
                 self.last_error = ""
                 self._same_err_count = 0
+                self._write_state()
                 await self._reader_task  # ends when connection drops
                 log("bridge disconnected, reconnecting")
             except Exception as e:
@@ -205,6 +292,10 @@ class Bridge:
                     auth_fails += 1
                 else:
                     auth_fails = 0
+                if ORIGIN_5XX.search(msg):
+                    backend_down_streak += 1
+                else:
+                    backend_down_streak = 0
                 # Storm taming: an identical failure every ~30s (e.g. a
                 # persistent origin 502) is logged every 20th occurrence,
                 # not every occurrence; transitions always log.
@@ -217,6 +308,7 @@ class Bridge:
                     self.last_error = msg
                     self._same_err_count = 1
                     log("connect failed:", msg)
+                self._write_state()
             self.connected.clear()
             # fail fast: tell waiters the bridge is down
             for q in list(self.pending.values()):
@@ -231,6 +323,15 @@ class Bridge:
                 # while the bridge is in active use, and idles quietly
                 # when it isn't.
                 sleep_for = min(30 * 2 ** (auth_fails - 3), 600)
+            elif backend_down_streak >= 2:
+                # Origin backend down (funnel 502/503/504): the far side
+                # needs a restart, not our retries. Back off hard
+                # (30, 60, 120, ... cap 600s); a client nudge still cuts
+                # one sleep short so recovery is fast when the backend
+                # returns, and idles quietly otherwise.
+                sleep_for = min(BACKEND_DOWN_BASE
+                                * 2 ** (backend_down_streak - 2),
+                                BACKEND_DOWN_CAP)
             else:
                 sleep_for = backoff
                 backoff = min(backoff * 2, 30)
@@ -306,18 +407,57 @@ class Bridge:
 
 
 async def handle_local(reader, writer, bridge):
+    bridge._in_flight += 1
+    bridge._write_state()
+
+    async def err(message):
+        """Malformed-input response path: never silently drop."""
+        writer.write((json.dumps(
+            {"type": "error", "message": message,
+             "protocol": PROTOCOL_VERSION}) + "\n").encode())
+        await writer.drain()
+
     try:
-        raw = await asyncio.wait_for(reader.readline(), 10)
+        try:
+            raw = await asyncio.wait_for(reader.readline(), 10)
+        except ValueError as e:
+            # Oversized line (> StreamReader limit): log for forensics,
+            # then respond (not a silent drop).
+            log(f"oversized request line rejected ({e})")
+            await err("request line too large")
+            return
         if not raw:
+            return
+        if len(raw) > MAX_REQUEST:
+            await err("request too large")
             return
         try:
             req = json.loads(raw.decode())
         except ValueError:
+            await err("malformed JSON request")
             return
+        if not isinstance(req, dict):
+            await err("request must be a JSON object")
+            return
+        # Schema validation: cmd/argv are the only execution vectors.
         cmd = req.get("cmd", "")
         argv = req.get("argv")
         timeout = req.get("timeout")
         workdir = req.get("workdir", "/home/toxic")
+        if argv is not None:
+            if (not isinstance(argv, list) or
+                    not all(isinstance(a, str) for a in argv)):
+                await err("argv must be a list of strings")
+                return
+        elif not isinstance(cmd, str):
+            await err("cmd must be a string")
+            return
+        if timeout is not None and not isinstance(timeout, (int, float)):
+            await err("timeout must be a number")
+            return
+        if not isinstance(workdir, str):
+            await err("workdir must be a string")
+            return
         if not bridge.connected.is_set():
             # Someone is actively trying: wake maintain() so a just-fixed
             # token is retried soon instead of at the end of backoff.
@@ -357,6 +497,8 @@ async def handle_local(reader, writer, bridge):
     except (asyncio.TimeoutError, ConnectionResetError, BrokenPipeError):
         pass
     finally:
+        bridge._in_flight -= 1
+        bridge._write_state()
         try:
             writer.close()
         except Exception:
@@ -365,22 +507,77 @@ async def handle_local(reader, writer, bridge):
 
 async def main():
     os.makedirs(CACHE, exist_ok=True)
+
+    # Singleflight, via an flock'd lock file — NOT via bind failure.
+    # asyncio's start_unix_server unlinks the path itself before binding
+    # ("remove the existing socket if it is occupied"), so a second starter
+    # never gets EADDRINUSE: it steals the socket and both daemons live.
+    # The lock serializes starters instead: exactly one enters the critical
+    # section, everyone else exits. Held for the daemon's lifetime (fd stays
+    # open); a dead daemon releases it on exit, letting the next starter
+    # through — even under SIGKILL.
+    import fcntl
+    lockf = open(SOCK_PATH + ".lock", "w")
+    try:
+        fcntl.flock(lockf, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        log("another starter holds the lock; exiting")
+        return
+    # We are the single starter. If a live daemon already owns the socket
+    # (it started before we took the lock), stand down.
+    if _socket_live(SOCK_PATH):
+        log("another daemon owns the socket; exiting")
+        return
+    # Stale socket file only: nobody answers on it.
     try:
         os.unlink(SOCK_PATH)
     except OSError:
         pass
+
     bridge = Bridge()
-    asyncio.create_task(bridge.maintain())
-    asyncio.create_task(bridge.pinger())
+    bridge._write_state()  # publish initial (down) state; stale file replaced
 
     async def on_client(r, w):
         await handle_local(r, w, bridge)
 
-    server = await asyncio.start_unix_server(on_client, path=SOCK_PATH)
+    server = await asyncio.start_unix_server(
+        on_client, path=SOCK_PATH,
+        # Match the StreamReader limit to MAX_REQUEST: without this,
+        # readline() fails at the 64 KiB default before the 8 MiB
+        # application-level check ever runs (caught 2026-10-03: 2270
+        # LimitOverrunErrors from oversized lines).
+        limit=MAX_REQUEST + 1024)
+    asyncio.create_task(bridge.maintain())
+    asyncio.create_task(bridge.pinger())
     os.chmod(SOCK_PATH, 0o600)
     log("listening on", SOCK_PATH)
+
+    # Graceful shutdown (hot-reload path): SIGTERM/SIGINT stop accepting
+    # new clients, drain in-flight ones (bounded), then exit and release
+    # the lock so the replacement can bind. No request is ever killed
+    # mid-flight by a reload.
+    loop = asyncio.get_running_loop()
+    shutdown = asyncio.Event()
+
+    def _on_signal():
+        log("shutdown requested; draining")
+        shutdown.set()
+
+    for _sig in (signal.SIGTERM, signal.SIGINT):
+        try:
+            loop.add_signal_handler(_sig, _on_signal)
+        except (NotImplementedError, RuntimeError, ValueError):
+            pass
     async with server:
-        await server.serve_forever()
+        await shutdown.wait()
+        log("draining %d in-flight clients" % bridge._in_flight)
+        server.close()
+        await server.wait_closed()
+        for _ in range(200):  # ~10s bound; then exit regardless
+            if bridge._in_flight <= 0:
+                break
+            await asyncio.sleep(0.05)
+    log("shutdown complete")
 
 
 if __name__ == "__main__":

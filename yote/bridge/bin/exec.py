@@ -23,7 +23,7 @@ surrogate for the real credential on approved egress.
 
 Performance: transport selection is an HFT race (first-valid-wins).
 Both lanes pre-dispatch concurrently (unix-socket connect vs session
-check, ~ms); the WS lane keeps dispatch priority while healthy and only
+check, ~ms); the genuinely first-ready lane wins and only
 the winning lane ever dispatches remotely, so a command can never
 double-execute. Every hop is measured in microseconds; winners go to
 ~/.cache/shingle/hft_race_winners.jsonl (tag "bridge-exec"). When WS has
@@ -54,7 +54,7 @@ import time
 import urllib.request
 import urllib.error
 import uuid
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 
 sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
 from dynamic_credentials import (
@@ -77,6 +77,79 @@ SESSION_FILE = os.path.expanduser("~/.cache/awrawr-mcp-session.json")
 WS_SOCK = os.path.expanduser("~/.cache/awrawr-ws-bridge.sock")
 WS_DAEMON = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                          "ws_daemon.py")
+WS_STATE = os.path.expanduser("~/.cache/awrawr-ws-bridge.state")
+
+# Hot reload: source files the daemon runs. If any is newer than the
+# daemon's start time, the daemon is stale and gets retired on the next
+# request (when idle) — edit the file and it just updates, no watcher
+# process, no supervisor command needed.
+WS_DAEMON_DEPS = (WS_DAEMON,
+                  os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               "wsframe.py"))
+
+
+def _ws_daemon_state():
+    try:
+        with open(WS_STATE) as f:
+            d = json.load(f)
+            return d if isinstance(d, dict) else None
+    except (OSError, ValueError):
+        return None
+
+
+def _ws_source_mtime():
+    latest = 0.0
+    for dep in WS_DAEMON_DEPS:
+        try:
+            latest = max(latest, os.path.getmtime(dep))
+        except OSError:
+            pass
+    return latest
+
+
+def _ws_hot_reload_if_stale():
+    """Retire a stale idle daemon so the next spawn boots fresh source.
+
+    If the daemon's start time predates any of its source files and it has
+    no in-flight clients, SIGTERM it (it drains gracefully and releases the
+    lock), wait briefly for the lock to free, and let the normal spawn path
+    boot the new code. A busy daemon is left alone — the next idle request
+    reloads. Never raises.
+    """
+    st = _ws_daemon_state()
+    if not st or not st.get("started"):
+        return
+    try:
+        if _ws_source_mtime() <= float(st["started"]):
+            return
+        if int(st.get("in_flight", 0)) > 0:
+            return  # busy; defer reload until idle
+        pid = int(st["pid"])
+    except (TypeError, ValueError):
+        return
+    import signal as _signal
+    try:
+        os.kill(pid, _signal.SIGTERM)
+    except OSError:
+        return
+    # Give the old daemon a moment to drain, exit, and release the lock
+    # so this request boots (and uses) the fresh code instead of punting.
+    import fcntl as _fcntl
+    deadline = time.monotonic() + 3
+    while time.monotonic() < deadline:
+        try:
+            lockf = open(WS_SOCK + ".lock", "w")
+        except OSError:
+            break
+        try:
+            _fcntl.flock(lockf, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+            _fcntl.flock(lockf, _fcntl.LOCK_UN)
+            return
+        except OSError:
+            pass
+        finally:
+            lockf.close()
+        time.sleep(0.1)
 
 # Degraded steady-state: when the WS lane proves itself unusable, mark it
 # down for _WS_DOWN_TTL so the next call skips WS entirely and goes straight
@@ -243,8 +316,45 @@ def _ws_try_once() -> socket.socket | None:
         return None
 
 
+_WS_DAEMON_PROCS: list = []  # spawned daemons, for zombie reaping
+
+
 def _ws_start_daemon():
-    """Spawn the ws daemon (singleflight via bind); returns Popen or None."""
+    """Spawn the ws daemon; returns Popen or None.
+
+    Spawner-side herd reduction: the daemon holds an flock on
+    <sock>.lock for its whole life (see ws_daemon.main). If the lock is
+    already held, a starter is mid-flight — don't fork another python,
+    the waiter will find the socket shortly. This is best-effort (a tiny
+    check-then-spawn race remains); the daemon-side lock is the guarantee
+    that exactly one survives.
+
+    Zombie reaping: retired daemons (hot-reload SIGTERM, crashes) would
+    linger as zombies because the fire-and-forget spawn path never waits
+    on them. poll() each previously spawned proc on every spawn — it reaps
+    without blocking — and drop the dead ones from the list.
+    """
+    global _WS_DAEMON_PROCS
+    live = []
+    for _p in _WS_DAEMON_PROCS:
+        try:
+            if _p.poll() is None:
+                live.append(_p)
+        except Exception:
+            pass
+    _WS_DAEMON_PROCS = live
+    try:
+        import fcntl
+        lockf = open(WS_SOCK + ".lock", "w")
+        try:
+            fcntl.flock(lockf, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            fcntl.flock(lockf, fcntl.LOCK_UN)
+        except OSError:
+            return None  # starter already in flight
+        finally:
+            lockf.close()
+    except OSError:
+        pass
     logf = None
     try:
         logf = open(os.path.expanduser("~/.cache/awrawr-ws-bridge.log"), "a")
@@ -256,6 +366,7 @@ def _ws_start_daemon():
             [sys.executable, WS_DAEMON],
             stdin=subprocess.DEVNULL, stdout=logf, stderr=logf,
             start_new_session=True, env=env)
+        _WS_DAEMON_PROCS.append(proc)
     except Exception:
         return None
     finally:
@@ -276,9 +387,10 @@ def _ws_connect_legacy():
     s = _ws_try_once()
     if s is not None:
         return s
-    # Lazy-start the daemon (singleflight: stale socket file is unlinked
-    # by the daemon itself on start; a second starter just fails to bind
-    # and the connect below still succeeds).
+    # Hot reload: retire a stale daemon before spawning (no-op if fresh).
+    _ws_hot_reload_if_stale()
+    # Lazy-start the daemon (singleflight via the flock'd lock file in
+    # _ws_start_daemon / ws_daemon.main: exactly one starter survives).
     proc = _ws_start_daemon()
     if proc is None:
         return None
@@ -308,6 +420,8 @@ def _ws_predispatch_fast():
     """
     global _ws_predispatch_error
     _ws_predispatch_error = ""
+    # Hot reload: retire a stale daemon before the race (no-op if fresh).
+    _ws_hot_reload_if_stale()
     s = _ws_try_once()
     if s is None:
         _ws_start_daemon()  # heal in background; don't block this call
@@ -489,6 +603,15 @@ def _ws_run(s: socket.socket, cmd: str, workdir: str, argv,
             return 1
         _ws_predispatch_error = "ws lane failed pre-dispatch"
         return None
+    finally:
+        # Client-side socket hygiene on every path: the daemon closed its
+        # side after "done", but an unclosed client fd lingers in the
+        # connector. A leaked fd per exec is a slow bleed; close it here so
+        # no caller has to remember.
+        try:
+            s.close()
+        except Exception:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -496,8 +619,8 @@ def _ws_run(s: socket.socket, cmd: str, workdir: str, argv,
 #
 # The hot path used to be sequential: try WS, and only on pre-dispatch
 # failure fall back to HTTPS. The race runs both lanes' pre-dispatch
-# CONCURRENTLY; the WS lane keeps dispatch priority while healthy
-# (structurally lower per-call overhead), and only the winning lane ever
+# CONCURRENTLY; the genuinely first-valid lane wins (no structural
+# priority — the race decides per call), and only the winning lane ever
 # dispatches remotely — a command can never double-execute. If the winner
 # fails between selection and dispatch (still pre-dispatch), the other
 # lane takes over; post-dispatch failures keep the legacy no-retry
@@ -554,15 +677,6 @@ def _https_dispatch_execute(pre, cmd, workdir, argv, timeout, read_timeout,
     if json_mode:
         return _https_exec_capture(cmd, workdir, read_timeout)
     return _https_exec(cmd, workdir, read_timeout)
-
-
-def _future_get_before(fut, deadline):
-    """Future result before a monotonic deadline; None on timeout/error."""
-    try:
-        return fut.result(timeout=max(0.0, deadline - time.monotonic()))
-    except Exception:
-        fut.cancel()
-        return None
 
 
 def _race_should_skip() -> bool:
@@ -637,13 +751,19 @@ def _race_log(winner, pre, exec_times, t0_ns, t_decide_ns, t_done_ns,
 
 
 def _race_exec(cmd, workdir, argv, timeout, read_timeout, json_mode):
-    """Race WS vs HTTPS pre-dispatch concurrently; the winner dispatches.
+    """Race WS vs HTTPS pre-dispatch concurrently; first-valid-wins.
 
     Dispatch-gated: only the winning lane dispatches remotely, so the
-    command can never double-execute. Returns the lane result (exit code
-    or result dict), _RACE_FALLBACK when no lane could dispatch (nothing
-    executed remotely: the caller runs the legacy path), or raises like
-    the legacy path would (e.g. HTTPS degraded).
+    command can never double-execute. The winner is the lane that is
+    genuinely ready first (not WS-by-priority) — a lane that finishes
+    first but invalid doesn't win; we wait for the other lane within the
+    deadline. The loser is cancelled best-effort and never delays the
+    winner (executor shuts down without waiting).
+
+    Returns the lane result (exit code or result dict), _RACE_FALLBACK
+    when no lane could dispatch (nothing executed remotely: the caller
+    runs the legacy path), or raises like the legacy path would (e.g.
+    HTTPS degraded).
     """
     t0_ns = time.perf_counter_ns()
     pre = {}
@@ -676,22 +796,64 @@ def _race_exec(cmd, workdir, argv, timeout, read_timeout, json_mode):
         fws = ex.submit(ws_job)
         fht = ex.submit(https_job)
         deadline = time.monotonic() + _RACE_PRE_TIMEOUT
-        ws_sock = _future_get_before(fws, deadline)
-        https_pre = _future_get_before(fht, deadline)
+        # First-valid-wins: take lanes in genuine completion order, not
+        # WS-first. A lane that finishes first but invalid (None) doesn't
+        # win — we keep waiting for the other lane within the deadline.
+        # The loser is cancelled best-effort and never delays the winner:
+        # shutdown(wait=False) so a slow loser doesn't block dispatch.
+        ws_sock, https_pre = None, None
+        first_valid = None  # "ws" or "https": genuinely first valid lane
+        pending = {fws, fht}
+        try:
+            while pending:
+                done, pending = wait(
+                    pending, timeout=max(0.0, deadline - time.monotonic()),
+                    return_when=FIRST_COMPLETED)
+                if not done:
+                    break  # deadline: stop waiting
+                for fut in done:
+                    try:
+                        res = fut.result()
+                    except Exception:
+                        res = None
+                    if fut is fws:
+                        ws_sock = res
+                    else:
+                        https_pre = res
+                    # First VALID result wins immediately — don't wait for
+                    # the other lane.
+                    if res is not None and first_valid is None:
+                        first_valid = "ws" if fut is fws else "https"
+                # Cancel whatever hasn't finished; a running lane ignores
+                # cancel (best-effort) but a queued one never starts.
+                # (Cancel before breaking: the loser must not linger.)
+                for fut in pending:
+                    fut.cancel()
+                if first_valid is not None:
+                    break
+        finally:
+            ex.shutdown(wait=False)
     t_decide_ns = time.perf_counter_ns()
 
     winner = None
     exec_times = {}
     result = _RACE_FALLBACK
-    if ws_sock is not None:
-        # WS keeps dispatch priority while healthy: persistent connection,
-        # structurally lower per-call overhead than HTTPS.
+    # First-valid-wins: the lane that was genuinely ready first dispatches.
+    # No structural priority — the race decides per call.
+    if first_valid == "ws" and ws_sock is not None:
         winner = "ws"
         e0 = time.perf_counter_ns()
         try:
             result = _ws_run(ws_sock, cmd, workdir, argv, timeout, json_mode)
         finally:
             exec_times["ws"] = (time.perf_counter_ns() - e0) / 1e9
+            # Client-side socket hygiene: the daemon closed its side after
+            # "done", but an unclosed client fd lingers in the connector.
+            # Close it — a leaked fd per exec is a slow bleed.
+            try:
+                ws_sock.close()
+            except OSError:
+                pass
         if result is None and https_pre is not None:
             # WS failed between selection and dispatch (still pre-dispatch:
             # the daemon never saw the command), so HTTPS dispatch is safe.
@@ -778,7 +940,15 @@ def _post(payload: dict, session_id: str | None,
     if session_id:
         req.add_header("Mcp-Session-Id", session_id)
     try:
-        resp = urllib.request.urlopen(req, timeout=_HTTPS_SOCKET_TIMEOUT)
+        # Bound the connect phase by the caller's read deadline as well: a
+        # blackholed connect must not outlive the budget set for the whole
+        # call. (2026-09-26: /health's 8s probe budget vs the 180s connect
+        # timeout — a stalled connect alone could blow the watchdog's 10s
+        # liveness curl and get a live connector pkill'd.) For the default
+        # 150s read deadline this is min(180,150)=150s, i.e. no behavior
+        # change on the normal path — the read deadline already dominated.
+        resp = urllib.request.urlopen(
+            req, timeout=min(_HTTPS_SOCKET_TIMEOUT, read_timeout))
     except urllib.error.HTTPError as e:
         detail = e.read().decode("utf-8", "replace")[:500]
         raise RuntimeError(f"HTTP {e.code} from bridge: {detail}")
@@ -1480,7 +1650,22 @@ def _emit_json(result: dict) -> int:
 
 def _https_exec_capture(cmd: str, workdir: str,
                         read_timeout: float = _DEFAULT_READ_TIMEOUT) -> dict:
-    """HTTPS fallback returning a result dict instead of printing."""
+    """HTTPS fallback returning a result dict instead of printing.
+
+    Degraded steady-state (mirrors main()'s HTTPS fallback gate): a lane
+    that recently stalled, blew its read deadline, or failed the connect
+    is failed fast here too instead of burning another full read cycle
+    per call. Without this, a lane blip piled unbounded 150s+ HTTPS
+    attempts onto callers — the 2026-09-26 connector restart storm, where
+    wedged fallback threads pushed /health past the watchdog's 10s
+    liveness curl. Raises like the CLI path does; the connector's
+    yote_exec() converts it to an "all lanes down" error dict.
+    """
+    down, why = _https_known_down()
+    if down:
+        raise RuntimeError(
+            "https transport degraded (%s); failing fast, retry shortly"
+            % why)
     t0 = time.monotonic()
     buf: list[str] = []
     code = _https_exec(cmd, workdir, read_timeout, _sink=buf.append)

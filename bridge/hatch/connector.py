@@ -30,7 +30,7 @@ Persistent cell-side daemon (runs as root), listening on a local TCP port
                        SIGTERM the job's process group (pid verified via
                        /proc cmdline; a reused pid is never signaled)
   /herd/*              proxied to yote 127.0.0.1:25100 (prefix stripped)
-  /flock/*             proxied to yote 127.0.0.1:25104 (prefix stripped)
+  /flock/*             proxied to yote 127.0.0.1:25193 (prefix stripped)
 
 Service proxying is HTTP-over-exec via /home/toxic/.cache/yote_svc_proxy.py
 on yote: one exec call per proxied request, no new yote ports, no server
@@ -44,6 +44,7 @@ import json
 import os
 import re
 import shlex
+import signal
 import sys
 import time
 import uuid
@@ -57,7 +58,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # The cell-side copy at ~/workspace/awrawr-bridge/exec.py must be synced from there.
 BRIDGE_EXEC = os.path.expanduser("~/workspace/awrawr-bridge/exec.py")
 YOTE_HELPER = "/home/toxic/.cache/yote_svc_proxy.py"
-SVC_PORTS = {"herd": 25100, "flock": 25104}
+SVC_PORTS = {"herd": 25100, "flock": 25193}
 MAX_BODY = 10 * 1024 * 1024
 
 # --- bridge-max: background dispatch ---------------------------------------
@@ -96,9 +97,16 @@ def log(*a):
 
 
 def yote_exec(cmd, workdir="/home/toxic", timeout=120, https_timeout=150):
-    """Run cmd on yote; WS lane first, HTTPS fallback on pre-dispatch fail.
+    """Run cmd on yote; raced lanes first, sequential legacy as fallback.
 
-    https_timeout bounds ONLY the HTTPS fallback's local read deadline
+    First-class route selection: exec.py's concurrent pre-dispatch race
+    (WS vs HTTPS, first-valid-wins, fail-fast ceilings) picks the lane
+    per call and logs the winner to the race ledger. The legacy
+    WS-then-HTTPS sequence only runs when the race declines
+    (_RACE_FALLBACK: nothing dispatched) or raises. AWRAWR_RACE=0 forces
+    the legacy path outright (escape hatch).
+
+    https_timeout bounds ONLY the HTTPS lane's local read deadline
     (default 150s, matching the lane's long-command needs). Liveness
     probes (/health) pass a short one: during a lane blip the fallback
     used to wedge the probe past the watchdog's 10s liveness curl, the
@@ -106,6 +114,14 @@ def yote_exec(cmd, workdir="/home/toxic", timeout=120, https_timeout=150):
     restart storm every ~2h on each bridge blip (2026-09-26). A degraded
     lane must report failure FAST, never hang the prober.
     """
+    if os.environ.get("AWRAWR_RACE", "1") != "0":
+        try:
+            res = bridge._race_exec(cmd, workdir, None, timeout,
+                                    https_timeout, True)
+            if res is not bridge._RACE_FALLBACK:
+                return res
+        except Exception:
+            pass  # fall through to the legacy sequential path
     res = bridge._ws_exec(cmd, workdir, None, timeout, capture=True)
     if res is None:
         try:
@@ -510,10 +526,32 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def log_message(self, fmt, *args):
-        log("%s %s" % (self.address_string(), fmt % args))
+        # Suppress routine 200 OK access logs (were generating ~17MB/day of noise).
+        # Only log errors and non-200 responses.
+        msg = fmt % args
+        if ' 200 ' not in msg:
+            log("%s %s" % (self.address_string(), msg))
 
 
 def main():
+    # Zombie reaping (2026-10-04): session children that exit without an
+    # explicit waitpid become zombies under this pid. Install a SIGCHLD
+    # handler that reaps them (GitHub-verified pattern: Supervisor/supervisor
+    # pidproxy.py). Without this, zombies accumulate in the process table.
+    def _reap_children(signum, frame):
+        while True:
+            try:
+                pid, _ = os.waitpid(-1, os.WNOHANG)
+                if pid == 0:
+                    break
+            except ChildProcessError:
+                break
+            except OSError:
+                break
+    try:
+        signal.signal(signal.SIGCHLD, _reap_children)
+    except (OSError, ValueError):
+        pass
     # Self-maintained pidfile: launcher $! capture is unreliable across
     # subshell/setsid boundaries (goes stale, watchdogs then kill the wrong
     # pid or none). The daemon always knows its own pid.
