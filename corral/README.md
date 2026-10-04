@@ -67,7 +67,7 @@ bun run src/cli/index.ts --help
 corral ./PROMPT.md --dry-run
 ```
 
-- `bun install` — install dependencies (CI uses `bun install --frozen-lockfile`)
+- `bun install` — install dependencies (CI uses plain `bun install`; `--frozen-lockfile` hangs on GH runners)
 - `bun run src/cli/index.ts --help` — same as the `cli` package script; prints real usage and the six invocation aliases
 - `corral ./PROMPT.md --dry-run` — generates `.super-ralph/generated/workflow.tsx` and friends without executing; the safe first run, requires no API key
 
@@ -180,7 +180,7 @@ bun test tests/      # unit + integration suite
 bun x tsc --noEmit   # typecheck — currently clean, 0 diagnostics
 ```
 
-CI (`.github/workflows/corral.yml` at the repo root — GitHub only executes workflows from the root) gates every push/PR touching `corral/**`: `bun install --frozen-lockfile` at the monorepo root with the bun store cached, then `bun run typecheck` and `bun test tests/` scoped to `corral/`. `corral/.github/workflows/ci.yml` mirrors the same gates as the package-local contract. Typecheck and tests also run locally via the commands above or `mise run test` / `mise run typecheck`.
+CI (`.github/workflows/corral.yml` at the repo root — GitHub only executes workflows from the root) gates every push/PR touching `corral/**`: plain `bun install` at the monorepo root (no `--frozen-lockfile`, no bun-store cache — both hung silently on GH runners), then `bun run typecheck` and `bun test tests/` scoped to `corral/`. `corral/.github/workflows/ci.yml` mirrors the same gates as the package-local contract. Typecheck and tests also run locally via the commands above or `mise run test` / `mise run typecheck`.
 
 **Adding a new component** (from `docs/ARCHITECTURE.md`):
 
