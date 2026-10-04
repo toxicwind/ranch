@@ -50,10 +50,13 @@ export async function executeTask(task: QueuedTask): Promise<ExecResult | null> 
   const cmd = task.exec?.cmd?.trim();
   if (!cmd) return null;
   let timedOut = false;
-  const proc = Bun.spawn(["bash", "-c", cmd], {
+  const proc = Bun.spawn(["/bin/bash", "-c", cmd], {  // absolute: bare "bash" PATH lookup fails under CI runners
     cwd: task.exec?.cwd ?? "/home/toxic",
     stdout: "pipe",
     stderr: "pipe",
+    // Guarantee a sane PATH for the shell and its children: moon/CI task
+    // envs may carry a scrubbed PATH
+    env: { ...process.env, PATH: process.env.PATH || "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" },
   });
   const killer = setTimeout(() => {
     timedOut = true;
