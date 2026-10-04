@@ -34,7 +34,7 @@ jobs:
     # postinstall browser downloads (~300MB) stall on GH runners — skip them.
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
-      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "1"
+      PUPPETEER_SKIP_DOWNLOAD: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
