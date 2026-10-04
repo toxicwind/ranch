@@ -180,7 +180,7 @@ bun test tests/      # unit + integration suite
 bun x tsc --noEmit   # typecheck — currently clean, 0 diagnostics
 ```
 
-CI (`.github/workflows/ci.yml`) runs `bun install --frozen-lockfile` on push and PR. Typecheck and tests run locally via the commands above or `mise run test` / `mise run typecheck`.
+CI (`.github/workflows/corral.yml` at the repo root — GitHub only executes workflows from the root) gates every push/PR touching `corral/**`: `bun install --frozen-lockfile` at the monorepo root with the bun store cached, then `bun run typecheck` and `bun test tests/` scoped to `corral/`. `corral/.github/workflows/ci.yml` mirrors the same gates as the package-local contract. Typecheck and tests also run locally via the commands above or `mise run test` / `mise run typecheck`.
 
 **Adding a new component** (from `docs/ARCHITECTURE.md`):
 
