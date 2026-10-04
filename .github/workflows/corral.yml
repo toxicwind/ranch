@@ -29,6 +29,12 @@ jobs:
     name: install, typecheck, test
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Corral's gates (typecheck + unit tests) never launch a browser, but the
+    # monorepo pulls playwright/puppeteer via sibling workspaces. Their
+    # postinstall browser downloads (~300MB) stall on GH runners — skip them.
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
