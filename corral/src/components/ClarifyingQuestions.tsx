@@ -1,8 +1,15 @@
 import React from "react";
+import { spawn } from "node:child_process";
 import type { SmithersCtx } from "../selectors";
 import { Task, Sequence } from "smithers-orchestrator";
 import type { ClarificationQuestion, ClarificationAnswer, ClarificationSession } from "../cli/clarifications";
 import { z } from "zod";
+// Minimal structural type for the spawn result -- we only use .on("close"/"error").
+// (Full ChildProcess types vary across @types/node installs; this is stable.)
+interface SpawnedProcess {
+  on(event: "close", listener: (code: number | null) => void): void;
+  on(event: "error", listener: (err: Error) => void): void;
+}
 
 export const generateQuestionsOutputSchema = z.object({
   questions: z.array(z.object({
@@ -204,7 +211,7 @@ Return valid JSON only, no markdown, no explanations.`;
             ], {
               stdio: "inherit",
               cwd: repoRoot,
-            });
+            }) as unknown as SpawnedProcess;
 
             uiProcess.on("close", (code) => {
               if (code === 0) {

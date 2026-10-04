@@ -4,6 +4,14 @@ import { spawn } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
+// Minimal structural type for the spawn result -- we only use .on() and stdio streams.
+// (Full ChildProcess types vary across @types/node installs; this is stable.)
+interface SpawnedProcess {
+  on(event: "close", listener: (code: number | null) => void): void;
+  on(event: "error", listener: (err: Error) => void): void;
+  stdout: { on(event: "data", listener: (chunk: Buffer) => void): void } | null;
+  stderr: { on(event: "data", listener: (chunk: Buffer) => void): void } | null;
+}
 
 export type MergeQueueOrderingStrategy =
   | "report-complete-fifo"
@@ -137,7 +145,7 @@ async function runShellCommand(command: string, cwd: string): Promise<CommandRes
     const child = spawn("bash", ["-lc", command], {
       cwd,
       stdio: ["ignore", "pipe", "pipe"],
-    });
+    }) as unknown as SpawnedProcess;
     let stdout = "";
     let stderr = "";
     child.stdout?.on("data", (chunk: Buffer) => {
