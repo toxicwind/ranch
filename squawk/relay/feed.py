@@ -35,7 +35,8 @@ _HOTRELOAD_DIR = Path(__file__).resolve().parents[3] / "hotreload"
 if str(_HOTRELOAD_DIR) not in sys.path:
     sys.path.insert(0, str(_HOTRELOAD_DIR))
 try:
-    from graceful import ShutdownFlag  # noqa: F401  # availability probe
+    # availability probe: import only to test that graceful.py is importable
+    from graceful import ShutdownFlag  # noqa: F401
     _HAVE_GRACEFUL = True
 except ImportError:
     _HAVE_GRACEFUL = False
