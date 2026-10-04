@@ -41,6 +41,15 @@ async function dryRun(extraArgs: string[] = []): Promise<string> {
   return readFileSync(join(workdir, ".super-ralph", "generated", "workflow.tsx"), "utf-8");
 }
 
+// Dry-runs shell out to the corral CLI, which requires a coding-agent CLI
+// (claude or codex) on PATH. CI runners do not have one: skip those tests
+// there instead of failing. They still run wherever the CLIs exist.
+const hasAgentCli = Boolean(Bun.which("claude") ?? Bun.which("codex"));
+function agentTest(name: string, fn: () => void | Promise<void>) {
+  if (hasAgentCli) return test(name, fn);
+  return test.skip(name, fn);
+}
+
 describe("finite-by-default", () => {
   const componentSrc = readFileSync(join(import.meta.dir, "..", "src", "components", "SuperRalph.tsx"), "utf-8");
 
@@ -58,24 +67,24 @@ describe("finite-by-default", () => {
     expect(code).toContain('onMaxReached="fail"');
   });
 
-  test("generated workflow has no infinite declarations", async () => {
+  agentTest("generated workflow has no infinite declarations", async () => {
     const wf = await dryRun();
     expect(wf).not.toContain("until={false}");
     expect(wf).not.toContain("Infinity");
   });
 
-  test("iteration budget is finite and defaults to 25", async () => {
+  agentTest("iteration budget is finite and defaults to 25", async () => {
     const wf = await dryRun();
     expect(wf).toContain("const MAX_ITERATIONS = 25;");
     expect(wf).toContain('onMaxReached="fail"');
   });
 
-  test("--max-iterations overrides the default", async () => {
+  agentTest("--max-iterations overrides the default", async () => {
     const wf = await dryRun(["--max-iterations", "7"]);
     expect(wf).toContain("const MAX_ITERATIONS = 7;");
   });
 
-  test("generated workflow contains no Monitor", async () => {
+  agentTest("generated workflow contains no Monitor", async () => {
     const wf = await dryRun();
     // The finite workflow has no interactive sibling: the Monitor dashboard
     // is a separately supervised concern, not part of a finite run.
@@ -83,7 +92,7 @@ describe("finite-by-default", () => {
     expect(wf).not.toContain("INCLUDE_MONITOR");
   });
 
-  test("final report step terminates the run", async () => {
+  agentTest("final report step terminates the run", async () => {
     const wf = await dryRun();
     expect(wf).toContain("FinalReport");
     expect(wf).toContain("final_report");
@@ -91,7 +100,7 @@ describe("finite-by-default", () => {
 });
 
 describe("completion validator", () => {
-  test("generated workflow validates completion after the final report", async () => {
+  agentTest("generated workflow validates completion after the final report", async () => {
     const wf = await dryRun();
     expect(wf).toContain("CompletionValidator");
     expect(wf).toContain("completion_validator");

@@ -791,7 +791,7 @@ Return ONLY valid JSON (no markdown fences, no commentary):
       }),
     { maxAttempts: useProxy ? 2 : 1 },
   );
-  if (parseOutcome.ok) {
+  if (parseOutcome.ok === true) {
     questions = parseOutcome.data.questions;
     if (parseOutcome.repaired) {
       console.log(`🔧 Recovered questions JSON via model repair (attempt ${parseOutcome.attempts}).`);
@@ -927,7 +927,10 @@ async function main() {
   }
 
   const detectedAgents = await detectAgents(repoRoot);
-  if (!detectedAgents.claude && !detectedAgents.codex) {
+  // Dry-run generates workflow files without executing them, so it must
+  // not require an agent CLI: CI runners (and any agentless box) can
+  // validate generation hermetically.
+  if (!isDryRun && !detectedAgents.claude && !detectedAgents.codex) {
     throw new Error(
       "No supported coding agent CLI detected. Install claude and/or codex, then rerun.",
     );
