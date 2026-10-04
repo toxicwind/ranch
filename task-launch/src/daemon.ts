@@ -15,7 +15,7 @@
  * Managed by pitchfork (sovereign/pitchfork.toml, [daemons.task-launch]).
  */
 
-import { watch } from "node:fs";
+import { existsSync, watch } from "node:fs";
 import { launch, planRelaunch, type RunRecord } from "./launcher";
 import { claimNext, ensureDirs, writeReceipt, queueRoot, QUEUE_ROOT, type QueuedTask } from "./queue";
 import { join } from "node:path";
@@ -51,7 +51,10 @@ export async function executeTask(task: QueuedTask): Promise<ExecResult | null> 
   if (!cmd) return null;
   let timedOut = false;
   const proc = Bun.spawn(["/bin/bash", "-c", cmd], {  // absolute: bare "bash" PATH lookup fails under CI runners
-    cwd: task.exec?.cwd ?? "/home/toxic",
+    // /home/toxic is the yote-side default; CI runners don't have it and a
+    // missing cwd makes posix_spawn fail with ENOENT. Fall back to the
+    // process cwd only when the default is absent — yote behavior unchanged.
+    cwd: task.exec?.cwd ?? (existsSync("/home/toxic") ? "/home/toxic" : process.cwd()),
     stdout: "pipe",
     stderr: "pipe",
     // Guarantee system dirs on PATH for the shell and its children:
