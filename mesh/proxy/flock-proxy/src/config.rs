@@ -941,8 +941,12 @@ mod tests {
     #[test]
     fn v1_store_migrates_to_provider_registry() {
         // A version 1 store carries the old single-`upstream` block; load()
-        // must fold it into the nvidia provider and seed the other twelve
-        // AstMatrix providers keyless.
+        // must fold it into the nvidia provider and seed the other thirteen
+        // providers keyless.
+        // Hermetic w.r.t. ambient provider keys: a real OPENROUTER_API_KEY
+        // in the environment must not make the migrated provider "usable".
+        let saved_or_key = std::env::var("OPENROUTER_API_KEY").ok();
+        std::env::remove_var("OPENROUTER_API_KEY");
         let dir = TestDir::new();
         let raw = r#"{
           "version": 1,
@@ -980,6 +984,9 @@ mod tests {
             .unwrap();
         assert!(or.enabled);
         assert!(!or.usable());
+        if let Some(v) = saved_or_key {
+            std::env::set_var("OPENROUTER_API_KEY", v);
+        }
         // Saving persists version 2 and mirrors the legacy upstream block.
         save(&dir.0, &sc).unwrap();
         let persisted: serde_json::Value =
@@ -991,7 +998,7 @@ mod tests {
         );
         // And it loads back identically.
         let again = load(&dir.0).unwrap().expect("round-trip");
-        assert_eq!(again.providers.len(), 13);
+        assert_eq!(again.providers.len(), 14);
     }
 
     #[test]
