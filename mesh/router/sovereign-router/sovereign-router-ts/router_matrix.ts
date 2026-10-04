@@ -1,4 +1,5 @@
 import { HealthDB } from "./router_health.ts";
+import { ModelDisabler } from "./model_disabler.ts";
 import {
   DB_PATH,
   STICKY_TTL,
@@ -296,6 +297,8 @@ export class Matrix {
    * misconfig) don't flow through record().
    */
   entitlementDead = new Map<string, number>();
+  /** Model disable/recheck with anomaly detection (2026-10-04). */
+  disabler = new ModelDisabler();
   fifoDepth = 0;
   health: HealthDB;
   governor: Governor;
@@ -522,6 +525,16 @@ export class Matrix {
       session,
       estTokens,
     );
+    // Model disabler: track per-model success/fail for disable/recheck (2026-10-04).
+    // Key by provider:model. Only count definitive outcomes (not rate-limited,
+    // which is a load signal not a model signal).
+    const dkey = `${prov}:${model}`;
+    if (status === 200) {
+      this.disabler.record(dkey, true);
+    } else if (status === 404 || status === 503 || status === 500) {
+      // 429 = rate-limited (load), not a model failure — don't count it.
+      this.disabler.record(dkey, false, `http_${status}`);
+    }
     if (status === 200) {
       const old = this.circuit.get(prov) || "closed";
       this.setElo(prov, (this.elo.get(prov) || 1000) + 16);
