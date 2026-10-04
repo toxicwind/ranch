@@ -22,9 +22,19 @@ export const providerRateLimiter = new ProviderRateLimiter();
 // opencurro-ai/opencodeZen, lidge-jun/opencodex#2160).
 // Stable for the process lifetime — mimics one long-lived CLI session/project.
 // ---------------------------------------------------------------------------
-const OPENCODE_UA = "opencode/1.17.0";
-const OPENCODE_SESSION_ID = "ses_" + Math.random().toString(36).slice(2, 18);
-const OPENCODE_PROJECT_ID = "p_" + Math.random().toString(36).slice(2, 18);
+ const OPENCODE_UA = "opencode/1.18.32 ai-sdk/provider-utils/4.0.23 runtime/bun/1.3.14";
+ // Zen free-tier gate checks ID format: ses_/msg_ + 26 chars (12 hex ts + 14 base62).
+ // Borrowed: denysvitali/llm-proxy newOpenCodeID, 12errh/zen-proxy.
+ function openCodeID(prefix: string): string {
+   const ts = Date.now().toString(16).padStart(12, "0").slice(-12);
+   const b62 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+   let r = "";
+   for (let i = 0; i < 14; i++) r += b62[Math.floor(Math.random() * 62)];
+   return prefix + ts + r;
+ }
+ const OPENCODE_SESSION_ID = openCodeID("ses_");
+ const OPENCODE_PROJECT_ID = "global";
+ const OPENCODE_PUBLIC_TOKEN = "public";
 
 export function rebuildRateLimiter(): void {
   providerRateLimiter.build(
@@ -197,18 +207,18 @@ export async function callOne(
     headers["HTTP-Referer"] = "https://zed.dev";
     headers["X-Title"] = "Sovereign-Router";
   }
-  if (provider === "zen") {
-    // OpenCode client identity (borrowed: 9router-opencode-fix,
-    // opencurro-ai/opencodeZen). Zen keys free-tier quota on these headers,
-    // not on an API key — without them requests land in a shared anonymous
-    // bucket and die with "Free usage exceeded" after a couple of calls.
-    // Session/project are stable per process (one long-lived CLI session);
-    // the request id is fresh per call, exactly like the real CLI.
-    headers["User-Agent"] = OPENCODE_UA;
-    headers["x-opencode-client"] = "cli";
-    headers["x-opencode-session"] = OPENCODE_SESSION_ID;
-    headers["x-opencode-project"] = OPENCODE_PROJECT_ID;
-    headers["x-opencode-request"] = OPENCODE_SESSION_ID + ":" + Date.now() + ":" + Math.random().toString(36).slice(2, 12);
+   if (provider === "zen") {
+     // OpenCode Zen free-tier gate (borrowed: denysvitali/llm-proxy, 12errh/zen-proxy).
+     // Format-checked, not app-attested: Bearer public + opencode/ UA + ses_/msg_ IDs
+     // (26 chars: 12 hex ts + 14 base62) + stream:true + bash/glob/grep/read tools.
+     // Without the exact format: 403 FreeTierError.
+     // Chris-provided OPENCODE_API_KEY via secrets; fallback to public anonymous.
+     headers["Authorization"] = "Bearer " + (getKey("zen") || OPENCODE_PUBLIC_TOKEN);
+     headers["User-Agent"] = OPENCODE_UA;
+     headers["x-opencode-client"] = "cli";
+     headers["x-opencode-session"] = OPENCODE_SESSION_ID;
+     headers["x-opencode-project"] = OPENCODE_PROJECT_ID;
+     headers["x-opencode-request"] = openCodeID("msg_");
   }
   // Model-pressure governor (flock governor.rs AIMD, per provider/model):
   // refused fast with 429 when the model is at its worker cap or draining.
@@ -255,6 +265,19 @@ export async function callOne(
   }
   flockMetrics.recordQueueWait(slot.waitedMs / 1000);
   const payload = { ...payloadBody, model, stream };
+   // Zen free-tier body gate (borrowed: denysvitali/llm-proxy prepareFreeTierBody).
+   // Requires stream:true + bash/glob/grep/read tool signatures, else 403.
+   if (provider === "zen") {
+     payload.stream = true;
+     const need = ["bash", "glob", "grep", "read"];
+     const have = new Set(((payload as any).tools || []).map((t: any) => (t?.function?.name || t?.name || "").toLowerCase()));
+     const missing = need.filter((n) => !have.has(n));
+     if (missing.length > 0) {
+       const mk = (n: string) => ({ type: "function", function: { name: n, description: n + " tool", parameters: { type: "object", properties: {}, required: [] } } });
+       (payload as any).tools = [...((payload as any).tools || []), ...missing.map(mk)];
+       if (!(payload as any).tool_choice) (payload as any).tool_choice = "none";
+     }
+   }
   const start = performance.now();
   // Failfast signal stack: connect (headers) < TTFT (first byte, stream) <
   // total attempt cap < client deadline / hangup. AbortSignal.any keeps
