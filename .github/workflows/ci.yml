@@ -28,15 +28,17 @@ jobs:
           sudo ln -sf "$HOME/.bun/install/global/node_modules/@moonrepo/core-linux-x64-gnu/moon" /usr/local/bin/moon
           moon --version
 
-      - name: Install jj (Jujutsu)
-        run: |
-          curl -sL "https://github.com/jj-vcs/jj/releases/download/v0.32.0/jj-v0.32.0-x86_64-unknown-linux-musl.tar.gz" | sudo tar xz -C /usr/local/bin jj
-          jj --version
-
       - name: Install JS workspaces
         run: bun install
         env:
           PUPPETEER_SKIP_DOWNLOAD: "true"
+
+      - name: Setup Python test env
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3-pytest python3-venv
+          /usr/bin/python3 -m venv lasso/.venv
+          lasso/.venv/bin/pip install --quiet -e ./lasso pytest
 
       - name: Affected tasks (PR)
         if: github.event_name == 'pull_request'
