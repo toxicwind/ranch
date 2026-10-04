@@ -861,3 +861,5 @@ export function startQuarantineProber(
     tick().catch((e) => console.error("[router] quarantine prober tick:", e));
   }, QUARANTINE_PROBE_MS);
 }
+import { BELIEF } from "./model_disabler.ts";
+export { BELIEF };
