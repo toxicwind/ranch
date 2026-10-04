@@ -1062,29 +1062,44 @@ class OracleLoop:
             self.done.add(tid)
             self._maybe_start_next_work(tid)
             return
-        a.winner, a.price_paid, a.assign_ts = winner, price_paid, now
         bond = mech.BOND
-        try:
-            # Profiles file is the source of truth: reload before locking
-            # so externally released bonds (stale-lock admin release)
-            # are visible. (nightjar-debug 2026-10-02)
-            self.profiles = mech.load_profiles()
-            mech.lock_bond(self.profiles, winner.removeprefix("bidder-"),
-                           tid, bond)
-        except (KeyError, ValueError) as e:
+        # Fall through contenders (highest first) if stake-lock fails.
+        # Vickrey: winner pays max(next-highest amount, RESERVE).
+        assigned = None
+        last_err = None
+        for idx, (cbidder, cbid) in enumerate(contenders):
+            try:
+                # Profiles file is the source of truth: reload before locking
+                # so externally released bonds (stale-lock admin release)
+                # are visible. (nightjar-debug 2026-10-02)
+                self.profiles = mech.load_profiles()
+                mech.lock_bond(self.profiles, cbidder.removeprefix("bidder-"),
+                               tid, bond)
+                next_amt = contenders[idx+1][1]["amount"] if idx+1 < len(contenders) else RESERVE
+                assigned = (cbidder, cbid["amount"], round(max(next_amt, RESERVE), 6))
+                break
+            except (KeyError, ValueError) as e:
+                last_err = e
+                continue
+        if assigned is None:
             if not replay:
                 self.market.post("no_assign", f"no-assign-{tid}",
                                  {"task_id": tid, "reason": "stake-lock-failed",
-                                  "detail": str(e)[:200], "posted_ts": now,
+                                  "detail": str(last_err)[:200], "posted_ts": now,
                                   "reveal": reveal},
                                  task_id=tid,
-                                 note="oracle-market: winner could not lock stake bond; closed.")
+                                 note="oracle-market: no contender could lock stake bond; closed.")
             self.log("no_assign", task_id=tid, reason="stake-lock-failed",
-                     detail=str(e)[:200], replay=replay)
+                     detail=str(last_err)[:200] if last_err else "all contenders failed",
+                     replay=replay)
             a.state = "CLOSED"
             self.done.add(tid)
             self._maybe_start_next_work(tid)
             return
+        winner, amount, price_paid = assigned
+        # Recalculate ties for the actual winner
+        ties = [b for b, d in contenders if d["amount"] == amount]
+        a.winner, a.price_paid, a.assign_ts = winner, price_paid, now
         if not replay:
             self._publish_assign(a, winner, amount, price_paid, reveal, ties,
                                  bond)
