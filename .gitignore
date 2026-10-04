@@ -6,6 +6,8 @@ github_*_pat.json
 *.env.local
 *.jsonl
 *.db
+# ... except the flicker migration-test seed fixture (CI needs it)
+!flicker/server/store/datastore/migration/test-files/sqlite.db
 *.db-shm
 *.db-wal
 *.sqlite
