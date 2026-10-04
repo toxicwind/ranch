@@ -306,7 +306,7 @@ async fn decompose_native(
         "You decompose a multi-model job into parallel LLM request bodies. \
          Reply with ONLY a JSON object of the form \
          '{{\"requests\":[{{\"model\":\"<provider/model id>\",\"messages\":[{{\"role\":\"user\",\"content\":\"<self-contained sub-task>\"}}],\
-         \"temperature\":0.7,\"max_tokens\":2000}]}}. \
+         \"temperature\":0.7,\"max_tokens\":2000}}]}}. \
          Each request must be self-contained (no cross-references between requests). \
          The \"model\" field MUST be one of these exact IDs, verbatim - never invent a model ID: {}. \
          Produce between 1 and {} requests. No prose, no markdown fences, JSON only.",

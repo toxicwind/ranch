@@ -94,6 +94,9 @@ import {
   type ProxyConfig,
 } from "../nimProxy.ts";
 import { detectExactReply, normalizeReply } from "../exactReply.ts";
+import { z } from "zod";
+import { CorralTimer } from "../timing.ts";
+import { parseWithRecovery } from "../structuredRecovery.ts";
 
 type ParsedArgs = {
   positional: string[];
@@ -759,20 +762,40 @@ Return ONLY valid JSON (no markdown fences, no commentary):
 
 
   }
-  // Parse the JSON response — extract JSON from possible markdown fences
-  let questions: any[];
-  try {
-    let jsonStr = claudeResult;
-    // Strip markdown code fences if present
-    const fenceMatch = jsonStr.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
-    if (fenceMatch) jsonStr = fenceMatch[1];
-    const parsed = JSON.parse(jsonStr.trim());
-    questions = parsed.questions;
-    if (!Array.isArray(questions) || questions.length === 0) {
-      throw new Error("No questions in response");
+  // Structured-output recovery (beyond super-ralph): validate the model's
+  // questions JSON against a zod schema and, on failure, run ONE bounded
+  // repair round through the proxy before falling back to hardcoded questions.
+  const questionsSchema = z.object({
+    questions: z.array(z.object({
+      question: z.string().min(1),
+      choices: z.array(z.object({
+        label: z.string(),
+        description: z.string(),
+        value: z.string(),
+      })).min(2).max(6),
+    })).min(1),
+  });
+  type Questions = z.infer<typeof questionsSchema>["questions"];
+  let questions: Questions;
+  const parseOutcome = await parseWithRecovery(
+    questionsSchema,
+    claudeResult,
+    async (feedback: string) =>
+      await proxyChatCompletions({
+        prompt: `${questionGenPrompt}\n\n${feedback}`,
+        model: (proxyConfig as ProxyConfig).model,
+        maxTokens: 4096,
+        config: proxyConfig as ProxyConfig,
+      }),
+    { maxAttempts: useProxy ? 2 : 1 },
+  );
+  if (parseOutcome.ok) {
+    questions = parseOutcome.data.questions;
+    if (parseOutcome.repaired) {
+      console.log(`🔧 Recovered questions JSON via model repair (attempt ${parseOutcome.attempts}).`);
     }
-  } catch (e: any) {
-    console.error("⚠️  Failed to parse generated questions, using fallback.");
+  } else {
+    console.error(`⚠️  Failed to parse generated questions (${parseOutcome.error}), using fallback.`);
     // Import hardcoded fallback
     const { getClarificationQuestions } = await import("./clarifications.ts");
     questions = getClarificationQuestions();
@@ -910,7 +933,8 @@ async function main() {
     console.log("📋 Non-interactive stdin detected — skipping clarifying questions.\n");
   }
   if (!questionsExplicitlySkipped && interactiveStdin) {
-    clarificationSession = await runClarifyingQuestions(promptText, repoRoot, packageScripts, parsed.flags["dry-run"] === true, proxyConfig);
+    clarificationSession = await timer.measure("clarifying-questions", () =>
+      runClarifyingQuestions(promptText, repoRoot, packageScripts, parsed.flags["dry-run"] === true, proxyConfig));
   }
 
   // Finite-by-default: Ralph loop iteration ceiling (backstop; the real exit
@@ -925,7 +949,7 @@ async function main() {
   const bunfigPath = join(generatedDir, "bunfig.toml");
   const dbPath = join(repoRoot, ".super-ralph/workflow.db");
 
-  const workflowSource = renderWorkflowFile({
+  const workflowSource = timer.measureSync("workflow-render", () => renderWorkflowFile({
     promptText,
     promptSpecPath,
     repoRoot,
@@ -935,7 +959,7 @@ async function main() {
     fallbackConfig,
     clarificationSession,
     maxIterations,
-  });
+  }));
 
   await writeFile(workflowPath, workflowSource, "utf8");
 
@@ -965,6 +989,9 @@ async function main() {
   const runId = typeof parsed.flags["run-id"] === "string"
     ? String(parsed.flags["run-id"])
     : `sr-${Date.now().toString(36)}-${randomUUID().slice(0, 8)}`;
+
+  // HFT: per-stage timing for the whole run (JSONL at ~/.corral/timings/<runId>.jsonl).
+  const timer = new CorralTimer(runId);
 
   const maxConcurrencyOverride = typeof parsed.flags["max-concurrency"] === "string"
     ? Math.max(1, parseFinite(parsed.flags["max-concurrency"], fallbackConfig.maxConcurrency))
@@ -1033,13 +1060,17 @@ async function main() {
     stdin: headless ? "ignore" : "inherit",
   });
 
-  const exitCode = await proc.exited;
+  const exitCode = await timer.measure("workflow-execute", () => proc.exited);
 
+  const timingSummary = timer.summary();
   if (exitCode === 0) {
     if (!headless) console.log("\n✅ Super Ralph workflow completed successfully!\n");
-    await printFinalReply(dbPath, runId, headless, promptText);
+    await timer.measure("finalize", () => printFinalReply(dbPath, runId, headless, promptText));
+    // Headless stdout is the reply byte-for-byte: timings go to stderr there.
+    if (headless) console.error(timingSummary); else console.log(timingSummary);
   } else {
     console.error(`\n❌ Workflow exited with code ${exitCode}\n`);
+    console.error(timingSummary);
     process.exit(exitCode);
   }
 }

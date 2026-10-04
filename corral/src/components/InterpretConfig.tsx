@@ -80,13 +80,17 @@ export function InterpretConfig({
   // Truncate oversized prompts: the nim-proxy route has token limits.
   // The full prompt is saved as PROMPT.md in the workspace; the agent can
   // read it if needed. This keeps interpret-config within model limits.
+  // Head+tail preservation: the tail usually holds the actual request while
+  // the head holds repo context — a pure head-clip loses the request.
   const MAX_PROMPT_CHARS = 12000;
+  const HEAD_KEEP = 8000;
   const truncatedPrompt =
     prompt.length > MAX_PROMPT_CHARS
-      ? prompt.slice(0, MAX_PROMPT_CHARS) +
+      ? prompt.slice(0, HEAD_KEEP) +
         "\n\n[... truncated " +
         String(prompt.length - MAX_PROMPT_CHARS) +
-        " chars; full prompt available in PROMPT.md in the workspace ...]"
+        " chars; full prompt available in PROMPT.md in the workspace ...]\n\n" +
+        prompt.slice(prompt.length - (MAX_PROMPT_CHARS - HEAD_KEEP))
       : prompt;
 
   const interpretPrompt = [

@@ -170,23 +170,6 @@ import time
 import framing
 import oracle_ask
 
-#!/usr/bin/env python3
-"""Rebuilt hardening test sections for bench/test_core.py (appended before the
-final print). Deterministic: no model calls, no network."""
-
-
-
-#!/usr/bin/env python3
-"""Rebuilt hardening test sections for bench/test_core.py (appended before the
-final print). Deterministic: no model calls, no network."""
-
-
-
-#!/usr/bin/env python3
-"""Rebuilt hardening test sections for bench/test_core.py (appended before the
-final print). Deterministic: no model calls, no network."""
-
-
 # ---- framing: fail-closed question intake ----
 _framing_cases = [
     ("Will this work?", "refused"),

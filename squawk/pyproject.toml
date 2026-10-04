@@ -49,7 +49,7 @@ changelog_file = "CHANGELOG.md"
 [tool.semantic_release.remote]
 type = "github"
 
-[tool.ruff]
+[tool.ruff.lint]
 # The oracle bench/bin scripts are long imperative experiment scripts that
 # deliberately set OS env vars (ORACLE_WORK, sys.path) and use section-local
 # imports mid-file. E402 is the established pattern here, not a bug.
