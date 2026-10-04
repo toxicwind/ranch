@@ -1,0 +1,35 @@
+#!/bin/sh
+# ferret — the furry face of the probe-toolkit den.
+# Usage: ferret <tool> [args...]   |   ferret list
+# Tools live as neutral wrappers in this same bin dir; ferret just dispatches.
+DEN="$(dirname "$(readlink -f "$0")")"
+list() {
+  echo "ferret den tools:"
+  for t in tman webprobe dnsprobe subprobe sigscan portprobe crawlprobe tlsprobe altprobe dbprobe asnprobe cdnprobe cloudprobe cidrprobe tldprobe httpserve notify chaos proxify shuffledns aix; do
+    [ -x "$DEN/$t" ] && echo "  $t"
+  done
+}
+case "$1" in
+  ""|list|ls) list ;;
+  probe) shift; exec "$DEN/webprobe" "$@" ;;
+  dns) shift; exec "$DEN/dnsprobe" "$@" ;;
+  sub) shift; exec "$DEN/subprobe" "$@" ;;
+  sig) shift; exec "$DEN/sigscan" "$@" ;;
+  ports) shift; exec "$DEN/portprobe" "$@" ;;
+  crawl) shift; exec "$DEN/crawlprobe" "$@" ;;
+  tls) shift; exec "$DEN/tlsprobe" "$@" ;;
+  alt) shift; exec "$DEN/altprobe" "$@" ;;
+  db) shift; exec "$DEN/dbprobe" "$@" ;;
+  asn) shift; exec "$DEN/asnprobe" "$@" ;;
+  cdn) shift; exec "$DEN/cdnprobe" "$@" ;;
+  cloud) shift; exec "$DEN/cloudprobe" "$@" ;;
+  cidr) shift; exec "$DEN/cidrprobe" "$@" ;;
+  tld) shift; exec "$DEN/tldprobe" "$@" ;;
+  serve) shift; exec "$DEN/httpserve" "$@" ;;
+  notify|notif) shift; exec "$DEN/notify" "$@" ;;
+  chaos) shift; exec "$DEN/chaos" "$@" ;;
+  prox|proxy) shift; exec "$DEN/proxify" "$@" ;;
+  shuffle) shift; exec "$DEN/shuffledns" "$@" ;;
+  aix) shift; exec "$DEN/aix" "$@" ;;
+  *) if [ -x "$DEN/$1" ]; then t="$1"; shift; exec "$DEN/$t" "$@"; else echo "unknown den tool: $1"; list; exit 1; fi ;;
+esac
