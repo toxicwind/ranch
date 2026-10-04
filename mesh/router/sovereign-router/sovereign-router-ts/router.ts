@@ -180,6 +180,7 @@ async function handleStream(
 
   void (async () => {
     try {
+      const requestStart = performance.now();
       const model = String(body.model || "auto");
       const promptText = (body.messages ?? []).map((m: { content?: unknown }) => String(m.content ?? "")).join("\n");
       const taskPath = getTaskPath(promptText);
@@ -270,6 +271,7 @@ async function handleStream(
       };
       let firstChunk = true;
       let tokenCount = 0;
+      let sseBuffer = "";
       const streamStart = performance.now();
       armIdle();
       try {
@@ -292,12 +294,28 @@ async function handleStream(
             }
           }
           if (value) {
-            const txt = new TextDecoder().decode(value);
-            const matches = txt.match(/\"delta\":\{\"content\"/g);
-            if (matches) tokenCount += matches.length;
-            const usageMatch = txt.match(/\"completion_tokens\":(\d+)/);
-            if (usageMatch && usageMatch[1]) {
-              tokenCount = parseInt(usageMatch[1], 10);
+            sseBuffer += new TextDecoder().decode(value, { stream: true });
+            const lines = sseBuffer.split("\n");
+            sseBuffer = lines.pop() ?? ""; // keep incomplete line
+            for (const line of lines) {
+              if (line.startsWith("data: ") && line !== "data: [DONE]") {
+                const dataJson = line.slice(6).trim();
+                try {
+                  const parsed = JSON.parse(dataJson);
+                  const delta = parsed.choices?.[0]?.delta;
+                  if (delta && (delta.content !== undefined || delta.reasoning_content !== undefined)) {
+                    tokenCount++;
+                  }
+                  if (parsed.usage?.completion_tokens) {
+                    const claimed = Number(parsed.usage.completion_tokens);
+                    if (claimed > 0 && Math.abs(claimed - tokenCount) / Math.max(1, tokenCount) > 0.20) {
+                      log(`[measurement] token mismatch provider_claimed=${claimed} counted=${tokenCount} — count wins`);
+                    }
+                  }
+                } catch {
+                  // Non-JSON frame (heartbeat/keepalive); ignore
+                }
+              }
             }
           }
           try {
@@ -307,8 +325,8 @@ async function handleStream(
           }
         }
       } finally {
-        const streamTotalMs = performance.now() - streamStart;
-        const realTps = streamTotalMs > 0 ? tokenCount / (streamTotalMs / 1000) : 0;
+        const streamTotalMs = performance.now() - requestStart;
+        const realTps = tokenCount >= 2 && streamTotalMs > 0 ? tokenCount / (streamTotalMs / 1000) : 0;
         if (winner.provider && winner.model) {
           const contract = validateContract(winner, winner.provider);
           const verifiedOk = contract.schema && contract.identity;
