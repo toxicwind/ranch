@@ -179,6 +179,7 @@ mod tests {
             status: 200,
             content_type: "application/json".into(),
             body: Bytes::from_static(b"{\"ok\":true}"),
+            extra: vec![],
         });
         let got = waiter.await.unwrap().expect("follower got result");
         assert_eq!(got.status, 200);

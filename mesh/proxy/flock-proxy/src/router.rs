@@ -1991,7 +1991,7 @@ mod tests {
     fn test_router(defs: Vec<ProviderDef>) -> RouterHandle {
         // Bypass build() (which needs a data dir and spawns loops): assemble
         // the inner state directly with persistence disabled.
-        let health = HealthDb::new(PersistHandle::disabled());
+        let health = HealthDb::new(PersistHandle::default());
         let mut runtimes = HashMap::new();
         let mut order = vec![];
         for def in &defs {
@@ -2003,14 +2003,14 @@ mod tests {
             runtimes: RwLock::new(runtimes),
             order: RwLock::new(order),
             health,
-            persist: PersistHandle::disabled(),
+            persist: PersistHandle::default(),
             limiter: Mutex::new(limiter),
             routing: RwLock::new(RoutingCfg::default()),
             governor_overrides: RwLock::new(Default::default()),
             governor_enabled: AtomicBool::new(true),
             client: reqwest::Client::new(),
             data_dir: PathBuf::from("/tmp/flock-router-test"),
-            _writer: None,
+            writer: Mutex::new(None),
             empty_strikes: Mutex::new(HashMap::new()),
         });
         RouterHandle { inner }

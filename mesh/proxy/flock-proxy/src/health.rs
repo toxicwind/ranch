@@ -125,6 +125,19 @@ impl HealthDb {
             .unwrap_or(1500)
     }
 
+    /// Pin a provider ELO rating directly (ops/tests). Persists like the
+    /// other setters.
+    pub fn set_elo(&self, provider: &str, elo: i32) {
+        {
+            let mut g = self.inner.write().unwrap();
+            g.elos.insert(provider.to_string(), elo);
+        }
+        self.persist.op(PersistOp::ProviderElo {
+            provider: provider.to_string(),
+            elo,
+        });
+    }
+
     /// `SetSticky` — AstMatrix declared this but never called it from the
     /// router. Here the router calls it on every successful response, and
     /// expiry is enforced (persisted).
