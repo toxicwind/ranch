@@ -45,6 +45,7 @@ const Schema = z.object({
     "cerebras": "https://api.cerebras.ai/v1",
     "google": "https://generativelanguage.googleapis.com/v1beta/openai",
     "mistral": "https://api.mistral.ai",
+    "zen": "https://opencode.ai/zen/v1",
   }),
 
   /** Hard ceiling on concurrent in-flight upstream calls. */
@@ -68,6 +69,10 @@ function readKeys(): Record<string, string> {
     const m = /^([A-Z0-9]+)_API_KEY$/.exec(k);
     if (m && v) out[m[1]!.toLowerCase()] = v;
   }
+  // OpenCode Zen key env is OPENCODE_API_KEY (mirrors sovereign-router-ts
+  // keyEnv); ZEN_API_KEY is accepted as an alias by the generic rule above.
+  if (!out["zen"] && process.env.OPENCODE_API_KEY)
+    out["zen"] = process.env.OPENCODE_API_KEY;
   return out;
 }
 

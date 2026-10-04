@@ -24,6 +24,7 @@ import { Ledger } from "./ledger.ts";
 import { Router } from "./router.ts";
 import { loadLiveCatalog, servingIds, DEFAULT_CATALOG_PATH } from "./catalog.ts";
 import { CredentialPlane, loadPoolsFromYaml } from "./keypool.ts";
+import { ZEN_MODELS, ZEN_PROVIDER } from "./zen.ts";
 
 const log = pino({ level: process.env.CUTTINGGATE_LOG_LEVEL ?? "info" });
 
@@ -288,6 +289,10 @@ export async function main(): Promise<void> {
   }
   const pairs = servingIds(loaded.data);
   for (const { id, provider } of pairs) router.register(id, provider);
+  // Zen free-tier seed: the live catalog can lag upstream rotations, so the
+  // verified-working set is always registered directly. (Live-verified
+  // 2026-10-04: 17/17 serve via the OpenCode request shape in zen.ts.)
+  for (const id of ZEN_MODELS) router.register(id, ZEN_PROVIDER);
   for (const [provider, entry] of Object.entries(loaded.data.providers)) {
     quarantine.observeListing(entry.serving, provider);
   }

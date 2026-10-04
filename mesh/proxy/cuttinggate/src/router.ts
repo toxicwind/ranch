@@ -21,6 +21,13 @@ import { Quarantine } from "./quarantine.ts";
 import type { CredentialPlane } from "./keypool.ts";
 import { Ledger } from "./ledger.ts";
 import { COPILOT_PROVIDER, CopilotClient, copilotHeaders } from "./copilot.ts";
+import {
+  ZEN_PROVIDER,
+  ZEN_BASE_URL,
+  foldZenSse,
+  zenBody,
+  zenHeaders,
+} from "./zen.ts";
 
 export type KnownModel = { id: string; provider: string };
 
@@ -155,6 +162,7 @@ export class Router {
   /** The upstream call for one provider. Overridden in tests. */
   protected async call(provider: string, req: ChatRequest, signal: AbortSignal): Promise<Response> {
     if (provider === COPILOT_PROVIDER) return this.callCopilot(req, signal);
+    if (provider === ZEN_PROVIDER) return this.callZen(req, signal);
 
     const base = this.config.bases[provider];
     if (!base) throw new Error(`no base url for provider ${provider}`);
@@ -167,6 +175,59 @@ export class Router {
       body: JSON.stringify({ model: req.model, messages: req.messages, temperature: req.temperature, max_tokens: req.max_tokens }),
       signal,
     });
+  }
+
+  /**
+   * OpenCode Zen free tier. Cannot ride the generic path: the free-tier gate
+   * demands OpenCode client-identity headers, stream:true, and gate tool
+   * definitions (see zen.ts). The SSE stream is folded into one JSON
+   * completion so the race engine's res.json() contract holds.
+   */
+  private async callZen(req: ChatRequest, signal: AbortSignal): Promise<Response> {
+    const key =
+      this.claimed.get(ZEN_PROVIDER) ?? this.config.keys[ZEN_PROVIDER] ?? "";
+    if (!key)
+      throw new Error("zen: no API key configured (set ZEN_API_KEY or OPENCODE_API_KEY)");
+    const res = await fetch(`${ZEN_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: zenHeaders(key),
+      body: JSON.stringify(
+        zenBody(req.model, req.messages, {
+          temperature: req.temperature,
+          max_tokens: req.max_tokens,
+        }),
+      ),
+      signal,
+    });
+    if (!res.ok) {
+      const errText = (await res.text()).slice(0, 500);
+      return new Response(
+        JSON.stringify({
+          error: { message: errText, type: "zen_upstream", status: res.status },
+        }),
+        {
+          status: res.status,
+          headers: { "content-type": "application/json" },
+        },
+      );
+    }
+    const { content, finishReason } = foldZenSse(await res.text());
+    return new Response(
+      JSON.stringify({
+        id: `zen_${crypto.randomUUID()}`,
+        object: "chat.completion",
+        created: Math.floor(Date.now() / 1000),
+        model: req.model,
+        choices: [
+          {
+            index: 0,
+            message: { role: "assistant", content },
+            finish_reason: finishReason ?? "stop",
+          },
+        ],
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
   }
 
   /**

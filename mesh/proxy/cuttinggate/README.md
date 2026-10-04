@@ -44,6 +44,69 @@ tests/            bun test suite (`bun test`)
 
 Part of the [mesh](../../README.md) routing plane at `ranch/mesh/proxy/cuttinggate/`. It superseded `:25104` (sovereign-router, still serving) and absorbed the `:25193` flock-proxy role (live again 2026-10-04, key-gated). Herd (`:25100`) is its local-inference leg when up.
 
+
+## Providers: OpenCode Zen free tier
+
+The `zen` provider (`https://opencode.ai/zen/v1`) serves OpenCode Zen's
+zero-cost models as first-class cuttinggate routes. Zen's free tier is gated
+on request *shape*, not app attestation — upstream answers `403
+FreeTierError` unless the request looks like the OpenCode CLI. cuttinggate
+applies the full shape per request (`src/zen.ts`, via `Router.call`):
+
+- `User-Agent: opencode/1.18.x` (semver ≥ 1.18.0), `x-opencode-client: cli`,
+  `x-opencode-project: global`
+- `x-opencode-session`: `ses_` + 26 chars (12 hex ts + 14 base62), stable per
+  process for prompt-cache affinity
+- `x-opencode-request`: `msg_` + 26 chars, fresh per call
+- body: `stream: true` (hard gate) plus the `bash`/`glob`/`grep`/`read` tool
+  definitions — a body omitting `glob`/`grep` is rejected; `tool_choice:
+  none` when the caller declared no tools
+- the SSE stream is folded back into one JSON completion (non-content frames
+  such as `inference-cost` are stripped) so the race engine's contract holds
+
+Auth: `ZEN_API_KEY`, or `OPENCODE_API_KEY` (mirrors sovereign-router-ts).
+The 17-model seed in `src/zen.ts` is always registered at boot, so the set
+below stays routable even when the live catalog lags an upstream rotation.
+
+### Verified model table (2026-10-04, live completions)
+
+| model | zen `/v1/models` label | completion | latency |
+|---|---|---|---|
+| ling-3.1-flash-free | listed | serves | 1.6s |
+| fledge-alpha-free | listed | serves | 0.5s |
+| mimo-v2.5-free | listed | serves | 0.5s |
+| mimo-v2.6-flash-free | listed | serves | 1.6s |
+| nemotron-3.5-lightning-free | listed | serves | 0.3s |
+| nemotron-3-ultra-free | listed | serves | 2.4s |
+| longcat-2.5-preview-free | listed | serves | 0.3s |
+| deepseek-v4-flash-free | listed | serves | 0.1s |
+| qwen3.6-plus-free | delisted, still serves | serves | 0.1s |
+| minimax-m3-free | delisted, still serves | serves | 1.7s |
+| north-mini-code-free | delisted, still serves | serves | 0.3s |
+| big-pickle | delisted, still serves | serves | 0.1s |
+| jev-1.13-free | listed | serves | 0.1s |
+| muse-spark-1.2-contributor-free | listed | serves | 0.1s |
+| muse-spark-1.3-contributor-free | listed | serves | 0.1s |
+| space-bunny-free | listed | serves | 0.1s |
+| ling-3.0-flash-fin-free | listed (new 2026-10-04) | serves | 0.1s |
+
+### Community projects taking zen further
+
+- denysvitali/llm-proxy — the fullest free-tier gate recipe (ID shape,
+  stream gate, tool injection, SSE fold-back); also serves the OpenCode Go
+  tier at `/zen/go/v1`
+- warexpor/opencode-zen-gateway — UA semver floor, stable session per key,
+  inference-cost stripping; notes the free tier is IP-day limited (after
+  `FreeUsageLimitError`, wait until UTC midnight)
+- aslamplr/turnpike — per-family endpoint split: DeepSeek/GLM/Kimi/LongCat
+  on chat-completions, MiniMax/Qwen on `/messages`, GPT/Grok on `/responses`
+- nexusrun/nexus_aigateway — session-header forwarding for the Go tier
+- blaspat/opencode-tk-proxy — header-injecting proxy for the Go tier
+- (earlier set documented in `mesh/router/sovereign-router/README.md`:
+  parithosh-varma/opencode-proxy, dinhkarate/opencode-zen-free-proxy,
+  markdev11/oc-proxy, JulienMaille/opencode-free-proxy,
+  vyn-7/opencode-bypass, parithosh-varma/zen-proxy)
+
 ## Dev / contributing
 
 Changes land as commits in the [toxicwind/ranch](https://github.com/toxicwind/ranch) repo (`mesh/proxy/cuttinggate/`). `bun run check` (typecheck + tests) before pushing. Keys live in 0600 files under `/home/toxic/` — never in this repo, never in logs.
