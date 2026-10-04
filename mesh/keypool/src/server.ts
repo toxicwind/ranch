@@ -150,7 +150,7 @@ export function createHandler(deps: ServerDeps) {
 
     // /health
     if (path === "/health" && req.method === "GET") {
-      return Response.json({ ok: true, service: "keypool" });
+      return Response.json({ ok: true, service: "keypool" }, { headers: { "Access-Control-Allow-Origin": "*" } });
     }
 
     // /status

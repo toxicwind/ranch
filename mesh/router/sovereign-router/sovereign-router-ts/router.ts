@@ -590,7 +590,7 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
         strategy: STRATEGY,
         parallel: MAX_PARALLEL,
         providers,
-      });
+      }, 200, { "Access-Control-Allow-Origin": "*" });
     }
 
     if (req.method === "POST" && path === "/admin/reload") {
