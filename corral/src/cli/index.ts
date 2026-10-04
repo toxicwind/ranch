@@ -94,6 +94,8 @@ import {
   type ProxyConfig,
 } from "../nimProxy.ts";
 import { detectExactReply, normalizeReply } from "../exactReply.ts";
+import { banner, ok, err, warn, info, muted, kv, summaryBox } from "../ui/cli-style";
+import { writeRunReport } from "../report/renderReport";
 import { z } from "zod";
 import { CorralTimer } from "../timing.ts";
 import { parseWithRecovery } from "../structuredRecovery.ts";
@@ -104,30 +106,30 @@ type ParsedArgs = {
 };
 
 function printHelp() {
-  console.log(`Sovereign Corral (corral / ralph / hyper / super-ralph / taskforge) — Multi-Agent Engineering & Ticket Orchestration
-
-Usage:
-  corral "prompt text"
-  ralph ./specs/feature.md --max-concurrency 8
-  hyper ./PROMPT.md
-  super-ralph ./PROMPT.md
-Options:
-  --cwd <path>                    Repo root (default: current directory)
-  --max-concurrency <n>           Workflow max concurrency override
-  --max-iterations <n>           Ralph loop iteration ceiling (default: 25)
-  --run-id <id>                   Explicit Smithers run id
-  --dry-run                       Generate workflow files but do not execute
-  --skip-questions                Skip the clarifying questions phase
-  --help                          Show this help
-
-Examples:
-  corral "Build a React todo app"
-  corral ./specs/feature.md --max-concurrency 8
-  ralph "Add authentication" --skip-questions
-`);
+  banner("Multi-Agent Engineering & Ticket Orchestration");
+  console.log("Usage:");
+  console.log('  corral "prompt text"');
+  console.log("  ralph ./specs/feature.md --max-concurrency 8");
+  console.log("  hyper ./PROMPT.md");
+  console.log("  super-ralph ./PROMPT.md\n");
+  console.log("Options:");
+  kv([
+    ["--cwd <path>", "Repo root (default: current directory)"],
+    ["--max-concurrency <n>", "Workflow max concurrency override"],
+    ["--max-iterations <n>", "Ralph loop iteration ceiling (default: 25)"],
+    ["--run-id <id>", "Explicit Smithers run id"],
+    ["--dry-run", "Generate workflow files but do not execute"],
+    ["--skip-questions", "Skip the clarifying questions phase"],
+    ["--report --run-id <id>", "Regenerate the HTML run report, print its path, exit"],
+    ["--help", "Show this help"],
+  ]);
+  console.log("\nExamples:");
+  console.log('  corral "Build a React todo app"');
+  console.log("  corral ./specs/feature.md --max-concurrency 8");
+  console.log('  ralph "Add authentication" --skip-questions');
 }
 
-const BOOLEAN_FLAGS = new Set(["help", "dry-run", "skip-questions", "check-env"]);
+const BOOLEAN_FLAGS = new Set(["help", "dry-run", "skip-questions", "check-env", "report"]);
 
 function parseArgs(argv: string[]): ParsedArgs {
   const positional: string[] = [];
@@ -850,6 +852,22 @@ async function main() {
 
   if ((parsed.flags as any)["check-env"]) { dumpCheckEnv(); }
 
+  // --report: regenerate the HTML run report from the run DB / event
+  // stream without executing anything. Prints the report path.
+  if (parsed.flags["report"] === true) {
+    const reportRunId = parsed.flags["run-id"];
+    if (typeof reportRunId !== "string" || !reportRunId) {
+      err("corral --report requires --run-id <id>");
+      process.exit(2);
+    }
+    const reportCwd = resolve(
+      typeof parsed.flags.cwd === "string" ? parsed.flags.cwd : process.cwd(),
+    );
+    const reportPath = await writeRunReport({ runId: reportRunId, root: reportCwd });
+    ok(`report written: ${reportPath}`);
+    return;
+  }
+
   if (parsed.flags.help || parsed.positional.length === 0) {
     printHelp();
     process.exit(parsed.flags.help ? 0 : 1);
@@ -872,6 +890,7 @@ async function main() {
     for (const [name, value] of Object.entries(proxyEnv)) {
       process.env[name] = value;
     }
+
     const proxyMsg =
       "nim-proxy: routing all model calls through " + proxyConfig.baseUrl +
       " (" + proxyConfig.apiKeys.length + " key(s), model " + proxyConfig.model +
@@ -892,7 +911,7 @@ async function main() {
   }
 
   // Headless (non-TTY stdout): exact-output mode - no banners, no chatter.
-  if (!headless) console.log("🚀 Super Ralph - Smithers Workflow Edition\n");
+  if (!headless) banner("Super Ralph \u2014 Smithers Workflow Edition");
 
   // Workspace gate (auto-provisioning): adopts an existing git repo via
   // `jj git init --colocate`, or provisions an isolated ~/.corral/runs/<id>
@@ -1004,17 +1023,20 @@ async function main() {
       console.log(`🔧 Workflow: ${workflowPath}`);
       console.log(`💾 Database: ${dbPath}`);
       console.log(`🆔 Run ID: ${runId}`);
-      console.log(`🤖 Agents: claude=${detectedAgents.claude} codex=${detectedAgents.codex} gh=${detectedAgents.gh}`);
-      console.log(`⚡ Concurrency: ${maxConcurrencyOverride}`);
-      console.log(`🔁 Max iterations: ${maxIterations}\n`);
+      kv([
+        ["agents", `claude=${detectedAgents.claude} codex=${detectedAgents.codex} gh=${detectedAgents.gh}`],
+        ["concurrency", String(maxConcurrencyOverride)],
+        ["max iterations", String(maxIterations)],
+      ]);
+      console.log("");
   }
 
   if (parsed.flags["dry-run"]) {
-    if (!headless) console.log("✅ Dry run complete. Workflow files generated but not executed.\n");
+    ok("Dry run complete. Workflow files generated but not executed.");
     return;
   }
 
-  if (!headless) console.log("🎬 Starting workflow execution...\n");
+  info("Starting workflow execution...");
 
   // Execute the workflow using Smithers CLI
   // Determine execution directory:
@@ -1064,14 +1086,34 @@ async function main() {
 
   const timingSummary = timer.summary();
   if (exitCode === 0) {
-    if (!headless) console.log("\n✅ Super Ralph workflow completed successfully!\n");
-    await timer.measure("finalize", () => printFinalReply(dbPath, runId, headless, promptText));
-    // Headless stdout is the reply byte-for-byte: timings go to stderr there.
-    if (headless) console.error(timingSummary); else console.log(timingSummary);
+    const reportPath = await writeReportQuietly(runId, repoRoot, promptText);
+    if (!headless) {
+      console.log("");
+      summaryBox("Run completed", [
+        ["run id", runId],
+        ["report", reportPath ?? "(report unavailable)"],
+      ], "success");
+      console.log("");
+    } else if (reportPath) {
+      console.error(`report: ${reportPath}`);
+    }
+    await printFinalReply(dbPath, runId, headless, promptText);
   } else {
-    console.error(`\n❌ Workflow exited with code ${exitCode}\n`);
+    err(`Workflow exited with code ${exitCode}`);
     console.error(timingSummary);
     process.exit(exitCode);
+  }
+}
+
+/**
+ * Render the HTML run report after a run. Best-effort: a report failure
+ * must never fail the run itself.
+ */
+async function writeReportQuietly(runId: string, repoRoot: string, promptText: string): Promise<string | null> {
+  try {
+    return await writeRunReport({ runId, root: repoRoot, prompt: promptText });
+  } catch {
+    return null;
   }
 }
 
@@ -1140,6 +1182,6 @@ async function printFinalReply(dbPath: string, runId: string, headless: boolean,
 }
 
 main().catch((error) => {
-  console.error("\n❌ Error:", error.message);
+  err(`Error: ${error.message}`);
   process.exit(1);
 });
