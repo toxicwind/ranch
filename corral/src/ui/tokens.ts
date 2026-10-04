@@ -57,6 +57,7 @@ export const colors = {
     bgRaised: c("#ffffff", [255, 255, 255], 231),
     bgCard:   c("#ffffff", [255, 255, 255], 231),
     border:   c("#e2e3ec", [226, 227, 236], 254),
+    borderSoft: c("#eaebf2", [234, 235, 242], 254),
     text:     c("#16171f", [22, 23, 31], 232),
     textDim:  c("#4c4e63", [76, 78, 99], 239),
   },
@@ -161,6 +162,7 @@ export function cssVariables(theme: "dark" | "light" = "dark"): string {
   const raised = theme === "dark" ? colors.bgRaised : colors.light.bgRaised;
   const card = theme === "dark" ? colors.bgCard : colors.light.bgCard;
   const border = theme === "dark" ? colors.border : colors.light.border;
+  const borderSoft = theme === "dark" ? colors.borderSoft : colors.light.borderSoft;
   const text = theme === "dark" ? colors.text : colors.light.text;
   const textDim = theme === "dark" ? colors.textDim : colors.light.textDim;
   void t;
@@ -170,7 +172,7 @@ export function cssVariables(theme: "dark" | "light" = "dark"): string {
     `--bg-card:${card.hex};`,
     `--bg-hover:${colors.bgHover.hex};`,
     `--border:${border.hex};`,
-    `--border-soft:${colors.borderSoft.hex};`,
+    `--border-soft:${borderSoft.hex};`,
     `--text:${text.hex};`,
     `--text-dim:${textDim.hex};`,
     `--text-faint:${colors.textFaint.hex};`,
