@@ -91,8 +91,8 @@ def apply_claims(prior, claims, prior_cluster_counts=None, retrieval_trace=None)
         [c.get("cluster_id", "") for c, _ in guarded], eff,
         prior_cluster_counts)
     final_llrs = []
-    for (c, guards), f, _ in zip(guarded, factors, eff):
-        fl = llr * f
+    for (c, guards), f, weight in zip(guarded, factors, eff):
+        fl = weight * f
         if f < 1.0:
             guards.append("cluster_discount_x%.2f" % f)
         final_llrs.append(fl)

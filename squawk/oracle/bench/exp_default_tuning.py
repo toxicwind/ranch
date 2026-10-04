@@ -271,9 +271,9 @@ def t5_abstention(rows):
 
 
 def t6_debate_budget(rows, concurrency):
+    import framing
     import engine
     import escalation
-    import framing
     import oracle_ask
     # Policy-DEBATE rows (disagreement-routed, gate_ok=True): the questions
     # where production would actually pay for a debate. status is not

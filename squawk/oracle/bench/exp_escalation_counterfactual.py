@@ -48,9 +48,9 @@ MODELS = ["oracle-judge-a", "oracle-judge-b", "oracle-judge-c"]
 
 def debated_final(question_text, timeout_s=90.0, work=None):
     """Mirror of oracle_ask.run_ask's debate block (same code path)."""
+    import framing
     import engine
     import escalation
-    import framing
     import oracle_ask
     framed = framing.frame_question(question_text)
     if framed.get("status") == "refused":

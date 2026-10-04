@@ -114,10 +114,10 @@ def confirmation_ratio(prior_prob, llrs):
     if lean == 0:
         return None
     confirming = total = 0.0
-    for llr in llrs:
-        m = abs(llr)
+    for v in llrs:
+        m = abs(v)
         total += m
-        if (llr > 0) - (llr < 0) == lean:
+        if (v > 0) - (v < 0) == lean:
             confirming += m
     return confirming / total if total > 0 else None
 
