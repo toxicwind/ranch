@@ -1,0 +1,89 @@
+#!/bin/bash
+# where-tasks: timestamped snapshot of where work is running (cell vs yote).
+# Every measurement carries a real datetime so lag is visible, not vibes.
+# Usage: where-tasks
+set -u
+NOW_UTC=$(date -u +%FT%TZ)
+NOW_LOCAL=$(date +"%F %T %Z")
+echo "=== where-tasks @ ${NOW_UTC} (local ${NOW_LOCAL}) ==="
+echo
+echo "--- cell ---"
+echo "datetime: $(date -u +%FT%TZ)"
+echo "load: $(cut -d' ' -f1-3 /proc/loadavg) (2 vCPU box)"
+echo
+echo "--- bridge round-trip (this is the lag number) ---"
+T0_EPOCH=$(date +%s%3N)
+T0_ISO=$(date -u +%FT%TZ)
+RT_OUT=$(~/workspace/bin/yote-conn exec 'date -u +%FT%TZ; cut -d" " -f1-3 /proc/loadavg' 2>&1)
+RT_RC=$?
+T1_EPOCH=$(date +%s%3N)
+T1_ISO=$(date -u +%FT%TZ)
+echo "sent:     ${T0_ISO}"
+echo "returned: ${T1_ISO}"
+echo "round-trip: $((T1_EPOCH - T0_EPOCH)) ms (rc=${RT_RC})"
+if [ $RT_RC -eq 0 ]; then
+  echo "yote datetime: $(echo "$RT_OUT" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z' | head -1)"
+  echo "yote load: $(echo "$RT_OUT" | tail -1) (16-core box)"
+else
+  echo "yote exec FAILED:"
+  echo "$RT_OUT" | head -5
+fi
+echo
+echo "--- pitchfork daemons (yote) ---"
+~/workspace/bin/yote-conn exec 'pitchfork list 2>/dev/null' 2>&1 | head -45
+echo
+echo "--- cell: top CPU processes (where cell tasks run) ---"
+echo "datetime: $(date -u +%FT%TZ)"
+ps -eo pid,pcpu,pmem,etime,args --sort=-pcpu | head -12 | cut -c1-170
+echo
+echo "--- my known tasks: race lanes + bridge calls in flight ---"
+echo "datetime: $(date -u +%FT%TZ)"
+LANES=$(pgrep -f 'opt-race/lane.py' | wc -l)
+LANERSS=$(ps -o rss= -C python3 2>/dev/null | awk '{s+=$1} END{printf "%.0f", s/1024}')
+echo "race lanes alive: ${LANES} (cell python RSS total ~${LANERSS} MB)"
+echo "yote-conn exec procs alive: $(pgrep -f 'bin/yote-conn exec' | wc -l) (each = one bridge call in flight)"
+echo "recent bridge commands:"
+pgrep -af 'bin/yote-conn exec' | head -6 | cut -c1-170
+echo
+echo "--- yote: top CPU processes (where bridge tasks run) ---"
+~/workspace/bin/yote-conn exec 'echo "datetime: $(date -u +%FT%TZ)"; ps -eo pid,pcpu,pmem,etime,args --sort=-pcpu | head -11 | cut -c1-150' 2>&1
+echo
+echo "--- cell hot procs (top CPU) ---"
+echo "datetime: $(date -u +%FT%TZ)"
+ps -eo pid,ppid,etimes,pcpu,comm,args --sort=-pcpu 2>/dev/null | head -8
+echo
+echo "--- agent tree (hatch-execd) ---"
+echo "datetime: $(date -u +%FT%TZ)"
+python3 -c "
+import os
+roots=[]
+for p in filter(str.isdigit, os.listdir('/proc')):
+    try:
+        if open('/proc/%s/comm'%p).read().strip()=='hatch-execd': roots.append(p)
+    except Exception: pass
+children={}
+for p in filter(str.isdigit, os.listdir('/proc')):
+    try:
+        parts=open('/proc/%s/stat'%p).read().rsplit(')',1)[1].split()
+        children.setdefault(parts[1],[]).append((p,parts[0]))
+    except Exception: pass
+seen=set(); stack=list(roots); live=frozen=0
+while stack:
+    p=stack.pop()
+    if p in seen: continue
+    seen.add(p)
+    for c,st in children.get(p,[]):
+        stack.append(c); live+=1
+        if st=='T': frozen+=1
+print('execd_roots=%d live_desc=%d T-state_frozen=%d'%(len(roots),live,frozen))
+"
+echo
+echo "--- yote hot procs (top CPU) ---"
+echo "datetime: $(date -u +%FT%TZ)"
+~/workspace/bin/yote-conn exec 'ps -eo pid,etimes,pcpu,comm,args --sort=-pcpu | head -8' 2>&1
+echo
+echo "--- bridge :18301 ---"
+echo "datetime: $(date -u +%FT%TZ)"
+~/workspace/bin/yote-conn exec 'curl -s -m 6 -o /dev/null -w "health=%{http_code} time=%{time_total}s\n" http://127.0.0.1:18301/health || echo "bridge DOWN"' 2>&1
+echo
+echo "=== end @ $(date -u +%FT%TZ) ==="
