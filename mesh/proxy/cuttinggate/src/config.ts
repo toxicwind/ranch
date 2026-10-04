@@ -45,7 +45,9 @@ const Schema = z.object({
     "cerebras": "https://api.cerebras.ai/v1",
     "google": "https://generativelanguage.googleapis.com/v1beta/openai",
     "mistral": "https://api.mistral.ai",
+    "google-eap": "http://127.0.0.1:25109/gemini-eap-interactions",
     "zen": "https://opencode.ai/zen/v1",
+    "flock": "http://127.0.0.1:25193/v1",
   }),
 
   /** Hard ceiling on concurrent in-flight upstream calls. */
