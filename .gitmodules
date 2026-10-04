@@ -308,3 +308,18 @@
 [submodule "wezterm"]
 	path = wezterm
 	url = https://github.com/toxicwind/wezterm.git
+
+# --- repair 2026-10-04: 4 gitlinks missing from the 00:12Z generation,
+#     urls verified via git remote get-url origin inside each checkout ---
+[submodule "AgentForensics"]
+	path = AgentForensics
+	url = https://github.com/aparnaa19/AgentForensics.git
+[submodule "borrowed/herdr"]
+	path = borrowed/herdr
+	url = https://github.com/ogulcancelik/herdr.git
+[submodule "borrowed/loom"]
+	path = borrowed/loom
+	url = https://github.com/rjwalters/loom.git
+[submodule "mcp-prompt-injection-detector"]
+	path = mcp-prompt-injection-detector
+	url = https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector.git
