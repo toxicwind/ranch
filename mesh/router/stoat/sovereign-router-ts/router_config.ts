@@ -216,24 +216,21 @@ function effectiveDefs(): ProviderDef[] {
        keyEnv: "OPENCODE_API_KEY",
        auth: "bearer",
       adapter: "static",
-       // Live-verified 2026-10-04: 16/16 models serve OK via router
-       // (10 quarantined "delisted" models re-verified live, restored)
+       // Upstream catalog 2026-10-04: 45 models, 11 free-tier.
+       // Verified against https://opencode.ai/zen/v1/models AND via router
+       // WITH response-model check — the router fails over on miss, so
+       // HTTP 200 alone does NOT prove the model served.
        staticModels: [
-         "ling-3.1-flash-free",
+         "big-pickle",
          "fledge-alpha-free",
+         "jev-1.13-free",
+         "ling-3.1-flash-free",
+         "longcat-2.5-preview-free",
          "mimo-v2.5-free",
          "mimo-v2.6-flash-free",
-         "nemotron-3.5-lightning-free",
-         "nemotron-3-ultra-free",
-         "longcat-2.5-preview-free",
-         "deepseek-v4-flash-free",
-         "qwen3.6-plus-free",
-         "minimax-m3-free",
-         "north-mini-code-free",
-         "big-pickle",
-         "jev-1.13-free",
          "muse-spark-1.2-contributor-free",
          "muse-spark-1.3-contributor-free",
+         "nemotron-3.5-lightning-free",
          "space-bunny-free",
        ],
        seeds: [
