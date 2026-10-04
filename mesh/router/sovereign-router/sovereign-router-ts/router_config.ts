@@ -214,7 +214,7 @@ function effectiveDefs(): ProviderDef[] {
       displayName: "opencode zen (free tier)",
       baseUrl: "https://opencode.ai/zen/v1",
        keyEnv: "OPENCODE_API_KEY",
-      auth: "none",
+       auth: "bearer",
       adapter: "static",
        staticModels: [
          "big-pickle",
