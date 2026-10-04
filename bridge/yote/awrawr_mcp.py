@@ -242,17 +242,6 @@ def _canonical_spawn_env():
                         env[_k] = _v
     except OSError:
         pass
-    # the daemon process environment. Single source of truth: /home/toxic/.secrets.
-    try:
-        with open("/home/toxic/.secrets") as _sf:
-            for _line in _sf:
-                _line = _line.strip()
-                if _line.startswith("GH_TOKEN=") or _line.startswith("GITHUB_TOKEN="):
-                    _k, _v = _line.split("=", 1)
-                    if _v:
-                        env[_k] = _v
-    except OSError:
-        pass
     return env
 
 
