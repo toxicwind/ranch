@@ -54,9 +54,11 @@ export async function executeTask(task: QueuedTask): Promise<ExecResult | null> 
     cwd: task.exec?.cwd ?? "/home/toxic",
     stdout: "pipe",
     stderr: "pipe",
-    // Guarantee a sane PATH for the shell and its children: moon/CI task
-    // envs may carry a scrubbed PATH
-    env: { ...process.env, PATH: process.env.PATH || "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" },
+    // Guarantee system dirs on PATH for the shell and its children:
+    // moon/CI task envs may carry a PATH without /usr/bin:/bin at all
+    // (bare "bash" posix_spawn ENOENT, "sleep" unresolvable). Append, never
+    // replace, so tool-specific dirs from the parent env keep priority.
+    env: { ...process.env, PATH: [process.env.PATH, "/usr/local/sbin", "/usr/local/bin", "/usr/sbin", "/usr/bin", "/sbin", "/bin"].filter(Boolean).join(":") },
   });
   const killer = setTimeout(() => {
     timedOut = true;
