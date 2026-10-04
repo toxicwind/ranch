@@ -301,7 +301,14 @@ async function handleStream(
     } finally {
       finish();
     }
-  })();
+  })().catch((e) => {
+    // Client hangup (AbortError) is routine traffic, not a bug: the SSE
+    // stream already closed via onAbort/finish. Anything else is logged
+    // loudly but must never kill the router (2026-10-03 crash-loop: an
+    // unhandled AbortError exited Bun and pitchfork respawned -> ~20s flap).
+    const nm = (e as { name?: string } | null)?.name;
+    if (nm !== "AbortError") log("sse route rejected:", String(e).slice(0, 300));
+  });
   return response;
 }
 
@@ -959,6 +966,15 @@ function hotReload(source: string): Record<string, unknown> {
   return { source, keys, priors };
 }
 process.on("SIGHUP", () => hotReload("SIGHUP"));
+
+// A client disconnect mid-request surfaces as AbortError in async work.
+// Exiting here costs a full restart flap, so the router stays up: swallow
+// abort-family rejections silently, log everything else loudly.
+process.on("unhandledRejection", (reason) => {
+  const nm = (reason as { name?: string } | null)?.name;
+  if (nm === "AbortError") return;
+  log("unhandledRejection (kept alive):", String(reason).slice(0, 300));
+});
 
 // Active quarantine re-prober: cheap GET {base}/models with a short
 // deadline; success half-opens the provider, failure re-opens at the next
