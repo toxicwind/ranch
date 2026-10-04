@@ -34,15 +34,9 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.4.2"
-      # The monorepo install (16 workspaces) is slow cold; cache the bun
-      # store keyed on the root lockfile so warm runs finish in ~30s.
-      - name: Cache bun store
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: |
-            bun-${{ runner.os }}-
+      # NOTE: no actions/cache for the bun store -- a restored cache made
+      # `bun install` hang silently for 15min (run 37168529657). The monorepo
+      # CI cold-installs in ~1-2min, so the cache buys nothing here.
       # Install at the repo ROOT (where bun.lock lives): corral has no own
       # lockfile, so bun walks up here anyway. Explicit beats implicit.
       - name: Install (frozen lockfile)
