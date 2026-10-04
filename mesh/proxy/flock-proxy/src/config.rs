@@ -959,7 +959,7 @@ mod tests {
         let sc = load(&dir.0).unwrap().expect("v1 store must load");
         assert_eq!(sc.version, CURRENT_VERSION);
         validate(&sc).expect("migrated store must validate");
-        assert_eq!(sc.providers.len(), 13, "all AstMatrix providers seeded");
+        assert_eq!(sc.providers.len(), 14, "all seeded providers present");
         let nv = sc.providers.iter().find(|p| p.name == "nvidia").unwrap();
         assert_eq!(nv.base_url, "https://integrate.api.nvidia.com");
         assert_eq!(nv.keys.len(), 1);

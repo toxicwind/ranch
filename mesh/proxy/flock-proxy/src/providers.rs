@@ -51,10 +51,12 @@ pub fn models_url(base_url: &str) -> String {
 /// gaining the prefix they need.
 pub fn upstream_url(base_url: &str, path_and_query: &str) -> String {
     let base = base_url.trim().trim_end_matches('/');
+    // Tolerate a missing leading slash, then dedupe a trailing /v1 on the
+    // base against a leading /v1 on the path (the /v1/v1 probe bug).
     let path = if path_and_query.starts_with('/') {
-        path_and_query
+        path_and_query.to_string()
     } else {
-        return format!("{base}/{path_and_query}");
+        format!("/{path_and_query}")
     };
     let base = if path == "/v1" || path.starts_with("/v1/") {
         base.strip_suffix("/v1").unwrap_or(base)
@@ -845,9 +847,9 @@ mod tests {
     }
 
     #[test]
-    fn thirteen_builtin_providers() {
+    fn fourteen_builtin_providers() {
         let defs = default_providers();
-        assert_eq!(defs.len(), 13);
+        assert_eq!(defs.len(), 14);
         let names: Vec<&str> = defs.iter().map(|p| p.name.as_str()).collect();
         for expected in [
             "herd",
@@ -863,6 +865,7 @@ mod tests {
             "openai",
             "perplexity",
             "siliconflow",
+            "google",
         ] {
             assert!(names.contains(&expected), "missing {expected}");
         }
@@ -997,12 +1000,17 @@ mod tests {
             assert_eq!(d.base_url, t.base_url, "{} base_url", ov.name);
             assert_eq!(d.keys[0].key_env, t.key_env, "{} key_env", ov.name);
             // Seeds are Roost's minus dead IDs (the Roost contract).
-            let want: Vec<String> = t
-                .seeds
-                .iter()
-                .filter(|m| !dead.contains(*m))
-                .map(|s| s.to_string())
-                .collect();
+            // Static adapters seed from static_models, not seeds — mirror
+            // default_providers() exactly.
+            let want: Vec<String> = if t.static_models.is_empty() {
+                t.seeds
+                    .iter()
+                    .filter(|m| !dead.contains(*m))
+                    .map(|s| s.to_string())
+                    .collect()
+            } else {
+                t.static_models.iter().map(|s| s.to_string()).collect()
+            };
             assert_eq!(d.models, want, "{} models", ov.name);
             // No advertised seed is a known-dead ID.
             for m in &d.models {
