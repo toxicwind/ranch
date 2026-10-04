@@ -29,6 +29,12 @@ deepseek-v4-flash-free, qwen3.6-plus-free, minimax-m3-free, north-mini-code-free
 big-pickle, jev-1.13-free, muse-spark-1.2-contributor-free,
 muse-spark-1.3-contributor-free, space-bunny-free
 
+**Added 2026-10-04 (API diff, 10 new):**
+claude-sonnet-5-5, gpt-5.3-codex-spark, gpt-6.1-sol, jev-1.13,
+ling-3.1-flash-free, longcat-2.5-preview-free, mimo-v2.5-free,
+jev-1.13-free, fledge-alpha-free, space-bunny-free
+(All verified live via :25104/v1/chat/completions)
+
 **Community projects taking zen further:**
 - parithosh-varma/opencode-proxy — zero-dep OpenAI-compatible proxy
 - dinhkarate/opencode-zen-free-proxy — OpenAI/Anthropic/Responses APIs
