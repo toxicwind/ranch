@@ -14,6 +14,8 @@ github_*_pat.json
 .env*
 *secret*
 *token*
+# design tokens are code, not secrets (aesthe 2026-10-03)
+!src/ui/tokens.ts
 
 # --- secret hygiene (2026-09-19): never commit credentials ---
 .secrets*
