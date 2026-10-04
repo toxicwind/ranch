@@ -22,6 +22,20 @@
   let stuck = $state(false);
   let newWhileStuck = $state(0);
   let prevCount = 0;
+  let msgEl: HTMLTextAreaElement | null = $state(null);
+
+  // auto-growing composer: the textarea expands with content up to a cap,
+  // then scrolls internally. Enter sends, Shift+Enter inserts a newline.
+  function autogrow() {
+    const el = msgEl;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 168) + "px";
+  }
+  // shrink back to one row whenever the draft clears (e.g. after send)
+  $effect(() => {
+    if (draft === "") autogrow();
+  });
 
   // message list for the active tab, derived from the live connection state
   let active = $derived(live.tabs[activeName] as { messages: Msg[]; cursor: number } | undefined
@@ -215,9 +229,12 @@
 
   <div id="composer">
     <div class="composer-bar">
-      <input
+      <textarea
         id="msg"
+        rows={1}
+        bind:this={msgEl}
         bind:value={draft}
+        oninput={autogrow}
         onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
         placeholder={`message #${activeName}`}
         autocomplete="off"
@@ -225,7 +242,7 @@
         aria-label="message"
         enterkeyhint="send"
         disabled={sending}
-      />
+      ></textarea>
       <button
         id="send"
         onclick={sendMsg}
@@ -239,7 +256,7 @@
       </button>
     </div>
     <div class="composer-meta" aria-hidden="true">
-      <span><kbd>enter</kbd> to send</span>
+      <span><kbd>enter</kbd> to send · <kbd>shift</kbd>+<kbd>enter</kbd> for a new line</span>
     </div>
   </div>
 
