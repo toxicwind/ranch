@@ -497,6 +497,7 @@ strategy: STRATEGY,
 strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free race (default) -> hybrid (fallback); per-request X-Strategy/X-Routed-Via headers show the chosen lane" : STRATEGY,
         uptime_s: Math.round(process.uptime()),
         started_at: new Date(Date.now() - process.uptime() * 1000).toISOString(),
+        model_disabler: state.disabler.stats(),
         providers,
       });
     }
@@ -1071,6 +1072,10 @@ function startWarmStandby(): void {
   tick().catch(() => {});
 }
 startWarmStandby();
+
+// Model disabler background rechecker (2026-10-04): probes disabled models
+// on backoff schedule; 2 consecutive successes re-admits them.
+import("./model_rechecker.ts").then((m) => m.startRechecker()).catch((e) => console.error("rechecker start failed:", String(e).slice(0, 120)));
 
 // Live model discovery: curated list + every model each key can serve.
 startLiveDiscovery();

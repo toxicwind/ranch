@@ -158,6 +158,7 @@ export async function callOne(
   stream = false,
   externalSignal?: AbortSignal,
   rctx?: RequestCtx,
+  force = false,
 ): Promise<RouteResult> {
   const decision = rctx?.decision;
   // 404-entitlement bench (503-forensics 2026-09-21): fail fast with ZERO
@@ -171,6 +172,18 @@ export async function callOne(
       provider,
       lat: 0,
       err: "entitlement_benched",
+    };
+  }
+  // Model disabler (2026-10-04): skip models benched by consecutive failures.
+  // They recheck on backoff via the background rechecker — zero attempt burn here.
+  if (!force && state.disabler.isDisabled(`${provider}:${model}`)) {
+    decision?.push_skip(provider, "model_disabled");
+    return {
+      ok: false,
+      status: 503,
+      provider,
+      lat: 0,
+      err: "model_disabled",
     };
   }
   if (!state.circuitOk(provider)) {
