@@ -36,6 +36,7 @@ const Schema = z.object({
    */
   bases: z.record(z.string(), z.string()).default({
     "llama-swap": "http://127.0.0.1:25100/v1",
+    "herd": "http://127.0.0.1:25100/v1",
     "nim-local": "http://127.0.0.1:8000/v1",
     "kimi-auto": "http://127.0.0.1:25153/v1",
     "openrouter": "https://openrouter.ai/api/v1",
