@@ -1,108 +1,42 @@
-> **SUPERSEDED 2026-10-02 — STILL SERVING ON :25104.** cuttinggate on `:25200` is the canonical live router. The sovereign-router on `:25104` was marked retired in docs, but `[daemons.sovereign-router]` still composes it in `estate/pitchfork.toml` with `auto = ["start"]`, and `bun router.ts` is bound and answering `/health` (verified 2026-10-02). This directory is preserved as a reference implementation; the strategy tables and endpoint docs below describe the router as it last ran as canonical.
+# Sovereign Router & Mesh Routing
 
-# Sovereign Router
-
-*Multi-provider LLM routing gateway (OpenAI-compatible `/v1/chat/completions`): one request fans out across many upstream providers with strategy-based failover, circuit breakers, sticky sessions, and a WAL health DB.*
+*Multi-provider LLM routing gateway on port :25104 with Speculative Learning, Obelisk Thompson-sampling Bayesian engine, 7-family rate limit deconvolution, and Gatehouse MCP tool integration.*
 
 ![ranch](https://img.shields.io/badge/toxicwind-ranch-blue?style=for-the-badge) ![mesh](https://img.shields.io/badge/mesh-router-purple?style=for-the-badge) ![bun](https://img.shields.io/badge/bun-black?style=for-the-badge) ![port 25104](https://img.shields.io/badge/port-25104-orange?style=for-the-badge)
 
-> Naming note: this was historically called "ast-matrix" / "ast-router" (a codename from the original research angle). It is a **provider router**, not a matrix — the directory is `mesh/router/`.
+## Active Routing Architecture (v3.2+)
 
-## Why this exists
+- **Canonical Active Service**: The TypeScript router on port `:25104` (`sovereign-router-ts`) is the active sovereign router daemon composed under `pitchfork` (`auto = ["start"]`).
+- **Speculative Learning**: Parallel hedged dispatch ($K=3, \delta=100\text{ms}$) where aborted in-flight losers are observed at fractional weights ($\beta += 0.3$, $\beta += 0.6$, rate-limit refill Gamma) turning tail-latency hedges into zero-cost continuous exploration.
+- **Hierarchical Bayesian State**: 
+  - Level 1: Shared credential bucket refill rates ($r \sim \text{Gamma}(\text{shape}_r, \text{rate}_r)$) modeling multi-key quotas.
+  - Level 2: Beta quality and Gamma latency/throughput posteriors per `(provider/model/task_path)`.
+- **7-Family Rate Limit Deconvolution**: Disambiguates `rpm`, `tpm`, `five_hour`, `seven_day`, `model_scoped`, `concurrency`, and `spend_cap` from raw HTTP 429 headers and bodies.
+- **Gatehouse MCP Integration**: Direct connection with `:25127` Gatehouse MCP proxy with all quarantine tools approved.
 
-- **One endpoint, every provider** — a single OpenAI-compatible API fronts herd, openrouter, nvidia, groq, cerebras, google, and mistral. Clients never rewire when providers change.
-- **Zero-cost is a strategy, not a hope** — the `free` strategy races local GPU inference against every `:free` cloud model, so cost-sensitive work never touches a paid endpoint by accident.
-- **Self-healing under load** — per-provider circuit breakers (open/half-open), Elo-weighted selection from live success/latency history, and 30-minute sticky sessions for multi-turn coherence.
-- **Observable by default** — a self-contained `/ui` dashboard shows the provider matrix, free-tier models, live circuit/Elo state, and a chat box that posts to the real endpoint.
-
-```mermaid
-flowchart LR
-    client([client<br/>OpenAI-compatible]) -->|"POST /v1/chat/completions<br/>X-Sovereign-Strategy"| r[("sovereign-router :25104<br/>strategy engine")]
-    r --> strat{"strategy"}
-    strat -->|hybrid| race["ast_race<br/>parallel fan-out"]
-    strat -->|free| freepool["race: local + :free cloud"]
-    strat -->|circuit_chain| seq["sequential +<br/>circuit breakers"]
-    strat -->|sticky_affinity| pin["session-pinned<br/>upstream"]
-    race --> herd[("herd :25100<br/>local herd")]
-    race --> cloud[(openrouter · nvidia<br/>groq · cerebras<br/>google · mistral)]
-    freepool --> herd
-    freepool --> cloud
-    seq --> cloud
-    pin --> cloud
-```
-
-## Quick Start
-
-```bash
-# via pitchfork (canonical — the sovereign-router-ts daemon binds :25104)
-# or directly:
-cd projects/mesh/router/sovereign-router-ts
-SOVEREIGN_ROUTER_PORT=25104 bun run router.ts
-```
-
-Then:
-
-```bash
-curl -H "X-Sovereign-Strategy: free" \
-  http://127.0.0.1:25104/v1/chat/completions
-```
-
-Open `http://127.0.0.1:25104/ui` for the live dashboard.
-
-## Strategies
-
-Set per request with the `X-Sovereign-Strategy` header.
-
-| Strategy | Behavior |
-|----------|-----------|
-| `hybrid` (default) | sticky → ast_race → circuit_chain |
-| `free` | **races local herd + every `:free` cloud model** (zero-cost) |
-| `ast_race` | parallel N providers, first AST/code-shaped response wins |
-| `sticky_affinity` | 30-min session pinning for multi-turn |
-| `weighted_elo` | dynamic Elo from success/latency |
-| `circuit_chain` | sequential with open/half-open circuit breakers |
-| `fifo_matrix` | bounded FIFO queue (back-pressure) |
-
-## Layout (this directory)
-
-```text
-projects/mesh/router/
-├── sovereign-router-ts/   # legacy router, still bound on :25104 (cuttinggate :25200 is canonical)
-│   └── router.ts          # Bun/TS, self-contained + /ui dashboard
-├── sovereign-mcp-gateway/ # MCP trust boundary: circuit breakers, sticky affinity (:25120)
-├── flock-py/              # v2 Python router (reference / source-of-truth)
-├── flock-router/          # TS/Bun router variant (4-way AST race, reference)
-├── free_zed_gateway/      # free-LLM-gateway concept (folded into the `free` strategy)
-├── README_COMPLETE.txt    # original research notes
-└── bin/                   # router operator scripts
-```
-
-## Free providers (maximal integration)
-
-The `free` strategy is the zero-cost path. It builds a candidate pool of:
-
-- **local herd** (always free — `local-fast` / `local-quality` / `local-longctx`)
-- **every `:free` model** across keyed cloud providers (OpenRouter's `tencent/hy3:free`, `poolside/laguna-*`, `qwen3-coder:free`, `gemma-4-31b-it:free`, `nemotron-*`, `hermes-3-*`, `gpt-oss-20b:free`, …)
-
-and races them through the *same* parallel/AST-preference/circuit machinery as `ast_race`. So local GPU and free cloud models compete on equal footing, and circuit breakers still apply per provider.
-
-## Endpoints (live router)
+## Endpoints
 
 | Path | Method | Purpose |
 |------|--------|---------|
-| `/v1/chat/completions` | POST | route a chat completion |
-| `/v1/models` | GET | list model aliases |
-| `/health` | GET | provider/circuit/elo summary |
-| `/ui` | GET | **self-contained dashboard** (providers, free models, live chat) |
-| `/ui/data` | GET | JSON snapshot for external dashboards |
-| `/debug/health` `/debug/sqlite` | GET | healing + raw health-DB aggregates |
-| `/mesh/*` | GET | GHAS-inspired mesh feature registry |
+| `/v1/chat/completions` | POST | Route streaming or buffered chat completions |
+| `/v1/models` | GET | List available and live-discovered models |
+| `/health` | GET | Health and provider status summary |
+| `/belief` | GET | Live inspection of Bayesian belief posteriors and arm counts |
+| `/status` | GET | Granular provider circuits, latencies, and health metrics |
+| `/ui` | GET | Web dashboard with live monitoring |
 
-## Dev / contributing
+## Directory Layout
 
-Changes land as commits in the toxicwind/ranch repo. **Superseded 2026-10-02:** the canonical live router is cuttinggate on `:25200` (`mesh/proxy/cuttinggate/`); `sovereign-router-ts/` is still bound on `:25104` as the preserved Bun implementation and `flock-py/` / `flock-router/` the reference variants — the strategy tables above describe the router as it last ran as canonical.
-
-## License & Security
-
-- Follows the toxicwind/ranch repo licensing.
-- Security: upstream provider keys live only in 0600 files under `/home/toxic/` (e.g. `~/.secrets`) and are never logged or committed; the router binds loopback and is reached externally only via tailnet/funnel routes; `/debug/sqlite` exposes raw health-DB aggregates — treat it as internal. Circuit breakers quarantine misbehaving upstreams automatically.
+```text
+ranch/mesh/router/
+├── sovereign-router-ts/   # Canonical live TS router daemon (:25104)
+│   ├── router.ts          # Core Bun HTTP server & hedged speculative dispatcher
+│   ├── obelisk_engine.ts  # @takk/bayesroute wrapper & latent task path descent
+│   ├── model_disabler.ts  # BeliefField, CredentialBuckets & Gamma/Beta sampling
+│   ├── rate_limit_deconvolution.ts # 7-family 429 classifier
+│   ├── adversarial_verifiers.ts    # L2/L4/L5 defense layers
+│   ├── race/              # Evolutionary variant race harness
+│   └── seed/              # Deep Seed v2 capability ladder & classifier sidecar
+├── herd/                  # BeeLlama / llama-swap local GPU inference daemon (:25100)
+└── flock-py/              # Python reference implementation
+```
