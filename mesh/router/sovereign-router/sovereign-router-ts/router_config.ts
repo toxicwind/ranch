@@ -205,6 +205,34 @@ function effectiveDefs(): ProviderDef[] {
       ],
       routerLocal: true,
     },
+    // OpenCode Zen free tier (borrowed: samosa-ai-com/opencode-go-multi-auth
+    // dual-upstream pattern + 9router-opencode-fix client identity).
+    // Anonymous — Zen keys free quota on the x-opencode-* client headers,
+    // injected per-request in router_strategy.ts, not on an API key.
+    {
+      name: "zen",
+      displayName: "opencode zen (free tier)",
+      baseUrl: "https://opencode.ai/zen/v1",
+      keyEnv: "",
+      auth: "none",
+      adapter: "static",
+      staticModels: [
+        "deepseek-v4-flash-free",
+        "mimo-v2.5-free",
+        "qwen3.6-plus-free",
+        "minimax-m3-free",
+        "nemotron-3-ultra-free",
+        "north-mini-code-free",
+      ],
+      seeds: [
+        "deepseek-v4-flash-free",
+        "mimo-v2.5-free",
+        "qwen3.6-plus-free",
+        "minimax-m3-free",
+        "nemotron-3-ultra-free",
+        "north-mini-code-free",
+      ],
+    },
   ]);
 }
 

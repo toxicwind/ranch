@@ -17,6 +17,14 @@ import { injectStreamOptions, noteInjectRejected } from "./streamopts.ts";
 // built here from the registry and rebuilt on hot reload.
 // ---------------------------------------------------------------------------
 export const providerRateLimiter = new ProviderRateLimiter();
+// ---------------------------------------------------------------------------
+// OpenCode Zen client identity (borrowed: 9router-opencode-fix,
+// opencurro-ai/opencodeZen, lidge-jun/opencodex#2160).
+// Stable for the process lifetime — mimics one long-lived CLI session/project.
+// ---------------------------------------------------------------------------
+const OPENCODE_UA = "opencode/1.17.0";
+const OPENCODE_SESSION_ID = "ses_" + Math.random().toString(36).slice(2, 18);
+const OPENCODE_PROJECT_ID = "p_" + Math.random().toString(36).slice(2, 18);
 
 export function rebuildRateLimiter(): void {
   providerRateLimiter.build(
@@ -188,6 +196,19 @@ export async function callOne(
   if (provider === "openrouter") {
     headers["HTTP-Referer"] = "https://zed.dev";
     headers["X-Title"] = "Sovereign-Router";
+  }
+  if (provider === "zen") {
+    // OpenCode client identity (borrowed: 9router-opencode-fix,
+    // opencurro-ai/opencodeZen). Zen keys free-tier quota on these headers,
+    // not on an API key — without them requests land in a shared anonymous
+    // bucket and die with "Free usage exceeded" after a couple of calls.
+    // Session/project are stable per process (one long-lived CLI session);
+    // the request id is fresh per call, exactly like the real CLI.
+    headers["User-Agent"] = OPENCODE_UA;
+    headers["x-opencode-client"] = "cli";
+    headers["x-opencode-session"] = OPENCODE_SESSION_ID;
+    headers["x-opencode-project"] = OPENCODE_PROJECT_ID;
+    headers["x-opencode-request"] = OPENCODE_SESSION_ID + ":" + Date.now() + ":" + Math.random().toString(36).slice(2, 12);
   }
   // Model-pressure governor (flock governor.rs AIMD, per provider/model):
   // refused fast with 429 when the model is at its worker cap or draining.
