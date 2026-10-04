@@ -1,4 +1,6 @@
 #!/bin/bash
+
+. "$HOME/estate/config/flock-ssot/env-shim.sh" 2>/dev/null || true
 # Flock launcher: injects provider API keys from /home/toxic/.secrets
 # into the daemon environment, then execs the binary. Keeps secret
 # values out of pitchfork.toml (which is committed to git).

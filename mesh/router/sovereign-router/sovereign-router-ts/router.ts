@@ -1098,10 +1098,12 @@ function startWarmStandby(): void {
       try {
         if (!keyOk(p)) continue;
         const conf = PROVIDERS[p];
+        const k = getKey(p);
         const headers: Record<string, string> = {
           Accept: "application/json",
           "User-Agent": "SovereignRouter/3.2 warm-standby",
         };
+        if (k) headers["Authorization"] = `Bearer ${k}`;
         const r = await fetch(`${conf.base.replace(/\/+$/, "")}/models`, {
           headers,
           signal: AbortSignal.timeout(5000),

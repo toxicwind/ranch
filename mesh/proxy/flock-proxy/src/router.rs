@@ -264,6 +264,7 @@ fn is_chat_completions_path(path_query: &str) -> bool {
 pub struct ProviderMeta {
     pub provider: String,
     pub display_name: String,
+    pub base_url: String,
     pub usable: bool,
     pub healthy: bool,
     pub latency_ms: Option<f64>,
@@ -1168,6 +1169,7 @@ impl RouterHandle {
                 ProviderMeta {
                     provider: def.name.clone(),
                     display_name: def.display_name.clone(),
+                    base_url: def.base_url.clone(),
                     usable: def.usable(),
                     healthy: self.inner.health.is_healthy(&def.name),
                     latency_ms: self.inner.health.latency_ms(&def.name),

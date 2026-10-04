@@ -630,6 +630,7 @@ pub(crate) fn observe_buffered(body: &[u8]) -> ResponseObservations {
 /// Substance check for the empty-completion guard: does this buffered
 /// response body carry any generated content? A chat-completion choice
 /// counts as substantive when any message.content (or delta.content)
+/// is non-blank, any message.reasoning_content (or delta.reasoning_content)
 /// is non-blank, or any message.tool_calls (or delta.tool_calls) is a
 /// non-empty array. Bodies without a choices envelope are not chat
 /// completions and pass through untouched.
@@ -658,6 +659,16 @@ pub(crate) fn has_substance(body: &[u8]) -> bool {
             }
             if part
                 .get("content")
+                .and_then(|c| c.as_str())
+                .is_some_and(|s| !s.trim().is_empty())
+            {
+                return true;
+            }
+            // Reasoning-only completions (e.g. moonshotai/kimi-k3 returns
+            // content:null with reasoning_content) are substantive output,
+            // not empty completions.
+            if part
+                .get("reasoning_content")
                 .and_then(|c| c.as_str())
                 .is_some_and(|s| !s.trim().is_empty())
             {

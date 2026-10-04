@@ -139,33 +139,28 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     keyEnvAlt: "NVIDIA_API_KEYS",
     auth: "bearer",
     adapter: "openai",
+    // Seeds are the entitlement-verified working set (2026-10-03
+    // audit of integrate.api.nvidia.com: 81 catalog models probed
+    // across all account keys, 7 return real completions). The
+    // removed seeds are entitlement-gated (404 "Function not found
+    // for account") or dead/hanging on every key.
     seeds: [
       "nvidia/nemotron-3-super-120b-a12b",
+      "nvidia/nemotron-3-ultra-550b-a55b",
+      "z-ai/glm-5.3-flash",
+      "deepseek-ai/deepseek-v4.1-flash",
+      "openai/gpt-oss-20b",
       "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
-      "nvidia/nemotron-3-nano-30b-a3b",
-      "meta/llama-3.1-70b-instruct",
-      "qwen/qwen3.5-397b-a17b",
-      "qwen/qwen3.5-122b-a10b",
-      "deepseek-ai/deepseek-v4-flash",
-      "deepseek-ai/deepseek-v4-pro",
-      "mistralai/mistral-large-3-675b-instruct-2512",
-      "google/gemma-4-31b-it",
-      "z-ai/glm-5.2",
-      "thinkingmachines/inkling",
+      "z-ai/glm-5.3",
     ],
     contextLengths: {
-      "deepseek-ai/deepseek-v4-flash": 256000,
-      "deepseek-ai/deepseek-v4-pro": 256000,
-      "google/gemma-4-31b-it": 1000000,
-      "meta/llama-3.1-70b-instruct": 128000,
-      "mistralai/mistral-large-3-675b-instruct-2512": 256000,
-      "nvidia/nemotron-3-nano-30b-a3b": 256000,
+      "deepseek-ai/deepseek-v4.1-flash": 256000,
       "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": 256000,
       "nvidia/nemotron-3-super-120b-a12b": 500000,
-      "qwen/qwen3.5-122b-a10b": 256000,
-      "qwen/qwen3.5-397b-a17b": 256000,
-      "thinkingmachines/inkling": 256000,
-      "z-ai/glm-5.2": 200000
+      "nvidia/nemotron-3-ultra-550b-a55b": 1000000,
+      "openai/gpt-oss-20b": 128000,
+      "z-ai/glm-5.3": 200000,
+      "z-ai/glm-5.3-flash": 200000
     },
   },
   {

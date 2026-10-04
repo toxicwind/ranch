@@ -218,7 +218,8 @@ export async function callOne(
       err: "rate_limited",
     };
   }
-  const url = conf.base.replace(/\/$/, "") + "/chat/completions";
+  const baseClean = conf.base.replace(/\/$/, "");
+  const url = baseClean.endsWith("/v1") ? `${baseClean}/chat/completions` : `${baseClean}/v1/chat/completions`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     "User-Agent": UA,

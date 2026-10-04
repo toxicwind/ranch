@@ -1115,6 +1115,25 @@ fn streaming(
 /// provider serves it, whether that provider is usable (keys present) and
 /// healthy, circuit state, probe latency, ELO, and the current
 /// empty-completion strike count for the exact (provider, model) pair.
+///
+/// The nvidia upstream catalog lists every model on the platform, not
+/// every model THIS account is entitled to serve — the unentitled ones
+/// answer 404 "Function not found for account" on chat completions.
+/// NIM_VERIFIED_MODELS is the entitlement-verified working set (the
+/// 2026-10-03 audit: 81 catalog models probed across all account keys,
+/// 7 return real completions). Unverified catalog entries are dropped
+/// from the advertisement so clients never route into a guaranteed 404;
+/// the strike machinery still quarantines anything that starts failing.
+const NIM_VERIFIED_MODELS: &[&str] = &[
+    "nvidia/nemotron-3-super-120b-a12b",
+    "nvidia/nemotron-3-ultra-550b-a55b",
+    "z-ai/glm-5.3-flash",
+    "deepseek-ai/deepseek-v4.1-flash",
+    "openai/gpt-oss-20b",
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+    "z-ai/glm-5.3",
+];
+
 fn flock_model_meta(
     router: &crate::router::RouterHandle,
     meta: &crate::router::ProviderMeta,
@@ -1151,8 +1170,24 @@ fn aggregate_models(body: &Bytes, router: &crate::router::RouterHandle) -> Bytes
         })
         .collect();
     // The upstream listing is nvidia's catalog: enrich every entry with the
-    // live nvidia provider metadata instead of leaving it bare.
+    // live nvidia provider metadata instead of leaving it bare, and drop
+    // catalog entries the account is not entitled to serve (the upstream
+    // lists platform-wide models, not account-entitled ones). The filter
+    // applies only to the real NVIDIA endpoint — a test mock or a local
+    // NIM shim serving as the nvidia provider keeps its own catalog.
     if let Some(nv) = metas.iter().find(|m| m.provider == "nvidia") {
+        let real_nim = nv.base_url.starts_with("https://integrate.api.nvidia.com");
+        let verified: std::collections::HashSet<&str> =
+            NIM_VERIFIED_MODELS.iter().copied().collect();
+        if real_nim {
+            data.retain(|entry| {
+                entry
+                    .get("id")
+                    .and_then(|i| i.as_str())
+                    .map(|id| verified.contains(id))
+                    .unwrap_or(true)
+            });
+        }
         for entry in data.iter_mut() {
             let id = entry
                 .get("id")

@@ -1043,8 +1043,9 @@ mod tests {
             nv.model_map.get("free").map(|s| s.as_str()),
             Some("nvidia/nemotron-3-ultra-550b-a55b")
         );
-        // Roost's nvidia seeds (12) replace the 2 stale hardcoded ones.
-        assert_eq!(nv.models.len(), 12);
+        // Roost's nvidia seeds (7, the entitlement-verified working set)
+        // replace the 2 stale hardcoded ones.
+        assert_eq!(nv.models.len(), 7);
         let mi = by_name("mistral");
         // Roost authority: no /v1 suffix (the old hardcode was wrong).
         assert_eq!(mi.base_url, "https://api.mistral.ai");

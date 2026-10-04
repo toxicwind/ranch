@@ -1,3 +1,5 @@
+# ⚠️  DEPRECATED 2026-10-04 — superseded by Rust flock on :25193.
+# Kept for reference; do not deploy. See flock-ssot/ROUTER_CANON.md.
 from __future__ import annotations
 import hashlib
 import json

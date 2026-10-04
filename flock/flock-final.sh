@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+
+. "$HOME/estate/config/flock-ssot/env-shim.sh" 2>/dev/null || true
 # ═══════════════════════════════════════════════════════════════════════════
 # flock-final.sh — install, run, and wire flock into your stack
 # ═══════════════════════════════════════════════════════════════════════════
@@ -20,8 +22,8 @@ if [[ "${1:-}" == "--dry-run" ]]; then
   DRY_RUN=1
 fi
 
-PROXY_URL="http://127.0.0.1:8000/v1"
-WIZARD_URL="http://127.0.0.1:8000/"
+PROXY_URL="http://127.0.0.1:25193/v1"
+WIZARD_URL="http://127.0.0.1:25193/"
 REPO="${FLOCK_REPO:-$HOME/projects/flock}"
 BIN_DST="$HOME/.flock/flock"
 DATA_DIR="$HOME/.flock-data"
@@ -96,12 +98,12 @@ if command -v pitchfork >/dev/null 2>&1 && [[ -f "$PITCHFORK_TOML" ]]; then
       cat >> "$PITCHFORK_TOML" <<TOML
 
 [daemons.flock]
-run = "exec env HOST=127.0.0.1 PORT=8000 DATA_DIR=$DATA_DIR $BIN_DST"
+run = "exec env HOST=127.0.0.1 PORT=25193 DATA_DIR=$DATA_DIR $BIN_DST"
 dir = "."
 mise = false
 retry = true
-ready_cmd = "ss -ltn 'sport = :8000' | grep -q LISTEN"
-env = { FLOCK_PORT = "8000" }
+ready_cmd = "ss -ltn 'sport = :25193' | grep -q LISTEN"
+env = { FLOCK_PORT = "25193" }
 auto = ["start"]
 TOML
       say "pitchfork stanza: added"
@@ -109,11 +111,11 @@ TOML
   fi
   run "pitchfork start flock 2>&1 | tail -2 || true"
 else
-  say "pitchfork not managing flock here; starting directly if :8000 is free..."
-  if ! ss -ltn 'sport = :8000' 2>/dev/null | grep -q LISTEN; then
-    run "setsid nohup env HOST=127.0.0.1 PORT=8000 DATA_DIR=\"$DATA_DIR\" \"$BIN_DST\" >> \"$DATA_DIR/flock.log\" 2>&1 < /dev/null &"
+  say "pitchfork not managing flock here; starting directly if :25193 is free..."
+  if ! ss -ltn 'sport = :25193' 2>/dev/null | grep -q LISTEN; then
+    run "setsid nohup env HOST=127.0.0.1 PORT=25193 DATA_DIR=\"$DATA_DIR\" \"$BIN_DST\" >> \"$DATA_DIR/flock.log\" 2>&1 < /dev/null &"
   else
-    say ":8000 already listening — leaving the running daemon alone."
+    say ":25193 already listening — leaving the running daemon alone."
   fi
 fi
 
@@ -209,15 +211,15 @@ for line in lines:
 
 block = f"""
 # ─── flock (rate-limit-aware) ───
-export FLOCK_URL="http://127.0.0.1:8000/v1"
+export FLOCK_URL="http://127.0.0.1:25193/v1"
 export FLOCK_API_KEY="{key}"
 # compat aliases for tools that still read the old names
-export NIM_PROXY_URL="http://127.0.0.1:8000/v1"
+export NIM_PROXY_URL="http://127.0.0.1:25193/v1"
 export NIM_PROXY_API_KEY="{key}"
-export NIM_BASE_URL="http://127.0.0.1:8000/v1"
+export NIM_BASE_URL="http://127.0.0.1:25193/v1"
 export NVIDIA_API_KEY="{key}"
 export NVIDIA_NIM_API_KEY="{key}"
-export ANTHROPIC_BASE_URL="http://127.0.0.1:8000/v1"
+export ANTHROPIC_BASE_URL="http://127.0.0.1:25193/v1"
 export ANTHROPIC_API_KEY="{key}"
 export ANTHROPIC_AUTH_TOKEN="{key}"
 """
@@ -246,7 +248,7 @@ cfg = {
       "npm": "@ai-sdk/openai-compatible",
       "name": "NVIDIA NIM (via flock)",
       "options": {
-        "baseURL": "http://127.0.0.1:8000/v1",
+        "baseURL": "http://127.0.0.1:25193/v1",
         "apiKey": os.environ["FLOCK_KEY"],
         "timeout": False,
       },
@@ -278,7 +280,7 @@ dry = os.environ.get("DRY_RUN") == "1"
 cfg = {
   "providers": [{
     "name": "nvidia",
-    "baseUrl": "http://127.0.0.1:8000/v1",
+    "baseUrl": "http://127.0.0.1:25193/v1",
     "apiKey": os.environ["FLOCK_KEY"],
     "models": [
       "nvidia/nemotron-3-super-120b-a12b",
@@ -309,7 +311,7 @@ echo "║  DONE                                                         ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo
 say "Binary:     $BIN_DST"
-say "Daemon:     :8000 (pitchfork 'flock' when managed)"
+say "Daemon:     :25193 (pitchfork 'flock' when managed)"
 say "Dashboard:  $WIZARD_URL"
 say "API:        $PROXY_URL"
 echo
