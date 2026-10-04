@@ -188,17 +188,29 @@ export class Router {
       this.claimed.get(ZEN_PROVIDER) ?? this.config.keys[ZEN_PROVIDER] ?? "";
     if (!key)
       throw new Error("zen: no API key configured (set ZEN_API_KEY or OPENCODE_API_KEY)");
-    const res = await fetch(`${ZEN_BASE_URL}/chat/completions`, {
-      method: "POST",
-      headers: zenHeaders(key),
-      body: JSON.stringify(
-        zenBody(req.model, req.messages, {
-          temperature: req.temperature,
-          max_tokens: req.max_tokens,
-        }),
-      ),
-      signal,
-    });
+    // Fail fast inside the gate's breaker timeout: a hung free-tier upstream
+    // must surface as a provider error, never wedge the attempt.
+    const attemptCtrl = new AbortController();
+    const attemptTimer = setTimeout(
+      () => attemptCtrl.abort(new Error("zen_attempt_timeout")),
+      12_000,
+    );
+    let res: Response;
+    try {
+      res = await fetch(`${ZEN_BASE_URL}/chat/completions`, {
+        method: "POST",
+        headers: zenHeaders(key),
+        body: JSON.stringify(
+          zenBody(req.model, req.messages, {
+            temperature: req.temperature,
+            max_tokens: req.max_tokens,
+          }),
+        ),
+        signal: AbortSignal.any([signal, attemptCtrl.signal]),
+      });
+    } finally {
+      clearTimeout(attemptTimer);
+    }
     if (!res.ok) {
       const errText = (await res.text()).slice(0, 500);
       return new Response(
@@ -290,12 +302,29 @@ export class Router {
             return { provider, valid: false, latencyMs: performance.now() - t0, error: e instanceof Error ? e.message : String(e) };
           }
         })
-        .then((r) => {
-          settled.push(r);
-          pending -= 1;
-          wake?.();
-          return r;
-        });
+        .then(
+          (r) => {
+            settled.push(r);
+            pending -= 1;
+            wake?.();
+            return r;
+          },
+          // A gate rejection (breaker timeout / open circuit) is a provider
+          // failure, never a process crash: record it and let the race
+          // continue with the remaining providers.
+          (e) => {
+            const r: Settled = {
+              provider,
+              valid: false,
+              latencyMs: 0,
+              error: e instanceof Error ? e.message : String(e),
+            };
+            settled.push(r);
+            pending -= 1;
+            wake?.();
+            return r;
+          },
+        );
       return { provider, promise: p };
     });
 
