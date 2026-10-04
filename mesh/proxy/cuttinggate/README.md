@@ -6,7 +6,7 @@
 
 ## Why this exists
 
-Every model an agent can think with should be one request away. cuttinggate is that one request: **strategy names — not model names — decide where traffic goes**, so clients never rewire when providers change. It superseded the sovereign-router on `:25104` (still serving — pitchfork `auto = ["start"]`, verified 2026-10-02) and absorbed the flock-proxy role (`:25193`, down).
+Every model an agent can think with should be one request away. cuttinggate is that one request: **strategy names — not model names — decide where traffic goes**, so clients never rewire when providers change. It superseded the sovereign-router on `:25104` (still serving — pitchfork `auto = ["start"]`, verified 2026-10-02) and absorbed the flock-proxy role (`:25193`, live again 2026-10-04, key-gated).
 
 - **Strategy-based routing** — `hybrid` (default: sticky → ast_race → circuit_chain), `free`, `ast_race`, `sticky_affinity`, `weighted_elo`, `circuit_chain`, `fifo_matrix`.
 - **Zero-cost by default** — the `free` strategy races local herd inference against every `:free` cloud model; cost-sensitive agents never touch a paid endpoint by accident.
@@ -42,7 +42,7 @@ tests/            bun test suite (`bun test`)
 
 ## Where it sits
 
-Part of the [mesh](../../README.md) routing plane at `ranch/mesh/proxy/cuttinggate/`. It superseded `:25104` (sovereign-router, still serving) and absorbed the `:25193` flock-proxy role (down). Herd (`:25100`) is its local-inference leg when up.
+Part of the [mesh](../../README.md) routing plane at `ranch/mesh/proxy/cuttinggate/`. It superseded `:25104` (sovereign-router, still serving) and absorbed the `:25193` flock-proxy role (live again 2026-10-04, key-gated). Herd (`:25100`) is its local-inference leg when up.
 
 ## Dev / contributing
 
