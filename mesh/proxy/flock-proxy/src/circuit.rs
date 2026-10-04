@@ -364,4 +364,77 @@ mod tests {
         assert!(restored2.allow());
         assert_eq!(restored2.state(), CircuitState::HalfOpen);
     }
+
+    /// Full persisted recovery sequence with no wall-clock sleeps: the
+    /// cooldown elapsing is simulated through `restore()` (the same path a
+    /// real restart takes), so the test never blocks on a timer.
+    ///
+    /// closed --(5 failures)--> open --(30 s cooldown, faked)--> half-open
+    /// --(2 trial successes)--> closed.
+    #[test]
+    fn full_recovery_sequence_no_sleep() {
+        let mut cb = CircuitBreaker::astmatrix_defaults();
+        assert_eq!(cb.state(), CircuitState::Closed);
+
+        // 1. closed -> open after the failure threshold.
+        for _ in 0..5 {
+            cb.record_failure(1_000_000);
+        }
+        assert_eq!(cb.state(), CircuitState::Open);
+        assert!(!cb.allow()); // gate shut while the cooldown runs
+
+        // 2. open -> half-open after the cooldown, via the persistence
+        // boundary: snapshot, then restore as a restart 31 s later would.
+        let snap = cb.snapshot();
+        assert_eq!(snap.state, 2);
+        assert_eq!(snap.failures, 5);
+        assert_eq!(snap.last_failure_unix, 1_000_000);
+        let mut cb = CircuitBreaker::restore(snap, 1_000_000 + 31);
+        assert_eq!(cb.state(), CircuitState::Open); // still open until consulted
+        assert!(cb.allow()); // -> half-open; probe lease goes to the transitioner
+        assert_eq!(cb.state(), CircuitState::HalfOpen);
+        assert!(!cb.allow()); // concurrent callers fail fast while probing
+
+        // 3. half-open -> closed after `half_open_max` (2) trial successes.
+        cb.record_success();
+        assert_eq!(cb.state(), CircuitState::HalfOpen);
+        assert_eq!(cb.failures(), 5); // failures reset only on close
+        cb.record_success();
+        assert_eq!(cb.state(), CircuitState::Closed);
+        assert_eq!(cb.failures(), 0);
+        assert!(cb.allow());
+    }
+
+    /// The failing branch of the same sequence, also sleep-free: a failed
+    /// half-open probe re-opens immediately with a FRESH cooldown, and the
+    /// persisted snapshot carries that new window across a restart.
+    #[test]
+    fn trial_failure_reopens_with_fresh_cooldown_no_sleep() {
+        let mut cb = CircuitBreaker::astmatrix_defaults();
+        for _ in 0..5 {
+            cb.record_failure(2_000_000);
+        }
+        assert_eq!(cb.state(), CircuitState::Open);
+
+        // Cooldown faked elapsed -> half-open probe admitted -> probe fails.
+        let snap = cb.snapshot();
+        let mut cb = CircuitBreaker::restore(snap, 2_000_000 + 31);
+        assert!(cb.allow());
+        assert_eq!(cb.state(), CircuitState::HalfOpen);
+        cb.record_failure(2_000_031);
+        assert_eq!(cb.state(), CircuitState::Open);
+        assert!(!cb.allow());
+
+        // The re-open stamps a fresh 30 s window: a restart 10 s after the
+        // failed probe still blocks, 31 s after it half-opens again.
+        let snap = cb.snapshot();
+        assert_eq!(snap.state, 2);
+        assert_eq!(snap.last_failure_unix, 2_000_031);
+        let mut too_soon = CircuitBreaker::restore(snap, 2_000_031 + 10);
+        assert_eq!(too_soon.state(), CircuitState::Open);
+        assert!(!too_soon.allow());
+        let mut cooled = CircuitBreaker::restore(snap, 2_000_031 + 31);
+        assert!(cooled.allow());
+        assert_eq!(cooled.state(), CircuitState::HalfOpen);
+    }
 }
