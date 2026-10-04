@@ -36,8 +36,8 @@ _oracle_work = os.environ.get("ORACLE_WORK")
 if _oracle_work:
     os.environ["ORACLE_WORK"] = _oracle_work
 
-import engine
 import calibration as cal
+import engine
 
 
 def load_rows(path):

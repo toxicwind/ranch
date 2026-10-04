@@ -25,8 +25,8 @@ import sys
 BIN = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(BIN, "..", "bin"))
 
-import engine
 import calibration as cal
+import engine
 
 
 def _existing_ids():

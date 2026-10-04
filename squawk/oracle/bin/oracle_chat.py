@@ -27,7 +27,6 @@ Event-driven throughout: the main loop is select() on inotify fds.
 No timers, no polling.
 """
 
-import base64
 import ctypes
 import fcntl
 import importlib.util
@@ -209,11 +208,11 @@ def extract_query(meta, body):
     """
     if meta.get("from", "").strip().lower() == FROM:
         return None  # own message -- never reply
-    m = re.sub(r"^\s*oracle\s*[:,]\s*", "", body, flags=re.I)
+    m = re.sub(r"^\s*oracle\s*[:,]\s*", "", body, flags=re.IGNORECASE)
     if m != body:
         q = m.strip()
     elif "@oracle" in body.lower():
-        q = re.sub(r"@oracle\b", "", body, flags=re.I).strip(" :,-\n")
+        q = re.sub(r"@oracle\b", "", body, flags=re.IGNORECASE).strip(" :,-\n")
     else:
         return None
     return q or None

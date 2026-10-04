@@ -29,7 +29,6 @@ Usage: python3 bench/exp_latency_cost.py --rows bench/results/eval_<ts>.jsonl
 import argparse
 import concurrent.futures as cf
 import json
-import math
 import os
 import random
 import sys
@@ -84,14 +83,14 @@ def part_a(rows):
             s = max(live, key=lambda x: x[1])[0]
             slowest[s] = slowest.get(s, 0) + 1
     return {"phase_splits": phases, "per_tier": per_tier,
-            "slowest_judge_counts": slowest, "n_emitted": len(emitted)}
+            "slowest_judge_counts": slowest, "n_emitted": len(scorable)}
 
 
 def part_b(questions_path, concurrencies, seed):
     sys.path.insert(0, BIN)
     import oracle_ask
     with open(questions_path) as f:
-        qs = [json.loads(l) for l in f if l.strip()]
+        qs = [json.loads(line) for line in f if line.strip()]
     rng = random.Random(seed)
     rng.shuffle(qs)
     sub = qs[:12]
@@ -104,6 +103,7 @@ def part_b(questions_path, concurrencies, seed):
         # reimport to pick up the new ORACLE_WORK is unnecessary:
         # engine/oracle_ask read it at first import; force reload
         import importlib
+
         import engine
         importlib.reload(engine)
         importlib.reload(oracle_ask)
@@ -182,7 +182,7 @@ def part_c(rows):
                                      reliability=1.0) for j in rest]
         p_cut, _ = engine.pooled_posterior(prior, js2)
         cut.append((p_cut, r["label"]))
-        saved_lat.append((slow["latency_s"] or 0))
+        saved_lat.append(slow["latency_s"] or 0)
         saved_calls.append(1)  # ~1 judge call + its retries avoided
     c1 = {"full_panel": metrics(full), "drop_slowest": metrics(cut),
           "accuracy_delta": (metrics(cut)["accuracy"] or 0) -
@@ -209,7 +209,7 @@ def main(argv):
     a = ap.parse_args(argv)
     ts = int(time.time())
     with open(a.rows) as f:
-        rows = [json.loads(l) for l in f if l.strip()]
+        rows = [json.loads(line) for line in f if line.strip()]
     out = {"ts": ts, "rows_path": a.rows,
            "partA_phase_analysis": part_a(rows)}
     if a.sweep:

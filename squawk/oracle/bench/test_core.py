@@ -5,7 +5,6 @@ Run: python3 bench/test_core.py
 Covers: bayes guards, calibration math, engine pooling/gates,
 evidence partitioning, escalation routing, sizing invariants.
 """
-import math
 import os
 import sys
 
@@ -16,8 +15,8 @@ os.environ.setdefault("ORACLE_WORK", "/tmp/oracle-test-work")
 import bayes
 import calibration as cal
 import engine
-import evidence as ev
 import escalation
+import evidence as ev
 import sizing
 
 PASS = 0
@@ -70,6 +69,7 @@ check("norm_ppf", approx(cal.norm_ppf(0.5), 0.0, 1e-9))
 check("norm roundtrip", approx(cal.norm_cdf(cal.norm_ppf(0.7)), 0.7, 1e-9))
 check("nll sane", cal.nll([0.9, 0.1], [1, 0]) < cal.nll([0.5, 0.5], [1, 0]))
 import tempfile as _tf
+
 _tmpd = _tf.mkdtemp(prefix="tc-gate-")
 cal.CAL_DIR = _tmpd
 cal.HISTORY_PATH = _tmpd + "/accepted_history.jsonl"
@@ -136,7 +136,8 @@ tier3, _ = escalation.route([], 0.5, False)
 check("human tier empty", tier3 == "HUMAN", tier3)
 tier4, _ = escalation.route([0.7, 0.75], 0.7, True, invariant_ok=False)
 check("invariant violation debates", tier4 == "DEBATE", tier4)
-mock = lambda model, prompt, timeout_s: {"content": "0.6"}
+def mock(model, prompt, timeout_s):
+    return {"content": "0.6"}
 d = escalation.debate_tier("Q?", "crit", "ev", ["oracle-judge-a"], mock,
                            k=2, max_rounds=2)
 check("debate budgeted", d["rounds"] <= 2 and 0.01 <= d["posterior"] <= 0.99)
@@ -169,35 +170,22 @@ import time
 import framing
 import oracle_ask
 
-
 #!/usr/bin/env python3
 """Rebuilt hardening test sections for bench/test_core.py (appended before the
 final print). Deterministic: no model calls, no network."""
-import threading
-import time
 
-import framing
-import oracle_ask
 
 
 #!/usr/bin/env python3
 """Rebuilt hardening test sections for bench/test_core.py (appended before the
 final print). Deterministic: no model calls, no network."""
-import threading
-import time
 
-import framing
-import oracle_ask
 
 
 #!/usr/bin/env python3
 """Rebuilt hardening test sections for bench/test_core.py (appended before the
 final print). Deterministic: no model calls, no network."""
-import threading
-import time
 
-import framing
-import oracle_ask
 
 # ---- framing: fail-closed question intake ----
 _framing_cases = [
@@ -294,7 +282,7 @@ check("ask path never applies calibration",
       "calibration must live in engine.build_verdict only")
 
 # ---- resilient judge: bounded retry then local fallback ----
-class _FakeJP(object):
+class _FakeJP:
     def __init__(self, refused, posterior=0.7, judge_id="x"):
         self.refused = refused
         self.posterior = posterior
@@ -428,6 +416,7 @@ check("debate final rebuilt by engine",
 # ---- canonical verdict hash: recompute and match the ledger row ----
 import hashlib as _hl
 import json as _json
+
 _hv = engine.build_verdict({"binary_question": "Q?", "base_rate_prior": 0.5,
                             "question_id": "hash1",
                             "resolution_criteria": "c"},

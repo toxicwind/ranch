@@ -6,11 +6,9 @@ Usage: python3 e2e-test.py
 """
 import json
 import re
-import subprocess
 import sys
 import time
 import uuid
-from pathlib import Path
 
 sys.path.insert(0, "/home/toxic/.fleet-bus/squawk-relay")
 import relay_common as C
@@ -27,8 +25,8 @@ def log(msg):
 
 def chat_stack():
     sys.path.insert(0, str(C.SQUAWK_CODE))
-    import fleet_relay
     import chat_commands
+    import fleet_relay
     fleet_relay.ensure_keys_env(root=C.CHAT_ROOT)
     key_dir = fleet_relay.resolve_key_dir(None, root=C.CHAT_ROOT)
     return chat_commands, key_dir
@@ -74,7 +72,7 @@ def main():
     results.update(outbox_seq=oseq, key=key)
 
     # ---- 3. forwarder posts -> same relay_key in #fleet ----
-    rk_re = re.compile(r"^relay_key:\s*(\S+)\s*$", re.M)
+    rk_re = re.compile(r"^relay_key:\s*(\S+)\s*$", re.MULTILINE)
 
     def find_fleet():
         d = C.CHAT_ROOT / C.DEST_CHANNEL
@@ -89,7 +87,7 @@ def main():
     results["fleet_file"] = fname
 
     # ---- 4. re-inject SAME key as a new outbox record (at-least-once dup) ----
-    max_seq = max(int(json.loads(l)["seq"]) for l in C.OUTBOX.read_text().splitlines() if l.strip())
+    max_seq = max(int(json.loads(line)["seq"]) for line in C.OUTBOX.read_text().splitlines() if line.strip())
     dup = dict(rec)
     dup["seq"] = max_seq + 1
     dup["ingest_ts"] = C.now_iso()

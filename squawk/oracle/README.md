@@ -189,14 +189,12 @@ guards, so re-ingested requests never duplicate decisions.
 
 ## Build
 
-The main build entry is `scripts/flicker-build.py` — it submits the canonical
+The main build entry is `scripts/mise-build.sh` — it submits the canonical
 core suite (`python3 bench/test_core.py`: deterministic, no model calls, no
-network; exits nonzero on failure) as a job to flicker, the estate build-job
-system, and streams the log:
+network; exits nonzero on failure) directly through mise. Eligible task artifacts restore through mbx-cache:
 
 ```bash
-./scripts/flicker-build.py
+./scripts/mise-build.sh
 ```
 
-Honors `FLICKER_URL` (default `http://127.0.0.1:25148`). Exit 0 on success
-(or cached identical success), 1 on failure/timeout.
+Exit status comes directly from the suite; no queue, polling loop, or fixed timeout.

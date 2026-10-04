@@ -39,11 +39,11 @@ import uuid
 BIN = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BIN)
 
-import framing
 import calibration as cal
 import engine
-import evidence as evmod
 import escalation
+import evidence as evmod
+import framing
 
 HERD_URL = os.environ.get("HERD_URL", "http://127.0.0.1:25100")
 WORK = os.environ.get("ORACLE_WORK", "/home/toxic/estate/ranch/squawk/oracle/work")

@@ -12,7 +12,6 @@ import json
 import os
 import select
 import sys
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -136,7 +135,7 @@ def acquire_lock(name):
     return fh
 
 
-class Inotify(object):
+class Inotify:
     """Minimal ctypes inotify wrapper (stdlib only)."""
 
     def __init__(self, paths, mask=WATCH_MASK):
