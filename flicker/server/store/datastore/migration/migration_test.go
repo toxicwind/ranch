@@ -27,6 +27,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	xormigrate "src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 )
@@ -44,10 +45,52 @@ func testDriver() string {
 	return driver
 }
 
+// ensureSQLiteFixture returns the path of the pre-dedupe sqlite fixture.
+// The fixture is gitignored by design (see test-files/README.md); when it is
+// absent it is generated on demand from the current migration list, so the
+// tests pass on a fresh checkout and in CI without a committed binary blob.
+func ensureSQLiteFixture(t *testing.T) string {
+	t.Helper()
+	if _, err := os.Stat(sqliteDB); err == nil {
+		return sqliteDB
+	}
+	tmpF, err := os.CreateTemp("./test-files", "fixture_*.db")
+	require.NoError(t, err)
+	fixture := tmpF.Name()
+	require.NoError(t, tmpF.Close())
+	t.Cleanup(func() { _ = os.Remove(fixture) })
+
+	engine, err := xorm.NewEngine("sqlite3", fixture)
+	require.NoError(t, err)
+
+	var filtered []*xormigrate.Migration
+	for _, m := range MigrationTasks() {
+		if m.ID == "deduplicate-log-entries" {
+			break
+		}
+		filtered = append(filtered, m)
+	}
+	xm := xormigrate.New(engine, filtered)
+	xm.InitSchema(func(*xorm.Engine) error { return nil })
+	require.NoError(t, xm.Migrate())
+	require.NoError(t, SyncLogEntryForFixture(engine))
+	_, err = engine.Exec("CREATE TABLE IF NOT EXISTS migrations (name TEXT UNIQUE)")
+	require.NoError(t, err)
+	_, err = engine.Exec("INSERT OR IGNORE INTO migrations (name) VALUES ('legacy-baseline')")
+	require.NoError(t, err)
+	_, err = engine.Exec(
+		"INSERT INTO log_entries (step_id, time, line, data, created, type) VALUES (?,?,?,?,?,?)",
+		2, 0, 0, []byte("original"), 1641630525, 0,
+	)
+	require.NoError(t, err)
+	require.NoError(t, engine.Close())
+	return fixture
+}
+
 func createSQLiteDB(t *testing.T) string {
 	tmpF, err := os.CreateTemp("./test-files", "tmp_")
 	require.NoError(t, err)
-	dbF, err := os.ReadFile(sqliteDB)
+	dbF, err := os.ReadFile(ensureSQLiteFixture(t))
 	require.NoError(t, err)
 
 	require.NoError(t, os.WriteFile(tmpF.Name(), dbF, 0o644))
