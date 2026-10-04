@@ -56,6 +56,7 @@ MAX_MESSAGES = 50
 TEXT_CAP = 500
 WATCH_MASK = 0x00000008 | 0x00000100  # IN_CLOSE_WRITE | IN_MOVED_TO
 _MSG_RE = re.compile(r"^(\d+)-.*\.md$")
+_CHANNEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 
 
 # ---------------------------------------------------------------------------
@@ -118,7 +119,11 @@ def _new_messages(chan_dir: Path, since: int) -> list:
         names = os.listdir(chan_dir)
     except OSError:
         return out
-    for name in sorted(names):
+    def _seq_key(name):
+        m = _MSG_RE.match(name)
+        return (int(m.group(1)), name) if m else (0, name)
+
+    for name in sorted(names, key=_seq_key):
         m = _MSG_RE.match(name)
         if m and int(m.group(1)) > since:
             out.append(chan_dir / name)
@@ -197,6 +202,11 @@ def build_fat(since: int, state: FeedState,
     messages = []
     last = since
     for p in paths:
+        # The filename seq is authoritative for cursor advancement: even a
+        # record whose body will not parse must not be refetched forever.
+        m = _MSG_RE.match(p.name)
+        if m:
+            last = max(last, int(m.group(1)))
         rec = fleet_relay.build_relay_record(
             p, channel=state.channel,
             identity=state.identity, key_dir=state.key_dir)
@@ -262,10 +272,20 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             except (TypeError, ValueError):
                 tail = 0
             tail = max(tail, 0)
-            state = self.server.state
-            with state.cond:
-                if state.high <= since:
-                    state.cond.wait(timeout=self.server.hold)
+            chan = qs.get("channel", [""])[0]
+            if not chan or chan == self.server.state.channel:
+                state = self.server.state
+            else:
+                # Unknown or malformed channel: 404, never reveal.
+                state = self.server.channel_state(chan)
+                if state is None:
+                    self._send_404()
+                    return
+            # tail= is the boot-snapshot path: answer immediately, never park.
+            if tail <= 0:
+                with state.cond:
+                    if state.high <= since:
+                        state.cond.wait(timeout=self.server.hold)
             self._send_json(200, build_fat(since, state, tail=tail))
             return
         self._send_404()
@@ -287,7 +307,43 @@ class FeedServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         self.state = state
         self.token = token
         self.hold = hold
+        self.feed_root = None
+        self.channel_states = {state.channel: state}
+        self.feed_watchers = []
+        self._chan_lock = threading.Lock()
         super().__init__(addr, _Handler)
+
+    def stop_watchers(self):
+        """Signal every channel watcher thread to exit and wait for it."""
+        for st in self.channel_states.values():
+            st.stop.set()
+        for w in self.feed_watchers:
+            w.join(timeout=5)
+
+    def channel_state(self, name: str):
+        """FeedState for a channel, or None when unknown/forbidden.
+
+        The name must be a plain channel dirname (no traversal); it must
+        exist under the feed root. States are created lazily with their own
+        inotify watcher thread.
+        """
+        if not _CHANNEL_RE.match(name):
+            return None
+        with self._chan_lock:
+            st = self.channel_states.get(name)
+            if st is not None:
+                return st
+            chan_dir = self.feed_root / name
+            if not chan_dir.is_dir():
+                return None
+            st = FeedState(chan_dir, name, self.state.identity,
+                           self.state.key_dir)
+            w = threading.Thread(target=_watch_loop, args=(st,),
+                                 daemon=True)
+            w.start()
+            self.channel_states[name] = st
+            self.feed_watchers.append(w)
+            return st
 
 
 def _ensure_keys_env(root: Path) -> None:
@@ -315,6 +371,8 @@ def serve(*, root: Path, channel: str, identity: str, key_dir: Path,
     watcher.start()
     server = FeedServer((bind, port), state, token, hold)
     server.feed_state = state
+    server.feed_root = root
+    server.feed_watchers.append(watcher)
     return server
 
 

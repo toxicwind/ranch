@@ -89,7 +89,6 @@ describe("parseWithRecovery", () => {
       { maxAttempts: 2 },
     );
     expect(out.ok).toBe(false);
-    if (!out.ok) {
       expect(out.attempts).toBe(2);
       expect(out.error.length).toBeGreaterThan(0);
     }
