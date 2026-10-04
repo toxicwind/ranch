@@ -17,7 +17,7 @@ for _cand in (_here, os.path.join(_here, "..")):
     if os.path.exists(os.path.join(_cand, "history_search.py")):
         sys.path.insert(0, _cand)
         break
-import history_search as hs  # noqa: E402
+import history_search as hs  # noqa: E402  (after sys.path.insert for sibling-dir import)
 
 
 def msg(seq, sender, channel, ts, title, body, status="discussion"):

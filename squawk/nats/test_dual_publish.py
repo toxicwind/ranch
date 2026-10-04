@@ -128,7 +128,7 @@ def _t2():
     probe = "nats-kill-probe-" + uuid.uuid4().hex[:8]
     # stop nats (owned path; nats is not squawk so pitchfork-restart allows it)
     subprocess.run(["pitchfork", "stop", "nats"], capture_output=True,
-                       text=True, timeout=60)
+                   text=True, timeout=60)
     time.sleep(2)
     down = subprocess.run(["ss", "-ltn"], capture_output=True, text=True)
     nats_down = ":4222" not in down.stdout
