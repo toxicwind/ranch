@@ -99,6 +99,11 @@ func defaultProviders() map[string]Provider {
 			NoAuth: true, Models: []string{"local-fast", "local-quality", "local-longctx"},
 			Weight: 1.0, ELO: 1600,
 		},
+		"omniroute": {
+			ID: "omniroute", BaseURL: "http://127.0.0.1:20129/v1",
+			NoAuth: true, FreeTier: true, Models: []string{"omniroute/auto"},
+			Weight: 1.0, ELO: 1500,
+		},
 		"openrouter": {
 			ID: "openrouter", BaseURL: "https://openrouter.ai/api/v1",
 			APIKey: os.Getenv("OPENROUTER_API_KEY"),
