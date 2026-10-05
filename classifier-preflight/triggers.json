@@ -203,6 +203,17 @@
       ],
       "why": "Process-control framing that blocks goal-owned tasks (2026-09-30).",
       "rewrite": "Behavioral: 'the load governor pauses the tool tree; runaway PIDs are recorded for resume.'"
+    },
+    {
+      "id": "imperative-override",
+      "patterns": [
+        {
+          "source": "\\bignore (all |any |my |the |these )?previous instructions?\\b|\\bdisregard (all |the |these )?prior instructions?\\b|\\bforget (your |all )?(previous |prior )?instructions?\\b|\\boverride (my |your |the )?previous instructions?\\b|\\bdisable (the |all )?(safety |security )?safeguards?\\b|\\bturn off (the )?(safety|security)\\b|\\brelax(ed)? (the )?(safety|security|safeguards?)\\b|\\boverride (the )?(policy|policies|safety policy)\\b|\\bspecial clearance\\b|\\breplacement instructions?\\b",
+          "flags": "gi"
+        }
+      ],
+      "why": "Instruction-override shape: claims authority over prior instructions, safeguards, or policy. The estate gate was missing it entirely (R1 gap, 2026-10-05).",
+      "rewrite": "Delete the override framing. If the task is legitimate, restate it as a plain instruction; if its actual purpose is wrong, the flag was right and the task dies."
     }
   ]
 }
