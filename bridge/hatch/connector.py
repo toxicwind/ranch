@@ -256,26 +256,65 @@ def _bg_kill(handle):
                 "error": "bad bg-kill frame"}
 
 
+_PROXY_IDEMPOTENT_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
+
+
+def _parse_proxy_frame(stdout):
+    """Validate one proxy frame from the yote helper.
+
+    Frame format (yote_svc_proxy.py): base64(JSON{status, headers,
+    body_b64}) + "\\n". Under WS-lane concurrency the frame can arrive
+    truncated; classify the failure so the caller can decide on retry.
+    Returns (doc, None) on success, (None, "frame-<kind>: ...") on failure.
+    """
+    raw = (stdout or "").strip()
+    if not raw:
+        return None, "frame-empty: helper produced no output"
+    try:
+        decoded = b64d(raw)
+    except Exception as e:
+        return None, "frame-b64: %s" % e
+    try:
+        doc = json.loads(decoded.decode())
+    except Exception as e:
+        return None, "frame-json: %s" % e
+    if not isinstance(doc, dict) or "status" not in doc:
+        return None, "frame-shape: missing 'status' key"
+    return doc, None
+
+
 def svc_proxy(svc, method, path, headers, body):
-    """Proxy one HTTP request to a yote-local service over the exec lane."""
+    """Proxy one HTTP request to a yote-local service over the exec lane.
+
+    The WS exec lane can truncate large frames under concurrency; a
+    truncated frame fails _parse_proxy_frame. For idempotent methods the
+    request is re-issued exactly once — the helper is stateless per
+    request, so the retry is safe and self-heals the transient 502
+    (2026-10-05 bridge diagnosis: ~1 in 10-15 concurrent /herd/* requests
+    hit "bad proxy frame" truncation, backends healthy throughout).
+    """
     payload = {"method": method, "port": SVC_PORTS[svc], "path": path,
                "headers": dict(headers), "body_b64": b64e(body),
                "timeout": 60}
     arg = b64e(json.dumps(payload).encode())
-    res = yote_exec("python3 %s '%s'" % (YOTE_HELPER, arg),
-                    "/home/toxic", timeout=90)
-    if res.get("code") != 0 or res.get("error"):
-        return {"status": 502, "headers": {},
-                "body": ("yote exec failed: %s %s"
-                         % (res.get("error"), res.get("stderr"))).encode()}
-    try:
-        doc = json.loads(b64d(res["stdout"].strip()).decode())
-    except Exception as e:
-        return {"status": 502, "headers": {},
-                "body": ("bad proxy frame: %s" % e).encode()}
-    return {"status": int(doc.get("status", 502)),
-            "headers": doc.get("headers", {}) or {},
-            "body": b64d(doc.get("body_b64", ""))}
+    attempts = 2 if str(method).upper() in _PROXY_IDEMPOTENT_METHODS else 1
+    last_err = "unknown proxy failure"
+    for _ in range(attempts):
+        res = yote_exec("python3 %s '%s'" % (YOTE_HELPER, arg),
+                        "/home/toxic", timeout=90)
+        if res.get("code") != 0 or res.get("error"):
+            # The exec itself failed: retrying won't fix a dead lane.
+            last_err = ("yote exec failed: %s %s"
+                        % (res.get("error"), res.get("stderr")))
+            break
+        doc, ferr = _parse_proxy_frame(res.get("stdout"))
+        if ferr is None:
+            return {"status": int(doc.get("status", 502)),
+                    "headers": doc.get("headers", {}) or {},
+                    "body": b64d(doc.get("body_b64", ""))}
+        last_err = "bad proxy frame: %s" % ferr
+        # Truncated frame on an idempotent method: loop retries once.
+    return {"status": 502, "headers": {}, "body": last_err.encode()}
 
 
 HOP_HEADERS = {"connection", "transfer-encoding", "keep-alive",

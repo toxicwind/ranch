@@ -489,6 +489,7 @@ def _ws_run(s: socket.socket, cmd: str, workdir: str, argv,
             return None
         dispatched = True  # daemon now owns the command; no re-dispatch
         buf = b""
+        malformed_frames = 0
         # The socket must stay silent-tolerant for the whole requested
         # command timeout: a quiet `sleep 600` sends no chunks, and a fixed
         # 120s ceiling here would kill it before the server's own timeout.
@@ -520,6 +521,15 @@ def _ws_run(s: socket.socket, cmd: str, workdir: str, argv,
                 try:
                     doc = json.loads(line.decode())
                 except ValueError:
+                    # A malformed frame line means bytes were lost or
+                    # corrupted in transit. Never silently swallow it:
+                    # count it so the "done" frame reports truncation
+                    # instead of returning partial output as success
+                    # (2026-10-05: WS-lane truncation under concurrency).
+                    malformed_frames += 1
+                    print("exec.py: dropped malformed ws frame "
+                          "(%d bytes, #%d)" % (len(line), malformed_frames),
+                          file=sys.stderr)
                     continue
                 t = doc.get("type")
                 if t == "chunk":
@@ -532,6 +542,12 @@ def _ws_run(s: socket.socket, cmd: str, workdir: str, argv,
                         sys.stdout.flush()
                 elif t == "done":
                     code = int(doc.get("code", 0))
+                    lane_truncated = (bool(doc.get("truncated", False))
+                                      or malformed_frames > 0)
+                    err = doc.get("error")
+                    if malformed_frames > 0 and not err:
+                        err = ("ws lane dropped %d malformed frame(s); "
+                               "output may be truncated" % malformed_frames)
                     if capture:
                         return {
                             "code": code,
@@ -539,9 +555,14 @@ def _ws_run(s: socket.socket, cmd: str, workdir: str, argv,
                             "stderr": "".join(err_parts),
                             "duration_ms": int((time.monotonic() - t0) * 1000),
                             "transport": "ws",
-                            "error": doc.get("error"),
-                            "truncated": bool(doc.get("truncated", False)),
+                            "error": err,
+                            "truncated": lane_truncated,
+                            "malformed_frames": malformed_frames,
                         }
+                    if malformed_frames > 0:
+                        print("exec.py: warning: %d malformed ws frame(s) "
+                              "dropped; output may be truncated"
+                              % malformed_frames, file=sys.stderr)
                     if doc.get("error"):
                         print(doc["error"], file=sys.stderr)
                     return code
