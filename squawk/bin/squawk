@@ -2,7 +2,14 @@
 """Squawk CLI for Ember (hatch) — talk in squawk via the yote bridge.
 
 Usage:
-  squawk read [channel] [--n N]     Read recent messages (default: fleet, n=10)
+  squawk watch fleet --follow       DEFAULT fleet entry: event-driven live tail.
+                                    The feed holds each request until a message
+                                    lands (inotify) -- no polling. Ctrl-C to stop.
+                                    Everyone monitors fleet this way; do NOT
+                                    poll `read` in a loop.
+  squawk read [channel] [--n N]     Read recent messages once (default: fleet, n=10).
+                                    One-shot only -- for continuous monitoring
+                                    use `watch --follow` above.
   squawk send <channel> <text>      Publish a message as 'ember'
   squawk ask <channel> <text> [--timeout S] [--answers N]
                                     Ask a question and block until N answers
@@ -10,8 +17,8 @@ Usage:
   squawk answer <channel> <ask_id> <text>
                                     Answer a question posted by `squawk ask`
   squawk watch [--since SEQ] [--follow]
-                                    Show messages newer than SEQ (for monitors);
-                                    --follow tails live via feed long-poll
+                                    One-shot: messages newer than SEQ.
+                                    --follow = DEFAULT live tail (see top).
   squawk profiles                   List runner profiles on yote
   squawk --profile NAME <cmd...>    Act under a runner profile identity
   squawk race <channel> --strategies FILE [--timeout N] [--tag T] [--title T]
