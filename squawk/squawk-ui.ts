@@ -191,6 +191,24 @@ function shimScreen(text: string): { text: string; flagged: string | null } {
   return { text, flagged: null };
 }
 
+// Canonical seq allocation (2026-10-05 seq-divergence fix): every writer must
+// allocate via chat_core._next_seq (mkdir lock + durable .seqhigh mark), never
+// Date.now(). Timestamp-domain seqs once made allocator-domain messages
+// invisible to seq-gated consumers after the high-water passed them.
+function allocSeq(channel: string): number {
+  try {
+    const r = spawnSync("python3",
+      ["/home/toxic/estate/ranch/squawk/seq_alloc.py", SQUAWK_ROOT, channel],
+      { timeout: 15000, encoding: "utf8" });
+    if (r.status === 0 && r.stdout) {
+      const n = parseInt(r.stdout.trim(), 10);
+      if (Number.isFinite(n) && n > 0) return n;
+    }
+  } catch {}
+  console.error("squawk-ui: seq allocator unreachable, falling back to timestamp (divergence risk)");
+  return Date.now();
+}
+
 // POST /send {channel, text} -> {ok, seq}
 async function handleSend(req: Request): Promise<Response> {
   let body: any;
@@ -210,13 +228,14 @@ async function handleSend(req: Request): Promise<Response> {
   if (screened.flagged) console.error(`squawk-ui: preflight flagged (${screened.flagged.slice(0, 120)}); sending anyway (fail-open)`);
   const safeText = screened.text;
   const ts = Date.now();
+  const seq = allocSeq(channel);
   const sender = "web-ui";
   const slug = slugify(text.slice(0, 40));
   const dir = join(SQUAWK_ROOT, channel);
-  const fname = `${ts}-${sender}-${slug}.md`;
+  const fname = `${seq}-${sender}-${slug}.md`;
   try {
     mkdirSync(dir, { recursive: true });
-    const fm = `---\nseq: ${ts}\nfrom: ${sender}\nto: all\nchannel: ${channel}\nts: ${new Date(ts).toISOString()}\nstatus: discussion\nuuid: ${Math.random().toString(16).slice(2, 10)}\ntitle: msg\n---\n${safeText}\n`;
+    const fm = `---\nseq: ${seq}\nfrom: ${sender}\nto: all\nchannel: ${channel}\nts: ${new Date(ts).toISOString()}\nstatus: discussion\nuuid: ${Math.random().toString(16).slice(2, 10)}\ntitle: msg\n---\n${safeText}\n`;
     writeFileSync(join(dir, fname), fm);
     // Delivery confirmation: read back, verify the write landed.
     const back = readFileSync(join(dir, fname), "utf8");
@@ -226,7 +245,7 @@ async function handleSend(req: Request): Promise<Response> {
   } catch (e) {
     return Response.json({ ok: false, error: String(e) }, { status: 500 });
   }
-  return Response.json({ ok: true, seq: ts });
+  return Response.json({ ok: true, seq });
 }
 
 // --- UI bundle: prebuilt Svelte 5 bundle, cached by mtime (hot-reload) ---
