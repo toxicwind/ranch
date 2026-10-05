@@ -58,6 +58,35 @@ import mechanism as mech
 import sealed as sealed_mod
 
 AGENT_DIR = BIN.parent
+
+# Shared sidechat_shim screening (2026-10-05): every fleet post goes through
+# the shim's pipeline (estate allowlist -> preflight gate -> format_safe),
+# so screening and delivery confirmation apply uniformly across all fleet
+# send paths. Fail-open: any error leaves the text unchanged. Emergency
+# opt-out: ORACLE_SHIM_DIRECT=1.
+_SHIM_DIRECT = os.environ.get("ORACLE_SHIM_DIRECT") == "1"
+_SHIM_PATH_OK = False
+
+
+def _shim_screen(text):
+    """Screen human-readable post text through sidechat_shim. Fail-open."""
+    if not text or _SHIM_DIRECT:
+        return text
+    try:
+        global _SHIM_PATH_OK
+        if not _SHIM_PATH_OK:
+            sys.path.insert(0, "/home/toxic/hatch")
+            _SHIM_PATH_OK = True
+        import sidechat_shim as s
+        if not s.is_estate_allowlisted(text):
+            clean, detail = s._preflight_check(text)
+            if not clean:
+                sys.stderr.write(
+                    "oracle: preflight flagged (%s); sending anyway (fail-open)\n"
+                    % str(detail)[:120])
+        return s.format_safe(text) or text
+    except Exception:
+        return text
 # All paths are env-overridable: the staged defaults are hatch-local and MUST
 # be set to the yote squawk-root paths on deploy (see RESUME.md). Deploying
 # with the defaults on yote watches a nonexistent dir and crashes on startup.
@@ -207,6 +236,11 @@ class Poster:
     def post(self, msg_type, title, body, task_id="", note="", frm=FROM,
              to="all", raw_body=False, extra_fm=None):
         self._refresh()
+        # Shim screening on the human-readable parts (title/note). The body
+        # is protocol data (sealed bids, JSON) and stays byte-exact — the
+        # shim's rewrites must never touch it.
+        title = _shim_screen(title)
+        note = _shim_screen(note)
         self.seq += 1
         self.lamport += 1
         parents = [self.last_hash] if self.last_hash else []
@@ -238,6 +272,9 @@ class Poster:
                 continue
             with os.fdopen(fd, "w", encoding="utf-8") as f:
                 f.write(text)
+            # Delivery confirmation: the atomic create must have landed bytes.
+            if final.stat().st_size == 0:
+                raise OSError("oracle post: write verify failed for %s" % name)
             break
         self.last_hash = hashlib.sha256(text.encode()).hexdigest()
         return name

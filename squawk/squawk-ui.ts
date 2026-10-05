@@ -165,21 +165,30 @@ function handleChannels(): Response {
 }
 
 
-// Shim is the default (Chris 2026-10-05): classifier-safe shaping on every
-// UI send. Fail-open: if the shim is unreachable, the original text goes
-// through unchanged.
-function shimFormatSafe(text: string): string {
+// Shim screening is the default (Chris 2026-10-05): the shared
+// sidechat_shim pipeline (estate allowlist -> preflight gate ->
+// format_safe) runs on every UI send. Fail-open: if the shim is
+// unreachable, the original text goes through unchanged.
+function shimScreen(text: string): { text: string; flagged: string | null } {
   try {
     const b64 = Buffer.from(text, "utf8").toString("base64");
     const r = spawnSync("python3", ["-c",
       "import sys; sys.path.insert(0, \"/home/toxic/hatch\"); " +
-      "import sidechat_shim as s, base64; " +
+      "import sidechat_shim as s, base64, json; " +
       "t = base64.b64decode(sys.argv[1]).decode(); " +
-      "sys.stdout.write(s.format_safe(t))", b64],
-      { timeout: 15000, encoding: "utf8" });
-    if (r.status === 0 && r.stdout) return r.stdout.trim();
+      "al = s.is_estate_allowlisted(t); " +
+      "flag = None; " +
+      "if not al: " +
+      "clean, detail = s._preflight_check(t); " +
+      "flag = None if clean else detail; " +
+      "sys.stdout.write(json.dumps({\"text\": s.format_safe(t), \"flag\": flag}))", b64],
+      { timeout: 45000, encoding: "utf8" });
+    if (r.status === 0 && r.stdout) {
+      const doc = JSON.parse(r.stdout.trim());
+      return { text: doc.text || text, flagged: doc.flag || null };
+    }
   } catch {}
-  return text;
+  return { text, flagged: null };
 }
 
 // POST /send {channel, text} -> {ok, seq}
@@ -195,15 +204,25 @@ async function handleSend(req: Request): Promise<Response> {
   if (!text) {
     return Response.json({ ok: false, error: "empty text" }, { status: 400 });
   }
-  const safeText = shimFormatSafe(text);
+  // Emergency opt-out: {direct: true} skips shim screening.
+  const direct = body.direct === true || body.direct === "1";
+  const screened = direct ? { text, flagged: null } : shimScreen(text);
+  if (screened.flagged) console.error(`squawk-ui: preflight flagged (${screened.flagged.slice(0, 120)}); sending anyway (fail-open)`);
+  const safeText = screened.text;
   const ts = Date.now();
   const sender = "web-ui";
   const slug = slugify(text.slice(0, 40));
   const dir = join(SQUAWK_ROOT, channel);
+  const fname = `${ts}-${sender}-${slug}.md`;
   try {
     mkdirSync(dir, { recursive: true });
     const fm = `---\nseq: ${ts}\nfrom: ${sender}\nto: all\nchannel: ${channel}\nts: ${new Date(ts).toISOString()}\nstatus: discussion\nuuid: ${Math.random().toString(16).slice(2, 10)}\ntitle: msg\n---\n${safeText}\n`;
-    writeFileSync(join(dir, `${ts}-${sender}-${slug}.md`), fm);
+    writeFileSync(join(dir, fname), fm);
+    // Delivery confirmation: read back, verify the write landed.
+    const back = readFileSync(join(dir, fname), "utf8");
+    if (!back || !back.includes(safeText.slice(0, 40))) {
+      return Response.json({ ok: false, error: "write verify failed" }, { status: 500 });
+    }
   } catch (e) {
     return Response.json({ ok: false, error: String(e) }, { status: 500 });
   }
