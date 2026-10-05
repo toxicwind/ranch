@@ -951,6 +951,27 @@
     "enabled": false,
     "mode": "none"
    }
+  },
+  {
+   "quarantined": false,
+   "name": "skills-hub",
+   "protocol": "stdio",
+   "command": "/home/toxic/.bun/bin/bun",
+   "args": [
+    "/home/toxic/estate/skills-hub/mcp/server.ts"
+   ],
+   "env": {
+    "SKILLS_HUB_ROOT": "/home/toxic/estate/skills-hub",
+    "SKILLS_HUB_NODE": "node"
+   },
+   "oauth": null,
+   "enabled": true,
+   "isolation": {
+    "enabled": false,
+    "mode": "none"
+   },
+   "health_check_interval": "15s",
+   "tool_discovery_interval": "2m0s"
   }
  ],
  "oauth_expiry_warning_hours": 4,
