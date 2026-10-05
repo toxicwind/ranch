@@ -10,6 +10,10 @@ Persistent cell-side daemon (runs as root), listening on a local TCP port
                          (ok=True requires a real authenticated exec probe;
                          *_claim flags are derived from that probe -- a claim
                          never contradicts a successful authenticated run)
+  GET  /livez           {"ok", "pid", "uptime_s", "threads", "ts"} --
+                         cheap liveness probe: process-local state only,
+                         never a yote exec. Supervisors/watchdogs probe
+                         THIS; /health is the deep readiness probe.
   POST /exec            {"cmd", "workdir"?, "timeout"?} -> exec result dict
   POST /exec-multi      {"cmds": [{"cmd", "workdir"?, "timeout"?}], "max_workers"?}
                          -> {"results": [exec result dict per cmd, tagged]}
@@ -57,6 +61,8 @@ from urllib.parse import parse_qs, urlparse
 
 PORT = int(os.environ.get("YOTE_CONNECTOR_PORT", "18301"))
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+_START_TIME = time.time()  # process boot; reported by /livez
 # exec.py canonical source: gear/awrawr-mcp/bin/exec.py in toxicwind/sovereign-projects.
 # The cell-side copy at ~/workspace/awrawr-bridge/exec.py must be synced from there.
 BRIDGE_EXEC = os.path.expanduser("~/workspace/awrawr-bridge/exec.py")
@@ -447,6 +453,22 @@ class Handler(BaseHTTPRequestHandler):
             return None, (400, {"error": "invalid JSON"})
 
     def do_GET(self):
+        if self.path == "/livez":
+            # Cheap liveness probe for the supervisor/death-watch wedge
+            # detectors: answers from process-local state only, NEVER a
+            # yote exec. /health is a readiness probe (does a real
+            # authenticated exec through the WS lane); under lane
+            # degradation or yote load it can take seconds and return 503,
+            # which the supervisor's 3s probe timeout reads as
+            # "not-serving" and SIGTERMs a healthy child (2026-10-05
+            # flapping: ~15 wedge-kills in 2h, all false positives).
+            # k8s liveness/readiness split: liveness = is this process
+             # alive and accept()ing; readiness (/health) = can it do work.
+            self._json(200, {"ok": True, "pid": os.getpid(),
+                            "uptime_s": round(time.time() - _START_TIME, 1),
+                             "threads": threading.active_count(),
+                             "ts": time.time()})
+            return
         if self.path == "/health":
             # The authoritative bit is exec_probe: a real no-op command
             # executed end-to-end through auth. ok=True requires it.

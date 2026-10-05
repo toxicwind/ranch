@@ -290,5 +290,51 @@ class WsRunMalformedFrameTests(unittest.TestCase):
         self.assertIsNone(res["error"])
 
 
+class LivezTests(unittest.TestCase):
+    """The /livez cheap-liveness endpoint (2026-10-05 flapping fix).
+
+    /health runs a real authenticated yote exec through the WS lane; the
+    supervisor's 3s probe timeout read a slow/503 /health as
+    "not-serving" and SIGTERMed healthy children (~15 false-positive
+    wedge kills in 2h on 2026-10-05). /livez must answer from
+    process-local state only: fast, and never touching the exec lane.
+    """
+
+    def _serve_once(self, path):
+        from http.server import ThreadingHTTPServer
+        import urllib.request
+        srv = ThreadingHTTPServer(("127.0.0.1", 0), connector.Handler)
+        t = threading.Thread(target=srv.serve_forever, daemon=True)
+        t.start()
+        try:
+            url = "http://127.0.0.1:%d%s" % (srv.server_address[1], path)
+            t0 = time.time()
+            with urllib.request.urlopen(url, timeout=5) as r:
+                body, status = r.read(), r.status
+            return status, json.loads(body.decode()), time.time() - t0
+        finally:
+            srv.shutdown()
+            srv.server_close()
+
+    @unittest.skipUnless(_HAVE_CONNECTOR, "connector.py not importable")
+    def test_livez_ok_fast_and_no_exec(self):
+        with mock.patch.object(connector, "yote_exec",
+                               side_effect=AssertionError("must not exec")):
+            status, doc, dt = self._serve_once("/livez")
+        self.assertEqual(status, 200)
+        self.assertTrue(doc["ok"])
+        self.assertEqual(doc["pid"], os.getpid())
+        self.assertGreaterEqual(doc["uptime_s"], 0)
+        self.assertGreaterEqual(doc["threads"], 1)
+        self.assertLess(dt, 1.0, "/livez must answer in ms, not seconds")
+
+    @unittest.skipUnless(_HAVE_CONNECTOR, "connector.py not importable")
+    def test_livez_thread_count_is_live(self):
+        _, doc, _ = self._serve_once("/livez")
+        # threads reflects this process's live thread count, so the
+        # supervisor's /proc-based wedge signal stays meaningful.
+        self.assertGreaterEqual(doc["threads"], threading.active_count() - 2)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

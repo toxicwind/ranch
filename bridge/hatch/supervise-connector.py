@@ -195,7 +195,7 @@ def port_serving():
     import http.client
     try:
         conn = http.client.HTTPConnection(HOST, PORT, timeout=3)
-        conn.request("GET", "/health")
+        conn.request("GET", "/livez")
         resp = conn.getresponse()
         # Any HTTP response (even 404/500) proves the process is alive
         # and accept()ing. Timeout/exception means wedged.
@@ -207,16 +207,20 @@ def port_serving():
 def port_serving_timed():
     """(serving, latency_seconds): timed version of port_serving().
 
-    Latency matters: a wedged connector can still answer /health while
-    taking 10s+ per request (2026-10-03: exec calls took 120s+ with
-    /health responding). The wedge watchdog treats slow answers as a
-    wedge signal, not as health.
+    Probes /livez (cheap liveness: process-local state only), NOT /health.
+    /health runs a real authenticated yote exec through the WS lane; under
+    lane degradation or yote load it takes seconds and returns 503, which
+    this 3s-timeout probe reads as "not-serving" and SIGTERMs a healthy
+    child (2026-10-05 flapping: ~15 false-positive wedge kills in 2h).
+    Liveness (/livez) answers in ms; a wedged process is still caught by
+    the thread-count signal (/proc) and by /livez itself going slow.
+    The wedge watchdog treats slow answers as a wedge signal, not health.
     """
     import http.client
     start = time.monotonic()
     try:
         conn = http.client.HTTPConnection(HOST, PORT, timeout=3)
-        conn.request("GET", "/health")
+        conn.request("GET", "/livez")
         resp = conn.getresponse()
         ok = 100 <= resp.status < 600
     except Exception:

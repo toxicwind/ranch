@@ -41,7 +41,7 @@ CHILD_PID_FILE = os.path.join(HERE, "connector.pid")
 SUPERVISOR = os.path.join(HERE, "supervise-connector.py")
 LAUNCHER = os.path.join(HERE, "start-detached.py")
 HOST, PORT = "127.0.0.1", 18301
-HEALTH_URL = "http://%s:%d/health" % (HOST, PORT)
+HEALTH_URL = "http://%s:%d/livez" % (HOST, PORT)
 POLL_SECS = 10
 HEARTBEAT_SECS = 600  # log a heartbeat line every 10 min (liveness proof)
 
@@ -95,7 +95,10 @@ def child_pid():
 
 
 def port_serving():
-    """True if 127.0.0.1:18301 answers HTTP /health."""
+    """True if 127.0.0.1:18301 answers HTTP /livez (cheap liveness).
+
+    Probes /livez, NOT /health: /health runs a real yote exec and reports
+    ok:false (503) under lane degradation, which is not process death."""
     try:
         with urllib.request.urlopen(HEALTH_URL, timeout=3) as r:
             d = json.loads(r.read().decode(errors="replace"))
