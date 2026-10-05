@@ -42,12 +42,15 @@ import base64
 import importlib.util
 import json
 import os
+import random
 import re
 import shlex
 import signal
 import sys
+import threading
 import time
 import uuid
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
@@ -283,6 +286,72 @@ def _parse_proxy_frame(stdout):
     return doc, None
 
 
+# --- Proxy retry budget (2026-10-05) -------------------------------------
+# The idempotent retry below self-heals transient frame truncation, but
+# under lane-wide distress every retry adds exec-lane load exactly when the
+# lane is struggling (retry-load investigation: +10-15% exec volume under
+# truncation, small but real). Rolling budget: proxy attempts and retries
+# are timestamped over a 10s window; when retries already make up 25% or
+# more of attempts, further retries are skipped (fail fast). A jittered
+# 50-200ms backoff before each retry decorrelates it from the burst that
+# caused the truncation.
+_PROXY_BUDGET_WINDOW_S = 10.0
+_PROXY_BUDGET_MAX_RETRY_RATIO = 0.25
+_PROXY_RETRY_BACKOFF_MIN_S = 0.05
+_PROXY_RETRY_BACKOFF_MAX_S = 0.20
+
+_proxy_budget_lock = threading.Lock()
+_proxy_attempt_ts = deque()  # svc_proxy entry timestamps (all methods)
+_proxy_retry_ts = deque()    # retry timestamps actually taken
+
+
+def _proxy_budget_reset():
+    """Clear the rolling retry-budget window. Used by tests."""
+    with _proxy_budget_lock:
+        _proxy_attempt_ts.clear()
+        _proxy_retry_ts.clear()
+
+
+def _proxy_budget_prune(now):
+    cutoff = now - _PROXY_BUDGET_WINDOW_S
+    while _proxy_attempt_ts and _proxy_attempt_ts[0] <= cutoff:
+        _proxy_attempt_ts.popleft()
+    while _proxy_retry_ts and _proxy_retry_ts[0] <= cutoff:
+        _proxy_retry_ts.popleft()
+
+
+def _proxy_budget_note_attempt(now=None):
+    """Record one proxy attempt in the rolling budget window."""
+    now = time.time() if now is None else now
+    with _proxy_budget_lock:
+        _proxy_budget_prune(now)
+        _proxy_attempt_ts.append(now)
+
+
+def _proxy_budget_retry_allowed(now=None):
+    """True if one more retry fits the rolling budget; records it.
+
+    Thread-safe (connector serves via ThreadingHTTPServer). The first
+    retry in a quiet window is always allowed; afterwards a retry is
+    allowed only while retries stay under 25% of attempts in the window.
+    """
+    now = time.time() if now is None else now
+    with _proxy_budget_lock:
+        _proxy_budget_prune(now)
+        if _proxy_retry_ts and (len(_proxy_retry_ts) /
+                                max(1, len(_proxy_attempt_ts))
+                                >= _PROXY_BUDGET_MAX_RETRY_RATIO):
+            return False
+        _proxy_retry_ts.append(now)
+        return True
+
+
+def _proxy_retry_backoff():
+    """Jittered 50-200ms pause before a proxy retry."""
+    time.sleep(random.uniform(_PROXY_RETRY_BACKOFF_MIN_S,
+                              _PROXY_RETRY_BACKOFF_MAX_S))
+
+
 def svc_proxy(svc, method, path, headers, body):
     """Proxy one HTTP request to a yote-local service over the exec lane.
 
@@ -292,6 +361,12 @@ def svc_proxy(svc, method, path, headers, body):
     request, so the retry is safe and self-heals the transient 502
     (2026-10-05 bridge diagnosis: ~1 in 10-15 concurrent /herd/* requests
     hit "bad proxy frame" truncation, backends healthy throughout).
+
+    Two guards keep the retry from adding load under lane-wide distress
+    (2026-10-05 retry-load investigation): a rolling 10s retry budget --
+    when retries already make up 25% of attempts in the window the retry
+    is skipped and the 502 fails fast -- and a jittered 50-200ms backoff
+    before each retry so it doesn't re-hit the burst.
     """
     payload = {"method": method, "port": SVC_PORTS[svc], "path": path,
                "headers": dict(headers), "body_b64": b64e(body),
@@ -299,7 +374,9 @@ def svc_proxy(svc, method, path, headers, body):
     arg = b64e(json.dumps(payload).encode())
     attempts = 2 if str(method).upper() in _PROXY_IDEMPOTENT_METHODS else 1
     last_err = "unknown proxy failure"
-    for _ in range(attempts):
+    last_frame_len = -1
+    _proxy_budget_note_attempt()
+    for attempt in range(attempts):
         res = yote_exec("python3 %s '%s'" % (YOTE_HELPER, arg),
                         "/home/toxic", timeout=90)
         if res.get("code") != 0 or res.get("error"):
@@ -312,8 +389,26 @@ def svc_proxy(svc, method, path, headers, body):
             return {"status": int(doc.get("status", 502)),
                     "headers": doc.get("headers", {}) or {},
                     "body": b64d(doc.get("body_b64", ""))}
+        last_frame_len = len(res.get("stdout") or "")
         last_err = "bad proxy frame: %s" % ferr
-        # Truncated frame on an idempotent method: loop retries once.
+        # Truncated frame on an idempotent method: loop retries once --
+        # unless the rolling retry budget is tripped (lane-wide distress:
+        # fail fast instead of adding load), with a jittered 50-200ms
+        # backoff so the retry doesn't re-hit the burst that truncated
+        # the first frame.
+        if attempt + 1 < attempts:
+            if not _proxy_budget_retry_allowed():
+                last_err = ("bad proxy frame: %s "
+                            "(retry budget tripped; failing fast)" % ferr)
+                break
+            _proxy_retry_backoff()
+    # Server-side record of the proxy failure reason (2026-10-05: 502s
+    # previously carried the reason only in the response body, so post-hoc
+    # diagnosis was impossible). frame_len distinguishes truncation
+    # (short/partial) from empty/garbled helper output.
+    log("proxy 502 svc=%s method=%s path=%s attempts=%d frame_len=%d "
+        "reason=%s" % (svc, method, path, attempts, last_frame_len,
+                       last_err))
     return {"status": 502, "headers": {}, "body": last_err.encode()}
 
 
@@ -549,6 +644,9 @@ class Handler(BaseHTTPRequestHandler):
             res = svc_proxy(svc_hit, self.command, rel,
                             self.headers, body)
         except Exception as e:
+            log("proxy 502 svc=%s %s %s exception=%s: %s"
+                % (svc_hit, self.command, self.path,
+                   type(e).__name__, e))
             self._json(502, {"error": "proxy failure: %s: %s"
                              % (type(e).__name__, e)})
             return

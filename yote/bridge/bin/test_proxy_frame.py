@@ -14,6 +14,10 @@ concurrent requests). Two defects fixed:
    chunk lines and the "done" frame returned partial stdout as success
    with truncated=False. Now malformed frames are counted and reported.
 
+3. connector.svc_proxy retry guards (2026-10-05 retry-load follow-up):
+   a rolling 10s retry budget (retries >= 25% of attempts -> fail fast)
+   and a jittered 50-200ms backoff before each retry.
+
 Run: python3 test_proxy_frame.py
 """
 
@@ -111,6 +115,9 @@ class ParseProxyFrameTests(unittest.TestCase):
 @unittest.skipUnless(_HAVE_CONNECTOR,
                      "connector.py not importable on this host")
 class SvcProxyRetryTests(unittest.TestCase):
+    def setUp(self):
+        connector._proxy_budget_reset()
+
     def _run(self, method, frames):
         calls = []
 
@@ -151,6 +158,82 @@ class SvcProxyRetryTests(unittest.TestCase):
             res = connector.svc_proxy("herd", "GET", "/v1/models", {}, b"")
         self.assertEqual(res["status"], 502)
         self.assertIn(b"yote exec failed", res["body"])
+
+
+@unittest.skipUnless(_HAVE_CONNECTOR,
+                     "connector.py not importable on this host")
+class SvcProxyBudgetTests(unittest.TestCase):
+    def setUp(self):
+        connector._proxy_budget_reset()
+
+    def _run(self, method, frames):
+        calls = []
+
+        def fake_exec(cmd, workdir="/home/toxic", timeout=120,
+                      https_timeout=150):
+            calls.append(cmd)
+            return {"code": 0, "stdout": frames[len(calls) - 1],
+                    "stderr": "", "error": None}
+
+        with mock.patch.object(connector, "yote_exec", fake_exec):
+            res = connector.svc_proxy("herd", method, "/v1/models", {}, b"")
+        return res, calls
+
+    def test_retry_still_allowed_on_fresh_budget(self):
+        # The budget must not change the normal retry path.
+        with mock.patch.object(connector, "_proxy_retry_backoff") as bo:
+            res, calls = self._run("GET",
+                                   [make_big_frame()[:173], make_frame()])
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(res["status"], 200)
+        bo.assert_called_once_with()
+
+    def test_backoff_not_called_when_no_retry(self):
+        with mock.patch.object(connector, "_proxy_retry_backoff") as bo:
+            res, calls = self._run("POST", [make_big_frame()[:173],
+                                            make_frame()])
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(res["status"], 502)
+        bo.assert_not_called()
+
+    def test_backoff_is_50_to_200ms(self):
+        with mock.patch.object(connector.random, "uniform",
+                               return_value=0.123) as uni, \
+             mock.patch.object(connector.time, "sleep") as slp:
+            connector._proxy_retry_backoff()
+        uni.assert_called_once_with(0.05, 0.20)
+        slp.assert_called_once_with(0.123)
+
+    def test_budget_trips_under_distress(self):
+        # Seed 3 attempts + 1 retry in-window: the retry decision then sees
+        # 1 retry / 4 attempts = 25% -> budget tripped, fail fast.
+        now = time.time()
+        for _ in range(3):
+            connector._proxy_budget_note_attempt(now)
+        self.assertTrue(connector._proxy_budget_retry_allowed(now))
+        res, calls = self._run("GET", [make_big_frame()[:173],
+                                       make_frame()])
+        self.assertEqual(len(calls), 1, "tripped budget must not retry")
+        self.assertEqual(res["status"], 502)
+        self.assertIn(b"retry budget tripped", res["body"])
+
+    def test_budget_recovers_after_window(self):
+        # A budget tripped >10s ago must not block a fresh retry.
+        old = time.time() - 11.0
+        for _ in range(3):
+            connector._proxy_budget_note_attempt(old)
+        self.assertTrue(connector._proxy_budget_retry_allowed(old))
+        res, calls = self._run("GET",
+                               [make_big_frame()[:173], make_frame()])
+        self.assertEqual(len(calls), 2, "window aged out: retry allowed")
+        self.assertEqual(res["status"], 200)
+
+    def test_quiet_lane_never_trips(self):
+        # Many clean attempts, no retries: ratio stays 0, retry allowed.
+        now = time.time()
+        for _ in range(50):
+            connector._proxy_budget_note_attempt(now)
+        self.assertTrue(connector._proxy_budget_retry_allowed(now))
 
 
 class WsRunMalformedFrameTests(unittest.TestCase):
