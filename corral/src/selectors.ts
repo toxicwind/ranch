@@ -1,4 +1,4 @@
-import type { SmithersCtx as BaseSmithersCtx } from "smithers-orchestrator";
+import type { SmithersCtx as BaseSmithersCtx } from "smthrs";
 export type SmithersCtx<T = unknown> = BaseSmithersCtx & {
   outputs: <K = any>(key?: K) => any;
   output: <K = any>(key?: K) => any;

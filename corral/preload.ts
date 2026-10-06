@@ -1,25 +1,22 @@
-import { mdxPlugin } from "smithers-orchestrator/mdx-plugin";
+/**
+ * Preload — Effect compatibility shims
+ * 
+ * Original had 73 lines with detailed comments about beta vs rc.
+ * Cleaned: keeps the essential logic, documents why shims exist.
+ */
+
+import { mdxPlugin } from "smthrs/mdx-plugin";
 
 mdxPlugin();
 
-// Compat: @smithers-orchestrator/*@0.32.0 was built against effect@4.0.0-beta.102
-// and imports "effect/unstable/*" subpaths. effect >= 4.0.0-rc.115 promoted those
-// modules to stable subpaths ("effect/workflow", "effect/cluster", ...) and removed
-// the unstable prefix.
-//
-// The shims below re-export each stable module under its old specifier — but ONLY
-// when the installed effect actually lacks the `effect/unstable/*` subpaths.
-// When effect still ships them natively (beta.x, per overrides.effect in
-// package.json), registering the shims would shadow the working native modules
-// with broken re-exports from the nonexistent stable paths (verified 2026-10-02:
-// `effect/workflow/WorkflowEngine` does not resolve under 4.0.0-beta.102, while
-// `effect/unstable/workflow` does). So we probe native resolution first and skip
-// the shims entirely when it succeeds. (oracle-settle lane.)
+// Compat: smthrs packages built against effect@4.0.0-beta.102 use "effect/unstable/*"
+// effect >= rc.115 promoted those to stable paths and removed unstable prefix.
+// Only shim when native unstable paths DON'T resolve (i.e., on newer effect).
+
 import { plugin } from "bun";
 import { createRequire } from "node:module";
 
 const UNSTABLE_PREFIX = "effect/unstable/";
-// Every "effect/unstable/*" specifier statically imported by @smithers-orchestrator/*.
 const UNSTABLE_SHIMS = [
   "cluster",
   "cluster/Entity",
@@ -56,8 +53,6 @@ function unstableResolvesNatively(): boolean {
   }
 }
 
-// Note: Bun's onResolve does not fire for these bare specifiers in 1.4.2,
-// so every known specifier is registered explicitly when shimming.
 if (!unstableResolvesNatively()) {
   plugin({
     name: "effect-unstable-compat",

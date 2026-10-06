@@ -1,5 +1,5 @@
 import React from "react";
-import { Task } from "smithers-orchestrator";
+import { Task } from "smthrs";
 import { z } from "zod";
 
 export const finalReportOutputSchema = z.object({

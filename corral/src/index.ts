@@ -1,16 +1,10 @@
 /**
- * Super Ralph - Reusable Ralph workflow pattern
- *
- * Encapsulates the ticket-driven development workflow with:
- * - Multi-agent code review
- * - TDD validation loops
- * - Automated ticket discovery and prioritization
- * - Stacked ticket processing with worktrees
- *
- * Extracted from Plue workflow, generalized for reuse.
+ * Corral public API — cleaned
+ * 
+ * Original index.ts had 195 lines of re-exports. Kept same but organized.
  */
 
-import {
+export {
   selectAllTickets,
   selectReviewTickets,
   selectDiscoverTickets,
@@ -29,9 +23,9 @@ import {
   selectTicketPipelineStage,
 } from "./selectors";
 
-import type { Ticket, RalphOutputs } from "./selectors";
+export type { Ticket, RalphOutputs } from "./selectors";
 
-import {
+export {
   SuperRalph,
   Job,
   ClarifyingQuestions,
@@ -51,32 +45,28 @@ import {
   monitorOutputSchema,
 } from "./components";
 
-import {
-  AgentRegistry,
-  getAgentRegistry,
-  resetAgentRegistry,
-} from "./agentRegistry";
-import type { AgentMetadata, AgentStats, AgentRegistrySnapshot } from "./agentRegistry";
+export { AgentRegistry, getAgentRegistry, resetAgentRegistry } from "./agentRegistry";
+export type { AgentMetadata, AgentStats, AgentRegistrySnapshot } from "./agentRegistry";
 
-import {
-  loadCrossRunTicketState,
-  getResumableTickets,
-  pipelineStageIndex,
-} from "./durability";
-import type { SuperRalphProps } from "./components/SuperRalph";
-import type { JobProps } from "./components/Job";
-import type { ClarifyingQuestionsOutput, ClarifyingQuestionsProps } from "./components/ClarifyingQuestions";
-import type { InterpretConfigOutput, InterpretConfigProps } from "./components/InterpretConfig";
-import type { MonitorOutput, MonitorProps } from "./components/Monitor";
-import type { TicketResumeProps } from "./components/TicketResume";
-import type { TicketSchedule, TicketScheduleJob, TicketSchedulerProps, TicketState } from "./components/TicketScheduler";
-import type { AgenticMergeQueueProps, AgenticMergeQueueTicket, MergeQueueResult } from "./components/AgenticMergeQueue";
-import type { CrossRunTicketState } from "./durability";
-import { useSuperRalph } from "./hooks/useSuperRalph";
-import type { SuperRalphContext, UseSuperRalphConfig } from "./hooks/useSuperRalph";
-import { ralphOutputSchemas } from "./schemas";
-import { detectExactReply, normalizeReply } from "./exactReply";
-import {
+export { loadCrossRunTicketState, getResumableTickets, pipelineStageIndex } from "./durability";
+export type { CrossRunTicketState } from "./durability";
+
+export type { SuperRalphProps } from "./components/SuperRalph";
+export type { JobProps } from "./components/Job";
+export type { ClarifyingQuestionsOutput, ClarifyingQuestionsProps } from "./components/ClarifyingQuestions";
+export type { InterpretConfigOutput, InterpretConfigProps } from "./components/InterpretConfig";
+export type { MonitorOutput, MonitorProps } from "./components/Monitor";
+export type { TicketResumeProps } from "./components/TicketResume";
+export type { TicketSchedule, TicketScheduleJob, TicketSchedulerProps, TicketState } from "./components/TicketScheduler";
+export type { AgenticMergeQueueProps, AgenticMergeQueueTicket, MergeQueueResult } from "./components/AgenticMergeQueue";
+
+export { useSuperRalph } from "./hooks/useSuperRalph";
+export type { SuperRalphContext, UseSuperRalphConfig } from "./hooks/useSuperRalph";
+
+export { ralphOutputSchemas } from "./schemas";
+export { detectExactReply, normalizeReply } from "./exactReply";
+
+export {
   NimProxyKeyPool,
   resolveProxyConfig,
   resolveProxyApiKey,
@@ -87,109 +77,19 @@ import {
   DEFAULT_PROXY_BASE_URL,
   DEFAULT_PROXY_MODEL,
 } from "./nimProxy";
-import type { ProxyConfig, ProxyKeyStats } from "./nimProxy";
-import { TelemetricOracle } from "./telemetricOracle";
-import type { TelemetryVector, NonInvasiveVerdict, WorkflowDbState } from "./telemetricOracle";
 
-export {
-  // Selectors
-  selectAllTickets,
-  selectReviewTickets,
-  selectDiscoverTickets,
-  selectCompletedTicketIds,
-  selectProgressSummary,
-  selectTicketReport,
-  selectResearch,
-  selectPlan,
-  selectImplement,
-  selectTestResults,
-  selectSpecReview,
-  selectCodeReviews,
-  selectClarifyingQuestions,
-  selectInterpretConfig,
-  selectMonitor,
-  selectTicketPipelineStage,
+export type { ProxyConfig, ProxyKeyStats } from "./nimProxy";
 
-  // Hooks
-  useSuperRalph,
+export { TelemetricOracle } from "./telemetricOracle";
+export type { TelemetryVector, NonInvasiveVerdict, WorkflowDbState } from "./telemetricOracle";
 
-  // Components
-  SuperRalph,
-  Job,
-  ClarifyingQuestions,
-  InterpretConfig,
-  Monitor,
-  TicketResume,
-  TicketScheduler,
-  ticketScheduleSchema,
-  scheduledJobSchema,
-  computePipelineStage,
-  isJobComplete,
-  JOB_TYPE_TO_OUTPUT_KEY,
-  AgenticMergeQueue,
-  mergeQueueResultSchema,
+// New clean exports
+export { ensureWorkspace, ensureJjAvailable } from "./cli/workspace";
+export { dumpCheckEnv, loadSecrets, parseFinite, CHECK_ENV_KEYS } from "./cli/env";
+export { parseArgs, printHelp } from "./cli/args";
+export type { ParsedArgs } from "./cli/args";
+export { runWorkflow } from "./cli/runner";
+export type { RunWorkflowOpts } from "./cli/runner";
 
-  // Agent Registry
-  AgentRegistry,
-  getAgentRegistry,
-  resetAgentRegistry,
-
-  // Durability
-  loadCrossRunTicketState,
-  getResumableTickets,
-  pipelineStageIndex,
-
-  // Schemas
-  ralphOutputSchemas,
-  detectExactReply,
-  normalizeReply,
-  clarifyingQuestionsOutputSchema,
-  interpretConfigOutputSchema,
-  monitorOutputSchema,
-
-  // nim-proxy
-  NimProxyKeyPool,
-  resolveProxyConfig,
-  resolveProxyApiKey,
-  proxyEnvOverrides,
-  proxyChatCompletions,
-  parseRetryAfterMs,
-  NimProxyConfigError,
-  DEFAULT_PROXY_BASE_URL,
-  DEFAULT_PROXY_MODEL,
-
-  // Telemetric Oracle EKG
-  TelemetricOracle,
-};
-
-export type {
-  Ticket,
-  RalphOutputs,
-  SuperRalphProps,
-  JobProps,
-  SuperRalphContext,
-  UseSuperRalphConfig,
-  ClarifyingQuestionsOutput,
-  ClarifyingQuestionsProps,
-  InterpretConfigOutput,
-  InterpretConfigProps,
-  MonitorOutput,
-  MonitorProps,
-  TicketResumeProps,
-  TicketSchedule,
-  TicketScheduleJob,
-  TicketSchedulerProps,
-  TicketState,
-  AgenticMergeQueueProps,
-  AgenticMergeQueueTicket,
-  MergeQueueResult,
-  AgentMetadata,
-  AgentStats,
-  AgentRegistrySnapshot,
-  CrossRunTicketState,
-  ProxyConfig,
-  ProxyKeyStats,
-  TelemetryVector,
-  NonInvasiveVerdict,
-  WorkflowDbState,
-};
+// Merge queue clean exports
+export * from "./mergeQueue";

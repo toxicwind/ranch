@@ -13,7 +13,7 @@ import {
   NimProxyConfigError,
   DEFAULT_PROXY_BASE_URL,
   type ProxyConfig,
-} from "./nimProxy.ts";
+} from "../src/nimProxy.ts";
 
 const ENV_KEYS = [
   "FLOCK_API_KEY",

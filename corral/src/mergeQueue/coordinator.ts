@@ -1,114 +1,27 @@
-import { workspaceAdd, workspaceClose, runJj } from "smithers-orchestrator";
-import type { AgentLike } from "smithers-orchestrator";
+
+import { workspaceAdd } from "smthrs";
+import type { AgentLike } from "smthrs";
+import type {
+  MergeQueueTicket,
+  MergeQueueLandResult,
+  MergeQueueOrderingStrategy,
+  QueueEntry,
+  CommandResult,
+  MergeQueueOps,
+  MergeQueueRequest,
+  EvictReason,
+} from "./types";
+import { createDefaultOps } from "./ops";
+import { REQUEST_MARKER, buildSpeculativeMergeQueuePrompt, extractRequestFromPrompt } from "./prompt";
+import { runJj } from "smthrs";
 import { spawn } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, join } from "node:path";
-// Minimal structural type for the spawn result -- we only use .on() and stdio streams.
-// (Full ChildProcess types vary across @types/node installs; this is stable.)
-interface SpawnedProcess {
-  on(event: "close", listener: (code: number | null) => void): void;
-  on(event: "error", listener: (err: Error) => void): void;
-  stdout: { on(event: "data", listener: (chunk: Buffer) => void): void } | null;
-  stderr: { on(event: "data", listener: (chunk: Buffer) => void): void } | null;
-}
+import { join } from "node:path";
 
-export type MergeQueueOrderingStrategy =
-  | "report-complete-fifo"
-  | "priority"
-  | "ticket-order";
-
-export type MergeQueueTicket = {
-  ticketId: string;
-  ticketTitle: string;
-  ticketCategory: string;
-  priority: "critical" | "high" | "medium" | "low";
-  reportIteration: number;
-  worktreePath: string;
-};
-
-export type MergeQueueLandResult = {
-  merged: boolean;
-  mergeCommit: string | null;
-  ciPassed: boolean;
-  summary: string;
-  evicted: boolean;
-  evictionReason: string | null;
-  evictionDetails: string | null;
-  attemptedLog: string | null;
-  attemptedDiffSummary: string | null;
-  landedOnMainSinceBranch: string | null;
-};
-
-type QueueEntry = {
-  ticket: MergeQueueTicket;
-  status: "pending" | "resolved";
-  readyForQueue: boolean;
-  enqueueSeq: number;
-  snapshotIndex: number;
-  invalidatedCount: number;
-  result?: MergeQueueLandResult;
-  waiters: Array<(result: MergeQueueLandResult) => void>;
-};
-
-type CommandResult = {
-  code: number;
-  stdout: string;
-  stderr: string;
-};
-
-type OperationResult = {
-  ok: boolean;
-  details: string;
-};
-
-type CiRunResult = {
-  passed: boolean;
-  details: string;
-};
-
-type EvictionContext = {
-  attemptedLog: string | null;
-  attemptedDiffSummary: string | null;
-  landedOnMainSinceBranch: string | null;
-};
-
-export type MergeQueueOps = {
-  fetchMain: (repoRoot: string) => Promise<OperationResult>;
-  rebase: (
-    repoRoot: string,
-    ticketId: string,
-    destinationRev: string,
-  ) => Promise<OperationResult>;
-  runCi: (
-    repoRoot: string,
-    ticket: MergeQueueTicket,
-    commands: string[],
-  ) => Promise<CiRunResult>;
-  fastForwardMain: (repoRoot: string, ticketId: string) => Promise<OperationResult>;
-  pushMain: (repoRoot: string) => Promise<OperationResult>;
-  readCommitId: (repoRoot: string, revset: string) => Promise<string | null>;
-  collectEvictionContext: (
-    repoRoot: string,
-    ticketId: string,
-  ) => Promise<EvictionContext>;
-  cleanupTicket: (repoRoot: string, ticket: MergeQueueTicket) => Promise<void>;
-};
-
-export type MergeQueueRequest = {
-  runId: string;
-  queueId: string;
-  repoRoot: string;
-  postLandChecks: string[];
-  orderingStrategy: MergeQueueOrderingStrategy;
-  maxSpeculativeDepth: number;
-  ticket: MergeQueueTicket;
-  queueSnapshot: MergeQueueTicket[];
-  readyForQueue: boolean;
-  postRebaseReviewAgent?: AgentLike;
-};
-
-const REQUEST_MARKER = "SUPER_RALPH_SPECULATIVE_MERGE_QUEUE_REQUEST";
+// Re-export for public API
+export { REQUEST_MARKER, buildSpeculativeMergeQueuePrompt, extractRequestFromPrompt };
+export type { MergeQueueTicket, MergeQueueLandResult, MergeQueueOrderingStrategy, MergeQueueRequest, MergeQueueOps };
 
 function bookmarkRev(ticketId: string): string {
   return `bookmark("ticket/${ticketId}")`;
@@ -119,207 +32,27 @@ function truncate(text: string, maxChars = 12000): string {
   return text.slice(text.length - maxChars);
 }
 
-function stringifyFailure(prefix: string, code: number, stderr: string): string {
-  const detail = stderr.trim();
-  if (detail) return `${prefix}: ${detail}`;
-  return `${prefix}: exit ${code}`;
-}
-
 async function runJjCommand(repoRoot: string, args: string[]): Promise<CommandResult> {
   const res: any = await (runJj as any)(args, { cwd: repoRoot });
   return { code: res?.code ?? 0, stdout: res?.stdout ?? "", stderr: res?.stderr ?? "" };
 }
 
-function normalizeOpResult(prefix: string, res: CommandResult): OperationResult {
-  if (res.code === 0) {
-    return { ok: true, details: res.stdout.trim() };
-  }
+function createDefaultMergeQueueOps(): MergeQueueOps {
+  return createDefaultOps();
+}
+
+async function collectDefaultEvictionContext(repoRoot: string, ticketId: string) {
   return {
-    ok: false,
-    details: stringifyFailure(prefix, res.code, res.stderr),
+    attemptedLog: null,
+    attemptedDiffSummary: null,
+    landedOnMainSinceBranch: null,
   };
 }
 
-async function runShellCommand(command: string, cwd: string): Promise<CommandResult> {
-  return await new Promise<CommandResult>((resolve) => {
-    const child = spawn("bash", ["-lc", command], {
-      cwd,
-      stdio: ["ignore", "pipe", "pipe"],
-    }) as unknown as SpawnedProcess;
-    let stdout = "";
-    let stderr = "";
-    child.stdout?.on("data", (chunk: Buffer) => {
-      stdout += chunk.toString("utf8");
-    });
-    child.stderr?.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString("utf8");
-    });
-    child.on("error", (err) => {
-      resolve({ code: 127, stdout, stderr: err.message });
-    });
-    child.on("close", (code) => {
-      resolve({ code: code ?? 1, stdout, stderr });
-    });
-  });
+async function cleanupDefaultTicketResources(repoRoot: string, ticket: MergeQueueTicket) {
+  // no-op
 }
 
-async function runCiInSpeculativeWorkspace(
-  repoRoot: string,
-  ticket: MergeQueueTicket,
-  commands: string[],
-): Promise<CiRunResult> {
-  if (!commands.length) {
-    return { passed: true, details: "No post-land checks configured." };
-  }
-
-  const tempRoot = await mkdtemp(join(tmpdir(), "super-ralph-mq-"));
-  const workspacePath = join(tempRoot, "workspace");
-  const suffix = `${Date.now().toString(36)}-${Math.floor(Math.random() * 1_000_000).toString(36)}`;
-  const workspaceName = `srq-${ticket.ticketId.replace(/[^a-zA-Z0-9_-]/g, "-")}-${suffix}`.slice(0, 96);
-  const commandLogs: string[] = [];
-
-  try {
-    const added: any = await (workspaceAdd as any)(workspaceName, workspacePath, {
-      cwd: repoRoot,
-      atRev: bookmarkRev(ticket.ticketId),
-    });
-    if (!added.success) {
-      return {
-        passed: false,
-        details: `Failed to create speculative workspace for ${ticket.ticketId}: ${added.error ?? "unknown error"}`,
-      };
-    }
-
-    for (const command of commands) {
-      const res = await runShellCommand(command, workspacePath);
-      const output = [`$ ${command}`, res.stdout.trim(), res.stderr.trim()]
-        .filter(Boolean)
-        .join("\n");
-      commandLogs.push(output);
-      if (res.code !== 0) {
-        commandLogs.push(`Command failed with exit code ${res.code}.`);
-        return { passed: false, details: truncate(commandLogs.join("\n\n")) };
-      }
-    }
-
-    return { passed: true, details: truncate(commandLogs.join("\n\n")) };
-  } finally {
-    await Promise.resolve((workspaceClose as any)(workspaceName, { cwd: repoRoot })).catch(() => undefined);
-    await rm(tempRoot, { recursive: true, force: true }).catch(() => undefined);
-  }
-}
-
-async function collectDefaultEvictionContext(
-  repoRoot: string,
-  ticketId: string,
-): Promise<EvictionContext> {
-  const attemptedLog = await runJjCommand(repoRoot, [
-    "log",
-    "-r",
-    `main..${bookmarkRev(ticketId)}`,
-    "--reversed",
-  ]);
-  const attemptedDiff = await runJjCommand(repoRoot, [
-    "diff",
-    "-r",
-    `roots(main..${bookmarkRev(ticketId)})`,
-    "--summary",
-  ]);
-  const landedOnMain = await runJjCommand(repoRoot, [
-    "log",
-    "-r",
-    `${bookmarkRev(ticketId)}..main`,
-    "--reversed",
-  ]);
-
-  return {
-    attemptedLog:
-      attemptedLog.code === 0
-        ? attemptedLog.stdout.trim() || null
-        : stringifyFailure("Could not capture attempted log", attemptedLog.code, attemptedLog.stderr),
-    attemptedDiffSummary:
-      attemptedDiff.code === 0
-        ? attemptedDiff.stdout.trim() || null
-        : stringifyFailure("Could not capture attempted diff", attemptedDiff.code, attemptedDiff.stderr),
-    landedOnMainSinceBranch:
-      landedOnMain.code === 0
-        ? landedOnMain.stdout.trim() || null
-        : stringifyFailure("Could not capture mainline changes", landedOnMain.code, landedOnMain.stderr),
-  };
-}
-
-async function cleanupDefaultTicketResources(repoRoot: string, ticket: MergeQueueTicket): Promise<void> {
-  await Promise.resolve((runJj as any)(["bookmark", "delete", `ticket/${ticket.ticketId}`], {
-    cwd: repoRoot,
-  })).catch(() => undefined);
-  const workspaceName = basename(ticket.worktreePath);
-  if (workspaceName) {
-    await Promise.resolve((workspaceClose as any)(workspaceName, { cwd: repoRoot })).catch(() => undefined);
-  }
-  await rm(ticket.worktreePath, { recursive: true, force: true }).catch(() => undefined);
-}
-
-export function createDefaultMergeQueueOps(): MergeQueueOps {
-  return {
-    async fetchMain(repoRoot) {
-      return normalizeOpResult("jj git fetch failed", await runJjCommand(repoRoot, ["git", "fetch"]));
-    },
-    async rebase(repoRoot, ticketId, destinationRev) {
-      return normalizeOpResult(
-        `Rebase failed for ticket/${ticketId}`,
-        await runJjCommand(repoRoot, [
-          "rebase",
-          "-b",
-          bookmarkRev(ticketId),
-          "-d",
-          destinationRev,
-        ]),
-      );
-    },
-    async runCi(repoRoot, ticket, commands) {
-      return await runCiInSpeculativeWorkspace(repoRoot, ticket, commands);
-    },
-    async fastForwardMain(repoRoot, ticketId) {
-      return normalizeOpResult(
-        `Failed to fast-forward main to ticket/${ticketId}`,
-        await runJjCommand(repoRoot, [
-          "bookmark",
-          "set",
-          "main",
-          "-r",
-          bookmarkRev(ticketId),
-        ]),
-      );
-    },
-    async pushMain(repoRoot) {
-      return normalizeOpResult(
-        "Failed to push main",
-        await runJjCommand(repoRoot, ["git", "push", "--bookmark", "main"]),
-      );
-    },
-    async readCommitId(repoRoot, revset) {
-      const res = await runJjCommand(repoRoot, [
-        "log",
-        "-r",
-        revset,
-        "--no-graph",
-        "-T",
-        "commit_id",
-      ]);
-      if (res.code !== 0) return null;
-      const line = res.stdout.trim().split("\n")[0]?.trim();
-      return line || null;
-    },
-    async collectEvictionContext(repoRoot, ticketId) {
-      return await collectDefaultEvictionContext(repoRoot, ticketId);
-    },
-    async cleanupTicket(repoRoot, ticket) {
-      await cleanupDefaultTicketResources(repoRoot, ticket);
-    },
-  };
-}
-
-const priorityRank: Record<MergeQueueTicket["priority"], number> = {
   critical: 0,
   high: 1,
   medium: 2,

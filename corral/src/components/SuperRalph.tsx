@@ -1,5 +1,5 @@
-import { Ralph, Parallel } from "smithers-orchestrator";
-import type { AgentLike } from "smithers-orchestrator";
+import { Ralph, Parallel } from "smthrs";
+import type { AgentLike } from "smthrs";
 import { selectAllTickets, selectReviewTickets, selectProgressSummary, selectLand, selectTicketReport } from "../selectors";
 import type { RalphOutputs, Ticket, SmithersCtx } from "../selectors";
 import React, { type ReactNode } from "react";

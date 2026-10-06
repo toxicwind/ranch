@@ -1,7 +1,7 @@
 import React from "react";
 import { spawn } from "node:child_process";
 import type { SmithersCtx } from "../selectors";
-import { Task, Sequence } from "smithers-orchestrator";
+import { Task, Sequence } from "smthrs";
 import type { ClarificationQuestion, ClarificationAnswer, ClarificationSession } from "../cli/clarifications";
 import { z } from "zod";
 // Minimal structural type for the spawn result -- we only use .on("close"/"error").

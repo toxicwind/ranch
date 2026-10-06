@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { z } from "zod";
-import { CorralTimer } from "./timing.ts";
-import { extractJson, parseWithRecovery } from "./structuredRecovery.ts";
+import { CorralTimer } from "../src/timing.ts";
+import { extractJson, parseWithRecovery } from "../src/structuredRecovery.ts";
 
 describe("CorralTimer", () => {
   test("measures sync and async stages, summary lists slowest first", async () => {

@@ -19,7 +19,7 @@ import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import {
   resolveProxyConfig,
   proxyEnvOverrides,
-} from "./nimProxy.ts";
+} from "../src/nimProxy.ts";
 
 const ROUTING_KEYS = [
   "FLOCK_API_KEY",

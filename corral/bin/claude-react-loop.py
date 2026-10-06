@@ -1,38 +1,46 @@
 #!/usr/bin/env python3
-"""ReAct loop for claude-shim: full Gatehouse MCP tool use for shim agents.
+"""
+ReAct loop for claude-shim — portable version
+Full Gatehouse MCP tool use for shim agents.
+
+Original hardcoded ~[old-ranch-path] paths and gatehouse config.
+This version is portable: uses env vars, falls back gracefully if gatehouse not present.
 
 The nim-shim-real binary is prompt->text only with zero tool capability.
-This wrapper implements a ReAct (Reasoning + Acting) loop:
-1. Fetch the live Gatehouse tool catalog (36 servers / 258 tools) and
-   inject it as tool instructions.
-2. Call the model via nim-shim-real.
-3. Parse <tool_call> tags from model output.
-4. Execute via Gatehouse CLI (tool-read / tool-write / tool-destructive).
-5. Feed results back, repeat until the model answers without tool tags.
+This wrapper implements a ReAct loop:
+1. Fetch live Gatehouse tool catalog (if available) and inject as instructions
+2. Call model via nim-shim-real
+3. Parse <tool_call> tags
+4. Execute via Gatehouse CLI
+5. Loop until model answers without tool tags
 
-Durability rules for this file:
-- NO timeouts anywhere. Subprocesses run to completion; the model calls
-  return when they return. (Standing user directive: never use timeouts.)
-- The catalog is fetched live at startup so it never goes stale.
-- Iteration ceiling is 25 (Corral default maxIterations), not 10.
+Durability:
+- NO timeouts — subprocesses run to completion
+- Catalog fetched live at startup
+- Iteration ceiling 25 (Corral default maxIterations)
 """
+
 import collections
 import json
 import os
 import re
 import subprocess
 import sys
-import urllib.request
+from pathlib import Path
 
-GATEHOUSE_BIN = "/home/toxic/estate/ranch/range/bin/gatehouse"
-GATEHOUSE_CONFIG = (
-    "/home/toxic/estate/ranch/barn/gatehouse/mcp_config.json"
+# Configurable via env
+GATEHOUSE_BIN = os.environ.get("GATEHOUSE_BIN", "gatehouse")
+GATEHOUSE_CONFIG = os.environ.get(
+    "GATEHOUSE_CONFIG",
+    str(Path.home() / ".config" / "corral" / "gatehouse" / "mcp_config.json")
 )
-NIM_SHIM_REAL = "/home/toxic/.local/bin/claude.nim-shim-real"
-MAX_ITERATIONS = 25
+NIM_SHIM_REAL = os.environ.get(
+    "CLAUDE_REAL_BIN",
+    str(Path.home() / ".local" / "bin" / "claude.nim-shim-real")
+)
+MAX_ITERATIONS = int(os.environ.get("CORRAL_REACT_MAX_ITER", "25"))
 MAX_RESULT_CHARS = 6000
 
-# Intent routing: map a tool name to a gatehouse call intent.
 _WRITE_TOKENS = (
     "write", "create", "update", "put", "patch", "set", "add", "push",
     "merge", "copy", "move", "rename", "index", "ingest", "execute",
@@ -43,14 +51,14 @@ _DESTRUCTIVE_TOKENS = ("delete", "remove", "destroy", "drop", "truncate", "kill"
 
 
 def run(cmd):
-    """Run a command with NO timeout. It returns when it returns."""
+    """Run command with NO timeout."""
     return subprocess.run(cmd, capture_output=True, text=True)
 
 
 def fetch_catalog():
-    """Return the live gatehouse tool catalog as a list of dicts."""
-    r = run([GATEHOUSE_BIN, "tools", "list", "-c", GATEHOUSE_CONFIG, "-o", "json"])
+    """Return live gatehouse tool catalog, or empty if not available."""
     try:
+        r = run([GATEHOUSE_BIN, "tools", "list", "-c", GATEHOUSE_CONFIG, "-o", "json"])
         data = json.loads(r.stdout)
         if isinstance(data, dict):
             data = data.get("tools", [])
@@ -60,6 +68,8 @@ def fetch_catalog():
 
 
 def compact_catalog(catalog):
+    if not catalog:
+        return "(no gatehouse catalog available — running in prompt-only mode)"
     grouped = collections.defaultdict(list)
     for t in catalog:
         name = t.get("name", "")
@@ -77,8 +87,7 @@ def full_catalog(catalog):
     for t in sorted(catalog, key=lambda x: (x.get("server_name", ""), x.get("name", ""))):
         lines.append(
             "%s:%s - %s"
-            % (t.get("server_name"), t.get("name"),
-               (t.get("description") or "")[:160])
+            % (t.get("server_name"), t.get("name"), (t.get("description") or "")[:160])
         )
     return "\n".join(lines)
 
@@ -87,15 +96,22 @@ def tool_schema(catalog, server, name):
     for t in catalog:
         if t.get("server_name") == server and t.get("name") == name:
             return json.dumps(
-                {"server": server, "name": name,
-                 "description": t.get("description"),
-                 "schema": t.get("schema")},
-                indent=2)[:4000]
+                {
+                    "server": server,
+                    "name": name,
+                    "description": t.get("description"),
+                    "schema": t.get("schema"),
+                },
+                indent=2,
+            )[:4000]
     return "Tool %s:%s not found in catalog." % (server, name)
 
 
 def build_instructions(catalog):
-    return """You have full tool access through the Gatehouse MCP proxy (36 servers, 258 tools).
+    if not catalog:
+        return "You are a coding agent. Answer the task directly."
+
+    return """You have full tool access through the Gatehouse MCP proxy.
 To use a tool, output EXACTLY this format:
 
 <tool_call>
@@ -105,35 +121,20 @@ To use a tool, output EXACTLY this format:
 TOOL CATALOG (server: tools):
 %s
 
-Special discovery tools (use these to learn a tool's argument schema before calling it):
-- <tool_call>{"server": "gatehouse", "tool": "catalog", "arguments": {}}</tool_call>
-  returns every tool with its one-line description.
-- <tool_call>{"server": "gatehouse", "tool": "describe", "arguments": {"server": "<server>", "tool": "<tool>"}}</tool_call>
-  returns the full JSON schema for one tool.
-
-Quick reference for common filesystem work (hashline server):
-- write: {"file": "/path", "content": "..."} - create or overwrite a file
-- read: {"file": "/path"} - read a file
-- patch: {"file": "/path", "edits": [...]} - surgical edit (see describe for schema)
-- find_block: locate a block by anchor; remove_file; rename_file
+Special discovery tools:
+- {"server": "gatehouse", "tool": "catalog"} returns every tool with description
+- {"server": "gatehouse", "tool": "describe", "arguments": {"server": "<server>", "tool": "<tool>"}} returns schema
 
 CRITICAL RULES:
-- When the task requires creating, writing, reading, modifying, executing, searching, or checking ANYTHING, you MUST output the <tool_call> tag with valid JSON. Do NOT just describe what you would do. Narrating an action without emitting a <tool_call> is a failed task.
-- Call gatehouse:describe FIRST when you are unsure of a tool's arguments.
-- Output ONLY the <tool_call> tag when you need to use a tool, nothing else.
-- After a tool executes you will see its result. Then either call another tool or give your final answer.
-- If the task needs no tools, answer directly without tool_call tags.
+- When task requires file operations, you MUST output <tool_call> tag. Narrating without calling is failure.
+- Call gatehouse:describe first when unsure of args.
+- Output ONLY tool_call tag when using tool.
+- After result, continue or give final answer without tags.
 """ % compact_catalog(catalog)
 
 
 def call_model(prompt):
-    """Call nim-shim-real. No timeout - returns when the model returns.
-
-    Reasoning-model fallback: some models (e.g. gpt-oss) nondeterministically
-    put their answer in the `reasoning` field with empty `content`, which the
-    shim drops. When the shim returns empty, retry via a direct API call and
-    use content, falling back to reasoning. 2026-10-01.
-    """
+    """Call nim-shim-real, with fallback to direct API call."""
     result = run([NIM_SHIM_REAL, prompt])
     out = result.stdout.strip()
     if out:
@@ -143,6 +144,8 @@ def call_model(prompt):
 
 def direct_model_call(prompt):
     """Direct OpenAI-compatible chat call; merges content and reasoning."""
+    import urllib.request
+
     base = os.environ.get("NIM_BASE_URL", "http://127.0.0.1:25200/v1").rstrip("/")
     key = os.environ.get("NVIDIA_API_KEY", "")
     model = os.environ.get("NIM_MODEL", "")
@@ -154,10 +157,13 @@ def direct_model_call(prompt):
         "top_p": 0.95,
     }).encode()
     req = urllib.request.Request(
-        base + "/chat/completions", data=body,
-        headers={"Authorization": "Bearer " + key,
-                 "Content-Type": "application/json",
-                 "User-Agent": "corral-react-loop/1.0"},
+        base + "/chat/completions",
+        data=body,
+        headers={
+            "Authorization": "Bearer " + key,
+            "Content-Type": "application/json",
+            "User-Agent": "corral-react-loop/1.0",
+        },
     )
     try:
         with urllib.request.urlopen(req) as resp:
@@ -187,23 +193,26 @@ def intent_for(tool_name):
 
 
 def execute_tool(catalog, server, tool, arguments):
-    """Execute a tool via Gatehouse CLI. Returns result text."""
     if server == "gatehouse":
         if tool == "catalog":
             return full_catalog(catalog)
         if tool == "describe":
-            return tool_schema(catalog,
-                               (arguments or {}).get("server", ""),
-                               (arguments or {}).get("tool", ""))
-        return "Unknown gatehouse pseudo-tool: %s (use catalog or describe)" % tool
+            return tool_schema(
+                catalog,
+                (arguments or {}).get("server", ""),
+                (arguments or {}).get("tool", ""),
+            )
+        return "Unknown gatehouse pseudo-tool: %s" % tool
 
     tool_name = "%s:%s" % (server, tool)
     cmd = intent_for(tool)
     json_args = json.dumps(arguments or {})
-    result = run([GATEHOUSE_BIN, "call", cmd,
-                  "--tool-name=%s" % tool_name,
-                  "--json_args=%s" % json_args,
-                  "-c", GATEHOUSE_CONFIG, "-o", "json"])
+    result = run([
+        GATEHOUSE_BIN, "call", cmd,
+        "--tool-name=%s" % tool_name,
+        "--json_args=%s" % json_args,
+        "-c", GATEHOUSE_CONFIG, "-o", "json",
+    ])
     output = (result.stdout or "") + (result.stderr or "")
     if len(output) > MAX_RESULT_CHARS:
         output = output[:MAX_RESULT_CHARS] + "\n... [truncated]"
@@ -239,8 +248,7 @@ def main():
         result = execute_tool(catalog, server, tool, arguments)
         full_prompt += (
             "\n\nTool call executed: %s:%s\nResult: %s\n\n"
-            "Continue with the task. If done, provide your final answer "
-            "without tool_call tags." % (server, tool, result)
+            "Continue with the task. If done, provide final answer without tags." % (server, tool, result)
         )
 
     print("Max iterations reached without completion.")

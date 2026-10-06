@@ -1,5 +1,5 @@
 import React from "react";
-import { Task } from "smithers-orchestrator";
+import { Task } from "smthrs";
 import type { SmithersCtx } from "../selectors";
 import { z } from "zod";
 import type { Ticket } from "../selectors";

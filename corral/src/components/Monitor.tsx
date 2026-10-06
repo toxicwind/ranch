@@ -1,5 +1,5 @@
 import React from "react";
-import { Task } from "smithers-orchestrator";
+import { Task } from "smthrs";
 import { z } from "zod";
 import type { ClarificationSession } from "../cli/clarifications";
 import { colors, statusMeta, toRunStatus, type RunStatus } from "../ui/tokens";

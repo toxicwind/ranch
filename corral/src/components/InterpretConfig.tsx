@@ -1,5 +1,5 @@
 import React from "react";
-import { Task } from "smithers-orchestrator";
+import { Task } from "smthrs";
 import type { ClarificationSession } from "../cli/clarifications";
 import { z } from "zod";
 

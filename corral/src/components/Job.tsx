@@ -1,6 +1,6 @@
 import React from "react";
-import { Worktree, Task } from "smithers-orchestrator";
-import type { AgentLike } from "smithers-orchestrator";
+import { Worktree, Task } from "smthrs";
+import type { AgentLike } from "smthrs";
 import { selectResearch, selectPlan, selectImplement, selectTestResults, selectSpecReview, selectCodeReviews, selectLand } from "../selectors";
 import type { RalphOutputs, Ticket, SmithersCtx } from "../selectors";
 import type { ScheduledJob } from "../scheduledTasks";

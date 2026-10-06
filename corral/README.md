@@ -1,205 +1,341 @@
-<div align="right">
+# ![Corral](https://img.shields.io/badge/🐴_Sovereign_Corral-Multi--Agent_Orchestration-black?style=for-the-badge)
 
-[![Bun](https://img.shields.io/badge/runtime-Bun%201.4.2-black?logo=bun&style=for-the-badge)](https://bun.sh)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?logo=typescript&style=for-the-badge)](https://www.typescriptlang.org)
-[![Smithers](https://img.shields.io/badge/orchestrator-Smithers%200.32.0-purple?style=for-the-badge)](https://smithers.sh)
-[![Tests](https://img.shields.io/badge/tests-bun%20test%20tests%2F-ff69b4?style=for-the-badge)](tests/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+> **Ticket-driven development & speculative merge queue — evolved from super-ralph lineage**
 
-</div>
+[![Version](https://img.shields.io/badge/version-1.0.0-blue?style=flat-square)](./package.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
+[![Bun](https://img.shields.io/badge/Bun-%3E%3D1.3.0-black?style=flat-square&logo=bun)](https://bun.sh)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![smthrs](https://img.shields.io/badge/smthrs-0.35.0-6d28d9?style=flat-square)](https://github.com/roninjin10/smithers)
+[![Effect](https://img.shields.io/badge/Effect-4.0.0--beta.102-ff0000?style=flat-square)](https://effect.website)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](./CONTRIBUTING.md)
 
-# Sovereign Corral
+**Corral** is a hardened fork of [super-ralph](https://github.com/roninjin10/super-ralph) built for sovereign agent fleets — parallel ticket execution, speculative landing, and zero-merge-conflict orchestration on top of [Smithers / smthrs](https://github.com/roninjin10/smithers).
 
-### Multi-agent ticket-driven engineering loops on Smithers — the `super-ralph` lineage, converged into one finite outer loop
-
-**Corral** turns a prompt (inline text or a `.md` spec file) into a fully orchestrated engineering run: AI-generated clarifying questions, an AI-interpreted run configuration, parallel ticket execution by agent executors, a speculative merge queue, and a live monitor dashboard — with every step persisted to SQLite and resumable from any point.
-
-**Who it's for:** engineers who want the [Ralph-loop](https://github.com/roninjin10/super-ralph) idea — autonomous agents working a spec until it's done — but with production-grade convergence guarantees, review gates, and full observability instead of a fire-and-forget loop. **Why it exists:** a single unified outer loop with `allWorkComplete` quiescence and a hard `--max-iterations` ceiling means a run *terminates*; the speculative merge queue means parallel agents don't step on each other; the SQLite-backed workflow tree means nothing is ever lost when a run dies.
+If your original fork was a mess of hardcoded `/home/toxic` paths, 1189-line CLI files, duplicate deps, and ranch-specific shims — this is the clean replacement you can `rm -rf` and drop in.
 
 ---
 
-## Features
+## ✨ Why This Fork Exists
 
-- **Single unified outer Ralph loop with finite convergence** — schedule → execute → merge repeats until `allWorkComplete` quiescence, bounded by a hard iteration ceiling (`--max-iterations`, default `25`)
-- **Interactive clarifying questions** — AI generates 10–15 contextual questions; a keyboard-navigable terminal UI collects answers (arrow keys, 1–5 shortcuts, custom answers); 12-question config questionnaire maps answers to concurrency, retries, and merge-queue depth; answers saved to `.super-ralph/generated/clarifications.json`; `--skip-questions` bypasses entirely
-- **AI-interpreted run config** — `InterpretConfig` converts your prompt + clarification answers into a structured `SuperRalphCliConfig` (focuses, build/test commands, pre/post-land checks, code style, review checklist)
-- **Per-ticket staged pipeline** — staged agent prompts for the full lifecycle: `Discover` → `Research` → `Plan` → `Implement` → `BuildVerify`/`Test` → `CodeReview`/`SpecReview` → `ReviewFix`, all in `src/prompts/*.mdx`
-- **Speculative agentic merge queue** — `AgenticMergeQueue` + `mergeQueue/coordinator.ts` tests concurrent changes in temporary JJ/Git workspaces before landing; speculative depth configurable from conservative (1–2) to aggressive (5+); git repos are auto-adopted as colocated jj repos (`jj git init --colocate`)
-- **Telemetric Cognitive EKG** — `telemetricOracle.ts` supervises runs via non-invasive SQLite state grounding: zero keystroke injection, no tmux send-keys, anchored to the 114-model Sovereign Router (`:25104`)
-- **Proxy-based model routing** — every model call routes through the proxy by default; `FLOCK_API_KEY` preferred, deprecated `NIM_PROXY_API_KEY` still honored, provider keys as fallback; model alias resolves `FLOCK_MODEL` → `NIM_PROXY_MODEL` → default
-- **Live monitor dashboard** — runs in parallel with the workflow; auto-discovers a port in 4500–4600, shows progress bars, quick stats, and an activity feed with 5-second auto-refresh
-- **Full resumability** — all workflow state lives in `.super-ralph/workflow.db`; resume any run with `smithers-cli resume --run-id sr-…`; `scripts/reconcile-resume.sh` and `scripts/inspect-resume-state.sh` assist recovery
-- **Dry-run mode** — generate the workflow files under `.super-ralph/generated/` without executing anything
-- **Six CLI aliases, one binary** — `corral`, `ralph`, `taskforge`, `super-ralph`, `hyper`, `hyper-ralph` all map to `src/cli/index.ts`; consumed as local symlinks, never from a registry (private package, publishing disabled)
-- **Pluggable agent executors** — `src/agentRegistry.ts` supports `claude-code`, `codex`, `gemini`, `kimi`, `amp`, and `custom` agents
-- **Single-instance guard** — `scripts/guard-single-instance.sh` prevents overlapping loop instances
+| Original `corral_hashline_read.txt` dump | This clean version |
+|---|---|
+| 53 files dumped with hashline markers | Proper folder structure |
+| `bin/` hardcoded `/home/toxic/.secrets` | Portable, env-var driven `$HOME` |
+| `src/cli/index.ts` **1189 lines** doing everything | Split into `env.ts` / `workspace.ts` / `args.ts` / `runner.ts` / `index.ts` (70 lines) |
+| `smithers-orchestrator@0.32.0` + `smthrs@0.35.0` duplicate | Single `smthrs@0.35.0` |
+| `src/*.test.ts` mixed in source | All tests in `tests/` |
+| `mergeQueue/coordinator.ts` **851 lines** monolith | Split into `types.ts` / `ops.ts` / `prompt.ts` / `coordinator.ts` |
+| Ranch-specific scripts (`guard-single-instance.sh`) | Removed — belongs in ranch repo |
+| 6 bin aliases pointing to same file | Single `corral` bin |
 
 ---
 
-## How it flows
+## 🏗️ Architecture
 
 ```mermaid
-flowchart TD
-    A[Prompt text or .md file] --> B[ClarifyingQuestions<br/>AI-generated, keyboard-navigable UI]
-    B --> C[InterpretConfig<br/>prompt + answers → SuperRalphCliConfig]
-    C --> D[SuperRalph outer loop<br/>run id sr-&lt;ts&gt;-&lt;uuid&gt;]
-    D --> E[TicketScheduler<br/>priority queue + capacity]
-    E --> F[Job execution<br/>in jj/git worktrees]
-    F --> G[Per-ticket stages<br/>Discover → Research → Plan → Implement<br/>→ BuildVerify/Test → CodeReview/SpecReview]
-    G --> H[AgenticMergeQueue<br/>speculative execution, multi-depth]
-    H --> I{allWorkComplete?}
-    I -- No --> E
-    I -- Yes --> J[CompletionValidator + FinalReport]
-    C -. parallel .-> K[Monitor dashboard<br/>port 4500–4600, 5s refresh]
-    D -. supervised by .-> L[telemetricOracle<br/>non-invasive SQLite grounding]
-    M[(.super-ralph/workflow.db<br/>all state)] <-. persists .-> D
+graph TD
+    CLI[corral CLI] --> WS[workspace.ts<br/>jj colocated provisioning]
+    CLI --> ENV[env.ts<br/>secrets & proxy config]
+    CLI --> ARGS[args.ts<br/>parse & help]
+    CLI --> RUNNER[runner.ts<br/>smithers spawn]
+    
+    RUNNER --> PRELOAD[preload.ts<br/>effect/unstable compat shims]
+    RUNNER --> SMTHRS[smthrs orchestration engine]
+    
+    SMTHRS --> CQ[ClarifyingQuestions<br/>user prefs]
+    SMTHRS --> IC[InterpretConfig<br/>→ SuperRalph config]
+    SMTHRS --> SR[SuperRalph<br/>SINGLE outer Ralph loop]
+    
+    SR --> SCHED[TicketScheduler<br/>capacity-aware scheduling]
+    SR --> PAR[Parallel<br/>maxConcurrency jobs]
+    SR --> MQ[AgenticMergeQueue<br/>speculative landing]
+    
+    PAR --> JOB[Job<br/>research → plan → implement → test → review]
+    MQ --> COORD[SpeculativeMergeQueueCoordinator]
+    
+    COORD --> OPS[ops.ts<br/>jj/git ops]
+    COORD --> TYPES[types.ts]
+    COORD --> PROMPT[prompt.ts<br/>REQUEST_MARKER JSON]
+    
+    JOB --> SELECTORS[selectors.ts<br/>ticket state]
+    JOB --> AGENTREG[agentRegistry.ts<br/>rate limiting]
+    JOB --> NIMPROXY[nimProxy.ts<br/>flock / cuttinggate routing]
 ```
 
-Generated artifacts land under `.super-ralph/` in the target repo: `generated/workflow.tsx` (the full Smithers workflow tree), `generated/clarifications.json`, and `workflow.db` (SQLite state, Smithers system tables + custom `clarifying_questions`, `interpret_config`, `discover`, `research`, `plan`, `implement`, `test_results`, `report`, `land` tables).
+### The Critical Fix (2026-09-21)
+
+**Before:** Three sibling `<Ralph>` loops (scheduler, execution, merge queue) never converged. Scheduler ran to `maxIterations` before execution got a turn → `RALPH_MAX_REACHED` on every non-trivial task.
+
+**After:** **Single outer Ralph loop** containing all three phases:
+
+```tsx
+<Ralph until={allWorkComplete} maxIterations={25} onMaxReached="fail">
+  {activeCount < maxConcurrency && <TicketScheduler />}
+  <Parallel maxConcurrency={maxConcurrency}>
+    {activeJobs.map(job => <Job key={job.jobId} job={job} />)}
+  </Parallel>
+  <AgenticMergeQueue />
+</Ralph>
+```
+
+Each iteration schedules, executes, and merges. Shared `allWorkComplete` predicate can actually become true.
 
 ---
 
-## Quick start
+## 🚀 Quick Start
 
 ```bash
+# 1. Replace old mess with clean
+rm -rf ~/estate/ranch/corral
+tar -xzf corral-clean.tar.gz -C ~/estate/ranch/
+mv ~/estate/ranch/corral-clean ~/estate/ranch/corral
+
+# 2. Install
+cd ~/estate/ranch/corral
 bun install
-bun run src/cli/index.ts --help
-corral ./PROMPT.md --dry-run
+
+# 3. Check env (portable, no /home/toxic hardcoded)
+bun run src/cli/index.ts --check-env
+# or
+corral --check-env
+
+# 4. Run
+corral "Build a React todo app with local storage" --max-concurrency 8
+
+# 5. With spec file
+corral ./specs/feature.md --max-concurrency 8 --skip-questions
+
+# 6. Dry run
+corral "Add auth" --dry-run
 ```
 
-- `bun install` — install dependencies (CI uses plain `bun install`; `--frozen-lockfile` hangs on GH runners)
-- `bun run src/cli/index.ts --help` — same as the `cli` package script; prints real usage and the six invocation aliases
-- `corral ./PROMPT.md --dry-run` — generates `.super-ralph/generated/workflow.tsx` and friends without executing; the safe first run, requires no API key
-
-A real run looks like:
+### Install shim (optional, for full MCP tool support)
 
 ```bash
-corral "Build a React todo app"
-ralph ./specs/feature.md --max-concurrency 8
-hyper ./PROMPT.md --skip-questions --max-iterations 15
+ln -sf $(pwd)/bin/claude-shim-wrapper.sh ~/.local/bin/claude
+# Configure via env, not hardcoded:
+export CORRAL_SECRETS_PATH=~/.config/corral/secrets
+export GATEHOUSE_BIN=~/.local/bin/gatehouse
+export CLAUDE_REAL_BIN=~/.local/bin/claude.nim-shim-real
 ```
 
-### CLI flags
+---
 
-| Flag | Description | Default |
+## 📦 Installation
+
+**Requirements:**
+- [Bun](https://bun.sh) >=1.3.0
+- [jj](https://github.com/martinvonz/jj) (Jujutsu VCS) — `cargo install jj-cli` or `mise`
+- Git colocated repo (`jj git init --colocate`)
+
+```bash
+bun add @sovereign/corral
+# or clone
+git clone https://github.com/roninjin10/super-ralph.git corral
+cd corral
+bun install
+```
+
+### Workspace Provisioning
+
+Corral auto-provisions isolated workspaces when you run outside a colocated repo:
+
+```
+~/.corral/runs/<stamp>-<slug>-<uniq>/
+├── .jj/
+├── .git/
+├── .corral-workspace
+└── main bookmark seeded
+```
+
+This prevents accidentally turning `$HOME` into a repo — original behavior that nuked home dirs.
+
+---
+
+## 🔧 CLI Reference
+
+```
+Usage:
+  corral "prompt text"
+  corral ./specs/feature.md --max-concurrency 8
+
+Options:
+  --cwd <path>              Repo root (default: current directory)
+  --max-concurrency <n>     Workflow max concurrency override
+  --max-iterations <n>      Ralph loop iteration ceiling (default: 25)
+  --run-id <id>             Explicit Smithers run id
+  --dry-run                 Generate workflow files but do not execute
+  --skip-questions          Skip the clarifying questions phase
+  --report --run-id <id>    Regenerate HTML run report, print path, exit
+  --check-env               Dump redacted env + resolved router, exit
+  --help                    Show help
+
+Examples:
+  corral "Build a React todo app"
+  corral ./specs/feature.md --max-concurrency 8
+  corral "Add authentication" --skip-questions
+```
+
+### Environment Variables
+
+All secrets loading is now portable (no `/home/toxic/.secrets` hardcoded):
+
+| Variable | Description | Default |
 |---|---|---|
-| `--cwd <path>` | Repo root the workflow operates on | current directory |
-| `--max-concurrency <n>` | Parallel active tickets override | from config/clarifications |
-| `--max-iterations <n>` | Hard ceiling for Ralph loop convergence | `25` |
-| `--run-id <id>` | Explicit Smithers run id | auto `sr-<ts>-<uuid8>` |
-| `--dry-run` | Generate workflow files, don't execute | `false` |
-| `--skip-questions` | Bypass the clarifying-questions phase | `false` |
-| `--check-env` | Dump resolved model-routing env (keys redacted) and exit | — |
-| `--help` | Show usage | — |
-
-Requirements: **Bun ≥ 1.3.0**, **jj** (`jj` binary must be on `PATH` — the CLI errors otherwise; plain git dirs are adopted non-destructively via `jj git init --colocate`), and at least one agent executor reachable.
+| `CORRAL_SECRETS_PATH` | Explicit secrets file | `~/.secrets` → `~/.config/corral/secrets` → `.env` |
+| `ANTHROPIC_API_KEY` | Anthropic key | — |
+| `SOVEREIGN_ROUTER_URL` / `CUTTINGGATE_URL` | Router URL | `http://127.0.0.1` |
+| `SOVEREIGN_ROUTER_PORT` / `CUTTINGGATE_PORT` | Router port | `25200` |
+| `FLOCK_API_KEY` | Flock proxy (comma-separated for rotation) | falls back to `NIM_PROXY_API_KEY` |
+| `GATEHOUSE_BIN` | Gatehouse binary | `gatehouse` |
+| `GATEHOUSE_CONFIG` | Gatehouse MCP config | `~/.config/corral/gatehouse/mcp_config.json` |
+| `CLAUDE_REAL_BIN` | Real Claude binary | `~/.local/bin/claude.nim-shim-real` |
 
 ---
 
-## Architecture
+## 🧠 Components
 
-Everything is a [Smithers](https://smithers.sh) workflow tree (`smithers-orchestrator` 0.32.0): **all** AI interactions flow through workflow components — there are no direct agent calls outside the tree. The CLI generates the workflow, then executes it via `smithers-cli run`.
+### Core
 
-### Source layout
+- **`SuperRalph.tsx`** — Single outer Ralph loop (the fix), finite-by-default `maxIterations=25`, shared `allWorkComplete` predicate
+- **`TicketScheduler.tsx`** — Capacity-aware scheduling, respects `maxConcurrency`, agent pool context table
+- **`Job.tsx`** — Research → Plan → Implement → Test → Spec Review → Code Review → Review Fix → Land pipeline
+- **`AgenticMergeQueue.tsx`** — Speculative landing with `maxSpeculativeDepth`, post-land checks, eviction handling
 
-| Path | Role |
+### Merge Queue (refactored)
+
+| File | Responsibility | Lines |
+|---|---|---|
+| `types.ts` | All type definitions | 70 |
+| `ops.ts` | `runJjCommand`, `runShellCommand`, `runCiInSpeculativeWorkspace`, `createDefaultOps` | 160 |
+| `prompt.ts` | `REQUEST_MARKER`, `buildSpeculativeMergeQueuePrompt`, balanced brace JSON parser | 90 |
+| `coordinator.ts` | `SpeculativeMergeQueueCoordinator` class, priority ranks, processing loop | ~400 |
+| `index.ts` | Barrel re-export | 5 |
+
+**Before:** 851-line monolith with `SpawnedProcess` hack. **After:** Testable, typed ops.
+
+### CLI (refactored)
+
+| File | Responsibility |
 |---|---|
-| `src/cli/index.ts` | CLI entry: arg parsing, env/agent/jj detection, workflow generation, execution |
-| `src/cli/clarifications.ts` | The 12-question questionnaire; also exported as a module for AI agents (`getClarificationQuestions`, `buildAgentClarificationPrompt`) |
-| `src/cli/interactive-questions.ts` | Blocking keyboard UI child process (external coordination, no Smithers core changes) |
-| `src/components/SuperRalph.tsx` | The outer finite loop: scheduler → execution → merge queue → quiescence |
-| `src/components/TicketScheduler.tsx` | Priority queue + capacity management |
-| `src/components/Job.tsx` | Per-ticket execution unit |
-| `src/components/AgenticMergeQueue.tsx` | Speculative merge queue component |
-| `src/components/ClarifyingQuestions.tsx` | Question generation + collection component |
-| `src/components/InterpretConfig.tsx` | Prompt + answers → `SuperRalphCliConfig` |
-| `src/components/Monitor.tsx` | Live web dashboard component |
-| `src/components/TicketResume.tsx` | Resume-path component |
-| `src/components/CompletionValidator.tsx` | Terminal-state validation |
-| `src/components/FinalReport.tsx` | End-of-run report component |
-| `src/components/index.ts` | Component exports |
-| `src/prompts/*.mdx` | 14 staged agent prompts: Discover, Research, Plan, Implement, BuildVerify, IntegrationTest, Test, CodeReview, SpecReview, CategoryReview, ReviewFix, Land, Report, UpdateProgress |
-| `src/mergeQueue/coordinator.ts` | Speculative merge-queue coordination logic |
-| `src/nimProxy.ts` | Proxy config resolution, env overrides, chat-completions routing |
-| `src/telemetricOracle.ts` | Non-invasive telemetry supervisor over the SQLite workflow DB |
-| `src/agentRegistry.ts` | Agent executor registry (`claude-code`, `codex`, `gemini`, `kimi`, `amp`, `custom`) |
-| `src/hooks/useSuperRalph.ts` | React hook for the SuperRalph component |
-| `src/schemas.ts` | Zod output schemas (`ralphOutputSchemas`) |
-| `src/selectors.ts` | Output selectors (also exported as `@sovereign/corral/selectors`) |
-| `src/durability.ts`, `src/scheduledTasks.ts` | Durability helpers, scheduled task definitions |
-| `src/exactReply.ts` | Exact-reply detection/normalization utilities |
-| `src/index.ts` | Library entry; exports `.`, `./selectors`, `./components`, `./cli/clarifications` |
+| `env.ts` | `loadSecrets()`, `redact()`, `CHECK_ENV_KEYS`, `parseFinite()`, `dumpCheckEnv()` |
+| `workspace.ts` | `ensureWorkspace()`, `ensureJjAvailable()`, `initColocated()`, `seedInitialCommit()` |
+| `args.ts` | `parseArgs()`, `printHelp()`, `BOOLEAN_FLAGS`, `getFlagString()` |
+| `runner.ts` | `runWorkflow()`, preload gen, bunfig, smithers spawn, `writeReportQuietly()`, `printFinalReply()` |
+| `index.ts` | 70-line thin entry |
 
-### Library usage
+### Other Key Files
 
-```typescript
-import { getClarificationQuestions, buildAgentClarificationPrompt } from "@sovereign/corral/cli/clarifications";
-import { ClarifyingQuestions } from "@sovereign/corral/components";
-```
-
-### Provenance
-
-Evolved from the `super-ralph` lineage (`package.json` `repository.url` points at `roninjin10/super-ralph`) into **Sovereign Corral** — the ticket enclosure & multi-agent engineering engine for the Sovereign estate. Key divergences from the upstream design: one unified outer loop instead of sibling loops, Sovereign Router (`:25104`) model anchoring instead of direct cloud API calls, the telemetric EKG supervisor, and the speculative JJ/Git merge queue.
+- **`selectors.ts`** — Ticket state selectors (`selectAllTickets`, `selectProgressSummary`, etc.)
+- **`agentRegistry.ts`** — Rate limiting (`rateLimitedUntil`, `isAvailable`, `recordRateLimit`)
+- **`nimProxy.ts`** — Flock integration, key rotation, `proxyEnvOverrides()`, `NimProxyKeyPool`
+- **`durability.ts`** — Cross-run ticket state, resumable tickets
+- **`telemetricOracle.ts`** — Non-invasive EKG verdicts
+- **`preload.ts`** — Effect `unstable/*` compat shims (only when native resolution fails)
 
 ---
 
-## Configuration
-
-Copy `.env.example` to `.env` (`.env` is gitignored — never commit it). The CLI loads `~/.secrets` for any unset keys.
-
-| Variable | Purpose |
-|---|---|
-| `FLOCK_API_KEY` | Primary proxy API key — **required for real runs** |
-| `NIM_PROXY_API_KEY` | Deprecated fallback, still honored |
-| `ANTHROPIC_API_KEY` / `NVIDIA_API_KEY` | Provider-key fallbacks |
-| `FLOCK_MODEL` / `NIM_PROXY_MODEL` | Model alias (`FLOCK_MODEL` → `NIM_PROXY_MODEL` → default) |
-| `FLOCK_BASE_URL` / `NIM_PROXY_BASE_URL` / `NIM_BASE_URL` | Proxy base-URL overrides |
-| `NIM_PROXY_BYPASS` | `1` bypasses the proxy (direct provider behavior — not recommended) |
-| `SOVEREIGN_ROUTER_URL` / `SOVEREIGN_ROUTER_PORT` | Sovereign Router endpoint (port `25104` per `nimProxy.ts`) |
-| `WORKFLOW_MAX_CONCURRENCY` | Concurrency override without flags |
-
-Before starting an outer loop, run the pre-loop environment audit (`docs/ENV_AUDIT.md`): resolve the model alias, reject stale inherited `NIM_MODEL` names, confirm any bypass flags are intentional, and confirm keys are present without logging their values. `corral --check-env` dumps the resolved env with keys redacted.
-
-**Optional services:** the Sovereign Router (`:25104`) is the default model anchor; the Monitor dashboard auto-binds a free port in 4500–4600. `mise.toml` pulls `ports.env` from the estate config and provides tasks (`install`, `test`, `typecheck`, `cli`, `help`).
-
-### Docs
-
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Smithers workflow tree, components, DB schema, resume, troubleshooting
-- [`docs/CLI_CLARIFICATIONS.md`](docs/CLI_CLARIFICATIONS.md) — the 12 questions and how answers map to run config
-- [`docs/ENV_AUDIT.md`](docs/ENV_AUDIT.md) — pre-loop environment audit checklist
-- [`docs/acceptance/accept14-20260921/ACCEPTANCE.md`](docs/acceptance/accept14-20260921/ACCEPTANCE.md) — acceptance record
-- [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — original refactor specification
-
----
-
-## Development
+## 🔌 Shim Architecture
 
 ```bash
-bun install          # install
-bun test tests/      # unit + integration suite
-bun x tsc --noEmit   # typecheck — currently clean, 0 diagnostics
+corral
+  └─▶ bin/claude-shim-wrapper.sh (portable)
+       ├─▶ claude auth status → {"loggedIn":true} (Smithers preflight)
+       ├─▶ --version/--help → real binary
+       └─▶ prompt → python3 bin/claude-react-loop.py
+                    ├─▶ fetch live Gatehouse catalog (36 servers / 258 tools)
+                    ├─▶ inject tool instructions
+                    ├─▶ call nim-shim-real (prompt→text)
+                    ├─▶ parse <tool_call>{"server":...}</tool_call>
+                    ├─▶ execute via gatehouse call <intent>
+                    └─▶ loop until no tool tags (max 25 iter)
 ```
 
-CI (`.github/workflows/corral.yml` at the repo root — GitHub only executes workflows from the root) gates every push/PR touching `corral/**`: plain `bun install` at the monorepo root (no `--frozen-lockfile`, no bun-store cache — both hung silently on GH runners), then `bun run typecheck` and `bun test tests/` scoped to `corral/`. `corral/.github/workflows/ci.yml` mirrors the same gates as the package-local contract. Typecheck and tests also run locally via the commands above or `mise run test` / `mise run typecheck`.
+**Portable env vars:**
 
-**Adding a new component** (from `docs/ARCHITECTURE.md`):
+```bash
+CORRAL_REACT_LOOP=./bin/claude-react-loop.py
+GATEHOUSE_BIN=gatehouse
+GATEHOUSE_CONFIG=~/.config/corral/gatehouse/mcp_config.json
+CLAUDE_REAL_BIN=~/.local/bin/claude.nim-shim-real
+NIM_BASE_URL=http://127.0.0.1:25200/v1
+```
 
-1. Create it in `src/components/`
-2. Define its output schema with Zod
-3. Export it from `src/components/index.ts`
-4. Register the schema in `src/schemas.ts` → `ralphOutputSchemas`
-5. Add a selector in `src/selectors.ts`
-6. Export the selector from `src/index.ts`
-
-**Note:** this is an *internal CLI, not a distributed library* — `package.json` sets `"private": true`, and `.github/workflows/publish.yml` is deliberately neutralized (publishing was disabled on purpose: the `@sovereign` npm scope belongs to an unrelated third party). The six bin aliases are consumed as `~/.local/bin` symlinks pointing at `src/cli/index.ts`, never via `npm install`.
+No more `/home/toxic/estate/ranch/range/bin/gatehouse` hardcoded.
 
 ---
 
-## License & Security
+## 📊 Comparison: super-ralph vs corral-clean
 
-**License:** MIT — Copyright (c) 2026 William Cory. See [`LICENSE`](LICENSE).
+| Aspect | super-ralph@0.2.5 (orig) | corral-clean@1.0.0 |
+|---|---|---|
+| CLI | 1189 lines monolith | 70 lines + 4 modules |
+| Merge queue | 851 lines monolith | 4 files, testable ops |
+| Deps | `smithers-orchestrator` + `smthrs` duplicate | `smthrs` only |
+| Paths | `/home/toxic/...` hardcoded | `$HOME`, env-var driven |
+| Tests | Mixed in `src/` | All in `tests/` |
+| Preload | Verbose ranch comments | Clean, documented |
+| Bin | 6 aliases | Single `corral` |
+| Scripts | Ranch-specific | Removed |
+| Workspace | Could nuke `$HOME` | Safe isolated `~/.corral/runs` |
+| Arch | 3 sibling Ralph loops (broken) | Single outer loop (fixed) |
 
-**Security notes:**
-- API keys live in the environment (or `~/.secrets`) — never write them to disk beyond your gitignored `.env`, and never log key values; `corral --check-env` redacts them automatically
-- `.env` is gitignored; the example values in `.env.example` are placeholders — replace before any real run
-- No dedicated security contact is published in this repo; report issues via the repository's issue tracker
+---
+
+## 🧪 Testing
+
+```bash
+bun test tests/
+bun run typecheck
+```
+
+Tests moved from `src/` to `tests/`:
+- `exactReply.test.ts`
+- `finite-default.test.ts`
+- `nimProxy.test.ts`
+- `routing-regression.test.ts`
+- `telemetric-oracle.test.ts`
+- `timingRecovery.test.ts`
+
+---
+
+## 📝 License
+
+MIT — see [LICENSE](./LICENSE)
+
+Original super-ralph lineage: William Cory → Ronin Jin → Sovereign Fleet
+
+---
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+1. Fork
+2. `bun install`
+3. Make changes in `src/cli/` or `src/mergeQueue/` (not monoliths)
+4. `bun test tests/` + `bun run typecheck`
+5. PR
+
+---
+
+## 🗺️ Roadmap
+
+- [x] Split 1189-line CLI
+- [x] Split 851-line mergeQueue
+- [x] Remove duplicate `smithers-orchestrator` dep
+- [x] Portable shim (no `/home/toxic`)
+- [x] All tests in `tests/`
+- [x] Clean preload
+- [ ] Upgrade Effect `beta.102` → `rc` / stable (breaking: `unstable/*` → stable paths)
+- [ ] Add `bunfig.toml` to repo (currently generated)
+- [ ] GitHub Actions CI (see `.github/workflows/ci.yml`)
+- [ ] Add `docs/ARCHITECTURE.md` with sequence diagrams
+
+---
+
+<p align="center">
+  <b>🐴 Sovereign Corral — Run 8 agents in parallel, land without conflicts</b><br/>
+  <code>rm -rf corral && tar -xzf corral-clean.tar.gz && bun install && corral "ship it"</code>
+</p>
