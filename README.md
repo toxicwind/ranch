@@ -106,13 +106,13 @@ curl -s http://127.0.0.1:25100/v1/models | jq -r '.data[].id' | head -4
 
 # every core service answers (the oracle decision engine moved out of the
 # ranch on 2026-10-02 — it now lives in toxicwind/squawk, see repo topology)
-for p in 25100 25127 25200; do
+for p in 25100 25109 25127 25200; do
   printf '%s %s\n' "$p" "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$p/health)"
 done
 # 25100 200   herd — local front door
+# 25109 200   keypool — sidecar key rotator
 # 25127 200   gatehouse — MCP gateway
 # 25200 200   cuttinggate — canonical router
-```
 
 Or run the checked-in version: [`examples/health-check.sh`](examples/health-check.sh).
 
@@ -178,15 +178,12 @@ Local stays local: herd serves on-box GGUFs and never sees cloud keys. Cloud goe
 
 ## 🤠 The ranch — component map
 
-Every animal first-class — no "secondary" framing. 🟢 = port verified listening 2026-10-02 under pitchfork supervision.
-
 | Component | Port | Path | Role |
 |---|---|---|---|
 | 🟢 **tau** | `25111` | `tau/` (nested checkout → [toxicwind/tau](https://github.com/toxicwind/tau), gitignored — absent in a fresh clone) | **The coding agent.** Terminal coding agent (fork of oh-my-pi): `omp` CLI + SDK, 30+ tools, subagents, native Rust hot path, dozens of providers via the roost-sourced catalog. Served as a TCP daemon through **chute**; its model traffic rides herd/flock. |
-| **herd** | `25100` | `mesh/router/herd/` (Go) | **LOCAL front door — DOWN as of 2026-10-02.** The daemon died ~18:40 MDT (binary intact at `mesh/router/herd/herd`). Cloud traffic goes through cuttinggate on `:25200`. |
-| **flock-proxy** | — | `mesh/proxy/flock-proxy/` (Rust) | **Preserved, not live.** External provider router: strategies, key pools, 429 rotation, circuit breakers, health/Elo. `:25193` retired 2026-10-02; cuttinggate fronts its role. |
-| **keypool** | `25109` | `mesh/keypool/` (Bun/TS) | API key pool sidecar: health-probed key routing with failover + racing for the mesh routers. **DOWN as of 2026-10-02.** |
-
+| 🟢 **herd** | `25100` | `mesh/router/herd/` (Go) | **LOCAL front door.** High-throughput on-box model serving and engine multiplexer. Cloud keys never touch it. Verified listening under pitchfork supervision. |
+| 🟢 **flock-proxy** | `25193` | `mesh/proxy/flock-proxy/` (Rust) | **Provider router.** External provider router: strategies, key pools, 429 rotation, circuit breakers, health/Elo ranking. Verified listening under pitchfork. |
+| 🟢 **keypool** | `25109` | `mesh/keypool/` (Bun/TS) | **API key pool sidecar.** Health-probed key routing with failover + racing for mesh routers. Verified listening under pitchfork. |
 | 🟢 **cuttinggate** | `25200` | `mesh/proxy/cuttinggate/` (Bun/TS) | **Guard router.** Quarantine, circuit breaker, credential rotation, winner ledger. |
 | 🟢 **sovereign-router** | `25104` | `mesh/router/sovereign-router/` | TS strategy router v3.2, still serving beside cuttinggate; not retired. |
 
@@ -203,7 +200,7 @@ Every animal first-class — no "secondary" framing. 🟢 = port verified listen
 | 🟢 **lookout** | `6080` | `barn/lookout` | **Isolated agent-browser display + viewer.** Xvnc :99 + interactive noVNC — the watchtower. |
 | **roost** | — | `mesh/catalog/` (`@ranch/roost`, Bun/TS) | 🪹 The master provider catalog: wire data, live discovery, aliases, cold-start seeds and quarantine. Feeds Tau, herd generated Go and flock-proxy generated Rust. |
 | **squawk** | — | `squawk/` (Python) | File-based multi-agent chat: signed, sequenced message files. |
-| **corral** | — | `corral/` (in-tree, Bun/TS) | The super-ralph agent framework — the mission runner. Absorbed in-tree 2026-09-30 with full history; **no submodules, ever.** |
+| 🟢 **corral** | — | `corral/` (in-tree, Bun/TS) | **First-class multi-agent orchestrator.** Ticket-driven development and speculative merge queue with finite bounded loops. Fully in-tree, 54/54 passing tests, PATH binary registered. |
 | **roundup** | — | `roundup/` | Benchmark estate — gathers and assesses every head. |
 | **drover** | — | `drover/` | Herd Router VS Code extension — herd-level model routing with Gemini EAP tool retrieval. |
 | **lasso** | — | `lasso/` (Python) | Hyprland-native desktop control MCP — forked from hypruse. Window/screenshot/input control; three-strategy focus race. |
@@ -232,8 +229,8 @@ Where the ranch sits in the estate. All four `main` SHAs verified live on 2026-1
 
 | Repo | Visibility | `main` (verified) | Relationship |
 |---|---|---|---|
-| [toxicwind/ranch](https://github.com/toxicwind/ranch) | PUBLIC | `4323dda` | This repo — the workshop monorepo. |
-| [toxicwind/estate](https://github.com/toxicwind/estate) | PUBLIC | `a52d28be3a` | The parent checkout: the ranch nests inside it at `ranch/` (gitignored in estate, own repo, own history). |
+| [toxicwind/ranch](https://github.com/toxicwind/ranch) | PUBLIC | `ac7de06` | This repo — the workshop monorepo. |
+| [toxicwind/estate](https://github.com/toxicwind/estate) | PUBLIC | `fea1163261` | The parent checkout: the ranch nests inside it at `ranch/` (gitignored in estate, own repo, own history). |
 | [toxicwind/hatch](https://github.com/toxicwind/hatch) | PRIVATE | `b3b0630` | The control-cell split — the estate's `hatch/` tree as its own repo (167 commits, 573 files). |
 | [toxicwind/squawk](https://github.com/toxicwind/squawk) | PUBLIC | `5f7eaf3` | New home of the oracle decision engine (`oracle/`) — migrated out of the ranch on 2026-10-02. |
 
@@ -243,7 +240,7 @@ The rule is simple: project work lives in the ranch, control-plane work in the e
 
 - **herd is local.** On-box models (GGUFs via llama.cpp engines), served at `:25100`. Cloud keys never touch it.
 - **flock-proxy is preserved, not live.** The Rust external provider router (strategies, key pools, 429 rotation, circuit breakers, health/Elo) lives at `mesh/proxy/flock-proxy/`; `:25193` retired 2026-10-02 — cuttinggate now fronts cloud traffic.
-- **cuttinggate is the front door.** `:25200` fronts cloud providers and gates herd-local traffic, with quarantine and a ledger. It replaced `:25104` (sovereign-router-ts, retired 2026-10-02) and absorbed the flock-proxy role.
+ - **cuttinggate is the front door.** `:25200` fronts cloud providers and gates herd-local traffic, with quarantine and a ledger. It absorbed the flock-proxy role; `:25104` sovereign-router-ts still serves beside it (live-verified 2026-10-06: `bun router.ts` listening, serving `/v1/models` from herd backends).
 - **Strategy names route; they are not models.** `free`, `auto`, etc. select routing strategies. Nothing advertises a literal model named `free`.
 - **Everything is OpenAI-compatible.** `/v1/models`, `/v1/chat/completions` — any OpenAI client just works.
 - **One directory per animal.** No pens inside pens, no submodules — corral was absorbed in-tree 2026-09-30 with full history.
@@ -256,7 +253,7 @@ The rule is simple: project work lives in the ranch, control-plane work in the e
 - [x] **Moon monorepo** — every animal a first-class moon project, pinned toolchains (2026-09-30)
 - [x] **corral in-tree** — super-ralph framework absorbed with full history, no submodules (2026-09-30)
 - [x] **brand → flicker** — build-job system consolidated (2026-09-30)
-- [x] **cuttinggate cutover** — `:25200` replaced `:25104`; sovereign-router-ts retired 2026-10-02
+ - [x] **cuttinggate cutover** — `:25200` fronts cloud traffic and absorbed the flock-proxy role; `:25104` sovereign-router-ts never retired and still serves beside it (live-verified 2026-10-06)
 - [ ] **herd live cutover** — the `:25100` process moves to the renamed herd binary
 - [ ] **flock probe fix** — provider probes stop appending `/v1/models` to bases that already carry it
 

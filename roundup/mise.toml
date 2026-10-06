@@ -1,0 +1,31 @@
+[tasks.herd-sweep]
+run = "./sweeps/roundup_herd_sweep.sh"
+description = "Benchmark every model herd can load"
+
+[tasks.bench]
+run = "./sweeps/roundup-bench.sh"
+description = "Benchmark providers using instruction_following scorer"
+
+[tasks.bench-v3]
+run = "./sweeps/roundup-bench-v3.sh"
+description = "Benchmark providers with capability probing"
+
+[tasks.sweep]
+run = "./sweeps/roundup_sweep.sh"
+description = "Quick sanity pass over working OpenRouter models"
+
+[tasks.estate-sweep]
+run = "bun ./sweeps/roundup-estate-sweep.ts"
+description = "One-command estate sweep"
+
+[tasks.emit-weights]
+run = "bun ./sweeps/emit-router-weights.ts"
+description = "Convert sweep results into router weights"
+
+[tasks.dump]
+run = "./sweeps/dump-roundup.sh"
+description = "Dump roundup directory"
+
+[tasks.upstream-status]
+run = "./scripts/upstream-merge.sh --status"
+description = "Check fork status"
