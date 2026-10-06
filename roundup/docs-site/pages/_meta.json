@@ -1,0 +1,19 @@
+{
+  "index": "Introduction",
+  "another": "Another Page",
+  "advanced": "Advanced (A Folder)",
+  "about": {
+    "title": "About",
+    "type": "page"
+  },
+  "contact": {
+    "title": "Contact \u2197",
+    "type": "page",
+    "href": "https://twitter.com/shuding_",
+    "newWindow": true
+  },
+  "benchmarks": {
+    "title": "Benchmarks",
+    "type": "page"
+  }
+}

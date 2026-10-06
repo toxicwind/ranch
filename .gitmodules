@@ -323,9 +323,6 @@
 [submodule "mcp-prompt-injection-detector"]
 	path = mcp-prompt-injection-detector
 	url = https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector.git
-[submodule "roundup/docs-site"]
-	path = roundup/docs-site
-	url = https://github.com/shuding/nextra-docs-template
 [submodule "roundup-site"]
 	path = roundup-site
 	url = https://github.com/owieth/turborepo-example
