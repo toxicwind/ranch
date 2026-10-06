@@ -83,10 +83,14 @@ export async function runWorkflow(opts: RunWorkflowOpts): Promise<void> {
   let smithersCliPath: string | null = null;
   let smithersSubcommand = "run";
 
+  const smithersCliRelCandidates = ["dist/cli.js", "cli.js", "src/bin/smithers.js"];
   for (const dir of smithersDirCandidates) {
-    if (existsSync(join(dir, "dist", "cli.js")) || existsSync(join(dir, "cli.js"))) {
+    const found = smithersCliRelCandidates
+      .map((rel) => join(dir, rel))
+      .find((abs) => existsSync(abs));
+    if (found) {
       smithersPackageRoot = dir;
-      smithersCliPath = existsSync(join(dir, "dist", "cli.js")) ? join(dir, "dist", "cli.js") : join(dir, "cli.js");
+      smithersCliPath = found;
       break;
     }
   }
