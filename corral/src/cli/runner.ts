@@ -69,7 +69,7 @@ export type RunWorkflowOpts = {
 export async function runWorkflow(opts: RunWorkflowOpts): Promise<void> {
   const { repoRoot, promptText, promptSourcePath, runId, maxConcurrency, maxIterations, skipQuestions, headless } = opts;
 
-  const timer = new CorralTimer();
+  const timer = new CorralTimer(runId);
   const superRalphSourceRoot = resolve(__dirname, "..", "..");
   const superRalphPreload = join(superRalphSourceRoot, "preload.ts");
   const workflowPath = join(superRalphSourceRoot, "src", "components", "SuperRalph.tsx"); // Actually smithers workflow file is different
