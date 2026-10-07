@@ -46,8 +46,16 @@ _draining = threading.Event()
 _active_requests = 0
 _active_lock = threading.Lock()
 
-CHAT_ROOT = Path(os.environ.get("SQUAWK_CHAT_ROOT", "/home/toxic/.shingle/squawk-root"))
-RELAY_DIR = Path(os.environ.get("SQUAWK_RELAY_DIR", "/home/toxic/.shingle/squawk-relay"))
+def _default_chat_root() -> Path:
+    p = Path("/home/toxic/.fleet-bus/squawk-root")
+    return p if p.exists() else Path("/home/toxic/.shingle/squawk-root")
+
+def _default_relay_dir() -> Path:
+    p = Path("/home/toxic/.fleet-bus/squawk-relay")
+    return p if p.exists() else Path("/home/toxic/.shingle/squawk-relay")
+
+CHAT_ROOT = Path(os.environ.get("SQUAWK_CHAT_ROOT", str(_default_chat_root())))
+RELAY_DIR = Path(os.environ.get("SQUAWK_RELAY_DIR", str(_default_relay_dir())))
 OUTBOX = RELAY_DIR / "outbox.jsonl"
 STATE = RELAY_DIR / "state.json"
 CONTROL = RELAY_DIR / "control.json"

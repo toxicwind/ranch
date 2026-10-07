@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-roost/v1",
-  "generatedAt": "2026-10-04T04:18:08.000Z",
+  "generatedAt": "2026-10-04T07:18:18.000Z",
   "generator": "@ranch/roost codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/roost src/data.ts",
   "adapters": [

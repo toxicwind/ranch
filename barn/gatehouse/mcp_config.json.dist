@@ -935,28 +935,6 @@
    "tool_discovery_interval": "2m0s"
   },
   {
-   "name": "browserless",
-   "command": "/home/toxic/.local/share/mise/installs/node/22.12.0/bin/node",
-   "args": [
-    "/home/toxic/estate/ranch/barn/browserless/dist/index.js"
-   ],
-   "env": {
-    "BROWSER_KEEPER_CDP": "http://127.0.0.1:9223"
-   },
-   "protocol": "stdio",
-   "enabled": true,
-   "quarantined": false,
-   "oauth": null,
-   "created": "2026-10-05T14:08:23.556351-06:00",
-   "updated": "2026-10-05T14:08:23.556351-06:00",
-   "health_check_interval": "15s",
-   "tool_discovery_interval": "2m0s",
-   "isolation": {
-    "enabled": false,
-    "mode": "none"
-   }
-  },
-  {
    "quarantined": false,
    "name": "skills-hub",
    "protocol": "stdio",
@@ -970,6 +948,27 @@
    },
    "oauth": null,
    "enabled": true,
+   "isolation": {
+    "enabled": false,
+    "mode": "none"
+   },
+   "health_check_interval": "15s",
+   "tool_discovery_interval": "2m0s"
+  },
+  {
+   "quarantined": false,
+   "name": "browserless",
+   "protocol": "stdio",
+   "command": "/home/toxic/.local/share/mise/installs/node/22.12.0/bin/node",
+   "args": [
+    "/home/toxic/estate/ranch/barn/browserless/dist/index.js"
+   ],
+   "oauth": null,
+   "enabled": true,
+   "auto_approve_tool_changes": true,
+   "trust_mode": "auto",
+   "created": "2026-10-05T14:01:13.673170646-06:00",
+   "updated": "0001-01-01T00:00:00Z",
    "isolation": {
     "enabled": false,
     "mode": "none"

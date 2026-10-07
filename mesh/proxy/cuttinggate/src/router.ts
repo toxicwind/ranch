@@ -1,37 +1,34 @@
 /**
  * Model routing: which provider serves this request.
  *
- * The rule set, in order:
+ * Rule set, in order:
+ *   1. A quarantined (model, provider) pair never leaves the building.
+ *   2. Candidates are ordered by the winner ledger.
+ *   3. Candidates race for the first *valid* answer. A 200 with empty content
+ *      is a failure wearing a 200; a non-2xx is an error, never "empty".
+ *   4. A serve-time 404 marks the slug.
  *
- *   1. Quarantined slugs never leave the building.
- *   2. Candidates are ordered by the winner ledger, so the provider that
- *      usually wins goes first and the slow path stops costing the common case.
- *   3. Candidates race for the first *valid* answer — not the first answer. A
- *      200 with empty content loses to a slower provider that actually replied.
- *   4. A serve-time 404 marks the slug, which is what keeps a retired `:free`
- *      tier from killing an agent mid-task.
+ * Breaker contract (see circuit.ts): an attempt THROWS (AttemptFailure) only
+ * for failures that indict the provider: network/timeout, 5xx, 401/402/403.
+ * 429s, model-level 404s, empties, key-pool exhaustion and race-cancelled
+ * attempts RETURN, so they never open the provider's breaker.
  *
- * Racing is the reason this is fast rather than merely correct: three providers
- * at once costs one provider's latency, not three.
+ * Keys are claimed per attempt and passed down; nothing per-provider is stored
+ * on the instance, so concurrent requests cannot misattribute outcomes. The
+ * keypool hands out env-var NAMES; the secret is resolved here.
+ *
+ * Clocks: every upstream attempt carries AbortSignal.timeout(ATTEMPT_MS); the
+ * race loop wakes on settle OR the hard-ceiling timer (cleared every wake).
  */
-
 import type { Config } from "./config.ts";
 import { ProviderGate } from "./circuit.ts";
 import { Quarantine } from "./quarantine.ts";
-import type { CredentialPlane } from "./keypool.ts";
+import { KeyPoolExhaustedError, type CredentialPlane } from "./keypool.ts";
 import { Ledger } from "./ledger.ts";
 import { COPILOT_PROVIDER, CopilotClient, copilotHeaders } from "./copilot.ts";
-import {
-  ZEN_PROVIDER,
-  ZEN_BASE_URL,
-  foldZenSse,
-  zenBody,
-  zenHeaders,
-} from "./zen.ts";
+import { ZEN_PROVIDER, ZEN_BASE_URL, foldZenSse, zenBody, zenHeaders } from "./zen.ts";
 
 export type KnownModel = { id: string; provider: string };
-
-/** A model id may be served by several providers; that is the whole point. */
 
 export type Attempt =
   | { ok: true; content: string; provider: string; latencyMs: number; raced: boolean; finishReason?: string; usage?: unknown }
@@ -44,67 +41,80 @@ export type ChatRequest = {
   max_tokens?: number;
 };
 
-type Settled = {
-  provider: string;
-  valid: boolean;
-  latencyMs: number;
-  content?: string;
-  finishReason?: string;
+/** One settled attempt, unblinded: every way an attempt can end is its own state. */
+type Outcome =
+  | { readonly kind: "valid"; readonly provider: string; readonly content: string; readonly finishReason?: string; readonly usage?: unknown; readonly latencyMs: number; readonly status: number }
+  | { readonly kind: "empty"; readonly provider: string; readonly latencyMs: number; readonly status: number }
+  | { readonly kind: "provider-error"; readonly provider: string; readonly latencyMs: number; readonly status: number; readonly error: string; readonly trip: boolean }
+  | { readonly kind: "gate-rejected"; readonly provider: string; readonly error: string }
+  | { readonly kind: "cancelled"; readonly provider: string };
+
+type Valid = Extract<Outcome, { kind: "valid" }>;
+type Failed = Extract<Outcome, { kind: "provider-error" }>;
+
+/** Thrown inside the gate so the breaker counts it; carries the real outcome. */
+class AttemptFailure extends Error {
+  constructor(readonly outcome: Failed) {
+    super(outcome.error);
+    this.name = "AttemptFailure";
+  }
+}
+
+/** Upstream 200 body shape: "content" vs "no content" vs "junk". */
+type BodyInput = {
+  choices?: { message?: { content?: unknown }; finish_reason?: string }[];
   usage?: unknown;
-  error?: string;
-  status?: number;
+} | null;
+
+type BodyShape =
+  | { readonly kind: "ok"; readonly content: string; readonly finishReason?: string; readonly usage?: unknown }
+  | { readonly kind: "empty"; readonly finishReason?: string; readonly usage?: unknown }
+  | { readonly kind: "malformed" };
+
+function parseBody(body: BodyInput): BodyShape {
+  if (!body) return { kind: "malformed" };
+  const choice = body.choices?.[0];
+  if (!choice) return { kind: "empty" };
+  const content = choice.message?.content;
+  if (typeof content !== "string" || content.trim() === "") {
+    return { kind: "empty", finishReason: choice.finish_reason, usage: body.usage };
+  }
+  return { kind: "ok", content, finishReason: choice.finish_reason, usage: body.usage };
+}
+
+const envMs = (name: string, fallback: number): number => {
+  const n = Number(process.env[name]);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
 };
 
-/** An empty completion is a failure wearing a 200. */
-function contentOf(body: { choices?: { message?: { content?: string }; finish_reason?: string }[]; usage?: unknown } | null): { content?: string; finishReason?: string; usage?: unknown } {
-  return {
-    content: body?.choices?.[0]?.message?.content,
-    finishReason: body?.choices?.[0]?.finish_reason,
-    usage: body?.usage,
-  };
-}
+const HARD_CEILING_MS = envMs("CUTTINGGATE_DEADLINE_MS", 120_000);
+const ATTEMPT_MS = envMs("CUTTINGGATE_ATTEMPT_MS", 60_000);
+const ZEN_ATTEMPT_MS = 12_000;
+
+/** Statuses that say something about the KEY (reported to the credential plane). */
+const KEY_FAULTS = new Set([401, 402, 403, 429]);
+
+/** Statuses that indict the provider and so count against its breaker. */
+const tripsBreaker = (status: number): boolean =>
+  status >= 500 || status === 401 || status === 402 || status === 403;
 
 export class Router {
   private catalog = new Map<string, Set<string>>();
-  private readonly claimed = new Map<string, string>();
   private readonly ledger: Ledger;
+  private copilot?: CopilotClient;
 
   constructor(
     private readonly config: Config,
     private readonly gate: ProviderGate,
     private readonly quarantine: Quarantine,
     ledger?: Ledger,
-    /**
-     * Optional credential plane. When present, every attempt claims a key from
-     * the provider's pool and reports the status back, so a dead key is cooled
-     * and rotated out instead of producing a bare 502 on every request.
-     */
     private readonly credentials?: CredentialPlane,
   ) {
     this.ledger = ledger ?? new Ledger();
   }
 
-  /**
-   * Copilot client, when an account token is configured.
-   *
-   * Copilot cannot ride the generic path: its credential is a short-lived
-   * session token minted by an exchange (not the pool key), and its host
-   * depends on the tenant's account class. Both are resolved per attempt in
-   * [`call`]. Absent, the Copilot provider is simply not routable.
-   */
-  private copilot?: CopilotClient;
+  setCopilot(client: CopilotClient): void { this.copilot = client; }
 
-  /** Attaches the Copilot client. Kept separate from the constructor so a
-   * deployment without an account token never constructs one. */
-  setCopilot(client: CopilotClient): void {
-    this.copilot = client;
-  }
-
-  /**
-   * Providers whose credential pool is currently exhausted, with the reason.
-   * Reads state, never claims: this is a diagnosis endpoint, and a diagnosis
-   * that throws is worse than the bug it reports.
-   */
   starved(): { provider: string; reason: string }[] {
     if (!this.credentials) return [];
     const providers = new Set([...this.catalog.values()].flatMap((s) => [...s]));
@@ -120,107 +130,99 @@ export class Router {
       });
   }
 
-  /** Registers that `provider` can serve `model`. Repeatable per model. */
   register(model: string, provider: string): void {
     const set = this.catalog.get(model);
     if (set) set.add(provider);
     else this.catalog.set(model, new Set([provider]));
   }
 
+  /** Atomically replace the whole catalog (a reload must also DROP dead pairs). */
+  reseed(pairs: Iterable<readonly [string, string]>): void {
+    const next = new Map<string, Set<string>>();
+    for (const [model, provider] of pairs) {
+      const set = next.get(model);
+      if (set) set.add(provider);
+      else next.set(model, new Set([provider]));
+    }
+    this.catalog = next;
+  }
+
   known(): KnownModel[] {
     return [...this.catalog.entries()].flatMap(([id, providers]) => [...providers].map((provider) => ({ id, provider })));
   }
 
-  private candidates(model: string): string[] {
-    const providers = this.catalog.get(model) ?? new Set<string>();
-    return this.ledger.order(model, [...providers]).filter((p) => !this.quarantine.isQuarantined(`${model}@${p}`));
+  providers(): string[] {
+    return [...new Set([...this.catalog.values()].flatMap((s) => [...s]))];
   }
 
-  /** Take a key for this attempt. Called by the race body so the attribution below is stub-proof. */
-  private claimKey(provider: string): string {
-    let key = "";
-    if (this.credentials) {
-      if (this.credentials.hasPool(provider)) {
-        // Pool configured: claim() throws a diagnosable error when exhausted.
-        key = this.credentials.claim(provider, { paid: false });
-      }
-      // No pool for this provider (local/keyless paths like llama-swap,
-      // nim-local, kimi-auto): fall through to the single configured key.
+  servingFor(provider: string): string[] {
+    return [...this.catalog.entries()].filter(([, s]) => s.has(provider)).map(([id]) => id);
+  }
+
+  serves(model: string, provider?: string): boolean {
+    const set = this.catalog.get(model);
+    if (!set) return false;
+    return provider === undefined ? set.size > 0 : set.has(provider);
+  }
+
+  private candidates(model: string, only?: string): string[] {
+    const set = this.catalog.get(model);
+    if (!set) return [];
+    let list = [...set];
+    if (only) list = list.filter((p) => p === only);
+    // Quarantine is keyed by model and remembers WHICH provider 404'd: only that
+    // pair is benched, the same model on another provider still serves.
+    const q = this.quarantine.get(model);
+    return this.ledger.order(model, list).filter((p) => !(q && q.provider === p));
+  }
+
+  /** Claim a key for this one attempt. Returned, never stored on the instance. */
+  private claimKey(provider: string): { name: string | null; secret: string } {
+    if (this.credentials?.hasPool(provider)) {
+      // Throws KeyPoolExhaustedError with a diagnosable message when no key is healthy.
+      const name = this.credentials.claim(provider, { paid: false });
+      return { name, secret: process.env[name] ?? "" };
     }
-    const single = this.config.keys[provider] ?? "";
-    if (!key) key = single;
-    this.claimed.set(provider, key);
-    return key;
+    return { name: null, secret: this.config.keys[provider] ?? "" };
   }
 
-  /** Attribute an outcome to the key this provider actually used. */
-  private reportOutcome(provider: string, status: number | null, error?: string): void {
-    const key = this.claimed.get(provider);
-    if (this.credentials && key) this.credentials.note(provider, key, status, error);
+  private reportOutcome(provider: string, keyName: string | null, status: number | null, error?: string): void {
+    if (!this.credentials || !keyName) return;
+    const ok = status !== null && status >= 200 && status < 300;
+    const keyFault = status === null || KEY_FAULTS.has(status);
+    // Other statuses (400/404/5xx...) say nothing about the key: do not cool it.
+    if (ok || keyFault) this.credentials.note(provider, keyName, status, error);
   }
 
-  /** The upstream call for one provider. Overridden in tests. */
-  protected async call(provider: string, req: ChatRequest, signal: AbortSignal): Promise<Response> {
+  protected async call(provider: string, req: ChatRequest, signal: AbortSignal, key = ""): Promise<Response> {
     if (provider === COPILOT_PROVIDER) return this.callCopilot(req, signal);
-    if (provider === ZEN_PROVIDER) return this.callZen(req, signal);
+    if (provider === ZEN_PROVIDER) return this.callZen(req, signal, key);
 
     const base = this.config.bases[provider];
     if (!base) throw new Error(`no base url for provider ${provider}`);
-    // Prefer a pool key; fall back to the single configured key when there is
-    // no pool. claim() throws a diagnosable error when the pool is exhausted.
-    const key = this.claimed.get(provider) ?? this.config.keys[provider] ?? "";
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    if (key) headers.authorization = `Bearer ${key}`;
     return fetch(`${base}/chat/completions`, {
       method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+      headers,
       body: JSON.stringify({ model: req.model, messages: req.messages, temperature: req.temperature, max_tokens: req.max_tokens }),
       signal,
     });
   }
 
-  /**
-   * OpenCode Zen free tier. Cannot ride the generic path: the free-tier gate
-   * demands OpenCode client-identity headers, stream:true, and gate tool
-   * definitions (see zen.ts). The SSE stream is folded into one JSON
-   * completion so the race engine's res.json() contract holds.
-   */
-  private async callZen(req: ChatRequest, signal: AbortSignal): Promise<Response> {
-    const key =
-      this.claimed.get(ZEN_PROVIDER) ?? this.config.keys[ZEN_PROVIDER] ?? "";
-    if (!key)
-      throw new Error("zen: no API key configured (set ZEN_API_KEY or OPENCODE_API_KEY)");
-    // Fail fast inside the gate's breaker timeout: a hung free-tier upstream
-    // must surface as a provider error, never wedge the attempt.
-    const attemptCtrl = new AbortController();
-    const attemptTimer = setTimeout(
-      () => attemptCtrl.abort(new Error("zen_attempt_timeout")),
-      12_000,
-    );
-    let res: Response;
-    try {
-      res = await fetch(`${ZEN_BASE_URL}/chat/completions`, {
-        method: "POST",
-        headers: zenHeaders(key),
-        body: JSON.stringify(
-          zenBody(req.model, req.messages, {
-            temperature: req.temperature,
-            max_tokens: req.max_tokens,
-          }),
-        ),
-        signal: AbortSignal.any([signal, attemptCtrl.signal]),
-      });
-    } finally {
-      clearTimeout(attemptTimer);
-    }
+  private async callZen(req: ChatRequest, signal: AbortSignal, key: string): Promise<Response> {
+    if (!key) throw new Error("zen: no API key configured (set ZEN_API_KEY or OPENCODE_API_KEY)");
+    const res = await fetch(`${ZEN_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: zenHeaders(key),
+      body: JSON.stringify(zenBody(req.model, req.messages, { temperature: req.temperature, max_tokens: req.max_tokens })),
+      signal: AbortSignal.any([signal, AbortSignal.timeout(ZEN_ATTEMPT_MS)]),
+    });
     if (!res.ok) {
       const errText = (await res.text()).slice(0, 500);
       return new Response(
-        JSON.stringify({
-          error: { message: errText, type: "zen_upstream", status: res.status },
-        }),
-        {
-          status: res.status,
-          headers: { "content-type": "application/json" },
-        },
+        JSON.stringify({ error: { message: errText, type: "zen_upstream", status: res.status } }),
+        { status: res.status, headers: { "content-type": "application/json" } },
       );
     }
     const { content, finishReason } = foldZenSse(await res.text());
@@ -230,28 +232,12 @@ export class Router {
         object: "chat.completion",
         created: Math.floor(Date.now() / 1000),
         model: req.model,
-        choices: [
-          {
-            index: 0,
-            message: { role: "assistant", content },
-            finish_reason: finishReason ?? "stop",
-          },
-        ],
+        choices: [{ index: 0, message: { role: "assistant", content }, finish_reason: finishReason ?? "stop" }],
       }),
       { status: 200, headers: { "content-type": "application/json" } },
     );
   }
 
-  /**
-   * Copilot's upstream call.
-   *
-   * Split from the generic path because Copilot differs in two ways that the
-   * bearer-key model cannot express: the credential is a short-lived session
-   * token minted by an exchange rather than the pool key, and the host depends
-   * on the tenant's account class. The exchange runs *after* `claimKey`, so the
-   * pool sees a normal attempt and cools the lane on failure exactly like any
-   * other provider.
-   */
   private async callCopilot(req: ChatRequest, signal: AbortSignal): Promise<Response> {
     const client = this.copilot;
     if (!client) throw new Error("copilot is routed but no account token is configured");
@@ -264,98 +250,122 @@ export class Router {
     });
   }
 
-  /**
-   * First-valid-wins race.
-   *
-   * Deliberately not `Promise.any`: that resolves on the first attempt to
-   * *settle*, so a provider returning an empty 200 would beat a slower provider
-   * that returned real content. Completions land in a shared buffer and signal a
-   * shared wake instead, which also means a provider added after the first await
-   * is still awaited.
-   */
-  async complete(model: string, messages: { role: string; content: string }[], extra: Partial<ChatRequest> = {}): Promise<Attempt> {
-    const req: ChatRequest = { model, messages, ...extra };
-    const providers = this.candidates(model);
-    if (!providers.length) return { ok: false, error: `no provider serves ${model}` };
+  /** One upstream attempt. Never throws; every ending is an Outcome. */
+  private async attempt(provider: string, req: ChatRequest, raceSignal: AbortSignal): Promise<Outcome> {
+    // A job that sat in the limiter queue past the race must not burn quota.
+    if (raceSignal.aborted) return { kind: "cancelled", provider };
+    const t0 = performance.now();
+    const elapsed = (): number => performance.now() - t0;
+    let keyName: string | null = null;
+    try {
+      const claim = this.claimKey(provider);
+      keyName = claim.name;
+      const signal = AbortSignal.any([raceSignal, AbortSignal.timeout(ATTEMPT_MS)]);
+      const res = await this.call(provider, req, signal, claim.secret);
+      this.reportOutcome(provider, keyName, res.status);
+      if (res.status === 404) this.quarantine.noteServe404(req.model, provider, `upstream 404 for ${req.model}`);
+
+      if (!res.ok) {
+        const text = (await res.text().catch(() => "")).slice(0, 200);
+        return {
+          kind: "provider-error", provider, latencyMs: elapsed(), status: res.status,
+          error: text ? `http_${res.status}: ${text}` : `http_${res.status}`,
+          trip: tripsBreaker(res.status),
+        };
+      }
+
+      const shape = parseBody((await res.json().catch(() => null)) as BodyInput);
+      if (raceSignal.aborted) return { kind: "cancelled", provider };
+      if (shape.kind === "ok") {
+        return { kind: "valid", provider, content: shape.content, finishReason: shape.finishReason, usage: shape.usage, latencyMs: elapsed(), status: res.status };
+      }
+      if (shape.kind === "empty") return { kind: "empty", provider, latencyMs: elapsed(), status: res.status };
+      return { kind: "provider-error", provider, latencyMs: elapsed(), status: res.status, error: "malformed_body", trip: false };
+    } catch (e) {
+      if (raceSignal.aborted) return { kind: "cancelled", provider };
+      if (e instanceof KeyPoolExhaustedError) {
+        return { kind: "provider-error", provider, latencyMs: elapsed(), status: 0, error: e.message, trip: false };
+      }
+      const error = e instanceof Error ? e.message : String(e);
+      this.reportOutcome(provider, keyName, null, error);
+      return { kind: "provider-error", provider, latencyMs: elapsed(), status: 0, error, trip: true };
+    }
+  }
+
+  /** Runs inside the gate: throws for breaker-relevant failures, returns the rest. */
+  private async dispatch(provider: string, req: ChatRequest, raceSignal: AbortSignal): Promise<Outcome> {
+    const r = await this.attempt(provider, req, raceSignal);
+    if (r.kind === "provider-error" && r.trip) throw new AttemptFailure(r);
+    return r;
+  }
+
+  private fromRejection(provider: string, e: unknown): Outcome {
+    if (e instanceof AttemptFailure) return e.outcome;
+    return { kind: "gate-rejected", provider, error: e instanceof Error ? e.message : String(e) };
+  }
+
+  async complete(
+    model: string,
+    messages: { role: string; content: string }[],
+    extra: Partial<ChatRequest> = {},
+    only?: string,
+  ): Promise<Attempt> {
+    const req: ChatRequest = { ...extra, model, messages };
+    const providers = this.candidates(model, only);
+    if (!providers.length) return { ok: false, error: `no provider serves ${model}${only ? ` on ${only}` : ""}` };
 
     const started = performance.now();
-    const controller = new AbortController();
-    const settled: Settled[] = [];
+    const deadline = started + HARD_CEILING_MS;
+    const race = new AbortController();
+    const inbox: Outcome[] = [];
     let wake: (() => void) | null = null;
-
     let pending = providers.length;
-    const inflight = providers.map((provider) => {
-      const p = this.gate
-        .run(provider, async (): Promise<Settled> => {
-          const t0 = performance.now();
-          try {
-            this.claimKey(provider);
-            const res = await this.call(provider, req, controller.signal);
-            this.reportOutcome(provider, res.status);
-            if (res.status === 404) this.quarantine.noteServe404(model, provider, `upstream 404 for ${model}`);
-            const body = (await res.json()) as Parameters<typeof contentOf>[0];
-            const { content, finishReason, usage } = contentOf(body);
-            const valid = res.ok && typeof content === "string" && content.trim().length > 0;
-            return { provider, valid, latencyMs: performance.now() - t0, content, finishReason, usage, status: res.status };
-          } catch (e) {
-            this.reportOutcome(provider, null, e instanceof Error ? e.message : String(e));
-            return { provider, valid: false, latencyMs: performance.now() - t0, error: e instanceof Error ? e.message : String(e) };
-          }
-        })
-        .then(
-          (r) => {
-            settled.push(r);
-            pending -= 1;
-            wake?.();
-            return r;
-          },
-          // A gate rejection (breaker timeout / open circuit) is a provider
-          // failure, never a process crash: record it and let the race
-          // continue with the remaining providers.
-          (e) => {
-            const r: Settled = {
-              provider,
-              valid: false,
-              latencyMs: 0,
-              error: e instanceof Error ? e.message : String(e),
-            };
-            settled.push(r);
-            pending -= 1;
-            wake?.();
-            return r;
-          },
-        );
-      return { provider, promise: p };
-    });
 
-    let winner: Settled | null = null;
-    let lastError: string | undefined;
-    for (;;) {
-      if (winner) break;
-      if (!settled.length) {
-        if (pending === 0) break;
-        const { promise: woke, resolve } = Promise.withResolvers<void>();
+    const post = (r: Outcome): void => {
+      if (r.kind === "valid" || r.kind === "empty" || r.kind === "provider-error") {
+        this.ledger.record(model, r.provider, r.latencyMs, r.kind === "valid");
+      }
+      if (r.kind === "empty") this.gate.noteEmpty(model);
+      inbox.push(r);
+      pending -= 1;
+      wake?.();
+    };
+
+    for (const provider of providers) {
+      this.gate
+        .run(provider, () => this.dispatch(provider, req, race.signal))
+        .then(post, (e: unknown) => post(this.fromRejection(provider, e)));
+    }
+
+    let winner: Valid | null = null;
+    const failures: string[] = [];
+
+    while (!winner && (pending > 0 || inbox.length > 0)) {
+      if (!inbox.length) {
+        const remaining = deadline - performance.now();
+        if (remaining <= 0) {
+          failures.push("deadline exceeded");
+          break;
+        }
+        const { promise, resolve } = Promise.withResolvers<void>();
         wake = resolve;
-        // A hard ceiling so one wedged provider cannot hold the request open.
-        const clock = setTimeout(resolve, 120_000);
-        await woke;
-        clearTimeout(clock);
+        const timer = setTimeout(resolve, remaining);
+        await promise;
+        clearTimeout(timer);
         wake = null;
       }
-      while (settled.length) {
-        const r = settled.shift()!;
-        if (r.valid && !winner) winner = r;
-        // The drain above empties `settled`; keep the first error so the
-        // final reason names the real failure instead of a generic message.
-        else if (r.error !== undefined && lastError === undefined) lastError = r.error;
+      for (const r of inbox.splice(0)) {
+        if (r.kind === "valid") winner ??= r;
+        else if (r.kind === "empty") failures.push(`${r.provider}: empty content`);
+        else if (r.kind === "provider-error" || r.kind === "gate-rejected") failures.push(`${r.provider}: ${r.error}`);
       }
     }
-    controller.abort();
+    race.abort();
 
     if (winner) {
       return {
         ok: true,
-        content: winner.content!,
+        content: winner.content,
         provider: winner.provider,
         latencyMs: performance.now() - started,
         raced: providers.length > 1,
@@ -363,8 +373,11 @@ export class Router {
         usage: winner.usage,
       };
     }
-
-    const reason = lastError ?? `no provider returned valid content (tried ${providers.join(", ")})`;
-    return { ok: false, error: reason };
+    return {
+      ok: false,
+      error: failures.length
+        ? `no provider returned valid content for ${model} (${failures.join("; ")})`
+        : `no provider returned valid content (tried ${providers.join(", ")})`,
+    };
   }
 }

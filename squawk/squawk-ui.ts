@@ -295,7 +295,7 @@ type SockData = { target: string; backend?: WebSocket; pending: (string | Buffer
 
 Bun.serve<SockData>({
   port: 25136,
-  hostname: "0.0.0.0",
+  hostname: "127.0.0.1",
   async fetch(req, server) {
     const url = new URL(req.url);
     // --- funnel mount prefix: the UI loads under /fleet on the funnel, so
@@ -375,4 +375,4 @@ Bun.serve<SockData>({
     },
   },
 });
-console.log("squawk-ui on 0.0.0.0:25136 (funnel /fleet + tailnet-direct), ws-aware, server-auth, hot-reload, channel-aware");
+console.log("squawk-ui on 127.0.0.1:25136 (funnel /fleet + tailnet-direct), ws-aware, server-auth, hot-reload, channel-aware");

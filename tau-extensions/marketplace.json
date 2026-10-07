@@ -57,6 +57,37 @@
       ],
       "homepage": "https://github.com/toxicwind/tau-extensions/tree/main/packages/tau-kimi-auto",
       "license": "MIT"
+    },
+    {
+      "name": "tau-omniroute",
+      "description": "OmniRoute models sync and dynamic gateway provider for Tau, OMP, and Pi.",
+      "version": "1.0.0",
+      "source": "./tau-omniroute",
+      "category": "model-provider",
+      "keywords": [
+        "omniroute",
+        "models",
+        "sync",
+        "provider",
+        "extension"
+      ],
+      "homepage": "https://github.com/toxicwind/tau-extensions/tree/main/packages/tau-omniroute",
+      "license": "MIT"
+    },
+    {
+      "name": "omp-model-router",
+      "description": "Cost-optimized model routing for prompts based on task complexity.",
+      "version": "0.8.9",
+      "source": "./omp-model-router",
+      "category": "routing",
+      "keywords": [
+        "model-router",
+        "cost-optimization",
+        "routing",
+        "extension"
+      ],
+      "homepage": "https://github.com/toxicwind/tau-extensions/tree/main/packages/omp-model-router",
+      "license": "MIT"
     }
   ]
 }

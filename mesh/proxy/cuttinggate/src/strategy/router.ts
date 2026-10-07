@@ -1,6 +1,6 @@
+#!/usr/bin/env bun
 // ⚠️  DEPRECATED 2026-10-04 — superseded by Rust flock on :25193.
 // Kept for reference; do not deploy. See flock-ssot/ROUTER_CANON.md.
-#!/usr/bin/env bun
 /**
  * Sovereign Router v3.2 (Bun/TypeScript)
  * Port of sovereign-router/router.py — same strategies, HealthDB WAL, circuit breakers.

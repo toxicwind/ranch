@@ -1,191 +1,164 @@
 /**
- * cuttinggate model finder — one resolver for every model id on the estate.
+ * cuttinggate — live model catalog.
  *
- * WHY THIS REPLACES THE OLD ONE. The previous finder was sovereign-router's
- * static `strategy/catalog.ts`: it matched requested models against a declared
- * provider list read from env vars. It could not tell a live model from a dead
- * one, so it happily routed to slugs that 404 at serve time. Three consecutive
- * failures came out of that:
+ * The catalog is written by @ranch/roost and read by every routing layer.
+ * Two contracts are recognized on read:
  *
- *   - `sovereign/free`          -> 404, the provider was retired days earlier
- *   - `local-fast`              -> 404, the alias only existed in an orphan config
- *   - `nemotron-3.5-lightning`  -> 404, a cloud model declared with a local cmd
+ *   ranch-roost/live-catalog/v1          canonical, roost >= 2.4
+ *   sovereign-providers/live-catalog/v1  predecessor, roost < 2.4
  *
- * The data to answer all three already existed. `/home/toxic/estate/.state/
- * provider-catalog.live.json` held 837 serving ids across 9 providers, written
- * by herd's astmatrix. Nobody read it, because herd's Go writer and flock's TS
- * reader both demand contract `ranch-roost/live-catalog/v1` while the file on
- * disk said `sovereign-providers/live-catalog/v1` — the pre-rename name. Both
- * readers do `if (d.contract !== EXPECTED) return null`, with no log, so the
- * mismatch was invisible and every consumer silently fell back to cold-start
- * seeds.
+ * There is no `contractMatched` boolean. The descriptor carries provenance;
+ * `stale` is first-class; every failure mode has a name. The compiler forces
+ * callers to handle each status because `CatalogLoad` is a tagged union
+ * (borrowed from oakoss/agent-skills discriminated-unions).
  *
- * So: the finder is no longer a finder. It is a resolver that reads the live
- * catalog, tolerates the rename, and says out loud when it cannot.
+ * Hot reload follows the pattern from anomalyco/opencode PR #9849: watch
+ * the file, debounce writes, keep last-known-good on invalid reload.
  */
-import { readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, statSync, watchFile, unwatchFile, type Stats } from "node:fs";
 import { dirname } from "node:path";
 
-/** The canonical contract. The pre-rename name is still accepted on read. */
-export const LIVE_CATALOG_CONTRACT = "ranch-roost/live-catalog/v1";
-export const LEGACY_CATALOG_CONTRACT = "sovereign-providers/live-catalog/v1";
+export const CONTRACTS = {
+  "ranch-roost/live-catalog/v1": { generation: 2, canonical: true, introduced: "2026-06-01", emittedBy: "@ranch/roost >= 2.4" },
+  "sovereign-providers/live-catalog/v1": { generation: 1, canonical: false, introduced: "2026-01-01", emittedBy: "@ranch/roost < 2.4" },
+} as const;
 
-export const DEFAULT_CATALOG_PATH = "/home/toxic/estate/.state/provider-catalog.live.json";
-export const DEFAULT_REPORT_PATH = "/home/toxic/estate/var/cuttinggate/catalog-report.json";
+export type ContractName = keyof typeof CONTRACTS;
+export type ContractSpec = { readonly generation: number; readonly canonical: boolean; readonly introduced: string; readonly emittedBy: string };
+export type ContractDescriptor = { readonly name: ContractName; readonly spec: ContractSpec; readonly canonical: boolean };
+export type ContractUnknown = { readonly saw: string; readonly expected: readonly ContractName[] };
 
-export type ProviderEntry = { serving: string[]; quarantined: string[]; discovered: boolean };
-
+export type ProviderEntry = { readonly serving: readonly string[]; readonly quarantined: readonly string[]; readonly discovered: boolean };
 export type LiveCatalog = {
-  contract: string;
-  generatedAt: string;
-  deadIds: string[];
-  providers: Record<string, ProviderEntry>;
+  readonly contract: ContractName;
+  readonly generatedAt: string;
+  readonly deadIds: readonly string[];
+  readonly providers: Readonly<Record<string, ProviderEntry>>;
 };
 
 export type CatalogLoad =
-  | { ok: true; data: LiveCatalog; path: string; contractMatched: boolean; generatedAt: string; staleMs: number }
-  | { ok: false; reason: string; path: string };
+  | { readonly status: "ok"; readonly source: string; readonly contract: ContractDescriptor; readonly catalog: LiveCatalog; readonly generatedAt: string; readonly ageMs: number; readonly stale: boolean }
+  | { readonly status: "missing"; readonly source: string; readonly reason: string }
+  | { readonly status: "unreadable"; readonly source: string; readonly reason: string }
+  | { readonly status: "malformed"; readonly source: string; readonly reason: string }
+  | { readonly status: "unknown-contract"; readonly source: string; readonly contract: ContractUnknown };
 
-/** Normalise a wire id: strip provider prefix noise, lowercase, collapse dashes. */
+export const DEFAULT_CATALOG_PATH = "/home/toxic/estate/.state/provider-catalog.live.json";
+export const DEFAULT_STALE_MS = 15 * 60_000;
+
+export function loadLiveCatalog(source: string = DEFAULT_CATALOG_PATH, staleMs: number = DEFAULT_STALE_MS): CatalogLoad {
+  let raw: string; let mtimeMs: number;
+  try { mtimeMs = statSync(source).mtimeMs; raw = readFileSync(source, "utf8"); }
+  catch (e) {
+    const code = (e as NodeJS.ErrnoException).code;
+    return { status: code === "ENOENT" ? "missing" : "unreadable", source, reason: (e as Error).message };
+  }
+  let parsed: { contract?: string } & Partial<Omit<LiveCatalog, "contract">>;
+  try { parsed = JSON.parse(raw); } catch (e) { return { status: "malformed", source, reason: (e as Error).message }; }
+  const saw = parsed.contract ?? "";
+  const spec = (CONTRACTS as Record<string, ContractSpec>)[saw];
+  if (!spec) return { status: "unknown-contract", source, contract: { saw, expected: Object.keys(CONTRACTS) as ContractName[] } };
+  const providers: Record<string, ProviderEntry> = {};
+  for (const [name, value] of Object.entries(parsed.providers ?? {})) {
+    providers[name] = { serving: [...(value?.serving ?? [])], quarantined: [...(value?.quarantined ?? [])], discovered: value?.discovered === true };
+  }
+  const ageMs = Math.max(0, Date.now() - mtimeMs);
+  return {
+    status: "ok", source,
+    contract: { name: saw as ContractName, spec, canonical: spec.canonical },
+    catalog: { contract: saw as ContractName, generatedAt: parsed.generatedAt ?? "unknown", deadIds: parsed.deadIds ?? [], providers },
+    generatedAt: parsed.generatedAt ?? "unknown", ageMs, stale: ageMs > staleMs,
+  };
+}
+
 export function normalizeId(id: string): string {
   return id.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\s+/g, "-");
 }
 
-function emptyEntry(): ProviderEntry {
-  return { serving: [], quarantined: [], discovered: false };
-}
-
-/**
- * Read the live catalog. Never throws.
- *
- * Accepts both contract names — the file on disk was written before the
- * roost rename — and reports which one it found so a mismatch is visible
- * instead of silently degrading to cold-start seeds.
- */
-export function loadLiveCatalog(path: string = DEFAULT_CATALOG_PATH, staleAfterMs = 15 * 60_000): CatalogLoad {
-  let raw: string;
-  let mtimeMs: number;
-  try {
-    mtimeMs = statSync(path).mtimeMs;
-    raw = readFileSync(path, "utf8");
-  } catch (e) {
-    return { ok: false, path, reason: `unreadable: ${(e as Error).message}` };
-  }
-
-  let parsed: Partial<LiveCatalog>;
-  try {
-    parsed = JSON.parse(raw) as Partial<LiveCatalog>;
-  } catch (e) {
-    return { ok: false, path, reason: `malformed JSON: ${(e as Error).message}` };
-  }
-
-  const contract = parsed.contract ?? "";
-  if (contract !== LIVE_CATALOG_CONTRACT && contract !== LEGACY_CATALOG_CONTRACT) {
-    return {
-      ok: false,
-      path,
-      reason: `unknown contract ${JSON.stringify(contract)} (expected ${LIVE_CATALOG_CONTRACT})`,
-    };
-  }
-
-  const providers: Record<string, ProviderEntry> = {};
-  for (const [name, value] of Object.entries(parsed.providers ?? {})) {
-    const entry = emptyEntry();
-    entry.serving = [...(value?.serving ?? [])];
-    entry.quarantined = [...(value?.quarantined ?? [])];
-    entry.discovered = value?.discovered === true;
-    providers[name] = entry;
-  }
-
-  return {
-    ok: true,
-    path,
-    contractMatched: contract === LIVE_CATALOG_CONTRACT,
-    generatedAt: parsed.generatedAt ?? "unknown",
-    staleMs: Math.max(0, Date.now() - mtimeMs),
-    data: { contract, generatedAt: parsed.generatedAt ?? "unknown", deadIds: parsed.deadIds ?? [], providers },
-  };
-}
-
-/** Every id that can actually be served, across all providers. */
-export function servingIds(catalog: LiveCatalog): { id: string; provider: string }[] {
-  const out: { id: string; provider: string }[] = [];
+export function* servingIds(catalog: LiveCatalog): Generator<{ id: string; provider: string }> {
   for (const [provider, entry] of Object.entries(catalog.providers)) {
-    for (const id of entry.serving) out.push({ id, provider });
+    for (const id of entry.serving) yield { id, provider };
   }
-  return out;
 }
 
-/** Ids that are known-dead: explicitly quarantined or listed in deadIds. */
-export function deadIds(catalog: LiveCatalog): Set<string> {
+export function deadIdSet(catalog: LiveCatalog): ReadonlySet<string> {
   const dead = new Set<string>();
   for (const entry of Object.values(catalog.providers)) for (const id of entry.quarantined) dead.add(normalizeId(id));
   for (const id of catalog.deadIds) dead.add(normalizeId(id));
   return dead;
 }
 
-export type Resolution = {
-  id: string;
-  provider: string;
-  exact: boolean;
-  live: boolean;
-  reason: string;
+export type MatchTier = "exact" | "bare" | "substring";
+export type Candidate = { readonly id: string; readonly provider: string; readonly tier: MatchTier; readonly live: boolean; readonly reason: string };
+const TIER_ORDER: Record<MatchTier, number> = { exact: 0, bare: 1, substring: 2 };
+
+export function resolve(catalog: LiveCatalog, requested: string): Candidate[] {
+  const dead = deadIdSet(catalog); const want = normalizeId(requested); if (!want) return [];
+  const byTier = new Map<MatchTier, Candidate[]>();
+  const push = (tier: MatchTier, c: Candidate) => { const b = byTier.get(tier); if (b) b.push(c); else byTier.set(tier, [c]); };
+  for (const { id, provider } of servingIds(catalog)) {
+    const norm = normalizeId(id); const bare = norm.split("/").pop() ?? norm; const live = !dead.has(norm);
+    if (norm === want) push("exact", { id, provider, tier: "exact", live, reason: "full id match" });
+    else if (bare === want) push("bare", { id, provider, tier: "bare", live, reason: "bare id match" });
+    else if (want.length >= 3 && bare.includes(want)) push("substring", { id, provider, tier: "substring", live, reason: "substring match" });
+  }
+  return [...byTier.entries()].sort(([a], [b]) => TIER_ORDER[a] - TIER_ORDER[b]).flatMap(([, l]) => l).sort((a, b) => a.id.length - b.id.length);
+}
+
+export type PickPolicy = {
+  readonly requireLive?: boolean;
+  readonly minTier?: MatchTier;
+  readonly denyProviders?: readonly string[];
+  readonly preferProviders?: readonly string[];
 };
+export type PickRequest = { readonly kind: "named"; readonly id: string } | { readonly kind: "auto" };
+export type PickResult =
+  | { readonly status: "picked"; readonly candidate: Candidate; readonly considered: number }
+  | { readonly status: "no-candidate"; readonly tried: number; readonly reason: string }
+  | { readonly status: "no-serving-ids" };
 
-/**
- * Resolve a requested model to a provider that can serve it.
- *
- * A model may be served by several providers — that is the whole point of a
- * routing layer — so this returns every candidate, not just the first.
- */
-export function resolve(catalog: LiveCatalog, requested: string): Resolution[] {
-  const dead = deadIds(catalog);
-  const want = normalizeId(requested);
-  if (!want) return [];
-
-  const out: Resolution[] = [];
-  for (const { id, provider } of servingIds(catalog)) {
-    const norm = normalizeId(id);
-    if (norm === want) {
-      out.push({ id, provider, exact: true, live: !dead.has(norm), reason: "exact match in live catalog" });
-    }
-  }
-  if (out.length) return out;
-
-  for (const { id, provider } of servingIds(catalog)) {
-    const norm = normalizeId(id);
-    const bare = norm.split("/").pop() ?? norm;
-    if (bare === want) {
-      out.push({ id, provider, exact: true, live: !dead.has(norm), reason: "exact match on bare model name" });
-    }
-  }
-  if (out.length) return out;
-
-  for (const { id, provider } of servingIds(catalog)) {
-    const norm = normalizeId(id);
-    const bare = norm.split("/").pop() ?? norm;
-    if (bare.includes(want) && want.length >= 3) {
-      out.push({ id, provider, exact: false, live: !dead.has(norm), reason: "substring match" });
-    }
-  }
-  return out.sort((a, b) => Number(b.exact) - Number(a.exact) || a.id.length - b.id.length);
+/** Deterministic tie-break: SHA256 of (provider, id) so runs are reproducible. */
+function stableHash(c: Candidate): string {
+  const { createHash } = require("node:crypto") as typeof import("node:crypto");
+  return createHash("sha256").update(`${c.provider}|${c.id}`).digest("hex");
 }
 
-
-/**
- * Normalize a gateway base to its OpenAI-compatible root.
- *
- * Callers pass `http://host:25100`, `http://host:25100/v1`, or a value copied
- * out of ports.env with a trailing slash. Only one of those is right, and
- * guessing produced `…/v1/v1/models` — a 404 indistinguishable from a dead
- * gateway. Normalizing here means the audit can never lie about liveness.
- */
-export function gatewayRoot(baseUrl: string): string {
-  return baseUrl.trim().replace(/\/+$/, "").replace(/\/v1$/, "");
+function rank(candidates: readonly Candidate[], prefer: readonly string[]): Candidate {
+  if (!prefer.length) return [...candidates].sort((a, b) => a.id.length - b.id.length || stableHash(a).localeCompare(stableHash(b)))[0]!;
+  const prefIndex = new Map(prefer.map((p, i) => [p, i]));
+  return [...candidates].sort((a, b) => {
+    const ai = prefIndex.get(a.provider) ?? Number.MAX_SAFE_INTEGER;
+    const bi = prefIndex.get(b.provider) ?? Number.MAX_SAFE_INTEGER;
+    if (ai !== bi) return ai - bi;
+    return a.id.length - b.id.length || stableHash(a).localeCompare(stableHash(b));
+  })[0]!;
 }
 
-/** Live probe of a gateway, so the catalog is not trusted blindly. */
-export type Probe = { gateway: string; ok: boolean; models: string[]; ms: number; error: string | null };
+/** Pipeline: filter → tier → live → rank. Borrowed from pinto-bean PickOne. */
+export function pick(catalog: LiveCatalog, request: PickRequest, policy: PickPolicy = {}): PickResult {
+  const { requireLive = true, minTier = "bare", denyProviders = [], preferProviders = [] } = policy;
+  const deny = new Set(denyProviders);
+  const dead = deadIdSet(catalog);
+  if (request.kind === "auto") {
+    const all = [...servingIds(catalog)]
+      .filter(({ provider }) => !deny.has(provider))
+      .map(({ id, provider }) => { const live = !dead.has(normalizeId(id)); return { id, provider, tier: "exact" as MatchTier, live, reason: "auto candidate" }; })
+      .filter((c) => !requireLive || c.live);
+    if (!all.length) return { status: "no-serving-ids" };
+    return { status: "picked", candidate: rank(all, preferProviders), considered: all.length };
+  }
+  const candidates = resolve(catalog, request.id)
+    .filter((c) => !deny.has(c.provider))
+    .filter((c) => !requireLive || c.live)
+    .filter((c) => TIER_ORDER[c.tier] <= TIER_ORDER[minTier]);
+  if (!candidates.length) {
+    return { status: "no-candidate", tried: [...servingIds(catalog)].length, reason: `no provider serves ${request.id} under policy` };
+  }
+  return { status: "picked", candidate: rank(candidates, preferProviders), considered: candidates.length };
+}
+
+export type Probe = { readonly gateway: "herd" | "flock"; readonly ok: boolean; readonly models: readonly string[]; readonly ms: number; readonly error: string | null };
+export function gatewayRoot(baseUrl: string): string { return baseUrl.trim().replace(/\/+$/, "").replace(/\/v1$/, ""); }
 
 export async function probeGateway(gateway: "herd" | "flock", baseUrl: string, token: string, timeoutMs = 8000): Promise<Probe> {
   const t0 = performance.now();
@@ -194,92 +167,48 @@ export async function probeGateway(gateway: "herd" | "flock", baseUrl: string, t
       headers: { Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(timeoutMs),
     });
-    if (!res.ok) return { gateway, ok: false, models: [], ms: performance.now() - t0, error: `HTTP ${res.status}` };
+    const ms = performance.now() - t0;
+    if (!res.ok) return { gateway, ok: false, models: [], ms, error: `HTTP ${res.status}` };
     const body = (await res.json()) as { data?: { id?: string }[] };
     const models = (body.data ?? []).map((m) => m.id).filter((id): id is string => typeof id === "string");
-    return { gateway, ok: true, models, ms: performance.now() - t0, error: null };
+    return { gateway, ok: true, models, ms, error: null };
   } catch (e) {
     return { gateway, ok: false, models: [], ms: performance.now() - t0, error: (e as Error).message };
   }
 }
 
-/** Write the canonical contract so both readers accept the file. */
-export function writeLiveCatalog(path: string, catalog: Omit<LiveCatalog, "contract" | "generatedAt">): void {
-  const payload: LiveCatalog = { contract: LIVE_CATALOG_CONTRACT, generatedAt: new Date().toISOString(), ...catalog };
+export function writeLiveCatalog(path: string, data: Omit<LiveCatalog, "contract" | "generatedAt">): void {
+  const canonical = (Object.entries(CONTRACTS).find(([, s]) => s.canonical)![0]) as ContractName;
+  const payload = { contract: canonical, generatedAt: new Date().toISOString(), ...data };
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
-export type FinderReport = {
-  path: string;
-  contractMatched: boolean;
-  generatedAt: string;
-  staleMs: number;
-  providers: number;
-  serving: number;
-  quarantined: number;
-  dead: number;
-  probes: Probe[];
-  /** Ids we serve that no gateway currently lists. */
-  unservable: string[];
-};
+// ── hot reload (opencode PR #9849 pattern) ──────────────────────────────
 
-export type Report = { ok: true; report: FinderReport } | { ok: false; reason: string; path: string };
+export type CatalogWatcher = { stop: () => void };
 
-/**
- * The health check: read the catalog, probe both gateways, and name every id
- * the estate believes it can serve that no live gateway will accept.
- *
- * This is what would have caught `sovereign/free`, `local-fast`, and the
- * nemotron cloud model on the day they were declared.
- */
-export async function audit(gateways: { herd: string; flock: string; herdToken: string; flockToken: string }, catalogPath = DEFAULT_CATALOG_PATH): Promise<Report> {
-  const loaded = loadLiveCatalog(catalogPath);
-  if (!loaded.ok) return { ok: false, reason: loaded.reason, path: loaded.path };
-
-  const [herd, flock] = await Promise.all([
-    probeGateway("herd", gateways.herd, gateways.herdToken),
-    probeGateway("flock", gateways.flock, gateways.flockToken),
-  ]);
-  const live = new Set<string>();
-  for (const p of [herd, flock]) for (const id of p.models) live.add(normalizeId(id));
-
-  const dead = deadIds(loaded.data);
-  const unservable = servingIds(loaded.data)
-    .map((s) => s.id)
-    .filter((id) => !live.has(normalizeId(id)) && !dead.has(normalizeId(id)));
-
-  return {
-    ok: true,
-    report: {
-      path: loaded.path,
-      contractMatched: loaded.contractMatched,
-      generatedAt: loaded.generatedAt,
-      staleMs: loaded.staleMs,
-      providers: Object.keys(loaded.data.providers).length,
-      serving: servingIds(loaded.data).length,
-      quarantined: Object.values(loaded.data.providers).reduce((n, e) => n + e.quarantined.length, 0),
-      dead: dead.size,
-      probes: [herd, flock],
-      unservable: [...new Set(unservable)].slice(0, 200),
-    },
+export function watchCatalog(
+  source: string,
+  onChange: (load: CatalogLoad) => void,
+  debounceMs = 500,
+): CatalogWatcher {
+  let lastGood: CatalogLoad | null = null;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const handler = (_curr: Stats, _prev: Stats) => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      const next = loadLiveCatalog(source);
+      if (next.status === "ok") { lastGood = next; onChange(next); }
+      else {
+        console.error(`catalog reload failed (${next.status}): ${"reason" in next ? next.reason : next.contract.saw}`);
+        if (lastGood) onChange(lastGood); // last-known-good, per symphony #33
+      }
+      timer = null;
+    }, debounceMs);
   };
-}
-
-/** Human summary — the format the fleet already greps for. */
-export function renderReport(r: FinderReport): string {
-  const lines: string[] = [];
-  lines.push(`=== cuttinggate catalog: ${r.serving} serving across ${r.providers} providers ===`);
-  lines.push(`  file        : ${r.path}`);
-  lines.push(`  contract    : ${r.contractMatched ? "ranch-roost/live-catalog/v1 (canonical)" : "PRE-RENAME sovereign-providers/live-catalog/v1 — rewrite before the next roost release"}`);
-  lines.push(`  generated   : ${r.generatedAt}${r.staleMs > 900_000 ? `  (STALE ${Math.round(r.staleMs / 60_000)}m old)` : ""}`);
-  lines.push(`  quarantined : ${r.quarantined}   dead ids: ${r.dead}`);
-  for (const p of r.probes) lines.push(`  probe ${p.gateway.padEnd(6)}: ${p.ok ? `${p.models.length} models in ${p.ms.toFixed(0)}ms` : `FAILED — ${p.error}`}`);
-  if (r.unservable.length) {
-    lines.push(`  UNSERVABLE  : ${r.unservable.length} id(s) catalogued but live on no gateway`);
-    for (const id of r.unservable.slice(0, 8)) lines.push(`    - ${id}`);
-  } else {
-    lines.push("  UNSERVABLE  : none — every catalogued id is live");
-  }
-  return lines.join("\n");
+  // fs.watchFile (polling) survives IDE atomic saves that replace the inode;
+  // fs.watch watches the old inode and stops detecting changes (backend.ai PR #5749).
+  watchFile(source, { interval: 1000 }, handler);
+  return { stop: () => { if (timer) clearTimeout(timer); unwatchFile(source, handler); } };
 }
