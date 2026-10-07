@@ -26,11 +26,15 @@
 // actually isolate per channel. The legacy feed proxy at :25135 remains for
 // CLI/other consumers; the UI no longer depends on its /wait channel filtering.
 //
+// Roster (2026-10-07): GET /roster and /api/agents/roster serve fleet
+// agent cards via fleet-roster buildRoster; ?channel= uses _meta.json.
+//
 // Signed send (2026-10-07): /send uses ui_relay_post.py (thin _post_message;
 // forge-race winner ~63ms) with chat.py relay-in hedge. Never hand-writes .md.
 import { readFileSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { buildRoster } from "./fleet-roster.ts";
 
 const FEED = "http://127.0.0.1:25135";
 const SQUAWK_DIR = "/home/toxic/estate/ranch/squawk";
@@ -166,6 +170,38 @@ function handleChannels(): Response {
   catch { dirs = []; }
   return Response.json({ ok: true, channels: dirs.filter(d => VALID_CHANNEL.test(d)).sort() });
 }
+
+// GET /roster (+ /api/agents/roster): agent activity cards for #fleet.
+// Borrowed from fleet-roster.ts buildRoster — same shape the fleet UI expects.
+// Optional ?channel=<name> returns channel membership from _meta.json (cmd_roster).
+function handleRoster(url: URL): Response {
+  const channel = (url.searchParams.get("channel") || "").trim().toLowerCase();
+  if (channel) {
+    if (!VALID_CHANNEL.test(channel)) {
+      return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
+    }
+    const metaPath = join(SQUAWK_ROOT, channel, "_meta.json");
+    try {
+      const meta = JSON.parse(readFileSync(metaPath, "utf8"));
+      let messages = 0;
+      try {
+        messages = readdirSync(join(SQUAWK_ROOT, channel)).filter((f) => /^\d+-.*\.md$/.test(f)).length;
+      } catch {}
+      return Response.json({
+        ok: true,
+        channel: meta.channel || channel,
+        topic: meta.topic || "",
+        members: meta.members || [],
+        messages,
+      });
+    } catch (e) {
+      return Response.json({ ok: false, error: String(e) }, { status: 404 });
+    }
+  }
+  // Default: fleet agent activity roster (fleet-roster / fleet-feed contract).
+  return Response.json({ ok: true, agents: buildRoster() });
+}
+
 
 
 // Shim screening is the default (Chris 2026-10-05): the shared
@@ -361,6 +397,7 @@ Bun.serve<SockData>({
     // --- channel-aware endpoints served from the local store ---
     if (url.pathname === "/wait" && req.method === "GET") return handleWait(url);
     if (url.pathname === "/channels" && req.method === "GET") return handleChannels();
+    if ((url.pathname === "/roster" || url.pathname === "/api/agents/roster") && req.method === "GET") return handleRoster(url);
     if (url.pathname === "/send" && req.method === "POST") return handleSend(req);
     // proxy everything else to the legacy feed
     // the feed serves everything under /squawk-feed/*; the client speaks
