@@ -499,6 +499,8 @@
   },
   {
    "args": [
+    "--from",
+    "git+https://github.com/toxicwind/mcp-background-job.git",
     "mcp-background-job"
    ],
    "command": "uvx",
@@ -514,7 +516,14 @@
    "protocol": "stdio",
    "quarantined": false,
    "tool_discovery_interval": "2m0s",
-   "updated": "2026-09-19T02:32:49.222701416-06:00"
+   "updated": "2026-10-07T08:35:00-06:00",
+   "env": {
+    "MCP_BG_MAX_JOBS": "32",
+    "MCP_BG_CLEANUP_INTERVAL": "60",
+    "MCP_BG_JOB_TIMEOUT": "1800",
+    "MCP_BG_MAX_OUTPUT_SIZE": "20MB",
+    "MCP_BG_JOB_RETENTION": "120"
+   }
   },
   {
    "args": [
