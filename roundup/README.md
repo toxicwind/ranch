@@ -65,13 +65,13 @@ flowchart LR
 
 ```bash
 # 1. benchmark every model herd can load, discovered live from the gateway
-./sweeps/roundup_herd_sweep.sh
+mise run herd-sweep
 
 # 2. read the ranking (quality desc, p50 latency asc)
 cat results/herd/ranking.md
 
 # 3. check the fork is still in step with upstream before you merge
-./scripts/upstream-merge.sh --status
+mise run upstream-status
 ```
 
 ## Layout
@@ -86,15 +86,15 @@ cat results/herd/ranking.md
 
 ## Sweeps
 
-| Script | Question it answers | Route |
-|---|---|---|
-| [`roundup_herd_sweep.sh`](./sweeps/roundup_herd_sweep.sh) | Which **local** model is best? Models discovered live from herd `/v1/models` on every run. | herd `:25100` |
-| [`roundup-bench.sh`](./sweeps/roundup-bench.sh) | Which **provider** is best, using the fork's `instruction_following` scorer via scenario YAML? | flock + NIM + vLLM remote |
-| [`roundup-bench-v3.sh`](./sweeps/roundup-bench-v3.sh) | Same, with capability probing so unsupported backends fail loudly instead of silently. | flock + NIM + vLLM remote |
-| [`roundup_sweep.sh`](./sweeps/roundup_sweep.sh) | Quick sanity pass over working OpenRouter models. | OpenRouter |
-| [`roundup-estate-sweep.ts`](./sweeps/roundup-estate-sweep.ts) | **One-command estate sweep**: discovers models live from herd, flock, and the sovereign router; benchmarks each with the fork's `instruction_following` scorer; emits `roundup-bench/1` JSONL (`results.jsonl`), `roundup-weights/1` (`weights.json`), and `ranking.md`. | herd `:25100` · flock `:25193` · sov `:25104` |
-| [`emit-router-weights.ts`](./sweeps/emit-router-weights.ts) | Converts sweep `results.jsonl` into the sovereign router's `schema_version: 2` weight contract (`provider_priors` + `model_priors`), which the router hot-reloads. | — |
-| [`dump-roundup.sh`](./sweeps/dump-roundup.sh) | Give me everything in this directory as one readable dump. | — |
+| Task | Script | Question it answers | Route |
+|---|---|---|---|
+| `mise run herd-sweep` | [`roundup_herd_sweep.sh`](./sweeps/roundup_herd_sweep.sh) | Which **local** model is best? Models discovered live from herd `/v1/models` on every run. | herd `:25100` |
+| `mise run bench` | [`roundup-bench.sh`](./sweeps/roundup-bench.sh) | Which **provider** is best, using the fork's `instruction_following` scorer via scenario YAML? | flock + NIM + vLLM remote |
+| `mise run bench-v3` | [`roundup-bench-v3.sh`](./sweeps/roundup-bench-v3.sh) | Same, with capability probing so unsupported backends fail loudly instead of silently. | flock + NIM + vLLM remote |
+| `mise run sweep` | [`roundup_sweep.sh`](./sweeps/roundup_sweep.sh) | Quick sanity pass over working OpenRouter models. | OpenRouter |
+| `mise run estate-sweep` | [`roundup-estate-sweep.ts`](./sweeps/roundup-estate-sweep.ts) | **One-command estate sweep**: discovers models live from herd, flock, and the sovereign router; benchmarks each with the fork's `instruction_following` scorer; emits `roundup-bench/1` JSONL (`results.jsonl`), `roundup-weights/1` (`weights.json`), and `ranking.md`. | herd `:25100` · flock `:25193` · sov `:25104` |
+| `mise run emit-weights` | [`emit-router-weights.ts`](./sweeps/emit-router-weights.ts) | Converts sweep `results.jsonl` into the sovereign router's `schema_version: 2` weight contract (`provider_priors` + `model_priors`), which the router hot-reloads. | — |
+| `mise run dump` | [`dump-roundup.sh`](./sweeps/dump-roundup.sh) | Give me everything in this directory as one readable dump. | — |
 
 All of them rank the same way — quality desc, p50 latency asc — and the
 `.sh` sweeps write `results/{herd,bench,sweeps}/ranking.md`. The estate sweep
@@ -151,11 +151,13 @@ agent's.
 Full procedure, including how to clone the standalone and what to check before
 pushing anything: **[docs/UPSTREAM-MERGE.md](./docs/UPSTREAM-MERGE.md)**.
 
-## Docs
+## Documentation Hub
 
-- [docs/UPSTREAM-MERGE.md](./docs/UPSTREAM-MERGE.md) — how upstream changes get in, and why
-- [docs/GUIDELLM_EVAL_PLAN.md](./docs/GUIDELLM_EVAL_PLAN.md) — what we are trying to measure
-- [docs/upstream-audit-guidellm-2026-09-20.md](./docs/upstream-audit-guidellm-2026-09-20.md) — the fork-vs-upstream audit behind the four commits
+- [**Upstream Merge Procedure**](./docs/UPSTREAM-MERGE.md) — how upstream changes get in, and why
+- [**Evaluation Plan**](./docs/GUIDELLM_EVAL_PLAN.md) — what we are trying to measure
+- [**Router Weights**](./docs/ROUTER-WEIGHTS.md) — how sweep results are converted into router weights
+- [**Upstream Audit (2026-09-20)**](./docs/upstream-audit-guidellm-2026-09-20.md) — the fork-vs-upstream audit behind the four commits
+- [**Upstream Assessment (2026-10-02)**](./docs/upstream-assessment-2026-10-02.md) — the latest upstream assessment
 
 ## Security
 
