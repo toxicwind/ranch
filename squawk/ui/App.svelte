@@ -1,6 +1,7 @@
 <script lang="ts">
   import MessageCard from "./MessageCard.svelte";
   import AddChannelDialog from "./AddChannelDialog.svelte";
+  import { untrack } from "svelte";
   import { live, keyOf } from "./live.svelte.js";
 
   type Msg = {
@@ -50,9 +51,13 @@
   let loading = $derived(active.messages.length === 0 && live.status !== "live");
 
   // --- boot: open the one websocket; the server replays since our cursor ---
+  // untrack: ensureChannel reads live.tabs ($state). Without untrack, every
+  // ingest re-runs this effect → disconnect/connect → duplicate syslines.
   $effect(() => {
-    live.ensureChannel("fleet");
-    live.connect();
+    untrack(() => {
+      live.ensureChannel("fleet");
+      live.connect();
+    });
     return () => { live.disconnect(); };
   });
 
@@ -64,15 +69,17 @@
   });
 
   // --- scroll: stick to bottom when new messages arrive (unless stuck) ---
+  // On first paint scrollTop is 0 (not "at bottom"), so an atBottom-only
+  // check left the feed glued to the top of a huge backlog. When !stuck,
+  // always pin to bottom; when stuck, leave the user alone (jump pill).
   $effect(() => {
     const el = logEl;
     const n = active.messages.length;
     void activeName;
-    if (!el || !n) return;
+    if (!el || !n || stuck) return;
     // run after DOM updates
     queueMicrotask(() => {
-      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
-      if (atBottom) el.scrollTop = el.scrollHeight;
+      el.scrollTop = el.scrollHeight;
     });
   });
 
