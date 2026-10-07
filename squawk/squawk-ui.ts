@@ -26,8 +26,8 @@
 // actually isolate per channel. The legacy feed proxy at :25135 remains for
 // CLI/other consumers; the UI no longer depends on its /wait channel filtering.
 //
-// Signed send (2026-10-07): /send borrows chat.py relay-in (HMAC via relay
-// identity + human: frontmatter). Never hand-writes .md files.
+// Signed send (2026-10-07): /send uses ui_relay_post.py (thin _post_message;
+// forge-race winner ~63ms) with chat.py relay-in hedge. Never hand-writes .md.
 import { readFileSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -238,31 +238,45 @@ async function handleSend(req: Request): Promise<Response> {
   const screened = direct ? { text, flagged: null } : shimScreen(text);
   if (screened.flagged) console.error(`squawk-ui: preflight flagged (${screened.flagged.slice(0, 120)}); sending anyway (fail-open)`);
   const safeText = screened.text;
+  // Hot path: ui_relay_post.py (same _post_message writer, no argparse).
+  // Forge race 2026-10-07: thin ~63ms VALID vs CLI relay-in ~73ms — first valid wins.
+  // Hedge: fall back to chat.py relay-in if thin fails.
+  const env = { ...process.env, AGENT_CHAT_ROOT: SQUAWK_ROOT };
+  const spawnOpts = { timeout: 20000, encoding: "utf8" as const, cwd: SQUAWK_DIR, env };
   try {
-    const r = spawnSync(
+    let r = spawnSync(
       "python3",
       [
-        join(SQUAWK_DIR, "chat.py"),
+        join(SQUAWK_DIR, "ui_relay_post.py"),
         "--root", SQUAWK_ROOT,
-        "relay-in",
         "--channel", channel,
         "--from", human,
         "--text", safeText,
         "--title", "msg",
       ],
-      {
-        timeout: 20000,
-        encoding: "utf8",
-        cwd: SQUAWK_DIR,
-        env: { ...process.env, AGENT_CHAT_ROOT: SQUAWK_ROOT },
-      },
+      spawnOpts,
     );
     if (r.status !== 0) {
+      console.error("squawk-ui: thin post failed, hedging to relay-in:", (r.stderr || r.stdout || "").trim().slice(0, 200));
+      r = spawnSync(
+        "python3",
+        [
+          join(SQUAWK_DIR, "chat.py"),
+          "--root", SQUAWK_ROOT,
+          "relay-in",
+          "--channel", channel,
+          "--from", human,
+          "--text", safeText,
+          "--title", "msg",
+        ],
+        spawnOpts,
+      );
+    }
+    if (r.status !== 0) {
       const err = (r.stderr || r.stdout || "relay-in failed").trim().slice(0, 400);
-      console.error("squawk-ui: relay-in failed:", err);
+      console.error("squawk-ui: signed send failed:", err);
       return Response.json({ ok: false, error: err }, { status: 500 });
     }
-    // "relayed #123 -> fleet/0123-relay-msg.md (human: chris)"
     const m = /relayed #(\d+)/.exec(r.stdout || "");
     const seq = m ? parseInt(m[1], 10) : 0;
     return Response.json({ ok: true, seq, human });
