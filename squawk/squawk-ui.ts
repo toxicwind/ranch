@@ -1,7 +1,8 @@
 // squawk-ui: squawk web UI + feed proxy on :25136.
 // Serves BOTH lanes: funnel /fleet -> 127.0.0.1:25136 and tailnet-direct.
-// Binds 0.0.0.0 so either lane reaches the same backend; pitchfork supervises (retry=true)
-// for correct failover. Moved out of /tmp into the ranch repo 2026-09-30.
+// Binds 127.0.0.1 by default (SQUAWK_UI_HOST override); Tailscale serve owns the
+// TS-IP :25136 face so 0.0.0.0 EADDRINUSE after cold restart. Pitchfork supervises
+// (retry=true) for failover. Moved out of /tmp into the ranch repo 2026-09-30.
 //
 // WS-aware (2026-09-30): the UI's live sources (squawk-ws push, nats-ws) open a
 // WebSocket at the same host+mount as the page (e.g. wss://<funnel>/fleet/squawk-ws).
@@ -368,7 +369,10 @@ type SockData = { target: string; backend?: WebSocket; pending: (string | Buffer
 
 Bun.serve<SockData>({
   port: 25136,
-  hostname: "0.0.0.0",
+  // Default loopback: Tailscale serve already owns :25136 on the TS IP.
+  // Binding 0.0.0.0 races that and EADDRINUSE after cold restart (Osprey 2026-10-07).
+  // Override with SQUAWK_UI_HOST if a dual-lane bind is needed.
+  hostname: process.env.SQUAWK_UI_HOST || "127.0.0.1",
   async fetch(req, server) {
     const url = new URL(req.url);
     // --- funnel mount prefix: the UI loads under /fleet on the funnel, so
@@ -449,4 +453,4 @@ Bun.serve<SockData>({
     },
   },
 });
-console.log("squawk-ui on 0.0.0.0:25136 (funnel /fleet + tailnet-direct), ws-aware, server-auth, hot-reload, channel-aware");
+console.log(`squawk-ui on ${process.env.SQUAWK_UI_HOST || "127.0.0.1"}:25136 (funnel /fleet + tailnet-direct), ws-aware, server-auth, hot-reload, channel-aware`);
