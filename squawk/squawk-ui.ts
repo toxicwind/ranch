@@ -25,6 +25,9 @@
 // channel store (/home/toxic/.fleet-bus/squawk-root/<channel>/*.md) so tabs
 // actually isolate per channel. The legacy feed proxy at :25135 remains for
 // CLI/other consumers; the UI no longer depends on its /wait channel filtering.
+//
+// Signed send (2026-10-07): /send borrows chat.py relay-in (HMAC via relay
+// identity + human: frontmatter). Never hand-writes .md files.
 import { readFileSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -125,7 +128,7 @@ function parseMsgFile(path: string, fallbackSeq: number): Msg | null {
     status: fm.status || "discussion",
     uuid: fm.uuid || "",
     title: fm.title || "msg",
-    signature: fm.signature,
+    signature: fm.signature || fm.hmac,
     text: text.trim(),
   };
 }
@@ -209,43 +212,63 @@ function allocSeq(channel: string): number {
   return Date.now();
 }
 
-// POST /send {channel, text} -> {ok, seq}
+// POST /send {channel, text, human?} -> {ok, seq}
+// Borrow chat.py relay-in: never hand-write message files. The relay
+// identity HMAC-signs; human attribution rides as HMAC-covered
+// relayed_from + human frontmatter (fleet-chat-v3). See chat_commands
+// cmd_relay_in / _post_message — "never hand-write message files."
 async function handleSend(req: Request): Promise<Response> {
   let body: any;
   try { body = await req.json(); }
   catch { return Response.json({ ok: false, error: "bad json" }, { status: 400 }); }
   const channel = String(body.channel || "").trim().toLowerCase();
   const text = String(body.text || "").trim();
+  const human = String(body.human || process.env.SQUAWK_UI_HUMAN || "chris").trim().toLowerCase();
   if (!VALID_CHANNEL.test(channel)) {
     return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
   }
   if (!text) {
     return Response.json({ ok: false, error: "empty text" }, { status: 400 });
   }
+  if (!/^[a-z][a-z0-9_-]{0,31}$/.test(human)) {
+    return Response.json({ ok: false, error: "invalid human" }, { status: 400 });
+  }
   // Emergency opt-out: {direct: true} skips shim screening.
   const direct = body.direct === true || body.direct === "1";
   const screened = direct ? { text, flagged: null } : shimScreen(text);
   if (screened.flagged) console.error(`squawk-ui: preflight flagged (${screened.flagged.slice(0, 120)}); sending anyway (fail-open)`);
   const safeText = screened.text;
-  const ts = Date.now();
-  const seq = allocSeq(channel);
-  const sender = "web-ui";
-  const slug = slugify(text.slice(0, 40));
-  const dir = join(SQUAWK_ROOT, channel);
-  const fname = `${seq}-${sender}-${slug}.md`;
   try {
-    mkdirSync(dir, { recursive: true });
-    const fm = `---\nseq: ${seq}\nfrom: ${sender}\nto: all\nchannel: ${channel}\nts: ${new Date(ts).toISOString()}\nstatus: discussion\nuuid: ${Math.random().toString(16).slice(2, 10)}\ntitle: msg\n---\n${safeText}\n`;
-    writeFileSync(join(dir, fname), fm);
-    // Delivery confirmation: read back, verify the write landed.
-    const back = readFileSync(join(dir, fname), "utf8");
-    if (!back || !back.includes(safeText.slice(0, 40))) {
-      return Response.json({ ok: false, error: "write verify failed" }, { status: 500 });
+    const r = spawnSync(
+      "python3",
+      [
+        join(SQUAWK_DIR, "chat.py"),
+        "--root", SQUAWK_ROOT,
+        "relay-in",
+        "--channel", channel,
+        "--from", human,
+        "--text", safeText,
+        "--title", "msg",
+      ],
+      {
+        timeout: 20000,
+        encoding: "utf8",
+        cwd: SQUAWK_DIR,
+        env: { ...process.env, AGENT_CHAT_ROOT: SQUAWK_ROOT },
+      },
+    );
+    if (r.status !== 0) {
+      const err = (r.stderr || r.stdout || "relay-in failed").trim().slice(0, 400);
+      console.error("squawk-ui: relay-in failed:", err);
+      return Response.json({ ok: false, error: err }, { status: 500 });
     }
+    // "relayed #123 -> fleet/0123-relay-msg.md (human: chris)"
+    const m = /relayed #(\d+)/.exec(r.stdout || "");
+    const seq = m ? parseInt(m[1], 10) : 0;
+    return Response.json({ ok: true, seq, human });
   } catch (e) {
     return Response.json({ ok: false, error: String(e) }, { status: 500 });
   }
-  return Response.json({ ok: true, seq });
 }
 
 // --- UI bundle: prebuilt Svelte 5 bundle, cached by mtime (hot-reload) ---
@@ -295,7 +318,7 @@ type SockData = { target: string; backend?: WebSocket; pending: (string | Buffer
 
 Bun.serve<SockData>({
   port: 25136,
-  hostname: "127.0.0.1",
+  hostname: "0.0.0.0",
   async fetch(req, server) {
     const url = new URL(req.url);
     // --- funnel mount prefix: the UI loads under /fleet on the funnel, so
@@ -375,4 +398,4 @@ Bun.serve<SockData>({
     },
   },
 });
-console.log("squawk-ui on 127.0.0.1:25136 (funnel /fleet + tailnet-direct), ws-aware, server-auth, hot-reload, channel-aware");
+console.log("squawk-ui on 0.0.0.0:25136 (funnel /fleet + tailnet-direct), ws-aware, server-auth, hot-reload, channel-aware");
