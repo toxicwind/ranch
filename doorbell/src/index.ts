@@ -1,5 +1,5 @@
 /**
- * doorbell v5 — Bun HTTP entry on :25202
+ * doorbell v7 — Bun HTTP entry on :25202
  * GET/POST/DELETE /doorbell-mcp?sessionId=  (primary)
  * GET/POST/DELETE /gemini-mcp?sessionId=   (backwards-compat alias)
  * GET /sessions, GET /health, POST /tier/seed
@@ -51,10 +51,16 @@ const server = Bun.serve({
     const path = url.pathname;
 
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+    console.log(
+      `[req] ${req.method} ${path}` +
+      ` ws=${req.headers.get("x-doorbell-workspace") || "-"}` +
+      ` ua=${(req.headers.get("user-agent") || "-").slice(0, 80)}` +
+      ` agent=${req.headers.get("x-agent-id") || "-"}`
+    );
 
     // OAuth fakes
     if (path.includes("oauth-protected-resource"))
-      return Response.json(oauthProtectedResource(), { headers: cors });
+      return Response.json(oauthProtectedResource(url), { headers: cors });
     if (path.includes("oauth-authorization-server"))
       return Response.json(oauthAuthorizationServer(), { headers: cors });
     if (path.endsWith("jwks.json")) return Response.json({ keys: [] }, { headers: cors });
@@ -154,7 +160,14 @@ const server = Bun.serve({
                   "io.modelcontextprotocol/serverInfo": { name: "doorbell", version: VERSION },
                 },
                 instructions:
-                  "doorbell v5. Catalog is truth; tiers are views. Prefer select_tier tier=router.",
+                  "doorbell v7. Router dispatchers are the catalog. list_routes names upstream tools.",
+                tools: [
+                  { name: "call_read", description: "Dispatch to a read-only tool." },
+                  { name: "call_write", description: "Dispatch to a write or read tool." },
+                  { name: "call_destructive", description: "Dispatch to any tool. Requires confirm:true." },
+                  { name: "list_routes", description: "List every tool on the underlying surface." },
+                  { name: "route", description: "Dispatch to any tool on the underlying MCP surface." },
+                ],
                 ttlMs: 3600000,
                 cacheScope: "public",
               },
@@ -224,8 +237,8 @@ const server = Bun.serve({
 
 setInterval(() => sweepSessions(SESSION_TTL_MS, MAX_AGENT_SESSIONS), SWEEP_INTERVAL_MS);
 
-console.log(`[✓] doorbell v5 — :${PORT}`);
+console.log(`[✓] doorbell v7 — :${PORT}`);
 console.log(`    upstream: ${GATEHOUSE}`);
 console.log(`    workspaces: xai/ spark/ (separate; not symlinked)`);
 console.log(`    policies: I→F→D→B→A→C→G→E→H; unresolved → router`);
-console.log(`    next branch: v6 (maximal weird tiers) — not implemented here`);
+console.log(`    v7: first response is the router catalog`);

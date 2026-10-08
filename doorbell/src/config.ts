@@ -32,7 +32,7 @@ export const DOORBELL_ROOT =
 export const SESSION_TTL_MS = 60 * 60 * 1000;
 export const SWEEP_INTERVAL_MS = 5 * 60 * 1000;
 export const MAX_AGENT_SESSIONS = 500;
-export const VERSION = "5.0.0";
+export const VERSION = "7.0.0";
 
 function loadKeyFromSecrets(): string {
   const candidates = [
@@ -106,6 +106,7 @@ export function loadWorkspaceConfig(ws: WorkspaceId): WorkspaceConfig {
 }
 
 export function detectWorkspace(req: Request, url: URL): WorkspaceId {
+  if (url.pathname.includes("gemini-mcp")) return "spark";
   const h = (req.headers.get("x-doorbell-workspace") || "").toLowerCase();
   if (h === "spark" || h === "xai") return h;
   const q = (url.searchParams.get("workspace") || "").toLowerCase();
@@ -113,6 +114,7 @@ export function detectWorkspace(req: Request, url: URL): WorkspaceId {
   const env = (process.env.DOORBELL_WORKSPACE || "").toLowerCase();
   if (env === "spark" || env === "xai") return env;
   const ua = (req.headers.get("user-agent") || "").toLowerCase();
+  if (ua === "google" || ua.startsWith("google")) return "spark";
   if (ua.includes("grok") || ua.includes("xai")) return "xai";
   return "xai";
 }
