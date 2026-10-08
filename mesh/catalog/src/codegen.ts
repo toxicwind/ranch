@@ -335,6 +335,29 @@ ${aliases}
 `;
 }
 
+
+/** Tau install slice: local routers and unkeyed static catalogs stay.
+ *  A provider with a keyEnv is omitted unless that variable (or keyEnvAlt)
+ *  is non-empty in env. The checked-in generated/ artifact stays the full
+ *  catalog; only the files Tau reads are filtered. */
+export function buildInstalledTauYaml(
+  input: CodegenInput,
+  env: Record<string, string | undefined>,
+): string {
+  const present = (name?: string) => {
+    if (!name) return false;
+    const v = env[name];
+    return typeof v === "string" && v.trim().length > 0;
+  };
+  const defs = input.defs.filter((d) => {
+    if (d.enabled === false || d.routerLocal) return false;
+    if (d.name === "flock" || d.name === "herd" || d.auth === "none") return true;
+    if (!d.keyEnv && !d.keyEnvAlt) return true;
+    return present(d.keyEnv) || present(d.keyEnvAlt);
+  });
+  return buildProvidersTauYaml({ ...input, defs });
+}
+
 /** Canonical YAML artifact for Tau (~/.tau/models.yml). */
 export function buildProvidersTauYaml(input: CodegenInput): string {
   const generatedAt = codegenTimestamp();
@@ -355,7 +378,7 @@ export function buildProvidersTauYaml(input: CodegenInput): string {
     "",
     "providers:",
     "  flock:",
-    '    baseUrl: http://127.0.0.1:25104/v1',
+    '    baseUrl: http://127.0.0.1:25193/v1',
     "    api: openai-completions",
     '    apiKey: "!cat /home/toxic/.tau/flock.key"',
     "    discovery:",

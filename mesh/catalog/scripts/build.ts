@@ -8,7 +8,7 @@
  */
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { emitAll } from "../src/codegen.ts";
+import { buildInstalledTauYaml, emitAll } from "../src/codegen.ts";
 import { DEAD_MODEL_IDS, MODEL_ALIASES, PROVIDER_DEFS } from "../src/data.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -43,8 +43,37 @@ console.log(`wrote ${goPath}`);
 console.log(`wrote ${rustPath}`);
 console.log(`wrote ${tauPath}`);
 
-// Sync to Tau consumer copies
-const tauContent = await Bun.file(tauPath).text();
-await Bun.write("/home/toxic/.tau/models.yml", tauContent);
-await Bun.write("/home/toxic/estate/config/tau/models.yml", tauContent);
-console.log("synced to ~/.tau/models.yml and estate/config/tau/models.yml");
+async function loadEnvFile(path: string): Promise<Record<string, string>> {
+  const env: Record<string, string> = {};
+  const file = Bun.file(path);
+  if (!(await file.exists())) return env;
+  for (const line of (await file.text()).split("\n")) {
+    const s = line.trim();
+    if (!s || s.startsWith("#") || !s.includes("=")) continue;
+    const eq = s.indexOf("=");
+    let k = s.slice(0, eq).trim().replace(/^export\s+/, "");
+    let v = s.slice(eq + 1).trim();
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+      v = v.slice(1, -1);
+    }
+    if (k) env[k] = v;
+  }
+  return env;
+}
+
+const installedEnv = {
+  ...(await loadEnvFile("/home/toxic/.tau/.env")),
+  ...(await loadEnvFile("/home/toxic/.secrets")),
+};
+const installed = buildInstalledTauYaml(
+  {
+    defs: PROVIDER_DEFS,
+    aliases: MODEL_ALIASES,
+    deadIds: DEAD_MODEL_IDS,
+    provenance: "@ranch/roost src/data.ts",
+  },
+  installedEnv,
+);
+await Bun.write("/home/toxic/.tau/models.yml", installed);
+await Bun.write("/home/toxic/estate/config/tau/models.yml", installed);
+console.log("synced installed slice to ~/.tau/models.yml and estate/config/tau/models.yml");
