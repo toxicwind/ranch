@@ -31,9 +31,20 @@ export interface OmniSettings {
 	apiKey: string;
 }
 
+
+/**
+ * Default gateway URL. The host port is owned by the estate SSOT
+ * (config/ports.env OMNIROUTE_PORT) and is deliberately NOT VansRouter's :20128;
+ * reading it here keeps the extension from hardcoding another service's port.
+ */
+function defaultServerUrl(): string {
+	const port = process.env.OMNIROUTE_PORT ?? "20130";
+	return `http://127.0.0.1:${port}`;
+}
+
 const EXTENSION_STATE_DIR = "pi-omniroute-sync";
 const DEFAULT_SETTINGS: OmniSettings = {
-	serverUrl: "http://localhost:20128",
+	serverUrl: defaultServerUrl(),
 	providerName: "omni",
 	onlyShowUsableModels: true,
 	showGlobalRoutingModels: true,

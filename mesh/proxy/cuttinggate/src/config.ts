@@ -48,6 +48,8 @@ const Schema = z.object({
     "google-eap": "http://127.0.0.1:25109/gemini-eap-interactions",
     "zen": "https://opencode.ai/zen/v1",
     "flock": "http://127.0.0.1:25193/v1",
+    "omniroute": "http://127.0.0.1:20130/v1",
+    "vans": "http://127.0.0.1:20128/v1",
   }),
 
   /** Hard ceiling on concurrent in-flight upstream calls. */
@@ -75,6 +77,8 @@ function readKeys(): Record<string, string> {
   // keyEnv); ZEN_API_KEY is accepted as an alias by the generic rule above.
   if (!out["zen"] && process.env.OPENCODE_API_KEY)
     out["zen"] = process.env.OPENCODE_API_KEY;
+  if (!out["flock"] && process.env.FLOCK_API_KEY)
+    out["flock"] = process.env.FLOCK_API_KEY;
   return out;
 }
 

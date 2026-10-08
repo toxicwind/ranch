@@ -58,6 +58,13 @@ __pycache__/
 # ffs index cache (30MB+ of generated symbol index)
 .ffs/
 
+# Smithers agent scratch output: per-run `*.html` reports and logs. Generated
+# on every agent sweep, never hand-edited. The sibling rule in
+# estate/.gitignore:1252 does NOT cover these -- ranch is its own git root
+# (/home/toxic/estate/ranch/.git), and an ignore rule only applies within the
+# root that declares it. Without this, agent scratch reports get staged.
+.smithers/
+
 # editor/agent scratch backups
 *.bak.[0-9]*
 

@@ -1,5 +1,5 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { basename, join } from "node:path";
 
 export interface RenderWorkflowParams {
   promptText: string;
@@ -15,13 +15,132 @@ export interface RenderWorkflowParams {
   runningFromSource: boolean;
 }
 
+function detectScriptRunner(repoRoot: string): "bun" | "pnpm" | "yarn" | "npm" {
+  if (existsSync(join(repoRoot, "bun.lock")) || existsSync(join(repoRoot, "bun.lockb"))) return "bun";
+  if (existsSync(join(repoRoot, "pnpm-lock.yaml"))) return "pnpm";
+  if (existsSync(join(repoRoot, "yarn.lock"))) return "yarn";
+  return "npm";
+}
+
+function scriptCommand(runner: "bun" | "pnpm" | "yarn" | "npm", scriptName: string): string {
+  if (runner === "bun") return `bun run ${scriptName}`;
+  if (runner === "pnpm") return `pnpm run ${scriptName}`;
+  if (runner === "yarn") return `yarn ${scriptName}`;
+  return `npm run ${scriptName}`;
+}
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "project";
+}
+
+function loadPackageScripts(repoRoot: string): Record<string, string> {
+  const packageJsonPath = join(repoRoot, "package.json");
+  if (!existsSync(packageJsonPath)) return {};
+  try {
+    const parsed = JSON.parse(readFileSync(packageJsonPath, "utf8")) as { scripts?: Record<string, string> };
+    if (!parsed || typeof parsed !== "object" || !parsed.scripts || typeof parsed.scripts !== "object") {
+      return {};
+    }
+    return parsed.scripts;
+  } catch {
+    return {};
+  }
+}
+
+export function buildFallbackConfig(
+  repoRoot: string,
+  promptSpecPath: string | null = null,
+  packageScripts: Record<string, string> = {},
+  overrides?: { maxConcurrency?: number; maxIterations?: number }
+) {
+  const runner = detectScriptRunner(repoRoot);
+
+  const buildCmds: Record<string, string> = {};
+  const testCmds: Record<string, string> = {};
+
+  if (packageScripts.typecheck) {
+    buildCmds.typecheck = scriptCommand(runner, "typecheck");
+  }
+  if (packageScripts.build) {
+    buildCmds.build = scriptCommand(runner, "build");
+  }
+  if (packageScripts.lint) {
+    buildCmds.lint = scriptCommand(runner, "lint");
+  }
+  if (packageScripts.test) {
+    testCmds.test = scriptCommand(runner, "test");
+  }
+
+  if (existsSync(join(repoRoot, "go.mod"))) {
+    buildCmds.go = buildCmds.go ?? "go build ./...";
+    testCmds.go = testCmds.go ?? "go test ./...";
+  }
+
+  if (existsSync(join(repoRoot, "Cargo.toml"))) {
+    buildCmds.rust = buildCmds.rust ?? "cargo build";
+    testCmds.rust = testCmds.rust ?? "cargo test";
+  }
+
+  if (Object.keys(buildCmds).length === 0) {
+    buildCmds.verify = runner === "bun" ? "bun run typecheck" : "echo \"Add build/typecheck command\"";
+  }
+
+  if (Object.keys(testCmds).length === 0) {
+    testCmds.tests = runner === "bun" ? "bun test" : "echo \"Add test command\"";
+  }
+
+  const specsPathCandidates = [
+    join(repoRoot, "docs/specs/engineering.md"),
+    join(repoRoot, "docs/specs"),
+    join(repoRoot, "specs"),
+  ];
+  if (promptSpecPath) specsPathCandidates.push(promptSpecPath);
+
+  const chosenSpecs = specsPathCandidates.find((candidate) => existsSync(candidate)) ?? promptSpecPath ?? "";
+
+  const projectName = basename(repoRoot);
+  const maxConcurrency = overrides?.maxConcurrency ?? Math.min(Math.max(Number(process.env.WORKFLOW_MAX_CONCURRENCY) || 6, 1), 32);
+
+  return {
+    projectName,
+    projectId: slugify(projectName),
+    focuses: [
+      { id: "core", name: "Core Platform" },
+      { id: "api", name: "API and Data" },
+      { id: "workflow", name: "Workflow and Automation" },
+    ],
+    specsPath: chosenSpecs,
+    referenceFiles: [
+      promptSpecPath,
+      existsSync(join(repoRoot, "README.md")) ? "README.md" : "",
+      existsSync(join(repoRoot, "docs")) ? "docs" : "",
+    ].filter(Boolean),
+    buildCmds,
+    testCmds,
+    preLandChecks: Object.values(buildCmds),
+    postLandChecks: Object.values(testCmds),
+    codeStyle: "Follow existing project conventions and keep changes minimal and test-driven.",
+    reviewChecklist: [
+      "Spec compliance",
+      "Tests cover behavior changes",
+      "No regression risk in existing flows",
+      "Error handling and observability",
+    ],
+    maxConcurrency,
+    maxIterations: overrides?.maxIterations ?? 25,
+  };
+}
+
 export function renderWorkflowFile(params: RenderWorkflowParams): string {
   const {
     promptText,
     promptSpecPath = null,
     repoRoot,
     dbPath,
-    packageScripts = {},
+    packageScripts: inputPackageScripts,
     detectedAgents,
     fallbackConfig,
     clarificationSession = null,
@@ -29,6 +148,15 @@ export function renderWorkflowFile(params: RenderWorkflowParams): string {
     superRalphSourceRoot,
     runningFromSource,
   } = params;
+
+  const packageScripts = inputPackageScripts && Object.keys(inputPackageScripts).length > 0
+    ? inputPackageScripts
+    : loadPackageScripts(repoRoot);
+
+  const effectiveFallbackConfig = {
+    ...buildFallbackConfig(repoRoot, promptSpecPath, packageScripts, fallbackConfig),
+    ...fallbackConfig,
+  };
 
   const isSuperRalphRepo =
     existsSync(join(repoRoot, "src/components/SuperRalph.tsx")) &&
@@ -56,7 +184,7 @@ const HAS_CODEX = ${detectedAgents.codex};
 const PROMPT_TEXT = ${JSON.stringify(promptText)};
 const PROMPT_SPEC_PATH = ${JSON.stringify(promptSpecPath)};
 const PACKAGE_SCRIPTS = ${JSON.stringify(packageScripts, null, 2)};
-const FALLBACK_CONFIG = ${JSON.stringify(fallbackConfig, null, 2)};
+const FALLBACK_CONFIG = ${JSON.stringify(effectiveFallbackConfig, null, 2)};
 const CLARIFICATION_SESSION = ${JSON.stringify(clarificationSession)};
 // Finite-by-default: Ralph loops exit on a real done predicate; this ceiling
 // is the backstop (onMaxReached="fail" makes exhaustion loud, exit non-zero).

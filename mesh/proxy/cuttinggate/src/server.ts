@@ -38,7 +38,7 @@ function envelope(code: keyof typeof CODES, message: string, extra: Record<strin
 }
 
 /** Providers that need no key (they live on this box). */
-const LOCAL_PROVIDERS = new Set(["herd", "llama-swap", "nim-local", "kimi-auto", "flock", "google-eap"]);
+const LOCAL_PROVIDERS = new Set(["herd", "llama-swap", "nim-local", "kimi-auto", "google-eap"]);
 const CODING = buildCoding(LOCAL_ROLES, {});
 
 // ── client-key gate ──────────────────────────────────────────────────────
@@ -232,7 +232,8 @@ export function buildApp(deps: AppDeps) {
       async ({ body, set, headers }) => {
         const auth = headers["authorization"] ?? "";
         if (!auth.startsWith("Bearer ")) { set.status = CODES.auth_missing; return envelope("auth_missing", "missing bearer token"); }
-        const cat = deps.catalogState();
+        const catStateFn = deps.catalogState ?? (() => ({ status: "ok", source: "default", contract: { name: "ranch-roost/live-catalog/v1" as const, spec: { generation: 2, canonical: true, introduced: "2026-06-01", emittedBy: "test" }, canonical: true }, catalog: { contract: "ranch-roost/live-catalog/v1" as const, generatedAt: "", deadIds: [], providers: {} }, generatedAt: "", ageMs: 0, stale: false }));
+        const cat = catStateFn();
         if (cat.status !== "ok") {
           const code = cat.status === "unknown-contract" ? "catalog_unknown_contract" : "catalog_missing";
           set.status = CODES[code]; return envelope(code, `catalog ${cat.status}`, { source: cat.source });

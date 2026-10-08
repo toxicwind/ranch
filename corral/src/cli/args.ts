@@ -1,28 +1,22 @@
 /**
- * CLI Argument parsing — extracted from 1189-line index.ts
+ * CLI argument parsing for Corral.
+ * Supports `corral "prompt"` and legacy `corral run "prompt"` / `corral up "prompt"`.
  */
 
 import { banner, kv } from "../ui/cli-style";
 
+/** Parsed CLI arguments */
 export type ParsedArgs = {
   positional: string[];
   flags: Record<string, string | boolean>;
 };
 
-const BOOLEAN_FLAGS = new Set([
-  "help",
-  "dry-run",
-  "skip-questions",
-  "check-env",
-  "report",
-]);
+const BOOLEAN_FLAGS = new Set(["help", "dry-run", "skip-questions", "check-env", "report"]);
 
+/** Print usage help */
 export function printHelp(): void {
   banner("Multi-Agent Engineering & Ticket Orchestration");
-  console.log("Usage:");
-  console.log('  corral "prompt text"');
-  console.log("  corral ./specs/feature.md --max-concurrency 8");
-  console.log("");
+  console.log("Usage:"); console.log(' corral "prompt text"'); console.log(" corral./specs/feature.md --max-concurrency 8"); console.log("");
   console.log("Options:");
   kv([
     ["--cwd <path>", "Repo root (default: current directory)"],
@@ -34,50 +28,30 @@ export function printHelp(): void {
     ["--report --run-id <id>", "Regenerate the HTML run report, print its path, exit"],
     ["--help", "Show this help"],
   ]);
-  console.log("\nExamples:");
-  console.log('  corral "Build a React todo app"');
-  console.log("  corral ./specs/feature.md --max-concurrency 8");
-  console.log('  corral "Add authentication" --skip-questions');
 }
 
+/** Parse argv into positional args and flags */
 export function parseArgs(argv: string[]): ParsedArgs {
   const positional: string[] = [];
   const flags: Record<string, string | boolean> = {};
-
-  for (let i = 0; i < argv.length; i += 1) {
+  for (let i = 0; i < argv.length; i++) {
     const token = argv[i];
-    if (!token.startsWith("--")) {
-      positional.push(token);
-      continue;
-    }
-
+    if (!token.startsWith("--")) { positional.push(token); continue; }
     const key = token.slice(2);
     const next = argv[i + 1];
-
-    // Boolean flags never consume the following token
-    if (BOOLEAN_FLAGS.has(key) || !next || next.startsWith("--")) {
-      flags[key] = true;
-      continue;
-    }
-
-    flags[key] = next;
-    i += 1;
+    if (BOOLEAN_FLAGS.has(key) ||!next || next.startsWith("--")) { flags[key] = true; continue; }
+    flags[key] = next; i++;
   }
-
+  if (positional[0] === "run" || positional[0] === "up") positional.shift();
   return { positional, flags };
 }
 
-export function getFlagString(
-  flags: Record<string, string | boolean>,
-  name: string
-): string | undefined {
-  const v = flags[name];
-  return typeof v === "string" ? v : undefined;
+/** Get string value for a flag */
+export function getFlagString(flags: Record<string, string | boolean>, name: string): string | undefined {
+  const v = flags[name]; return typeof v === "string"? v : undefined;
 }
 
-export function hasFlag(
-  flags: Record<string, string | boolean>,
-  name: string
-): boolean {
+/** Check if a flag is present */
+export function hasFlag(flags: Record<string, string | boolean>, name: string): boolean {
   return flags[name] === true || typeof flags[name] === "string";
 }

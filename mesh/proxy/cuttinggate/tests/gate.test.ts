@@ -180,6 +180,7 @@ describe("winner ledger", () => {
     const first = new Ledger(join(dir, "ledger.jsonl"));
     for (let i = 0; i < 5; i++) first.record("m/x", "alpha", 10, true);
     for (let i = 0; i < 5; i++) first.record("m/x", "beta", 900, false);
+    first.flush();
 
     const afterRestart = new Ledger(join(dir, "ledger.jsonl"));
     expect(afterRestart.order("m/x", ["beta", "alpha"])[0]).toBe("alpha");
