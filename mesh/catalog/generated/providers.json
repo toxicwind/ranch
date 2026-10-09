@@ -49,6 +49,24 @@
       "routerLocal": true
     },
     {
+      "name": "vansrouter",
+      "displayName": "VansRouter (local)",
+      "baseUrl": "http://127.0.0.1:20128/v1",
+      "keyEnv": "VANSROUTER_API_KEY",
+      "adapter": "openai",
+      "auth": "bearer",
+      "routerLocal": true
+    },
+    {
+      "name": "omniroute",
+      "displayName": "OmniRoute (local gateway)",
+      "baseUrl": "http://127.0.0.1:20130/v1",
+      "keyEnv": "OMNIROUTE_GATEWAY_KEY",
+      "adapter": "openai",
+      "auth": "bearer",
+      "routerLocal": true
+    },
+    {
       "name": "openrouter",
       "baseUrl": "https://openrouter.ai/api/v1",
       "keyEnv": "OPENROUTER_API_KEY",
@@ -625,6 +643,8 @@
     "kimi-auto": [
       "kimi-auto"
     ],
+    "vansrouter": [],
+    "omniroute": [],
     "openrouter": [
       "qwen/qwen3.8-27b:free",
       "poolside/laguna-xs-2.1:free",

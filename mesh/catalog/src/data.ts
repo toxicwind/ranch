@@ -86,12 +86,53 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     name: "kimi-auto",
     displayName: "kimi-auto shim",
     // 2026-10-02: :25105 is mesh-front/prometheus, not kimi-auto -- the kimi-auto alias-shim is :25153 (200 on /v1/models).
+    // 2026-10-09 (verified): the shim currently serves NOTHING. herd lists 52
+    // models and none of the six targets in its chain exist any more
+    // (openrouter-free/*, hf-free/*, nim-kimi/* all gone), so every completion
+    // returns 404 "no router for requested model". Zero free Kimi remains
+    // upstream: OpenRouter lists 9 Kimi variants, all priced
+    // (0.00000045..0.0000006 $/tok) with no `:free` suffix on any of them.
+    // Kept registered (not deleted) so the pitchfork daemon and the
+    // herd.d/kimi-auto.yaml fragment remain the single source of truth; this
+    // comment is the record of why it cannot serve.
     baseUrl: "http://127.0.0.1:25153/v1",
     keyEnv: "KIMI_AUTO_SHIM_KEY",
     auth: "none",
     adapter: "static",
     staticModels: ["kimi-auto"],
     seeds: ["kimi-auto"],
+    routerLocal: true,
+  },
+  {
+    name: "vansrouter",
+    displayName: "VansRouter (local)",
+    // 2026-10-09: :20128 is VansRouter -- a TS-router-local OpenAI-compatible
+    // gateway serving the oc/* and mmf/* namespaces. It is NOT OmniRoute
+    // (:20130, config/ports.env OMNIROUTE_PORT). Both are wired: roost lists
+    // them as separate providers so neither shadows the other.
+    baseUrl: "http://127.0.0.1:20128/v1",
+    keyEnv: "VANSROUTER_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // Seeds empty on purpose: /v1/models is live and cheap (verified 2026-10-09,
+    // 14 ids). Hand-seeded names rot; discovery is the source of truth.
+    seeds: [],
+    routerLocal: true,
+  },
+  {
+    name: "omniroute",
+    displayName: "OmniRoute (local gateway)",
+    // 2026-10-09: :20130 is OmniRoute (config/ports.env OMNIROUTE_PORT) --
+    // the multi-provider aggregator with its own dashboard at
+    // https://estate.tailc9ac71.ts.net:8443. Distinct from VansRouter (:20128);
+    // both are registered so neither shadows the other. Gateway auth uses a
+    // key minted in the dashboard (API Keys -> estate-gateway), not the
+    // per-provider upstream keys that live inside its DB.
+    baseUrl: "http://127.0.0.1:20130/v1",
+    keyEnv: "OMNIROUTE_GATEWAY_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    seeds: [],
     routerLocal: true,
   },
   {
