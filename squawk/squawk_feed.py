@@ -61,7 +61,13 @@ HOLD_SECONDS = 55.0
 MAX_MESSAGES = 50
 TAIL_CAP = 500  # server-side cap on ?tail= boot snapshots
 TEXT_CAP = 500
-WATCH_MASK = 0x00000008 | 0x00000100  # IN_CLOSE_WRITE | IN_MOVED_TO
+# inotify event bits (linux/inotify.h). NOTE: 0x100 is IN_CREATE, not
+# IN_MOVED_TO (0x80) -- IN_CREATE fires at open(), before any content
+# is written, so it must NOT be in the mask: the watcher would bump
+# the high-water mark on an empty file and serve body:null records.
+_IN_CLOSE_WRITE = 0x00000008
+_IN_MOVED_TO = 0x00000080
+WATCH_MASK = _IN_CLOSE_WRITE | _IN_MOVED_TO
 _MSG_RE = re.compile(r"^(\d+)-.*\.md$")
 _CHANNEL_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
 
