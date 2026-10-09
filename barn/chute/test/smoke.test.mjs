@@ -42,8 +42,8 @@ test("serves a real connection and spawns child", async () => {
   expect(parsed.params.mcpServers[0].name).toBe("a");
 });
 
-test("no cmd and no --check exits 1", async () => {
+test("no cmd and no --check exits 2 (EX_USAGE)", async () => {
   const p = spawn(CHUTE, []);
   const { code } = await waitExit(p);
-  expect(code).toBe(1);
+  expect(code).toBe(2);
 });
