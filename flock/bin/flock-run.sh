@@ -3,4 +3,4 @@
 set -euo pipefail
 . "$HOME/estate/config/flock-ssot/env-shim.sh"
 export PROXY_API_KEYS="${PROXY_API_KEYS:-$FLOCK_API_KEY}"
-exec /home/toxic/.flock/flock "$@"
+exec /home/toxic/archive/home-dirs-2026/.flock/flock "$@"
