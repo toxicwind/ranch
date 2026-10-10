@@ -16,11 +16,15 @@ if [[ "${1:-}" == "auth" && "${2:-}" == "status" ]]; then
   exit 0
 fi
 
-# Preserve caller-provided proxy routing over secrets file
+# Preserve caller-provided proxy ROUTING over secrets file.
+# Credential vars are the reverse: the secrets file is the source of truth.
+# (2026-10-10: a stale inherited NVIDIA_API_KEY -- dead npk_ea key lingering
+# in the systemd user env -- shadowed the good key in ~/.secrets and 401'd
+# every super-ralph agent call, slashing bidders for infra faults.)
 _keep_nim_base_url="${NIM_BASE_URL:-}"
-_keep_nvidia_api_key="${NVIDIA_API_KEY:-}"
 _keep_nim_model="${NIM_MODEL:-}"
 _keep_anthropic_base_url="${ANTHROPIC_BASE_URL:-}"
+_keep_nvidia_api_key="${NVIDIA_API_KEY:-}"  # fallback only: used iff secrets file lacks it
 
 # Load secrets from standard locations (first found wins)
 # Order: CORRAL_SECRETS_PATH > ~/.secrets > ~/.config/corral/secrets
@@ -36,15 +40,21 @@ fi
 
 if [[ -n "${_secrets_path:-}" && -f "$_secrets_path" ]]; then
   set -a
+  set +u
   # shellcheck disable=SC1090
   source "$_secrets_path"
+  set -u
   set +a
 fi
 
 [[ -n "$_keep_nim_base_url" ]] && export NIM_BASE_URL="$_keep_nim_base_url"
-[[ -n "$_keep_nvidia_api_key" ]] && export NVIDIA_API_KEY="$_keep_nvidia_api_key"
 [[ -n "$_keep_nim_model" ]] && export NIM_MODEL="$_keep_nim_model"
 [[ -n "$_keep_anthropic_base_url" ]] && export ANTHROPIC_BASE_URL="$_keep_anthropic_base_url"
+# Credentials: the secrets file wins. An inherited NVIDIA_API_KEY is only a
+# fallback when the file did not define one.
+if [[ -z "${NVIDIA_API_KEY:-}" && -n "$_keep_nvidia_api_key" ]]; then
+  export NVIDIA_API_KEY="$_keep_nvidia_api_key"
+fi
 unset _keep_nim_base_url _keep_nvidia_api_key _keep_nim_model _keep_anthropic_base_url
 
 export NIM_BASE_URL="${NIM_BASE_URL:-http://127.0.0.1:25200/v1}"
