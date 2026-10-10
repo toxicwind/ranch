@@ -29,3 +29,15 @@ description = "Dump roundup directory"
 [tasks.upstream-status]
 run = "./scripts/upstream-merge.sh --status"
 description = "Check fork status"
+
+[tasks.gen-benchmarks]
+run = "bun ./scripts/gen-benchmarks-json.ts"
+description = "Generate docs-site/public/benchmarks.json from latest ranking"
+
+[tasks.docs-dev]
+run = "cd docs-site && npm run dev"
+description = "Dev server for rankings site"
+
+[tasks.docs-build]
+run = "cd docs-site && npm run build"
+description = "Build rankings site"

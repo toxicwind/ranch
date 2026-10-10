@@ -1,0 +1,29 @@
+name: rankings-site
+
+on:
+  push:
+    paths:
+      - 'roundup/results/**'
+      - 'roundup/docs-site/**'
+      - 'roundup/scripts/gen-benchmarks-json.ts'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Generate benchmarks.json
+        run: bun roundup/scripts/gen-benchmarks-json.ts
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: roundup/docs-site/package-lock.json
+      - name: Install & build
+        working-directory: roundup/docs-site
+        run: |
+          npm ci || npm install
+          npm run build

@@ -1,11 +1,15 @@
-# Roundup
+# Roundup Rankings
 
-**A cattle roundup gathers and assesses every head. This one gathers and assesses every model.**
+Live model rankings for the estate.
 
-Seventy-five local models on a 3090 and thirteen cloud providers behind one
-gateway — roundup measures all of them with the same harness, the same scorer,
-and the same questions, then ranks them on the only two axes that matter:
+Quality descending, then p50 latency ascending. Cost is not a factor.
 
-> **quality descending, then p50 latency ascending. Cost is not a factor.**
+[View Rankings](/benchmarks)
 
-[Get Started](/docs/GUIDELLM_EVAL_PLAN)
+## How it updates
+
+- `mise run estate-sweep` produces `results/estate/*/ranking.md` + `weights.json`
+- `mise run realworld-bench` produces the real-world task scores
+- Nightly tau bench + bench-radar watches `/home/toxic/bench-run.log`
+
+The rankings page loads the latest generated `benchmarks.json`.
