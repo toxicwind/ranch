@@ -236,3 +236,6 @@
 [submodule "barn/weave-sub"]
 	path = barn/weave-sub
 	url = https://github.com/toxicwind/weave.git
+[submodule "barn/flatbread"]
+	path = barn/flatbread
+	url = https://github.com/toxicwind/flatbread.git
