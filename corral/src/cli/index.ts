@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import { parseArgs, printHelp, getFlagString, hasFlag } from "./args";
 import { dumpCheckEnv, loadSecrets, parseFinite } from "./env";
 import { ensureWorkspace } from "./workspace";
+import { detectAgents } from "./detect-agents";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -67,7 +68,7 @@ async function main() {
     const source = renderWorkflowFile({
       promptText, promptSpecPath: promptSourcePath, repoRoot,
       dbPath: join(repoRoot, ".smithers", "workflow.db"),
-      packageScripts: {}, detectedAgents: { claude: true, codex: true },
+      packageScripts: {}, detectedAgents: detectAgents(),
       fallbackConfig: { maxConcurrency, maxIterations }, maxIterations,
       superRalphSourceRoot: resolve(__dirname, "..", ".."), runningFromSource: true,
     });

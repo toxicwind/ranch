@@ -14,6 +14,7 @@ import { CorralTimer } from "../timing";
 import { writeRunReport } from "../report/renderReport";
 import { detectExactReply, normalizeReply } from "../exactReply";
 import { renderWorkflowFile } from "./generator";
+import { detectAgents } from "./detect-agents";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -168,7 +169,7 @@ export async function runWorkflow(opts: RunWorkflowOpts): Promise<void> {
     repoRoot,
     dbPath,
     packageScripts: {},
-    detectedAgents: { claude: true, codex: true },
+    detectedAgents: detectAgents(),
     fallbackConfig: { maxConcurrency, maxIterations },
     maxIterations,
     superRalphSourceRoot,

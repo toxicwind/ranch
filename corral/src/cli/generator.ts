@@ -218,7 +218,7 @@ function choose(primary: "claude" | "codex", systemPrompt: string) {
   if (primary === "claude" && HAS_CLAUDE) return createClaude(systemPrompt);
   if (primary === "codex" && HAS_CODEX) return createCodex(systemPrompt);
   if (HAS_CLAUDE) return createClaude(systemPrompt);
-  return createCodex(systemPrompt);
+  throw new Error("corral: no agent engine available (claude and codex both failed detection). Install claude or codex, or set OPENAI_API_KEY.");
 }
 
 const planningAgent = choose("claude", "Plan and research next tickets.");
