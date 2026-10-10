@@ -4,7 +4,7 @@ import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 const RESULTS = join(import.meta.dir, "../results/estate");
-const OUT = join(import.meta.dir, "../docs-site/public/benchmarks.json");
+const OUT = join(import.meta.dir, "/home/toxic/estate/tools/rankings/public/benchmarks.json");
 
 if (!existsSync(RESULTS)) {
   console.error("no results/estate");
