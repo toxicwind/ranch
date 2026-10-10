@@ -148,6 +148,14 @@ def direct_model_call(prompt):
 
     base = os.environ.get("NIM_BASE_URL", "http://127.0.0.1:25200/v1").rstrip("/")
     key = os.environ.get("NVIDIA_API_KEY", "")
+    # flock (:25193) needs its client key, not the NVIDIA upstream key
+    if ":25193" in base:
+        try:
+            ck = os.path.expanduser("~/.flock-data/client-key.corral")
+            if os.path.exists(ck):
+                key = open(ck).read().strip()
+        except Exception:
+            pass
     model = os.environ.get("NIM_MODEL", "")
     body = json.dumps({
         "model": model,

@@ -49,6 +49,10 @@ fi
 
 [[ -n "$_keep_nim_base_url" ]] && export NIM_BASE_URL="$_keep_nim_base_url"
 [[ -n "$_keep_nim_model" ]] && export NIM_MODEL="$_keep_nim_model"
+# Default NIM_MODEL from CLAUDE_CODE_SUBAGENT_MODEL if not set
+if [[ -z "${NIM_MODEL:-}" && -n "${CLAUDE_CODE_SUBAGENT_MODEL:-}" ]]; then
+  export NIM_MODEL="$CLAUDE_CODE_SUBAGENT_MODEL"
+fi
 [[ -n "$_keep_anthropic_base_url" ]] && export ANTHROPIC_BASE_URL="$_keep_anthropic_base_url"
 # Credentials: the secrets file wins. An inherited NVIDIA_API_KEY is only a
 # fallback when the file did not define one.
