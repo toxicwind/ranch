@@ -35,5 +35,16 @@ export {
   PROVIDER_DEFS,
 } from "./data.ts";
 
+export {
+  displayNameFor,
+  keyEnvFor,
+  KNOWN_ENDPOINTS,
+  loadCatalogProviderDefs,
+  loadDropInDefs,
+  loadProviderDefs,
+  synthesizeProviderDef,
+} from "./auto-loader.ts";
+export type { AutoLoadOptions, AutoLoadResult } from "./auto-loader.ts";
+
 export { buildInstalledTauYaml, buildProvidersGo, buildProvidersJson, buildProvidersRust, buildProvidersTauYaml, emitAll } from "./codegen.ts";
 export type { CodegenInput } from "./codegen.ts";
