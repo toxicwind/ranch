@@ -20,90 +20,6 @@
 
 # --- generated 2026-10-04T00:12:09Z: one entry per tracked gitlink,
 #     url = each checkout's own origin ---
-[submodule "ComfyUI-TTools"]
-	path = ComfyUI-TTools
-	url = https://github.com/toxicwind/ranch
-[submodule "RSSLive"]
-	path = RSSLive
-	url = https://github.com/toxicwind/ranch
-[submodule "additional-lens-profiles"]
-	path = additional-lens-profiles
-	url = https://github.com/toxicwind/ranch
-[submodule "agentic-moment-2026"]
-	path = agentic-moment-2026
-	url = https://github.com/toxicwind/ranch
-[submodule "agentos"]
-	path = agentos
-	url = https://github.com/toxicwind/ranch
-[submodule "arc-agi-experiment"]
-	path = arc-agi-experiment
-	url = https://github.com/toxicwind/ranch
-[submodule "arxiv-code"]
-	path = arxiv-code
-	url = https://github.com/toxicwind/ranch
-[submodule "ast-grep"]
-	path = ast-grep
-	url = https://github.com/toxicwind/ranch
-[submodule "awawr-loader"]
-	path = awawr-loader
-	url = https://github.com/toxicwind/ranch
-[submodule "awesome-agent-gateway-2026"]
-	path = awesome-agent-gateway-2026
-	url = https://github.com/toxicwind/ranch
-[submodule "awesome-api-shape-explorer"]
-	path = awesome-api-shape-explorer
-	url = https://github.com/toxicwind/ranch
-[submodule "bashrc-quote-fix"]
-	path = bashrc-quote-fix
-	url = https://github.com/toxicwind/ranch
-[submodule "bedrock"]
-	path = bedrock
-	url = https://github.com/toxicwind/ranch
-[submodule "chat-coord"]
-	path = chat-coord
-	url = https://github.com/toxicwind/ranch
-[submodule "codeflux"]
-	path = codeflux
-	url = https://github.com/toxicwind/ranch
-[submodule "codeflux-moulti"]
-	path = codeflux-moulti
-	url = https://github.com/toxicwind/ranch
-[submodule "codeflux-patchling"]
-	path = codeflux-patchling
-	url = https://github.com/toxicwind/ranch
-[submodule "codeflux-python-patch"]
-	path = codeflux-python-patch
-	url = https://github.com/toxicwind/ranch
-[submodule "codeflux-watchfiles"]
-	path = codeflux-watchfiles
-	url = https://github.com/toxicwind/ranch
-[submodule "computer-use-linux"]
-	path = computer-use-linux
-	url = https://github.com/toxicwind/ranch
-[submodule "dayz-toolkit"]
-	path = dayz-toolkit
-	url = https://github.com/toxicwind/ranch
-[submodule "dedi-ops"]
-	path = dedi-ops
-	url = https://github.com/toxicwind/ranch
-[submodule "effusion-labs"]
-	path = effusion-labs
-	url = https://github.com/toxicwind/ranch
-[submodule "effusion-labs-tickets"]
-	path = effusion-labs-tickets
-	url = https://github.com/toxicwind/ranch
-[submodule "evidence-locker"]
-	path = evidence-locker
-	url = https://github.com/toxicwind/ranch
-[submodule "extagents"]
-	path = extagents
-	url = https://github.com/toxicwind/ranch
-[submodule "goldfinger"]
-	path = goldfinger
-	url = https://github.com/toxicwind/ranch
-[submodule "hypr-agent-portal"]
-	path = hypr-agent-portal
-	url = https://github.com/toxicwind/ranch
 [submodule "killer-features/bid-market/vendor/agora"]
 	path = killer-features/bid-market/vendor/agora
 	url = https://github.com/KAIJUJO/Agora.git
@@ -137,15 +53,6 @@
 [submodule "killer-features/debate-oracle/vendor/llm_debate"]
 	path = killer-features/debate-oracle/vendor/llm_debate
 	url = https://github.com/ucl-dark/llm_debate.git
-[submodule "libsecret"]
-	path = libsecret
-	url = https://github.com/toxicwind/ranch
-[submodule "llm-mapreduce"]
-	path = llm-mapreduce
-	url = https://github.com/toxicwind/ranch
-[submodule "lookout"]
-	path = lookout
-	url = https://github.com/toxicwind/ranch
 [submodule "mcpproxy-go"]
 	path = mcpproxy-go
 	url = https://github.com/toxicwind/mcpproxy-go.git
