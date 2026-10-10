@@ -239,3 +239,6 @@
 [submodule "barn/flatbread"]
 	path = barn/flatbread
 	url = https://github.com/toxicwind/flatbread.git
+[submodule "forge/web"]
+	path = forge/web
+	url = https://github.com/toxicwind/CMSaasStarter.git
