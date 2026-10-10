@@ -24,3 +24,13 @@ No protocol overlap. Workflow:
 - barn/weave-sub (submodule)
 - barn/weave (clone)
 - forge/ (public entrypoint)
+
+## flatbread
+
+Context graph for agents and sites. Submoduled at barn/flatbread.
+Has a Next.js example at examples/nextjs/ that can query the content graph.
+
+Pairs with weave (merge) and forge (build cache):
+- flatbread holds the content graph
+- weave merges agent edits cleanly
+- forge caches the builds
