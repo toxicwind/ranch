@@ -242,3 +242,6 @@
 [submodule "forge/web"]
 	path = forge/web
 	url = https://github.com/toxicwind/CMSaasStarter.git
+[submodule "tau-extensions"]
+	path = tau-extensions
+	url = https://github.com/toxicwind/tau-extensions.git
