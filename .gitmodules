@@ -245,3 +245,6 @@
 [submodule "tau-extensions"]
 	path = tau-extensions
 	url = https://github.com/toxicwind/tau-extensions.git
+[submodule "doorbell"]
+	path = doorbell
+	url = https://github.com/toxicwind/doorbell.git
