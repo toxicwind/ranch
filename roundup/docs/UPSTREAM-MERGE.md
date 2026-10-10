@@ -11,9 +11,9 @@ If you are about to sync from upstream, read this end to end first.
 | Location | Holds | Why |
 |---|---|---|
 | `https://github.com/toxicwind/roundup` | the fork's **real git history** + the `upstream` remote | the only place a merge can actually happen |
-| `ranch/roundup/fork/` | 525 tracked files, 18 MB, vendored **in-tree** | the working copy the benchmarks import |
+| `ranch/roundup/guidellm/` | 525 tracked files, 18 MB, vendored **in-tree** | the working copy the benchmarks import |
 
-`fork/` is not a nested repository — it is real tracked files in the
+`guidellm/` is not a nested repository — it is real tracked files in the
 `toxicwind/ranch` monorepo, so a fresh clone of the ranch gets the benchmark
 tool with no second checkout and no submodule dance. That is the whole reason
 the code is duplicated rather than symlinked or submoduled.
@@ -37,7 +37,7 @@ box** — only the GitHub remote. To merge, clone it somewhere first.
 4. **PRs to `vllm-project/guidellm` are Chris's call.** They speak as
    toxicwind to an external maintainer group. Agents audit and prepare; they
    do not open.
-5. **Record every merge.** Append the decision block to `fork/MERGE-DECISIONS.md`.
+5. **Record every merge.** Append the decision block to `guidellm/MERGE-DECISIONS.md`.
    A merge with no recorded decision is a merge we will not be able to explain.
 
 ## Current state (audit of 2026-09-20, still the reference)
@@ -65,7 +65,7 @@ happen upstream, which is why they go together in one PR.
 
 ## Last recorded merge
 
-`fork/MERGE-DECISIONS.md`:
+`guidellm/MERGE-DECISIONS.md`:
 
 ```
 Processed: true
@@ -92,7 +92,7 @@ git diff --stat HEAD upstream/main | tail -20
 git merge upstream/main          # merge commit, resolve, do not squash
 
 # 5. record the decision before pushing anything
-#    append to fork/MERGE-DECISIONS.md:
+#    append to guidellm/MERGE-DECISIONS.md:
 #      Processed: true
 #      Resulting commit: <new sha>
 #      Tag: refs/recovery/maximal-merge-<date>
@@ -106,8 +106,8 @@ git log --oneline | grep -E '74ec8623|bb96157f|99540b90|6b40c21e'
 
 ## What the audit doc gets wrong
 
-`docs/upstream-audit-guidellm-2026-09-20.md` calls `fork/`
+`docs/upstream-audit-guidellm-2026-09-20.md` calls `guidellm/`
 "Local working copy (**git-ignored**, benchmark runs)". That is **stale**.
-`git ls-files fork` returns **525 tracked files** — `fork/` is committed to
+`git ls-files fork` returns **525 tracked files** — `guidellm/` is committed to
 the ranch monorepo on purpose, which is the entire reason it can be vendored.
 Treat the audit as accurate about commits and wrong about tracking.

@@ -33,7 +33,7 @@ It answers three questions nothing else on the estate can:
 - **Which backend is actually best** for a given workload, right now, tonight?
 - **Which upstream provider is worth trusting** — flock already tracks Elo and
   circuit state per provider; roundup adds measured latency on top.
-- **What did our own fork change** when we pull from upstream, and is any of it
+- **What did our own vendored GuideLLM change** when we pull from upstream, and is any of it
   upstreamable?
 
 ```mermaid
@@ -49,7 +49,7 @@ flowchart LR
   end
 
   subgraph Roundup
-    G["guidellm fork<br/>ranch/roundup/fork"]
+    G["vendored GuideLLM<br/>ranch/roundup/guidellm"]
     S["sweeps/*.sh"]
     R["results/*/ranking.md"]
   end
@@ -70,7 +70,7 @@ mise run herd-sweep
 # 2. read the ranking (quality desc, p50 latency asc)
 cat results/herd/ranking.md
 
-# 3. check the fork is still in step with upstream before you merge
+# 3. check the vendored GuideLLM is still in step with upstream before you merge
 mise run upstream-status
 ```
 
@@ -78,7 +78,7 @@ mise run upstream-status
 
 | Path | What it is |
 |---|---|
-| [`fork/`](./fork) | The `toxicwind/roundup` codebase — 525 tracked files vendored in-tree. Real files, not a submodule. |
+| [`guidellm/`](./guidellm) | The `toxicwind/roundup` codebase — 525 tracked files vendored in-tree. Real files, not a submodule. |
 | [`sweeps/`](./sweeps) | The benchmark runs. One script per question. |
 | [`scripts/`](./scripts) | Upstream sync tooling. |
 | [`docs/`](./docs) | Eval plan, upstream audit, and the merge procedure. |
@@ -89,10 +89,10 @@ mise run upstream-status
 | Task | Script | Question it answers | Route |
 |---|---|---|---|
 | `mise run herd-sweep` | [`roundup_herd_sweep.sh`](./sweeps/roundup_herd_sweep.sh) | Which **local** model is best? Models discovered live from herd `/v1/models` on every run. | herd `:25100` |
-| `mise run bench` | [`roundup-bench.sh`](./sweeps/roundup-bench.sh) | Which **provider** is best, using the fork's `instruction_following` scorer via scenario YAML? | flock + NIM + vLLM remote |
+| `mise run bench` | [`roundup-bench.sh`](./sweeps/roundup-bench.sh) | Which **provider** is best, using the vendored GuideLLM's `instruction_following` scorer via scenario YAML? | flock + NIM + vLLM remote |
 | `mise run bench-v3` | [`roundup-bench-v3.sh`](./sweeps/roundup-bench-v3.sh) | Same, with capability probing so unsupported backends fail loudly instead of silently. | flock + NIM + vLLM remote |
 | `mise run sweep` | [`roundup_sweep.sh`](./sweeps/roundup_sweep.sh) | Quick sanity pass over working OpenRouter models. | OpenRouter |
-| `mise run estate-sweep` | [`roundup-estate-sweep.ts`](./sweeps/roundup-estate-sweep.ts) | **One-command estate sweep**: discovers models live from herd, flock, and the sovereign router; benchmarks each with the fork's `instruction_following` scorer; emits `roundup-bench/1` JSONL (`results.jsonl`), `roundup-weights/1` (`weights.json`), and `ranking.md`. | herd `:25100` · flock `:25193` · sov `:25104` |
+| `mise run estate-sweep` | [`roundup-estate-sweep.ts`](./sweeps/roundup-estate-sweep.ts) | **One-command estate sweep**: discovers models live from herd, flock, and the sovereign router; benchmarks each with the vendored GuideLLM's `instruction_following` scorer; emits `roundup-bench/1` JSONL (`results.jsonl`), `roundup-weights/1` (`weights.json`), and `ranking.md`. | herd `:25100` · flock `:25193` · sov `:25104` |
 | `mise run emit-weights` | [`emit-router-weights.ts`](./sweeps/emit-router-weights.ts) | Converts sweep `results.jsonl` into the sovereign router's `schema_version: 2` weight contract (`provider_priors` + `model_priors`), which the router hot-reloads. | — |
 | `mise run dump` | [`dump-roundup.sh`](./sweeps/dump-roundup.sh) | Give me everything in this directory as one readable dump. | — |
 
@@ -108,7 +108,7 @@ additionally writes router-consumable `results.jsonl` + `weights.json`, and
 Rank: quality desc, p50 latency asc
 ```
 
-Quality comes from the fork's pluggable scorer registry — the built-in
+Quality comes from the vendored GuideLLM's pluggable scorer registry — the built-in
 `instruction_following` scorer, plus whatever else is registered. Cost is
 deliberately excluded; that is a standing decision, not an oversight.
 
@@ -122,13 +122,13 @@ passes no `api_key` to GuideLLM, and prints none. The provider sweeps pull
 and never echo them. If you find yourself adding `--api-key` to a sweep, you
 have broken the rule.
 
-## The fork
+## Vendored GuideLLM
 
 `roundup` is a fork of `vllm-project/guidellm`. It exists **twice**, on purpose:
 
 - **[github.com/toxicwind/roundup](https://github.com/toxicwind/roundup)** — the
   real git history and the `upstream` remote. The only place a merge can happen.
-- **`fork/`** — 525 tracked files, 18 MB, committed into the ranch monorepo so a
+- **`guidellm/`** — 525 tracked files, 18 MB, committed into the ranch monorepo so a
   fresh clone gets a working benchmark with no submodule and no second checkout.
 
 Those are not drifting copies. `scripts/upstream-merge.sh` is what keeps them in
@@ -143,7 +143,7 @@ step.
 | `99540b90` | Empty output scores `0.0` instead of skipping; scorer exceptions record `0.0` with error metadata | yes, with discussion |
 | `6b40c21e` | Quality aggregates cover completed requests only | yes, as a pair with `99540b90` |
 
-**History rules: never rebase, never squash, never force-push the fork's main.**
+**History rules: never rebase, never squash, never force-push the vendored GuideLLM's main.**
 When upstream takes our work we merge their changes back as a merge commit, so
 the histogram stays honest. PRs to an external project are Chris's call, not an
 agent's.
@@ -161,7 +161,7 @@ pushing anything: **[docs/UPSTREAM-MERGE.md](./docs/UPSTREAM-MERGE.md)**.
 - [**Upstream Merge Procedure**](./docs/UPSTREAM-MERGE.md) — how upstream changes get in, and why
 - [**Evaluation Plan**](./docs/GUIDELLM_EVAL_PLAN.md) — what we are trying to measure
 - [**Router Weights**](./docs/ROUTER-WEIGHTS.md) — how sweep results are converted into router weights
-- [**Upstream Audit (2026-09-20)**](./docs/upstream-audit-guidellm-2026-09-20.md) — the fork-vs-upstream audit behind the four commits
+- [**Upstream Audit (2026-09-20)**](./docs/upstream-audit-guidellm-2026-09-20.md) — the vendored GuideLLM-vs-upstream audit behind the four commits
 - [**Upstream Assessment (2026-10-02)**](./docs/upstream-assessment-2026-10-02.md) — the latest upstream assessment
 
 ## Security
@@ -171,7 +171,7 @@ pushing anything: **[docs/UPSTREAM-MERGE.md](./docs/UPSTREAM-MERGE.md)**.
 - Benchmark traffic is routed through herd/flock so provider keys never leave
   the estate.
 - The venv lives at `/home/toxic/.venv-guidellm` as an **editable install of the
-  fork**. Editing `fork/` changes what `guidellm` runs — that is the point, and
+  fork**. Editing `guidellm/` changes what `guidellm` runs — that is the point, and
   also the reason to treat it as production code.
 - `scripts/upstream-merge.sh` refuses to sync from a partial checkout. Deleting
   requires `--prune-into` explicitly.
@@ -180,8 +180,8 @@ pushing anything: **[docs/UPSTREAM-MERGE.md](./docs/UPSTREAM-MERGE.md)**.
 
 The fork is [Apache-2.0](https://github.com/vllm-project/guidellm/blob/main/LICENSE),
 matching upstream GuideLLM. Our sweep and tooling scripts in `sweeps/` and
-`scripts/` are MIT. See [`fork/LICENSE`](./fork/LICENSE) and
-[`fork/MERGE-DECISIONS.md`](./fork/MERGE-DECISIONS.md).
+`scripts/` are MIT. See [`guidellm/LICENSE`](./guidellm/LICENSE) and
+[`guidellm/MERGE-DECISIONS.md`](./guidellm/MERGE-DECISIONS.md).
 
 > Renamed from `guidellm/` on 2026-09-30 (`toxicwind/guidellm` →
 > `toxicwind/roundup`). The benchmarking tool under the hood is still GuideLLM —

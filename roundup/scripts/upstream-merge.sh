@@ -6,7 +6,7 @@
 #
 #   ~/roundup-standalone  -> git clone of toxicwind/roundup, the only place a
 #                            merge can happen (it carries the `upstream` remote)
-#   ranch/roundup/fork/   -> 525 real tracked files vendored into the ranch
+#   ranch/roundup/guidellm/   -> 525 real tracked files vendored into the ranch
 #                            monorepo, so a fresh clone gets a working benchmark
 #                            with no submodule and no second checkout
 #
@@ -51,7 +51,7 @@ note() { printf '  %s\n' "$*"; }
 die()  { bad "$*"; exit 1; }
 
 # Excluded from sync: venv junk, caches, and anything that would nest a repo.
-# fork/ must stay real tracked files — a .git inside it would silently turn
+# guidellm/ must stay real tracked files — a .git inside it would silently turn
 # the monorepo copy back into a submodule.
 RSYNC_EXCLUDES=(
   --exclude='.git/'
