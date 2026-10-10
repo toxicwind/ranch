@@ -1018,16 +1018,34 @@ class OracleLoop:
         (SPEC §2.2); winner pays max(second_highest, RESERVE). Reputation
         gates eligibility but never distorts the clearing price.
         """
-        def eligible(bidder):
+        # Profiles file is the source of truth: reload at clearing so a
+        # stake top-up (or slash) that landed after startup is honored.
+        # (Same pattern as the pre-lock reload below.)
+        self.profiles = mech.load_profiles()
+
+        def _ineligible_reason(bidder):
             prof = self.profiles.get(bidder.removeprefix("bidder-"))
             if not prof:
-                return False
-            return mech.class_allowed(a.task_class, self.rep.get(bidder, 0))
+                return "no-profile"
+            if not mech.class_allowed(a.task_class, self.rep.get(bidder, 0)):
+                return "class-gated"
+            # Collateral gate (2026-10-09, intake 1709): a bidder whose free
+            # stake cannot cover the assignment bond must not win. Clearing
+            # first and failing at lock_bond produced bid_accepted ->
+            # no_assign(stake-lock-failed), a market that looks alive but
+            # never assigns. Fail at clearing, not at locking.
+            if mech.free_stake(prof) < mech.BOND:
+                return "insufficient-stake"
+            return None
+
+        def eligible(bidder):
+            return _ineligible_reason(bidder) is None
 
         ranked = sorted(a.bids.items(),
                         key=lambda kv: (-kv[1]["amount"], kv[1]["mtime"]))
         reveal = [{"bidder": b, "amount": d["amount"], "nonce": d["nonce"],
                    "eligible": eligible(b),
+                   "ineligible_reason": _ineligible_reason(b),
                    "tags_matched": d["tags_matched"],
                    "kb_attestation": d.get("attestation")}
                   for b, d in ranked]
