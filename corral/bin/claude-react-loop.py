@@ -50,15 +50,20 @@ _WRITE_TOKENS = (
 _DESTRUCTIVE_TOKENS = ("delete", "remove", "destroy", "drop", "truncate", "kill")
 
 
-def run(cmd):
-    """Run command with NO timeout."""
-    return subprocess.run(cmd, capture_output=True, text=True)
+def run(cmd, timeout=60):
+    """Run command with timeout. Returns None on timeout."""
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return None
 
 
 def fetch_catalog():
     """Return live gatehouse tool catalog, or empty if not available."""
     try:
-        r = run([GATEHOUSE_BIN, "tools", "list", "-c", GATEHOUSE_CONFIG, "-o", "json"])
+        r = run([GATEHOUSE_BIN, "tools", "list", "-c", GATEHOUSE_CONFIG, "-o", "json"], timeout=10)
+        if r is None:
+            return []
         data = json.loads(r.stdout)
         if isinstance(data, dict):
             data = data.get("tools", [])
@@ -135,8 +140,8 @@ CRITICAL RULES:
 
 def call_model(prompt):
     """Call nim-shim-real, with fallback to direct API call."""
-    result = run([NIM_SHIM_REAL, prompt])
-    out = result.stdout.strip()
+    result = run([NIM_SHIM_REAL, prompt], timeout=120)
+    out = (result.stdout.strip() if result else "")
     if out:
         return out
     return direct_model_call(prompt)
