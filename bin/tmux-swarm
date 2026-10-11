@@ -1,0 +1,183 @@
+#!/usr/bin/env bun
+/**
+ * tmux-swarm — Universal multi-agent terminal orchestrator for the Sovereign Estate.
+ *
+ * Consolidates tau-tmux.sh, tmux-mcp, and swarm grid layouts into a single
+ * high-performance CLI with live tok telemetry and multi-socket discovery.
+ *
+ * Usage:
+ *   tmux-swarm ls                       List all sessions across all known sockets
+ *   tmux-swarm find [pat]               Search sessions and windows
+ *   tmux-swarm new <name> [-- agents]   Create session with optional multi-pane swarm
+ *   tmux-swarm grid <name> [N]          Tile session into N agent panes (default: 4)
+ *   tmux-swarm send <name>[:P] <cmd>    Send command to pane
+ *   tmux-swarm capture <name>[:P]       Dump pane text non-destructively
+ *   tmux-swarm tok <name>[:P]           Token telemetry on pane output via native tok
+ *   tmux-swarm kill <name>              Kill session
+ */
+import { execSync } from "node:child_process";
+import { parseArgs } from "node:util";
+
+const SOCKETS = ["", "-L tauhyperfix", "-L swarm", "-L estate"];
+
+export function sh(cmd: string, timeoutMs = 15000): string {
+  try {
+    return execSync(cmd, { encoding: "utf8", timeout: timeoutMs, stdio: ["ignore", "pipe", "pipe"] }).trim();
+  } catch (e: any) {
+    throw new Error(e?.stderr?.toString?.() || e?.message || String(e));
+  }
+}
+
+export function listSessions(): Array<{ socket: string; session: string; windows: string }> {
+  const list: Array<{ socket: string; session: string; windows: string }> = [];
+  for (const s of SOCKETS) {
+    try {
+      const out = sh(`tmux ${s} list-sessions -F '#{session_name}:#{session_windows}'`);
+      for (const line of out.split("\n")) {
+        const parts = line.split(":");
+        if (parts[0]) {
+          list.push({ socket: s || "default", session: parts[0], windows: parts[1] || "1" });
+        }
+      }
+    } catch {}
+  }
+  return list;
+}
+
+export function resolveSessionSocket(name: string): string {
+  for (const s of SOCKETS) {
+    try {
+      sh(`tmux ${s} has-session -t ${name}`);
+      return s;
+    } catch {}
+  }
+  return "";
+}
+
+export function createGrid(name: string, count = 4, layout = "tiled", cmd = "bash"): void {
+  const s = resolveSessionSocket(name);
+  if (s) {
+    sh(`tmux ${s} kill-session -t ${name}`);
+  }
+
+  // Create session with first window
+  sh(`tmux new-session -d -s ${name} -x 200 -y 50 "${cmd}"`);
+  for (let i = 1; i < count; i++) {
+    sh(`tmux split-window -t ${name} "${cmd}"`);
+    sh(`tmux select-layout -t ${name} ${layout}`);
+  }
+}
+
+export function capturePane(target: string, lines = 50): string {
+  let [session, pane] = target.split(":");
+  pane = pane || "0";
+  const s = resolveSessionSocket(session);
+  return sh(`tmux ${s} capture-pane -p -t ${session}:0.${pane} -S -${lines}`);
+}
+
+export function paneTokens(target: string): { target: string; tokens: number; bytes: number } {
+  const text = capturePane(target, 100);
+  let tokens = 0;
+  try {
+    const tokOut = execSync(`tok -e o200k_harmony "${text.replace(/"/g, '\\"')}"`, { encoding: "utf8" }).trim();
+    tokens = parseInt(tokOut, 10) || 0;
+  } catch {
+    tokens = text.split(/\s+/).filter(Boolean).length;
+  }
+  return { target, tokens, bytes: Buffer.byteLength(text, "utf8") };
+}
+
+export function sendCommand(target: string, command: string): void {
+  let [session, pane] = target.split(":");
+  pane = pane || "0";
+  const s = resolveSessionSocket(session);
+  sh(`tmux ${s} send-keys -t ${session}:0.${pane} "${command.replace(/"/g, '\\"')}" C-m`);
+}
+
+export function killSession(name: string): boolean {
+  const s = resolveSessionSocket(name);
+  if (s !== undefined) {
+    try {
+      sh(`tmux ${s} kill-session -t ${name}`);
+      return true;
+    } catch {}
+  }
+  return false;
+}
+
+if (import.meta.main) {
+  const args = Bun.argv.slice(2);
+  const cmd = args[0] || "ls";
+
+  switch (cmd) {
+    case "ls": {
+      const sessions = listSessions();
+      if (sessions.length === 0) {
+        console.log("No active tmux sessions across known sockets.");
+      } else {
+        for (const s of sessions) {
+          console.log(`[${s.socket}] ${s.session} (${s.windows} windows)`);
+        }
+      }
+      break;
+    }
+    case "find": {
+      const pat = args[1] || "";
+      const sessions = listSessions().filter(s => s.session.includes(pat));
+      for (const s of sessions) {
+        console.log(`[${s.socket}] ${s.session}`);
+      }
+      break;
+    }
+    case "grid": {
+      const name = args[1] || "swarm";
+      const count = parseInt(args[2] || "4", 10);
+      createGrid(name, count);
+      console.log(`[tmux-swarm] Created grid session '${name}' with ${count} agent panes`);
+      break;
+    }
+    case "send": {
+      const target = args[1];
+      const runCmd = args.slice(2).join(" ");
+      if (!target || !runCmd) {
+        console.error("Usage: tmux-swarm send <session[:pane]> <command>");
+        process.exit(1);
+      }
+      sendCommand(target, runCmd);
+      console.log(`[tmux-swarm] Sent to ${target}: ${runCmd}`);
+      break;
+    }
+    case "capture": {
+      const target = args[1];
+      if (!target) {
+        console.error("Usage: tmux-swarm capture <session[:pane]>");
+        process.exit(1);
+      }
+      console.log(capturePane(target));
+      break;
+    }
+    case "tok": {
+      const target = args[1];
+      if (!target) {
+        console.error("Usage: tmux-swarm tok <session[:pane]>");
+        process.exit(1);
+      }
+      const tel = paneTokens(target);
+      console.log(`[tmux-swarm] Telemetry ${tel.target}: ${tel.tokens} tokens, ${tel.bytes} bytes`);
+      break;
+    }
+    case "kill": {
+      const name = args[1];
+      if (!name) {
+        console.error("Usage: tmux-swarm kill <session>");
+        process.exit(1);
+      }
+      const ok = killSession(name);
+      console.log(`[tmux-swarm] Kill ${name}: ${ok}`);
+      break;
+    }
+    default:
+      console.log(`Universal tmux-swarm — Commands: ls, find, grid, send, capture, tok, kill`);
+      break;
+  }
+}
