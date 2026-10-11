@@ -24,6 +24,6 @@
     "@tau/tau-agent": ">=18.0.0"
   },
   "devDependencies": {
-    "@tau/tau-agent": "18.3.0"
+    "@tau/tau-agent": "npm:@oh-my-pi/pi-coding-agent@18.3.0"
   }
 }
