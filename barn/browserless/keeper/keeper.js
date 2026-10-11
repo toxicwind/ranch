@@ -119,21 +119,40 @@ async function launchOnce() {
       "--disable-dev-shm-usage",
       "--no-first-run",
       "--no-default-browser-check",
+      "--window-position=0,0",
+      "--window-size=1600,900",
+      "--start-maximized",
     ],
     ignoreDefaultArgs: ["--enable-automation"],
     viewport: { width: 1600, height: 900 },
     locale: "en-US",
   });
   activeCtx = ctx;
+
+  // Window bounds enforcer: keep outer window holder within 1600x900 resolution
+  try {
+    const { execSync } = require("child_process");
+    execSync("xdotool search --onlyvisible --class chromium windowsize 1600 900 windowmove 0 0", {
+      env: Object.assign({}, process.env, { DISPLAY: ":99" }),
+      timeout: 3000,
+    });
+  } catch (_) {}
   await ctx.addInitScript(() => {
     Object.defineProperty(navigator, "webdriver", { get: () => undefined });
   });
   writeStatus(baseStatus("up"));
   log("chromium up, CDP on 127.0.0.1:" + CDP_PORT);
 
-  // Auto-restore cookies from backup vault on startup so sessions never vanish
+  // Auto-restore cookies from Secretsmith Cookie-Vault on startup so sessions never vanish
   const backupCookieFile = "/home/toxic/.browserless/cookies-backup.json";
   try {
+    // Sync live Firefox cookies into vault via Secretsmith before restoring
+    try {
+      const { execSync } = require("child_process");
+      execSync("secretsmith cookie-vault sync", { timeout: 10000 });
+      log("secretsmith cookie-vault synced Firefox credentials");
+    } catch (_) {}
+
     if (fs.existsSync(backupCookieFile)) {
       const rawBackup = JSON.parse(fs.readFileSync(backupCookieFile, "utf8"));
       if (Array.isArray(rawBackup) && rawBackup.length > 0) {

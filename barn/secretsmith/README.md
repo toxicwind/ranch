@@ -64,6 +64,15 @@ secretsmith chromium-logins              # decrypt ~/.config/chromium/Default/Lo
 secretsmith chromium-logins --profile-dir /path/to/profile --show
 secretsmith chromium-cookies
 
+# Bitwarden integration (first-class vault resolution)
+secretsmith bw-status                      # check Bitwarden CLI vault status
+secretsmith bw-get password github         # retrieve password (Secret Service fallback)
+secretsmith --json bw-status
+
+# Cookie Vault integration (Firefox & Keeper session synchronization)
+secretsmith cookie-vault sync              # sync live Firefox cookies into keeper vault
+secretsmith cookie-vault status            # report stored cookies & domains
+
 # JSON mode for everything (scriptable)
 secretsmith --json search --schema chromium
 ```

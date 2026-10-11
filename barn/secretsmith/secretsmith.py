@@ -748,6 +748,74 @@ def cmd_chromium_cookies(svc, a, registry, as_json):
     return 0
 
 
+def cmd_bitwarden_status(svc, a, registry, as_json):
+    """Query Bitwarden CLI status."""
+    import subprocess
+    try:
+        res = subprocess.run(["bw", "status"], capture_output=True, text=True, timeout=5)
+        data = json.loads(res.stdout) if res.stdout.strip() else {"status": "unreachable"}
+    except Exception as e:
+        data = {"status": "error", "error": str(e)}
+    if as_json:
+        print(json.dumps(data, indent=2))
+    else:
+        print("Bitwarden status: %s (server: %s)" % (data.get("status"), data.get("serverUrl") or "default"))
+    return 0
+
+
+def cmd_bitwarden_get(svc, a, registry, as_json):
+    """Retrieve an item from Bitwarden CLI, falling back to Secret Service."""
+    import subprocess
+    session = os.environ.get("BW_SESSION")
+    cmd = ["bw", "get", a.item_type, a.id_or_name]
+    if session:
+        cmd.extend(["--session", session])
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+        if res.returncode == 0:
+            if as_json:
+                print(res.stdout)
+            else:
+                out = res.stdout.strip()
+                print(out if a.show else redact(len(out)))
+            return 0
+        else:
+            err = res.stderr.strip()
+    except Exception as e:
+        err = str(e)
+
+    # Fallback to Secret Service
+    items = svc.search({"name": a.id_or_name})
+    if not items:
+        print("secretsmith: bitwarden/secrets error: %s" % err, file=sys.stderr)
+        return 1
+    sec = items[0].get_secret()
+    val = sec.decode("utf-8", "replace") if sec else ""
+    if as_json:
+        print(json.dumps({"source": "secretservice", "item": a.id_or_name, "value": val if a.show else redact(len(val))}))
+    else:
+        print(val if a.show else redact(len(val)))
+    return 0
+
+
+def cmd_cookie_vault_sync(svc, a, registry, as_json):
+    """Synchronize Firefox and Keeper cookies via cookie-vault utility."""
+    import subprocess
+    cookie_vault_bin = "/home/toxic/estate/ranch/barn/browserless/bin/cookie-vault.ts"
+    subcmd = a.vault_action or "sync"
+    try:
+        res = subprocess.run(["bun", cookie_vault_bin, subcmd], capture_output=True, text=True, timeout=15)
+        out = res.stdout.strip()
+        if as_json:
+            print(json.dumps({"action": subcmd, "exit": res.returncode, "output": out}))
+        else:
+            print(out)
+        return res.returncode
+    except Exception as e:
+        print("secretsmith: cookie-vault error: %s" % e, file=sys.stderr)
+        return 1
+
+
 def build_parser():
     p = argparse.ArgumentParser(prog="secretsmith",
                                 description="maximal freedesktop Secret Service CLI")
@@ -815,6 +883,20 @@ def build_parser():
     cc2 = sub.add_parser("chromium-cookies", help="decrypt Chromium Cookies")
     cc2.add_argument("--profile-dir", default="")
     cc2.set_defaults(func=cmd_chromium_cookies)
+
+    # First-class Bitwarden integration
+    bw_p = sub.add_parser("bw-status", help="check Bitwarden vault status")
+    bw_p.set_defaults(func=cmd_bitwarden_status)
+
+    bw_g = sub.add_parser("bw-get", help="retrieve Bitwarden secret (password/item/username) with Secret Service fallback")
+    bw_g.add_argument("item_type", choices=["password", "username", "item", "totp", "notes"])
+    bw_g.add_argument("id_or_name", help="item name or ID")
+    bw_g.set_defaults(func=cmd_bitwarden_get)
+
+    # First-class Cookie Vault integration
+    cv = sub.add_parser("cookie-vault", help="cookie-vault sync/grab/restore integration")
+    cv.add_argument("vault_action", nargs="?", default="sync", choices=["sync", "grab-firefox", "grab-keeper", "restore-keeper", "status"])
+    cv.set_defaults(func=cmd_cookie_vault_sync)
 
     return p
 
