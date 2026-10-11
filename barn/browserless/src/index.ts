@@ -424,7 +424,9 @@ class BrowserlessMCPServer {
                 const config = BrowserlessConfigSchema.parse(args);
                 this.client = new BrowserlessClient(config);
               }
-            } catch {}
+            } catch {
+              // Invalid token/config: fall through to keeper-direct persistent mode.
+            }
             const status = await this.persistent.status();
             return {
               content: [
