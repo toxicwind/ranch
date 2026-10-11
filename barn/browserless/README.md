@@ -24,10 +24,10 @@ vendor browserless.io v2.49.0 app (/home/toxic/.browserless/app, stock, untouche
 ```
 
 The MCP server is **stdio only** — no port, no daemon. MCP clients spawn
-`./mcp.sh` per session, and it **refuses to start** if the keeper CDP is
+`./mcp.sh` per session (powered by **Bun** runtime), and it **refuses to start** if the keeper CDP is
 down (fail loud, never half-working; `BROWSER_MCP_ALLOW_NO_KEEPER=1`
 bypasses for maintenance). `persistent_*` is the first-class path
-(headed, logged-in, state survives across tasks); the `:25130` HTTP
+(headed, logged-in, authenticated with synced Firefox cookies, state survives across tasks); the `:25130` HTTP
 tools are the legacy lane and several are honestly documented as
 broken against v2.49.0 in their tool descriptions.
 
