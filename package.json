@@ -1,5 +1,5 @@
 {
-  "description": "Ranch monorepo \u2014 herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), corral (TS), drover (TS), roost (TS), and shared Bun/TS packages. Estate owns the mise build cache.",
+  "description": "Ranch monorepo — herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), corral (TS), drover (TS), roost (TS), and shared Bun/TS packages. Estate owns the mise build cache.",
   "name": "ranch",
   "private": true,
   "scripts": {
@@ -28,10 +28,7 @@
       "mesh/catalog",
       "mesh/keypool",
       "mesh/proxy/cuttinggate",
-      "mesh/router/herd",
-      "tau",
-      "tau/packages/*",
-      "tau-extensions"
+      "mesh/router/herd"
     ],
     "catalog": {
       "@babel/generator": "^7.29.8",
