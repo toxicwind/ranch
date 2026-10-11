@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import type { ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import type { ExtensionContext } from "tau";
 import type { RouterState, ModelCostEntry } from "../state";
 import type { RouterConfig } from "../types";
 import { ROUTER_TIERS } from "../config";

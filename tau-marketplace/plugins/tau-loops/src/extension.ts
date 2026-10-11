@@ -10,7 +10,7 @@
  * deliberately do not run on their own — an audit that fires on every session
  * open is the same mistake as auto-probing every free model on startup.
  */
-import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
+import type { ExtensionAPI } from "tau";
 import { censusConsumers, diffTrees, formatCensus, formatDiff, resolveDir } from "./dir-diff.ts";
 import { describeRun, formatReport, resolveApiKey, resolveConfigPath, runAudit } from "./model-audit.ts";
 import { formatProbeRun, resolveOmpPath, runProbe } from "./probe-runner.ts";

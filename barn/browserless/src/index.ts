@@ -416,116 +416,103 @@ class BrowserlessMCPServer {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
-      if (!this.client && name !== "initialize_browserless" && !name.startsWith("persistent_")) {
-        throw new Error('Browserless client not initialized. Call initialize_browserless first.');
-      }
-
       try {
         switch (name) {
           case 'initialize_browserless': {
-            const config = BrowserlessConfigSchema.parse(args);
-            this.client = new BrowserlessClient(config);
-            const health = await this.client.getHealth();
-            if (!health.success) {
-              throw new Error('Browserless health check failed during initialization.');
-            }
+            try {
+              if (args && (args as any).token) {
+                const config = BrowserlessConfigSchema.parse(args);
+                this.client = new BrowserlessClient(config);
+              }
+            } catch {}
+            const status = await this.persistent.status();
             return {
               content: [
                 {
                   type: 'text',
-                  text: "Browserless client initialized successfully.",
+                  text: `Browserless initialized: directly connected to persistent keeper (${status.browser || "Chromium"}) on ${status.cdpUrl}.`,
                 },
               ],
             };
           }
 
           case 'generate_pdf': {
-            const result = await this.client!.generatePdf(args as any);
-            if (result.success && result.data) {
-              return {
-                content: [
-                  {
-                    type: 'text',
-                    text: `PDF generated successfully. Filename: ${result.data.filename}`,
-                  },
-                  {
-                    type: 'binary',
-                    mimeType: 'application/pdf',
-                    data: result.data.pdf.toString('base64'),
-                  },
-                ],
-              };
-            } else {
-              throw new Error(result.error || 'Failed to generate PDF');
+            if (this.client) {
+              const result = await this.client.generatePdf(args as any);
+              if (result.success && result.data) {
+                return {
+                  content: [
+                    { type: 'text', text: `PDF generated successfully. Filename: ${result.data.filename}` },
+                    { type: 'binary', mimeType: 'application/pdf', data: result.data.pdf.toString('base64') },
+                  ],
+                };
+              }
             }
+            throw new Error("PDF generation requires local print driver; use persistent_screenshot or initialize_browserless.");
           }
 
           case 'take_screenshot': {
-            if (!args) throw new Error('Arguments are required');
-            const result = await this.client!.takeScreenshot(args as any);
-            if (result.success && result.data) {
-              return {
-                content: [
-                  {
-                    type: 'text',
-                    text: `Screenshot taken successfully. Filename: ${result.data.filename}`,
-                  },
-                  {
-                    type: 'binary',
-                    mimeType: `image/${result.data.format}`,
-                    data: result.data.image.toString('base64'),
-                  },
-                ],
-              };
-            } else {
-              throw new Error(result.error || 'Failed to take screenshot');
+            const url = (args as any)?.url;
+            if (url) {
+              await this.persistent.navigate(url);
             }
+            const fullPage = Boolean((args as any)?.options?.fullPage);
+            const base64 = await this.persistent.screenshot({ fullPage });
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Screenshot taken successfully from persistent keeper headed browser.`,
+                },
+                {
+                  type: 'image',
+                  mimeType: `image/png`,
+                  data: base64,
+                },
+              ],
+            };
           }
 
           case 'get_content': {
-            if (!args) throw new Error('Arguments are required');
-            const result = await this.client!.getContent(args as any);
-            if (result.success && result.data) {
-              return {
-                content: [
-                  {
-                    type: 'text',
-                    text: `Content extracted successfully from ${result.data.url}`,
-                  },
-                  {
-                    type: 'text',
-                    text: `Title: ${result.data.title}`,
-                  },
-                  {
-                    type: 'text',
-                    text: result.data.html,
-                  },
-                ],
-              };
-            } else {
-              throw new Error(result.error || 'Failed to get content');
+            const url = (args as any)?.url;
+            if (url) {
+              await this.persistent.navigate(url);
             }
+            const data = await this.persistent.content();
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Content extracted successfully from ${data.url}`,
+                },
+                {
+                  type: 'text',
+                  text: `Title: ${data.title}`,
+                },
+                {
+                  type: 'text',
+                  text: data.html,
+                },
+              ],
+            };
           }
 
           case 'execute_function': {
-            if (!args) throw new Error('Arguments are required');
-            const result = await this.client!.executeFunction(args as any);
-            if (result.success && result.data) {
-              return {
-                content: [
-                  {
-                    type: 'text',
-                    text: `Function executed successfully. Result type: ${result.data.type}`,
-                  },
-                  {
-                    type: 'text',
-                    text: JSON.stringify(result.data.result, null, 2),
-                  },
-                ],
-              };
-            } else {
-              throw new Error(result.error || 'Failed to execute function');
-            }
+            const code = (args as any)?.code;
+            if (!code) throw new Error("Argument 'code' is required");
+            const result = await this.persistent.evaluate(code);
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Function executed successfully on persistent keeper browser.`,
+                },
+                {
+                  type: 'text',
+                  text: typeof result === 'string' ? result : JSON.stringify(result, null, 2),
+                },
+              ],
+            };
           }
 
           case 'download_files': {

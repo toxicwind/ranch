@@ -67,6 +67,19 @@ function goAliasMap(m: Record<string, ModelAlias>): string {
     .join("\n")}\n}`;
 }
 
+/** Ordered key pool for a provider. keyEnv is first; keyEnvAlt may hold a
+ *  comma-separated list of additional vars (the "N keys" model — the old
+ *  two-key cap was an artifact of keyEnvAlt being a single scalar). */
+function keyEnvsOf(d: { keyEnv?: string; keyEnvAlt?: string }): string[] {
+  const out: string[] = [];
+  if (d.keyEnv) out.push(d.keyEnv);
+  for (const v of (d.keyEnvAlt ?? "").split(",")) {
+    const t = v.trim();
+    if (t) out.push(t);
+  }
+  return out;
+}
+
 /** Canonical JSON artifact for non-TS consumers (Python research scripts). */
 export function buildProvidersJson(input: CodegenInput): string {
   const doc = {
@@ -81,6 +94,7 @@ export function buildProvidersJson(input: CodegenInput): string {
       baseUrl: d.baseUrl,
       keyEnv: d.keyEnv,
       ...(d.keyEnvAlt ? { keyEnvAlt: d.keyEnvAlt } : {}),
+      keyEnvs: keyEnvsOf(d),
       adapter: d.adapter,
       ...(d.modelsPath ? { modelsPath: d.modelsPath } : {}),
       ...(d.auth ? { auth: d.auth } : {}),
@@ -249,7 +263,11 @@ export function buildProvidersRust(input: CodegenInput): string {
         `display_name: ${jsonEscaped(d.displayName ?? d.name)},`,
         `base_url: ${jsonEscaped(d.baseUrl)},`,
         `key_env: ${jsonEscaped(d.keyEnv)},`,
-        `key_env_alt: ${jsonEscaped(d.keyEnvAlt ?? "")},`,
+        // The Rust flock-proxy consumer reads this as one scalar var name.
+        // Emit only the first pool member so the field stays valid while the
+        // Rust side is being retired in favour of the Bun/TS flocksync port,
+        // which reads the full `keyEnvs` pool.
+        `key_env_alt: ${jsonEscaped((d.keyEnvAlt ?? "").split(",")[0].trim())},`,
         `adapter: ${jsonEscaped(d.adapter)},`,
         `auth: ${jsonEscaped(d.auth ?? "")},`,
         `header_name: ${jsonEscaped(d.headerName ?? "")},`,
@@ -352,8 +370,9 @@ export function buildInstalledTauYaml(
   const defs = input.defs.filter((d) => {
     if (d.enabled === false || d.routerLocal) return false;
     if (d.name === "flock" || d.name === "herd" || d.auth === "none") return true;
-    if (!d.keyEnv && !d.keyEnvAlt) return true;
-    return present(d.keyEnv) || present(d.keyEnvAlt);
+    const pool = keyEnvsOf(d);
+    if (pool.length === 0) return true;
+    return pool.some(present);
   });
   return buildProvidersTauYaml({ ...input, defs });
 }

@@ -1,5 +1,5 @@
 import type { SelectListTheme, SymbolTheme } from "@oh-my-pi/pi-tui";
-import type { Theme } from "@oh-my-pi/pi-coding-agent";
+import type { Theme } from "tau";
 
 /** Build a SelectListTheme from a Theme instance (avoids relying on uninitialized module global). */
 export function buildSelectListTheme(theme: Theme): SelectListTheme {

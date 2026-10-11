@@ -1,5 +1,5 @@
-import type { ShimmerPalette } from "@oh-my-pi/pi-coding-agent/modes/theme/shimmer";
-import type { ThemeColor } from "@oh-my-pi/pi-coding-agent";
+import type { ShimmerPalette } from "tau/modes/theme/shimmer";
+import type { ThemeColor } from "tau";
 import type { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
 
 // ─── Model name shortening ────────────────────────────────────────────────────

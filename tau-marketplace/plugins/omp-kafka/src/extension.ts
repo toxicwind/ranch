@@ -15,7 +15,7 @@
  * group offsets flush before the process exits.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "tau";
 import { z } from "zod/v4";
 import { type LoadResult, loadConfig } from "./config.ts";
 import { type ConsumerStatus, ManagedConsumer } from "./consumer.ts";

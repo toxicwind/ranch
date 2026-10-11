@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "tau";
 import type { RouterState } from "../state";
 import { profileNames, ROUTER_PIN_VALUES } from "../config";
 import { handleStatus } from "./status";

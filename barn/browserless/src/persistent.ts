@@ -551,4 +551,15 @@ export class PersistentBrowser {
       throw new KeeperError("EVAL_FAILED", `evaluate(tab ${index}) failed: ${errMsg(e)}`, e);
     }
   }
+
+  async content(opts: { tab?: number } = {}): Promise<{ html: string; title: string; url: string }> {
+    const { page: p, index } = await this.resolve(opts.tab);
+    try {
+      const html = await withTimeout(p.content(), EVAL_TIMEOUT_MS, `content(tab ${index})`);
+      const title = await withTimeout(p.title(), 5000, `title(tab ${index})`).catch(() => "");
+      return { html, title, url: p.url() };
+    } catch (e) {
+      throw new KeeperError("EVAL_FAILED", `content(tab ${index}) failed: ${errMsg(e)}`, e);
+    }
+  }
 }

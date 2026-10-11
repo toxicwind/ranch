@@ -31,7 +31,7 @@ import type {
 	ExtensionContext,
 	WriteToolCallEvent,
 	WriteToolResultEvent,
-} from "@oh-my-pi/pi-coding-agent";
+} from "tau";
 import {
 	type RepoProbe,
 	commitPaths,

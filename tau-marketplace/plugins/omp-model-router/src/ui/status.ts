@@ -1,7 +1,7 @@
-import type { ExtensionContext, Theme } from "@oh-my-pi/pi-coding-agent";
+import type { ExtensionContext, Theme } from "tau";
 import type { TUI } from "@oh-my-pi/pi-tui";
-import type { ShimmerPalette } from "@oh-my-pi/pi-coding-agent/modes/theme/shimmer";
-import { shimmerSegments } from "@oh-my-pi/pi-coding-agent/modes/theme/shimmer";
+import type { ShimmerPalette } from "tau/modes/theme/shimmer";
+import { shimmerSegments } from "tau/modes/theme/shimmer";
 import type { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
 import type {
 	RoutingDecision,

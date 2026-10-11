@@ -10,7 +10,7 @@
  * See: https://github.com/rtk-ai/rtk
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "tau";
 import type { RouterState } from "./state";
 
 type ToolCallEvent = {

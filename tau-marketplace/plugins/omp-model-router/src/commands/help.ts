@@ -1,4 +1,4 @@
-import type { ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import type { ExtensionContext } from "tau";
 
 export const handleHelp = async (
 	_args: string[],

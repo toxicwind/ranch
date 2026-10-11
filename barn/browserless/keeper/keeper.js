@@ -131,12 +131,39 @@ async function launchOnce() {
   writeStatus(baseStatus("up"));
   log("chromium up, CDP on 127.0.0.1:" + CDP_PORT);
 
+  // Auto-restore cookies from backup vault on startup so sessions never vanish
+  const backupCookieFile = "/home/toxic/.browserless/cookies-backup.json";
+  try {
+    if (fs.existsSync(backupCookieFile)) {
+      const rawBackup = JSON.parse(fs.readFileSync(backupCookieFile, "utf8"));
+      if (Array.isArray(rawBackup) && rawBackup.length > 0) {
+        await ctx.addCookies(rawBackup);
+        log("restored " + rawBackup.length + " session cookies from vault on launch");
+      }
+    }
+  } catch (ce) {
+    log("cookie restore failed on startup:", ce.message);
+  }
+
   let checks = 0;
   for (;;) {
     await new Promise((r) => setTimeout(r, 10000));
     checks++;
     if (!(await cdpAlive())) { log("CDP unresponsive, recycling browser"); break; }
     lastHealthyAt = Date.now();
+
+    // Auto-save cookies every 60 seconds so new logins and tokens are perpetually saved
+    if (checks % 6 === 0) {
+      try {
+        const liveCookies = await ctx.cookies();
+        if (liveCookies && liveCookies.length > 0) {
+          fs.writeFileSync(backupCookieFile, JSON.stringify(liveCookies, null, 2));
+        }
+      } catch (se) {
+        /* non-fatal background cookie backup */
+      }
+    }
+
     // Bounded observability: one heartbeat per ~5min instead of silence.
     if (checks % 30 === 0) {
       log("heartbeat: chromium healthy", {

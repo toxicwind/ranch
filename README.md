@@ -33,6 +33,12 @@ Env: introduce `ARROYO_*`, keep `YOTE_*` aliases until cutover. See `arroyo/MOVE
 
 - tau via chute (or `~/tau`)
 
+## Submodules & Coverage Tooling
+
+- `estate-scripts/` — consolidated operational and CI scripts repository (`@estate/scripts`), tested via Bun.
+- `tools/c8/` — borrowed V8 native coverage orchestration engine submodule.
+- `bin/estate-coverage-runner.ts` — estate-wide accelerated parallel test & coverage orchestrator across packages.
+
 ## Do not
 
 - Resurrect `tack/` (superseded by roost)

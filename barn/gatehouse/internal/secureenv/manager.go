@@ -86,6 +86,23 @@ func DefaultEnvConfig() *EnvConfig {
 		)
 	}
 
+	// Display / desktop-session variables (Linux only). Upstreams that drive
+	// the local desktop (computer-use, browser automation, Hyprland IPC) fail
+	// with "no display server" when the daemon's sanitized spawn env drops
+	// variables it inherited from the user session. These are session routing
+	// coordinates, not secrets, so forwarding them is safe; they are meaningless
+	// outside a graphical Linux session, so they stay Linux-only.
+	if runtime.GOOS == "linux" {
+		allowedVars = append(allowedVars,
+			"DISPLAY",                     // X11 display (Xwayland)
+			"WAYLAND_DISPLAY",             // Wayland compositor socket
+			"XDG_SESSION_TYPE",            // x11 | wayland | tty
+			"XDG_SESSION_DESKTOP",         // desktop session name
+			"XDG_CURRENT_DESKTOP",         // current desktop environment
+			"HYPRLAND_INSTANCE_SIGNATURE", // Hyprland IPC handshake
+		)
+	}
+
 	// Add locale-related variables
 	localeVars := []string{
 		"LC_ALL", "LC_CTYPE", "LC_NUMERIC", "LC_TIME", "LC_COLLATE",

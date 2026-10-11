@@ -1,5 +1,5 @@
 import type { SessionCalibration } from "../calibration/types";
-import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "tau";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
@@ -192,7 +192,7 @@ export class RouterState {
 	}
 	private get embargoDir(): string {
 		try {
-			const { getAgentDir } = require("@oh-my-pi/pi-coding-agent");
+			const { getAgentDir } = require("tau");
 			return getAgentDir();
 		} catch {
 			return join(homedir(), ".omp", "agent");

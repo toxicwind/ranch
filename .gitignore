@@ -78,6 +78,13 @@ __pycache__/
 /omp-semantic-policy/
 /barn/woodpecker/
 /gear/
+/kitty-mcp-server/
+/wezterm/
+/wezterm-agent-mcp/
+
+# Runtime session state & scratch dumps
+yote/sessions/
+*.b64
 
 # `corral` and `paddock` are ALSO nested checkouts, but unlike the
 # four paths above they are tracked on purpose: each is a gitlink (mode

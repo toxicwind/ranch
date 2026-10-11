@@ -34,7 +34,7 @@
 import type {
 	EditToolDetails,
 	EditToolPerFileResult,
-} from "@oh-my-pi/pi-coding-agent";
+} from "tau";
 
 /** Lightweight handle to the parts of a diff we care about. */
 export interface DiffSummary {

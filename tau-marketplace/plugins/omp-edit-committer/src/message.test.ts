@@ -10,7 +10,7 @@ import { describe, expect, test } from "bun:test";
 import type {
 	EditToolDetails,
 	EditToolPerFileResult,
-} from "@oh-my-pi/pi-coding-agent";
+} from "tau";
 import {
 	type DiffSummary,
 	buildMessage,

@@ -7,11 +7,11 @@
  * a stat row, and a `hunk` hint pointing reviewers to modem-dev/hunk.
  *
  * We compose a `Container` of `Text` rows because those are the only
- * public TUI primitives re-exported from `@oh-my-pi/pi-coding-agent`.
+ * public TUI primitives re-exported from `tau`.
  * Anything fancier (Box, border, theme-aware padding) is internal.
  */
-import { Container, Text } from "@oh-my-pi/pi-coding-agent";
-import type { MessageRenderOptions, Theme } from "@oh-my-pi/pi-coding-agent";
+import { Container, Text } from "tau";
+import type { MessageRenderOptions, Theme } from "tau";
 
 /** Payload the extension stores via `pi.appendEntry("edit-committer", ...)`. */
 export interface CommitRecord {
