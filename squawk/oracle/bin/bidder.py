@@ -63,6 +63,10 @@ OUT_CAP = 8000
 ERR_CAP = 2000
 PARTIAL_CAP = 65536  # bound for the on-disk partial-output evidence file
 RALPH_POST_BUFFER_S = 30.0  # time to preserve evidence + post result
+CORRAL_CLI = Path("/home/toxic/estate/ranch/corral/src/cli/index.ts")
+CORRAL_CAP_S = 1740  # same class as super-ralph: agentic runs are slow
+CORRAL_BASE_URL = os.environ.get("CORRAL_BASE_URL",
+                                "http://127.0.0.1:25104/v1")
                              # before the oracle's exec deadline
 
 
@@ -759,6 +763,62 @@ class Bidder:
             encoding="utf-8")
         return success, out, err, dur
 
+    def _run_corral(self, task, workdir, env, timeout_ms, t0):
+        """Execute an agentic task via the corral CLI (market primary path).
+
+        Corral is the ticket-driven agent orchestrator (Smithers); the task
+        payload IS the ticket prompt. Model calls route through the claude
+        NIM shim (CORRAL_BASE_URL, default :25104 sovereign router --
+        verified live 2026-10-12). Headless stdout carries the final reply.
+        On corral failure the caller falls back to super-ralph -- a dead
+        backend must never no-result a task another backend could run.
+        Returns (success, out, err, dur_ms).
+        """
+        tid = task["task_id"]
+        prompt = task.get("payload", "") or ""
+        (workdir / "prompt.md").write_text(prompt, encoding="utf-8")
+        if not CORRAL_CLI.exists():
+            dur = (time.time() - t0) * 1000
+            return (False, "",
+                    "corral CLI not found: %s" % CORRAL_CLI, dur)
+        cenv = dict(env)
+        cenv["NIM_BASE_URL"] = CORRAL_BASE_URL
+        cenv["ANTHROPIC_BASE_URL"] = CORRAL_BASE_URL
+        cenv["SOVEREIGN_ROUTER_URL"] = CORRAL_BASE_URL
+        # 2026-10-12 (oracle-repair): the oracle's exec deadline is
+        # assign_ts + timeout_ms/1000, but the bidder starts the
+        # subprocess after assignment. Leave room to preserve evidence
+        # and post the partial result instead of racing the deadline.
+        ceiling = max(10.0, min(timeout_ms / 1000.0, CORRAL_CAP_S)
+                      - RALPH_POST_BUFFER_S)
+        self.say("%s invoking corral on %s (ceiling %.0fs)."
+                 % (self.name, tid, ceiling))
+        try:
+            p = subprocess.run(
+                ["bun", str(CORRAL_CLI), "--cwd", str(workdir),
+                 "--skip-questions", str(workdir / "prompt.md")],
+                cwd=str(workdir), capture_output=True, text=True,
+                timeout=ceiling, env=cenv)
+            dur = (time.time() - t0) * 1000
+            out = (p.stdout or "")[-OUT_CAP:]
+            err = (p.stderr or "")[-ERR_CAP:]
+            success = p.returncode == 0 and bool((p.stdout or "").strip())
+            if not success and not err.strip():
+                err = "corral exited %d with empty output" % p.returncode
+        except subprocess.TimeoutExpired as te:
+            dur = (time.time() - t0) * 1000
+            out = ((te.stdout or "") if isinstance(te.stdout, str) else "")
+            out = out[-OUT_CAP:]
+            err = "corral timeout after %.0fs" % ceiling
+            success = False
+        (workdir / "corral-invocation.txt").write_text(
+            "cli: %s\nbase_url: %s\nceiling_s: %.0f\n"
+            "exit: %s\nduration_ms: %.1f\n"
+            % (CORRAL_CLI, CORRAL_BASE_URL, ceiling,
+               p.returncode if "p" in dir() else "timeout", dur),
+            encoding="utf-8")
+        return success, out, err, dur
+
     def execute_task(self, task):
         tid = task["task_id"]
         if tid in self.executed:
@@ -803,7 +863,17 @@ class Bidder:
         t0 = time.time()
         success, out, err = False, "", ""
         try:
-            if task.get("exec_mode") == "super-ralph":
+            if task.get("exec_mode") == "corral":
+                # Primary agentic path (2026-10-12): corral ticket run,
+                # with automatic fallback to super-ralph on corral failure.
+                success, out, err, dur = self._run_corral(
+                    task, workdir, env, timeout_ms, t0)
+                if not success:
+                    self.say("%s corral failed on %s (%s); falling back "
+                             "to super-ralph." % (self.name, tid, err[:120]))
+                    success, out, err, dur = self._run_super_ralph(
+                        task, workdir, env, timeout_ms, t0)
+            elif task.get("exec_mode") == "super-ralph":
                 # Agentic execution via the real Super Ralph CLI.
                 # Returns the same (success, out, err, dur) tuple
                 # the python path computes below; the shared tail

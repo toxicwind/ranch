@@ -118,9 +118,10 @@ DEBATE_HARD_MS = 4 * 3600 * 1000   # hard settle (always > soft)
 DEBATE_QUORUM = 2                 # replies needed for a quorum settle
 KB_SHA_RE = re.compile(r"^[0-9a-f]{40}$")  # knowledgebase commit SHA
 
-# Agentic execution (2026-09-21, oracle-repair): intake TASK/RESEARCH/DIRECT
-# requests become Super Ralph prompts (exec_mode="super-ralph") executed by
-# the winning bidder. The oracle never executes payloads; it only verifies.
+# Agentic execution (2026-10-12, oracle-repair): intake TASK/RESEARCH/DIRECT
+# requests become corral ticket prompts (exec_mode="corral") executed by
+# the winning bidder, with automatic fallback to Super Ralph on corral
+# failure. The oracle never executes payloads; it only verifies.
 AGENTIC_TIMEOUT_MS = 30 * 60 * 1000   # Super Ralph runs are slow (~11 min
                                       # observed for a trivial run)
 AGENTIC_BID_WINDOW_MS = 15000
@@ -565,7 +566,7 @@ class OracleLoop:
             "tags": sorted(set(tags or ["probe"])),
             "acceptance": acceptance,
             "task_class": task_class,
-            "exec_mode": "super-ralph",
+            "exec_mode": "corral",
             "posted_ts": time.time(),
             "bid_window_ms": bid_window_ms,
             "timeout_ms": timeout_ms,
