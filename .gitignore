@@ -122,3 +122,13 @@ ranch-analyze/config/
 
 # wezterm/ is a local 6.8GB vendored build tree - never committed.
 wezterm/
+
+# ── credentials / sessions (purge_secrets_final) ──
+config/.secrets
+config/.secrets.*
+config/secrets/
+config/tau/sessions/
+**/tau/sessions/
+*.pem
+credentials.json
+service-account*.json
