@@ -1272,19 +1272,29 @@ class OracleLoop:
             self.log("stake_released", task_id=tid, bidder=bidder,
                      reward=mech.REWARD, replay=replay)
         else:
-            # severity tiers (nexaflow decay): no usable result at all ->
-            # full bond; failed attempt -> half bond.
-            fraction = 1.0 if not success else 0.5
             if reason is None:
                 reason = "failed-verification" if success else "no-result"
-            sl = mech.slash(self.profiles, LEDGER, tid, reason=reason,
-                            fraction=fraction)
-            # NOTE: rep is only decremented when the slash actually landed.
-            # Updating it unconditionally diverged in-memory rep from the
-            # ledger-derived rep on restart whenever slash() failed closed.
-            if sl:
-                self.log("slashed", **sl, verified=False, replay=replay)
-                self.rep[bidder] = max(0, self.rep.get(bidder, 0) - 2)
+            # 2026-10-12 (bruteforce, Chris): infrastructure empty-responses
+            # are NOT bidder faults. The 66s ghost kills the executor; the
+            # bidder did nothing wrong. Release the bond, do not slash, do
+            # not touch rep. Flags/slashes are for failed verification of
+            # real output, not dead executors. The flag path was a red herring.
+            if reason == "no-result" and not success:
+                mech.release_bond(self.profiles, short_id, tid)
+                self.log("bond_released_infra", task_id=tid, bidder=bidder,
+                         reason=reason, verified=False, replay=replay)
+            else:
+                # severity tiers (nexaflow decay): failed attempt ->
+                # half bond; failed verification of real output -> full.
+                fraction = 0.5 if success else 1.0
+                sl = mech.slash(self.profiles, LEDGER, tid, reason=reason,
+                                fraction=fraction)
+                # NOTE: rep is only decremented when the slash actually landed.
+                # Updating it unconditionally diverged in-memory rep from the
+                # ledger-derived rep on restart whenever slash() failed closed.
+                if sl:
+                    self.log("slashed", **sl, verified=False, replay=replay)
+                    self.rep[bidder] = max(0, self.rep.get(bidder, 0) - 2)
         # The settled event carries the full decision: reconstruct() can
         # re-publish a settle that was decided but never reached the channel
         # (crash between the stake write and _publish_settle) exactly once.

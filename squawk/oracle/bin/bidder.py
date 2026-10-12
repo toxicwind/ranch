@@ -642,7 +642,13 @@ class Bidder:
         # inherited NIM_MODEL may be an upstream provider ID (not a router
         # route) which 404s on every call -- never inherit it blindly.
         # _resolve_ralph_model probes candidates and falls back live.
-        ralph_model = _resolve_ralph_model(RALPH_BASE_URL)
+        # 2026-10-12 (bruteforce, Chris): the 66s ghost kills one model with
+        # empty output. Build the retry chain: resolved winner first, then rest.
+        _models_to_try = [_resolve_ralph_model(RALPH_BASE_URL)]
+        for _cand in RALPH_MODEL_CANDIDATES:
+            if _cand and _cand not in _models_to_try:
+                _models_to_try.append(_cand)
+        ralph_model = _models_to_try[0]
         renv["NIM_MODEL"] = ralph_model
         renv["ANTHROPIC_DEFAULT_OPUS_MODEL"] = ralph_model
         # 2026-10-02 (oracle-settle-2): super-ralph nim-proxy reads
@@ -660,62 +666,88 @@ class Bidder:
         # to preserve evidence and post the partial result.
         ceiling = max(10.0, min(timeout_ms / 1000.0, RALPH_CAP_S)
                     - RALPH_POST_BUFFER_S)
-        self.say("%s invoking super-ralph on %s (ceiling %.0fs, model %s)."
-                 % (self.name, tid, ceiling, ralph_model))
-        try:
-            p = subprocess.run(
-                [str(RALPH_BIN), prompt, "--skip-questions",
-                 "--max-concurrency", "8"],
-                cwd=str(workdir), capture_output=True, text=True,
-                timeout=ceiling, env=renv)
-            rc = p.returncode
-            dur = (time.time() - t0) * 1000
-            out = _canon_ralph_text((p.stdout or "")[-OUT_CAP:])
-            err = (p.stderr or "")[-ERR_CAP:]
-            success = rc == 0 and bool((p.stdout or "").strip())
-            if not success and not err.strip():
-                err = "super-ralph exited %d with empty output" % rc
-        except subprocess.TimeoutExpired as te:
-            # 2026-09-21 (tern): NEVER discard partial evidence on timeout.
-            # TimeoutExpired carries the output captured before the kill;
-            # finished nodes' progress also lives in the workflow DB.
-            # Preserve it bounded + redacted instead of returning empty.
-            dur = (time.time() - t0) * 1000
-            success = False
-            timed_out = True
-            part_out = _redact_text((te.stdout or "") or "")
-            part_err = _redact_text((te.stderr or "") or "")
-            node_summary = _summarize_ralph_nodes(workdir)
-            chunks = []
-            if node_summary:
-                chunks.append(node_summary)
-            if part_out.strip():
-                chunks.append("--- partial stdout (last %d bytes) ---\n%s"
-                              % (PARTIAL_CAP, part_out[-PARTIAL_CAP:]))
-            if part_err.strip():
-                chunks.append("--- partial stderr (truncated) ---\n%s"
-                              % part_err[-ERR_CAP:])
-            (workdir / "partial-output.txt").write_text(
-                "\n\n".join(chunks) if chunks
-                else "(no partial output captured before timeout)",
-                encoding="utf-8")
-            # The no-result path carries the partial summary -- clearly
-            # marked so nobody mistakes it for a completed result.
-            marker = ("[PARTIAL - super-ralph timed out after %.0fs; "
-                      "full evidence in partial-output.txt]\n" % ceiling)
-            head = marker + (node_summary + "\n" if node_summary else "")
-            # 2026-09-21 (tern): the PARTIAL marker must survive even
-            # with huge partial stdout -- reserve its headroom first.
-            body = _canon_ralph_text(part_out)[-(OUT_CAP - len(head)):]
-            out = head + body
-            err = ("super-ralph timeout after %.0fs; partial evidence "
-                   "preserved in partial-output.txt" % ceiling)
-            if part_err.strip():
-                err = (err + "\n" + part_err)[-ERR_CAP:]
-        except Exception as e:  # noqa: BLE001
-            dur = (time.time() - t0) * 1000
-            out, success = "", False
-            err = "%s: %s" % (type(e).__name__, e)[:500]
+        # 2026-10-12 (bruteforce): retry across models on ghost-empty output.
+        _attempt_errs = []
+        for _attempt_idx, _try_model in enumerate(_models_to_try):
+            if _attempt_idx > 0:
+                ralph_model = _try_model
+                renv["NIM_MODEL"] = ralph_model
+                renv["ANTHROPIC_DEFAULT_OPUS_MODEL"] = ralph_model
+                # Reset per-attempt state: a timeout on attempt N must not
+                # poison the ghost-empty check on attempt N+1.
+                timed_out = False
+                rc = None
+                self.say("%s RETRY %d/%d ghost-empty, trying %s on %s."
+                         % (self.name, _attempt_idx + 1, len(_models_to_try),
+                            _try_model, tid))
+            else:
+                self.say("%s invoking super-ralph on %s (ceiling %.0fs, model %s)."
+                         % (self.name, tid, ceiling, ralph_model))
+            try:
+                p = subprocess.run(
+                    [str(RALPH_BIN), prompt, "--skip-questions",
+                     "--max-concurrency", "8"],
+                    cwd=str(workdir), capture_output=True, text=True,
+                    timeout=ceiling, env=renv)
+                rc = p.returncode
+                dur = (time.time() - t0) * 1000
+                out = _canon_ralph_text((p.stdout or "")[-OUT_CAP:])
+                err = (p.stderr or "")[-ERR_CAP:]
+                success = rc == 0 and bool((p.stdout or "").strip())
+                if not success and not err.strip():
+                    err = "super-ralph exited %d with empty output" % rc
+            except subprocess.TimeoutExpired as te:
+                # 2026-09-21 (tern): NEVER discard partial evidence on timeout.
+                # TimeoutExpired carries the output captured before the kill;
+                # finished nodes' progress also lives in the workflow DB.
+                # Preserve it bounded + redacted instead of returning empty.
+                dur = (time.time() - t0) * 1000
+                success = False
+                timed_out = True
+                part_out = _redact_text((te.stdout or "") or "")
+                part_err = _redact_text((te.stderr or "") or "")
+                node_summary = _summarize_ralph_nodes(workdir)
+                chunks = []
+                if node_summary:
+                    chunks.append(node_summary)
+                if part_out.strip():
+                    chunks.append("--- partial stdout (last %d bytes) ---\n%s"
+                                  % (PARTIAL_CAP, part_out[-PARTIAL_CAP:]))
+                if part_err.strip():
+                    chunks.append("--- partial stderr (truncated) ---\n%s"
+                                  % part_err[-ERR_CAP:])
+                (workdir / "partial-output.txt").write_text(
+                    "\n\n".join(chunks) if chunks
+                    else "(no partial output captured before timeout)",
+                    encoding="utf-8")
+                # The no-result path carries the partial summary -- clearly
+                # marked so nobody mistakes it for a completed result.
+                marker = ("[PARTIAL - super-ralph timed out after %.0fs; "
+                          "full evidence in partial-output.txt]\n" % ceiling)
+                head = marker + (node_summary + "\n" if node_summary else "")
+                # 2026-09-21 (tern): the PARTIAL marker must survive even
+                # with huge partial stdout -- reserve its headroom first.
+                body = _canon_ralph_text(part_out)[-(OUT_CAP - len(head)):]
+                out = head + body
+                err = ("super-ralph timeout after %.0fs; partial evidence "
+                       "preserved in partial-output.txt" % ceiling)
+                if part_err.strip():
+                    err = (err + "\n" + part_err)[-ERR_CAP:]
+            except Exception as e:  # noqa: BLE001
+                dur = (time.time() - t0) * 1000
+                out, success = "", False
+                err = "%s: %s" % (type(e).__name__, e)[:500]
+            # 2026-10-12 (bruteforce): ghost-empty = try next model.
+            # Non-empty output (even on failure) or timeout-with-partial = keep.
+            _is_ghost_empty = not (out or "").strip() and not timed_out
+            if _is_ghost_empty and _attempt_idx < len(_models_to_try) - 1:
+                _attempt_errs.append("model %s: %s" % (_try_model, err[:200]))
+                continue
+            if _attempt_errs:
+                err = ("all %d models ghost-empty; " % len(_models_to_try)
+                       + " | ".join(_attempt_errs) + " || last: " + err)[:2000]
+            break
+
         # Invocation evidence for the audit trail (also a result artifact).
         (workdir / "ralph-invocation.txt").write_text(
             "bin: %s\nmodel: %s\nbase_url: %s\nceiling_s: %.0f\n"
