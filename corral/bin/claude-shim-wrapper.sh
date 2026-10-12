@@ -61,7 +61,7 @@ if [[ -z "${NVIDIA_API_KEY:-}" && -n "$_keep_nvidia_api_key" ]]; then
 fi
 unset _keep_nim_base_url _keep_nvidia_api_key _keep_nim_model _keep_anthropic_base_url
 
-export NIM_BASE_URL="${NIM_BASE_URL:-http://127.0.0.1:25200/v1}"
+export NIM_BASE_URL="${NIM_BASE_URL:-http://127.0.0.1:25104/v1}"
 
 # Fallback mapping: NIM_PROXY_API_KEY -> NVIDIA_API_KEY only if latter unset
 if [[ -z "${NVIDIA_API_KEY:-}" && -n "${NIM_PROXY_API_KEY:-}" ]]; then

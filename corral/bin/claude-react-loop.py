@@ -139,8 +139,12 @@ CRITICAL RULES:
 
 
 def call_model(prompt):
-    """Call nim-shim-real, with fallback to direct API call."""
-    result = run([NIM_SHIM_REAL, prompt], timeout=120)
+    """Call nim-shim-real (prompt via stdin), with fallback to direct API call."""
+    try:
+        result = subprocess.run([NIM_SHIM_REAL], input=prompt,
+                                capture_output=True, text=True, timeout=120)
+    except subprocess.TimeoutExpired:
+        result = None
     out = (result.stdout.strip() if result else "")
     if out:
         return out
@@ -151,7 +155,7 @@ def direct_model_call(prompt):
     """Direct OpenAI-compatible chat call; merges content and reasoning."""
     import urllib.request
 
-    base = os.environ.get("NIM_BASE_URL", "http://127.0.0.1:25200/v1").rstrip("/")
+    base = os.environ.get("NIM_BASE_URL", "http://127.0.0.1:25104/v1").rstrip("/")
     key = os.environ.get("NVIDIA_API_KEY", "")
     # flock (:25193) needs its client key, not the NVIDIA upstream key
     if ":25193" in base:
