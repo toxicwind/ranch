@@ -13,7 +13,6 @@
   "version": "1.0.0",
   "workspaces": {
     "packages": [
-      "barn/browserless",
       "campfire",
       "corral",
       "drover",
