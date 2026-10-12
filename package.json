@@ -1,5 +1,5 @@
 {
-  "description": "Ranch monorepo — herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), corral (TS), drover (TS), roost (TS), and shared Bun/TS packages. Estate owns the mise build cache.",
+  "description": "Ranch monorepo \u2014 herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), corral (TS), drover (TS), roost (TS), and shared Bun/TS packages. Estate owns the mise build cache.",
   "name": "ranch",
   "private": true,
   "scripts": {
@@ -13,6 +13,7 @@
   "version": "1.0.0",
   "workspaces": {
     "packages": [
+      "barn/browserless/keeper",
       "campfire",
       "corral",
       "drover",
