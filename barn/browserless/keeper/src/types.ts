@@ -117,7 +117,7 @@ export const PdfRequestSchema = z.object({
   addScriptTag: z.array(ScriptTagSchema).optional(),
   addStyleTag: z.array(StyleTagSchema).optional(),
   cookies: z.array(CookieSchema).optional(),
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
   viewport: ViewportSchema.optional(),
   waitForEvent: WaitForEventSchema.optional(),
   waitForFunction: WaitForFunctionSchema.optional(),
@@ -134,7 +134,7 @@ export const ScreenshotRequestSchema = z.object({
   addScriptTag: z.array(ScriptTagSchema).optional(),
   addStyleTag: z.array(StyleTagSchema).optional(),
   cookies: z.array(CookieSchema).optional(),
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
   viewport: ViewportSchema.optional(),
   gotoOptions: z.object({
     waitUntil: z.string().optional(),
@@ -158,7 +158,7 @@ export const ContentRequestSchema = z.object({
   waitForFunction: WaitForFunctionSchema.optional(),
   waitForTimeout: z.number().optional(),
   addScriptTag: z.array(ScriptTagSchema).optional(),
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
   cookies: z.array(CookieSchema).optional(),
   viewport: ViewportSchema.optional(),
 });
@@ -168,7 +168,7 @@ export type ContentRequest = z.infer<typeof ContentRequestSchema>;
 // Function request schema
 export const FunctionRequestSchema = z.object({
   code: z.string(),
-  context: z.record(z.any()).optional(),
+  context: z.record(z.string(), z.any()).optional(),
 });
 
 export type FunctionRequest = z.infer<typeof FunctionRequestSchema>;
@@ -176,7 +176,7 @@ export type FunctionRequest = z.infer<typeof FunctionRequestSchema>;
 // Download request schema
 export const DownloadRequestSchema = z.object({
   code: z.string(),
-  context: z.record(z.any()).optional(),
+  context: z.record(z.string(), z.any()).optional(),
 });
 
 export type DownloadRequest = z.infer<typeof DownloadRequestSchema>;
@@ -184,7 +184,7 @@ export type DownloadRequest = z.infer<typeof DownloadRequestSchema>;
 // Export request schema
 export const ExportRequestSchema = z.object({
   url: z.string(),
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
   gotoOptions: z.object({
     waitUntil: z.string().optional(),
     timeout: z.number().optional(),
@@ -201,7 +201,7 @@ export const PerformanceRequestSchema = z.object({
   url: z.string(),
   config: z.object({
     extends: z.string().optional(),
-    settings: z.record(z.any()).optional(),
+    settings: z.record(z.string(), z.any()).optional(),
   }).optional(),
 });
 
@@ -217,7 +217,7 @@ export const UnblockRequestSchema = z.object({
   ttl: z.number().optional(),
   stealth: z.boolean().optional(),
   blockAds: z.boolean().optional(),
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
 });
 
 export type UnblockRequest = z.infer<typeof UnblockRequestSchema>;
@@ -225,7 +225,7 @@ export type UnblockRequest = z.infer<typeof UnblockRequestSchema>;
 // BrowserQL query schema
 export const BrowserQLRequestSchema = z.object({
   query: z.string(),
-  variables: z.record(z.any()).optional(),
+  variables: z.record(z.string(), z.any()).optional(),
 });
 
 export type BrowserQLRequest = z.infer<typeof BrowserQLRequestSchema>;
@@ -238,7 +238,7 @@ export const WebSocketOptionsSchema = z.object({
   blockAds: z.boolean().optional(),
   viewport: ViewportSchema.optional(),
   userAgent: z.string().optional(),
-  extraHTTPHeaders: z.record(z.string()).optional(),
+  extraHTTPHeaders: z.record(z.string(), z.string()).optional(),
 });
 
 export type WebSocketOptions = z.infer<typeof WebSocketOptionsSchema>;

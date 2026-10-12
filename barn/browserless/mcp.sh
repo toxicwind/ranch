@@ -9,4 +9,4 @@
 # Build (node >= 18): npm install && npm run build
 # Registered in the mesh MCP registry as: browserless-mcp
 set -euo pipefail
-exec bun /home/toxic/estate/ranch/barn/browserless/dist/index.js "$@"
+exec bun /home/toxic/estate/ranch/barn/browserless/keeper/dist/index.js "$@"

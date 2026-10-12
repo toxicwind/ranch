@@ -1,22 +1,107 @@
 # browser-keeper
 
-One persistent headed Chromium for the whole mesh. First-class citizen of
-browserless-mcp: MCP tasks drive it through `persistent_*` tools instead of
-spawning ephemeral sessions, so logins, tabs and state survive across tasks.
+One persistent headed Chromium for the whole mesh, plus the keeper-first MCP
+server that drives it. First-class citizen of the estate: the browser and its
+MCP tools live together in this tree.
+
+- **The keeper** — one persistent headed Chromium. Owns
+  `/home/toxic/.browserless/profiles/nv-audit` exclusively, exposes CDP on
+  `127.0.0.1:9223`, writes `/home/toxic/.browserless/keeper/status.json`,
+  relaunches Chromium if it dies. Single-instance: exits if CDP already
+  answers.
+- **The MCP server** (`src/`, built to `dist/`) — stdio MCP server
+  (`browserless-mcp` 1.3.0). Eleven `[keeper-first]` `persistent_*` tools
+  attach via `chromium.connectOverCDP` to the keeper — no
+  `initialize_browserless` needed, logins/tabs/state survive across tasks.
+
+## What it is
+
+`browser-keeper` is the estate's shared browser: a single long-lived Chromium
+that every agent drives through MCP instead of each spawning its own
+ephemeral session. The keeper daemon keeps the browser alive; the MCP server
+is the control plane. Both live here, built and versioned together.
 
 ## Layout
 
-- `keeper.js` - the daemon. Owns `/home/toxic/.browserless/profiles/nv-audit`
-  exclusively, exposes CDP on `127.0.0.1:9223`, writes
-  `/home/toxic/.browserless/keeper/status.json`, relaunches Chromium if it
-  dies. Single-instance: exits if CDP already answers.
-- `keeper.sh` - pitchfork launcher for the isolated display: unsets `WAYLAND_DISPLAY`, sets `DISPLAY=:99`, execs keeper.js (Forge 2026-09-21 — the keeper never renders in Chris's Hyprland session).
-- `pitchfork.fragment.toml` - merge into `[daemons.browser-keeper]` in
+- `keeper.cjs` — the daemon (CommonJS; the `.cjs` extension keeps it working
+  under this package's `"type": "module"`). Owns the `nv-audit` profile,
+  exposes CDP on `127.0.0.1:9223`, writes the status file, relaunches
+  Chromium if it dies.
+- `keeper.sh` — pitchfork launcher for the isolated display: unsets
+  `WAYLAND_DISPLAY`, sets `DISPLAY=:99`, execs keeper.cjs (Forge 2026-09-21
+  — the keeper never renders in Chris's Hyprland session).
+- `pitchfork.fragment.toml` — merge into `[daemons.browser-keeper]` in
   `/home/toxic/estate/pitchfork.toml` (owned sequence from
   `/home/toxic/estate`).
-- `browser-toggle.sh` - LEGACY: showed/hid the keeper window via the Hyprland
+- `browser-toggle.sh` — LEGACY: showed/hid the keeper window via the Hyprland
   scratchpad. Dead since the keeper moved to the isolated Xvnc :99 display
   (no Hyprland window exists any more); kept for reference.
+- `src/` — the MCP server source (`index.ts`, `persistent.ts`, `client.ts`,
+  `types.ts`, `simple-server.ts`).
+- `dist/` — `tsc` build output (gitignored; built on the box, never committed).
+- `smoke/keeper-smoke.mjs` — smoke suite, runs against the live keeper.
+- `../mcp.sh` — stdio launcher: `exec bun keeper/dist/index.js` (repo-relative).
+
+## How it runs
+
+**The keeper daemon** (pitchfork-supervised, `estate/browser-keeper`):
+
+```bash
+cd /home/toxic/estate && ./bin/pitchfork-restart estate/browser-keeper --cold
+```
+
+Ready when `curl -sf http://127.0.0.1:9223/json/version` answers. It needs the
+isolated display (`estate/agent-display`, Xvnc :99) up first — without it the
+keeper crash-loops on "Missing X server or $DISPLAY".
+
+**The MCP server** — stdio, no port, no daemon. Build once, launch per client
+session:
+
+```bash
+cd /home/toxic/estate/ranch/barn/browserless/keeper
+npm install && npm run build   # tsc -> dist/ (dist/ and node_modules/ are gitignored)
+npm test                       # node smoke/keeper-smoke.mjs against the live keeper
+```
+
+`../mcp.sh` execs it on stdio for manual use. In production, Gatehouse spawns
+it (see below).
+
+## How it registers in Gatehouse
+
+Gatehouse (`estate/gatehouse`, mcpproxy on `127.0.0.1:25127`) spawns the MCP
+server per the `browserless` entry in
+`/home/toxic/estate/ranch/barn/gatehouse/mcp_config.json` (live) and
+`mcp_config.json.dist` (durable template — the entry must be in BOTH or a
+restart drops it):
+
+```json
+{
+  "name": "browserless",
+  "protocol": "stdio",
+  "command": "/home/toxic/.local/share/mise/installs/node/22.12.0/bin/node",
+  "args": ["/home/toxic/estate/ranch/barn/browserless/keeper/dist/index.js"],
+  "enabled": true,
+  "health_check_interval": "15s",
+  "tool_discovery_interval": "2m0s",
+  "isolation": {"enabled": false, "mode": "none"},
+  "quarantined": false
+}
+```
+
+**Quirk (do not regress):** Gatehouse silently drops config entries carrying
+an `env` field — the entry must have NO `env` key. The server defaults to
+CDP `127.0.0.1:9223`, which is where the keeper listens, so no env is needed.
+
+After changing the entry: `pitchfork-restart estate/gatehouse --cold`
+(Gatehouse holds a bolt DB lock; the hot path cannot boot a staging
+candidate), then verify with the gatehouse connector:
+
+```bash
+~/workspace/bin/gatehouse servers | grep browserless
+~/workspace/bin/gatehouse tools persistent_status
+~/workspace/bin/gatehouse call browserless:persistent_status '{}'
+# expect: cdpAlive true, keeper state up
+```
 
 ## MCP tools (browserless-mcp 1.3.0, `src/persistent.ts`)
 
@@ -44,31 +129,6 @@ event) and reconnected with backoff + jitter. The MCP server refuses to
 start when the keeper is down (fail loud; `BROWSER_MCP_ALLOW_NO_KEEPER=1`
 bypasses for maintenance) and shuts down gracefully on SIGTERM/SIGINT.
 
-## MCP serve path (how clients reach the keeper tools)
-
-The repo MCP server is a **stdio** server — no port, no daemon. Build once,
-launch per client session:
-
-```bash
-cd projects/range/ranch/barn/browserless
-npm install && npm run build   # tsc -> dist/ (dist/ and node_modules/ are gitignored build artifacts)
-./mcp.sh                        # exec node dist/index.js on stdio
-```
-
-Registered in the mesh MCP registry
-(`/home/toxic/projects/my-ai-tools/configs/mcp-registry.json`) as
-`browserless-mcp` -> command
-`/home/toxic/estate/projects/range/ranch/barn/browserless/mcp.sh`.
-The `persistent_*` tools attach to the keeper CDP at `127.0.0.1:9223`
-(override: `BROWSER_KEEPER_CDP`); keeper state file
-`/home/toxic/.browserless/keeper/status.json` (override:
-`BROWSER_KEEPER_STATUS`). E2E-verified 2026-09-21: 26 tools listed
-(11 `persistent_*`, first in the list), `persistent_status` ->
-`cdpAlive: true` against the live keeper, and `npm test`
-(`smoke/keeper-smoke.mjs`) passes against the live keeper in a scratch
-tab: status → tabs → new_tab → activate → navigate → evaluate →
-pageText → screenshot → error codes → close_tab → status.
-
 ## Keeper status.json
 
 `/home/toxic/.browserless/keeper/status.json` carries: `cdp`, `pid`,
@@ -95,28 +155,15 @@ focus.)
   never rotated, never stored anywhere else).
 - `agent-viewer` — websockify serving stock noVNC on **`127.0.0.1:6080`
   (loopback-only)**. The viewer is **INTERACTIVE**: noVNC defaults
-  `view_only=false` (verified in vendored `app/ui.js`; `mandatory.json` and
-  `defaults.json` are empty), so Chris can click, type, and take over the
-  agent browser. View-only was explicitly rejected (Chris 2026-09-21:
-  "view only is no point, user should be able to interact or help lol").
+  `view_only=false`, so Chris can click, type, and take over the
+  agent browser.
 - External route (2026-09-21, Forge): tailnet-only via `tailscale serve`
-  on `:8443` -- `/agent-browser` -> `127.0.0.1:6080` (declared in
-  `projects/yote/ops/funnel-map.sh` SERVE_MAP). No funnel, no token gate
-  (Chris 2026-09-21: token gate was not wanted -- tailscale and network and
-  agent access only). The old gate (`../viewer/agent-viewer-gate.py`, was
-  `:6081`) is retired, kept as reference only. noVNC resolves its
-  `./websockify` WS path relative to the page URL, so the subpath mount just
-  works. Use the MagicDNS name -- raw tailnet IPs fail the TLS handshake
-  (SNI).
-- VNC auth is untouched: noVNC still prompts for the Xvnc password.
+  on `:8443` — `/agent-browser` -> `127.0.0.1:6080`. No funnel, no token gate.
 
 Viewer URL: `https://github-mcp-host.tailc9ac71.ts.net:8443/agent-browser/vnc.html`
 
-Restart/rollback: `pitchfork-restart agent-viewer --reregister` (picks up
-`pitchfork.toml` run-line changes).
-To close the external route without touching the daemons:
-`tailscale serve --https=8443 --set-path /agent-browser off` as root.
-
 ## CDP WebSocket Origin quirk (Lumen 2026-10-02)
 
-The CDP WebSocket endpoint rejects connections carrying the default `Origin: http://127.0.0.1:9223` header (403, "Rejected an incoming WebSocket connection"). Workaround: suppress the Origin header entirely on the client side. Python `websocket-client` does this with `suppress_origin=True` on `create_connection()` — the handshake then goes through clean.
+CDP over the isolated display needs the Origin header allowed — see the
+keeper source for the current handling. If `connectOverCDP` starts failing
+with 403s, check this first.
