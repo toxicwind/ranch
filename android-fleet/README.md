@@ -1,6 +1,6 @@
 # android-fleet
 
-ADB-managed Android devices on the LAN — Chris's Pixel 9 Pro XL and the bedroom Google TV — plus [`nuvio/`](nuvio/), an LG webOS TV app that deploys over the `ares` CLI instead of ADB. Scripts live here canonically; `/home/toxic/bin/` holds symlinks for PATH/supervisor compatibility.
+ADB-managed Android devices on the LAN — Chris's Pixel 9 Pro XL and the bedroom Google TV. (LG webOS TV tooling and streaming services have been decoupled to standalone `/home/toxic/nuvio/`). Scripts live here canonically; `/home/toxic/bin/` holds symlinks for PATH/supervisor compatibility.
 
 <div align="right">
 
