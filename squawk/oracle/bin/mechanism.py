@@ -111,11 +111,34 @@ def provision_bidder(bidder_id: str, capabilities, max_class="standard",
     return key_id, master_hex
 
 
+_PROFILE_REQUIRED = ("key_id", "bidder_id", "secret")
+
 def load_profiles() -> dict:
     if not PROFILES.exists():
         return {}
     with open(PROFILES, "rb") as f:
-        return tomllib.load(f)
+        data = tomllib.load(f)
+    # 2026-10-12: a malformed profile (e.g. [warden] with only stake=)
+    # used to pass load cleanly and then crash save_profiles with
+    # KeyError('key_id'), surfacing as no_assign{stake-lock-failed} on
+    # EVERY auction -- one bad entry DoS'd the whole market. Validate on
+    # load: quarantine malformed entries (data preserved as JSON, never
+    # silently dropped) and keep the market running on the valid ones.
+    bad = {bid: prof for bid, prof in data.items()
+           if not isinstance(prof, dict)
+           or not all(k in prof for k in _PROFILE_REQUIRED)}
+    if bad:
+        ts = time.strftime("%Y%m%dT%H%M%S")
+        qp = PROFILES.parent / f"quarantine-malformed-{ts}.json"
+        with open(qp, "w", encoding="utf-8") as f:
+            json.dump({"quarantined_ts": ts,
+                       "reason": "missing one of %s" % (list(_PROFILE_REQUIRED),),
+                       "profiles": bad}, f, indent=2)
+        for bid in bad:
+            del data[bid]
+        print("load_profiles: quarantined malformed profiles %s -> %s"
+              % (sorted(bad), qp), flush=True)
+    return data
 
 
 def save_profiles(profiles: dict):
