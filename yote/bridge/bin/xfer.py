@@ -1,32 +1,31 @@
 #!/usr/bin/env python3
-"""xfer.py — binary-safe, resumable file transfer over the awrawr bridge.
+"""xfer.py — file transfer between the cell and yote, fastest lane first.
 
-Saves files to awrawr-pc without shells, quoting, base64 dances, or the
-90s exec ceiling. Binary frames (opcode 0x2) carry raw bytes; the server
-verifies size+sha256 and installs atomically. Interrupted uploads resume.
+Primary: binary WebSocket frames via wss://.../exec-ws (binary frames,
+no base64 overhead, resumable, server-side sha256 verify, atomic install).
+Fallback: mcp lane via yote-mcp-exec (base64-in-heredoc, same verify).
+
+Transport priority (2026-10-12, Chris: fastest primary):
+  1. WS binary (wss:// through egress proxy, or ws://127.0.0.1:8379 direct)
+  2. MCP lane (yote-mcp-exec code_execution) — if WS is down
 
 Usage:
-    xfer.py put <local> <remote> [--chunk-kb N]
-    xfer.py get <remote> <local> [--chunk-kb N]
-
-Transport (--via auto|bridge|direct, default auto):
-  bridge — from the cell: wss:// through the egress proxy, auth via the
-           Secure Vault surrogate (custom.awrawr-mcp). Parallel lane:
-           its own connection, separate from the exec multiplex.
-  direct — from awrawr-pc itself (interactive shell included):
-           ws://127.0.0.1:8379/exec-ws, auth via ~/.awrawr_mcp_token.
-           No proxy, no TLS, no vault needed.
-  auto   — direct if 127.0.0.1:8379 is reachable, else bridge.
+    xfer.py put <local> <remote> [--mode 0644] [--chunk-kb N] [--via auto|bridge|direct|mcp]
+    xfer.py get <remote> <local> [--chunk-kb N] [--via ...]
 
 Remote paths must be inside /home/toxic or /tmp (server policy).
+Exit 0 on success with a "sha256 ok" line; exit 1 with "xfer: <reason>"
+on stderr otherwise. Reasons are never empty.
 """
 import argparse
 import asyncio
 import base64
 import hashlib
+import importlib.util
 import json
 import os
 import secrets
+import shlex
 import socket
 import ssl
 import sys
@@ -35,15 +34,19 @@ import urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 BIN_DIR = os.path.dirname(os.path.abspath(__file__))
-from wsframe import WS_GUID, read_frame, send_frame, read_message  # noqa: E402
+from wsframe import (WS_GUID, read_frame, send_frame, read_message,  # noqa: E402
+                     _DrainTimeout, _DEFAULT_DRAIN_TIMEOUT_S)
 
-WS_HOST = "github-mcp-host.tailc9ac71.ts.net"
+WS_HOSTS = ["estate.tailc9ac71.ts.net", "github-mcp-host.tailc9ac71.ts.net"]
 WS_PATH = "/exec-ws"
 LOCAL_PORT = 8379
 TOKEN_FILE = os.path.expanduser("~/.awrawr_mcp_token")
 IDLE_S = 150
+PUT_DRAIN_TIMEOUT_S = 60.0
+MCP_EXEC_PATH = "/home/hatch/workspace/bin/yote-mcp-exec"
 
 
+# ---------------------------------------------------------------- WS lane
 def _surrogate():
     sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
     sys.path.insert(0, os.path.join(os.path.dirname(
@@ -82,29 +85,47 @@ async def _ws_handshake(reader, writer, host, path, auth_header,
 
 
 async def connect_bridge():
-    """Cell -> wss:// through the egress proxy, surrogate auth."""
+    """Cell -> wss:// through the egress proxy, surrogate auth.
+
+    Tries each WS_HOSTS entry in order; the /exec-ws route lives on the
+    estate hostname, but github-mcp-host is kept as a fallback.
+    """
     header, surrogate = await asyncio.to_thread(_surrogate)
     phost, pport = _proxy_target()
-    raw = socket.create_connection((phost, pport), timeout=15)
-    try:
-        raw.sendall(("CONNECT %s:443 HTTP/1.1\r\nHost: %s:443\r\n\r\n"
-                     % (WS_HOST, WS_HOST)).encode())
-        resp = b""
-        while b"\r\n\r\n" not in resp:
-            blk = raw.recv(4096)
-            if not blk:
-                break
-            resp += blk
-        if b" 200" not in resp.split(b"\r\n", 1)[0]:
-            raise RuntimeError("proxy CONNECT failed")
-        ctx = ssl.create_default_context()
-        reader, writer = await asyncio.open_connection(
-            sock=raw, ssl=ctx, server_hostname=WS_HOST)
-    except Exception:
-        raw.close()
-        raise
-    await _ws_handshake(reader, writer, WS_HOST, WS_PATH, header, surrogate)
-    return reader, writer
+    last_err = None
+    for ws_host in WS_HOSTS:
+        raw = socket.create_connection((phost, pport), timeout=15)
+        try:
+            raw.sendall(("CONNECT %s:443 HTTP/1.1\r\nHost: %s:443\r\n\r\n"
+                         % (ws_host, ws_host)).encode())
+            resp = b""
+            while b"\r\n\r\n" not in resp:
+                blk = raw.recv(4096)
+                if not blk:
+                    break
+                resp += blk
+            if b" 200" not in resp.split(b"\r\n", 1)[0]:
+                raise RuntimeError("proxy CONNECT failed")
+            ctx = ssl.create_default_context()
+            reader, writer = await asyncio.open_connection(
+                sock=raw, ssl=ctx, server_hostname=ws_host)
+        except Exception as e:
+            raw.close()
+            last_err = e
+            continue
+        try:
+            await _ws_handshake(reader, writer, ws_host, WS_PATH,
+                                header, surrogate)
+            return reader, writer
+        except Exception as e:
+            try:
+                writer.close()
+            except Exception:
+                pass
+            last_err = e
+            continue
+    raise RuntimeError("ws handshake failed on all hosts: %s"
+                       % (str(last_err).strip() or repr(last_err)))
 
 
 async def connect_direct():
@@ -122,12 +143,11 @@ async def connect_direct():
     return reader, writer
 
 
-async def connect(via):
+async def connect_ws(via):
     if via == "direct":
         return await connect_direct()
     if via == "bridge":
         return await connect_bridge()
-    # auto: direct when the local port answers
     try:
         s = socket.create_connection(("127.0.0.1", LOCAL_PORT), timeout=3)
         s.close()
@@ -155,72 +175,67 @@ async def _recv_json(reader, writer):
         return json.loads(payload.decode("utf-8", "replace"))
 
 
-def _sha256_of(path):
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
+async def _ws_put_once(reader, writer, local, remote, size, digest,
+                       chunk, mode):
+    op_id = secrets.token_hex(8)
+    await _send_json(writer, {"id": op_id, "op": "put", "path": remote,
+                              "size": size, "sha256": digest, "mode": mode})
+    doc = await _recv_json(reader, writer)
+    if doc.get("type") == "put-error":
+        raise RuntimeError("server: " + doc.get("message", "?"))
+    if doc.get("type") != "put-ready":
+        raise RuntimeError("unexpected reply: %r" % (doc,))
+    offset = int(doc.get("offset", 0))
+    t0 = time.monotonic()
+    with open(local, "rb") as f:
+        f.seek(offset)
         while True:
-            blk = f.read(1048576)
+            blk = f.read(chunk)
             if not blk:
                 break
-            h.update(blk)
-    return h.hexdigest()
+            try:
+                await send_frame(writer, 0x2, blk, mask=True,
+                                 drain_timeout=PUT_DRAIN_TIMEOUT_S)
+            except _DrainTimeout:
+                raise RuntimeError("drain timeout: path stalled for "
+                                   "%.0fs; retry resumes" % PUT_DRAIN_TIMEOUT_S)
+    await _send_json(writer, {"id": op_id, "op": "put-end"})
+    doc = await _recv_json(reader, writer)
+    dt = time.monotonic() - t0
+    if doc.get("type") != "put-done":
+        raise RuntimeError("server: " + doc.get("message", repr(doc)))
+    bps = (size - offset) / dt if dt > 0 else 0
+    print("put %s -> %s  %d bytes  sha256 ok  %.1fs  %.0f B/s%s (ws)"
+          % (local, doc.get("path"), size, dt, bps,
+             "  (resumed from %d)" % offset if offset else ""))
 
 
-async def do_put(reader, writer, local, remote, chunk, mode):
+async def do_put_ws(via, local, remote, chunk, mode):
     size = os.path.getsize(local)
     digest = _sha256_of(local)
-    # "transfer busy" means another put to the same path is live: bounded
-    # retries poll that real condition instead of failing the save.
     deadline = time.monotonic() + 300
     while True:
+        reader, writer = await connect_ws(via)
         try:
-            await _put_once(reader, writer, local, remote, size, digest,
-                            chunk, mode)
+            await _ws_put_once(reader, writer, local, remote, size, digest,
+                                chunk, mode)
             return
         except RuntimeError as e:
-            if "transfer busy" not in str(e) or time.monotonic() >= deadline:
+            msg = str(e)
+            retryable = ("transfer busy" in msg) or ("drain timeout" in msg)
+            if not retryable or time.monotonic() >= deadline:
                 raise
             await asyncio.sleep(2)
+        finally:
+            try:
+                writer.close()
+            except Exception:
+                pass
 
 
-async def _put_once(reader, writer, local, remote, size, digest,
-                    chunk, mode):
+async def do_get_ws(via, remote, local, chunk):
     op_id = secrets.token_hex(8)
-    try:
-        await _send_json(writer, {"id": op_id, "op": "put", "path": remote,
-                                  "size": size, "sha256": digest,
-                                  "mode": mode})
-        doc = await _recv_json(reader, writer)
-        if doc.get("type") == "put-error":
-            raise RuntimeError("server: " + doc.get("message", "?"))
-        if doc.get("type") != "put-ready":
-            raise RuntimeError("unexpected reply: %r" % (doc,))
-        offset = int(doc.get("offset", 0))
-        sent = 0
-        t0 = time.monotonic()
-        with open(local, "rb") as f:
-            f.seek(offset)
-            while True:
-                blk = f.read(chunk)
-                if not blk:
-                    break
-                await send_frame(writer, 0x2, blk, mask=True)
-                sent += len(blk)
-        await _send_json(writer, {"id": op_id, "op": "put-end"})
-        doc = await _recv_json(reader, writer)
-        dt = time.monotonic() - t0
-        if doc.get("type") != "put-done":
-            raise RuntimeError("server: " + doc.get("message", repr(doc)))
-        bps = (size - offset) / dt if dt > 0 else 0
-        print("put %s -> %s  %d bytes  sha256 ok  %.1fs  %.0f B/s%s"
-              % (local, doc.get("path"), size, dt, bps,
-                 "  (resumed from %d)" % offset if offset else ""))
-    finally:
-        pass
-
-
-async def do_get(reader, writer, remote, local, chunk):
-    op_id = secrets.token_hex(8)
+    reader, writer = await connect_ws(via)
     try:
         await _send_json(writer, {"id": op_id, "op": "get", "path": remote})
         doc = await _recv_json(reader, writer)
@@ -242,13 +257,10 @@ async def do_get(reader, writer, remote, local, chunk):
                     continue
                 if kind is True:
                     end = json.loads(payload.decode("utf-8", "replace"))
-                    if end.get("type") == "get-error":
-                        raise RuntimeError("server: " +
-                                           end.get("message", "?"))
-                    raise RuntimeError("unexpected text frame: %r" % (end,))
+                    raise RuntimeError("server: " +
+                                       end.get("message", repr(end)))
                 f.write(payload)
                 received += len(payload)
-        # drain the get-done
         doc = await _recv_json(reader, writer)
         if doc.get("type") != "get-done":
             raise RuntimeError("missing get-done: %r" % (doc,))
@@ -258,35 +270,8 @@ async def do_get(reader, writer, remote, local, chunk):
             raise RuntimeError("sha256 mismatch on download")
         os.replace(tmp, local)
         dt = time.monotonic() - t0
-        print("get %s -> %s  %d bytes  sha256 ok  %.1fs  %.0f B/s"
-              % (remote, local, size, dt,
-                 size / dt if dt > 0 else 0))
-    finally:
-        pass
-
-
-async def amain(args):
-    try:
-        reader, writer = await connect(args.via)
-    except Exception as e:
-        # PERMANENT fallback: the WS binary path is down (no listener on the
-        # far end). Chunked base64 through exec.py's shell transport carries
-        # the same bytes; slower, but the transfer still lands. This is not a
-        # retry loop — one clean path switch, then done.
-        print("xfer: WS path down (%s); falling back to exec transport" % e,
-              file=sys.stderr)
-        if args.cmd == "put":
-            put_via_exec(args.local, args.remote, args.mode)
-        else:
-            get_via_exec(args.remote, args.local)
-        return
-    try:
-        if args.cmd == "put":
-            await do_put(reader, writer, args.local, args.remote,
-                         args.chunk_kb * 1024, args.mode)
-        else:
-            await do_get(reader, writer, args.remote, args.local,
-                         args.chunk_kb * 1024)
+        print("get %s -> %s  %d bytes  sha256 ok  %.1fs  %.0f B/s (ws)"
+              % (remote, local, size, dt, size / dt if dt > 0 else 0))
     finally:
         try:
             writer.close()
@@ -294,116 +279,192 @@ async def amain(args):
             pass
 
 
-EXEC_CHUNK = 30 * 1024  # raw bytes per exec call; base64 expands to ~40 KiB
+# --------------------------------------------------------------- MCP lane
+def _load_mcp():
+    from importlib.machinery import SourceFileLoader
+    if not os.path.isfile(MCP_EXEC_PATH):
+        raise RuntimeError("mcp lane missing: %s not found" % MCP_EXEC_PATH)
+    loader = SourceFileLoader("yote_mcp_exec", MCP_EXEC_PATH)
+    spec = importlib.util.spec_from_loader("yote_mcp_exec", loader)
+    mod = importlib.util.module_from_spec(spec)
+    loader.exec_module(mod)
+    return mod
 
 
-def _exec_shell(cmd):
-    """Run a shell command on awrawr-pc via exec.py; return (rc, stdout)."""
-    import subprocess as _sp
-    p = _sp.run([sys.executable, os.path.join(BIN_DIR, "exec.py"), cmd],
-                capture_output=True, text=True, timeout=120)
-    out = (p.stdout or "").strip()
-    if out.startswith("[exit="):
-        head, _, rest = out.partition("]")
-        try:
-            return int(head[len("[exit="):]), rest.strip()
-        except ValueError:
-            pass
-    return p.returncode, out
+_MCP = None
 
 
-def put_via_exec(local, remote, mode="0644"):
-    import base64 as _b64
-    import shlex as _sh
+def mcp_run(cmd, timeout_ms=60000):
+    global _MCP
+    if _MCP is None:
+        _MCP = _load_mcp()
+    try:
+        return _MCP.run(cmd, timeout_ms)
+    except Exception as e:
+        msg = str(e).strip()
+        raise RuntimeError("mcp transport failed: %s" % (msg or repr(e)))
+
+
+def _check_policy(remote):
+    if not (remote.startswith("/home/toxic/") or remote.startswith("/tmp/")):
+        raise RuntimeError("remote path outside /home/toxic or /tmp: %s"
+                           % remote)
+
+
+def _sha256_of(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        while True:
+            blk = f.read(1048576)
+            if not blk:
+                break
+            h.update(blk)
+    return h.hexdigest()
+
+
+def do_put_mcp(local, remote, chunk_kb=512, mode="0644"):
+    _check_policy(remote)
     size = os.path.getsize(local)
-    with open(local, "rb") as f:
-        digest = hashlib.sha256(f.read()).hexdigest()
+    digest = _sha256_of(local)
+    q = shlex.quote
     tmp = remote + ".xfer-tmp"
-    q = _sh.quote
-    rc, out = _exec_shell(
-        "mkdir -p %s && rm -f %s && : > %s && echo ok"
-        % (q(os.path.dirname(remote) or "."), q(tmp), q(tmp)))
-    if rc != 0 or out != "ok":
-        raise RuntimeError("remote staging failed: %s" % out)
+    tmo = 120000
+    rc, out = mcp_run(
+        "mkdir -p %s && rm -f %s && : > %s && echo STAGED"
+        % (q(os.path.dirname(remote) or "."), q(tmp), q(tmp)),
+        tmo)
+    if rc != 0 or out.strip() != "STAGED":
+        raise RuntimeError("remote staging failed: rc=%d out=%r"
+                           % (rc, out.strip()[:200]))
     t0 = time.monotonic()
+    raw_per_call = chunk_kb * 1024
     n = 0
     with open(local, "rb") as f:
         while True:
-            raw = f.read(EXEC_CHUNK)
+            raw = f.read(raw_per_call)
             if not raw:
                 break
-            b64 = _b64.b64encode(raw).decode()
-            rc, out = _exec_shell(
-                "printf '%%s' '%s' | base64 -d >> %s && echo ok"
-                % (b64, q(tmp)))
-            if rc != 0 or out != "ok":
-                raise RuntimeError("chunk %d failed: %s" % (n, out))
+            b64 = base64.b64encode(raw).decode()
+            rc, out = mcp_run(
+                "base64 -d >> %s <<'XFER_EOF'\n%s\nXFER_EOF\n"
+                "echo CHUNK_OK" % (q(tmp), b64), tmo)
+            if rc != 0 or out.strip() != "CHUNK_OK":
+                raise RuntimeError("chunk %d failed: rc=%d out=%r"
+                                   % (n, rc, out.strip()[:200]))
             n += 1
-    rc, got = _exec_shell("sha256sum %s | cut -d' ' -f1" % q(tmp))
-    if rc != 0 or got != digest:
-        raise RuntimeError("sha256 mismatch on upload: %s != %s"
-                           % (got, digest))
-    rc, out = _exec_shell("mv %s %s && chmod %s %s && echo ok"
-                          % (q(tmp), q(remote), q(mode), q(remote)))
-    if rc != 0 or out != "ok":
-        raise RuntimeError("remote commit failed: %s" % out)
+    rc, out = mcp_run("stat -c%%s %s && sha256sum %s | cut -d' ' -f1"
+                      % (q(tmp), q(tmp)), tmo)
+    if rc != 0:
+        raise RuntimeError("remote verify failed: rc=%d out=%r"
+                           % (rc, out.strip()[:200]))
+    lines = out.strip().split()
+    if len(lines) < 2 or int(lines[0]) != size or lines[1] != digest:
+        raise RuntimeError("sha256/size mismatch on upload")
+    rc, out = mcp_run("mv %s %s && chmod %s %s && echo COMMITTED"
+                      % (q(tmp), q(remote), q(mode), q(remote)), tmo)
+    if rc != 0 or out.strip() != "COMMITTED":
+        raise RuntimeError("remote commit failed: rc=%d out=%r"
+                           % (rc, out.strip()[:200]))
     dt = time.monotonic() - t0
-    print("put %s -> %s  %d bytes  sha256 ok  %.1fs  %.0f B/s (exec transport)"
-          % (local, remote, size, dt, size / dt if dt > 0 else 0))
+    print("put %s -> %s  %d bytes  sha256 ok  %.1fs  %.0f B/s  (%d chunks, mcp)"
+          % (local, remote, size, dt, size / dt if dt > 0 else 0, n))
 
 
-def get_via_exec(remote, local):
-    import base64 as _b64
-    import shlex as _sh
-    q = _sh.quote
-    rc, out = _exec_shell("stat -c%%s %s" % q(remote))
+def do_get_mcp(remote, local, chunk_kb=512):
+    _check_policy(remote)
+    q = shlex.quote
+    tmo = 120000
+    rc, out = mcp_run("stat -c%%s %s && sha256sum %s | cut -d' ' -f1"
+                      % (q(remote), q(remote)), tmo)
     if rc != 0:
-        raise RuntimeError("remote stat failed: %s" % out)
-    size = int(out)
-    rc, digest = _exec_shell("sha256sum %s | cut -d' ' -f1" % q(remote))
-    if rc != 0:
-        raise RuntimeError("remote sha256 failed: %s" % digest)
+        raise RuntimeError("remote stat failed: rc=%d out=%r"
+                           % (rc, out.strip()[:200]))
+    lines = out.strip().split()
+    if len(lines) < 2:
+        raise RuntimeError("remote stat parse failed")
+    size, digest = int(lines[0]), lines[1]
     t0 = time.monotonic()
-    chunks = (size + EXEC_CHUNK - 1) // EXEC_CHUNK
-    with open(local, "wb") as f:
+    raw_per_call = chunk_kb * 1024
+    chunks = (size + raw_per_call - 1) // raw_per_call if size else 0
+    tmp = local + ".part-xfer"
+    with open(tmp, "wb") as f:
         for i in range(chunks):
-            rc, b64 = _exec_shell(
+            rc, b64 = mcp_run(
                 "dd if=%s bs=%d skip=%d 2>/dev/null | base64 -w0"
-                % (q(remote), EXEC_CHUNK, i))
+                % (q(remote), raw_per_call, i), tmo)
             if rc != 0:
                 raise RuntimeError("chunk %d failed" % i)
-            f.write(_b64.b64decode(b64))
-    with open(local, "rb") as f:
-        got = hashlib.sha256(f.read()).hexdigest()
+            f.write(base64.b64decode(b64))
+    got = _sha256_of(tmp)
     if got != digest:
-        os.unlink(local)
+        os.unlink(tmp)
         raise RuntimeError("sha256 mismatch on download")
+    os.replace(tmp, local)
     dt = time.monotonic() - t0
-    print("get %s -> %s  %d bytes  sha256 ok  %.1fs  %.0f B/s (exec transport)"
-          % (remote, local, size, dt,
-             size / dt if dt > 0 else 0))
+    print("get %s -> %s  %d bytes  sha256 ok  %.1fs  %.0f B/s  (%d chunks, mcp)"
+          % (remote, local, size, dt, size / dt if dt > 0 else 0, chunks))
 
 
+# ------------------------------------------------------------------ main
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--via", choices=["auto", "bridge", "direct"],
-                    default="auto")
+    ap.add_argument("--via", choices=["auto", "bridge", "direct", "mcp"],
+                    default="auto",
+                    help="transport: WS binary (auto/bridge/direct) or mcp lane")
     ap.add_argument("--chunk-kb", type=int, default=64,
-                    help="upload frame size in KiB (race winner: 64)")
+                    help="WS upload frame size in KiB (default 64)")
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("put")
     p.add_argument("local")
     p.add_argument("remote")
     p.add_argument("--mode", default="0644")
+    p.add_argument("--chunk-kb", type=int, default=64)
+    p.add_argument("--mcp-chunk-kb", type=int, default=512,
+                   help="mcp lane chunk size in KiB (default 512)")
     g = sub.add_parser("get")
     g.add_argument("remote")
     g.add_argument("local")
+    g.add_argument("--chunk-kb", type=int, default=64)
+    g.add_argument("--mcp-chunk-kb", type=int, default=512)
     args = ap.parse_args()
+
+    # Forced mcp lane
+    if args.via == "mcp":
+        try:
+            if args.cmd == "put":
+                do_put_mcp(args.local, args.remote,
+                           args.mcp_chunk_kb, args.mode)
+            else:
+                do_get_mcp(args.remote, args.local, args.mcp_chunk_kb)
+        except Exception as e:
+            print("xfer: %s" % (str(e).strip() or repr(e)), file=sys.stderr)
+            sys.exit(1)
+        return
+
+    # Primary: WS binary (fastest). Fallback: mcp lane.
     try:
-        asyncio.run(amain(args))
+        if args.cmd == "put":
+            if not os.path.isfile(args.local):
+                raise RuntimeError("not a file: %s" % args.local)
+            asyncio.run(do_put_ws(args.via, args.local, args.remote,
+                                  args.chunk_kb * 1024, args.mode))
+        else:
+            asyncio.run(do_get_ws(args.via, args.remote, args.local,
+                                  args.chunk_kb * 1024))
     except Exception as e:
-        print("xfer: %s" % e, file=sys.stderr)
-        sys.exit(1)
+        msg = str(e).strip() or repr(e)
+        print("xfer: WS path down (%s); falling back to mcp lane" % msg,
+              file=sys.stderr)
+        try:
+            if args.cmd == "put":
+                do_put_mcp(args.local, args.remote,
+                           args.mcp_chunk_kb, args.mode)
+            else:
+                do_get_mcp(args.remote, args.local, args.mcp_chunk_kb)
+        except Exception as e2:
+            print("xfer: %s" % (str(e2).strip() or repr(e2)),
+                  file=sys.stderr)
+            sys.exit(1)
 
 
 if __name__ == "__main__":

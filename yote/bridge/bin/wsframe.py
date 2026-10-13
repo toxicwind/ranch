@@ -5,9 +5,20 @@ No third-party deps and no credential imports, so it is importable both
 from the cell (ws_daemon.py, xfer.py) and from awrawr-pc's interactive
 shell (xfer.py --via direct).
 """
+import asyncio
 import secrets
 
 WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+
+# Backpressure isolation (2026-10-04, cinder-idletime): an unbounded
+# writer.drain() lets a stalled network path wedge the sender forever
+# while the server's XFER_IDLE_S (120s) aborts the transfer. Bound the
+# drain so the client fails fast and can resume on a fresh connection.
+_DEFAULT_DRAIN_TIMEOUT_S = 60.0
+
+
+class _DrainTimeout(asyncio.TimeoutError):
+    """writer.drain() exceeded the bound: the path is not reading."""
 
 
 async def read_frame(reader):
@@ -27,8 +38,14 @@ async def read_frame(reader):
     return fin, opcode, payload
 
 
-async def send_frame(writer, opcode, payload=b"", mask=True):
-    """Send one frame. Clients MUST mask (mask=True); servers must not."""
+async def send_frame(writer, opcode, payload=b"", mask=True, drain_timeout=None):
+    """Send one frame. Clients MUST mask (mask=True); servers must not.
+
+    drain_timeout bounds writer.drain(): None (default) preserves the
+    historical unbounded behavior for small control frames; pass a
+    float for bulk data so a stalled path raises _DrainTimeout instead
+    of wedging the sender.
+    """
     hdr = bytes([0x80 | opcode])
     n = len(payload)
     if n < 126:
@@ -42,7 +59,14 @@ async def send_frame(writer, opcode, payload=b"", mask=True):
         payload = bytes(b ^ m[i % 4] for i, b in enumerate(payload))
         hdr += m
     writer.write(hdr + payload)
-    await writer.drain()
+    if drain_timeout is None:
+        await writer.drain()
+    else:
+        try:
+            await asyncio.wait_for(writer.drain(), drain_timeout)
+        except asyncio.TimeoutError:
+            raise _DrainTimeout(
+                "drain timeout: no read for %.0fs" % drain_timeout)
 
 
 async def read_message(reader):
