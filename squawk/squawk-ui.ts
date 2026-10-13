@@ -32,7 +32,7 @@
 //
 // Signed send (2026-10-07): /send uses ui_relay_post.py (thin _post_message;
 // forge-race winner ~63ms) with chat.py relay-in hedge. Never hand-writes .md.
-import { readFileSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
+import { readFileSync, statSync, mkdirSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { buildRoster } from "./fleet-roster.ts";
@@ -97,6 +97,12 @@ function wsTarget(pathname: string, search: string): string {
 // --- channel store: read/write message files directly for true tab isolation ---
 const VALID_CHANNEL = /^#?[a-z0-9-_]{1,32}$/;
 
+// Channel names are stored without the cosmetic "#" prefix (dirs: fleet,
+// ops). Clients may ask for "#ops" or "ops" -- both mean the same channel.
+function normChannel(raw: string): string {
+  return raw.trim().toLowerCase().replace(/^#/, "");
+}
+
 function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32) || "msg";
 }
@@ -145,7 +151,7 @@ function parseMsgFile(path: string, fallbackSeq: number): Msg | null {
 
 // GET /wait?since=<seq>&channel=<name>&tail=<n> -> {ok, messages, cursor}
 function handleWait(url: URL): Response {
-  const channel = (url.searchParams.get("channel") || "fleet").toLowerCase();
+  const channel = normChannel(url.searchParams.get("channel") || "fleet");
   if (!VALID_CHANNEL.test(channel)) {
     return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
   }
@@ -190,7 +196,7 @@ function handleChannels(): Response {
 // Borrowed from fleet-roster.ts buildRoster — same shape the fleet UI expects.
 // Optional ?channel=<name> returns channel membership from _meta.json (cmd_roster).
 function handleRoster(url: URL): Response {
-  const channel = (url.searchParams.get("channel") || "").trim().toLowerCase();
+  const channel = normChannel(url.searchParams.get("channel") || "");
   if (channel) {
     if (!VALID_CHANNEL.test(channel)) {
       return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
@@ -272,7 +278,7 @@ async function handleSend(req: Request): Promise<Response> {
   let body: any;
   try { body = await req.json(); }
   catch { return Response.json({ ok: false, error: "bad json" }, { status: 400 }); }
-  const channel = String(body.channel || "").trim().toLowerCase();
+  const channel = normChannel(String(body.channel || ""));
   const text = String(body.text || "").trim();
   const human = String(body.human || process.env.SQUAWK_UI_HUMAN || "chris").trim().toLowerCase();
   if (!VALID_CHANNEL.test(channel)) {
@@ -294,6 +300,23 @@ async function handleSend(req: Request): Promise<Response> {
   // Hedge: fall back to chat.py relay-in if thin fails.
   const env = { ...process.env, AGENT_CHAT_ROOT: SQUAWK_ROOT };
   const spawnOpts = { timeout: 20000, encoding: "utf8" as const, cwd: SQUAWK_DIR, env };
+  // Dynamic channels (Chris 2026-10-13: "dynamic chat auto #fleet #ops
+  // should exist"): posting to a channel that does not exist yet creates it
+  // on the fly via the real init path (dir + .cursors + _meta.json +
+  // discovery index + CRDT op), never a hand-written meta file.
+  if (!existsSync(join(SQUAWK_ROOT, channel, "_meta.json"))) {
+    const init = spawnSync(
+      "python3",
+      [join(SQUAWK_DIR, "chat.py"), "--root", SQUAWK_ROOT, "init", channel],
+      spawnOpts,
+    );
+    if (init.status !== 0) {
+      const err = (init.stderr || init.stdout || "init failed").trim().slice(0, 200);
+      console.error("squawk-ui: auto-init failed for channel", channel, err);
+      return Response.json({ ok: false, error: `channel auto-create failed: ${err}` }, { status: 500 });
+    }
+    console.log(`squawk-ui: auto-created channel '${channel}'`);
+  }
   try {
     let r = spawnSync(
       "python3",
