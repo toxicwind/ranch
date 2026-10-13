@@ -688,11 +688,12 @@ class Bidder:
         # 2026-10-02 (oracle-settle-2): super-ralph nim-proxy reads
         # FLOCK_* (not NIM_MODEL). Inherited FLOCK pair (nemotron on
         # :25193) is a dead route -> empty stdout, slashed no-result.
-        # 2026-10-13 (vesper, Chris corrective): do NOT use local herd
-        # models (local-fast/local-quality/local-longctx on :25100 are not
-        # ready). Working chain is cuttinggate:25200 -> flock:25193 ->
-        # vans:20128. Use NIM-backed models through flock.
-        renv["FLOCK_BASE_URL"] = "http://127.0.0.1:25193"
+        # 2026-10-13 (osprey root-cause): ghost = empty responses after ~66s
+        # on direct :25193 (flock). Working chain is cuttinggate:25200 ->
+        # flock:25193 -> vans:20128; :25200 is the entry point and works
+        # consistently (3/3), :25193 direct is flaky. Use :25200.
+        # (2026-10-13 vesper/Chris: do NOT use :25100 herd local models.)
+        renv["FLOCK_BASE_URL"] = "http://127.0.0.1:25200"
         renv["FLOCK_MODEL"] = "openai/gpt-oss-20b"
         try:
             with open("/home/toxic/.flock-data/client-key.corral") as _kf:
