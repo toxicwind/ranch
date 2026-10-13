@@ -7,14 +7,14 @@ Public emergent builder for the estate.
 | Piece | Where | Port |
 |-------|-------|------|
 | NativeLink (REAPI) | barn/nativelink | :25155 / :25157 |
-| mbx-cache (mise) | vendored/mr-boxington-cache | :25148 |
+| forge build daemon (flicker-server binary) | pitchfork estate/forge + estate/forge-agent | :25148 HTTP / :25240 gRPC |
 | pattern-borrow | scripts/pattern-borrow.ts | - |
 | emergent (research) | emergent/ | - |
 
 ## Quick start
 
 bazel build --remote_cache=grpc://127.0.0.1:25155 //...
-mise run task   # uses mbx at :25148
+mise run task   # task cache via the forge daemon at :25148 (mbx client)
 bun emergent/paper-borrow.ts query
 
 ## Name
