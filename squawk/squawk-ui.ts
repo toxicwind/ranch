@@ -174,7 +174,16 @@ function handleChannels(): Response {
   let dirs: string[];
   try { dirs = readdirSync(SQUAWK_ROOT, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name); }
   catch { dirs = []; }
-  return Response.json({ ok: true, channels: dirs.filter(d => VALID_CHANNEL.test(d)).sort() });
+  // Only real chat channels: must contain message .md files or _meta.json.
+  // Filters out system dirs (keys, presence) and CLI artifacts (--channel).
+  const channels = dirs.filter(d => {
+    if (!VALID_CHANNEL.test(d)) return false;
+    try {
+      const files = readdirSync(join(SQUAWK_ROOT, d));
+      return files.some(f => f.endsWith('.md') || f === '_meta.json');
+    } catch { return false; }
+  }).sort();
+  return Response.json({ ok: true, channels });
 }
 
 // GET /roster (+ /api/agents/roster): agent activity cards for #fleet.
