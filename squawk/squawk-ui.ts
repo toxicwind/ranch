@@ -44,8 +44,13 @@ const FEED_TOKEN_PATH = "/home/toxic/hatch/agents/ember/squawk-relay/feed-token"
 const SQUAWK_ROOT = "/home/toxic/.fleet-bus/squawk-root";
 
 // websocket upgrade targets: client path -> backend ws url.
+// 2026-10-13: the estate squawk-ws (:25147) was superseded (pitchfork daemon
+// stopped, nothing listens there) - the UI sat in a reconnect loop. fleet-feed
+// (:25201/ws/fleet) is the live push backend. The client-facing /squawk-ws path
+// stays stable so bookmarks and the bundle do not churn; only the shuttle
+// target moves, and the client speaks the fleet-feed protocol (live.svelte.js).
 const WS_TARGETS: Record<string, string> = {
-  "/squawk-ws": "ws://127.0.0.1:25147/squawk-ws",
+  "/squawk-ws": "ws://127.0.0.1:25201/ws/fleet",
   "/nats-ws": "ws://127.0.0.1:4223/",
 };
 
@@ -90,7 +95,7 @@ function wsTarget(pathname: string, search: string): string {
 }
 
 // --- channel store: read/write message files directly for true tab isolation ---
-const VALID_CHANNEL = /^[a-z0-9-_]{1,32}$/;
+const VALID_CHANNEL = /^#?[a-z0-9-_]{1,32}$/;
 
 function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32) || "msg";
