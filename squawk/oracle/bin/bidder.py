@@ -171,8 +171,7 @@ RALPH_MODEL_CANDIDATES = [
     # Never trust a candidate ID without verifying it in /v1/models.
     # 2026-10-13 (vesper, Chris corrective): NIM-backed models via flock.
     # Local herd models (gemma-4-12b, gpt-oss-20b on :25100) are not ready.
-    "nvidia/nemotron-3-nano-30b-a3b",
-    "nvidia/nemotron-3.5-lightning",
+    "openai/gpt-oss-20b",
 ]
 _ralph_model_cache = {"model": None, "ts": 0.0}
 RALPH_MODEL_CACHE_S = 300
