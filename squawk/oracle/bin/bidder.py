@@ -53,7 +53,10 @@ PAYLOAD_CAP_S = 590  # hard ceiling per task execution
 RALPH_BIN = Path("/home/toxic/.local/bin/super-ralph")
 RALPH_CAP_S = 1740  # 29 min ceiling: Super Ralph runs are slow (~11 min
                     # observed for a trivial run)
-RALPH_MODEL = os.environ.get("RALPH_MODEL", "kimi-k3-nim")
+# 2026-10-13 (osprey root-cause, verified live): kimi-k3-nim 404s on
+# :25193. Default to the verified-working executor model.
+RALPH_MODEL = os.environ.get("RALPH_MODEL",
+                            "nvidia/nemotron-3-ultra-550b-a55b")
 RALPH_BASE_URL = os.environ.get("RALPH_BASE_URL",
                                 "http://127.0.0.1:25193/v1")  # flock (NIM-backed); 2026-10-13 Chris corrective: do NOT use local herd :25100
 # cuttinggate's auth gate requires a "Bearer " prefix (any non-empty value;
@@ -169,8 +172,12 @@ RALPH_MODEL_CANDIDATES = [
     # are PHANTOMS -- they do not exist on the router, which SILENTLY
     # SUBSTITUTED meta/llama-3.2-11b-vision-instruct (Wraith diagnosis).
     # Never trust a candidate ID without verifying it in /v1/models.
-    # 2026-10-13 (vesper, Chris corrective): NIM-backed models via flock.
-    # Local herd models (gemma-4-12b, gpt-oss-20b on :25100) are not ready.
+    # 2026-10-13 (osprey root-cause, verified live): openai/gpt-oss-20b
+    # is DEAD -- 200-empty or hang on :25193, "no provider returned valid
+    # content" on :25200. nvidia/nemotron-3-ultra-550b-a55b verified 200 +
+    # non-empty on both routes. Verified-first ordering; the resolver's
+    # non-empty probe promotes whatever actually answers.
+    "nvidia/nemotron-3-ultra-550b-a55b",
     "openai/gpt-oss-20b",
 ]
 _ralph_model_cache = {"model": None, "ts": 0.0}
@@ -694,7 +701,11 @@ class Bidder:
         # consistently (3/3), :25193 direct is flaky. Use :25200.
         # (2026-10-13 vesper/Chris: do NOT use :25100 herd local models.)
         renv["FLOCK_BASE_URL"] = "http://127.0.0.1:25200"
-        renv["FLOCK_MODEL"] = "openai/gpt-oss-20b"
+        # 2026-10-13 (osprey root-cause): the nim-proxy must run the
+        # resolver-verified winner, never a hardcoded ID. Hardcoding
+        # gpt-oss-20b here stomped the working model and re-armed the
+        # ghost on every super-ralph fallback.
+        renv["FLOCK_MODEL"] = ralph_model
         try:
             with open("/home/toxic/.flock-data/client-key.corral") as _kf:
                 renv["FLOCK_API_KEY"] = _kf.read().strip()

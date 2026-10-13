@@ -1281,7 +1281,12 @@ class OracleLoop:
             # bidder did nothing wrong. Release the bond, do not slash, do
             # not touch rep. Flags/slashes are for failed verification of
             # real output, not dead executors. The flag path was a red herring.
-            if reason == "no-result" and not success:
+            # 2026-10-13 (osprey root-cause): the ghost's silent-death mode
+            # never posts a result, so the oracle settles it as "exec-timeout"
+            # -- which bypassed the no-result fix and kept slashing bidders
+            # (raccoon's spiral). No result produced + not success =
+            # infrastructure. Same release, no slash, no rep change.
+            if reason in ("no-result", "exec-timeout") and not success:
                 mech.release_bond(self.profiles, short_id, tid)
                 self.log("bond_released_infra", task_id=tid, bidder=bidder,
                          reason=reason, verified=False, replay=replay)
