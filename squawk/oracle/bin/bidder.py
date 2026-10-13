@@ -55,7 +55,7 @@ RALPH_CAP_S = 1740  # 29 min ceiling: Super Ralph runs are slow (~11 min
                     # observed for a trivial run)
 RALPH_MODEL = os.environ.get("RALPH_MODEL", "kimi-k3-nim")
 RALPH_BASE_URL = os.environ.get("RALPH_BASE_URL",
-                                "http://127.0.0.1:25104/v1")  # sovereign TS router; :25200 (cuttinggate test) is dead
+                                "http://127.0.0.1:25100/v1")  # herd router; :25104 sovereign is dark as of 2026-10-13
 # cuttinggate's auth gate requires a "Bearer " prefix (any non-empty value;
 # the upstream key comes from cuttinggate's own credential plane).
 RALPH_API_KEY = os.environ.get("RALPH_API_KEY", "oracle-market-bidder")
@@ -157,12 +157,14 @@ def _summarize_ralph_nodes(workdir):
 # against the router with a live probe, falling back down a priority chain.
 RALPH_MODEL_CANDIDATES = [
     os.environ.get("RALPH_MODEL") or "",  # explicit operator override
-    # 2026-10-03: :25200 (cuttinggate test instance) is DEAD — nothing
-    # listening. :25104 (sovereign TS router) is the live backend, verified
-    # 2026-10-03 with non-empty completions on every candidate below.
-    "gemini-eap-openai/gemini-3.8-flash",
-    "google/gemini-3.8-flash",
-    "openai/gpt-oss-20b",  # fallback; routes fine on :25104
+    # 2026-10-13: gemini-eap-openai/gemini-3.8-flash and google/gemini-3.8-flash
+    # are PHANTOMS -- they do not exist on the router, which SILENTLY
+    # SUBSTITUTED meta/llama-3.2-11b-vision-instruct (Wraith diagnosis).
+    # Never trust a candidate ID without verifying it in /v1/models.
+    # Verified live 2026-10-13 on :25100 (herd): gemma-4-12b returns valid
+    # JSON for schema prompts (interpret-config needs JSON-following).
+    "gemma-4-12b",
+    "openai/gpt-oss-20b",  # fallback; routes fine when :25104 is up
 ]
 _ralph_model_cache = {"model": None, "ts": 0.0}
 RALPH_MODEL_CACHE_S = 300
@@ -183,6 +185,27 @@ def _resolve_ralph_model(base_url, timeout=15):
         return _ralph_model_cache["model"]
     candidates = [c for c in RALPH_MODEL_CANDIDATES if c]
     base = base_url.rstrip("/")
+    # 2026-10-13: validate candidate IDs against /v1/models. A router that
+    # silently substitutes a different model for an unknown ID will pass the
+    # probe but run the wrong model. Fail the phantom loudly, never accept
+    # silent substitution.
+    try:
+        mreq = urllib.request.Request(
+            base + "/models",
+            headers={"Authorization": "Bearer " + RALPH_API_KEY,
+                     "User-Agent": "oracle-market-bidder"})
+        with urllib.request.urlopen(mreq, timeout=timeout) as mr:
+            mdata = json.loads(mr.read().decode("utf-8", "replace"))
+        live_ids = {m.get("id") for m in mdata.get("data", []) if m.get("id")}
+        phantoms = [c for c in candidates if c not in live_ids]
+        if phantoms:
+            print(f"_resolve_ralph_model: PHANTOM model IDs not on router: {phantoms} "
+                  f"(not in /v1/models; refusing silent substitution)", flush=True)
+        candidates = [c for c in candidates if c in live_ids]
+    except Exception as e:
+        # If /v1/models is unreachable, proceed to probe (which will fail
+        # loudly on connection error rather than silently substituting).
+        print(f"_resolve_ralph_model: /v1/models check failed ({e}); probing anyway", flush=True)
     for cand in candidates:
         try:
             body = json.dumps({
@@ -663,7 +686,7 @@ class Bidder:
         # ready). Working chain is cuttinggate:25200 -> flock:25193 ->
         # vans:20128. Use NIM-backed models through flock.
         renv["FLOCK_BASE_URL"] = "http://127.0.0.1:25193"
-        renv["FLOCK_MODEL"] = "nvidia/nemotron-3-nano-30b-a3b"
+        renv["FLOCK_MODEL"] = "openai/gpt-oss-20b"
         try:
             with open("/home/toxic/.flock-data/client-key.corral") as _kf:
                 renv["FLOCK_API_KEY"] = _kf.read().strip()
