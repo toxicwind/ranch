@@ -988,9 +988,16 @@
     },
     {
       "name": "sidechat-shim",
-      "url": "http://127.0.0.1:25198/mcp",
-      "protocol": "http",
-      "enabled": true
+      "protocol": "stdio",
+      "command": "/home/toxic/.awrawr-mcp-venv/bin/python",
+      "args": [
+        "/home/toxic/hatch/shim_mcp.py"
+      ],
+      "env": {
+        "SHIM_MCP_TRANSPORT": "stdio"
+      },
+      "enabled": true,
+      "quarantined": false
     }
   ],
   "oauth_expiry_warning_hours": 4,
