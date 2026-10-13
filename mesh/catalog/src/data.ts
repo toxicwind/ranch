@@ -52,29 +52,9 @@
 import type { ModelAlias, ProviderDef } from "./types.ts";
 
 export const PROVIDER_DEFS: ProviderDef[] = [
-  {
-    name: "herd",
-    displayName: "herd (local)",
-    baseUrl: "http://127.0.0.1:25100/v1",
-    keyEnv: "HERD_API_KEY",
-    auth: "none",
-    adapter: "openai",
-    seeds: [
-      "google/diffusiongemma-26b-a4b-it",
-      "meta/llama-3.2-11b-vision-instruct",
-      "meta/muse-glimmer-30b",
-      "nvidia/ising-calibration-1.5-31b",
-      "nvidia/nemotron-3-super-120b-a12b",
-      "nvidia/nemotron-3.5-content-safety",
-      "nvidia/nemotron-3.5-lightning-30b-a3b",
-      "nvidia/nemotron-parse-2.0",
-      "nvidia/riva-translate-4b-instruct-v1.1",
-      "nvidia/riva-translate-4b-instruct-v2",
-      "openai/gpt-oss-20b",
-      "poolside/laguna-xs-2.1",
-      "z-ai/glm-5.3-flash",
-    ],
-  },
+  // 2026-10-13: `herd` deleted per Chris's order. Local herd models
+  // (llama-swap :25100) are not ready; the catalog must not advertise
+  // them. Working chain: cuttinggate :25200 -> flock :25193 -> vans.
   // 2026-10-09: `nim-local` deleted. It declared baseUrl 127.0.0.1:8000/v1,
   // which violated the estate port SSOT (all 25xxx, config/ports.env) and
   // contributed ZERO models to the live fleet (verified: 0 nim-local-prefixed

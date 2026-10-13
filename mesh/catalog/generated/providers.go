@@ -30,21 +30,6 @@ type CatalogProviderDef struct {
 // ProviderCatalogDefs is the canonical provider table.
 var ProviderCatalogDefs = []CatalogProviderDef{
 	{
-		Name:           "herd",
-		BaseURL:        "http://127.0.0.1:25100/v1",
-		KeyEnv:         "HERD_API_KEY",
-		KeyEnvAlt:      "",
-		Adapter:        "openai",
-		Auth:           "none",
-		HeaderName:     "",
-		QueryParam:     "",
-		ModelsPath:     "",
-		NoModelsReason: "",
-		NoAuth:         true,
-		RouterLocal:    false,
-		Enabled:        true,
-	},
-	{
 		Name:           "kimi-auto",
 		BaseURL:        "http://127.0.0.1:25153/v1",
 		KeyEnv:         "KIMI_AUTO_SHIM_KEY",
@@ -711,21 +696,6 @@ var ProviderCatalogDefs = []CatalogProviderDef{
 // membership — never add live models here. Seeds may name dead IDs; the
 // catalog filters deadIds everywhere (cold start included).
 var ProviderCatalogSeeds = map[string][]string{
-	"herd": []string{
-		"google/diffusiongemma-26b-a4b-it",
-		"meta/llama-3.2-11b-vision-instruct",
-		"meta/muse-glimmer-30b",
-		"nvidia/ising-calibration-1.5-31b",
-		"nvidia/nemotron-3-super-120b-a12b",
-		"nvidia/nemotron-3.5-content-safety",
-		"nvidia/nemotron-3.5-lightning-30b-a3b",
-		"nvidia/nemotron-parse-2.0",
-		"nvidia/riva-translate-4b-instruct-v1.1",
-		"nvidia/riva-translate-4b-instruct-v2",
-		"openai/gpt-oss-20b",
-		"poolside/laguna-xs-2.1",
-		"z-ai/glm-5.3-flash",
-	},
 	"kimi-auto": []string{
 		"google/diffusiongemma-26b-a4b-it",
 		"meta/llama-3.2-11b-vision-instruct",

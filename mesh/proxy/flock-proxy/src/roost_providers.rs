@@ -46,23 +46,6 @@ pub struct RoostProvider {
 /// The canonical provider table, generated from the Roost catalog.
 pub const ROOST_PROVIDERS: &[RoostProvider] = &[
     RoostProvider {
-        name: "herd",
-        display_name: "herd (local)",
-        base_url: "http://127.0.0.1:25100/v1",
-        key_env: "HERD_API_KEY",
-        key_env_alt: "",
-        adapter: "openai",
-        auth: "none",
-        header_name: "",
-        query_param: "",
-        models_path: "",
-        router_local: false,
-        enabled: true,
-        seeds: &["google/diffusiongemma-26b-a4b-it", "meta/llama-3.2-11b-vision-instruct", "meta/muse-glimmer-30b", "nvidia/ising-calibration-1.5-31b", "nvidia/nemotron-3-super-120b-a12b", "nvidia/nemotron-3.5-content-safety", "nvidia/nemotron-3.5-lightning-30b-a3b", "nvidia/nemotron-parse-2.0", "nvidia/riva-translate-4b-instruct-v1.1", "nvidia/riva-translate-4b-instruct-v2", "openai/gpt-oss-20b", "poolside/laguna-xs-2.1", "z-ai/glm-5.3-flash"],
-        static_models: &[],
-        context_lengths: &[],
-    },
-    RoostProvider {
         name: "kimi-auto",
         display_name: "kimi-auto shim",
         base_url: "http://127.0.0.1:25153/v1",

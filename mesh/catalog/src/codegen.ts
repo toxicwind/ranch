@@ -402,12 +402,6 @@ export function buildProvidersTauYaml(input: CodegenInput): string {
     '    apiKey: "!cat /home/toxic/.tau/flock.key"',
     "    discovery:",
     "      type: openai-models-list",
-    "  herd:",
-    '    baseUrl: http://127.0.0.1:25100/v1',
-    "    api: openai-completions",
-    "    auth: none",
-    "    discovery:",
-    "      type: openai-models-list",
   ];
 
   for (const d of input.defs) {
