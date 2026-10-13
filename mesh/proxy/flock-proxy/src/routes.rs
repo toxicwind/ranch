@@ -45,7 +45,9 @@ pub const LOGIN: &str = "/login";
 pub const LOGOUT: &str = "/logout";
 pub const SETUP: &str = "/setup";
 pub const SETUP_VALIDATE_KEY: &str = "/setup/validate-key";
-pub const V1_BODYBUILDER: &str = "/v1/bodybuilder";
+pub const V1_BODYBUILDER: &str = "/v1/custom/bodybuilder";
+pub const V1_BODYBUILDER_LEGACY: &str = "/v1/bodybuilder";
+pub const V1_CUSTOM_DOTS: &str = "/v1/custom/dots";
 pub const V1_WILDCARD: &str = "/v1/{*path}";
 
 #[cfg(test)]

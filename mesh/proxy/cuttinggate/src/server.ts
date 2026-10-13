@@ -22,7 +22,9 @@ import { Ledger } from "./ledger.ts";
 import { Router } from "./router.ts";
 import { loadLiveCatalog, normalizeId, watchCatalog, DEFAULT_CATALOG_PATH, type CatalogLoad, type LiveCatalog, type CatalogWatcher } from "./catalog.ts";
 import { CredentialPlane, loadPoolsFromYaml } from "./keypool.ts";
-import { ZEN_MODELS, ZEN_PROVIDER } from "./zen.ts";
+import { ZEN_MODELS, ZEN_PROVIDER, ZEN_LEGACY_PROVIDER } from "./zen.ts";
+import { COPILOT_PROVIDER } from "./copilot.ts";
+import { DOTS_MODELS, DOTS_PROVIDER, DOTS_MODEL } from "./dots.ts";
 import { buildCoding, LOCAL_ROLES, normalizeModelSpec, resolveModel, type CatalogQuery } from "./strategy/catalog.ts";
 
 const log = pino({ level: process.env.CUTTINGGATE_LOG_LEVEL ?? "info" });
@@ -191,6 +193,24 @@ export function buildApp(deps: AppDeps) {
     .get("/models/sse", () => handleModelsSse())
     .get("/v1/models/sse", () => handleModelsSse())
     .get(
+      "/v1/custom/openfang-resolve",
+      ({ query }) => {
+        const spec = query.spec ?? "";
+        const norm = normalizeModelSpec(spec, catalogQuery, CODING);
+        const [provider, model] = resolveModel(spec, catalogQuery, CODING);
+        const root = `http://${config.host}:${config.port}`;
+        return {
+          spec, provider, model,
+          route: "custom/openfang-resolve",
+          provider_base_url: config.bases[provider] ?? null,
+          router_chat_url: `${root}/v1/chat/completions`,
+          router_status_url: `${root}/status`,
+          normalized_from: norm.provider ? `${norm.provider}:${norm.model}` : norm.model,
+        };
+      },
+      { query: t.Object({ spec: t.Optional(t.String()) }) },
+    )
+    .get(
       "/openfang/resolve",
       ({ query }) => {
         const spec = query.spec ?? "";
@@ -199,6 +219,7 @@ export function buildApp(deps: AppDeps) {
         const root = `http://${config.host}:${config.port}`;
         return {
           spec, provider, model,
+          route: "custom/openfang-resolve",
           provider_base_url: config.bases[provider] ?? null,
           router_chat_url: `${root}/v1/chat/completions`,
           router_status_url: `${root}/status`,
@@ -206,6 +227,66 @@ export function buildApp(deps: AppDeps) {
         };
       },
       { query: t.Object({ spec: t.Optional(t.String()) }) },
+    )
+    .post(
+      "/v1/custom/bodybuilder",
+      async ({ body }) => {
+        const job = String((body as Record<string, unknown>)?.job ?? "").trim();
+        if (!job) {
+          return { error: "missing job" };
+        }
+        const maxRequests = Math.min(Math.max(Number((body as Record<string, unknown>)?.max_requests ?? 4) || 4, 1), 16);
+        const execute = (body as Record<string, unknown>)?.execute !== false;
+        const known = router.known();
+        const pool = known.length ? known.map((m) => `${m.provider}/${m.id}`) : [DOTS_MODEL];
+        const requests = Array.from({ length: maxRequests }, (_, i) => ({
+          model: pool[i % pool.length]!,
+          messages: [{ role: "user", content: job }],
+          temperature: 0.7,
+          max_tokens: 2000,
+        }));
+        if (!execute) return { route: "custom/bodybuilder", requests };
+        const results = await Promise.all(
+          requests.map(async (req) => {
+            const target = req.model.includes("/") ? req.model.split("/").slice(1).join("/") : req.model;
+            const r = await router.complete(target, req.messages, { temperature: req.temperature, max_tokens: req.max_tokens });
+            return r.ok
+              ? { model: req.model, ok: true, text: r.content, latency_ms: Math.round(r.latencyMs), routed_via: `${r.provider}/${target}` }
+              : { model: req.model, ok: false, error: r.error, latency_ms: 0 };
+          }),
+        );
+        return { route: "custom/bodybuilder", requests, results };
+      },
+    )
+    .post(
+      "/v1/bodybuilder",
+      async ({ body }) => {
+        const job = String((body as Record<string, unknown>)?.job ?? "").trim();
+        if (!job) {
+          return { error: "missing job" };
+        }
+        const maxRequests = Math.min(Math.max(Number((body as Record<string, unknown>)?.max_requests ?? 4) || 4, 1), 16);
+        const execute = (body as Record<string, unknown>)?.execute !== false;
+        const known = router.known();
+        const pool = known.length ? known.map((m) => `${m.provider}/${m.id}`) : [DOTS_MODEL];
+        const requests = Array.from({ length: maxRequests }, (_, i) => ({
+          model: pool[i % pool.length]!,
+          messages: [{ role: "user", content: job }],
+          temperature: 0.7,
+          max_tokens: 2000,
+        }));
+        if (!execute) return { route: "custom/bodybuilder", requests };
+        const results = await Promise.all(
+          requests.map(async (req) => {
+            const target = req.model.includes("/") ? req.model.split("/").slice(1).join("/") : req.model;
+            const r = await router.complete(target, req.messages, { temperature: req.temperature, max_tokens: req.max_tokens });
+            return r.ok
+              ? { model: req.model, ok: true, text: r.content, latency_ms: Math.round(r.latencyMs), routed_via: `${r.provider}/${target}` }
+              : { model: req.model, ok: false, error: r.error, latency_ms: 0 };
+          }),
+        );
+        return { route: "custom/bodybuilder", requests, results };
+      },
     )
     .post("/admin/reload", ({ set }) => {
       if (!deps.reload) {
@@ -239,10 +320,24 @@ export function buildApp(deps: AppDeps) {
           set.status = CODES[code]; return envelope(code, `catalog ${cat.status}`, { source: cat.source });
         }
 
-        // openfang shim: "provider:model" / "provider/model" specs -> canonical pair.
+        // custom/ and openfang shim: "custom/dots", "custom/zen", "custom/copilot", "provider:model" specs.
         let model = body.model;
         let only: string | undefined;
-        if (!router.serves(model)) {
+        if (model === "custom/dots" || model === DOTS_MODEL || model === `openrouter/${DOTS_MODEL}`) {
+          if (router.serves(DOTS_MODEL, DOTS_PROVIDER)) {
+            model = DOTS_MODEL;
+            only = DOTS_PROVIDER;
+          } else if (router.serves("custom/dots", DOTS_PROVIDER)) {
+            model = "custom/dots";
+            only = DOTS_PROVIDER;
+          }
+        } else if (model.startsWith("custom/zen/")) {
+          model = model.slice("custom/zen/".length);
+          only = ZEN_PROVIDER;
+        } else if (model.startsWith("custom/copilot/")) {
+          model = model.slice("custom/copilot/".length);
+          only = COPILOT_PROVIDER;
+        } else if (!router.serves(model)) {
           const norm = normalizeModelSpec(model, catalogQuery, CODING);
           if (norm.provider && router.serves(norm.model, norm.provider)) {
             model = norm.model;
@@ -254,7 +349,20 @@ export function buildApp(deps: AppDeps) {
           const q = quarantine.get(model); set.status = CODES.model_quarantined;
           return envelope("model_quarantined", `model ${model} is quarantined: ${q?.reason} (${q?.detail})`, { model });
         }
-        const attempt = await router.complete(model, body.messages, { temperature: body.temperature, max_tokens: body.max_tokens }, only);
+        const rawBody = body as Record<string, unknown>;
+        const attempt = await router.complete(
+          model,
+          body.messages,
+          {
+            temperature: body.temperature,
+            max_tokens: body.max_tokens,
+            tools: Array.isArray(rawBody.tools) ? (rawBody.tools as never) : undefined,
+            tool_choice: rawBody.tool_choice,
+            forced_tool: typeof rawBody.forced_tool === "string" ? rawBody.forced_tool : undefined,
+            sessionId: typeof rawBody.sessionId === "string" ? rawBody.sessionId : headers["x-session-id"],
+          },
+          only,
+        );
         if (!attempt.ok) {
           set.status = CODES.no_provider_serves;
           return envelope("no_provider_serves", attempt.error, { model: body.model, catalog_contract: cat.contract.name });
@@ -282,11 +390,19 @@ export function buildApp(deps: AppDeps) {
         set.headers["x-routed-via"] = routedVia;
         return {
           id, object: "chat.completion", created, model: body.model,
-          choices: [{ index: 0, message: { role: "assistant", content: attempt.content }, finish_reason: attempt.finishReason ?? "stop" }],
+          choices: [{
+            index: 0,
+            message: {
+              role: "assistant",
+              content: attempt.content,
+              ...(attempt.toolCalls ? { tool_calls: attempt.toolCalls } : {}),
+            },
+            finish_reason: attempt.finishReason ?? (attempt.toolCalls ? "tool_calls" : "stop"),
+          }],
           usage: attempt.usage, meta: { provider: attempt.provider, latency_ms: Math.round(attempt.latencyMs), raced: attempt.raced },
         };
       },
-      { body: t.Object({ model: t.String({ minLength: 1 }), messages: t.Array(t.Object({ role: t.String(), content: t.String() })), stream: t.Optional(t.Boolean()), temperature: t.Optional(t.Number()), max_tokens: t.Optional(t.Number()) }) },
+      { body: t.Object({ model: t.String({ minLength: 1 }), messages: t.Array(t.Object({ role: t.String(), content: t.Nullable(t.String()) }, { additionalProperties: true })), stream: t.Optional(t.Boolean()), temperature: t.Optional(t.Number()), max_tokens: t.Optional(t.Number()) }, { additionalProperties: true }) },
     );
 }
 
@@ -306,7 +422,13 @@ function seedRouter(router: Router, quarantine: Quarantine, cat: LiveCatalog): n
       pairs.push([id, provider]);
     }
   }
-  for (const id of ZEN_MODELS) pairs.push([id, ZEN_PROVIDER]);
+  for (const id of ZEN_MODELS) {
+    pairs.push([id, ZEN_PROVIDER]);
+    pairs.push([id, ZEN_LEGACY_PROVIDER]);
+  }
+  for (const id of DOTS_MODELS) {
+    pairs.push([id, DOTS_PROVIDER]);
+  }
   router.reseed(pairs);
   for (const [provider, entry] of Object.entries(cat.providers)) quarantine.observeListing(entry.serving, provider);
   return pairs.length;

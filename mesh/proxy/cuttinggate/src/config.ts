@@ -47,6 +47,10 @@ const Schema = z.object({
     "mistral": "https://api.mistral.ai",
     "google-eap": "http://127.0.0.1:25109/gemini-eap-interactions",
     "zen": "https://opencode.ai/zen/v1",
+    "custom/zen": "https://opencode.ai/zen/v1",
+    "custom/dots": "https://openrouter.ai/api/v1",
+    "custom/copilot": "https://api.githubcopilot.com",
+    "custom/bodybuilder": "http://127.0.0.1:25193/v1",
     "flock": "http://127.0.0.1:25193/v1",
     "omniroute": "http://127.0.0.1:20130/v1",
     "vans": "http://127.0.0.1:20128/v1",
@@ -77,6 +81,12 @@ function readKeys(): Record<string, string> {
   // keyEnv); ZEN_API_KEY is accepted as an alias by the generic rule above.
   if (!out["zen"] && process.env.OPENCODE_API_KEY)
     out["zen"] = process.env.OPENCODE_API_KEY;
+  if (out["zen"] && !out["custom/zen"])
+    out["custom/zen"] = out["zen"];
+  if (out["openrouter"] && !out["custom/dots"])
+    out["custom/dots"] = out["openrouter"];
+  if (process.env.GITHUB_TOKEN && !out["custom/copilot"])
+    out["custom/copilot"] = process.env.GITHUB_TOKEN;
   if (!out["flock"] && process.env.FLOCK_API_KEY)
     out["flock"] = process.env.FLOCK_API_KEY;
   return out;

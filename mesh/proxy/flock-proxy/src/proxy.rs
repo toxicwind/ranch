@@ -117,7 +117,9 @@ fn label_path(path: &str) -> String {
         | "/v1/completions"
         | "/v1/embeddings"
         | "/v1/models"
-        | "/v1/rankings" => path.to_owned(),
+        | "/v1/rankings"
+        | "/v1/custom/dots"
+        | "/v1/custom/rankings" => path.to_owned(),
         _ => "other".to_owned(),
     }
 }
@@ -522,17 +524,34 @@ pub async fn handle(
         Err(()) => return invalid_deadline(),
     };
 
-    let path_query = uri
+    let mut path_query = uri
         .path_and_query()
         .map(|pq| pq.as_str().to_owned())
         .unwrap_or_else(|| uri.path().to_owned());
 
     let mut parsed = serde_json::from_slice::<serde_json::Value>(&body).ok();
-    let raw_model = parsed
+    let mut raw_model = parsed
         .as_ref()
         .and_then(|v| v.get("model").and_then(|m| m.as_str()))
         .unwrap_or("none")
         .to_owned();
+    // Dots custom-model normalization: any Dots model id or /v1/custom/dots
+    // request is coerced via dotsBody before the normal proxy path runs.
+    let mut body = body;
+    if crate::dots::is_dots_model_or_path(&raw_model, uri.path()) {
+        let session_id = headers
+            .get("x-session-id")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("flock-dots-session");
+        if let Some(ref mut val) = parsed {
+            *val = crate::dots::coerce_dots_payload(val.clone(), session_id);
+            raw_model = crate::dots::DOTS_CANONICAL_MODEL.to_owned();
+            body = Bytes::from(serde_json::to_vec(val).unwrap_or_default());
+        }
+        if path_query == crate::routes::V1_CUSTOM_DOTS {
+            path_query = "/v1/chat/completions".to_owned();
+        }
+    }
     let ctx = Ctx {
         client,
         model: label_model(&state, &raw_model),
@@ -576,7 +595,7 @@ pub async fn handle(
     // Usage injection: streamed responses only report exact token usage when
     // asked via stream_options, so ask on the client's behalf. `fallback`
     // keeps the untouched body for a one-shot retry if the model rejects it.
-    let mut body = body;
+    // (`body` was already shadowed as mutable above for the Dots coercion.)
     let mut fallback = None;
     if wants_stream && !cfg.strict_passthrough && uri.path() == "/v1/chat/completions" {
         let injectable = parsed

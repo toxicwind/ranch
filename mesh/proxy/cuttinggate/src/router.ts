@@ -25,25 +25,30 @@ import { ProviderGate } from "./circuit.ts";
 import { Quarantine } from "./quarantine.ts";
 import { KeyPoolExhaustedError, type CredentialPlane } from "./keypool.ts";
 import { Ledger } from "./ledger.ts";
-import { COPILOT_PROVIDER, CopilotClient, copilotHeaders } from "./copilot.ts";
-import { ZEN_PROVIDER, ZEN_BASE_URL, foldZenSse, zenBody, zenHeaders } from "./zen.ts";
+import { COPILOT_PROVIDER, COPILOT_LEGACY_PROVIDER, CopilotClient, copilotHeaders } from "./copilot.ts";
+import { ZEN_PROVIDER, ZEN_LEGACY_PROVIDER, ZEN_BASE_URL, foldZenSse, zenBody, zenHeaders } from "./zen.ts";
+import { DOTS_PROVIDER, DOTS_LEGACY_PROVIDER, DOTS_MODEL, dotsBody, type DotsMessage, type DotsTool } from "./dots.ts";
 
 export type KnownModel = { id: string; provider: string };
 
 export type Attempt =
-  | { ok: true; content: string; provider: string; latencyMs: number; raced: boolean; finishReason?: string; usage?: unknown }
+  | { ok: true; content: string; provider: string; latencyMs: number; raced: boolean; finishReason?: string; usage?: unknown; toolCalls?: unknown }
   | { ok: false; error: string };
 
 export type ChatRequest = {
   model: string;
-  messages: { role: string; content: string }[];
+  messages: { role: string; content: string | null }[];
   temperature?: number;
   max_tokens?: number;
+  tools?: DotsTool[];
+  tool_choice?: unknown;
+  forced_tool?: string;
+  sessionId?: string;
 };
 
 /** One settled attempt, unblinded: every way an attempt can end is its own state. */
 type Outcome =
-  | { readonly kind: "valid"; readonly provider: string; readonly content: string; readonly finishReason?: string; readonly usage?: unknown; readonly latencyMs: number; readonly status: number }
+  | { readonly kind: "valid"; readonly provider: string; readonly content: string; readonly finishReason?: string; readonly usage?: unknown; readonly toolCalls?: unknown; readonly latencyMs: number; readonly status: number }
   | { readonly kind: "empty"; readonly provider: string; readonly latencyMs: number; readonly status: number }
   | { readonly kind: "provider-error"; readonly provider: string; readonly latencyMs: number; readonly status: number; readonly error: string; readonly trip: boolean }
   | { readonly kind: "gate-rejected"; readonly provider: string; readonly error: string }
@@ -60,14 +65,14 @@ class AttemptFailure extends Error {
   }
 }
 
-/** Upstream 200 body shape: "content" vs "no content" vs "junk". */
+/** Upstream 200 body shape: "content" (or tool_calls) vs "no content" vs "junk". */
 type BodyInput = {
-  choices?: { message?: { content?: unknown }; finish_reason?: string }[];
+  choices?: { message?: { content?: unknown; tool_calls?: unknown }; finish_reason?: string }[];
   usage?: unknown;
 } | null;
 
 type BodyShape =
-  | { readonly kind: "ok"; readonly content: string; readonly finishReason?: string; readonly usage?: unknown }
+  | { readonly kind: "ok"; readonly content: string; readonly finishReason?: string; readonly usage?: unknown; readonly toolCalls?: unknown }
   | { readonly kind: "empty"; readonly finishReason?: string; readonly usage?: unknown }
   | { readonly kind: "malformed" };
 
@@ -76,10 +81,18 @@ function parseBody(body: BodyInput): BodyShape {
   const choice = body.choices?.[0];
   if (!choice) return { kind: "empty" };
   const content = choice.message?.content;
-  if (typeof content !== "string" || content.trim() === "") {
+  const toolCalls = choice.message?.tool_calls;
+  const hasTools = Array.isArray(toolCalls) && toolCalls.length > 0;
+  if ((!content || typeof content !== "string" || content.trim() === "") && !hasTools) {
     return { kind: "empty", finishReason: choice.finish_reason, usage: body.usage };
   }
-  return { kind: "ok", content, finishReason: choice.finish_reason, usage: body.usage };
+  return {
+    kind: "ok",
+    content: typeof content === "string" ? content : "",
+    finishReason: choice.finish_reason,
+    usage: body.usage,
+    ...(hasTools ? { toolCalls } : {}),
+  };
 }
 
 const envMs = (name: string, fallback: number): number => {
@@ -195,8 +208,11 @@ export class Router {
   }
 
   protected async call(provider: string, req: ChatRequest, signal: AbortSignal, key = ""): Promise<Response> {
-    if (provider === COPILOT_PROVIDER) return this.callCopilot(req, signal);
-    if (provider === ZEN_PROVIDER) return this.callZen(req, signal, key);
+    if (provider === COPILOT_PROVIDER || provider === COPILOT_LEGACY_PROVIDER) return this.callCopilot(req, signal);
+    if (provider === ZEN_PROVIDER || provider === ZEN_LEGACY_PROVIDER) return this.callZen(req, signal, key);
+    if (provider === DOTS_PROVIDER || provider === DOTS_LEGACY_PROVIDER || req.model === "custom/dots" || req.model === DOTS_MODEL) {
+      return this.callDots(provider, req, signal, key);
+    }
 
     const base = this.config.bases[provider];
     if (!base) throw new Error(`no base url for provider ${provider}`);
@@ -210,12 +226,34 @@ export class Router {
     });
   }
 
+  private async callDots(provider: string, req: ChatRequest, signal: AbortSignal, key: string): Promise<Response> {
+    const base = this.config.bases[provider] ?? this.config.bases[DOTS_PROVIDER] ?? this.config.bases["openrouter"] ?? "https://openrouter.ai/api/v1";
+    const resolvedKey = key || this.config.keys[DOTS_PROVIDER] || this.config.keys["openrouter"] || "";
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    if (resolvedKey) headers.authorization = `Bearer ${resolvedKey}`;
+    const payload = dotsBody(req.messages as DotsMessage[], {
+      sessionId: req.sessionId,
+      tools: req.tools,
+      tool_choice: req.tool_choice,
+      forced_tool: req.forced_tool,
+      temperature: req.temperature,
+      max_tokens: req.max_tokens,
+    });
+    return fetch(`${base}/chat/completions`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+      signal,
+    });
+  }
+
   private async callZen(req: ChatRequest, signal: AbortSignal, key: string): Promise<Response> {
     if (!key) throw new Error("zen: no API key configured (set ZEN_API_KEY or OPENCODE_API_KEY)");
+    const normMsgs = req.messages.map((m) => ({ role: m.role, content: m.content ?? "" }));
     const res = await fetch(`${ZEN_BASE_URL}/chat/completions`, {
       method: "POST",
       headers: zenHeaders(key),
-      body: JSON.stringify(zenBody(req.model, req.messages, { temperature: req.temperature, max_tokens: req.max_tokens })),
+      body: JSON.stringify(zenBody(req.model, normMsgs, { temperature: req.temperature, max_tokens: req.max_tokens })),
       signal: AbortSignal.any([signal, AbortSignal.timeout(ZEN_ATTEMPT_MS)]),
     });
     if (!res.ok) {
@@ -277,7 +315,7 @@ export class Router {
       const shape = parseBody((await res.json().catch(() => null)) as BodyInput);
       if (raceSignal.aborted) return { kind: "cancelled", provider };
       if (shape.kind === "ok") {
-        return { kind: "valid", provider, content: shape.content, finishReason: shape.finishReason, usage: shape.usage, latencyMs: elapsed(), status: res.status };
+        return { kind: "valid", provider, content: shape.content, finishReason: shape.finishReason, usage: shape.usage, toolCalls: shape.toolCalls, latencyMs: elapsed(), status: res.status };
       }
       if (shape.kind === "empty") return { kind: "empty", provider, latencyMs: elapsed(), status: res.status };
       return { kind: "provider-error", provider, latencyMs: elapsed(), status: res.status, error: "malformed_body", trip: false };
@@ -306,7 +344,7 @@ export class Router {
 
   async complete(
     model: string,
-    messages: { role: string; content: string }[],
+    messages: { role: string; content: string | null }[],
     extra: Partial<ChatRequest> = {},
     only?: string,
   ): Promise<Attempt> {
@@ -371,6 +409,7 @@ export class Router {
         raced: providers.length > 1,
         finishReason: winner.finishReason,
         usage: winner.usage,
+        ...(winner.toolCalls ? { toolCalls: winner.toolCalls } : {}),
       };
     }
     return {
