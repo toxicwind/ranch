@@ -45,18 +45,33 @@ import engine
 import evidence as evmod
 import escalation
 
-HERD_URL = os.environ.get("HERD_URL", "http://127.0.0.1:25100")
+# Inference endpoint: flock :25193 (NIM-backed). 2026-10-13 Chris
+# corrective: do NOT use the local herd models on :25100 -- not ready.
+# Working chain: cuttinggate:25200 -> flock:25193 -> vans:20128.
+# HERD_URL env name kept for caller compatibility; default is flock.
+HERD_URL = os.environ.get("HERD_URL", "http://127.0.0.1:25193")
+
+# Flock requires the client key as a Bearer token. Read at startup from
+# the 0600 key file (same pattern as bin/bidder.py); never hardcoded.
+FLOCK_API_KEY = ""
+try:
+    with open("/home/toxic/.flock-data/client-key.corral") as _fk:
+        FLOCK_API_KEY = _fk.read().strip()
+except OSError:
+    pass
 WORK = os.environ.get("ORACLE_WORK", "/home/toxic/estate/ranch/squawk/oracle/work")
 
-# Judge panel: ROUTER ROLE ALIASES. Concrete targets are owned by
-# config/herd.yaml ("Oracle judge panel"); this list is routing surface
-# only, never model-family selection.
+# Judge panel: NIM-backed models served by flock :25193, verified live
+# 2026-10-13 with the flock client key (HTTP 200 on a JSON probe). The
+# old herd router aliases (oracle-judge-a/b/c) no longer exist in
+# herd.yaml, and oracle-judge-local was a local beellama model -- banned
+# by the 2026-10-13 corrective from Chris (local herd models not ready).
 DEFAULT_JUDGES = [
-    "oracle-judge-a",
-    "oracle-judge-b",
-    "oracle-judge-c",
+    "nvidia/nemotron-3-ultra-550b-a55b",
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+    "nvidia/nemotron-3-super-120b-a12b:free",
 ]
-FALLBACK_JUDGE = "oracle-judge-local"  # local last resort, router-owned
+FALLBACK_JUDGE = "nvidia/nemotron-3-ultra-550b-a55b"
 
 JUDGE_PROMPT = """You are judge {idx} (anonymous) on the OpenFang Oracle panel.
 Question: {question}
@@ -176,9 +191,12 @@ def herd_chat(model, prompt, timeout_s=90, max_tokens=1500):
         "temperature": 0.2,
         "max_tokens": max_tokens,
     }).encode()
+    headers = {"Content-Type": "application/json"}
+    if FLOCK_API_KEY:
+        headers["Authorization"] = "Bearer " + FLOCK_API_KEY
     req = urllib.request.Request(
         HERD_URL + "/v1/chat/completions", data=body,
-        headers={"Content-Type": "application/json"}, method="POST")
+        headers=headers, method="POST")
     t0 = time.time()
     try:
         with urllib.request.urlopen(req, timeout=timeout_s) as r:
