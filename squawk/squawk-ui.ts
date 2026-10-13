@@ -69,6 +69,28 @@ function getFeedToken(): string {
   return feedToken;
 }
 
+// NATS auth injection: the UI's ?src=nats mode speaks the NATS protocol
+// through this shuttle to :4223, which requires the feed token. The browser
+// never sees the secret - we splice auth_token into the client's CONNECT
+// frame here, server-side, exactly once per socket.
+const NATS_CONNECT_RE = /^CONNECT\s*(\{[\s\S]*\})\r?\n?$/;
+function maybeInjectNatsAuth(data: ShuttleData, frame: string | Buffer): string | Buffer {
+  if (!data.natsAuth || data.natsAuthed) return frame;
+  const text = typeof frame === "string" ? frame : (frame as Buffer).toString("utf8");
+  const m = NATS_CONNECT_RE.exec(text);
+  if (!m) return frame;
+  try {
+    const obj = JSON.parse(m[1]);
+    const t = getFeedToken();
+    if (!t || obj.auth_token) return frame;
+    obj.auth_token = t;
+    data.natsAuthed = true;
+    return "CONNECT " + JSON.stringify(obj) + "\r\n";
+  } catch {
+    return frame;
+  }
+}
+
 // copy incoming headers, injecting the server-side feed token when the
 // browser sent no usable Authorization header of its own.
 function authHeaders(incoming: Headers): Headers {
@@ -467,7 +489,7 @@ async function uiHtml(): Promise<string> {
     + `</body></html>`;
 }
 
-type ShuttleData = { kind: "shuttle"; target: string; backend?: WebSocket; pending: (string | Buffer)[] };
+type ShuttleData = { kind: "shuttle"; target: string; backend?: WebSocket; pending: (string | Buffer)[]; natsAuth?: boolean; natsAuthed?: boolean };
 type SockData = NativeData | ShuttleData;
 
 Bun.serve<SockData>({
@@ -494,7 +516,7 @@ Bun.serve<SockData>({
         return new Response("squawk-ws upgrade failed", { status: 400 });
       }
       const target = wsTarget(url.pathname, url.search);
-      if (target && server.upgrade(req, { data: { kind: "shuttle", target, pending: [] } as ShuttleData })) {
+      if (target && server.upgrade(req, { data: { kind: "shuttle", target, pending: [], natsAuth: target.startsWith("ws://127.0.0.1:4223") } as ShuttleData })) {
         return; // upgraded: the socket now lives in the websocket handlers
       }
       return new Response("no websocket target for " + url.pathname, { status: 404 });
@@ -544,7 +566,7 @@ Bun.serve<SockData>({
       ws.data.backend = backend;
       backend.onopen = () => {
         for (const m of ws.data.pending.splice(0)) {
-          try { backend.send(m); } catch {}
+          try { backend.send(maybeInjectNatsAuth(ws.data, m)); } catch {}
         }
       };
       backend.onmessage = (ev) => {
@@ -564,7 +586,7 @@ Bun.serve<SockData>({
       }
       const b = ws.data.backend;
       if (b && b.readyState === WebSocket.OPEN) {
-        try { b.send(message); } catch {}
+        try { b.send(maybeInjectNatsAuth(ws.data, message)); } catch {}
       } else {
         ws.data.pending.push(message); // queue the subscribe frame until dial completes
       }

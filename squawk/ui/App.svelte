@@ -2,7 +2,13 @@
   import MessageCard from "./MessageCard.svelte";
   import AddChannelDialog from "./AddChannelDialog.svelte";
   import { untrack } from "svelte";
-  import { live, keyOf } from "./live.svelte.js";
+  import { live as feedLive, keyOf as feedKeyOf } from "./live.svelte.js";
+  import { natsLive, keyOf as natsKeyOf } from "./nats-live.svelte.js";
+  // ?src=nats swaps the live source to NATS+JetStream (file-feed snapshot
+  // for history, NATS for live). Default stays the feed websocket.
+  const SRC_NATS = new URLSearchParams(location.search).get("src") === "nats";
+  const live = SRC_NATS ? (natsLive as typeof feedLive) : feedLive;
+  const keyOf = SRC_NATS ? natsKeyOf : feedKeyOf;
 
   type Msg = {
     seq: number; file_seq?: number; from: string; sender?: string; to: string; channel: string;
@@ -56,7 +62,17 @@
   $effect(() => {
     untrack(() => {
       live.ensureChannel("fleet");
-      live.connect();
+      if (SRC_NATS) {
+        // NATS carries live messages only - hydrate history from the file
+        // feed first (it stays the source of truth), then go live.
+        fetch("wait?channel=fleet&tail=200")
+          .then((r) => r.json())
+          .then((d) => { if (d && Array.isArray(d.messages)) (live as typeof natsLive).ingestSnapshot("fleet", d.messages); })
+          .catch((e) => live.sysLine("snapshot failed: " + (e?.message || e)))
+          .finally(() => live.connect());
+      } else {
+        live.connect();
+      }
     });
     return () => { live.disconnect(); };
   });
@@ -159,6 +175,17 @@
     >
       <span class="dot {dotClass}"></span>
       <span class="conn-label">{connLabel}</span>
+      <button
+        class="src-toggle"
+        title={SRC_NATS ? "live via NATS+JetStream - click for file-feed websocket" : "live via file-feed websocket - click for NATS+JetStream"}
+        aria-label="toggle live source"
+        onclick={() => {
+          const u = new URL(location.href);
+          if (SRC_NATS) u.searchParams.delete("src");
+          else u.searchParams.set("src", "nats");
+          location.href = u.toString();
+        }}
+      >src: {SRC_NATS ? "nats" : "feed"}</button>
     </div>
   </header>
 
