@@ -32,7 +32,7 @@
 //
 // Signed send (2026-10-07): /send uses ui_relay_post.py (thin _post_message;
 // forge-race winner ~63ms) with chat.py relay-in hedge. Never hand-writes .md.
-import { readFileSync, statSync, mkdirSync, writeFileSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, statSync, mkdirSync, writeFileSync, readdirSync, existsSync, watch } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { buildRoster } from "./fleet-roster.ts";
@@ -43,14 +43,13 @@ const UI_ENTRY = join(SQUAWK_DIR, "ui", "dist", "bundle.js");
 const FEED_TOKEN_PATH = "/home/toxic/hatch/agents/ember/squawk-relay/feed-token";
 const SQUAWK_ROOT = "/home/toxic/.fleet-bus/squawk-root";
 
-// websocket upgrade targets: client path -> backend ws url.
-// 2026-10-13: the estate squawk-ws (:25147) was superseded (pitchfork daemon
-// stopped, nothing listens there) - the UI sat in a reconnect loop. fleet-feed
-// (:25201/ws/fleet) is the live push backend. The client-facing /squawk-ws path
-// stays stable so bookmarks and the bundle do not churn; only the shuttle
-// target moves, and the client speaks the fleet-feed protocol (live.svelte.js).
+// websocket SHUTTLE targets: client path -> backend ws url (nats only).
+// /squawk-ws is NATIVE (2026-10-13): served by this process straight from
+// the channel store, so every channel (fleet, ops, leads, ...) gets live
+// push with store signatures intact. History: the estate squawk-ws (:25147)
+// was superseded, and the fleet-feed shuttle that replaced it only ever
+// carried #fleet - #ops and friends stayed dark. Native is the fix.
 const WS_TARGETS: Record<string, string> = {
-  "/squawk-ws": "ws://127.0.0.1:25201/ws/fleet",
   "/nats-ws": "ws://127.0.0.1:4223/",
 };
 
@@ -117,6 +116,7 @@ type Msg = {
   uuid: string;
   title: string;
   signature?: string;
+  sealed?: boolean;
   text: string;
 };
 
@@ -135,6 +135,7 @@ function parseMsgFile(path: string, fallbackSeq: number): Msg | null {
     }
   }
   const seq = Number(fm.seq) || fallbackSeq;
+  const sealed = fm.sealed === "true";
   return {
     seq,
     from: fm.from || "?",
@@ -145,18 +146,14 @@ function parseMsgFile(path: string, fallbackSeq: number): Msg | null {
     uuid: fm.uuid || "",
     title: fm.title || "msg",
     signature: fm.signature || fm.hmac,
-    text: text.trim(),
+    sealed,
+    text: sealed ? "" : text.trim(),
   };
 }
 
-// GET /wait?since=<seq>&channel=<name>&tail=<n> -> {ok, messages, cursor}
-function handleWait(url: URL): Response {
-  const channel = normChannel(url.searchParams.get("channel") || "fleet");
-  if (!VALID_CHANNEL.test(channel)) {
-    return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
-  }
-  const since = Number(url.searchParams.get("since") || 0);
-  const tail = Math.min(Math.max(Number(url.searchParams.get("tail") || 200), 1), 1000);
+// Shared channel-store read: messages with filename seq > since, oldest
+// first, capped at the newest `tail`. Used by /wait AND the native WS.
+function readChannelMessages(channel: string, since: number, tail: number): Msg[] {
   const dir = join(SQUAWK_ROOT, channel);
   let files: string[];
   try { files = readdirSync(dir); } catch { files = []; }
@@ -170,9 +167,77 @@ function handleWait(url: URL): Response {
     if (msg) msgs.push(msg);
   }
   msgs.sort((a, b) => a.seq - b.seq);
-  const sliced = msgs.slice(-tail);
+  return msgs.slice(-tail);
+}
+
+// GET /wait?since=<seq>&channel=<name>&tail=<n> -> {ok, messages, cursor}
+function handleWait(url: URL): Response {
+  const channel = normChannel(url.searchParams.get("channel") || "fleet");
+  if (!VALID_CHANNEL.test(channel)) {
+    return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
+  }
+  const since = Number(url.searchParams.get("since") || 0);
+  const tail = Math.min(Math.max(Number(url.searchParams.get("tail") || 200), 1), 1000);
+  const sliced = readChannelMessages(channel, since, tail);
   const cursor = sliced.length ? sliced[sliced.length - 1].seq : since;
   return Response.json({ ok: true, messages: sliced, cursor });
+}
+
+// --- native /squawk-ws: multi-channel live push from the channel store ---
+// Protocol (the client's native tongue in live.svelte.js):
+//   client -> {subscribe: string[], since: Record<string, number>}
+//   server -> {type:"messages", channel, messages:[...]}  (backfill + live)
+//             {type:"status", kind:"subscribed"|"ping", ...}
+type NativeData = { kind: "native"; subs: Map<string, number>; hb?: ReturnType<typeof setInterval> };
+const nativeSockets = new Set<{ data: NativeData; send: (s: string) => void }>();
+const channelWatchers = new Map<string, ReturnType<typeof watch>>();
+
+function pushChannelUpdates(channel: string): void {
+  for (const ws of nativeSockets) {
+    const cursor = ws.data.subs.get(channel);
+    if (cursor === undefined) continue;
+    const msgs = readChannelMessages(channel, cursor, 200);
+    if (!msgs.length) continue;
+    ws.data.subs.set(channel, msgs[msgs.length - 1]!.seq);
+    try { ws.send(JSON.stringify({ type: "messages", channel, messages: msgs })); } catch {}
+  }
+}
+
+function ensureChannelWatcher(channel: string): void {
+  if (channelWatchers.has(channel)) return;
+  const dir = join(SQUAWK_ROOT, channel);
+  try {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const w = watch(dir, () => {
+      // a create can beat the writer's first write; debounce coalesces the
+      // burst and lets the content land before we read.
+      clearTimeout(timer);
+      timer = setTimeout(() => pushChannelUpdates(channel), 120);
+    });
+    w.on("error", () => { channelWatchers.delete(channel); try { w.close(); } catch {} });
+    channelWatchers.set(channel, w);
+  } catch { /* dir may not exist yet; a later subscribe retries */ }
+}
+
+function handleNativeSubscribe(ws: { data: NativeData; send: (s: string) => void }, message: string | Buffer): void {
+  let d: any;
+  try { d = JSON.parse(String(message)); } catch { return; }
+  if (!d || !Array.isArray(d.subscribe)) return;
+  const subs = new Map<string, number>();
+  for (const name of d.subscribe) {
+    const ch = normChannel(String(name));
+    if (!VALID_CHANNEL.test(ch)) continue;
+    const since = Number(d.since?.[ch] || 0);
+    subs.set(ch, since);
+    ensureChannelWatcher(ch);
+    const msgs = readChannelMessages(ch, since, 200);
+    if (msgs.length) {
+      subs.set(ch, msgs[msgs.length - 1]!.seq);
+      try { ws.send(JSON.stringify({ type: "messages", channel: ch, messages: msgs })); } catch {}
+    }
+  }
+  ws.data.subs = subs;
+  try { ws.send(JSON.stringify({ type: "status", kind: "subscribed", channels: [...subs.keys()] })); } catch {}
 }
 
 // GET /channels -> {ok, channels: [...]}
@@ -402,7 +467,8 @@ async function uiHtml(): Promise<string> {
     + `</body></html>`;
 }
 
-type SockData = { target: string; backend?: WebSocket; pending: (string | Buffer)[] };
+type ShuttleData = { kind: "shuttle"; target: string; backend?: WebSocket; pending: (string | Buffer)[] };
+type SockData = NativeData | ShuttleData;
 
 Bun.serve<SockData>({
   port: 25136,
@@ -420,10 +486,15 @@ Bun.serve<SockData>({
     if (url.pathname === "/fleet" || url.pathname.startsWith("/fleet/")) {
       url.pathname = url.pathname.slice("/fleet".length) || "/";
     }
-    // --- websocket upgrade: shuttle to the real backend, don't fetch-proxy ---
+    // --- websocket upgrade: /squawk-ws is native; others shuttle ---
     if (req.headers.get("upgrade")?.toLowerCase() === "websocket") {
+      if (url.pathname === "/squawk-ws") {
+        const data: NativeData = { kind: "native", subs: new Map() };
+        if (server.upgrade(req, { data })) return;
+        return new Response("squawk-ws upgrade failed", { status: 400 });
+      }
       const target = wsTarget(url.pathname, url.search);
-      if (target && server.upgrade(req, { data: { target, pending: [] } })) {
+      if (target && server.upgrade(req, { data: { kind: "shuttle", target, pending: [] } as ShuttleData })) {
         return; // upgraded: the socket now lives in the websocket handlers
       }
       return new Response("no websocket target for " + url.pathname, { status: 404 });
@@ -454,6 +525,15 @@ Bun.serve<SockData>({
   },
   websocket: {
     open(ws) {
+      if (ws.data.kind === "native") {
+        nativeSockets.add(ws as never);
+        // heartbeat frame: keeps funnel/idle intermediaries from reaping
+        // the socket; the client ignores unknown status kinds.
+        ws.data.hb = setInterval(() => {
+          try { ws.send(JSON.stringify({ type: "status", kind: "ping", ts: Date.now() })); } catch {}
+        }, 45000);
+        return;
+      }
       let backend: WebSocket;
       try {
         backend = new WebSocket(ws.data.target);
@@ -478,6 +558,10 @@ Bun.serve<SockData>({
       };
     },
     message(ws, message) {
+      if (ws.data.kind === "native") {
+        handleNativeSubscribe(ws as never, message as never);
+        return;
+      }
       const b = ws.data.backend;
       if (b && b.readyState === WebSocket.OPEN) {
         try { b.send(message); } catch {}
@@ -486,6 +570,11 @@ Bun.serve<SockData>({
       }
     },
     close(ws) {
+      if (ws.data.kind === "native") {
+        nativeSockets.delete(ws as never);
+        if (ws.data.hb) clearInterval(ws.data.hb);
+        return;
+      }
       try { ws.data.backend?.close(); } catch {}
     },
   },
