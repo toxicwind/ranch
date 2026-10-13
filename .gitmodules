@@ -257,3 +257,9 @@
 [submodule "barn/corral"]
 	path = barn/corral
 	url = ./barn/corral
+[submodule "submodules/phone-sentinel"]
+	path = submodules/phone-sentinel
+	url = /home/toxic/phone-sentinel
+[submodule "extensions/drover"]
+	path = extensions/drover
+	url = https://github.com/toxicwind/drover.git
