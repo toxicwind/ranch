@@ -55,10 +55,18 @@ RALPH_CAP_S = 1740  # 29 min ceiling: Super Ralph runs are slow (~11 min
                     # observed for a trivial run)
 RALPH_MODEL = os.environ.get("RALPH_MODEL", "kimi-k3-nim")
 RALPH_BASE_URL = os.environ.get("RALPH_BASE_URL",
-                                "http://127.0.0.1:25100/v1")  # herd router; :25104 sovereign is dark as of 2026-10-13
+                                "http://127.0.0.1:25193/v1")  # flock (NIM-backed); 2026-10-13 Chris corrective: do NOT use local herd :25100
 # cuttinggate's auth gate requires a "Bearer " prefix (any non-empty value;
 # the upstream key comes from cuttinggate's own credential plane).
 RALPH_API_KEY = os.environ.get("RALPH_API_KEY", "oracle-market-bidder")
+# 2026-10-13 (vesper): when routing via flock, use the flock client key.
+# Read at startup from the 0600 key file; never hardcoded.
+if '127.0.0.1:25193' in RALPH_BASE_URL:
+    try:
+        with open('/home/toxic/.flock-data/client-key.corral') as _fk:
+            RALPH_API_KEY = 'Bearer ' + _fk.read().strip()
+    except OSError:
+        pass
 OUT_CAP = 8000
 ERR_CAP = 2000
 PARTIAL_CAP = 65536  # bound for the on-disk partial-output evidence file
@@ -161,10 +169,10 @@ RALPH_MODEL_CANDIDATES = [
     # are PHANTOMS -- they do not exist on the router, which SILENTLY
     # SUBSTITUTED meta/llama-3.2-11b-vision-instruct (Wraith diagnosis).
     # Never trust a candidate ID without verifying it in /v1/models.
-    # Verified live 2026-10-13 on :25100 (herd): gemma-4-12b returns valid
-    # JSON for schema prompts (interpret-config needs JSON-following).
-    "gemma-4-12b",
-    "openai/gpt-oss-20b",  # fallback; routes fine when :25104 is up
+    # 2026-10-13 (vesper, Chris corrective): NIM-backed models via flock.
+    # Local herd models (gemma-4-12b, gpt-oss-20b on :25100) are not ready.
+    "nvidia/nemotron-3-nano-30b-a3b",
+    "nvidia/nemotron-3.5-lightning",
 ]
 _ralph_model_cache = {"model": None, "ts": 0.0}
 RALPH_MODEL_CACHE_S = 300
