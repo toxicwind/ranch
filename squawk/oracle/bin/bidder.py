@@ -658,10 +658,17 @@ class Bidder:
         # 2026-10-02 (oracle-settle-2): super-ralph nim-proxy reads
         # FLOCK_* (not NIM_MODEL). Inherited FLOCK pair (nemotron on
         # :25193) is a dead route -> empty stdout, slashed no-result.
-        # Pin the pair probed live working 2026-10-02: :25100
-        # (herd, 200) + gemma-4-12b (model calls succeeded).
-        renv["FLOCK_BASE_URL"] = "http://127.0.0.1:25100"
-        renv["FLOCK_MODEL"] = "gemma-4-12b"
+        # 2026-10-13 (vesper, Chris corrective): do NOT use local herd
+        # models (local-fast/local-quality/local-longctx on :25100 are not
+        # ready). Working chain is cuttinggate:25200 -> flock:25193 ->
+        # vans:20128. Use NIM-backed models through flock.
+        renv["FLOCK_BASE_URL"] = "http://127.0.0.1:25193"
+        renv["FLOCK_MODEL"] = "nvidia/nemotron-3-nano-30b-a3b"
+        try:
+            with open("/home/toxic/.flock-data/client-key.corral") as _kf:
+                renv["FLOCK_API_KEY"] = _kf.read().strip()
+        except OSError:
+            pass
         # 2026-09-21 (tern): the oracle's exec deadline is
         # assign_ts + timeout_ms/1000, but the bidder starts the
         # subprocess after assignment. Without a buffer the oracle
