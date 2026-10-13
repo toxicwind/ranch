@@ -1014,7 +1014,8 @@ class OracleLoop:
         """Pure Vickrey clearing over a.bids.
 
         Returns (winner, amount, price_paid, reveal, contenders, ties), or
-        (None, reason, reveal) when the auction closes unassigned.
+        (None, reason, None, reveal, None, None) when the auction closes
+        unassigned (reveal in 4th slot, matching the success shape).
         Highest sealed amount wins; ties break on earliest bid-file mtime
         (SPEC §2.2); winner pays max(second_highest, RESERVE). Reputation
         gates eligibility but never distorts the clearing price.
@@ -1053,11 +1054,11 @@ class OracleLoop:
         contenders = [(b, d) for b, d in ranked if eligible(b)]
         if not contenders:
             return None, ("no-eligible-bids" if ranked else "no-valid-bids"), \
-                reveal, None, None, None
+                None, reveal, None, None
         winner, wbid = contenders[0]
         amount = wbid["amount"]
         if amount < RESERVE:
-            return None, "reserve-not-met", reveal, None, None, None
+            return None, "reserve-not-met", None, reveal, None, None
         ties = [b for b, d in contenders if d["amount"] == amount]
         second = contenders[1][1]["amount"] if len(contenders) > 1 else RESERVE
         price_paid = round(max(second, RESERVE), 6)
@@ -1097,7 +1098,7 @@ class OracleLoop:
         v = self._vickrey(a)
         winner, amount, price_paid, reveal, contenders, ties = v
         if winner is None:
-            # _vickrey returns (None, reason, reveal, None, None, None)
+            # _vickrey returns (None, reason, None, reveal, None, None)
             reason = amount
             if not replay:
                 body = {"task_id": tid, "reason": reason, "posted_ts": now,
