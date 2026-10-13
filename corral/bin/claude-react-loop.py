@@ -155,7 +155,7 @@ def direct_model_call(prompt):
     """Direct OpenAI-compatible chat call; merges content and reasoning."""
     import urllib.request
 
-    base = os.environ.get("NIM_BASE_URL", "http://127.0.0.1:25104/v1").rstrip("/")
+    base = os.environ.get("NIM_BASE_URL", "http://127.0.0.1:25193/v1").rstrip("/")
     key = os.environ.get("NVIDIA_API_KEY", "")
     # flock (:25193) needs its client key, not the NVIDIA upstream key
     if ":25193" in base:

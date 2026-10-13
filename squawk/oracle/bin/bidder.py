@@ -74,7 +74,7 @@ RALPH_POST_BUFFER_S = 30.0  # time to preserve evidence + post result
 CORRAL_CLI = Path("/home/toxic/estate/ranch/corral/src/cli/index.ts")
 CORRAL_CAP_S = 1740  # same class as super-ralph: agentic runs are slow
 CORRAL_BASE_URL = os.environ.get("CORRAL_BASE_URL",
-                                "http://127.0.0.1:25104/v1")
+                                "http://127.0.0.1:25193/v1")
                              # before the oracle's exec deadline
 
 
