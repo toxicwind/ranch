@@ -18,6 +18,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { loadConfig, loadSecretsFiles, type Config } from "./config.ts";
 import { ProviderGate } from "./circuit.ts";
 import { Quarantine } from "./quarantine.ts";
+import { Pauser } from "./pauser.ts";
 import { Ledger } from "./ledger.ts";
 import { Router } from "./router.ts";
 import { loadLiveCatalog, normalizeId, watchCatalog, DEFAULT_CATALOG_PATH, type CatalogLoad, type LiveCatalog, type CatalogWatcher } from "./catalog.ts";
@@ -113,6 +114,7 @@ export type AppDeps = {
   /** Re-read the catalog from disk and reseed the router. */
   reload?: () => CatalogLoad;
   credentials?: CredentialPlane;
+  pauser?: Pauser;
 };
 
 function describeLoad(c: CatalogLoad): string {
@@ -121,6 +123,7 @@ function describeLoad(c: CatalogLoad): string {
 
 export function buildApp(deps: AppDeps) {
   const { quarantine, ledger, router, config } = deps;
+  const pauser = deps.pauser;
   const clientKeys = parseClientKeys();
 
   const catalogQuery: CatalogQuery = {
@@ -174,6 +177,28 @@ export function buildApp(deps: AppDeps) {
       };
     })
     .get("/quarantine", () => ({ count: quarantine.count, entries: quarantine.list() }))
+    .get("/pauses", () => pauser ? { count: pauser.count, entries: pauser.list() } : { count: 0, entries: [] })
+    .post(
+      "/pauses",
+      ({ body }) => {
+        if (!pauser) return { error: "pauser not configured" };
+        const b = body as Record<string, unknown>;
+        const action = String(b.action ?? "");
+        const provider = String(b.provider ?? "");
+        const model = typeof b.model === "string" ? b.model : null;
+        if (!provider) return { error: "provider required" };
+        if (action === "pause") {
+          const durationMs = Math.min(Math.max(Number(b.durationMs ?? 300000) || 300000, 1000), 3600000);
+          pauser.pause(model, provider, durationMs, "manual", String(b.detail ?? ""));
+          return { status: "ok", action: "paused", model, provider, durationMs };
+        }
+        if (action === "resume") {
+          const ok = pauser.resume(model, provider);
+          return { status: "ok", action: "resumed", model, provider, removed: ok };
+        }
+        return { error: "action must be 'pause' or 'resume'" };
+      },
+    )
     .get("/status", () => ({
       providers: deps.gate.snapshot(),
       quarantined: quarantine.count,
@@ -441,6 +466,7 @@ export async function main(): Promise<void> {
 
   const gate = new ProviderGate(config);
   const quarantine = new Quarantine();
+  const pauser = new Pauser();
   const ledger = new Ledger();
   let credentials: CredentialPlane | undefined;
   try {
@@ -448,7 +474,7 @@ export async function main(): Promise<void> {
     credentials = pools.length ? new CredentialPlane(pools) : undefined;
   } catch (e) { console.error(`keypool config unreadable, running without the credential plane: ${(e as Error).message}`); }
 
-  const router = new Router(config, gate, quarantine, ledger, credentials);
+  const router = new Router(config, gate, quarantine, ledger, credentials, pauser);
   const catalogPath = process.env.CUTTINGGATE_CATALOG ?? DEFAULT_CATALOG_PATH;
   let current: CatalogLoad = loadLiveCatalog(catalogPath);
   if (current.status !== "ok") { process.stderr.write(`cuttinggate: catalog load failed: ${current.status} (${catalogPath})\n`); process.exit(1); }
@@ -479,7 +505,7 @@ export async function main(): Promise<void> {
   process.on("SIGTERM", shutdown);
   process.on("SIGINT", shutdown);
 
-  const app = buildApp({ config, gate, quarantine, ledger, router, catalogState: () => current, reload, credentials });
+  const app = buildApp({ config, gate, quarantine, ledger, router, catalogState: () => current, reload, credentials, pauser });
   app.listen({ port: config.port, hostname: config.host });
   log.info({ port: config.port, host: config.host, providers: Object.keys(config.keys) }, "cuttinggate up");
 }

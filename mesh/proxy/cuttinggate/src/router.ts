@@ -28,6 +28,7 @@ import { Ledger } from "./ledger.ts";
 import { COPILOT_PROVIDER, COPILOT_LEGACY_PROVIDER, CopilotClient, copilotHeaders } from "./copilot.ts";
 import { ZEN_PROVIDER, ZEN_LEGACY_PROVIDER, ZEN_BASE_URL, foldZenSse, zenBody, zenHeaders } from "./zen.ts";
 import { DOTS_PROVIDER, DOTS_LEGACY_PROVIDER, DOTS_MODEL, dotsBody, type DotsMessage, type DotsTool } from "./dots.ts";
+import { Pauser } from "./pauser.ts";
 
 export type KnownModel = { id: string; provider: string };
 
@@ -122,6 +123,7 @@ export class Router {
     private readonly quarantine: Quarantine,
     ledger?: Ledger,
     private readonly credentials?: CredentialPlane,
+    private readonly pauser?: Pauser,
   ) {
     this.ledger = ledger ?? new Ledger();
   }
@@ -186,7 +188,12 @@ export class Router {
     // Quarantine is keyed by model and remembers WHICH provider 404'd: only that
     // pair is benched, the same model on another provider still serves.
     const q = this.quarantine.get(model);
-    return this.ledger.order(model, list).filter((p) => !(q && q.provider === p));
+    list = list.filter((p) => !(q && q.provider === p));
+    // Paused models/providers are skipped until their pause lifts.
+    if (this.pauser) {
+      list = list.filter((p) => !this.pauser!.isPaused(model, p));
+    }
+    return this.ledger.order(model, list);
   }
 
   /** Claim a key for this one attempt. Returned, never stored on the instance. */
@@ -364,6 +371,11 @@ export class Router {
         this.ledger.record(model, r.provider, r.latencyMs, r.kind === "valid");
       }
       if (r.kind === "empty") this.gate.noteEmpty(model);
+      // First-class pause: provider errors/timeouts pause the model;
+      // red herrings (404, 429, 400, 401/2/3) never trigger a pause.
+      if (r.kind === "provider-error" && this.pauser) {
+        this.pauser.noteFailure(model, r.provider, r.status, r.error);
+      }
       inbox.push(r);
       pending -= 1;
       wake?.();
