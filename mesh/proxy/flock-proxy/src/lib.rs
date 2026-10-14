@@ -52,6 +52,8 @@ use auth::Admin;
 use dispatch::Dispatcher;
 use pool::{Pool, PoolHandle};
 
+mod client_api;
+
 // Recorder configuration and Rust-owned browser fixtures share this one
 // production bucket registry; fixture code must never approximate it.
 #[rustfmt::skip]
@@ -742,6 +744,18 @@ pub async fn run() {
             auth::require_session,
         ));
 
+    // Client-facing API: same /api prefix, client-key auth instead of a
+    // session. Registered as a sibling of `control_plane` *inside* the
+    // nest: axum lets a nested router's fallback shadow routes added to
+    // the outer router, so these must live under the nest to win their
+    // own paths. They carry no session layer — `client_api` gates them
+    // against the configured client keys itself.
+    let client_plane = Router::new()
+        .route(routes::API_HEALTH_PING, get(client_api::health_ping))
+        .route(routes::API_CLIENT_PROVIDERS, get(client_api::providers))
+        .route(routes::API_PRICING, get(client_api::pricing))
+        .route(routes::API_PRICING_MODELS, get(client_api::pricing_models));
+
     let protected = Router::new()
         .route(routes::ROOT, get(dash))
         .route(routes::DASH, get(dash))
@@ -755,7 +769,7 @@ pub async fn run() {
             state.clone(),
             auth::require_session,
         ))
-        .nest(routes::API_PREFIX, control_plane);
+        .nest(routes::API_PREFIX, control_plane.merge(client_plane));
 
     // Public surface: health probe, login flow, the first-run wizard (404
     // once setup completes), and the API (its own key gate + setup gate).

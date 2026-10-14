@@ -40,6 +40,16 @@ pub const API_SETTINGS_VALIDATE_KEY: &str = "/settings/validate-key";
 pub const API_PROVIDERS: &str = "/providers";
 pub const API_SETTINGS_ROUTING: &str = "/settings/routing";
 
+// Client-facing surface (client-key auth, not session auth). Paths are
+// deliberately distinct from the operator routes above: the operator
+// `/api/providers` is session-gated, and `auth::identify` reads a Bearer
+// header as `user:pass`, so a client key can never satisfy it. Clients
+// get their own key-gated paths.
+pub const API_HEALTH_PING: &str = "/health/ping";
+pub const API_CLIENT_PROVIDERS: &str = "/client/providers";
+pub const API_PRICING: &str = "/pricing";
+pub const API_PRICING_MODELS: &str = "/pricing/models";
+
 pub const HEALTH: &str = "/health";
 pub const LOGIN: &str = "/login";
 pub const LOGOUT: &str = "/logout";

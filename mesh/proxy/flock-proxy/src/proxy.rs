@@ -124,6 +124,38 @@ fn label_path(path: &str) -> String {
     }
 }
 
+/// Flatten `messages[].content` part-arrays into plain strings.
+///
+/// Returns true when the body was mutated. Text parts are joined with a
+/// newline; parts without a `text` field (tool calls, images, unknown types)
+/// are appended as fenced JSON so nothing disappears silently. Bodies whose
+/// `messages` are absent or already strings are untouched.
+pub(crate) fn normalize_message_contents(body: &mut serde_json::Value) -> bool {
+    let Some(messages) = body.get_mut("messages").and_then(|m| m.as_array_mut()) else {
+        return false;
+    };
+    let mut changed = false;
+    for msg in messages.iter_mut() {
+        let Some(parts) = msg.get_mut("content").and_then(|c| c.as_array_mut()) else {
+            continue;
+        };
+        let mut texts: Vec<String> = Vec::with_capacity(parts.len());
+        for part in parts.iter() {
+            match part.get("text").and_then(|t| t.as_str()) {
+                Some(t) => texts.push(t.to_owned()),
+                None => texts.push(format!(
+                    "<part type={}>\n{}\n</part>",
+                    part.get("type").and_then(|t| t.as_str()).unwrap_or("unknown"),
+                    serde_json::to_string_pretty(part).unwrap_or_default()
+                )),
+            }
+        }
+        msg["content"] = serde_json::Value::String(texts.join("\n"));
+        changed = true;
+    }
+    changed
+}
+
 /// Statuses worth waiting out: rate limit and transient server-side trouble.
 /// Upstream 404 strikes before a model is quarantined out of the
 /// /v1/models advertisement (fix C). Strikes decay via
@@ -550,6 +582,17 @@ pub async fn handle(
         }
         if path_query == crate::routes::V1_CUSTOM_DOTS {
             path_query = "/v1/chat/completions".to_owned();
+        }
+    }
+    // Multimodal-content normalization (2026-10-14): several clients (rig
+    // agents among them) emit `messages[].content` as a part array even for
+    // pure-text turns. Strict OpenAI-compatible upstreams reject that shape
+    // with 422 "Expected union value: string|null". Flatten text parts to a
+    // single string; non-text parts are appended as fenced JSON so no
+    // information is silently dropped. Strings and null pass through.
+    if let Some(ref mut val) = parsed {
+        if normalize_message_contents(val) {
+            body = Bytes::from(serde_json::to_vec(val).unwrap_or_default());
         }
     }
     let ctx = Ctx {
@@ -1498,9 +1541,61 @@ fn gateway_timeout(cfg: &Config, pool_len: usize) -> Response {
 #[cfg(test)]
 mod tests {
     use super::{
-        bounded_label, count_tools, is_json_mode, label_path, sanitize_label, tool_choice_mode,
+        bounded_label, count_tools, is_json_mode, label_path, normalize_message_contents,
+        sanitize_label, tool_choice_mode,
     };
     use std::collections::HashSet;
+
+    #[test]
+    fn flattens_text_part_arrays() {
+        let mut body: serde_json::Value = serde_json::json!({
+            "model": "m",
+            "messages": [
+                {"role": "system", "content": "plain"},
+                {"role": "user", "content": [
+                    {"type": "text", "text": "hello"},
+                    {"type": "text", "text": "world"}
+                ]}
+            ]
+        });
+        assert!(normalize_message_contents(&mut body));
+        assert_eq!(body["messages"][1]["content"], "hello\nworld");
+        assert_eq!(body["messages"][0]["content"], "plain");
+    }
+
+    #[test]
+    fn non_text_parts_are_preserved_as_json() {
+        let mut body: serde_json::Value = serde_json::json!({
+            "messages": [
+                {"role": "user", "content": [
+                    {"type": "image_url", "image_url": {"url": "data:image/png;base64,x"}}
+                ]}
+            ]
+        });
+        assert!(normalize_message_contents(&mut body));
+        let content = body["messages"][0]["content"].as_str().unwrap();
+        assert!(content.contains("<part type=image_url>"));
+        assert!(content.contains("data:image/png;base64,x"));
+    }
+
+    #[test]
+    fn string_and_null_content_pass_through() {
+        let mut body: serde_json::Value = serde_json::json!({
+            "messages": [
+                {"role": "user", "content": "already a string"},
+                {"role": "assistant", "content": null}
+            ]
+        });
+        assert!(!normalize_message_contents(&mut body));
+        assert_eq!(body["messages"][0]["content"], "already a string");
+        assert!(body["messages"][1]["content"].is_null());
+    }
+
+    #[test]
+    fn missing_messages_is_noop() {
+        let mut body: serde_json::Value = serde_json::json!({"model": "m"});
+        assert!(!normalize_message_contents(&mut body));
+    }
 
     #[test]
     fn sanitize_strips_injection_chars() {
