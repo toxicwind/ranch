@@ -96,3 +96,23 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+def sync_agent_config(key: str) -> bool:
+    """Sync to /home/toxic/.tau/agent/config.yml (the file tau actually reads)."""
+    import re
+    path = os.path.join(HOME, ".tau", "agent", "config.yml")
+    if not os.path.exists(path):
+        return False
+    with open(path) as f:
+        content = f.read()
+    new_content = re.sub(
+        r"(baseUrl: http://127\.0\.0\.1:25193/v1\n\s+apiKey: )[^\n]+",
+        r"\g<1>" + key,
+        content
+    )
+    if new_content == content:
+        return False
+    backup(path)
+    with open(path, "w") as f:
+        f.write(new_content)
+    return True
