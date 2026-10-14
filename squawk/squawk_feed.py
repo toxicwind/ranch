@@ -176,6 +176,12 @@ def _watch_loop(state: FeedState):
             state.note_advanced()
             state.stop.wait(2.0)
         return
+    # The watch is armed only now: inotify reports events strictly after
+    # add_watch, so a post that landed between the FeedState snapshot and
+    # this point would never generate an event. Re-scan once to close the
+    # window (fixes the test_ping_public_content_free watcher-timeout flake,
+    # seen 2026-10-11 and 2026-10-14: high-water stuck until the next post).
+    state.note_advanced()
     try:
         while not state.stop.is_set():
             r, _, _ = select.select([ino.fd], [], [], 1.0)
