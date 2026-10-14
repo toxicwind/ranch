@@ -483,7 +483,7 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
     // multi-model job -> structured {requests:[...]} fan-out bodies for the
     // caller to execute in parallel. Generation is free (free-race lane);
     // execution stays with the caller.
-    if (req.method === "POST" && path === "/v1/bodybuilder") {
+    if (req.method === "POST" && (path === "/v1/custom/bodybuilder" || path === "/v1/bodybuilder")) {
       let b: Record<string, unknown>;
       try {
         b = (await req.json()) as Record<string, unknown>;
@@ -751,3 +751,4 @@ console.log(`Health DB: ${DB_PATH} (WAL)`);
 console.log(`Listening ${server.hostname}:${server.port}`);
 
 // hotreload-probe 1784356795195
+5195

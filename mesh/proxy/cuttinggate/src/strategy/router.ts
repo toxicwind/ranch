@@ -434,7 +434,7 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
     // track-4 domain). Normalizes any spec the buggy CLI can produce —
     // "nvidia:gpt-oss-20b", "provider/model", bare ids, aliases — into the
     // canonical (provider, model, base_url) triple the daemon should use.
-    if (req.method === "GET" && path === "/openfang/resolve") {
+    if (req.method === "GET" && (path === "/v1/custom/openfang-resolve" || path === "/openfang/resolve")) {
       const spec = url.searchParams.get("spec") || "";
       const norm = normalizeModelSpec(spec);
       const [p, mid] = resolveModel(spec);

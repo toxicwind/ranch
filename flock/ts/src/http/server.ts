@@ -59,6 +59,9 @@ export const ROUTES: RouteDescriptor[] = [
 	{ method: "POST", path: "/setup",     access: "Public", phase: "PreSetup", openapi: true },
 	{ method: "POST", path: "/setup/validate-key", access: "Public", phase: "PreSetup", openapi: true },
 
+	/* Custom bodybuilder route */
+	{ method: "POST", path: "/v1/custom/bodybuilder", access: "Client", phase: "PostSetup", openapi: false },
+
 	/* OpenAI-v1 passthrough wildcard */
 	{ method: "ANY",  path: "/v1/{*path}", access: "Client", phase: "PostSetup", openapi: false },
 ];

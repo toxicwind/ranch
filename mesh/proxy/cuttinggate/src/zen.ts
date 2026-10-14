@@ -22,7 +22,8 @@
  * aslamplr/turnpike (per-family endpoint split — chat-completions here).
  */
 
-export const ZEN_PROVIDER = "zen";
+export const ZEN_PROVIDER = "custom/zen";
+export const ZEN_LEGACY_PROVIDER = "zen";
 export const ZEN_BASE_URL = "https://opencode.ai/zen/v1";
 
 /**

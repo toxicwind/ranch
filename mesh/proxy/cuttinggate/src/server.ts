@@ -263,24 +263,29 @@ export function buildApp(deps: AppDeps) {
         const maxRequests = Math.min(Math.max(Number((body as Record<string, unknown>)?.max_requests ?? 4) || 4, 1), 16);
         const execute = (body as Record<string, unknown>)?.execute !== false;
         const known = router.known();
-        const pool = known.length ? known.map((m) => `${m.provider}/${m.id}`) : [DOTS_MODEL];
-        const requests = Array.from({ length: maxRequests }, (_, i) => ({
-          model: pool[i % pool.length]!,
-          messages: [{ role: "user", content: job }],
-          temperature: 0.7,
-          max_tokens: 2000,
-        }));
-        if (!execute) return { route: "custom/bodybuilder", requests };
+        const pool = known.length ? known : [{ id: DOTS_MODEL, provider: DOTS_PROVIDER }];
+        const requests = Array.from({ length: maxRequests }, (_, i) => {
+          const entry = pool[i % pool.length]!;
+          return {
+            model: `${entry.provider}/${entry.id}`,
+            _id: entry.id,
+            _provider: entry.provider,
+            messages: [{ role: "user", content: job }],
+            temperature: 0.7,
+            max_tokens: 2000,
+          };
+        });
+        const cleanRequests = requests.map(({ _id: _, _provider: __, ...rest }) => rest);
+        if (!execute) return { route: "custom/bodybuilder", requests: cleanRequests };
         const results = await Promise.all(
           requests.map(async (req) => {
-            const target = req.model.includes("/") ? req.model.split("/").slice(1).join("/") : req.model;
-            const r = await router.complete(target, req.messages, { temperature: req.temperature, max_tokens: req.max_tokens });
+            const r = await router.complete(req._id, req.messages, { temperature: req.temperature, max_tokens: req.max_tokens }, req._provider);
             return r.ok
-              ? { model: req.model, ok: true, text: r.content, latency_ms: Math.round(r.latencyMs), routed_via: `${r.provider}/${target}` }
+              ? { model: req.model, ok: true, text: r.content, latency_ms: Math.round(r.latencyMs), routed_via: `${r.provider}/${req._id}` }
               : { model: req.model, ok: false, error: r.error, latency_ms: 0 };
           }),
         );
-        return { route: "custom/bodybuilder", requests, results };
+        return { route: "custom/bodybuilder", requests: cleanRequests, results };
       },
     )
     .post(
@@ -293,24 +298,29 @@ export function buildApp(deps: AppDeps) {
         const maxRequests = Math.min(Math.max(Number((body as Record<string, unknown>)?.max_requests ?? 4) || 4, 1), 16);
         const execute = (body as Record<string, unknown>)?.execute !== false;
         const known = router.known();
-        const pool = known.length ? known.map((m) => `${m.provider}/${m.id}`) : [DOTS_MODEL];
-        const requests = Array.from({ length: maxRequests }, (_, i) => ({
-          model: pool[i % pool.length]!,
-          messages: [{ role: "user", content: job }],
-          temperature: 0.7,
-          max_tokens: 2000,
-        }));
-        if (!execute) return { route: "custom/bodybuilder", requests };
+        const pool = known.length ? known : [{ id: DOTS_MODEL, provider: DOTS_PROVIDER }];
+        const requests = Array.from({ length: maxRequests }, (_, i) => {
+          const entry = pool[i % pool.length]!;
+          return {
+            model: `${entry.provider}/${entry.id}`,
+            _id: entry.id,
+            _provider: entry.provider,
+            messages: [{ role: "user", content: job }],
+            temperature: 0.7,
+            max_tokens: 2000,
+          };
+        });
+        const cleanRequests = requests.map(({ _id: _, _provider: __, ...rest }) => rest);
+        if (!execute) return { route: "custom/bodybuilder", requests: cleanRequests };
         const results = await Promise.all(
           requests.map(async (req) => {
-            const target = req.model.includes("/") ? req.model.split("/").slice(1).join("/") : req.model;
-            const r = await router.complete(target, req.messages, { temperature: req.temperature, max_tokens: req.max_tokens });
+            const r = await router.complete(req._id, req.messages, { temperature: req.temperature, max_tokens: req.max_tokens }, req._provider);
             return r.ok
-              ? { model: req.model, ok: true, text: r.content, latency_ms: Math.round(r.latencyMs), routed_via: `${r.provider}/${target}` }
+              ? { model: req.model, ok: true, text: r.content, latency_ms: Math.round(r.latencyMs), routed_via: `${r.provider}/${req._id}` }
               : { model: req.model, ok: false, error: r.error, latency_ms: 0 };
           }),
         );
-        return { route: "custom/bodybuilder", requests, results };
+        return { route: "custom/bodybuilder", requests: cleanRequests, results };
       },
     )
     .post("/admin/reload", ({ set }) => {

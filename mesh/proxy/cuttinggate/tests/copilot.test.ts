@@ -212,6 +212,6 @@ describe("token discovery", () => {
   });
 
   test("the provider key matches what the router routes on", () => {
-    expect(COPILOT_PROVIDER).toBe("copilot");
+    expect(COPILOT_PROVIDER).toBe("custom/copilot");
   });
 });

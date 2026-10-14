@@ -75,6 +75,9 @@ export const ROUTES: RouteDescriptor[] = [
 	{ method: "POST", path: "/setup",     access: "Public", phase: "PreSetup", openapi: true,  probe_path: "/setup" },
 	{ method: "POST", path: "/setup/validate-key", access: "Public", phase: "PreSetup", openapi: true,  probe_path: "/setup/validate-key" },
 
+	/* Custom bodybuilder route */
+	{ method: "POST", path: "/v1/custom/bodybuilder", access: "Client", phase: "PostSetup", openapi: false, probe_path: "/v1/custom/bodybuilder" },
+
 	/* OpenAI-v1 passthrough wildcard */
 	{ method: "ANY",  path: "/v1/{*path}", access: "Client", phase: "PostSetup", openapi: false, probe_path: "/v1/chat/completions" },
 ];

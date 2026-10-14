@@ -78,7 +78,7 @@ describe("zen request shape (OpenCode free-tier gate)", () => {
   });
 
   test("ZEN_MODELS is the 17-model set, no dupes", () => {
-    expect(ZEN_PROVIDER).toBe("zen");
+    expect(ZEN_PROVIDER).toBe("custom/zen");
     expect(ZEN_MODELS.length).toBe(17);
     expect(new Set(ZEN_MODELS).size).toBe(17);
     for (const id of ["mimo-v2.5-free", "ling-3.0-flash-fin-free", "big-pickle"])

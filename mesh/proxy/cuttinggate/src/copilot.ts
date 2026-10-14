@@ -17,7 +17,8 @@
 export const COPILOT_TOKEN_ENV = "GITHUB_TOKEN";
 
 /** Registry key. cuttinggate routes on provider ids, so this must match. */
-export const COPILOT_PROVIDER = "copilot";
+export const COPILOT_PROVIDER = "custom/copilot";
+export const COPILOT_LEGACY_PROVIDER = "copilot";
 
 /** Which GitHub-operated API host this tenant is provisioned for. */
 export type TenantClass = "Standard" | "Team" | "Organization";
