@@ -47,8 +47,15 @@ export type PauseEntry = {
 /** Backoff schedule: 30s, 60s, 2m, 5m, 10m (max). */
 const BACKOFF_MS = [30_000, 60_000, 120_000, 300_000, 600_000];
 
-/** Provider cascade: 3 model pauses within 5m → pause the provider for 5m. */
-const CASCADE_THRESHOLD = 3;
+/**
+ * Provider cascade: pause the provider only when the FAILURE RATE across its
+ * models is high — not on an absolute count. Modern providers serve hundreds
+ * of models; 3 failures out of 500 is noise, 3 out of 3 is a provider outage.
+ * Cascade when >50% of distinct models attempted in the window are paused,
+ * with a minimum of 3 distinct models to avoid single-model noise.
+ */
+const CASCADE_MIN_MODELS = 3;
+const CASCADE_FAILURE_RATE = 0.5;
 const CASCADE_WINDOW_MS = 5 * 60_000;
 const CASCADE_PAUSE_MS = 5 * 60_000;
 
@@ -88,8 +95,10 @@ export function shouldPause(status: number | null, error: string): boolean {
 
 export class Pauser {
   private entries = new Map<string, PauseEntry>();
-  /** Recent model pauses per provider, for cascade detection. */
-  private recentPauses = new Map<string, number[]>();
+  /** Recent model pauses per provider: model -> timestamp, for cascade detection. */
+  private recentPauses = new Map<string, Map<string, number>>();
+  /** Distinct models attempted per provider in the window (for failure rate). */
+  private attemptedModels = new Map<string, Map<string, number>>();
 
   private key(model: string | null, provider: string): string {
     return model ? `${model}|${provider}` : `${provider}:*`;
@@ -168,8 +177,8 @@ export class Pauser {
       detail: detail || `${status ?? "network"}: ${error.slice(0, 200)}`,
     });
 
-    // Cascade check: 3+ model pauses on this provider within 5m?
-    this.recordRecentPause(provider, now);
+    // Cascade check: rate-based, not count-based.
+    this.recordRecentPause(provider, model, now);
     this.checkCascade(provider, now);
 
     return true;
@@ -197,34 +206,66 @@ export class Pauser {
     return this.entries.delete(this.key(model, provider));
   }
 
-  private recordRecentPause(provider: string, now: number): void {
-    const arr = this.recentPauses.get(provider) ?? [];
-    arr.push(now);
+  /** Record that a model was attempted (for failure-rate denominator). */
+  noteAttempt(model: string, provider: string): void {
+    const now = Date.now();
+    let m = this.attemptedModels.get(provider);
+    if (!m) {
+      m = new Map();
+      this.attemptedModels.set(provider, m);
+    }
+    m.set(model, now);
     // Prune outside the window.
     const cutoff = now - CASCADE_WINDOW_MS;
-    this.recentPauses.set(provider, arr.filter((t) => t > cutoff));
+    for (const [k, t] of m) {
+      if (t <= cutoff) m.delete(k);
+    }
+  }
+
+  private recordRecentPause(provider: string, model: string, now: number): void {
+    let m = this.recentPauses.get(provider);
+    if (!m) {
+      m = new Map();
+      this.recentPauses.set(provider, m);
+    }
+    m.set(model, now);
+    // Prune outside the window.
+    const cutoff = now - CASCADE_WINDOW_MS;
+    for (const [k, t] of m) {
+      if (t <= cutoff) m.delete(k);
+    }
   }
 
   private checkCascade(provider: string, now: number): void {
-    const arr = this.recentPauses.get(provider) ?? [];
-    if (arr.length >= CASCADE_THRESHOLD) {
-      const pk = this.key(null, provider);
-      // Don't re-cascade if already paused.
-      if (!this.entries.has(pk)) {
-        this.entries.set(pk, {
-          key: pk,
-          model: null,
-          provider,
-          reason: "provider-cascade",
-          strikes: 1,
-          resumeAt: now + CASCADE_PAUSE_MS,
-          firstSeen: now,
-          lastSeen: now,
-          detail: `${arr.length} models paused within 5m`,
-        });
+    const paused = this.recentPauses.get(provider);
+    const attempted = this.attemptedModels.get(provider);
+    if (!paused || !attempted) return;
+
+    const pausedCount = paused.size;
+    const attemptedCount = attempted.size;
+
+    // Need minimum distinct models AND >50% failure rate.
+    if (pausedCount >= CASCADE_MIN_MODELS && attemptedCount > 0) {
+      const rate = pausedCount / attemptedCount;
+      if (rate >= CASCADE_FAILURE_RATE) {
+        const pk = this.key(null, provider);
+        // Don't re-cascade if already paused.
+        if (!this.entries.has(pk)) {
+          this.entries.set(pk, {
+            key: pk,
+            model: null,
+            provider,
+            reason: "provider-cascade",
+            strikes: 1,
+            resumeAt: now + CASCADE_PAUSE_MS,
+            firstSeen: now,
+            lastSeen: now,
+            detail: `${pausedCount}/${attemptedCount} models paused (${Math.round(rate * 100)}% failure rate)`,
+          });
+        }
+        // Reset after cascading.
+        this.recentPauses.set(provider, new Map());
       }
-      // Reset the counter after cascading.
-      this.recentPauses.set(provider, []);
     }
   }
 }

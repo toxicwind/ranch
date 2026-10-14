@@ -54,8 +54,12 @@ describe("pauser lifecycle", () => {
     expect(p.isPaused("m1", "prov")).toBe(false);
   });
 
-  test("provider cascade: 3 model pauses -> provider pause", () => {
+  test("provider cascade: high failure rate -> provider pause", () => {
     const p = new Pauser();
+    // Attempt 3 models, all 3 fail = 100% failure rate -> cascade.
+    p.noteAttempt("m1", "prov");
+    p.noteAttempt("m2", "prov");
+    p.noteAttempt("m3", "prov");
     p.noteFailure("m1", "prov", 500, "error");
     p.noteFailure("m2", "prov", 500, "error");
     p.noteFailure("m3", "prov", 500, "error");
@@ -65,6 +69,22 @@ describe("pauser lifecycle", () => {
     const cascade = entries.find((e) => e.reason === "provider-cascade");
     expect(cascade).toBeDefined();
     expect(cascade?.model).toBeNull();
+  });
+
+  test("provider cascade: low failure rate -> no provider pause", () => {
+    const p = new Pauser();
+    // Attempt 10 models, only 3 fail = 30% failure rate -> no cascade.
+    for (let i = 1; i <= 10; i++) p.noteAttempt(`m${i}`, "prov");
+    p.noteFailure("m1", "prov", 500, "error");
+    p.noteFailure("m2", "prov", 500, "error");
+    p.noteFailure("m3", "prov", 500, "error");
+    // No provider-level pause: 3/10 = 30% < 50% threshold.
+    expect(p.isPaused("m11", "prov")).toBe(false);
+    const entries = p.list();
+    const cascade = entries.find((e) => e.reason === "provider-cascade");
+    expect(cascade).toBeUndefined();
+    // But the individual models are paused.
+    expect(p.isPaused("m1", "prov")).toBe(true);
   });
 
   test("exponential backoff on repeated failures", () => {

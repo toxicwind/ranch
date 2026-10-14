@@ -382,6 +382,8 @@ export class Router {
     };
 
     for (const provider of providers) {
+      // Track attempt for cascade failure-rate denominator.
+      this.pauser?.noteAttempt(model, provider);
       this.gate
         .run(provider, () => this.dispatch(provider, req, race.signal))
         .then(post, (e: unknown) => post(this.fromRejection(provider, e)));
