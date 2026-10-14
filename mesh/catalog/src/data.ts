@@ -338,6 +338,31 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     },
   },
   {
+    name: "freeinference",
+    displayName: "FreeInference",
+    baseUrl: "https://freeinference.org/v1",
+    keyEnv: "FREEINFERENCE_API_KEY",
+    auth: "bearer",
+    adapter: "openai",
+    // Verified live 2026-10-13: keyed GET /v1/models returns these 6;
+    // chat completions 200 on qwen3.6-35b. bge-m3 is embeddings-only
+    // so it stays out of chat seeds.
+    seeds: [
+      "glm-5.3-flash",
+      "minimax-m3",
+      "qwen3.6-35b",
+      "diffusiongemma",
+      "deepseek-v4-flash",
+    ],
+    contextLengths: {
+      "glm-5.3-flash": 1000000,
+      "minimax-m3": 1000000,
+      "qwen3.6-35b": 262000,
+      "diffusiongemma": 262000,
+      "deepseek-v4-flash": 1000000,
+    },
+  },
+  {
     name: "wandb",
     displayName: "W&B Inference",
     baseUrl: "https://api.inference.wandb.ai/v1",

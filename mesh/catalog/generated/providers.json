@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-roost/v1",
-  "generatedAt": "2026-10-10T18:52:12.000Z",
+  "generatedAt": "2026-10-13T07:27:35.000Z",
   "generator": "@ranch/roost codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/roost src/data.ts",
   "adapters": [
@@ -108,6 +108,17 @@
       "keyEnv": "DEEPSEEK_API_KEY",
       "keyEnvs": [
         "DEEPSEEK_API_KEY"
+      ],
+      "adapter": "openai",
+      "auth": "bearer"
+    },
+    {
+      "name": "freeinference",
+      "displayName": "FreeInference",
+      "baseUrl": "https://freeinference.org/v1",
+      "keyEnv": "FREEINFERENCE_API_KEY",
+      "keyEnvs": [
+        "FREEINFERENCE_API_KEY"
       ],
       "adapter": "openai",
       "auth": "bearer"
@@ -617,6 +628,13 @@
       "openai/gpt-oss-20b",
       "poolside/laguna-xs-2.1",
       "z-ai/glm-5.3-flash"
+    ],
+    "freeinference": [
+      "glm-5.3-flash",
+      "minimax-m3",
+      "qwen3.6-35b",
+      "diffusiongemma",
+      "deepseek-v4-flash"
     ],
     "wandb": [
       "google/diffusiongemma-26b-a4b-it",

@@ -518,18 +518,9 @@ struct ProviderOverlay {
     model_map: &'static [(&'static str, &'static str)],
 }
 
-/// The 13 providers flock serves, in registry order. `display_name` is the
+/// The 14 providers flock serves, in registry order. `display_name` is the
 /// bare provider name (verbatim from the old hardcoded defaults).
 const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
-    ProviderOverlay {
-        name: "herd",
-        elo: 1600,
-        weight: 1.0,
-        free_tier: false,
-        default_rpm: 0,
-        display_name: "herd",
-        model_map: &[],
-    },
     ProviderOverlay {
         name: "openrouter",
         elo: 1500,
@@ -636,6 +627,15 @@ const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
         free_tier: true,
         default_rpm: 0,
         display_name: "siliconflow",
+        model_map: &[],
+    },
+    ProviderOverlay {
+        name: "freeinference",
+        elo: 1520,
+        weight: 1.2,
+        free_tier: true,
+        default_rpm: 0,
+        display_name: "freeinference",
         model_map: &[],
     },
     ProviderOverlay {
@@ -852,7 +852,6 @@ mod tests {
         assert_eq!(defs.len(), 14);
         let names: Vec<&str> = defs.iter().map(|p| p.name.as_str()).collect();
         for expected in [
-            "herd",
             "openrouter",
             "nvidia",
             "groq",
@@ -866,6 +865,7 @@ mod tests {
             "perplexity",
             "siliconflow",
             "google",
+            "freeinference",
         ] {
             assert!(names.contains(&expected), "missing {expected}");
         }
