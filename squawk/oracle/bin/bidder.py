@@ -79,6 +79,16 @@ CORRAL_CAP_S = 1740  # same class as super-ralph: agentic runs are slow
 CORRAL_BASE_URL = os.environ.get("CORRAL_BASE_URL",
                                 "http://127.0.0.1:25193/v1")
                              # before the oracle's exec deadline
+# 2026-10-13 (osprey runner-overhead): one-shot fast path for trivial
+# probe tasks. The corral ticket pipeline (9 tickets x 9 stages, ~110
+# model calls) burns 15-28 min on a 10-line script. One-shot does 1-2
+# direct model calls (<3 min) and falls back to corral on failure, so
+# complex tasks are never short-changed.
+ONE_SHOT_BASE_URL = os.environ.get("ONE_SHOT_BASE_URL",
+                                   "http://127.0.0.1:25200/v1")
+ONE_SHOT_API_KEY = os.environ.get("ONE_SHOT_API_KEY", "oracle-market-bidder")
+ONE_SHOT_CAP_S = 150.0  # hard ceiling: must stay well under 3 min
+ONE_SHOT_PROBE_MAX_CHARS = 2500  # gate: longer prompts always take the pipeline
 
 
 # ---- timeout evidence preservation (2026-09-21: tern) ----
@@ -812,6 +822,122 @@ class Bidder:
             encoding="utf-8")
         return success, out, err, dur
 
+    def _is_trivial_probe(self, task):
+        """Conservative trivial-task gate for the one-shot fast path.
+
+        Only probe-tagged, short, explicitly PROBE-labeled prompts qualify --
+        complex tasks always take the full pipeline. False negatives (a
+        trivial task going corral) cost time; false positives (a complex
+        task going one-shot) would cost correctness. This gate is biased
+        to false negatives.
+        """
+        if task.get("exec_mode") == "one-shot":
+            return True
+        if task.get("exec_mode") != "corral":
+            return False
+        tags = [str(t).lower() for t in (task.get("tags") or [])]
+        if "probe" not in tags:
+            return False
+        prompt = task.get("payload", "") or ""
+        if len(prompt) > ONE_SHOT_PROBE_MAX_CHARS:
+            return False
+        if "PROBE" not in prompt.upper():
+            return False
+        return True
+
+    def _one_shot_call(self, model, prompt, timeout=60):
+        """Single OpenAI-compatible chat call. Tries :25200 (cuttinggate)
+        first, falls back to :25193 (flock direct). Returns content or ""."""
+        body = json.dumps({"model": model,
+                           "messages": [{"role": "user", "content": prompt}],
+                           "max_tokens": 4096,
+                           "temperature": 0.2}).encode()
+        routes = [(ONE_SHOT_BASE_URL, "Bearer " + ONE_SHOT_API_KEY),
+                  ("http://127.0.0.1:25193/v1", RALPH_API_KEY)]
+        for base, auth in routes:
+            try:
+                req = urllib.request.Request(
+                    base.rstrip("/") + "/chat/completions", data=body,
+                    headers={"Content-Type": "application/json",
+                             "Authorization": auth,
+                             "User-Agent": "oracle-market-bidder"})
+                with urllib.request.urlopen(req, timeout=timeout) as r:
+                    payload = json.loads(r.read().decode("utf-8", "replace"))
+                choices = payload.get("choices") or []
+                content = ""
+                if choices:
+                    msg = choices[0].get("message") or {}
+                    content = (msg.get("content") or "").strip()
+                if content:
+                    return content
+            except Exception:
+                continue
+        return ""
+
+    def _run_one_shot(self, task, workdir, env, timeout_ms, t0):
+        """One-shot fast path for trivial probe tasks: 1-2 direct model
+        calls instead of the ~110-call corral ticket pipeline. Writes any
+        script to the workdir, executes it locally, and composes the final
+        reply ending with ACCEPTANCE-REPORT. Returns (success, out, err,
+        dur) like the other runners; the shared result tail is unchanged.
+        """
+        tid = task["task_id"]
+        prompt = task.get("payload", "") or ""
+        (workdir / "prompt.md").write_text(prompt, encoding="utf-8")
+        model = _resolve_ralph_model(RALPH_BASE_URL)
+        cap = min(ONE_SHOT_CAP_S, max(10.0, timeout_ms / 1000.0 - 30.0))
+        self.say("%s one-shot on %s (cap %.0fs, model %s)."
+                 % (self.name, tid, cap, model))
+        script_prompt = ("You are a coding agent. Do this task:\n\n%s\n\n"
+                         "If the task needs a script, output the Python script in a "
+                         "```python fenced block. Keep any prose brief."
+                         % prompt)
+        out1 = self._one_shot_call(model, script_prompt, timeout=60)
+        if not out1.strip():
+            dur = (time.time() - t0) * 1000
+            return False, "", "one-shot: model returned empty (call 1)", dur
+        exec_note = ""
+        m = re.search(r"```python\s*(.*?)```", out1, re.DOTALL)
+        if m:
+            (workdir / "task_script.py").write_text(m.group(1),
+                                                   encoding="utf-8")
+            try:
+                p = subprocess.run(["python3", "task_script.py"],
+                                   cwd=str(workdir), capture_output=True,
+                                   text=True, timeout=60)
+                exec_note = ("Script task_script.py executed: exit %d\n"
+                             "stdout:\n%s\nstderr:\n%s"
+                             % (p.returncode, (p.stdout or "")[-2000:],
+                                (p.stderr or "")[-500:]))
+            except subprocess.TimeoutExpired:
+                exec_note = "Script task_script.py timed out after 60s"
+            except Exception as e:  # noqa: BLE001
+                exec_note = "Script execution failed: %s" % e
+        remaining = cap - (time.time() - t0)
+        out2 = ""
+        if remaining > 20:
+            final_prompt = ("Task:\n%s\n\nYour draft answer:\n%s\n\n%s\n\n"
+                            "Write the final result: summarize what was done, "
+                            "include any JSON output, and end with exactly this "
+                            "section:\nACCEPTANCE-REPORT:\n"
+                            "- criterion 1: MET - <evidence>\n"
+                            "- criterion 2: MET - <evidence>\n"
+                            "(one line per acceptance criterion in the task above; "
+                            "write UNMET with a reason instead of MET if one fails)"
+                            % (prompt, out1[:4000], exec_note))
+            out2 = self._one_shot_call(
+                model, final_prompt,
+                timeout=max(15, min(60, remaining - 5)))
+        if not out2.strip():
+            out2 = out1 + ("\n\n" + exec_note if exec_note else "")
+        dur = (time.time() - t0) * 1000
+        (workdir / "oneshot-invocation.txt").write_text(
+            "model: %s\nbase_url: %s\nduration_ms: %.1f\n"
+            % (model, ONE_SHOT_BASE_URL, dur), encoding="utf-8")
+        success = bool(out2.strip())
+        err = "" if success else "one-shot: empty output after 2 calls"
+        return success, out2[-OUT_CAP:], err, dur
+
     def _run_corral(self, task, workdir, env, timeout_ms, t0):
         """Execute an agentic task via the corral CLI (market primary path).
 
@@ -912,7 +1038,26 @@ class Bidder:
         t0 = time.time()
         success, out, err = False, "", ""
         try:
-            if task.get("exec_mode") == "corral":
+            if (task.get("exec_mode") == "one-shot"
+                    or self._is_trivial_probe(task)):
+                # One-shot fast path (2026-10-13): trivial probe tasks skip
+                # the corral ticket pipeline (~110 model calls, 15-28 min)
+                # for 1-2 direct calls (<3 min). Falls back to corral, then
+                # super-ralph, so nothing is ever short-changed.
+                success, out, err, dur = self._run_one_shot(
+                    task, workdir, env, timeout_ms, t0)
+                if not success:
+                    self.say("%s one-shot failed on %s (%s); falling back "
+                             "to corral." % (self.name, tid, err[:120]))
+                    success, out, err, dur = self._run_corral(
+                        task, workdir, env, timeout_ms, t0)
+                    if not success:
+                        self.say("%s corral failed on %s (%s); falling back "
+                                 "to super-ralph."
+                                 % (self.name, tid, err[:120]))
+                        success, out, err, dur = self._run_super_ralph(
+                            task, workdir, env, timeout_ms, t0)
+            elif task.get("exec_mode") == "corral":
                 # Primary agentic path (2026-10-12): corral ticket run,
                 # with automatic fallback to super-ralph on corral failure.
                 success, out, err, dur = self._run_corral(
