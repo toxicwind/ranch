@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"net/http"
 	"sort"
 	"strings"
@@ -434,7 +435,14 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRootRedirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/ui", http.StatusFound)
+	// The dashboard used to be embedded at /ui; it is now served separately
+	// (see range/ui/CONSOLIDATION.md). HERD_DASHBOARD_URL points at the real
+	// dashboard origin; unset falls back to the legacy /ui path.
+	target := os.Getenv("HERD_DASHBOARD_URL")
+	if target == "" {
+		target = "/ui"
+	}
+	http.Redirect(w, r, target, http.StatusFound)
 }
 
 func handleUpstreamRedirect(w http.ResponseWriter, r *http.Request) {

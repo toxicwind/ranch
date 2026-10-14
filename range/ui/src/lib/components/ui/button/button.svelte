@@ -2,6 +2,7 @@
 	import type { Snippet } from "svelte";
 	import type { HTMLButtonAttributes } from "svelte/elements";
 	import { Button as ButtonPrimitive } from "bits-ui";
+	import type { ButtonRootProps } from "bits-ui";
 
 	const BASE =
 		"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
@@ -20,15 +21,17 @@
 		sm: "h-8 rounded-md px-3 text-xs",
 		lg: "h-10 rounded-md px-8",
 		icon: "size-9",
+		"icon-sm": "size-8",
 	};
 
 	let {
+		ref = $bindable(null),
 		class: klass = "",
 		variant = "default",
 		size = "default",
 		children,
 		...restProps
-	}: ButtonPrimitive.Props &
+	}: ButtonRootProps &
 		HTMLButtonAttributes & {
 			variant?: keyof typeof VARIANT;
 			size?: keyof typeof SIZE;
@@ -42,6 +45,6 @@
 	);
 </script>
 
-<ButtonPrimitive.Root class={classes} {...restProps}>
+<ButtonPrimitive.Root bind:ref class={classes} {...restProps}>
 	{@render children?.()}
 </ButtonPrimitive.Root>

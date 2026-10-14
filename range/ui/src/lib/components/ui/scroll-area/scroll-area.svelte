@@ -1,12 +1,14 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import { ScrollArea as ScrollAreaPrimitive } from "bits-ui";
+	// bits-ui 2.19 exports per-part props (ScrollAreaRootProps), not a Props namespace.
+	import type { ScrollAreaRootProps } from "bits-ui";
 
 	let {
 		class: klass = "",
 		children,
 		...restProps
-	}: ScrollAreaPrimitive.Props & { children?: Snippet } = $props();
+	}: ScrollAreaRootProps & { children?: Snippet } = $props();
 </script>
 
 <ScrollAreaPrimitive.Root class={["relative", klass].join(" ")} {...restProps}>
