@@ -100,12 +100,7 @@
       "HOMEBREW_PREFIX",
       "COLIMA_HOME",
       "HYPRLAND_INSTANCE_SIGNATURE",
-      "CONTEXT7_API_KEY",
-      "DISPLAY",
-      "WAYLAND_DISPLAY",
-      "XDG_SESSION_TYPE",
-      "XDG_SESSION_DESKTOP",
-      "XDG_CURRENT_DESKTOP"
+      "CONTEXT7_API_KEY"
     ],
     "custom_vars": {
       "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
@@ -504,20 +499,11 @@
     },
     {
       "args": [
-        "--from",
-        "git+https://github.com/toxicwind/mcp-background-job.git",
         "mcp-background-job"
       ],
       "command": "uvx",
       "created": "2026-07-19T02:33:58.727152595-06:00",
       "enabled": true,
-      "env": {
-        "MCP_BG_MAX_JOBS": "32",
-        "MCP_BG_CLEANUP_INTERVAL": "60",
-        "MCP_BG_JOB_TIMEOUT": "1800",
-        "MCP_BG_MAX_OUTPUT_SIZE": "20MB",
-        "MCP_BG_JOB_RETENTION": "120"
-      },
       "health_check_interval": "15s",
       "isolation": {
         "enabled": false,
@@ -528,7 +514,7 @@
       "protocol": "stdio",
       "quarantined": false,
       "tool_discovery_interval": "2m0s",
-      "updated": "2026-10-07T08:35:00-06:00"
+      "updated": "2026-09-19T02:32:49.222701416-06:00"
     },
     {
       "args": [
@@ -865,138 +851,21 @@
       "quarantined": false
     },
     {
-      "name": "huggingface",
-      "url": "https://huggingface.co/mcp",
-      "protocol": "http",
-      "headers": {
-        "Authorization": "Bearer "
-      },
-      "oauth": {
-        "login_url": "https://huggingface.co/mcp?login",
-        "enabled": true
-      },
-      "env": {},
-      "enabled": true,
-      "health_check_interval": "15s",
-      "tool_discovery_interval": "2m0s",
-      "isolation": {
-        "enabled": false,
-        "mode": "none"
-      },
-      "quarantined": false,
-      "auto_approve_tool_changes": true,
-      "trust_mode": "auto"
-    },
-    {
-      "name": "hatch-mcp",
+      "name": "awrawr",
       "command": "/home/toxic/.bun/bin/bun",
       "args": [
-        "/home/toxic/estate/tools/hatch-mcp/server.ts"
-      ],
-      "protocol": "stdio",
-      "env": {},
-      "enabled": true,
-      "health_check_interval": "15s",
-      "tool_discovery_interval": "2m0s",
-      "isolation": {
-        "enabled": false,
-        "mode": "none"
-      },
-      "quarantined": false,
-      "auto_approve_tool_changes": true,
-      "trust_mode": "auto"
-    },
-    {
-      "quarantined": false,
-      "name": "wezterm",
-      "protocol": "stdio",
-      "command": "/home/toxic/.bun/bin/bun",
-      "args": [
-        "/home/toxic/estate/ranch/wezterm-agent-mcp/build/cli.js"
-      ],
-      "env": {
-        "WEZTERM_UNIX_SOCKET": "/run/user/1000/wezterm/wayland-wayland-1-org.wezfurlong.wezterm"
-      },
-      "oauth": null,
-      "enabled": true,
-      "isolation": {
-        "enabled": false,
-        "mode": "none"
-      },
-      "health_check_interval": "15s",
-      "tool_discovery_interval": "2m0s",
-      "updated": "2026-10-13T00:54:37.044421-06:00"
-    },
-    {
-      "quarantined": false,
-      "name": "kitty",
-      "protocol": "stdio",
-      "command": "/home/toxic/.bun/bin/bun",
-      "args": [
-        "/home/toxic/estate/ranch/kitty-mcp-server/dist/index.js"
+        "/home/toxic/estate/services/awrawr-mcp/src/index.ts",
+        "--stdio"
       ],
       "env": {},
-      "oauth": null,
-      "enabled": true,
-      "isolation": {
-        "enabled": false,
-        "mode": "none"
-      },
-      "health_check_interval": "15s",
-      "tool_discovery_interval": "2m0s",
-      "updated": "2026-10-13T00:54:37.044431-06:00"
-    },
-    {
-      "name": "browserless",
-      "command": "/home/toxic/.local/share/mise/installs/node/22.12.0/bin/node",
-      "args": [
-        "/home/toxic/estate/ranch/barn/browserless/keeper/dist/index.js"
-      ],
       "protocol": "stdio",
       "enabled": true,
-      "quarantined": false,
-      "oauth": null,
-      "created": "2026-10-05T14:08:23.556351-06:00",
-      "updated": "2026-10-12T10:51:44.649721-06:00",
       "health_check_interval": "15s",
       "tool_discovery_interval": "2m0s",
       "isolation": {
         "enabled": false,
         "mode": "none"
-      }
-    },
-    {
-      "quarantined": false,
-      "name": "skills-hub",
-      "protocol": "stdio",
-      "command": "/home/toxic/.bun/bin/bun",
-      "args": [
-        "/home/toxic/estate/skills-hub/mcp/server.ts"
-      ],
-      "env": {
-        "SKILLS_HUB_ROOT": "/home/toxic/estate/skills-hub",
-        "SKILLS_HUB_NODE": "node"
       },
-      "oauth": null,
-      "enabled": true,
-      "isolation": {
-        "enabled": false,
-        "mode": "none"
-      },
-      "health_check_interval": "15s",
-      "tool_discovery_interval": "2m0s"
-    },
-    {
-      "name": "sidechat-shim",
-      "protocol": "stdio",
-      "command": "/home/toxic/.awrawr-mcp-venv/bin/python",
-      "args": [
-        "/home/toxic/hatch/shim_mcp.py"
-      ],
-      "env": {
-        "SHIM_MCP_TRANSPORT": "stdio"
-      },
-      "enabled": true,
       "quarantined": false
     }
   ],

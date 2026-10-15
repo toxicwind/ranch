@@ -1,8 +1,7 @@
 // squawk-ui: squawk web UI + feed proxy on :25136.
 // Serves BOTH lanes: funnel /fleet -> 127.0.0.1:25136 and tailnet-direct.
-// Binds 127.0.0.1 by default (SQUAWK_UI_HOST override); Tailscale serve owns the
-// TS-IP :25136 face so 0.0.0.0 EADDRINUSE after cold restart. Pitchfork supervises
-// (retry=true) for failover. Moved out of /tmp into the ranch repo 2026-09-30.
+// Binds 0.0.0.0 so either lane reaches the same backend; pitchfork supervises (retry=true)
+// for correct failover. Moved out of /tmp into the ranch repo 2026-09-30.
 //
 // WS-aware (2026-09-30): the UI's live sources (squawk-ws push, nats-ws) open a
 // WebSocket at the same host+mount as the page (e.g. wss://<funnel>/fleet/squawk-ws).
@@ -26,16 +25,8 @@
 // channel store (/home/toxic/.fleet-bus/squawk-root/<channel>/*.md) so tabs
 // actually isolate per channel. The legacy feed proxy at :25135 remains for
 // CLI/other consumers; the UI no longer depends on its /wait channel filtering.
-//
-// Roster (2026-10-07): GET /roster and /api/agents/roster serve fleet
-// agent cards via fleet-roster buildRoster; ?channel= uses _meta.json.
-//
-// Signed send (2026-10-07): /send uses ui_relay_post.py (thin _post_message;
-// forge-race winner ~63ms) with chat.py relay-in hedge. Never hand-writes .md.
-import { readFileSync, statSync, mkdirSync, writeFileSync, readdirSync, existsSync, watch } from "node:fs";
+import { readFileSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { spawnSync } from "node:child_process";
-import { buildRoster } from "./fleet-roster.ts";
 
 const FEED = "http://127.0.0.1:25135";
 const SQUAWK_DIR = "/home/toxic/estate/ranch/squawk";
@@ -43,13 +34,9 @@ const UI_ENTRY = join(SQUAWK_DIR, "ui", "dist", "bundle.js");
 const FEED_TOKEN_PATH = "/home/toxic/hatch/agents/ember/squawk-relay/feed-token";
 const SQUAWK_ROOT = "/home/toxic/.fleet-bus/squawk-root";
 
-// websocket SHUTTLE targets: client path -> backend ws url (nats only).
-// /squawk-ws is NATIVE (2026-10-13): served by this process straight from
-// the channel store, so every channel (fleet, ops, leads, ...) gets live
-// push with store signatures intact. History: the estate squawk-ws (:25147)
-// was superseded, and the fleet-feed shuttle that replaced it only ever
-// carried #fleet - #ops and friends stayed dark. Native is the fix.
+// websocket upgrade targets: client path -> backend ws url.
 const WS_TARGETS: Record<string, string> = {
+  "/squawk-ws": "ws://127.0.0.1:25147/squawk-ws",
   "/nats-ws": "ws://127.0.0.1:4223/",
 };
 
@@ -67,28 +54,6 @@ function getFeedToken(): string {
     /* token file unreadable: keep whatever we have (possibly empty) */
   }
   return feedToken;
-}
-
-// NATS auth injection: the UI's ?src=nats mode speaks the NATS protocol
-// through this shuttle to :4223, which requires the feed token. The browser
-// never sees the secret - we splice auth_token into the client's CONNECT
-// frame here, server-side, exactly once per socket.
-const NATS_CONNECT_RE = /^CONNECT\s*(\{[\s\S]*\})\r?\n?$/;
-function maybeInjectNatsAuth(data: ShuttleData, frame: string | Buffer): string | Buffer {
-  if (!data.natsAuth || data.natsAuthed) return frame;
-  const text = typeof frame === "string" ? frame : (frame as Buffer).toString("utf8");
-  const m = NATS_CONNECT_RE.exec(text);
-  if (!m) return frame;
-  try {
-    const obj = JSON.parse(m[1]);
-    const t = getFeedToken();
-    if (!t || obj.auth_token) return frame;
-    obj.auth_token = t;
-    data.natsAuthed = true;
-    return "CONNECT " + JSON.stringify(obj) + "\r\n";
-  } catch {
-    return frame;
-  }
 }
 
 // copy incoming headers, injecting the server-side feed token when the
@@ -115,14 +80,122 @@ function wsTarget(pathname: string, search: string): string {
   return base + search;
 }
 
-// --- channel store: read/write message files directly for true tab isolation ---
-const VALID_CHANNEL = /^#?[a-z0-9-_]{1,32}$/;
-
-// Channel names are stored without the cosmetic "#" prefix (dirs: fleet,
-// ops). Clients may ask for "#ops" or "ops" -- both mean the same channel.
-function normChannel(raw: string): string {
-  return raw.trim().toLowerCase().replace(/^#/, "");
+// --- cell-primary reverse tunnel (2026-10-03) ---
+// The cell dials in on /squawk-tunnel (WSS via funnel, token-authenticated).
+// When the tunnel is up, squawk traffic (/, /ui, /wait, /channels, /send,
+// /health, and WS /squawk-ws) is proxied to the cell-primary server;
+// local serving is the fallback when the tunnel is down.
+// Browser -> Funnel -> Yote -> Cell.
+const TUNNEL_TOKEN_PATH = "/home/toxic/.config/squawk-tunnel.token";
+let tunnelToken = "";
+let tunnelTokenMtimeMs = 0;
+function getTunnelToken(): string {
+  try {
+    const st = statSync(TUNNEL_TOKEN_PATH);
+    if (st.mtimeMs !== tunnelTokenMtimeMs) {
+      tunnelToken = readFileSync(TUNNEL_TOKEN_PATH, "utf8").trim();
+      tunnelTokenMtimeMs = st.mtimeMs;
+    }
+  } catch { /* keep whatever we have */ }
+  return tunnelToken;
 }
+
+const TUNNELED_PATHS = new Set(["/", "/ui", "/wait", "/channels", "/send", "/health"]);
+const TUNNEL_HOP_HEADERS = new Set(["connection", "transfer-encoding", "keep-alive",
+  "proxy-authenticate", "proxy-authorization", "te", "trailer", "upgrade", "host"]);
+
+let tunnelSock: ServerWebSocket<SockData> | null = null;
+let tunnelSeq = 0;
+const tunnelHttpPending = new Map<string, {
+  resolve: (r: Response) => void; reject: (e: Error) => void; timer: Timer;
+}>();
+// bridge id -> browser websocket, for WS connections shuttled through the tunnel
+const tunnelWsBridges = new Map<string, ServerWebSocket<SockData>>();
+
+function tunnelSend(obj: any): boolean {
+  if (!tunnelSock) return false;
+  try {
+    tunnelSock.send(JSON.stringify(obj));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function tunnelHttp(method: string, path: string, headers: Headers, body: ArrayBuffer | null): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    const id = "h" + (++tunnelSeq) + "-" + Date.now().toString(36);
+    const timer = setTimeout(() => {
+      tunnelHttpPending.delete(id);
+      reject(new Error("tunnel http timeout"));
+    }, 30000);
+    tunnelHttpPending.set(id, { resolve, reject, timer });
+    const h: Record<string, string> = {};
+    headers.forEach((v, k) => {
+      if (!TUNNEL_HOP_HEADERS.has(k.toLowerCase())) h[k] = v;
+    });
+    const ok = tunnelSend({
+      type: "http", id, method, path, headers: h,
+      body_b64: body ? Buffer.from(body).toString("base64") : "",
+    });
+    if (!ok) {
+      clearTimeout(timer);
+      tunnelHttpPending.delete(id);
+      reject(new Error("tunnel down"));
+    }
+  });
+}
+
+function handleTunnelMessage(raw: string | Buffer) {
+  let msg: any;
+  try {
+    msg = JSON.parse(typeof raw === "string" ? raw : Buffer.from(raw).toString());
+  } catch { return; }
+  const t = msg?.type;
+  if (t === "http-res" && msg.id) {
+    const p = tunnelHttpPending.get(msg.id);
+    if (!p) return;
+    tunnelHttpPending.delete(msg.id);
+    clearTimeout(p.timer);
+    const body = msg.body_b64 ? Buffer.from(msg.body_b64, "base64") : null;
+    p.resolve(new Response(body, {
+      status: Number(msg.status) || 200,
+      headers: msg.headers || {},
+    }));
+    return;
+  }
+  if (t === "ws-data" && msg.id) {
+    const bws = tunnelWsBridges.get(msg.id);
+    if (!bws) return;
+    try {
+      if (msg.text !== undefined && msg.text !== null) bws.send(msg.text);
+      else if (msg.b64) bws.send(Buffer.from(msg.b64, "base64"));
+    } catch {}
+    return;
+  }
+  if (t === "ws-opened" && msg.id) {
+    return; // ack; the bridge is already registered
+  }
+  if (t === "ws-close" && msg.id) {
+    const bws = tunnelWsBridges.get(msg.id);
+    tunnelWsBridges.delete(msg.id);
+    if (bws) {
+      try { bws.close(Number(msg.code) || 1000, String(msg.reason || "")); } catch {}
+    }
+    return;
+  }
+  if (t === "ping") {
+    tunnelSend({ type: "pong" });
+    return;
+  }
+  if (t === "hello") {
+    console.log("squawk-tunnel: cell hello received, tunnel live");
+    return;
+  }
+}
+
+// --- channel store: read/write message files directly for true tab isolation ---
+const VALID_CHANNEL = /^[a-z0-9-_]{1,32}$/;
 
 function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32) || "msg";
@@ -138,7 +211,6 @@ type Msg = {
   uuid: string;
   title: string;
   signature?: string;
-  sealed?: boolean;
   text: string;
 };
 
@@ -157,7 +229,6 @@ function parseMsgFile(path: string, fallbackSeq: number): Msg | null {
     }
   }
   const seq = Number(fm.seq) || fallbackSeq;
-  const sealed = fm.sealed === "true";
   return {
     seq,
     from: fm.from || "?",
@@ -167,15 +238,19 @@ function parseMsgFile(path: string, fallbackSeq: number): Msg | null {
     status: fm.status || "discussion",
     uuid: fm.uuid || "",
     title: fm.title || "msg",
-    signature: fm.signature || fm.hmac,
-    sealed,
-    text: sealed ? "" : text.trim(),
+    signature: fm.signature,
+    text: text.trim(),
   };
 }
 
-// Shared channel-store read: messages with filename seq > since, oldest
-// first, capped at the newest `tail`. Used by /wait AND the native WS.
-function readChannelMessages(channel: string, since: number, tail: number): Msg[] {
+// GET /wait?since=<seq>&channel=<name>&tail=<n> -> {ok, messages, cursor}
+function handleWait(url: URL): Response {
+  const channel = (url.searchParams.get("channel") || "fleet").toLowerCase();
+  if (!VALID_CHANNEL.test(channel)) {
+    return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
+  }
+  const since = Number(url.searchParams.get("since") || 0);
+  const tail = Math.min(Math.max(Number(url.searchParams.get("tail") || 200), 1), 1000);
   const dir = join(SQUAWK_ROOT, channel);
   let files: string[];
   try { files = readdirSync(dir); } catch { files = []; }
@@ -189,77 +264,9 @@ function readChannelMessages(channel: string, since: number, tail: number): Msg[
     if (msg) msgs.push(msg);
   }
   msgs.sort((a, b) => a.seq - b.seq);
-  return msgs.slice(-tail);
-}
-
-// GET /wait?since=<seq>&channel=<name>&tail=<n> -> {ok, messages, cursor}
-function handleWait(url: URL): Response {
-  const channel = normChannel(url.searchParams.get("channel") || "fleet");
-  if (!VALID_CHANNEL.test(channel)) {
-    return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
-  }
-  const since = Number(url.searchParams.get("since") || 0);
-  const tail = Math.min(Math.max(Number(url.searchParams.get("tail") || 200), 1), 1000);
-  const sliced = readChannelMessages(channel, since, tail);
+  const sliced = msgs.slice(-tail);
   const cursor = sliced.length ? sliced[sliced.length - 1].seq : since;
   return Response.json({ ok: true, messages: sliced, cursor });
-}
-
-// --- native /squawk-ws: multi-channel live push from the channel store ---
-// Protocol (the client's native tongue in live.svelte.js):
-//   client -> {subscribe: string[], since: Record<string, number>}
-//   server -> {type:"messages", channel, messages:[...]}  (backfill + live)
-//             {type:"status", kind:"subscribed"|"ping", ...}
-type NativeData = { kind: "native"; subs: Map<string, number>; hb?: ReturnType<typeof setInterval> };
-const nativeSockets = new Set<{ data: NativeData; send: (s: string) => void }>();
-const channelWatchers = new Map<string, ReturnType<typeof watch>>();
-
-function pushChannelUpdates(channel: string): void {
-  for (const ws of nativeSockets) {
-    const cursor = ws.data.subs.get(channel);
-    if (cursor === undefined) continue;
-    const msgs = readChannelMessages(channel, cursor, 200);
-    if (!msgs.length) continue;
-    ws.data.subs.set(channel, msgs[msgs.length - 1]!.seq);
-    try { ws.send(JSON.stringify({ type: "messages", channel, messages: msgs })); } catch {}
-  }
-}
-
-function ensureChannelWatcher(channel: string): void {
-  if (channelWatchers.has(channel)) return;
-  const dir = join(SQUAWK_ROOT, channel);
-  try {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const w = watch(dir, () => {
-      // a create can beat the writer's first write; debounce coalesces the
-      // burst and lets the content land before we read.
-      clearTimeout(timer);
-      timer = setTimeout(() => pushChannelUpdates(channel), 120);
-    });
-    w.on("error", () => { channelWatchers.delete(channel); try { w.close(); } catch {} });
-    channelWatchers.set(channel, w);
-  } catch { /* dir may not exist yet; a later subscribe retries */ }
-}
-
-function handleNativeSubscribe(ws: { data: NativeData; send: (s: string) => void }, message: string | Buffer): void {
-  let d: any;
-  try { d = JSON.parse(String(message)); } catch { return; }
-  if (!d || !Array.isArray(d.subscribe)) return;
-  const subs = new Map<string, number>();
-  for (const name of d.subscribe) {
-    const ch = normChannel(String(name));
-    if (!VALID_CHANNEL.test(ch)) continue;
-    const since = Number(d.since?.[ch] || 0);
-    subs.set(ch, since);
-    ensureChannelWatcher(ch);
-    const msgs = readChannelMessages(ch, since, 200);
-    if (msgs.length) {
-      subs.set(ch, msgs[msgs.length - 1]!.seq);
-      try { ws.send(JSON.stringify({ type: "messages", channel: ch, messages: msgs })); } catch {}
-    }
-  }
-  ws.data.subs = subs;
-  try { ws.send(JSON.stringify({ type: "status", kind: "subscribed", channels: [...subs.keys()] })); } catch {}
 }
 
 // GET /channels -> {ok, channels: [...]}
@@ -267,183 +274,34 @@ function handleChannels(): Response {
   let dirs: string[];
   try { dirs = readdirSync(SQUAWK_ROOT, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name); }
   catch { dirs = []; }
-  // Only real chat channels: must contain message .md files or _meta.json.
-  // Filters out system dirs (keys, presence) and CLI artifacts (--channel).
-  const channels = dirs.filter(d => {
-    if (!VALID_CHANNEL.test(d)) return false;
-    try {
-      const files = readdirSync(join(SQUAWK_ROOT, d));
-      return files.some(f => f.endsWith('.md') || f === '_meta.json');
-    } catch { return false; }
-  }).sort();
-  return Response.json({ ok: true, channels });
+  return Response.json({ ok: true, channels: dirs.filter(d => VALID_CHANNEL.test(d)).sort() });
 }
 
-// GET /roster (+ /api/agents/roster): agent activity cards for #fleet.
-// Borrowed from fleet-roster.ts buildRoster — same shape the fleet UI expects.
-// Optional ?channel=<name> returns channel membership from _meta.json (cmd_roster).
-function handleRoster(url: URL): Response {
-  const channel = normChannel(url.searchParams.get("channel") || "");
-  if (channel) {
-    if (!VALID_CHANNEL.test(channel)) {
-      return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
-    }
-    const metaPath = join(SQUAWK_ROOT, channel, "_meta.json");
-    try {
-      const meta = JSON.parse(readFileSync(metaPath, "utf8"));
-      let messages = 0;
-      try {
-        messages = readdirSync(join(SQUAWK_ROOT, channel)).filter((f) => /^\d+-.*\.md$/.test(f)).length;
-      } catch {}
-      return Response.json({
-        ok: true,
-        channel: meta.channel || channel,
-        topic: meta.topic || "",
-        members: meta.members || [],
-        messages,
-      });
-    } catch (e) {
-      return Response.json({ ok: false, error: String(e) }, { status: 404 });
-    }
-  }
-  // Default: fleet agent activity roster (fleet-roster / fleet-feed contract).
-  return Response.json({ ok: true, agents: buildRoster() });
-}
-
-
-
-// Shim screening is the default (Chris 2026-10-05): the shared
-// sidechat_shim pipeline (estate allowlist -> preflight gate ->
-// format_safe) runs on every UI send. Fail-open: if the shim is
-// unreachable, the original text goes through unchanged.
-function shimScreen(text: string): { text: string; flagged: string | null } {
-  try {
-    const b64 = Buffer.from(text, "utf8").toString("base64");
-    const r = spawnSync("python3", ["-c",
-      "import sys; sys.path.insert(0, \"/home/toxic/hatch\"); " +
-      "import sidechat_shim as s, base64, json; " +
-      "t = base64.b64decode(sys.argv[1]).decode(); " +
-      "al = s.is_estate_allowlisted(t); " +
-      "flag = None; " +
-      "if not al: " +
-      "clean, detail = s._preflight_check(t); " +
-      "flag = None if clean else detail; " +
-      "sys.stdout.write(json.dumps({\"text\": s.format_safe(t), \"flag\": flag}))", b64],
-      { timeout: 45000, encoding: "utf8" });
-    if (r.status === 0 && r.stdout) {
-      const doc = JSON.parse(r.stdout.trim());
-      return { text: doc.text || text, flagged: doc.flag || null };
-    }
-  } catch {}
-  return { text, flagged: null };
-}
-
-// Canonical seq allocation (2026-10-05 seq-divergence fix): every writer must
-// allocate via chat_core._next_seq (mkdir lock + durable .seqhigh mark), never
-// Date.now(). Timestamp-domain seqs once made allocator-domain messages
-// invisible to seq-gated consumers after the high-water passed them.
-function allocSeq(channel: string): number {
-  try {
-    const r = spawnSync("python3",
-      ["/home/toxic/estate/ranch/squawk/seq_alloc.py", SQUAWK_ROOT, channel],
-      { timeout: 15000, encoding: "utf8" });
-    if (r.status === 0 && r.stdout) {
-      const n = parseInt(r.stdout.trim(), 10);
-      if (Number.isFinite(n) && n > 0) return n;
-    }
-  } catch {}
-  console.error("squawk-ui: seq allocator unreachable, falling back to timestamp (divergence risk)");
-  return Date.now();
-}
-
-// POST /send {channel, text, human?} -> {ok, seq}
-// Borrow chat.py relay-in: never hand-write message files. The relay
-// identity HMAC-signs; human attribution rides as HMAC-covered
-// relayed_from + human frontmatter (fleet-chat-v3). See chat_commands
-// cmd_relay_in / _post_message — "never hand-write message files."
+// POST /send {channel, text} -> {ok, seq}
 async function handleSend(req: Request): Promise<Response> {
   let body: any;
   try { body = await req.json(); }
   catch { return Response.json({ ok: false, error: "bad json" }, { status: 400 }); }
-  const channel = normChannel(String(body.channel || ""));
+  const channel = String(body.channel || "").trim().toLowerCase();
   const text = String(body.text || "").trim();
-  const human = String(body.human || process.env.SQUAWK_UI_HUMAN || "chris").trim().toLowerCase();
   if (!VALID_CHANNEL.test(channel)) {
     return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
   }
   if (!text) {
     return Response.json({ ok: false, error: "empty text" }, { status: 400 });
   }
-  if (!/^[a-z][a-z0-9_-]{0,31}$/.test(human)) {
-    return Response.json({ ok: false, error: "invalid human" }, { status: 400 });
-  }
-  // Emergency opt-out: {direct: true} skips shim screening.
-  const direct = body.direct === true || body.direct === "1";
-  const screened = direct ? { text, flagged: null } : shimScreen(text);
-  if (screened.flagged) console.error(`squawk-ui: preflight flagged (${screened.flagged.slice(0, 120)}); sending anyway (fail-open)`);
-  const safeText = screened.text;
-  // Hot path: ui_relay_post.py (same _post_message writer, no argparse).
-  // Forge race 2026-10-07: thin ~63ms VALID vs CLI relay-in ~73ms — first valid wins.
-  // Hedge: fall back to chat.py relay-in if thin fails.
-  const env = { ...process.env, AGENT_CHAT_ROOT: SQUAWK_ROOT };
-  const spawnOpts = { timeout: 20000, encoding: "utf8" as const, cwd: SQUAWK_DIR, env };
-  // Dynamic channels (Chris 2026-10-13: "dynamic chat auto #fleet #ops
-  // should exist"): posting to a channel that does not exist yet creates it
-  // on the fly via the real init path (dir + .cursors + _meta.json +
-  // discovery index + CRDT op), never a hand-written meta file.
-  if (!existsSync(join(SQUAWK_ROOT, channel, "_meta.json"))) {
-    const init = spawnSync(
-      "python3",
-      [join(SQUAWK_DIR, "chat.py"), "--root", SQUAWK_ROOT, "init", channel],
-      spawnOpts,
-    );
-    if (init.status !== 0) {
-      const err = (init.stderr || init.stdout || "init failed").trim().slice(0, 200);
-      console.error("squawk-ui: auto-init failed for channel", channel, err);
-      return Response.json({ ok: false, error: `channel auto-create failed: ${err}` }, { status: 500 });
-    }
-    console.log(`squawk-ui: auto-created channel '${channel}'`);
-  }
+  const ts = Date.now();
+  const sender = "web-ui";
+  const slug = slugify(text.slice(0, 40));
+  const dir = join(SQUAWK_ROOT, channel);
   try {
-    let r = spawnSync(
-      "python3",
-      [
-        join(SQUAWK_DIR, "ui_relay_post.py"),
-        "--root", SQUAWK_ROOT,
-        "--channel", channel,
-        "--from", human,
-        "--text", safeText,
-        "--title", "msg",
-      ],
-      spawnOpts,
-    );
-    if (r.status !== 0) {
-      console.error("squawk-ui: thin post failed, hedging to relay-in:", (r.stderr || r.stdout || "").trim().slice(0, 200));
-      r = spawnSync(
-        "python3",
-        [
-          join(SQUAWK_DIR, "chat.py"),
-          "--root", SQUAWK_ROOT,
-          "relay-in",
-          "--channel", channel,
-          "--from", human,
-          "--text", safeText,
-          "--title", "msg",
-        ],
-        spawnOpts,
-      );
-    }
-    if (r.status !== 0) {
-      const err = (r.stderr || r.stdout || "relay-in failed").trim().slice(0, 400);
-      console.error("squawk-ui: signed send failed:", err);
-      return Response.json({ ok: false, error: err }, { status: 500 });
-    }
-    const m = /relayed #(\d+)/.exec(r.stdout || "");
-    const seq = m ? parseInt(m[1], 10) : 0;
-    return Response.json({ ok: true, seq, human });
+    mkdirSync(dir, { recursive: true });
+    const fm = `---\nseq: ${ts}\nfrom: ${sender}\nto: all\nchannel: ${channel}\nts: ${new Date(ts).toISOString()}\nstatus: discussion\nuuid: ${Math.random().toString(16).slice(2, 10)}\ntitle: msg\n---\n${text}\n`;
+    writeFileSync(join(dir, `${ts}-${sender}-${slug}.md`), fm);
   } catch (e) {
     return Response.json({ ok: false, error: String(e) }, { status: 500 });
   }
+  return Response.json({ ok: true, seq: ts });
 }
 
 // --- UI bundle: prebuilt Svelte 5 bundle, cached by mtime (hot-reload) ---
@@ -489,15 +347,14 @@ async function uiHtml(): Promise<string> {
     + `</body></html>`;
 }
 
-type ShuttleData = { kind: "shuttle"; target: string; backend?: WebSocket; pending: (string | Buffer)[]; natsAuth?: boolean; natsAuthed?: boolean };
-type SockData = NativeData | ShuttleData;
+type SockData = {
+  target?: string; backend?: WebSocket; pending?: (string | Buffer)[];
+  tunnel?: boolean; tunnelBridge?: boolean; bridgeId?: string;
+};
 
 Bun.serve<SockData>({
   port: 25136,
-  // Default loopback: Tailscale serve already owns :25136 on the TS IP.
-  // Binding 0.0.0.0 races that and EADDRINUSE after cold restart (Osprey 2026-10-07).
-  // Override with SQUAWK_UI_HOST if a dual-lane bind is needed.
-  hostname: process.env.SQUAWK_UI_HOST || "127.0.0.1",
+  hostname: "0.0.0.0",
   async fetch(req, server) {
     const url = new URL(req.url);
     // --- funnel mount prefix: the UI loads under /fleet on the funnel, so
@@ -508,15 +365,24 @@ Bun.serve<SockData>({
     if (url.pathname === "/fleet" || url.pathname.startsWith("/fleet/")) {
       url.pathname = url.pathname.slice("/fleet".length) || "/";
     }
-    // --- websocket upgrade: /squawk-ws is native; others shuttle ---
+    // --- websocket upgrade: shuttle to the real backend, don't fetch-proxy ---
     if (req.headers.get("upgrade")?.toLowerCase() === "websocket") {
-      if (url.pathname === "/squawk-ws") {
-        const data: NativeData = { kind: "native", subs: new Map() };
-        if (server.upgrade(req, { data })) return;
-        return new Response("squawk-ws upgrade failed", { status: 400 });
+      // --- cell reverse tunnel: the cell dials in here (token-authenticated) ---
+      if (url.pathname === "/squawk-tunnel") {
+        const tok = url.searchParams.get("token") || req.headers.get("x-tunnel-token") || "";
+        if (tok && tok === getTunnelToken()) {
+          if (server.upgrade(req, { data: { tunnel: true } })) return;
+          return new Response("upgrade failed", { status: 426 });
+        }
+        return new Response("forbidden", { status: 403 });
+      }
+      // --- squawk-ws via tunnel when the cell is connected ---
+      if (url.pathname === "/squawk-ws" && tunnelSock) {
+        if (server.upgrade(req, { data: { tunnelBridge: true, bridgeId: "", pending: [] } })) return;
+        return new Response("upgrade failed", { status: 426 });
       }
       const target = wsTarget(url.pathname, url.search);
-      if (target && server.upgrade(req, { data: { kind: "shuttle", target, pending: [], natsAuth: target.startsWith("ws://127.0.0.1:4223") } as ShuttleData })) {
+      if (target && server.upgrade(req, { data: { target, pending: [] } })) {
         return; // upgraded: the socket now lives in the websocket handlers
       }
       return new Response("no websocket target for " + url.pathname, { status: 404 });
@@ -531,8 +397,19 @@ Bun.serve<SockData>({
     // --- channel-aware endpoints served from the local store ---
     if (url.pathname === "/wait" && req.method === "GET") return handleWait(url);
     if (url.pathname === "/channels" && req.method === "GET") return handleChannels();
-    if ((url.pathname === "/roster" || url.pathname === "/api/agents/roster") && req.method === "GET") return handleRoster(url);
     if (url.pathname === "/send" && req.method === "POST") return handleSend(req);
+    // --- cell-primary tunnel: proxy squawk traffic to the cell when connected ---
+    if (tunnelSock && TUNNELED_PATHS.has(url.pathname)) {
+      try {
+        const bodyBuf = (req.method === "GET" || req.method === "HEAD")
+          ? null : await req.arrayBuffer();
+        return await tunnelHttp(req.method, url.pathname + url.search, req.headers, bodyBuf);
+      } catch (e) {
+        console.log("squawk-tunnel: http proxy failed, local fallback:",
+          String(e).slice(0, 80));
+        // fall through to local serving
+      }
+    }
     // proxy everything else to the legacy feed
     // the feed serves everything under /squawk-feed/*; the client speaks
     // bare relative paths, so add the prefix here (unless already present)
@@ -547,26 +424,39 @@ Bun.serve<SockData>({
   },
   websocket: {
     open(ws) {
-      if (ws.data.kind === "native") {
-        nativeSockets.add(ws as never);
-        // heartbeat frame: keeps funnel/idle intermediaries from reaping
-        // the socket; the client ignores unknown status kinds.
-        ws.data.hb = setInterval(() => {
-          try { ws.send(JSON.stringify({ type: "status", kind: "ping", ts: Date.now() })); } catch {}
-        }, 45000);
+      const d = ws.data;
+      // --- cell tunnel connection ---
+      if (d.tunnel) {
+        if (tunnelSock) {
+          try { tunnelSock.close(1000, "replaced"); } catch {}
+        }
+        tunnelSock = ws;
+        console.log("squawk-tunnel: cell connected");
         return;
       }
+      // --- browser WS bridged through the tunnel to the cell ---
+      if (d.tunnelBridge) {
+        const id = "w" + (++tunnelSeq) + "-" + Date.now().toString(36);
+        d.bridgeId = id;
+        tunnelWsBridges.set(id, ws);
+        if (!tunnelSend({ type: "ws-open", id, path: "/squawk-ws" })) {
+          tunnelWsBridges.delete(id);
+          try { ws.close(1011, "tunnel down"); } catch {}
+        }
+        return;
+      }
+      // --- legacy: shuttle to the loopback backend ---
       let backend: WebSocket;
       try {
-        backend = new WebSocket(ws.data.target);
+        backend = new WebSocket(d.target!);
       } catch {
         try { ws.close(1011, "backend dial failed"); } catch {}
         return;
       }
-      ws.data.backend = backend;
+      d.backend = backend;
       backend.onopen = () => {
-        for (const m of ws.data.pending.splice(0)) {
-          try { backend.send(maybeInjectNatsAuth(ws.data, m)); } catch {}
+        for (const m of (d.pending || []).splice(0)) {
+          try { backend.send(m); } catch {}
         }
       };
       backend.onmessage = (ev) => {
@@ -580,25 +470,62 @@ Bun.serve<SockData>({
       };
     },
     message(ws, message) {
-      if (ws.data.kind === "native") {
-        handleNativeSubscribe(ws as never, message as never);
+      const d = ws.data;
+      // --- messages from the cell tunnel ---
+      if (d.tunnel) {
+        handleTunnelMessage(message);
         return;
       }
-      const b = ws.data.backend;
+      // --- browser messages on a tunnel-bridged socket ---
+      if (d.tunnelBridge) {
+        const id = d.bridgeId;
+        if (id) {
+          if (typeof message === "string") {
+            tunnelSend({ type: "ws-data", id, text: message });
+          } else {
+            tunnelSend({ type: "ws-data", id,
+              b64: Buffer.from(message).toString("base64") });
+          }
+        }
+        return;
+      }
+      // --- legacy shuttle ---
+      const b = d.backend;
       if (b && b.readyState === WebSocket.OPEN) {
-        try { b.send(maybeInjectNatsAuth(ws.data, message)); } catch {}
+        try { b.send(message); } catch {}
       } else {
-        ws.data.pending.push(message); // queue the subscribe frame until dial completes
+        (d.pending || (d.pending = [])).push(message);
       }
     },
     close(ws) {
-      if (ws.data.kind === "native") {
-        nativeSockets.delete(ws as never);
-        if (ws.data.hb) clearInterval(ws.data.hb);
+      const d = ws.data;
+      // --- tunnel dropped: fail pending, close bridges, fall back to local ---
+      if (d.tunnel) {
+        if (tunnelSock === ws) tunnelSock = null;
+        for (const [, p] of tunnelHttpPending) {
+          clearTimeout(p.timer);
+          p.reject(new Error("tunnel closed"));
+        }
+        tunnelHttpPending.clear();
+        for (const [, bws] of tunnelWsBridges) {
+          try { bws.close(1011, "tunnel closed"); } catch {}
+        }
+        tunnelWsBridges.clear();
+        console.log("squawk-tunnel: cell disconnected, local fallback active");
         return;
       }
-      try { ws.data.backend?.close(); } catch {}
+      // --- bridged browser socket closed ---
+      if (d.tunnelBridge) {
+        const id = d.bridgeId;
+        if (id) {
+          tunnelWsBridges.delete(id);
+          tunnelSend({ type: "ws-close", id });
+        }
+        return;
+      }
+      // --- legacy ---
+      try { d.backend?.close(); } catch {}
     },
   },
 });
-console.log(`squawk-ui on ${process.env.SQUAWK_UI_HOST || "127.0.0.1"}:25136 (funnel /fleet + tailnet-direct), ws-aware, server-auth, hot-reload, channel-aware`);
+console.log("squawk-ui on 0.0.0.0:25136 (funnel /fleet + tailnet-direct), ws-aware, server-auth, hot-reload, channel-aware");
