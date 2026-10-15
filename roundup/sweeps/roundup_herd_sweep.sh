@@ -107,7 +107,7 @@ run_one() {
   fi
 }
 export -f run_one
-export OUTDIR HERD TIMEOUT REQUESTS PROMPT_TOKENS OUTPUT_TOKENS
+export OUTDIR HERD TIMEOUT REQUESTS PROMPT_TOKENS OUTPUT_TOKENS GUIDELLM
 
 printf '%s\n' "${MODELS[@]}" | xargs -P "$CONCURRENCY" -I{} bash -c 'run_one "$@"' _ {}
 
