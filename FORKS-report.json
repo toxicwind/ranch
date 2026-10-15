@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-15T06:04:38.033Z",
+  "generated": "2026-10-15T06:10:20.195Z",
   "total": 194,
-  "withUpstream": 47,
+  "withUpstream": 48,
   "infos": [
     {
       "name": "additional-lens-profiles",
@@ -11,7 +11,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "AgentForensics",
@@ -21,7 +23,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 1512078,
-      "fileCount": 81
+      "fileCount": 81,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "agentic-moment-2026",
@@ -31,7 +35,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "agentos",
@@ -41,7 +47,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "android-fleet",
@@ -51,7 +59,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 32376818,
-      "fileCount": 6427
+      "fileCount": 6427,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "arc-agi-experiment",
@@ -61,7 +71,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "arroyo",
@@ -71,7 +83,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 1637,
-      "fileCount": 6
+      "fileCount": 6,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "arxiv-code",
@@ -81,7 +95,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "ast-grep",
@@ -91,7 +107,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "ast-grep-rules",
@@ -101,7 +119,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 2210,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "audits",
@@ -111,7 +131,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 41663,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "auto1m",
@@ -121,7 +143,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 101748,
-      "fileCount": 10
+      "fileCount": 10,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "awawr-loader",
@@ -131,7 +155,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "awesome-agent-gateway-2026",
@@ -141,7 +167,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "awesome-api-shape-explorer",
@@ -151,7 +179,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "barn",
@@ -161,7 +191,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 2362669338,
-      "fileCount": 12945
+      "fileCount": 12945,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "bashrc-quote-fix",
@@ -171,7 +203,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "bedrock",
@@ -181,7 +215,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "bench-radar",
@@ -191,7 +227,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 133299,
-      "fileCount": 10
+      "fileCount": 10,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "bin",
@@ -201,7 +239,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 8564,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "borrowed",
@@ -211,7 +251,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 133432598,
-      "fileCount": 6084
+      "fileCount": 6084,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "bridge",
@@ -221,7 +263,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 721643,
-      "fileCount": 53
+      "fileCount": 53,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "bugbounty",
@@ -231,7 +275,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 5629632,
-      "fileCount": 34
+      "fileCount": 34,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "campfire",
@@ -241,7 +287,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 119843,
-      "fileCount": 28
+      "fileCount": 28,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "cell-mirror",
@@ -251,7 +299,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 15727,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "chat-coord",
@@ -261,7 +311,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "classifier",
@@ -271,7 +323,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 37376,
-      "fileCount": 8
+      "fileCount": 8,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "classifier-preflight",
@@ -281,7 +335,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 60570,
-      "fileCount": 12
+      "fileCount": 12,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "codebase-memory",
@@ -291,7 +347,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 627,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "codeflux",
@@ -301,7 +359,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "codeflux-moulti",
@@ -311,7 +371,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "codeflux-patchling",
@@ -321,7 +383,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "codeflux-python-patch",
@@ -331,7 +395,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "codeflux-watchfiles",
@@ -341,7 +407,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "ComfyUI-TTools",
@@ -351,7 +419,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "computer-use-linux",
@@ -361,7 +431,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "corral",
@@ -371,7 +443,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 604087464,
-      "fileCount": 53702
+      "fileCount": 53702,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "cron-trust",
@@ -381,7 +455,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 101137,
-      "fileCount": 6
+      "fileCount": 6,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "dashboard",
@@ -391,7 +467,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 24178,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "data",
@@ -401,7 +479,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 1032550,
-      "fileCount": 8
+      "fileCount": 8,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "dayz-toolkit",
@@ -411,7 +491,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "dedi-ops",
@@ -421,7 +503,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "disparate-latent-experiment",
@@ -431,7 +515,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 36310641,
-      "fileCount": 1058
+      "fileCount": 1058,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "docs",
@@ -441,7 +527,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 4203,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "doorbell",
@@ -451,7 +539,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 614992,
-      "fileCount": 283
+      "fileCount": 283,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "dots-client",
@@ -461,7 +551,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 8072,
-      "fileCount": 3
+      "fileCount": 3,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "drover",
@@ -471,7 +563,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 11208574,
-      "fileCount": 25
+      "fileCount": 25,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "effusion-labs",
@@ -481,7 +575,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "effusion-labs-tickets",
@@ -491,7 +587,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "emergent",
@@ -501,7 +599,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 17770,
-      "fileCount": 4
+      "fileCount": 4,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "estate-chat",
@@ -511,7 +611,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 5992160,
-      "fileCount": 528
+      "fileCount": 528,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "estate-scripts",
@@ -521,7 +623,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 6899544,
-      "fileCount": 279
+      "fileCount": 279,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "evidence-locker",
@@ -531,7 +635,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "examples",
@@ -541,7 +647,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 3219,
-      "fileCount": 4
+      "fileCount": 4,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "extagents",
@@ -551,7 +659,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "extensions",
@@ -561,7 +671,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 5886648,
-      "fileCount": 51
+      "fileCount": 51,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "fanout",
@@ -571,7 +683,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 19642,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "fast-race",
@@ -581,7 +695,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 38628,
-      "fileCount": 3
+      "fileCount": 3,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "ferret-den",
@@ -591,7 +707,9 @@
       "hasGit": true,
       "isSubmodule": false,
       "sizeBytes": 52349220,
-      "fileCount": 5540
+      "fileCount": 5540,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "fleet",
@@ -601,7 +719,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 103374,
-      "fileCount": 18
+      "fileCount": 18,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "fleet-bus-mcp",
@@ -611,7 +731,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 18746,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "fleet-chat",
@@ -621,7 +743,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 25019,
-      "fileCount": 6
+      "fileCount": 6,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "fleet-ops",
@@ -631,7 +755,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 299489,
-      "fileCount": 45
+      "fileCount": 45,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "flicker",
@@ -641,7 +767,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 172108102,
-      "fileCount": 1616
+      "fileCount": 1616,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "flock",
@@ -651,7 +779,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 10091669,
-      "fileCount": 723
+      "fileCount": 723,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "forge",
@@ -661,7 +791,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 516157,
-      "fileCount": 113
+      "fileCount": 113,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "gatehouse-staging",
@@ -671,7 +803,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 6678488,
-      "fileCount": 35
+      "fileCount": 35,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "gayxxx-sovereign",
@@ -681,7 +815,9 @@
       "hasGit": true,
       "isSubmodule": false,
       "sizeBytes": 5126360,
-      "fileCount": 412
+      "fileCount": 412,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "gear",
@@ -691,7 +827,9 @@
       "hasGit": true,
       "isSubmodule": false,
       "sizeBytes": 8180800,
-      "fileCount": 65
+      "fileCount": 65,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "gguf-read",
@@ -701,7 +839,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 3679,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "github-search",
@@ -711,7 +851,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 2262995028,
-      "fileCount": 45093
+      "fileCount": 45093,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "goldfinger",
@@ -721,7 +863,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "hatch-decode",
@@ -731,7 +875,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 716838,
-      "fileCount": 42
+      "fileCount": 42,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "hatch-mcp",
@@ -741,7 +887,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 17139,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "herdproof-bun",
@@ -751,7 +899,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 842,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "hf-model-sync",
@@ -761,7 +911,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 18755,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "host-proof",
@@ -771,7 +923,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 30144,
-      "fileCount": 4
+      "fileCount": 4,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "huggingface-mcp-server",
@@ -781,7 +935,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 67546,
-      "fileCount": 10
+      "fileCount": 10,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "hypr-agent-portal",
@@ -791,7 +947,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "hyprgrid",
@@ -801,7 +959,9 @@
       "hasGit": true,
       "isSubmodule": false,
       "sizeBytes": 855376,
-      "fileCount": 95
+      "fileCount": 95,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "Hyprgrid-gestures",
@@ -811,7 +971,9 @@
       "hasGit": true,
       "isSubmodule": false,
       "sizeBytes": 89394,
-      "fileCount": 40
+      "fileCount": 40,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "keep",
@@ -821,7 +983,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 867554004,
-      "fileCount": 2836
+      "fileCount": 2836,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "killer-features",
@@ -831,7 +995,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 101339471,
-      "fileCount": 4424
+      "fileCount": 4424,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "kilo-cli",
@@ -841,7 +1007,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 433906912,
-      "fileCount": 3762
+      "fileCount": 3762,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "kilo-code",
@@ -851,7 +1019,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 864387900,
-      "fileCount": 10978
+      "fileCount": 10978,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "kimi-claw",
@@ -861,7 +1031,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 1300419,
-      "fileCount": 160
+      "fileCount": 160,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "kitty-mcp-server",
@@ -871,7 +1043,15 @@
       "hasGit": true,
       "isSubmodule": false,
       "sizeBytes": 42183502,
-      "fileCount": 3861
+      "fileCount": 3861,
+      "signals": [
+        {
+          "kind": "github-parent",
+          "weight": 3,
+          "detail": "toxicwind/kitty-mcp-server is a fork of secemp9/kitty-mcp-server (https://github.com/secemp9/kitty-mcp-server)"
+        }
+      ],
+      "signalTotal": 3
     },
     {
       "name": "kodi-fleet",
@@ -881,7 +1061,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 15752179,
-      "fileCount": 703
+      "fileCount": 703,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "lasso",
@@ -891,7 +1073,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 73214661,
-      "fileCount": 2156
+      "fileCount": 2156,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "leakfix-src",
@@ -901,7 +1085,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 66299,
-      "fileCount": 5
+      "fileCount": 5,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "ledger",
@@ -911,7 +1097,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 34420,
-      "fileCount": 3
+      "fileCount": 3,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "lib",
@@ -921,7 +1109,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 3222,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "libsecret",
@@ -931,7 +1121,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "llm-mapreduce",
@@ -941,7 +1133,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "lookout",
@@ -951,7 +1145,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "matter-server",
@@ -961,7 +1157,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 94390,
-      "fileCount": 5
+      "fileCount": 5,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "mcp-gateway",
@@ -971,7 +1169,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 637,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "mcp-prompt-injection-detector",
@@ -981,7 +1181,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 4332122,
-      "fileCount": 38
+      "fileCount": 38,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "mcpproxy-go",
@@ -991,7 +1193,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 424400607,
-      "fileCount": 3752
+      "fileCount": 3752,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "mesh",
@@ -1001,7 +1205,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 20290980287,
-      "fileCount": 322548
+      "fileCount": 322548,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "metaaivm",
@@ -1011,7 +1217,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 15548,
-      "fileCount": 4
+      "fileCount": 4,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "metaaivm-profile",
@@ -1021,7 +1229,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 10706,
-      "fileCount": 7
+      "fileCount": 7,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "meta-research-toolkit",
@@ -1031,7 +1241,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 241290403,
-      "fileCount": 8874
+      "fileCount": 8874,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "mission-control",
@@ -1041,7 +1253,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 15689,
-      "fileCount": 8
+      "fileCount": 8,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "ml-serve",
@@ -1051,7 +1265,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 30304,
-      "fileCount": 6
+      "fileCount": 6,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "model-max",
@@ -1061,7 +1277,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 1455071,
-      "fileCount": 15
+      "fileCount": 15,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "monad-forge",
@@ -1071,7 +1289,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 203031,
-      "fileCount": 6
+      "fileCount": 6,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "muse-cli",
@@ -1081,7 +1301,15 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 1922437,
-      "fileCount": 79
+      "fileCount": 79,
+      "signals": [
+        {
+          "kind": "github-parent",
+          "weight": 3,
+          "detail": "toxicwind/muse-cli is a fork of nikships/muse-cli (https://github.com/nikships/muse-cli)"
+        }
+      ],
+      "signalTotal": 3
     },
     {
       "name": "namespace-concealment-explorer",
@@ -1091,7 +1319,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 23801,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "naming-audit",
@@ -1101,7 +1331,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 6218,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "nim-inkling-api-research",
@@ -1111,7 +1343,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 55905,
-      "fileCount": 42
+      "fileCount": 42,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "nim-repos",
@@ -1121,7 +1355,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 2841478486,
-      "fileCount": 63117
+      "fileCount": 63117,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "null-g-proxy",
@@ -1131,7 +1367,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 30382225,
-      "fileCount": 1203
+      "fileCount": 1203,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "nvidia-alive",
@@ -1141,7 +1379,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 406722,
-      "fileCount": 121
+      "fileCount": 121,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "nvidia-kernel-guard",
@@ -1151,7 +1391,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 91596,
-      "fileCount": 84
+      "fileCount": 84,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "nvidia-nim-model-probe",
@@ -1161,7 +1403,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 542418,
-      "fileCount": 63
+      "fileCount": 63,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "omp-test-runner-watchdog-OzX7V0",
@@ -1171,7 +1415,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 16,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "openfang-join",
@@ -1181,7 +1427,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 22183,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "openrouter-probe",
@@ -1191,7 +1439,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 3729306,
-      "fileCount": 64
+      "fileCount": 64,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "ops",
@@ -1201,7 +1451,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 422356,
-      "fileCount": 62
+      "fileCount": 62,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "outlier-toolkit",
@@ -1211,7 +1463,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 3755308,
-      "fileCount": 288
+      "fileCount": 288,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "pack-fix",
@@ -1221,7 +1475,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 32745,
-      "fileCount": 6
+      "fileCount": 6,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "paper-poller",
@@ -1231,17 +1487,27 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 99266,
-      "fileCount": 42
+      "fileCount": 42,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "pd-mcp-standalone",
-      "upstream": null,
-      "upstreamSource": null,
+      "upstream": "https://github.com/intelligent-ears/pd-tools-mcp",
+      "upstreamSource": "GitHub parent fork",
       "remoteOrigin": "https://github.com/toxicwind/pd-mcp.git",
       "hasGit": true,
       "isSubmodule": false,
       "sizeBytes": 50184146,
-      "fileCount": 5392
+      "fileCount": 5392,
+      "signals": [
+        {
+          "kind": "github-parent",
+          "weight": 3,
+          "detail": "toxicwind/pd-mcp is a fork of intelligent-ears/pd-tools-mcp (https://github.com/intelligent-ears/pd-tools-mcp)"
+        }
+      ],
+      "signalTotal": 3
     },
     {
       "name": "pearlctl",
@@ -1251,7 +1517,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 616087,
-      "fileCount": 106
+      "fileCount": 106,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "phone-ocr-sweep",
@@ -1261,7 +1529,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 3173,
-      "fileCount": 4
+      "fileCount": 4,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "pj-fast",
@@ -1271,7 +1541,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 6074277,
-      "fileCount": 106
+      "fileCount": 106,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "pollinations-proxy",
@@ -1281,7 +1553,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 10449,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "provider-fuzz",
@@ -1291,7 +1565,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 147701,
-      "fileCount": 16
+      "fileCount": 16,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "qed",
@@ -1301,7 +1577,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 66804921350,
-      "fileCount": 358476
+      "fileCount": 358476,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "ralph-dashboard",
@@ -1311,7 +1589,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 445758770,
-      "fileCount": 22189
+      "fileCount": 22189,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "ranch-analyze",
@@ -1321,7 +1601,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 312143905,
-      "fileCount": 6125
+      "fileCount": 6125,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "range",
@@ -1331,7 +1613,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 367278551,
-      "fileCount": 16645
+      "fileCount": 16645,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "rankings",
@@ -1341,7 +1625,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 548739649,
-      "fileCount": 16987
+      "fileCount": 16987,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "refusal-hunt",
@@ -1351,7 +1637,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 132468526,
-      "fileCount": 3258
+      "fileCount": 3258,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "rename-roundup",
@@ -1361,7 +1649,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 21244,
-      "fileCount": 4
+      "fileCount": 4,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "repo-first-class",
@@ -1371,7 +1661,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 81799,
-      "fileCount": 47
+      "fileCount": 47,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "research",
@@ -1381,7 +1673,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 3660891,
-      "fileCount": 90
+      "fileCount": 90,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "rig",
@@ -1391,7 +1685,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 203883752,
-      "fileCount": 747
+      "fileCount": 747,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "roundup",
@@ -1401,7 +1697,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 706199118,
-      "fileCount": 18013
+      "fileCount": 18013,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "roundup-site",
@@ -1411,7 +1709,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 428805,
-      "fileCount": 74
+      "fileCount": 74,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "routing",
@@ -1421,7 +1721,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 86740,
-      "fileCount": 10
+      "fileCount": 10,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "routing-score",
@@ -1431,7 +1733,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 14297,
-      "fileCount": 3
+      "fileCount": 3,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "RSSLive",
@@ -1441,7 +1745,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 0,
-      "fileCount": 0
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "rsync-mcp",
@@ -1451,7 +1757,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 247469,
-      "fileCount": 101
+      "fileCount": 101,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "rust-algo-web",
@@ -1461,7 +1769,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 3476144650,
-      "fileCount": 11657
+      "fileCount": 11657,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "rustdesk-server",
@@ -1471,7 +1781,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 19718235,
-      "fileCount": 11
+      "fileCount": 11,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "ryzen3090-whoa",
@@ -1481,7 +1793,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 36303185,
-      "fileCount": 1056
+      "fileCount": 1056,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "safety-review-gate",
@@ -1491,7 +1805,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 273431,
-      "fileCount": 35
+      "fileCount": 35,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "saturation-guard",
@@ -1501,7 +1817,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 41105,
-      "fileCount": 7
+      "fileCount": 7,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "scripts",
@@ -1510,8 +1828,10 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 12425,
-      "fileCount": 3
+      "sizeBytes": 19792,
+      "fileCount": 3,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "secretsmith",
@@ -1521,7 +1841,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 131624,
-      "fileCount": 41
+      "fileCount": 41,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "session-bus-refresh",
@@ -1531,7 +1853,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 48269,
-      "fileCount": 33
+      "fileCount": 33,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "shell",
@@ -1540,8 +1864,10 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4013275056,
-      "fileCount": 14599
+      "sizeBytes": 4013507759,
+      "fileCount": 14599,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "skillforge",
@@ -1551,7 +1877,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 32691,
-      "fileCount": 36
+      "fileCount": 36,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "sovereign",
@@ -1561,7 +1889,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 425210325,
-      "fileCount": 548
+      "fileCount": 548,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "sovereign-dispersal",
@@ -1571,7 +1901,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 94412,
-      "fileCount": 52
+      "fileCount": 52,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "sovereign-dispersal-monolith",
@@ -1581,7 +1913,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 3716,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "sovereign-end4",
@@ -1591,7 +1925,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 32936200,
-      "fileCount": 1284
+      "fileCount": 1284,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "sovereign-monitor",
@@ -1601,7 +1937,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 34593,
-      "fileCount": 7
+      "fileCount": 7,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "sovereign-scripts",
@@ -1611,7 +1949,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 149399,
-      "fileCount": 52
+      "fileCount": 52,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "sovereign-skills",
@@ -1621,7 +1961,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 64302,
-      "fileCount": 38
+      "fileCount": 38,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "sovereign-whoa-breakthrough",
@@ -1631,7 +1973,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 36295563,
-      "fileCount": 1055
+      "fileCount": 1055,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "spark",
@@ -1641,7 +1985,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 340006,
-      "fileCount": 15
+      "fileCount": 15,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "spark-harvest",
@@ -1651,7 +1997,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 19353,
-      "fileCount": 8
+      "fileCount": 8,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "squawk",
@@ -1660,8 +2008,10 @@
       "remoteOrigin": "https://github.com/toxicwind/squawk.git",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 20728480,
-      "fileCount": 1793
+      "sizeBytes": 20729018,
+      "fileCount": 1793,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "squawk-watchdog",
@@ -1671,7 +2021,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 6912,
-      "fileCount": 4
+      "fileCount": 4,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "squawk-ws",
@@ -1681,7 +2033,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 305095,
-      "fileCount": 19
+      "fileCount": 19,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "stable",
@@ -1691,7 +2045,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 140249520,
-      "fileCount": 14109
+      "fileCount": 14109,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "standalone",
@@ -1701,7 +2057,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 6315,
-      "fileCount": 11
+      "fileCount": 11,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "stash-guard",
@@ -1711,7 +2069,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 26750,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "stream-broker",
@@ -1721,7 +2081,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 11252,
-      "fileCount": 8
+      "fileCount": 8,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "strudel-dev-vite",
@@ -1731,7 +2093,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 1774649,
-      "fileCount": 61
+      "fileCount": 61,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "strudel-sampler-server-vite",
@@ -1741,7 +2105,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 313422,
-      "fileCount": 65
+      "fileCount": 65,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "submodules",
@@ -1751,7 +2117,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 10477,
-      "fileCount": 7
+      "fileCount": 7,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "switchboard",
@@ -1761,7 +2129,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 36023,
-      "fileCount": 10
+      "fileCount": 10,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "task-launch",
@@ -1771,7 +2141,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 39004,
-      "fileCount": 11
+      "fileCount": 11,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "tau",
@@ -1781,7 +2153,9 @@
       "hasGit": true,
       "isSubmodule": false,
       "sizeBytes": 5334916648,
-      "fileCount": 48433
+      "fileCount": 48433,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "tau-extensions",
@@ -1791,7 +2165,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 5018936635,
-      "fileCount": 77624
+      "fileCount": 77624,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "tau-marketplace",
@@ -1801,7 +2177,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 694344,
-      "fileCount": 126
+      "fileCount": 126,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "tmux-mcp",
@@ -1811,7 +2189,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 10045,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "toolcall-agent",
@@ -1821,7 +2201,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 40636,
-      "fileCount": 5
+      "fileCount": 5,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "tools",
@@ -1831,7 +2213,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 953431,
-      "fileCount": 138
+      "fileCount": 138,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "toxicwind-repos",
@@ -1841,7 +2225,9 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 215158331,
-      "fileCount": 897
+      "fileCount": 897,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "trading-post",
@@ -1851,7 +2237,15 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 1703946355,
-      "fileCount": 94699
+      "fileCount": 94699,
+      "signals": [
+        {
+          "kind": "github-parent",
+          "weight": 3,
+          "detail": "toxicwind/trading-post is a fork of framerslab/agentos (https://github.com/framerslab/agentos)"
+        }
+      ],
+      "signalTotal": 3
     },
     {
       "name": "websearch-mcp",
@@ -1861,7 +2255,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 8621,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "wezterm",
@@ -1871,7 +2267,15 @@
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 8526433284,
-      "fileCount": 31543
+      "fileCount": 31543,
+      "signals": [
+        {
+          "kind": "github-parent",
+          "weight": 3,
+          "detail": "toxicwind/wezterm is a fork of wezterm/wezterm (https://github.com/wezterm/wezterm)"
+        }
+      ],
+      "signalTotal": 3
     },
     {
       "name": "wezterm-agent-mcp",
@@ -1881,7 +2285,15 @@
       "hasGit": true,
       "isSubmodule": false,
       "sizeBytes": 41617136,
-      "fileCount": 3825
+      "fileCount": 3825,
+      "signals": [
+        {
+          "kind": "github-parent",
+          "weight": 3,
+          "detail": "toxicwind/wezterm-agent-mcp is a fork of multiagentcognition/wezterm-agent-mcp (https://github.com/multiagentcognition/wezterm-agent-mcp)"
+        }
+      ],
+      "signalTotal": 3
     },
     {
       "name": "windmill",
@@ -1891,7 +2303,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 16183,
-      "fileCount": 6
+      "fileCount": 6,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "wtf-filetrace",
@@ -1901,7 +2315,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 82,
-      "fileCount": 1
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "wtf-orch",
@@ -1911,7 +2327,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 4909,
-      "fileCount": 3
+      "fileCount": 3,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "wtf-orthogonal-seed",
@@ -1921,7 +2339,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 15556,
-      "fileCount": 3
+      "fileCount": 3,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "yote",
@@ -1930,8 +2350,10 @@
       "remoteOrigin": "https://github.com/toxicwind/ranch",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 30178508,
-      "fileCount": 2122
+      "sizeBytes": 30185020,
+      "fileCount": 2122,
+      "signals": [],
+      "signalTotal": 0
     },
     {
       "name": "yote-maximal",
@@ -1941,7 +2363,9 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 6729,
-      "fileCount": 2
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
     }
   ]
 }

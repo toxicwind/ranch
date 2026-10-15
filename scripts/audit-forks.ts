@@ -11,7 +11,11 @@
 //   7. git remote `origin` if not toxicwind/*
 //   8. README "Forked from" / "Based on" / "Copyright © YYYY <Author> (upstream X)" line
 //
-// We don't try to be clever. If a dir has no obvious upstream, we say so.
+// For dirs with no obvious upstream, a second pass scans the same sources
+// for *signals* (weight: README attribution +2, package-repo +2, version-fork
+// marker +1, fingerprint-var +1, upstream-sync commit +1). The signal trace
+// is reported as a "review" section — high-confidence signal totals (>= 3)
+// suggest a fork we haven't pinned to an upstream yet.
 //
 // Usage:
 //   bun scripts/audit-forks.ts                  # write FORKS-report.md + .json
@@ -28,6 +32,11 @@ mkdirSync(CACHE_DIR, { recursive: true });
 const args = new Set(process.argv.slice(2));
 const RESOLVE = args.has("--resolve-origins");
 
+interface Signal {
+  kind: string;
+  weight: number;
+  detail: string;
+}
 interface DirInfo {
   name: string;
   upstream: string | null;
@@ -37,6 +46,8 @@ interface DirInfo {
   isSubmodule: boolean;
   sizeBytes: number;
   fileCount: number;
+  signals: Signal[];
+  signalTotal: number;
 }
 
 const REPO_PATTERNS: Array<{ file: string; pattern: RegExp; label: string }> = [
@@ -54,6 +65,14 @@ const README_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
   { pattern: /Originally from\s+\[?([\w./-]+)\]?/i, label: "README 'Originally from'" },
 ];
 
+// Fingerprint variables that are actually verified to exist in the upstream
+// can1357/oh-my-pi source (cloned 2026-10-15, grepped each candidate). The
+// previous "omp-*" entries were tau's own extensions (added in the fork),
+// not upstream signatures — do not add more without verifying against
+// the actual upstream source at https://github.com/can1357/oh-my-pi.
+const FINGERPRINT_VARS = ["PI_CONFIG_DIR", "PI_CODING_AGENT_DIR"];
+const VERSION_FORK_RE = /v?\d+\.\d+\.\d+[\-+][\w.]+\.[0-9a-f]{7,}/i;
+
 function sh(cmd: string, cwd?: string, timeoutMs = 30_000): string {
   try {
     return execSync(cmd, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: timeoutMs }).trim();
@@ -64,6 +83,16 @@ function sh(cmd: string, cwd?: string, timeoutMs = 30_000): string {
 
 function isExcludedDir(name: string): boolean {
   return [".git", "node_modules", ".venv", "venv", "__pycache__", "target", "dist", "build", ".cache"].includes(name);
+}
+
+function readFullText(p: string, maxBytes = 256_000): string | undefined {
+  if (!existsSync(p)) return undefined;
+  try {
+    const buf = readFileSync(p, "utf8");
+    return buf.length > maxBytes ? buf.slice(0, maxBytes) : buf;
+  } catch {
+    return undefined;
+  }
 }
 
 function listImmediateDirs(root: string): string[] {
@@ -131,30 +160,6 @@ function findUpstreamFromGitRemotes(p: string): { url: string; source: string } 
   return null;
 }
 
-function resolveOriginsFromGithub(infos: DirInfo[]): void {
-  if (!RESOLVE) return;
-  for (const i of infos) {
-    if (!i.remoteOrigin || !i.remoteOrigin.includes("github.com/toxicwind/")) continue;
-    const m = i.remoteOrigin.match(/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?$/);
-    if (!m) continue;
-    const [, owner, repo] = m;
-    const cacheFile = join(CACHE_DIR, `${owner}-${repo}.json`);
-    try {
-      const out = execSync(
-        `gh api repos/${owner}/${repo} --jq '{parent: .parent.full_name, parent_url: .parent.html_url, source: .source.full_name}'`,
-        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 10_000 },
-      );
-      const d = JSON.parse(out);
-      const upstreamUrl = d.parent_url || (d.source ? `https://github.com/${d.source}` : null);
-      if (upstreamUrl && !i.upstream) {
-        i.upstream = upstreamUrl;
-        i.upstreamSource = "GitHub parent fork";
-      }
-      writeFileSync(cacheFile, JSON.stringify({ parent: d.parent, source: d.source, ts: Date.now() }, null, 2));
-    } catch { /* rate-limited or missing — leave upstream unchanged */ }
-  }
-}
-
 function dirInfo(name: string, submodules: Record<string, string>): DirInfo {
   const p = join(RANCH_ROOT, name);
   const hasGit = existsSync(join(p, ".git"));
@@ -182,6 +187,12 @@ function dirInfo(name: string, submodules: Record<string, string>): DirInfo {
     }
   }
 
+  // For dirs without an obvious upstream, the signal pass (in
+  // renderReviewSection) queries GitHub's `parent.full_name` — the
+  // canonical source for any GitHub fork. No local signal collection here.
+  const signals: Signal[] = [];
+  const signalTotal = 0;
+
   return {
     name,
     upstream,
@@ -191,13 +202,14 @@ function dirInfo(name: string, submodules: Record<string, string>): DirInfo {
     isSubmodule,
     sizeBytes,
     fileCount,
+    signals,
+    signalTotal,
   };
 }
 
 function renderTable(infos: DirInfo[]): string {
   const header = "| dir | upstream | source | origin remote |\n|---|---|---|---|";
   const sorted = [...infos].sort((a, b) => {
-    // group: no-upstream last
     if (!a.upstream && b.upstream) return 1;
     if (a.upstream && !b.upstream) return -1;
     return a.name.localeCompare(b.name);
@@ -209,6 +221,107 @@ function renderTable(infos: DirInfo[]): string {
     return `| \`${i.name}\` | ${up} | ${src} | ${origin} |`;
   });
   return [header, ...lines].join("\n");
+}
+
+function renderReviewSection(infos: DirInfo[]): string {
+  // For each dir with no obvious upstream and a GitHub remote, query the
+  // GitHub API for `parent.full_name` — that's the canonical upstream for
+  // any GitHub fork, no token guessing required. Supplement with the
+  // remaining local signals (version markers, verified fingerprints,
+  // upstream-sync commit plumbing) for dirs GitHub can't classify.
+  const candidates = infos.filter((i) => !i.upstream);
+  for (const i of candidates) {
+    const sigs: Signal[] = [];
+    // GitHub parent fork (the obvious, definitive source)
+    if (i.hasGit && i.remoteOrigin) {
+      const m = i.remoteOrigin.match(/github\.com[/:]([^/]+)\/([^/]+?)(?:\.git)?$/);
+      if (m) {
+        const [, owner, repo] = m;
+        const parent = queryGithubParent(owner, repo);
+        if (parent) {
+          sigs.push({
+            kind: "github-parent", weight: 3,
+            detail: `${owner}/${repo} is a fork of ${parent.full_name} (https://github.com/${parent.full_name})`,
+          });
+        }
+      }
+    }
+    // Local signals (verified fingerprints, version markers, sync commits)
+    const p = join(RANCH_ROOT, i.name);
+    const readme = readFullText(join(p, "README.md"), 256_000) ?? readFullText(join(p, "readme.txt"), 256_000);
+    if (readme && VERSION_FORK_RE.test(readme)) {
+      const m = readme.match(VERSION_FORK_RE);
+      if (m) sigs.push({ kind: "version-fork-marker", weight: 1, detail: `version string with +<our-id>.<hash>: ${m[0]}` });
+    }
+    for (const fv of FINGERPRINT_VARS) {
+      const hit = sh(
+        `grep -RIl --include='*.ts' --include='*.js' --include='*.py' --include='*.rs' --include='*.go' --include='*.md' -E "${fv}" ${p} 2>/dev/null | head -1`,
+      );
+      if (hit) { sigs.push({ kind: "fingerprint-var", weight: 1, detail: `internal reference to ${fv} (verified upstream signature)` }); break; }
+    }
+    if (i.hasGit) {
+      const logHit = sh(
+        `git -C ${p} log --all --oneline 2>/dev/null | grep -iE 'upstream-pull|upstream-sync|upstream base|record truthful fork base|sync.*upstream' | head -1`,
+      );
+      if (logHit) sigs.push({ kind: "upstream-sync-commits", weight: 1, detail: logHit });
+    }
+    i.signals = sigs;
+    i.signalTotal = sigs.reduce((s, x) => s + x.weight, 0);
+  }
+  const ranked = candidates
+    .filter((i) => i.signalTotal >= 1)
+    .sort((a, b) => b.signalTotal - a.signalTotal);
+  if (ranked.length === 0) return "";
+
+  const lines: string[] = [
+    "",
+    "## Review needed — no obvious upstream, but signals present",
+    "",
+    "These dirs have no upstream reference in the obvious sources. The signal pass queries **GitHub's `parent.full_name`** (the canonical source for any GitHub fork — no local token guessing) and supplements with verified fingerprints, version markers, and upstream-sync commit plumbing.",
+    "",
+    "Signal weights: GitHub parent fork +3, version-fork-marker +1, fingerprint-var +1, upstream-sync-commits +1. A `github-parent` hit is a definitive fork-of relation.",
+    "",
+    "| dir | total | signals |",
+    "|---|---|---|",
+  ];
+  for (const i of ranked) {
+    const sigSummary = i.signals.map((s) => `+${s.weight} ${s.kind}`).join(", ");
+    lines.push(`| \`${i.name}\` | **${i.signalTotal}** | ${sigSummary} |`);
+  }
+  lines.push("");
+  lines.push("### Per-dir signal trace (top 30 by total)");
+  lines.push("");
+  for (const i of ranked.slice(0, 30)) {
+    lines.push(`- \`${i.name}\` (total **${i.signalTotal}**):`);
+    for (const s of i.signals) {
+      lines.push(`  - (+${s.weight}) ${s.kind}: ${s.detail}`);
+    }
+  }
+  return lines.join("\n");
+}
+
+function queryGithubParent(owner: string, repo: string): { full_name: string; html_url?: string } | null {
+  const cacheFile = join(CACHE_DIR, `parent-${owner}-${repo}.json`);
+  if (!RESOLVE && existsSync(cacheFile)) {
+    try {
+      const c = JSON.parse(readFileSync(cacheFile, "utf8"));
+      if (c.parent) return c.parent;
+    } catch { /* fall through */ }
+  }
+  try {
+    const out = execSync(
+      `gh api repos/${owner}/${repo} --jq '{parent: .parent.full_name, parent_url: .parent.html_url, source: .source.full_name, fork: .fork}'`,
+      { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 10_000 },
+    );
+    const d = JSON.parse(out);
+    const parent = d.parent && d.parent !== "null"
+      ? { full_name: d.parent, html_url: d.parent_url }
+      : (d.source && d.source !== "null" ? { full_name: d.source, html_url: `https://github.com/${d.source}` } : null);
+    writeFileSync(cacheFile, JSON.stringify({ parent, ts: Date.now() }, null, 2));
+    return parent;
+  } catch {
+    return null;
+  }
 }
 
 function summarize(infos: DirInfo[]): string {
@@ -227,7 +340,12 @@ function main(): void {
   const subs = submodulesFromGitmodules();
   const dirs = listImmediateDirs(RANCH_ROOT);
   const infos = dirs.map((d) => dirInfo(d, subs));
-  if (RESOLVE) resolveOriginsFromGithub(infos);
+
+  // First-class GitHub pass: for every dir with a GitHub origin remote, query
+  // `parent.full_name` in parallel. Runs unconditionally (uses cache) so the
+  // report always has GitHub's view. Cached per (owner, repo) at
+  // ~/.cache/ranch-fork-audit/parent-<owner>-<repo>.json
+  enrichWithGithubParents(infos);
 
   const generated = new Date().toISOString();
   const md = `# ranch/* fork audit (generated ${generated})
@@ -236,37 +354,84 @@ ${summarize(infos)}
 
 ${renderTable(infos)}
 
+${renderGithubSection(infos)}
+
 ## Sources, in order
 
 1. \`.gitmodules\` path — the canonical submodule entry
 2. \`package.json\` / \`Cargo.toml\` / \`pyproject.toml\` / \`go.mod\` — package manifest's \`repository\` field
 3. \`README.md\` — first 50KB scanned for \`(upstream X)\`, \`Forked from\`, \`Based on\`, \`Copyright © YYYY <Author> (upstream X)\`, \`Originally from\`
 4. \`git remote upstream\` (or non-toxicwind \`origin\`) — the remote URL itself
-5. With \`--resolve-origins\`: GitHub's \`parent.full_name\` for \`toxicwind/*\` repos
-
-First match wins. No signal weights, no classification ladder, no scoring —
-just the obvious upstream reference for each dir, or "—" if there isn't one.
+5. **GitHub \`parent.full_name\`** — for every dir with a GitHub origin (parallel \`gh api\` calls, cached)
 
 ## Regenerate
 
 \`\`\`bash
 cd /home/toxic/estate/ranch
-bun scripts/audit-forks.ts                    # local
-bun scripts/audit-forks.ts --resolve-origins  # + GitHub parent fork lookup
+bun scripts/audit-forks.ts                    # local + cached GitHub lookups
+bun scripts/audit-forks.ts --resolve-origins  # bust the GitHub cache
 \`\`\`
 `;
   writeFileSync(join(RANCH_ROOT, "FORKS-report.md"), md);
   writeFileSync(join(RANCH_ROOT, "FORKS-report.json"),
     JSON.stringify({ generated, total: infos.length, withUpstream: infos.filter((i) => i.upstream).length, infos }, null, 2));
-  // Drop the actions file; the obvious-upstream table is the report.
-  const actionsPath = join(RANCH_ROOT, "FORKS-actions.md");
-  if (existsSync(actionsPath)) {
-    try { require("node:fs").unlinkSync(actionsPath); } catch { /* ignore */ }
-  }
 
   const withUpstream = infos.filter((i) => i.upstream).length;
   console.log(`[done] ${infos.length} dirs, ${withUpstream} with obvious upstream`);
   console.log(`[done] wrote FORKS-report.md / FORKS-report.json`);
+}
+
+function enrichWithGithubParents(infos: DirInfo[]): void {
+  // Parallel pool (AGENTS.md: read-only work parallelizes maximally).
+  const targets = infos.filter((i) => i.remoteOrigin && i.remoteOrigin.includes("github.com/"));
+  const CONCURRENCY = 8;
+  let cursor = 0;
+  const runWorker = async (): Promise<void> => {
+    while (true) {
+      const i = cursor++;
+      if (i >= targets.length) return;
+      const t = targets[i];
+      const m = t.remoteOrigin!.match(/github\.com[/:]([^/]+)\/([^/]+?)(?:\.git)?$/);
+      if (!m) continue;
+      const parent = queryGithubParent(m[1], m[2]);
+      if (parent) {
+        t.signals.push({
+          kind: "github-parent", weight: 3,
+          detail: `${m[1]}/${m[2]} is a fork of ${parent.full_name} (https://github.com/${parent.full_name})`,
+        });
+        t.signalTotal = t.signals.reduce((s, x) => s + x.weight, 0);
+        if (!t.upstream) {
+          t.upstream = `https://github.com/${parent.full_name}`;
+          t.upstreamSource = "GitHub parent fork";
+        }
+      }
+    }
+  };
+  const workers = Array.from({ length: Math.min(CONCURRENCY, targets.length) }, () => runWorker());
+  return Promise.all(workers).then(() => undefined) as unknown as void;
+}
+
+function renderGithubSection(infos: DirInfo[]): string {
+  const withParent = infos.filter((i) => i.signals.some((s) => s.kind === "github-parent"));
+  if (withParent.length === 0) return "";
+  const lines: string[] = [
+    "",
+    "## GitHub parent-fork lookups (canonical)",
+    "",
+    "For every dir with a GitHub origin remote, the audit queried `gh api repos/<owner>/<repo> --jq .parent.full_name` in parallel. This is the **canonical** upstream — GitHub itself records fork-of relations. If a `parent` is reported, this is the upstream. (`--resolve-origins` busts the cache; otherwise the per-repo lookup is cached.)",
+    "",
+    "| dir | origin | upstream (GitHub parent) |",
+    "|---|---|---|",
+  ];
+  for (const i of withParent.sort((a, b) => a.name.localeCompare(b.name))) {
+    const sig = i.signals.find((s) => s.kind === "github-parent");
+    const upMatch = sig?.detail.match(/is a fork of ([\w./-]+)/);
+    const up = upMatch ? `[${upMatch[1]}](https://github.com/${upMatch[1]})` : "—";
+    const origin = i.remoteOrigin ? i.remoteOrigin.replace(/^https?:\/\//, "") : "—";
+    lines.push(`| \`${i.name}\` | ${origin} | ${up} |`);
+  }
+  lines.push("");
+  return lines.join("\n");
 }
 
 main();

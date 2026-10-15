@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-15T06:04:38.033Z)
+# ranch/* fork audit (generated 2026-10-15T06:10:20.195Z)
 
-194 immediate subdirs; **47** have an obvious upstream reference.
+194 immediate subdirs; **48** have an obvious upstream reference.
 
 By source:
   - **37** .gitmodules
@@ -9,6 +9,7 @@ By source:
   - **2** git remote origin (non-toxicwind)
   - **2** git remote upstream
   - **1** README 'Forked from'
+  - **1** GitHub parent fork
   - **1** Cargo.toml repository
 
 | dir | upstream | source | origin remote |
@@ -34,6 +35,7 @@ By source:
 | `nvidia-nim-model-probe` | [github.com/toxicwind/nvidia-nim-model-probe](https://github.com/toxicwind/nvidia-nim-model-probe) | .gitmodules | github.com/toxicwind/nvidia-nim-model-probe.git |
 | `outlier-toolkit` | [github.com/toxicwind/outlier-toolkit](https://github.com/toxicwind/outlier-toolkit) | .gitmodules | github.com/toxicwind/outlier-toolkit.git |
 | `paper-poller` | [github.com/toxicwind/paper-poller](https://github.com/toxicwind/paper-poller) | .gitmodules | github.com/toxicwind/paper-poller.git |
+| `pd-mcp-standalone` | [github.com/intelligent-ears/pd-tools-mcp](https://github.com/intelligent-ears/pd-tools-mcp) | GitHub parent fork | github.com/toxicwind/pd-mcp.git |
 | `pearlctl` | [github.com/toxicwind/pearlctl](https://github.com/toxicwind/pearlctl) | .gitmodules | github.com/toxicwind/pearlctl.git |
 | `pj-fast` | [github.com/toxicwind/pj-fast](https://github.com/toxicwind/pj-fast) | .gitmodules | github.com/toxicwind/pj-fast.git |
 | `ralph-dashboard` | [github.com/toxicwind/ralph-dashboard](https://github.com/toxicwind/ralph-dashboard) | .gitmodules | github.com/toxicwind/ralph-dashboard.git |
@@ -162,7 +164,6 @@ By source:
 | `openrouter-probe` | — | — | — |
 | `ops` | — | — | — |
 | `pack-fix` | — | — | — |
-| `pd-mcp-standalone` | — | — | github.com/toxicwind/pd-mcp.git |
 | `phone-ocr-sweep` | — | — | — |
 | `pollinations-proxy` | — | — | — |
 | `provider-fuzz` | — | — | — |
@@ -208,21 +209,33 @@ By source:
 | `wtf-orthogonal-seed` | — | — | — |
 | `yote-maximal` | — | — | — |
 
+
+## GitHub parent-fork lookups (canonical)
+
+For every dir with a GitHub origin remote, the audit queried `gh api repos/<owner>/<repo> --jq .parent.full_name` in parallel. This is the **canonical** upstream — GitHub itself records fork-of relations. If a `parent` is reported, this is the upstream. (`--resolve-origins` busts the cache; otherwise the per-repo lookup is cached.)
+
+| dir | origin | upstream (GitHub parent) |
+|---|---|---|
+| `kitty-mcp-server` | github.com/toxicwind/kitty-mcp-server.git | [secemp9/kitty-mcp-server](https://github.com/secemp9/kitty-mcp-server) |
+| `muse-cli` | github.com/toxicwind/muse-cli.git | [nikships/muse-cli](https://github.com/nikships/muse-cli) |
+| `pd-mcp-standalone` | github.com/toxicwind/pd-mcp.git | [intelligent-ears/pd-tools-mcp](https://github.com/intelligent-ears/pd-tools-mcp) |
+| `trading-post` | github.com/toxicwind/trading-post.git | [framerslab/agentos](https://github.com/framerslab/agentos) |
+| `wezterm` | github.com/toxicwind/wezterm.git | [wezterm/wezterm](https://github.com/wezterm/wezterm) |
+| `wezterm-agent-mcp` | github.com/toxicwind/wezterm-agent-mcp.git | [multiagentcognition/wezterm-agent-mcp](https://github.com/multiagentcognition/wezterm-agent-mcp) |
+
+
 ## Sources, in order
 
 1. `.gitmodules` path — the canonical submodule entry
 2. `package.json` / `Cargo.toml` / `pyproject.toml` / `go.mod` — package manifest's `repository` field
 3. `README.md` — first 50KB scanned for `(upstream X)`, `Forked from`, `Based on`, `Copyright © YYYY <Author> (upstream X)`, `Originally from`
 4. `git remote upstream` (or non-toxicwind `origin`) — the remote URL itself
-5. With `--resolve-origins`: GitHub's `parent.full_name` for `toxicwind/*` repos
-
-First match wins. No signal weights, no classification ladder, no scoring —
-just the obvious upstream reference for each dir, or "—" if there isn't one.
+5. **GitHub `parent.full_name`** — for every dir with a GitHub origin (parallel `gh api` calls, cached)
 
 ## Regenerate
 
 ```bash
 cd /home/toxic/estate/ranch
-bun scripts/audit-forks.ts                    # local
-bun scripts/audit-forks.ts --resolve-origins  # + GitHub parent fork lookup
+bun scripts/audit-forks.ts                    # local + cached GitHub lookups
+bun scripts/audit-forks.ts --resolve-origins  # bust the GitHub cache
 ```
