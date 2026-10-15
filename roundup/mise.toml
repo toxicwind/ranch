@@ -41,3 +41,19 @@ description = "Dev server for rankings site"
 [tasks.docs-build]
 run = "cd docs-site && npm run build"
 description = "Build rankings site"
+
+# Preflight: verify toolchain + endpoints before any sweep. Exit non-zero on
+# the 2026-10-14 silent-failure class (missing guidellm, zero results, exit 0).
+[tasks.test]
+run = "python3 -m pytest tests/test_sweep_preflight.py -v"
+description = "Roundup preflight: fork present, guidellm resolvable, sweep fails loudly"
+
+# Live smoke: 1 model, 1 request — proves a sweep can actually produce data.
+[tasks.smoke]
+run = "ROUNDUP_LIVE=1 python3 -m pytest tests/test_sweep_preflight.py::test_live_smoke_sweep_produces_results -v"
+description = "Live smoke sweep (1 model, 1 request) — meta-test against silent failure"
+
+# Full herd sweep (all live herd models, guidellm path now explicit).
+[tasks.herd-sweep]
+run = "./sweeps/roundup_herd_sweep.sh"
+description = "Benchmark every model herd can load (loud-fail on zero results)"

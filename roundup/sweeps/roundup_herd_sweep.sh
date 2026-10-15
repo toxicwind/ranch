@@ -30,6 +30,22 @@ PROMPT_TOKENS=32
 OUTPUT_TOKENS=32
 HERD=http://127.0.0.1:25100
 
+# GUIDELLM discovery — the 2026-10-14 silent-failure bug: bare `guidellm` was
+# not on PATH, every benchmark failed, the summary reported "completed: 0
+# failed: 0", and the script exited 0. Resolve explicitly and fail loudly.
+GUIDELLM=""
+for c in ~/.venv-guidellm/bin/guidellm \
+         /home/toxic/estate/ranch/roundup/guidellm/.venv/bin/guidellm; do
+  [ -x "$c" ] && { GUIDELLM="$c"; break; }
+done
+[ -z "$GUIDELLM" ] && GUIDELLM=$(command -v guidellm || true)
+if [ -z "$GUIDELLM" ]; then
+  echo "FATAL: guidellm not found (checked ~/.venv-guidellm, fork .venv, PATH)." >&2
+  echo "  install: python3 -m venv ~/.venv-guidellm && ~/.venv-guidellm/bin/pip install -e roundup/guidellm" >&2
+  exit 3
+fi
+echo "[sweep] guidellm: $GUIDELLM"
+
 while [ $# -gt 0 ]; do
   case "$1" in
     --outdir) OUTDIR="$2"; shift 2;;
@@ -77,7 +93,7 @@ run_one() {
   local safe; safe=$(echo "$m" | tr '/:' '__')
   local out="$OUTDIR/${safe}.json"
   echo "=== $m ==="
-  if timeout "$TIMEOUT" guidellm run \
+  if timeout "$TIMEOUT" "$GUIDELLM" run \
     --backend "kind=openai_http,target=$HERD/v1,model=$m,validate_backend=False" \
     --data "kind=synthetic_text,prompt_tokens=$PROMPT_TOKENS,output_tokens=$OUTPUT_TOKENS" \
     --profile kind=synchronous \
@@ -97,30 +113,41 @@ printf '%s\n' "${MODELS[@]}" | xargs -P "$CONCURRENCY" -I{} bash -c 'run_one "$@
 
 echo
 echo "[sweep] summary:"
+# summary: count real benchmark jsons; FAILED sweep must exit non-zero
+# (previously "completed: 0 failed: 0" with exit 0 — the silent failure).
 python3 - "$OUTDIR" <<'PYEOF'
 import json, sys, glob, os
 outdir = sys.argv[1]
-ok, fail = [], []
+real, empty, corrupt = 0, 0, 0
+details = []
 for f in sorted(glob.glob(os.path.join(outdir, "*.json"))):
     name = os.path.basename(f)[:-5]
     try:
         d = json.load(open(f))
-        benchmarks = d.get("benchmarks")
-        if isinstance(benchmarks, list) and benchmarks:
-            b = benchmarks[0]
-            metrics = b.get("metrics", {}) or {}
-            # pull a latency-ish summary if present
+        b = d.get("benchmarks") or []
+        if b:
+            real += 1
+            metrics = (b[0].get("metrics", {}) or {})
             lat = metrics.get("request_latency", {}) or metrics.get("time_to_first_token", {})
             mean = lat.get("mean") if isinstance(lat, dict) else None
-            ok.append((name, mean))
+            details.append(("OK", name, mean))
         else:
-            ok.append((name, None))
+            empty += 1
+            details.append(("EMPTY", name, None))
     except Exception:
-        fail.append(name)
-print("  completed: %d  failed: %d" % (len(ok), len(fail)))
-for name, mean in ok:
-    print("    OK   %-60s %s" % (name, ("mean_latency=%.3f" % mean) if mean else ""))
-for name in fail:
-    print("    FAIL %s" % name)
+        corrupt += 1
+        details.append(("FAIL", name, None))
+logs = glob.glob(os.path.join(outdir, "*.json.log"))
+print(f"  benchmarks with data: {real}  empty: {empty}  corrupt: {corrupt}  runs attempted (logs): {len(logs)}")
+for status, name, mean in details:
+    if status == "OK":
+        print("    OK   %-60s %s" % (name, ("mean_latency=%.3f" % mean) if mean else ""))
+    else:
+        print("    %-4s %s" % (status, name))
+if real == 0:
+    print("  FAILED: sweep produced ZERO benchmark results — do not report this run as done", file=sys.stderr)
+    sys.exit(1)
 PYEOF
+SUMMARY_RC=$?
+[ "$SUMMARY_RC" -ne 0 ] && exit 1
 echo "[sweep] done: $OUTDIR"
