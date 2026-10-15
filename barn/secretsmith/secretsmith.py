@@ -173,9 +173,20 @@ class SecretService:
                 items.append(self.item_info(ip, c["label"]))
         return items
 
-    def search(self, attr_filters, collection=None):
-        return [it for it in self.list_items(collection)
-                if all(it["attributes"].get(k) == v for k, v in attr_filters.items())]
+    def search(self, attr_filters, collection=None, label=None, query=None):
+        out = []
+        for it in self.list_items(collection):
+            if label is not None and it.get("label") != label:
+                continue
+            if not all(it["attributes"].get(k) == v for k, v in attr_filters.items()):
+                continue
+            if query is not None:
+                hay = " ".join([it.get("label") or ""]
+                               + ["%s=%s" % (k, v) for k, v in it["attributes"].items()])
+                if query.lower() not in hay.lower():
+                    continue
+            out.append(it)
+        return out
 
     def is_locked(self, path, iface):
         return bool(self._get(path, iface, "Locked"))
@@ -431,7 +442,8 @@ def cmd_search(svc, a, registry, as_json):
         filters["xdg:schema"] = schema
     # NOTE: no schema filter by default — we search EVERYTHING, so the original
     # bug (wrong-schema filter silently returning empty) cannot happen.
-    found = svc.search(filters, collection=a.collection)
+    found = svc.search(filters, collection=a.collection,
+                       label=getattr(a, "label", None), query=getattr(a, "query", None))
     if a.show:
         svc.ensure_unlocked_items(found)
         for it in found:
@@ -467,7 +479,9 @@ def _is_text(b):
 
 def cmd_get(svc, a, registry, as_json):
     filters = parse_attrs(a.attr)
-    found = svc.search(filters, collection=a.collection)
+    if not filters and not getattr(a, "label", None):
+        raise SecretsmithError("specify --label or at least one --attr k=v")
+    found = svc.search(filters, collection=a.collection, label=getattr(a, "label", None))
     if not found:
         raise SecretsmithError("no item matches %r" % filters)
     if len(found) > 1:
@@ -495,7 +509,6 @@ def cmd_get(svc, a, registry, as_json):
         else:
             print("secret: %s  (use --show to print)" % redact(len(secret)))
     return 0
-
 
 def read_secret_input(a):
     if a.secret_file:
@@ -532,7 +545,9 @@ def cmd_set(svc, a, registry, as_json):
 
 def cmd_delete(svc, a, registry, as_json):
     filters = parse_attrs(a.attr)
-    found = svc.search(filters, collection=a.collection)
+    if not filters and not getattr(a, "label", None):
+        raise SecretsmithError("specify --label or at least one --attr k=v")
+    found = svc.search(filters, collection=a.collection, label=getattr(a, "label", None))
     if not found:
         raise SecretsmithError("no item matches %r" % filters)
     if not a.yes:
@@ -819,24 +834,41 @@ def cmd_cookie_vault_sync(svc, a, registry, as_json):
 def build_parser():
     p = argparse.ArgumentParser(prog="secretsmith",
                                 description="maximal freedesktop Secret Service CLI")
-    p.add_argument("--bus", help="D-Bus session bus address (default: $DBUS_SESSION_BUS_ADDRESS)")
-    p.add_argument("--json", action="store_true", help="JSON output for everything")
-    p.add_argument("--show", action="store_true",
-                   help="print secret values (never printed without this flag)")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    s = sub.add_parser("search", help="search items by attributes (all schemas by default)")
+    # Common flags live in a parent parser so they work BOTH before the
+    # subcommand (secretsmith --show get ...) and after it (secretsmith get
+    # ... --show). Previously they were only on the root parser, so the
+    # natural post-subcommand placement died with "unrecognized arguments".
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--bus", help="D-Bus session bus address (default: $DBUS_SESSION_BUS_ADDRESS)")
+    common.add_argument("--json", action="store_true", help="JSON output for everything")
+    common.add_argument("--show", action="store_true",
+                        help="print secret values (never printed without this flag)")
+    p.add_argument("--bus", dest="root_bus", help=argparse.SUPPRESS)
+    p.add_argument("--json", dest="root_json", action="store_true", help="JSON output for everything")
+    p.add_argument("--show", dest="root_show", action="store_true",
+                   help="print secret values (never printed without this flag)")
+
+    s = sub.add_parser("search", parents=[common],
+                       help="search items by attributes / label / free-text query (all schemas by default)")
+    s.add_argument("query", nargs="?", help="free-text match against label and attributes")
     s.add_argument("--schema", help="friendly schema name from registry (or raw xdg:schema)")
+    s.add_argument("--label", help="exact item label match")
     s.add_argument("--attr", action="append", default=[], metavar="k=v")
     s.add_argument("--collection", help="collection label or path")
     s.set_defaults(func=cmd_search)
 
-    g = sub.add_parser("get", help="get exactly one item's secret metadata")
-    g.add_argument("--attr", action="append", default=[], metavar="k=v", required=True)
+    g = sub.add_parser("get", parents=[common],
+                       help="get exactly one item (metadata; add --show to print the secret)")
+    g.add_argument("--label", help="exact item label match")
+    g.add_argument("--attr", action="append", default=[], metavar="k=v",
+                   required=False, help="attribute filter (required unless --label given)")
     g.add_argument("--collection", help="collection label or path")
     g.set_defaults(func=cmd_get)
 
-    st = sub.add_parser("set", help="store a secret (reads stdin unless --secret-file)")
+    st = sub.add_parser("set", parents=[common],
+                        help="store a secret (reads stdin unless --secret-file)")
     st.add_argument("--label", required=True)
     st.add_argument("--attr", action="append", default=[], metavar="k=v")
     st.add_argument("--collection", help="collection label or path (default: default alias)")
@@ -844,8 +876,11 @@ def build_parser():
     st.add_argument("--replace", action="store_true")
     st.set_defaults(func=cmd_set)
 
-    d = sub.add_parser("delete", help="delete items matching attributes")
-    d.add_argument("--attr", action="append", default=[], metavar="k=v", required=True)
+    d = sub.add_parser("delete", parents=[common],
+                       help="delete items matching attributes or label")
+    d.add_argument("--label", help="exact item label match")
+    d.add_argument("--attr", action="append", default=[], metavar="k=v",
+                   required=False, help="attribute filter (required unless --label given)")
     d.add_argument("--collection", help="collection label or path")
     d.add_argument("--yes", action="store_true")
     d.set_defaults(func=cmd_delete)
@@ -903,6 +938,11 @@ def build_parser():
 
 def main(argv=None):
     a = build_parser().parse_args(argv)
+    # Reconcile flags given BEFORE the subcommand with those given AFTER it:
+    # subparser defaults would otherwise clobber the root-parsed values.
+    a.bus = a.bus or getattr(a, "root_bus", None)
+    a.json = a.json or getattr(a, "root_json", False)
+    a.show = a.show or getattr(a, "root_show", False)
     if a.bus:
         os.environ["DBUS_SESSION_BUS_ADDRESS"] = a.bus
     try:
