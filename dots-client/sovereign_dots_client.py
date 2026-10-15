@@ -14,7 +14,7 @@ class SovereignDotsClient:
         )
         self.model = "dots-studio/dots-3-note-preview:free"
 
-    def execute_structured_step(self, session_id: str, messages: list, tools: list, forced_tool: str = None) -> dict:
+    def execute_structured_step(self, session_id: str, messages: list, tools: list, forced_tool: str = None, require_parameters: bool = True) -> dict:
         # 1. Normalize prior messages: replace content=None with content=""
         normalized_messages = []
         for m in messages:
@@ -34,6 +34,9 @@ class SovereignDotsClient:
             strict_tools.append(st)
 
         # 3. Construct sovereign payload
+        # Note: OpenRouter returns 404 "no endpoints found" when custom stop sequences
+        # and provider.require_parameters=True are combined; only send stop when
+        # require_parameters is False.
         extra_body = {
             "sessionId": session_id,
             "max_tokens": 4096,
@@ -42,12 +45,13 @@ class SovereignDotsClient:
                 "max_tokens": 128,
                 "exclude": True
             },
-            "stop": ["</tool_call>", "</dots_function_call>", "<|endoftext|>", "```"],
             "provider": {
-                "require_parameters": True,
+                "require_parameters": require_parameters,
                 "allow_fallbacks": False
             }
         }
+        if not require_parameters:
+            extra_body["stop"] = ["</tool_call>", "</dots_function_call>", "<|endoftext|>", "```"]
 
         tool_choice = {"type": "function", "function": {"name": forced_tool}} if forced_tool else "auto"
 

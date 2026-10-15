@@ -95,9 +95,9 @@ function collectPlugins(): PluginEntry[] {
 			privileged: p.privileged === true,
 			role: typeof p.role === "string" ? p.role : undefined,
 			merged,
-			// `source` is repo-relative to the sovereign root, not to the tau package.
+			// `source` is repo-relative to the estate root, not to the tau package.
 			sourceExists: source !== "" && existsSync(resolve(SOVEREIGN_ROOT, source)),
-			// `merged` holds alias NAMES ("sovereign-swap"), not paths, so it is
+			// `merged` holds alias NAMES ("estate-swap"), not paths, so it is
 			// reported but never path-checked. Checking them said nothing.
 			mergedAllExist: true,
 		}];

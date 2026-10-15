@@ -30,9 +30,9 @@ projects/shell/
 
 ## B. The `ii` fork (untouched by this redo)
 
-- Git submodule: `.git` gitfile → `/home/toxic/estate/.git/modules/shell/sovereign-end4`;
-  submodule NAME `shell/sovereign-end4` ≠ checkout path `projects/shell/ii` (cosmetic mismatch, noted).
-- Remote: `https://github.com/toxicwind/sovereign-end4.git` (fresh repo, not a GitHub fork; no upstream remote).
+- Git submodule: `.git` gitfile → `/home/toxic/estate/.git/modules/shell/estate-end4`;
+  submodule NAME `shell/estate-end4` ≠ checkout path `projects/shell/ii` (cosmetic mismatch, noted).
+- Remote: `https://github.com/toxicwind/estate-end4.git` (fresh repo, not a GitHub fork; no upstream remote).
 - Top level: `AGENTS.md`, `diagnose`, `diagnose.result`, `docs/`, `dots/`, `dots-extra/`, `.github/`,
   `install.conf.yaml`, `LICENSE`, `licenses/`, `packages.arch.txt`, `README.md`, `scripts/` (only
   `apply-keyring-pam.sh`), `sdata/` (incl. `dist-arch/illogical-impulse-quickshell-git/PKGBUILD`),

@@ -6,7 +6,7 @@ Immutable copy: `/home/toxic/estate/projects/herd/herd.20260930-052800`
 
 ## If herd fails to start or dies
 
-Herd serves on `:25100`. The sovereign router (`:25104`) depends on it via
+Herd serves on `:25100`. The estate router (`:25104`) depends on it via
 `LLM_BASE_URL` (default `http://127.0.0.1:25100/v1`).
 
 ### Immediate fallback (no restart needed)
@@ -22,7 +22,7 @@ export HERD_V1="https://openrouter.ai/api/v1"
 
 The router reads `LLM_BASE_URL` first, then `HERD_V1`, then defaults to
 herd `:25100`. Setting either env var reroutes around a dead herd instantly.
-Restart the router (`sovereign/router`) to pick up the change.
+Restart the router (`estate/router`) to pick up the change.
 
 ### Restore the binary (warden path)
 
@@ -35,7 +35,7 @@ follows **fallback, not rollback**:
   alerts. Rebuild from a trusted source and redeploy by hand.
 
 If the immutable copy itself is corrupt, rebuild from source:
-`toxicwind/sovereign-swap` @ `7fc25280816fa7f98764ac46d1435d55ac9dc3c3`
+`toxicwind/estate-swap` @ `7fc25280816fa7f98764ac46d1435d55ac9dc3c3`
 (or newer upstream — prefer cutting edge per Chris).
 
 ### Verify after recovery

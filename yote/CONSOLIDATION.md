@@ -1,6 +1,6 @@
 # Yote Consolidation — merge manifest
 
-**Date:** 2026-09-20 · **Directive:** Chris — merge all Yote material on GitHub (private + public) into `sovereign-projects/projects/`, production-grade, stop using the gist.
+**Date:** 2026-09-20 · **Directive:** Chris — merge all Yote material on GitHub (private + public) into `estate-projects/projects/`, production-grade, stop using the gist.
 **Coordinator:** subagent e57b7099 · **Plan:** `~/workspace/yote-consolidation/PLAN.md` (also in this repo's workspace copy)
 **Iron rules honored:** no repo deleted; no newer file clobbered by an older one; every move recorded here.
 
@@ -10,7 +10,7 @@
 - Repos matching `*yote*` (name/description): `toxicwind/yote` (private, Rust gateway — the real one) + 1 false positive (ComfyUI fork via "Coyote-A").
 - Full detail: `~/workspace/yote-consolidation/inventory/`.
 
-## Merges (phase 3) — all into `toxicwind/sovereign-projects@main`
+## Merges (phase 3) — all into `toxicwind/estate-projects@main`
 
 ### 3a — Rust gateway: `toxicwind/yote` → `projects/yote/rust-gateway/`
 - **Commit:** `c9383e4ae946643d29babba342ab18b5983ffada` (base `b6da5840`)
@@ -35,14 +35,14 @@
 - Gist `e817e044162bb59c386615f89b1baeb0` left live, **deprecated** (description updated).
 - Full table: `manifest/merge-b-ops.md`.
 
-### 3d — Stale-mirror check: `toxicwind/sovereign` vs `sovereign-projects`
-- Verdict: **pure stale mirror — nothing merged.** 2 shared yote paths: 1 identical, 1 diverged (`src/services/yote.ts`: sovereign 18,569 B Sep 11 vs SP 23,768 B Sep 17 — SP newer). 0 paths only-in-sovereign. Full report: `manifest/merge-c-diff.md`.
+### 3d — Stale-mirror check: `toxicwind/estate` vs `estate-projects`
+- Verdict: **pure stale mirror — nothing merged.** 2 shared yote paths: 1 identical, 1 diverged (`src/services/yote.ts`: estate 18,569 B Sep 11 vs SP 23,768 B Sep 17 — SP newer). 0 paths only-in-estate. Full report: `manifest/merge-c-diff.md`.
 
 ## Gist deprecation (phase 4)
 
 - Contents migrated per 3c. New canonical raw URLs (public repo, no auth):
-  - `https://raw.githubusercontent.com/toxicwind/sovereign-projects/main/projects/yote/ops/yote-doctor.sh`
-  - `https://raw.githubusercontent.com/toxicwind/sovereign-projects/main/projects/yote/ops/yote-fix.sh`
+  - `https://raw.githubusercontent.com/toxicwind/estate-projects/main/projects/yote/ops/yote-doctor.sh`
+  - `https://raw.githubusercontent.com/toxicwind/estate-projects/main/projects/yote/ops/yote-fix.sh`
 - `yote-fix.sh`'s deploy source for `exec.py`/`ws_daemon.py` repointed from gist raw to `.../projects/yote/bridge/bin/...` (commit TBD in phase 4).
 - References to update (parent's lane): `MEMORY.md` gist URLs, `~/workspace/docs/` run commands, yote-fix v1/v2 copies on the yote box.
 

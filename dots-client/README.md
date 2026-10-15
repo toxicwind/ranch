@@ -24,6 +24,10 @@ found in the Dots 3 Note recon (see `../tau/docs/dots3-fixes.md`).
 - `base_url` was pasted as a markdown link
   (`[https://openrouter.ai/api/v1](https://openrouter.ai/api/v1)`); corrected to
   the plain URL. The pasted form would have failed every call.
+- OpenRouter returns HTTP 404 `"no endpoints found"` when custom `stop` sequences
+  and `provider.require_parameters: True` are sent together. `execute_structured_step`
+  now omits `stop` when `require_parameters=True` (default) and includes `stop`
+  when `require_parameters=False`.
 
 ## Usage
 

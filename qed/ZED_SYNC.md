@@ -1,14 +1,14 @@
-# Zed sync strategy: embedded QED snapshot ↔ `toxicwind/sovereign-zed`
+# Zed sync strategy: embedded QED snapshot ↔ `toxicwind/estate-zed`
 
 Status 2026-09-20 (zed-qed). This is the plan, not the execution — the
 merge itself is a separate, scheduled operation (see §5).
 
 ## 1. What the two trees are
 
-| | `projects/qed/zed` (embedded) | `toxicwind/sovereign-zed` |
+| | `projects/qed/zed` (embedded) | `toxicwind/estate-zed` |
 |---|---|---|
-| Form | Snapshot vendored into sovereign-projects | Full-history fork of `zed-industries/zed` |
-| History in sovereign-projects | 2 commits (imported 2026-09-07, `1900610cf3` de-submodule) | Not present |
+| Form | Snapshot vendored into estate-projects | Full-history fork of `zed-industries/zed` |
+| History in estate-projects | 2 commits (imported 2026-09-07, `1900610cf3` de-submodule) | Not present |
 | Shared ancestry | **None** — file copy, not subtree/filter-repo | Full upstream + fork history |
 | Version (workspace `Cargo.toml`) | 0.61 (app 1.13.0-era) | 0.61 (app 1.17.0-era) |
 | Sovereign deltas | Schema-normalizer extraction (`a87f5e5189`), provider set | Custom providers (pre-extraction triplicated normalizers) |
@@ -21,19 +21,19 @@ plus full history.
 ## 2. Goal
 
 One canonical zed tree with **full history preserved** (no snapshot
-re-imports, no squashed ancestry), sovereign customizations retained,
+re-imports, no squashed ancestry), estate customizations retained,
 and a repeatable forward-sync path.
 
 ## 3. Strategy: subtree graft, then re-apply deltas
 
-1. **Provenance pin.** Identify the `sovereign-zed` commit the snapshot
+1. **Provenance pin.** Identify the `estate-zed` commit the snapshot
    was taken from (compare `crates/zed/Cargo.toml` version + `git log -S`
    on distinctive files; tree-hash comparison if needed). Record it here.
-2. **Graft history.** In sovereign-projects, on a fresh branch, announced
+2. **Graft history.** In estate-projects, on a fresh branch, announced
    in squawk fleet (§5):
    ```bash
-   git remote add sovereign-zed https://github.com/toxicwind/sovereign-zed.git
-   git fetch sovereign-zed main
+   git remote add estate-zed https://github.com/toxicwind/estate-zed.git
+   git fetch estate-zed main
 
    # Pin the snapshot before touching it.
    git tag qed-zed-snapshot-$(date +%Y%m%d)
@@ -42,10 +42,10 @@ and a repeatable forward-sync path.
    # (receipt 2026-10-01: `fatal: prefix 'X' already exists.`), so move
    # the snapshot aside and commit the removal first.
    git mv projects/qed/zed projects/qed/zed.snapshot
-   git commit -m "qed: stage snapshot aside for sovereign-zed subtree graft"
+   git commit -m "qed: stage snapshot aside for estate-zed subtree graft"
 
    # Import the fork's full history under the canonical prefix.
-   git subtree add --prefix=projects/qed/zed sovereign-zed main
+   git subtree add --prefix=projects/qed/zed estate-zed main
    ```
    The snapshot remains in git at `projects/qed/zed.snapshot` on this
    branch. Expect conflicts in ~697 files — resolve by taking the
@@ -99,12 +99,12 @@ files every QED worker reads.
 - `git subtree add --prefix=X` on an existing prefix fails:
   `fatal: prefix 'X' already exists.` — §3.2 now moves the snapshot
   aside first. The old single-command recipe was not executable.
-- `toxicwind/sovereign-zed` exists and is reachable
-  (`gh repo view toxicwind/sovereign-zed` returns
-  `https://github.com/toxicwind/sovereign-zed`).
+- `toxicwind/estate-zed` exists and is reachable
+  (`gh repo view toxicwind/estate-zed` returns
+  `https://github.com/toxicwind/estate-zed`).
 - `cargo fmt -p language_models` clean (3 pre-existing diffs in
   `provider.rs`, `provider/open_ai_compatible.rs`, `settings.rs` fixed
   2026-10-01).
 - `README.md` mermaid/tree references corrected: the fork is
-  `toxicwind/sovereign-zed`, not `toxicwind/zed` (no such repo in
+  `toxicwind/estate-zed`, not `toxicwind/zed` (no such repo in
   `gh repo list toxicwind`).

@@ -1,7 +1,7 @@
 <div align="right">
 
-[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/part_of-sovereign--projects-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-projects#license)
+[![estate-projects](https://img.shields.io/badge/part_of-estate--projects-blue?style=for-the-badge)](https://github.com/toxicwind/estate-projects)
 
 </div>
 
@@ -9,7 +9,7 @@
 
 > **The canonical home of Chris's `ii` quickshell setup: the illogical-impulse fork plus the operations layer that keeps it alive on Hyprland.**
 
-Two halves: `ii/` — the `ii` fork of end-4's illogical-impulse (submodule, remote `toxicwind/sovereign-end4`; QML/config work lives here, untouched by the redo) — and the first-class operations layer around it (`bin/`, `lib/`, `deploy/`) that launches, supervises, and doctors it.
+Two halves: `ii/` — the `ii` fork of end-4's illogical-impulse (submodule, remote `toxicwind/estate-end4`; QML/config work lives here, untouched by the redo) — and the first-class operations layer around it (`bin/`, `lib/`, `deploy/`) that launches, supervises, and doctors it.
 
 ## Entrypoints
 
@@ -40,7 +40,7 @@ flowchart TB
 
 ## License & security
 
-MIT — see the [canonical LICENSE](https://github.com/toxicwind/sovereign-projects#license). `qs-install` writes to `~/.config/systemd/user/` and `~/.config/hypr/` — your own dotfiles, nothing system-wide.
+MIT — see the [canonical LICENSE](https://github.com/toxicwind/estate-projects#license). `qs-install` writes to `~/.config/systemd/user/` and `~/.config/hypr/` — your own dotfiles, nothing system-wide.
 
 ## Layout
 

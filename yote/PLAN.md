@@ -2,7 +2,7 @@
 
 **Status**: Planning → Active → **BRUTEFORCE EXECUTION**
 **Updated**: 2026-08-07
-**Goal**: Make Yote work **MAXIMALLY** — not just a Telegram wrapper, but a **full sovereign Telegram gateway** that leverages OpenFang's agent ecosystem, Overlord MTProto, and the sovereign mesh. **Nightly self-updates, PR cherry-picking, agent swarms, self-improving agents.**
+**Goal**: Make Yote work **MAXIMALLY** — not just a Telegram wrapper, but a **full estate Telegram gateway** that leverages OpenFang's agent ecosystem, Overlord MTProto, and the estate mesh. **Nightly self-updates, PR cherry-picking, agent swarms, self-improving agents.**
 
 ---
 
@@ -449,7 +449,7 @@ jobs:
 ### 9.4 Sovereign Mesh Expansion (MAXIMAL)
 - [ ] **Multi-Node Mesh**: Yote + OpenFang + herd on separate nodes
 - [ ] **Geo-Distributed**: Run mesh nodes in different regions
-- [ ] **Mesh Federation**: Connect multiple sovereign meshes
+- [ ] **Mesh Federation**: Connect multiple estate meshes
 
 ---
 

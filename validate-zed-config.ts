@@ -35,16 +35,16 @@ else {
   }
 }
 
-// 2. Exactly ONE context_server: mcpproxy-sovereign.
+// 2. Exactly ONE context_server: mcpproxy-estate.
 try {
   const j = parseJSONC(readFileSync(ZED, "utf8"));
   const cs = j.context_servers || {};
   const ks = Object.keys(cs);
-  if (ks.length === 1 && ks[0] === "mcpproxy-sovereign")
-    ok("single mcpproxy-sovereign entry");
+  if (ks.length === 1 && ks[0] === "mcpproxy-estate")
+    ok("single mcpproxy-estate entry");
   else
     fail(
-      `expected exactly 1 context_server 'mcpproxy-sovereign', got: ${ks.join(", ")}`,
+      `expected exactly 1 context_server 'mcpproxy-estate', got: ${ks.join(", ")}`,
     );
 
   // 3. No openai_compatible model uses forbidden fields.

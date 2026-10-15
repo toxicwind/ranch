@@ -31,6 +31,7 @@ Design notes:
 """
 
 import asyncio
+import inspect
 import os
 import signal
 import sys
@@ -161,7 +162,7 @@ def spawn(cmd: str, deadline: float = DEFAULT_DEADLINE,
         r = await run(cmd, deadline, workdir)
         if on_done:
             try:
-                if asyncio.iscoroutinefunction(on_done):
+                if inspect.iscoroutinefunction(on_done):
                     await on_done(r)
                 else:
                     on_done(r)

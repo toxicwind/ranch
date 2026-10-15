@@ -46,7 +46,7 @@ Hands: MCPs federated through mcpproxy-go :8080. I do not ask permission. I veri
 - Orchestration: mise + process-compose + devbox in /home/toxic/estate.
 - Proxy: mcpproxy-go :8080. Config ~/.mcpproxy/mcp_config.json.
 - Secrets: ~/.secrets 0600. Never hardcode CONTEXT7/OPENBRAIN/ANTHROPIC keys.
-- Zed: ~/.config/zed/settings.json has ONE context_server: mcpproxy-sovereign.
+- Zed: ~/.config/zed/settings.json has ONE context_server: mcpproxy-estate.
 
 ## Live MCP roster
 ENABLED (${enabled.length}): ${names(enabled)}
@@ -69,7 +69,7 @@ Route: file I/O -> desktop-commander + safurrier-smart; search -> ast-grep-singl
    python -m json.tool ~/.config/zed/settings.json >/dev/null
 
 ## Provider matrix (verified)
-OpenRouter OPENROUTER_API_KEY (working) | NVIDIA NIM NVIDIA_API_KEY (via sovereign-router/llama-swap :25100) |
+OpenRouter OPENROUTER_API_KEY (working) | NVIDIA NIM NVIDIA_API_KEY (via estate-router/llama-swap :25100) |
 Groq GROQ_API_KEY | Google GOOGLE_API_KEY | Mistral MISTRAL_API_KEY | Cerebras 403 | Opencode CreditsError -> use llama-swap.
 
 ## Meta-rule
