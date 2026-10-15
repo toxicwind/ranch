@@ -1,3191 +1,1947 @@
 {
-  "generated": "2026-10-15T05:59:01.736Z",
-  "counts": {
-    "experimental": 45,
-    "submodule": 37,
-    "vendored": 42,
-    "orphan": 59,
-    "fork": 11
-  },
+  "generated": "2026-10-15T06:04:38.033Z",
+  "total": 194,
+  "withUpstream": 47,
   "infos": [
     {
       "name": "additional-lens-profiles",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/additional-lens-profiles.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "AgentForensics",
-      "type": "submodule",
+      "upstream": "https://github.com/aparnaa19/AgentForensics",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/aparnaa19/AgentForensics.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/aparnaa19/AgentForensics.git",
-      "remoteOwner": "aparnaa19",
-      "remoteRepo": "AgentForensics",
-      "head": "962a28b",
-      "upstream": "https://github.com/aparnaa19/AgentForensics.git",
-      "toxicwind": "https://github.com/aparnaa19/AgentForensics.git",
       "sizeBytes": 1512078,
-      "fileCount": 81,
-      "topFiles": [
-        "agentforensics",
-        "agentforensics_launcher.spec",
-        "agentforensics-vscode",
-        "benchdeepset .py",
-        "benchdeepset.py",
-        "benchmark_latency.py",
-        "benchtest.py",
-        "benchtest_results.json"
-      ]
+      "fileCount": 81
     },
     {
       "name": "agentic-moment-2026",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/agentic-moment-2026.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "agentos",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/agentos.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "android-fleet",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/android-fleet.git",
       "sizeBytes": 32376818,
-      "fileCount": 6427,
-      "topFiles": [
-        "bin",
-        "docs",
-        "node_modules",
-        "phone-backup",
-        "README.md",
-        "submodules"
-      ]
+      "fileCount": 6427
     },
     {
       "name": "arc-agi-experiment",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/arc-agi-experiment.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "arroyo",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/arroyo.git",
       "sizeBytes": 1637,
-      "fileCount": 6,
-      "topFiles": [
-        "coyote",
-        "discord",
-        "mcp",
-        "MOVE.md",
-        "overlord",
-        "README.md"
-      ]
+      "fileCount": 6
     },
     {
       "name": "arxiv-code",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/arxiv-code.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "ast-grep",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/ast-grep.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "ast-grep-rules",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/ast-grep-rules.git",
       "sizeBytes": 2210,
-      "fileCount": 1,
-      "topFiles": [
-        "agent-stack"
-      ]
+      "fileCount": 1
     },
     {
       "name": "audits",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/audits.git",
       "sizeBytes": 41663,
-      "fileCount": 2,
-      "topFiles": [
-        "moonshot-parked-audit-2026-09-20.md",
-        "scheduler-audit-2026-09-20.md"
-      ]
+      "fileCount": 2
     },
     {
       "name": "auto1m",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/auto1m.git",
       "sizeBytes": 101748,
-      "fileCount": 10,
-      "topFiles": [
-        "auto1m.py",
-        "corpus",
-        "__pycache__",
-        "README.md",
-        "test_auto1m.py",
-        "test-run.log",
-        "test_unit.py"
-      ]
+      "fileCount": 10
     },
     {
       "name": "awawr-loader",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/awawr-loader.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "awesome-agent-gateway-2026",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/awesome-agent-gateway-2026.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "awesome-api-shape-explorer",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/awesome-api-shape-explorer.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "barn",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/barn.git",
       "sizeBytes": 2362669338,
-      "fileCount": 12945,
-      "topFiles": [
-        "chute",
-        "corral",
-        "flatbread",
-        "gatehouse",
-        "gemini-mcp",
-        "import-secrets-to-bw.sh",
-        "lookout",
-        "nativelink"
-      ]
+      "fileCount": 12945
     },
     {
       "name": "bashrc-quote-fix",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/bashrc-quote-fix.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "bedrock",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/bedrock.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "bench-radar",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/bench-radar.git",
       "sizeBytes": 133299,
-      "fileCount": 10,
-      "topFiles": [
-        "notify.sh",
-        "pitchfork.d",
-        "README.md",
-        "server.ts",
-        "state"
-      ]
+      "fileCount": 10
     },
     {
       "name": "bin",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/bin.git",
       "sizeBytes": 8564,
-      "fileCount": 2,
-      "topFiles": [
-        "estate-coverage-runner.ts",
-        "tmux-swarm"
-      ]
+      "fileCount": 2
     },
     {
       "name": "borrowed",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/borrowed.git",
       "sizeBytes": 133432598,
-      "fileCount": 6084,
-      "topFiles": [
-        "herdr",
-        "loom"
-      ]
+      "fileCount": 6084
     },
     {
       "name": "bridge",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/bridge.git",
       "sizeBytes": 721643,
-      "fileCount": 53,
-      "topFiles": [
-        "bin",
-        "hatch",
-        "README.md",
-        "ripline",
-        "yote"
-      ]
+      "fileCount": 53
     },
     {
       "name": "bugbounty",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/bugbounty.git",
       "sizeBytes": 5629632,
-      "fileCount": 34,
-      "topFiles": [
-        "artifacts",
-        "lib",
-        "node_modules",
-        "open-github.mjs",
-        "open-google.mjs",
-        "open-xai.mjs",
-        "package.json",
-        "package-lock.json"
-      ]
+      "fileCount": 34
     },
     {
       "name": "campfire",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/campfire.git",
       "sizeBytes": 119843,
-      "fileCount": 28,
-      "topFiles": [
-        "AGENTS.md",
-        "campfire.toml",
-        "docs",
-        "moon.yml",
-        "node_modules",
-        "package.json",
-        "README.md",
-        "scripts"
-      ]
+      "fileCount": 28
     },
     {
       "name": "cell-mirror",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/cell-mirror.git",
       "sizeBytes": 15727,
-      "fileCount": 1,
-      "topFiles": [
-        "cell-mirror-daemon.py"
-      ]
+      "fileCount": 1
     },
     {
       "name": "chat-coord",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/chat-coord.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "classifier",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/classifier.git",
       "sizeBytes": 37376,
-      "fileCount": 8,
-      "topFiles": [
-        "moon.yml",
-        "package.json",
-        "README-doctor.md",
-        "src",
-        "tests"
-      ]
+      "fileCount": 8
     },
     {
       "name": "classifier-preflight",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/classifier-preflight.git",
       "sizeBytes": 60570,
-      "fileCount": 12,
-      "topFiles": [
-        "datasets",
-        "db-src",
-        "moon.yml",
-        "preflight.test.ts",
-        "preflight.ts",
-        "README.md",
-        "tools",
-        "triggers.json"
-      ]
+      "fileCount": 12
     },
     {
       "name": "codebase-memory",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/codebase-memory.git",
       "sizeBytes": 627,
-      "fileCount": 1,
-      "topFiles": [
-        "run.sh"
-      ]
+      "fileCount": 1
     },
     {
       "name": "codeflux",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/codeflux.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "codeflux-moulti",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/codeflux-moulti.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "codeflux-patchling",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/codeflux-patchling.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "codeflux-python-patch",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/codeflux-python-patch.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "codeflux-watchfiles",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/codeflux-watchfiles.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "ComfyUI-TTools",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/ComfyUI-TTools.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "computer-use-linux",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/computer-use-linux.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "corral",
-      "type": "vendored",
+      "upstream": "https://github.com/roninjin10/super-ralph.git",
+      "upstreamSource": "package.json repository",
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/corral.git",
       "sizeBytes": 604087464,
-      "fileCount": 53702,
-      "topFiles": [
-        "bin",
-        "bun.lock",
-        "CHANGELOG.md",
-        "CONTRIBUTING.md",
-        "docs",
-        "LICENSE",
-        "node_modules",
-        "package.json"
-      ]
+      "fileCount": 53702
     },
     {
       "name": "cron-trust",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/cron-trust.git",
       "sizeBytes": 101137,
-      "fileCount": 6,
-      "topFiles": [
-        "backfill-policy.json",
-        "cron-backfill",
-        "cron-receipt",
-        "cron-trust-monitor",
-        "__pycache__"
-      ]
+      "fileCount": 6
     },
     {
       "name": "dashboard",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/dashboard.git",
       "sizeBytes": 24178,
-      "fileCount": 1,
-      "topFiles": [
-        "index.html"
-      ]
+      "fileCount": 1
     },
     {
       "name": "data",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/data.git",
       "sizeBytes": 1032550,
-      "fileCount": 8,
-      "topFiles": [
-        "check_results.json",
-        "coding_generated.json",
-        "full_pkg_table.json",
-        "models_discovered.json",
-        "pkg_categorization.json",
-        "scaffold_full.json",
-        "weird_pkgs_dig.json",
-        "weird_pkg_source_heads.json"
-      ]
+      "fileCount": 8
     },
     {
       "name": "dayz-toolkit",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/dayz-toolkit.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "dedi-ops",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/dedi-ops.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "disparate-latent-experiment",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/disparate-latent-experiment.git",
       "sizeBytes": 36310641,
-      "fileCount": 1058,
-      "topFiles": [
-        "bun.lock",
-        "node_modules",
-        "output"
-      ]
+      "fileCount": 1058
     },
     {
       "name": "docs",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/docs.git",
       "sizeBytes": 4203,
-      "fileCount": 2,
-      "topFiles": [
-        "ARCHITECTURE.md",
-        "images"
-      ]
+      "fileCount": 2
     },
     {
       "name": "doorbell",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/doorbell",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/doorbell.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/doorbell.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "doorbell",
-      "head": "24d228c",
-      "toxicwind": "https://github.com/toxicwind/doorbell.git",
       "sizeBytes": 614992,
-      "fileCount": 283,
-      "topFiles": [
-        "bunfig.toml",
-        "CONTRIBUTING.md",
-        "docs",
-        "doorbell.tar.gz.b64",
-        "gemini-mcp-hono.ts",
-        "gemini-monad.ts",
-        "host-install",
-        "install.sh"
-      ]
+      "fileCount": 283
     },
     {
       "name": "dots-client",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/dots-client.git",
       "sizeBytes": 8072,
-      "fileCount": 3,
-      "topFiles": [
-        "__pycache__",
-        "README.md",
-        "sovereign_dots_client.py"
-      ]
+      "fileCount": 3
     },
     {
       "name": "drover",
-      "type": "vendored",
+      "upstream": "https://github.com/A-man-Sharma-04/modelpilot",
+      "upstreamSource": "package.json repository",
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/drover.git",
       "sizeBytes": 11208574,
-      "fileCount": 25,
-      "topFiles": [
-        "changelog.md",
-        "drover-1.0.0-sovereign.vsix",
-        "esbuild.js",
-        "images",
-        "LICENSE.txt",
-        "moon.yml",
-        "node_modules",
-        "package.json"
-      ]
+      "fileCount": 25
     },
     {
       "name": "effusion-labs",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/effusion-labs.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "effusion-labs-tickets",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/effusion-labs-tickets.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "emergent",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/emergent.git",
       "sizeBytes": 17770,
-      "fileCount": 4,
-      "topFiles": [
-        "demo",
-        "paper-borrow.ts",
-        "README.md"
-      ]
+      "fileCount": 4
     },
     {
       "name": "estate-chat",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/estate-chat.git",
       "sizeBytes": 5992160,
-      "fileCount": 528,
-      "topFiles": [
-        "chat",
-        "chat.ts",
-        "dispatch.ts",
-        "drill-dispatch.sh",
-        "node_modules",
-        "package.json",
-        "pitchfork.d",
-        "README.md"
-      ]
+      "fileCount": 528
     },
     {
       "name": "estate-scripts",
-      "type": "submodule",
+      "upstream": "./estate-scripts",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": null,
       "hasGit": true,
       "isSubmodule": true,
-      "head": "5150e09",
-      "toxicwind": "./estate-scripts",
       "sizeBytes": 6899544,
-      "fileCount": 279,
-      "topFiles": [
-        "analyze_small_edits.py",
-        "bash_corpus_stats.jl",
-        "bazel-natives.ts",
-        "check-spoofed-versions.ts",
-        "ci-macos-sign.sh",
-        "ci-macos-upload-secrets.sh",
-        "ci-release-build-binaries.test.ts",
-        "ci-release-build-binaries.ts"
-      ]
+      "fileCount": 279
     },
     {
       "name": "evidence-locker",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/evidence-locker.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "examples",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/examples.git",
       "sizeBytes": 3219,
-      "fileCount": 4,
-      "topFiles": [
-        "flock-free.sh",
-        "health-check.sh",
-        "herd-chat.sh",
-        "README.md"
-      ]
+      "fileCount": 4
     },
     {
       "name": "extagents",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/extagents.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "extensions",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/extensions.git",
       "sizeBytes": 5886648,
-      "fileCount": 51,
-      "topFiles": [
-        "drover"
-      ]
+      "fileCount": 51
     },
     {
       "name": "fanout",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/fanout.git",
       "sizeBytes": 19642,
-      "fileCount": 2,
-      "topFiles": [
-        "fanout",
-        "README.md"
-      ]
+      "fileCount": 2
     },
     {
       "name": "fast-race",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/fast-race.git",
       "sizeBytes": 38628,
-      "fileCount": 3,
-      "topFiles": [
-        "fast_race.py",
-        "__pycache__",
-        "README.md"
-      ]
+      "fileCount": 3
     },
     {
       "name": "ferret-den",
-      "type": "fork",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": "https://github.com/toxicwind/ferret-den.git",
       "hasGit": true,
       "isSubmodule": false,
-      "remote": "https://github.com/toxicwind/ferret-den.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "ferret-den",
-      "head": "aa575f7",
-      "toxicwind": "https://github.com/toxicwind/ferret-den.git",
       "sizeBytes": 52349220,
-      "fileCount": 5540,
-      "topFiles": [
-        "-",
-        "AGENTS.md",
-        "assets",
-        "build",
-        "bun.lock",
-        "CHANGELOG.md",
-        "CODE_OF_CONDUCT.md",
-        "CONTRIBUTING.md"
-      ]
+      "fileCount": 5540
     },
     {
       "name": "fleet",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/fleet.git",
       "sizeBytes": 103374,
-      "fileCount": 18,
-      "topFiles": [
-        "bench-forks.sh",
-        "extract_forks.ts",
-        "fleet_arch_config.ts",
-        "fleet_calc.ts",
-        "fleet_config_ranker.ts",
-        "fleet_config.ts",
-        "fleet_parse.ts",
-        "fleet_predict.ts"
-      ]
+      "fileCount": 18
     },
     {
       "name": "fleet-bus-mcp",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/fleet-bus-mcp.git",
       "sizeBytes": 18746,
-      "fileCount": 1,
-      "topFiles": [
-        "server.ts"
-      ]
+      "fileCount": 1
     },
     {
       "name": "fleet-chat",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/fleet-chat.git",
       "sizeBytes": 25019,
-      "fileCount": 6,
-      "topFiles": [
-        "cli.ts",
-        "package.json",
-        "README.md",
-        "server.ts"
-      ]
+      "fileCount": 6
     },
     {
       "name": "fleet-ops",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/fleet-ops.git",
       "sizeBytes": 299489,
-      "fileCount": 45,
-      "topFiles": [
-        "bridge-watchdog",
-        "cron-honest-status",
-        "cron-mirror",
-        "cron-receipt",
-        "cron-trust-monitor",
-        "cron-trust-monitor-matrix.py",
-        "depend-refire.py",
-        "fleet-watchdog"
-      ]
+      "fileCount": 45
     },
     {
       "name": "flicker",
-      "type": "vendored",
+      "upstream": "https://go.woodpecker-ci.org/woodpecker/v3",
+      "upstreamSource": "go.mod module",
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/flicker.git",
       "sizeBytes": 172108102,
-      "fileCount": 1616,
-      "topFiles": [
-        "agent",
-        "bin",
-        "CHANGELOG.md",
-        "checkmake.ini",
-        "cli",
-        "cmd",
-        "codecov.yaml",
-        "contrib"
-      ]
+      "fileCount": 1616
     },
     {
       "name": "flock",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/flock.git",
       "sizeBytes": 10091669,
-      "fileCount": 723,
-      "topFiles": [
-        "bin",
-        "client",
-        "dashboard",
-        "docs",
-        "FEATURE_PARITY.md",
-        "flock-final.sh",
-        "flock-final.sh.bak.20261004T055107Z",
-        "flock-final.sh.bak.20261004T055222Z"
-      ]
+      "fileCount": 723
     },
     {
       "name": "forge",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/forge.git",
       "sizeBytes": 516157,
-      "fileCount": 113,
-      "topFiles": [
-        "bin",
-        "README.md",
-        "WEAVE.md",
-        "web"
-      ]
+      "fileCount": 113
     },
     {
       "name": "gatehouse-staging",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/gatehouse-staging.git",
       "sizeBytes": 6678488,
-      "fileCount": 35,
-      "topFiles": [
-        "config.db",
-        "index.bleve",
-        "logs"
-      ]
+      "fileCount": 35
     },
     {
       "name": "gayxxx-sovereign",
-      "type": "fork",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": "https://github.com/toxicwind/ranch",
       "hasGit": true,
       "isSubmodule": false,
-      "remote": "https://github.com/toxicwind/ranch",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "ranch",
-      "head": "4dee991",
-      "toxicwind": "https://github.com/toxicwind/gayxxx-sovereign.git",
       "sizeBytes": 5126360,
-      "fileCount": 412,
-      "topFiles": [
-        "AGENTS.md",
-        "builds",
-        "cs3_inspector.py",
-        "extracted",
-        "EXTRACTION_REPORT.md",
-        "final_builds",
-        "plugins.json",
-        "README.md"
-      ]
+      "fileCount": 412
     },
     {
       "name": "gear",
-      "type": "fork",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": true,
       "isSubmodule": false,
-      "head": "326d7bd",
-      "toxicwind": "https://github.com/toxicwind/gear.git",
       "sizeBytes": 8180800,
-      "fileCount": 65,
-      "topFiles": [
-        "annas-router",
-        "awrawr-mcp",
-        "glab-token",
-        "kimi-container-runtime",
-        "MERGE-DECISIONS.md",
-        "pitchfork-service-triage",
-        "secret-scanner",
-        "session-wrap"
-      ]
+      "fileCount": 65
     },
     {
       "name": "gguf-read",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/gguf-read.git",
       "sizeBytes": 3679,
-      "fileCount": 1,
-      "topFiles": [
-        "audit_out"
-      ]
+      "fileCount": 1
     },
     {
       "name": "github-search",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/github-search.git",
       "sizeBytes": 2262995028,
-      "fileCount": 45093,
-      "topFiles": [
-        "AGENTS.md",
-        "apps",
-        "_archaeology",
-        "audit_results.json",
-        "bunfig.toml",
-        "Cargo.lock",
-        "Cargo.toml",
-        "CHANGELOG.md"
-      ]
+      "fileCount": 45093
     },
     {
       "name": "goldfinger",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/goldfinger.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "hatch-decode",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/hatch-decode.git",
       "sizeBytes": 716838,
-      "fileCount": 42,
-      "topFiles": [
-        "findings",
-        "lanes",
-        "ORACLE.md",
-        "pass2",
-        "pass3",
-        "README.md"
-      ]
+      "fileCount": 42
     },
     {
       "name": "hatch-mcp",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/hatch-mcp.git",
       "sizeBytes": 17139,
-      "fileCount": 1,
-      "topFiles": [
-        "server.ts"
-      ]
+      "fileCount": 1
     },
     {
       "name": "herdproof-bun",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/herdproof-bun.git",
       "sizeBytes": 842,
-      "fileCount": 1,
-      "topFiles": [
-        "packages"
-      ]
+      "fileCount": 1
     },
     {
       "name": "hf-model-sync",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/hf-model-sync.git",
       "sizeBytes": 18755,
-      "fileCount": 2,
-      "topFiles": [
-        "hf_sync.ts",
-        "tracked.json"
-      ]
+      "fileCount": 2
     },
     {
       "name": "host-proof",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/host-proof.git",
       "sizeBytes": 30144,
-      "fileCount": 4,
-      "topFiles": [
-        "host-audit.sh",
-        "proof-bundle.bun.js",
-        "README.md",
-        "run.sh"
-      ]
+      "fileCount": 4
     },
     {
       "name": "huggingface-mcp-server",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/huggingface-mcp-server.git",
       "sizeBytes": 67546,
-      "fileCount": 10,
-      "topFiles": [
-        "Dockerfile",
-        "LICENSE",
-        "pyproject.toml",
-        "README.md",
-        "smithery.yaml",
-        "src",
-        "uv.lock"
-      ]
+      "fileCount": 10
     },
     {
       "name": "hypr-agent-portal",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/hypr-agent-portal.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "hyprgrid",
-      "type": "fork",
+      "upstream": "https://github.com/Aetherall/hyprgrid",
+      "upstreamSource": "git remote origin (non-toxicwind)",
+      "remoteOrigin": "https://github.com/Aetherall/hyprgrid.git",
       "hasGit": true,
       "isSubmodule": false,
-      "remote": "https://github.com/Aetherall/hyprgrid.git",
-      "remoteOwner": "Aetherall",
-      "remoteRepo": "hyprgrid",
-      "head": "5c6bbb1",
-      "upstream": "https://github.com/Aetherall/hyprgrid.git",
-      "toxicwind": "https://github.com/toxicwind/hyprgrid.git",
       "sizeBytes": 855376,
-      "fileCount": 95,
-      "topFiles": [
-        "CApi.cpp",
-        "docs",
-        "flake.lock",
-        "flake.nix",
-        "Gesture.hpp",
-        "Gestures.cpp",
-        "Gestures.hpp",
-        "Grid.cpp"
-      ]
+      "fileCount": 95
     },
     {
       "name": "Hyprgrid-gestures",
-      "type": "fork",
+      "upstream": "https://github.com/jairnarvaez/Hyprgrid",
+      "upstreamSource": "git remote origin (non-toxicwind)",
+      "remoteOrigin": "https://github.com/jairnarvaez/Hyprgrid.git",
       "hasGit": true,
       "isSubmodule": false,
-      "remote": "https://github.com/jairnarvaez/Hyprgrid.git",
-      "remoteOwner": "jairnarvaez",
-      "remoteRepo": "Hyprgrid",
-      "head": "af395bc",
-      "upstream": "https://github.com/jairnarvaez/Hyprgrid.git",
-      "toxicwind": "https://github.com/toxicwind/Hyprgrid-gestures.git",
       "sizeBytes": 89394,
-      "fileCount": 40,
-      "topFiles": [
-        "include",
-        "main.cpp",
-        "Makefile",
-        "README.md",
-        "src"
-      ]
+      "fileCount": 40
     },
     {
       "name": "keep",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/keep.git",
       "sizeBytes": 867554004,
-      "fileCount": 2836,
-      "topFiles": [
-        "Cargo.lock",
-        "Cargo.toml",
-        "README.md",
-        "src",
-        "target"
-      ]
+      "fileCount": 2836
     },
     {
       "name": "killer-features",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/killer-features.git",
       "sizeBytes": 101339471,
-      "fileCount": 4424,
-      "topFiles": [
-        "bid-market",
-        "code-racer",
-        "debate-oracle"
-      ]
+      "fileCount": 4424
     },
     {
       "name": "kilo-cli",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/kilo-cli",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/kilo-cli.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/kilo-cli.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "kilo-cli",
-      "head": "27adb484b",
-      "toxicwind": "https://github.com/toxicwind/kilo-cli.git",
       "sizeBytes": 433906912,
-      "fileCount": 3762,
-      "topFiles": [
-        "AGENTS.md",
-        "bunfig.toml",
-        "bun.lock",
-        "CODE_OF_CONDUCT.md",
-        "CONTRIBUTING.md",
-        "flake.lock",
-        "flake.nix",
-        "FORK.md"
-      ]
+      "fileCount": 3762
     },
     {
       "name": "kilo-code",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/kilo-code",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/kilo-code.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/kilo-code.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "kilo-code",
-      "head": "046f1419fb",
-      "toxicwind": "https://github.com/toxicwind/kilo-code.git",
       "sizeBytes": 864387900,
-      "fileCount": 10978,
-      "topFiles": [
-        "AGENTS.md",
-        "artifacts",
-        "bin",
-        "bunfig.toml",
-        "bun.lock",
-        "CODE_OF_CONDUCT.md",
-        "CONTEXT.md",
-        "CONTRIBUTING.md"
-      ]
+      "fileCount": 10978
     },
     {
       "name": "kimi-claw",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/kimi-claw.git",
       "sizeBytes": 1300419,
-      "fileCount": 160,
-      "topFiles": [
-        "bridge.ts",
-        "deploy.sh",
-        "dist",
-        "instances",
-        "logs",
-        "node_modules",
-        "openclaw.plugin.json",
-        "package.json"
-      ]
+      "fileCount": 160
     },
     {
       "name": "kitty-mcp-server",
-      "type": "fork",
+      "upstream": "https://github.com/secemp9/kitty-mcp-server",
+      "upstreamSource": "git remote upstream",
+      "remoteOrigin": "https://github.com/toxicwind/kitty-mcp-server.git",
       "hasGit": true,
       "isSubmodule": false,
-      "remote": "https://github.com/toxicwind/kitty-mcp-server.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "kitty-mcp-server",
-      "head": "f223c5c",
-      "toxicwind": "https://github.com/toxicwind/kitty-mcp-server.git",
       "sizeBytes": 42183502,
-      "fileCount": 3861,
-      "topFiles": [
-        "bun.lock",
-        "dist",
-        "LICENSE",
-        "node_modules",
-        "package.json",
-        "package-lock.json",
-        "README.md",
-        "src"
-      ]
+      "fileCount": 3861
     },
     {
       "name": "kodi-fleet",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/kodi-fleet.git",
       "sizeBytes": 15752179,
-      "fileCount": 703,
-      "topFiles": [
-        "addons",
-        "bin",
-        "docs",
-        "forensics",
-        "README.md",
-        "tests"
-      ]
+      "fileCount": 703
     },
     {
       "name": "lasso",
-      "type": "vendored",
+      "upstream": "https://github.com/IlyasKhallouki/hypruse",
+      "upstreamSource": "README 'Forked from'",
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/lasso.git",
       "sizeBytes": 73214661,
-      "fileCount": 2156,
-      "topFiles": [
-        "ARCHITECTURE.md",
-        "assets",
-        "CHANGELOG.md",
-        "COMPAT.md",
-        "CONTRIBUTING.md",
-        "LICENSE",
-        "moon.yml",
-        "packaging"
-      ]
+      "fileCount": 2156
     },
     {
       "name": "leakfix-src",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/leakfix-src.git",
       "sizeBytes": 66299,
-      "fileCount": 5,
-      "topFiles": [
-        "build",
-        "crash.log",
-        "leakfix",
-        "leakfix.egg-info"
-      ]
+      "fileCount": 5
     },
     {
       "name": "ledger",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/ledger.git",
       "sizeBytes": 34420,
-      "fileCount": 3,
-      "topFiles": [
-        "ledger.ts",
-        "package.json",
-        "README.md"
-      ]
+      "fileCount": 3
     },
     {
       "name": "lib",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/lib.git",
       "sizeBytes": 3222,
-      "fileCount": 1,
-      "topFiles": [
-        "lock.ts"
-      ]
+      "fileCount": 1
     },
     {
       "name": "libsecret",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/libsecret.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "llm-mapreduce",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/llm-mapreduce.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "lookout",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/lookout.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "matter-server",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/matter-server.git",
       "sizeBytes": 94390,
-      "fileCount": 5,
-      "topFiles": [
-        "package.json",
-        "package-lock.json",
-        "README.md"
-      ]
+      "fileCount": 5
     },
     {
       "name": "mcp-gateway",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/mcp-gateway.git",
       "sizeBytes": 637,
-      "fileCount": 2,
-      "topFiles": [
-        "package.json",
-        "src"
-      ]
+      "fileCount": 2
     },
     {
       "name": "mcp-prompt-injection-detector",
-      "type": "submodule",
+      "upstream": "https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector",
-      "remoteOwner": "thilinawishvekeerthi",
-      "remoteRepo": "mcp-prompt-injection-detector",
-      "head": "7270fd8",
-      "upstream": "https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector",
-      "toxicwind": "https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector.git",
       "sizeBytes": 4332122,
-      "fileCount": 38,
-      "topFiles": [
-        "McpPromptInjectionEvaluation",
-        "mcp_prompt_injection_prevention.ipynb",
-        "mcp-security-gateway.html",
-        "mcp_server_only.ipynb",
-        "README.md"
-      ]
+      "fileCount": 38
     },
     {
       "name": "mcpproxy-go",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/mcpproxy-go",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/mcpproxy-go.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/mcpproxy-go.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "mcpproxy-go",
-      "head": "c029f031",
-      "toxicwind": "https://github.com/toxicwind/mcpproxy-go.git",
       "sizeBytes": 424400607,
-      "fileCount": 3752,
-      "topFiles": [
-        "AGENTS.md",
-        "assets",
-        "AUTOUPDATE.md",
-        "bench",
-        "CHANGELOG.md",
-        "CLAUDE.md",
-        "cliff.toml",
-        "cmd"
-      ]
+      "fileCount": 3752
     },
     {
       "name": "mesh",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/mesh.git",
       "sizeBytes": 20290980287,
-      "fileCount": 322548,
-      "topFiles": [
-        "bin",
-        "browserless",
-        "catalog",
-        "config.landing.yml",
-        "flocksync",
-        "gateway",
-        "gemini-mcp",
-        "keypool"
-      ]
+      "fileCount": 322548
     },
     {
       "name": "metaaivm",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/metaaivm.git",
       "sizeBytes": 15548,
-      "fileCount": 4,
-      "topFiles": [
-        "collector.ts",
-        "dedup-rank.ts",
-        "moon.yml",
-        "README.md"
-      ]
+      "fileCount": 4
     },
     {
       "name": "metaaivm-profile",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/metaaivm-profile.git",
       "sizeBytes": 10706,
-      "fileCount": 7,
-      "topFiles": [
-        "moon.yml",
-        "node_modules",
-        "package.json",
-        "profile.json",
-        "README.md",
-        "src",
-        "verify.ts"
-      ]
+      "fileCount": 7
     },
     {
       "name": "meta-research-toolkit",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/meta-research-toolkit.git",
       "sizeBytes": 241290403,
-      "fileCount": 8874,
-      "topFiles": [
-        "bun.lock",
-        "coverage",
-        "docs",
-        "Makefile",
-        "node_modules",
-        "package.json",
-        "pyproject.toml",
-        "README.md"
-      ]
+      "fileCount": 8874
     },
     {
       "name": "mission-control",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/mission-control.git",
       "sizeBytes": 15689,
-      "fileCount": 8,
-      "topFiles": [
-        "moon.yml",
-        "README.md",
-        "src",
-        "state",
-        "tests"
-      ]
+      "fileCount": 8
     },
     {
       "name": "ml-serve",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/ml-serve.git",
       "sizeBytes": 30304,
-      "fileCount": 6,
-      "topFiles": [
-        "client",
-        "pitchfork.d",
-        "README.md",
-        "server.py",
-        "systemd"
-      ]
+      "fileCount": 6
     },
     {
       "name": "model-max",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/model-max.git",
       "sizeBytes": 1455071,
-      "fileCount": 15,
-      "topFiles": [
-        "emergent_master",
-        "model-ids.json",
-        "phase1.json",
-        "phase2.json",
-        "phase3-provider-20260930.json",
-        "README.md",
-        "sweep-deep.log",
-        "sweep.py"
-      ]
+      "fileCount": 15
     },
     {
       "name": "monad-forge",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/monad-forge.git",
       "sizeBytes": 203031,
-      "fileCount": 6,
-      "topFiles": [
-        "spark",
-        "xai"
-      ]
+      "fileCount": 6
     },
     {
       "name": "muse-cli",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/muse-cli",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/muse-cli.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/muse-cli.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "muse-cli",
-      "head": "8de07a3",
-      "toxicwind": "https://github.com/toxicwind/muse-cli.git",
       "sizeBytes": 1922437,
-      "fileCount": 79,
-      "topFiles": [
-        "AGENTS.md",
-        "assets",
-        "docs",
-        "firebase.json",
-        "install.sh",
-        "LICENSE",
-        "profiles",
-        "pyproject.toml"
-      ]
+      "fileCount": 79
     },
     {
       "name": "namespace-concealment-explorer",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/namespace-concealment-explorer.git",
       "sizeBytes": 23801,
-      "fileCount": 1,
-      "topFiles": [
-        "live_test.log"
-      ]
+      "fileCount": 1
     },
     {
       "name": "naming-audit",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/naming-audit.git",
       "sizeBytes": 6218,
-      "fileCount": 1,
-      "topFiles": [
-        "validate.py"
-      ]
+      "fileCount": 1
     },
     {
       "name": "nim-inkling-api-research",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/nim-inkling-api-research",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/nim-inkling-api-research.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/nim-inkling-api-research.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "nim-inkling-api-research",
-      "head": "76c8083",
-      "toxicwind": "https://github.com/toxicwind/nim-inkling-api-research.git",
       "sizeBytes": 55905,
-      "fileCount": 42,
-      "topFiles": [
-        "cmd",
-        "go.mod",
-        "LICENSE",
-        "README.md",
-        "run.sh",
-        "templates"
-      ]
+      "fileCount": 42
     },
     {
       "name": "nim-repos",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/nim-repos.git",
       "sizeBytes": 2841478486,
-      "fileCount": 63117,
-      "topFiles": [
-        "api-evangelist-nvidia-nim",
-        "bauka0-nvidia-nim-provider",
-        "david-eve-za-nvidia-nim-mcp",
-        "diegovisk-pi-nvidia-nim",
-        "furqanafridi-free-claude-code",
-        "gabriel-ferraresi-NIMGEN",
-        "Gitlawb-openclaude",
-        "h0rcrux-hermes-backup"
-      ]
+      "fileCount": 63117
     },
     {
       "name": "null-g-proxy",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/null-g-proxy.git",
       "sizeBytes": 30382225,
-      "fileCount": 1203,
-      "topFiles": [
-        "bunfig.toml",
-        "bun.lock",
-        "dist",
-        "node_modules",
-        "openapi.yaml",
-        "package.json",
-        "pitchfork.d",
-        "README.md"
-      ]
+      "fileCount": 1203
     },
     {
       "name": "nvidia-alive",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/nvidia-alive",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/nvidia-alive.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/nvidia-alive.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "nvidia-alive",
-      "head": "d78720f",
-      "toxicwind": "https://github.com/toxicwind/nvidia-alive.git",
       "sizeBytes": 406722,
-      "fileCount": 121,
-      "topFiles": [
-        "alive",
-        "bench",
-        "bench.sh",
-        "context-map.json",
-        "docs",
-        "README.md",
-        "results",
-        "scenario-smoke.json"
-      ]
+      "fileCount": 121
     },
     {
       "name": "nvidia-kernel-guard",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/nvidia-kernel-guard",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/nvidia-kernel-guard.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/nvidia-kernel-guard.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "nvidia-kernel-guard",
-      "head": "a7089eb",
-      "toxicwind": "https://github.com/toxicwind/nvidia-kernel-guard.git",
       "sizeBytes": 91596,
-      "fileCount": 84,
-      "topFiles": [
-        "bin",
-        "config",
-        "hooks",
-        "install.sh",
-        "LICENSE",
-        "README.md",
-        "systemd",
-        "tests"
-      ]
+      "fileCount": 84
     },
     {
       "name": "nvidia-nim-model-probe",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/nvidia-nim-model-probe",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/nvidia-nim-model-probe.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/nvidia-nim-model-probe.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "nvidia-nim-model-probe",
-      "head": "21e8136",
-      "toxicwind": "https://github.com/toxicwind/nvidia-nim-model-probe.git",
       "sizeBytes": 542418,
-      "fileCount": 63,
-      "topFiles": [
-        "analysis",
-        "audit_endpoints.py",
-        "auth.py",
-        "bench.py",
-        "data",
-        "docs",
-        "fuzz_endpoints.py",
-        "LICENSE"
-      ]
+      "fileCount": 63
     },
     {
       "name": "omp-test-runner-watchdog-OzX7V0",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/omp-test-runner-watchdog-OzX7V0.git",
       "sizeBytes": 16,
-      "fileCount": 2,
-      "topFiles": [
-        "continued",
-        "started"
-      ]
+      "fileCount": 2
     },
     {
       "name": "openfang-join",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/openfang-join.git",
       "sizeBytes": 22183,
-      "fileCount": 2,
-      "topFiles": [
-        "openfang-join",
-        "README.md"
-      ]
+      "fileCount": 2
     },
     {
       "name": "openrouter-probe",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/openrouter-probe.git",
       "sizeBytes": 3729306,
-      "fileCount": 64,
-      "topFiles": [
-        "abstract-20260920-142518.jsonl",
-        "abstract-20260920-142947.jsonl",
-        "abstract_run_free.log",
-        "abstract_run.log",
-        "deep-20260920-021854.jsonl",
-        "deep_pass.py",
-        "deep_run.log",
-        "e2e-probe.py"
-      ]
+      "fileCount": 64
     },
     {
       "name": "ops",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/ops.git",
       "sizeBytes": 422356,
-      "fileCount": 62,
-      "topFiles": [
-        "bg-tracker",
-        "bin",
-        "dispatcher",
-        "lane-verify",
-        "README.md",
-        "runner-audit.md",
-        "RUNNERS.md",
-        "stall-detect"
-      ]
+      "fileCount": 62
     },
     {
       "name": "outlier-toolkit",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/outlier-toolkit",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/outlier-toolkit.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/outlier-toolkit.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "outlier-toolkit",
-      "head": "b242ba2",
-      "toxicwind": "https://github.com/toxicwind/outlier-toolkit.git",
       "sizeBytes": 3755308,
-      "fileCount": 288,
-      "topFiles": [
-        "hatch_outlier",
-        "OUTLIER-CLI-READINESS.md",
-        "README.md",
-        "vendor",
-        "VENDOR.md",
-        "watch.py"
-      ]
+      "fileCount": 288
     },
     {
       "name": "pack-fix",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/pack-fix.git",
       "sizeBytes": 32745,
-      "fileCount": 6,
-      "topFiles": [
-        "bin",
-        "hesitance-patterns.md",
-        "orphan-sweep.md",
-        "README.md",
-        "runner-audit.md"
-      ]
+      "fileCount": 6
     },
     {
       "name": "paper-poller",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/paper-poller",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/paper-poller.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/paper-poller.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "paper-poller",
-      "head": "f65799f",
-      "toxicwind": "https://github.com/toxicwind/paper-poller.git",
       "sizeBytes": 99266,
-      "fileCount": 42,
-      "topFiles": [
-        "bin",
-        "README.md",
-        "seed-demo"
-      ]
+      "fileCount": 42
     },
     {
       "name": "pd-mcp-standalone",
-      "type": "fork",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": "https://github.com/toxicwind/pd-mcp.git",
       "hasGit": true,
       "isSubmodule": false,
-      "remote": "https://github.com/toxicwind/pd-mcp.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "pd-mcp",
-      "head": "43b6056",
-      "toxicwind": "https://github.com/toxicwind/pd-mcp-standalone.git",
       "sizeBytes": 50184146,
-      "fileCount": 5392,
-      "topFiles": [
-        "AGENTS.md",
-        "build",
-        "bun.lock",
-        "CHANGELOG.md",
-        "CODE_OF_CONDUCT.md",
-        "CONTRIBUTING.md",
-        "driver.ts",
-        "examples"
-      ]
+      "fileCount": 5392
     },
     {
       "name": "pearlctl",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/pearlctl",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/pearlctl.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/pearlctl.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "pearlctl",
-      "head": "f07ea5b",
-      "toxicwind": "https://github.com/toxicwind/pearlctl.git",
       "sizeBytes": 616087,
-      "fileCount": 106,
-      "topFiles": [
-        "assets",
-        "CHANGELOG.md",
-        "CODE_OF_CONDUCT.md",
-        "CONTRIBUTING.md",
-        "docs",
-        "examples",
-        "LICENSE",
-        "node_modules"
-      ]
+      "fileCount": 106
     },
     {
       "name": "phone-ocr-sweep",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/phone-ocr-sweep.git",
       "sizeBytes": 3173,
-      "fileCount": 4,
-      "topFiles": [
-        "collect-hits.sh",
-        "ocr-one.sh",
-        "README.md",
-        "run-ocr.sh"
-      ]
+      "fileCount": 4
     },
     {
       "name": "pj-fast",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/pj-fast",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/pj-fast.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/pj-fast.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "pj-fast",
-      "head": "5333d10",
-      "toxicwind": "https://github.com/toxicwind/pj-fast.git",
       "sizeBytes": 6074277,
-      "fileCount": 106,
-      "topFiles": [
-        "archive",
-        "config.js",
-        "docs",
-        "lib",
-        "LICENSE",
-        "package.json",
-        "package-lock.json",
-        "pj.js"
-      ]
+      "fileCount": 106
     },
     {
       "name": "pollinations-proxy",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/pollinations-proxy.git",
       "sizeBytes": 10449,
-      "fileCount": 1,
-      "topFiles": [
-        "tester.ts"
-      ]
+      "fileCount": 1
     },
     {
       "name": "provider-fuzz",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/provider-fuzz.git",
       "sizeBytes": 147701,
-      "fileCount": 16,
-      "topFiles": [
-        "allowlist.json",
-        "allowlist.py",
-        "dead_uuids.json",
-        "fuzz.py",
-        "NIM-PROBE-REPORT.md",
-        "nim_probes.py",
-        "nvcf_classifier.py",
-        "nvcf_functions_20260920.json"
-      ]
+      "fileCount": 16
     },
     {
       "name": "qed",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/qed.git",
       "sizeBytes": 66804921350,
-      "fileCount": 358476,
-      "topFiles": [
-        "README.md",
-        "zed",
-        "zedra",
-        "ZED_SYNC.md"
-      ]
+      "fileCount": 358476
     },
     {
       "name": "ralph-dashboard",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/ralph-dashboard",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/ralph-dashboard.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/ralph-dashboard.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "ralph-dashboard",
-      "head": "567758e",
-      "toxicwind": "https://github.com/toxicwind/ralph-dashboard.git",
       "sizeBytes": 445758770,
-      "fileCount": 22189,
-      "topFiles": [
-        "ADOPTION.md",
-        "backend",
-        "data",
-        "docker-compose.yml",
-        "Dockerfile",
-        "docs",
-        "frontend",
-        "ralph.png"
-      ]
+      "fileCount": 22189
     },
     {
       "name": "ranch-analyze",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/ranch-analyze.git",
       "sizeBytes": 312143905,
-      "fileCount": 6125,
-      "topFiles": [
-        "code",
-        "sessions"
-      ]
+      "fileCount": 6125
     },
     {
       "name": "range",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/range.git",
       "sizeBytes": 367278551,
-      "fileCount": 16645,
-      "topFiles": [
-        "bin",
-        "pitchfork.d",
-        "ranch",
-        "README.md",
-        "ui"
-      ]
+      "fileCount": 16645
     },
     {
       "name": "rankings",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/rankings.git",
       "sizeBytes": 548739649,
-      "fileCount": 16987,
-      "topFiles": [
-        "bun.lock",
-        "components",
-        "LICENSE",
-        "next.config.mjs",
-        "next-env.d.ts",
-        "node_modules",
-        "package.json",
-        "pages"
-      ]
+      "fileCount": 16987
     },
     {
       "name": "refusal-hunt",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/refusal-hunt",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/refusal-hunt.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/refusal-hunt.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "refusal-hunt",
-      "head": "39e0d46",
-      "toxicwind": "https://github.com/toxicwind/refusal-hunt.git",
       "sizeBytes": 132468526,
-      "fileCount": 3258,
-      "topFiles": [
-        "8task-extended-report-20260916.json",
-        "8task-run-20260915-2344.md",
-        "analyze.py",
-        "bin",
-        "burst_analysis.py",
-        "canary-feed.sh",
-        "canary-log-20260915.md",
-        "chat-audit-20260916"
-      ]
+      "fileCount": 3258
     },
     {
       "name": "rename-roundup",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/rename-roundup.git",
       "sizeBytes": 21244,
-      "fileCount": 4,
-      "topFiles": [
-        "README.md",
-        "rename.py",
-        "rename.ts",
-        "SKILL.md"
-      ]
+      "fileCount": 4
     },
     {
       "name": "repo-first-class",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/repo-first-class",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/repo-first-class.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/repo-first-class.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "repo-first-class",
-      "head": "09d1f21",
-      "toxicwind": "https://github.com/toxicwind/repo-first-class.git",
       "sizeBytes": 81799,
-      "fileCount": 47,
-      "topFiles": [
-        "docs",
-        "examples",
-        "LICENSE",
-        "pyproject.toml",
-        "README.md",
-        "src",
-        "tests"
-      ]
+      "fileCount": 47
     },
     {
       "name": "research",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/research.git",
       "sizeBytes": 3660891,
-      "fileCount": 90,
-      "topFiles": [
-        "add_groq.py",
-        "bins_list.txt",
-        "check_providers.py",
-        "dedup_env_v2.txt",
-        "discover_models.py",
-        "research",
-        "reusable_k8s_scaffold_loader.py",
-        "reusable_k8s_scaffold_loader_v2.py"
-      ]
+      "fileCount": 90
     },
     {
       "name": "rig",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/rig",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/rig.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/rig.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "rig",
-      "head": "0dad0aa",
-      "toxicwind": "https://github.com/toxicwind/rig.git",
       "sizeBytes": 203883752,
-      "fileCount": 747,
-      "topFiles": [
-        "agents",
-        "AGENTS.md",
-        "Cargo.lock",
-        "Cargo.toml",
-        "CHANGELOG.md",
-        "CLAUDE.md",
-        "CODE_OF_CONDUCT.md",
-        "CONTRIBUTING.md"
-      ]
+      "fileCount": 747
     },
     {
       "name": "roundup",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/roundup.git",
       "sizeBytes": 706199118,
-      "fileCount": 18013,
-      "topFiles": [
-        "docs",
-        "docs-site",
-        "guidellm",
-        "mise.toml",
-        "README.md",
-        "results",
-        "scripts",
-        "sweeps"
-      ]
+      "fileCount": 18013
     },
     {
       "name": "roundup-site",
-      "type": "submodule",
+      "upstream": "https://github.com/owieth/turborepo-example",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/owieth/turborepo-example",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/owieth/turborepo-example",
-      "remoteOwner": "owieth",
-      "remoteRepo": "turborepo-example",
-      "head": "190b913",
-      "upstream": "https://github.com/owieth/turborepo-example",
-      "toxicwind": "https://github.com/owieth/turborepo-example",
       "sizeBytes": 428805,
-      "fileCount": 74,
-      "topFiles": [
-        "apps",
-        "CONTRIBUTING.md",
-        "docs",
-        "eslint.config.mjs",
-        "LICENSE",
-        "package.json",
-        "packages",
-        "pnpm-lock.yaml"
-      ]
+      "fileCount": 74
     },
     {
       "name": "routing",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/routing.git",
       "sizeBytes": 86740,
-      "fileCount": 10,
-      "topFiles": [
-        "bench",
-        "docs"
-      ]
+      "fileCount": 10
     },
     {
       "name": "routing-score",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/routing-score.git",
       "sizeBytes": 14297,
-      "fileCount": 3,
-      "topFiles": [
-        "publish_scores.py",
-        "README.md",
-        "tests"
-      ]
+      "fileCount": 3
     },
     {
       "name": "RSSLive",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/RSSLive.git",
       "sizeBytes": 0,
-      "fileCount": 0,
-      "topFiles": []
+      "fileCount": 0
     },
     {
       "name": "rsync-mcp",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/rsync-mcp",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/rsync-mcp.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/rsync-mcp.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "rsync-mcp",
-      "head": "5b79242",
-      "toxicwind": "https://github.com/toxicwind/rsync-mcp.git",
       "sizeBytes": 247469,
-      "fileCount": 101,
-      "topFiles": [
-        "CLAUDE.md",
-        "index.js",
-        "LICENSE",
-        "package.json",
-        "README.md",
-        "smoke.ts",
-        "src",
-        "tests"
-      ]
+      "fileCount": 101
     },
     {
       "name": "rust-algo-web",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/rust-algo-web.git",
       "sizeBytes": 3476144650,
-      "fileCount": 11657,
-      "topFiles": [
-        "Cargo.lock",
-        "Cargo.toml",
-        "frontend",
-        "run.sh",
-        "rustfmt.toml",
-        "rust-toolchain.toml",
-        "src",
-        "static"
-      ]
+      "fileCount": 11657
     },
     {
       "name": "rustdesk-server",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/rustdesk-server.git",
       "sizeBytes": 19718235,
-      "fileCount": 11,
-      "topFiles": [
-        "amd64",
-        "bin",
-        "db_v2.sqlite3",
-        "db_v2.sqlite3-shm",
-        "db_v2.sqlite3-wal",
-        "id_ed25519",
-        "id_ed25519.pub",
-        "README.md"
-      ]
+      "fileCount": 11
     },
     {
       "name": "ryzen3090-whoa",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/ryzen3090-whoa.git",
       "sizeBytes": 36303185,
-      "fileCount": 1056,
-      "topFiles": [
-        "bun.lock",
-        "core",
-        "node_modules"
-      ]
+      "fileCount": 1056
     },
     {
       "name": "safety-review-gate",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/safety-review-gate",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/safety-review-gate.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/safety-review-gate.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "safety-review-gate",
-      "head": "f9f0223",
-      "toxicwind": "https://github.com/toxicwind/safety-review-gate.git",
       "sizeBytes": 273431,
-      "fileCount": 35,
-      "topFiles": [
-        "backfill-20260917",
-        "README.md"
-      ]
+      "fileCount": 35
     },
     {
       "name": "saturation-guard",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/saturation-guard.git",
       "sizeBytes": 41105,
-      "fileCount": 7,
-      "topFiles": [
-        "boot-probe",
-        "config.toml",
-        "daemon.py",
-        "logs",
-        "MERGE-DECISIONS.md",
-        "README.md",
-        "test-config.toml"
-      ]
+      "fileCount": 7
     },
     {
       "name": "scripts",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/scripts.git",
-      "sizeBytes": 9022,
-      "fileCount": 3,
-      "topFiles": [
-        "audit-forks.ts",
-        "fix-devin-home.sh",
-        "mise-build.sh"
-      ]
+      "sizeBytes": 12425,
+      "fileCount": 3
     },
     {
       "name": "secretsmith",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/secretsmith",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/secretsmith.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/secretsmith.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "secretsmith",
-      "head": "b5b4632",
-      "toxicwind": "https://github.com/toxicwind/secretsmith.git",
       "sizeBytes": 131624,
-      "fileCount": 41,
-      "topFiles": [
-        "bin",
-        "compat-chromium-keyring.sh",
-        "README.md",
-        "schemas.json",
-        "secretsmith.py",
-        "tests"
-      ]
+      "fileCount": 41
     },
     {
       "name": "session-bus-refresh",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/session-bus-refresh",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/session-bus-refresh.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/session-bus-refresh.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "session-bus-refresh",
-      "head": "05a7c68",
-      "toxicwind": "https://github.com/toxicwind/session-bus-refresh.git",
       "sizeBytes": 48269,
-      "fileCount": 33,
-      "topFiles": [
-        "driver.py",
-        "evidence",
-        "README.md",
-        "refresh_rejoin_cursor.py"
-      ]
+      "fileCount": 33
     },
     {
       "name": "shell",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/shell.git",
-      "sizeBytes": 4012971722,
-      "fileCount": 14599,
-      "topFiles": [
-        "AUDIT.md",
-        "bin",
-        "deploy",
-        "evidence",
-        "ii",
-        "lib",
-        "quarantine",
-        "README.md"
-      ]
+      "sizeBytes": 4013275056,
+      "fileCount": 14599
     },
     {
       "name": "skillforge",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/skillforge",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/skillforge.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/skillforge.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "skillforge",
-      "head": "4e1c80d",
-      "toxicwind": "https://github.com/toxicwind/skillforge.git",
       "sizeBytes": 32691,
-      "fileCount": 36,
-      "topFiles": [
-        "README.md"
-      ]
+      "fileCount": 36
     },
     {
       "name": "sovereign",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/sovereign",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/sovereign.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/sovereign.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "sovereign",
-      "head": "6732ffa",
-      "toxicwind": "https://github.com/toxicwind/sovereign.git",
       "sizeBytes": 425210325,
-      "fileCount": 548,
-      "topFiles": [
-        "agent",
-        "agents",
-        "AGENTS.md",
-        "appinfo.json",
-        "architecture.d2",
-        "ast-grep-rules",
-        "audit",
-        "bin"
-      ]
+      "fileCount": 548
     },
     {
       "name": "sovereign-dispersal",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/sovereign-dispersal",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/sovereign-dispersal.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/sovereign-dispersal.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "sovereign-dispersal",
-      "head": "b36cbd0",
-      "toxicwind": "https://github.com/toxicwind/sovereign-dispersal.git",
       "sizeBytes": 94412,
-      "fileCount": 52,
-      "topFiles": [
-        "bun.lock",
-        "dashboard.html",
-        "Dockerfile",
-        "package.json",
-        "README.md",
-        "scripts",
-        "src",
-        "tests"
-      ]
+      "fileCount": 52
     },
     {
       "name": "sovereign-dispersal-monolith",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/sovereign-dispersal-monolith.git",
       "sizeBytes": 3716,
-      "fileCount": 1,
-      "topFiles": [
-        "src"
-      ]
+      "fileCount": 1
     },
     {
       "name": "sovereign-end4",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/sovereign-end4",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/sovereign-end4.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/sovereign-end4.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "sovereign-end4",
-      "head": "e2d16dea",
-      "toxicwind": "https://github.com/toxicwind/sovereign-end4.git",
       "sizeBytes": 32936200,
-      "fileCount": 1284,
-      "topFiles": [
-        "AGENTS.md",
-        "diagnose",
-        "docs",
-        "dots",
-        "dots-extra",
-        "install.conf.yaml",
-        "LICENSE",
-        "licenses"
-      ]
+      "fileCount": 1284
     },
     {
       "name": "sovereign-monitor",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/sovereign-monitor.git",
       "sizeBytes": 34593,
-      "fileCount": 7,
-      "topFiles": [
-        "gnome-screenshot-shim",
-        "recursive-fallback.test.ts",
-        "recursive-fallback.ts",
-        "repo-radar.test.ts",
-        "repo-radar.ts",
-        "watchdog.test.ts",
-        "watchdog.ts"
-      ]
+      "fileCount": 7
     },
     {
       "name": "sovereign-scripts",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/sovereign-scripts",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/sovereign-scripts.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/sovereign-scripts.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "sovereign-scripts",
-      "head": "6d8a965",
-      "toxicwind": "https://github.com/toxicwind/sovereign-scripts.git",
       "sizeBytes": 149399,
-      "fileCount": 52,
-      "topFiles": [
-        "AGENTS.md",
-        "archivefs_v3.py",
-        "arfs-cat.py",
-        "auto-hook-loader.py",
-        "cache_timing.py",
-        "commit_extractor.py",
-        "git-push-one.py",
-        "health_check.py"
-      ]
+      "fileCount": 52
     },
     {
       "name": "sovereign-skills",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/sovereign-skills",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/sovereign-skills.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/sovereign-skills.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "sovereign-skills",
-      "head": "0447734",
-      "toxicwind": "https://github.com/toxicwind/sovereign-skills.git",
       "sizeBytes": 64302,
-      "fileCount": 38,
-      "topFiles": [
-        "AGENTS.md",
-        "lib",
-        "README.md",
-        "src"
-      ]
+      "fileCount": 38
     },
     {
       "name": "sovereign-whoa-breakthrough",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/sovereign-whoa-breakthrough.git",
       "sizeBytes": 36295563,
-      "fileCount": 1055,
-      "topFiles": [
-        "bun.lock",
-        "node_modules"
-      ]
+      "fileCount": 1055
     },
     {
       "name": "spark",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/spark.git",
       "sizeBytes": 340006,
-      "fileCount": 15,
-      "topFiles": [
-        "manifests",
-        "README.md",
-        "scripts"
-      ]
+      "fileCount": 15
     },
     {
       "name": "spark-harvest",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/spark-harvest.git",
       "sizeBytes": 19353,
-      "fileCount": 8,
-      "topFiles": [
-        "harvest.ts",
-        "moon.yml",
-        "package.json",
-        "profile.json",
-        "README.md",
-        "src",
-        "verify.ts"
-      ]
+      "fileCount": 8
     },
     {
       "name": "squawk",
-      "type": "fork",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": "https://github.com/toxicwind/squawk.git",
       "hasGit": true,
       "isSubmodule": false,
-      "remote": "https://github.com/toxicwind/squawk.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "squawk",
-      "head": "d2deabb",
-      "toxicwind": "https://github.com/toxicwind/squawk.git",
-      "sizeBytes": 20727832,
-      "fileCount": 1793,
-      "topFiles": [
-        "agent_chat",
-        "agent_chat_plugin.egg-info",
-        "AGENTS.md",
-        "bin",
-        "build",
-        "bun.lock",
-        "CHANGELOG.md",
-        "chat_commands.py"
-      ]
+      "sizeBytes": 20728480,
+      "fileCount": 1793
     },
     {
       "name": "squawk-watchdog",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/squawk-watchdog.git",
       "sizeBytes": 6912,
-      "fileCount": 4,
-      "topFiles": [
-        "README.md",
-        "squawk-watchdog.service",
-        "squawk-watchdog.sh",
-        "squawk-watchdog.timer"
-      ]
+      "fileCount": 4
     },
     {
       "name": "squawk-ws",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/squawk-ws.git",
       "sizeBytes": 305095,
-      "fileCount": 19,
-      "topFiles": [
-        "moon.yml",
-        "pitchfork.d",
-        "__pycache__",
-        "README.md",
-        "scripts",
-        "squawk_ws_client_local.py",
-        "squawk_ws_server.py",
-        "state.json"
-      ]
+      "fileCount": 19
     },
     {
       "name": "stable",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/stable.git",
       "sizeBytes": 140249520,
-      "fileCount": 14109,
-      "topFiles": [
-        "bench",
-        "bin",
-        "browser-router.sh",
-        "BROWSER-STACK.md",
-        "config.json",
-        "docker-compose.yml",
-        "Dockerfile",
-        "env.example"
-      ]
+      "fileCount": 14109
     },
     {
       "name": "standalone",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/standalone.git",
       "sizeBytes": 6315,
-      "fileCount": 11,
-      "topFiles": [
-        "awrawr",
-        "bedrock",
-        "boundless",
-        "codebase-memory",
-        "duet",
-        "hashline",
-        "kimi-code-npm",
-        "kimi-token-audit"
-      ]
+      "fileCount": 11
     },
     {
       "name": "stash-guard",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/stash-guard.git",
       "sizeBytes": 26750,
-      "fileCount": 2,
-      "topFiles": [
-        "README.md",
-        "stash-guard.py"
-      ]
+      "fileCount": 2
     },
     {
       "name": "stream-broker",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/stream-broker.git",
       "sizeBytes": 11252,
-      "fileCount": 8,
-      "topFiles": [
-        "moon.yml",
-        "package.json",
-        "pitchfork.d",
-        "README.md",
-        "scripts",
-        "smoke.test.ts",
-        "src"
-      ]
+      "fileCount": 8
     },
     {
       "name": "strudel-dev-vite",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/strudel-dev-vite",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/strudel-dev-vite.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/strudel-dev-vite.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "strudel-dev-vite",
-      "head": "9b7168c",
-      "toxicwind": "https://github.com/toxicwind/strudel-dev-vite.git",
       "sizeBytes": 1774649,
-      "fileCount": 61,
-      "topFiles": [
-        "apps",
-        "Dockerfile",
-        "package.json",
-        "package-lock.json",
-        "packages",
-        "playwright.config.ts",
-        "README.md",
-        "samples"
-      ]
+      "fileCount": 61
     },
     {
       "name": "strudel-sampler-server-vite",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/strudel-sampler-server-vite",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/strudel-sampler-server-vite.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/strudel-sampler-server-vite.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "strudel-sampler-server-vite",
-      "head": "fbe63de",
-      "toxicwind": "https://github.com/toxicwind/strudel-sampler-server-vite.git",
       "sizeBytes": 313422,
-      "fileCount": 65,
-      "topFiles": [
-        "CODE_OF_CONDUCT.md",
-        "CONTRIBUTING.md",
-        "deploy-prod.py",
-        "docker-compose.yml",
-        "Dockerfile",
-        "package.json",
-        "package-lock.json",
-        "PULL_REQUEST_TEMPLATE.md"
-      ]
+      "fileCount": 65
     },
     {
       "name": "submodules",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/submodules.git",
       "sizeBytes": 10477,
-      "fileCount": 7,
-      "topFiles": [
-        "phone-sentinel"
-      ]
+      "fileCount": 7
     },
     {
       "name": "switchboard",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/switchboard.git",
       "sizeBytes": 36023,
-      "fileCount": 10,
-      "topFiles": [
-        "dist",
-        "hyper-race.ts",
-        "moon.yml",
-        "package.json",
-        "proof.ts",
-        "README.md",
-        "RECOMMENDATION.md",
-        "server.test.ts"
-      ]
+      "fileCount": 10
     },
     {
       "name": "task-launch",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/task-launch.git",
       "sizeBytes": 39004,
-      "fileCount": 11,
-      "topFiles": [
-        "e2e-probe.ts",
-        "moon.yml",
-        "package.json",
-        "pitchfork.d",
-        "README.md",
-        "regression",
-        "src"
-      ]
+      "fileCount": 11
     },
     {
       "name": "tau",
-      "type": "fork",
+      "upstream": "https://github.com/can1357/oh-my-pi",
+      "upstreamSource": "git remote upstream",
+      "remoteOrigin": "https://github.com/toxicwind/tau.git",
       "hasGit": true,
       "isSubmodule": false,
-      "remote": "https://github.com/toxicwind/tau.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "tau",
-      "head": "c3cbcdcafa",
-      "toxicwind": "https://github.com/toxicwind/tau.git",
       "sizeBytes": 5334916648,
-      "fileCount": 48433,
-      "topFiles": [
-        "about.toml",
-        "AGENTS.md",
-        "apply-combined.ts",
-        "apply-combined-v4.ts",
-        "assets",
-        "bazel",
-        "bazel-bin",
-        "bazel-out"
-      ]
+      "fileCount": 48433
     },
     {
       "name": "tau-extensions",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/tau-extensions",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/tau-extensions.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/tau-extensions.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "tau-extensions",
-      "head": "b4005fb",
-      "toxicwind": "https://github.com/toxicwind/tau-extensions.git",
       "sizeBytes": 5018936635,
-      "fileCount": 77624,
-      "topFiles": [
-        "AGENTS.md",
-        "biome.json",
-        "bun.lock",
-        "LICENSE",
-        "marketplace.json",
-        "node_modules",
-        "omp-antigravity-fix",
-        "omp-provider-factory-droid"
-      ]
+      "fileCount": 77624
     },
     {
       "name": "tau-marketplace",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/tau-marketplace.git",
       "sizeBytes": 694344,
-      "fileCount": 126,
-      "topFiles": [
-        "bin",
-        "CHANGELOG.md",
-        "CONTRIBUTING.md",
-        "LICENSE",
-        "marketplace.json",
-        "moon.yml",
-        "package.json",
-        "plugins"
-      ]
+      "fileCount": 126
     },
     {
       "name": "tmux-mcp",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/tmux-mcp.git",
       "sizeBytes": 10045,
-      "fileCount": 2,
-      "topFiles": [
-        "README.md",
-        "server.ts"
-      ]
+      "fileCount": 2
     },
     {
       "name": "toolcall-agent",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/toolcall-agent.git",
       "sizeBytes": 40636,
-      "fileCount": 5,
-      "topFiles": [
-        "agent_loop.py",
-        "hft_race.py",
-        "OPPORTUNITIES.md",
-        "__pycache__",
-        "README.md"
-      ]
+      "fileCount": 5
     },
     {
       "name": "tools",
-      "type": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/tools.git",
       "sizeBytes": 953431,
-      "fileCount": 138,
-      "topFiles": [
-        "c8",
-        "fleet-ops",
-        "mcp-background-job"
-      ]
+      "fileCount": 138
     },
     {
       "name": "toxicwind-repos",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/toxicwind-repos",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/toxicwind-repos",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/toxicwind-repos",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "toxicwind-repos",
-      "head": "35ae8c8",
-      "toxicwind": "https://github.com/toxicwind/toxicwind-repos",
       "sizeBytes": 215158331,
-      "fileCount": 897,
-      "topFiles": [
-        "audit_all_repos.csv",
-        "audit_all_repos.jsonl",
-        "bashagt",
-        "github-advanced-search-mcp",
-        "MIGRATION_GUIDE.md",
-        "push-safe.sh",
-        "README.md",
-        "toxicwind_kernel.py"
-      ]
+      "fileCount": 897
     },
     {
       "name": "trading-post",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/trading-post",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/trading-post.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/trading-post.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "trading-post",
-      "head": "e898b212",
-      "toxicwind": "https://github.com/toxicwind/trading-post.git",
       "sizeBytes": 1703946355,
-      "fileCount": 94699,
-      "topFiles": [
-        "assets",
-        "CHANGELOG.md",
-        "CITATION.cff",
-        "codecov.yml",
-        "CONTRIBUTING.md",
-        "docs",
-        "eslint.config.js",
-        "examples"
-      ]
+      "fileCount": 94699
     },
     {
       "name": "websearch-mcp",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/websearch-mcp.git",
       "sizeBytes": 8621,
-      "fileCount": 2,
-      "topFiles": [
-        "README.md",
-        "server.py"
-      ]
+      "fileCount": 2
     },
     {
       "name": "wezterm",
-      "type": "submodule",
+      "upstream": "https://github.com/toxicwind/wezterm",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/wezterm.git",
       "hasGit": true,
       "isSubmodule": true,
-      "remote": "https://github.com/toxicwind/wezterm.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "wezterm",
-      "head": "6fb1c2432",
-      "toxicwind": "https://github.com/toxicwind/wezterm.git",
       "sizeBytes": 8526433284,
-      "fileCount": 31543,
-      "topFiles": [
-        "assets",
-        "async_ossl",
-        "base91",
-        "bidi",
-        "bintree",
-        "Cargo.lock",
-        "Cargo.toml",
-        "ci"
-      ]
+      "fileCount": 31543
     },
     {
       "name": "wezterm-agent-mcp",
-      "type": "fork",
+      "upstream": "https://github.com/multiagentcognition/wezterm-agent-mcp.git",
+      "upstreamSource": "package.json repository",
+      "remoteOrigin": "https://github.com/toxicwind/wezterm-agent-mcp.git",
       "hasGit": true,
       "isSubmodule": false,
-      "remote": "https://github.com/toxicwind/wezterm-agent-mcp.git",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "wezterm-agent-mcp",
-      "head": "8df9674",
-      "toxicwind": "https://github.com/toxicwind/wezterm-agent-mcp.git",
       "sizeBytes": 41617136,
-      "fileCount": 3825,
-      "topFiles": [
-        "build",
-        "bun.lock",
-        "LICENSE",
-        "node_modules",
-        "package.json",
-        "package-lock.json",
-        "README.md",
-        "src"
-      ]
+      "fileCount": 3825
     },
     {
       "name": "windmill",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/windmill.git",
       "sizeBytes": 16183,
-      "fileCount": 6,
-      "topFiles": [
-        "cuda_probe.ts",
-        "package.json",
-        "pitchfork.d",
-        "README.md",
-        "scripts",
-        "server.ts"
-      ]
+      "fileCount": 6
     },
     {
       "name": "wtf-filetrace",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/wtf-filetrace.git",
       "sizeBytes": 82,
-      "fileCount": 1,
-      "topFiles": [
-        "audit_out"
-      ]
+      "fileCount": 1
     },
     {
       "name": "wtf-orch",
-      "type": "experimental",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/wtf-orch.git",
       "sizeBytes": 4909,
-      "fileCount": 3,
-      "topFiles": [
-        "audit"
-      ]
+      "fileCount": 3
     },
     {
       "name": "wtf-orthogonal-seed",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/wtf-orthogonal-seed.git",
       "sizeBytes": 15556,
-      "fileCount": 3,
-      "topFiles": [
-        "audit_out",
-        "fingerprint_run.log"
-      ]
+      "fileCount": 3
     },
     {
       "name": "yote",
-      "type": "fork",
+      "upstream": "https://github.com/toxicwind/yote",
+      "upstreamSource": "Cargo.toml repository",
+      "remoteOrigin": "https://github.com/toxicwind/ranch",
       "hasGit": true,
       "isSubmodule": false,
-      "remote": "https://github.com/toxicwind/ranch",
-      "remoteOwner": "toxicwind",
-      "remoteRepo": "ranch",
-      "head": "4dee991",
-      "toxicwind": "https://github.com/toxicwind/yote.git",
-      "sizeBytes": 30171626,
-      "fileCount": 2122,
-      "topFiles": [
-        "bridge",
-        "bunfig.toml",
-        "bun.lock",
-        "Cargo.toml",
-        "CONSOLIDATION.md",
-        "fix_agents.py",
-        "host",
-        "LICENSE"
-      ]
+      "sizeBytes": 30178508,
+      "fileCount": 2122
     },
     {
       "name": "yote-maximal",
-      "type": "orphan",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "toxicwind": "https://github.com/toxicwind/yote-maximal.git",
       "sizeBytes": 6729,
-      "fileCount": 2,
-      "topFiles": [
-        "PAPERS.md",
-        "RUNBOOK.md"
-      ]
+      "fileCount": 2
     }
   ]
 }

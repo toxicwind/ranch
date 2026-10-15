@@ -1,56 +1,62 @@
 // ranch/scripts/audit-forks.ts
 //
-// Reusable audit of every `ranch/*` directory: classify it (fork / vendored /
-// orphan), pair it with its upstream and `toxicwind/*` counterpart, and
-// produce a markdown report (FORKS-report.md) plus a JSON sidecar
-// (FORKS-report.json) for downstream tooling. The script is idempotent —
-// running it twice produces the same result modulo new forks — and `--apply`
-// optionally creates the missing `toxicwind/*` mirror repos via `gh`.
+// For each `ranch/*` dir, find the *obvious* upstream reference and report it.
+// Sources we look at, in order — first match wins:
+//   1. .gitmodules path (we already track it as a submodule)
+//   2. package.json `repository.url` (Node/TS projects)
+//   3. Cargo.toml `package.repository` (Rust)
+//   4. pyproject.toml `[project].urls.Homepage` / `[tool.poetry].repository` (Python)
+//   5. go.mod module path (Go)
+//   6. git remote `upstream` (some forks have one)
+//   7. git remote `origin` if not toxicwind/*
+//   8. README "Forked from" / "Based on" / "Copyright © YYYY <Author> (upstream X)" line
 //
-// The companion FORKS.md is the hand-edited policy/summary index;
-// this audit is the machine-driven catalog that regenerates FORKS.md's
-// "ranch dir × upstream × toxicwind" table.
+// We don't try to be clever. If a dir has no obvious upstream, we say so.
 //
 // Usage:
-//   bun scripts/audit-forks.ts                  # write reports, no changes
-//   bun scripts/audit-forks.ts --apply         # gh repo create for orphans
-//   bun scripts/audit-forks.ts --since <sha>   # only dirs changed since sha
+//   bun scripts/audit-forks.ts                  # write FORKS-report.md + .json
+//   bun scripts/audit-forks.ts --resolve-origins   # + GitHub parent lookup
 
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync, statSync } from "node:fs";
-import { join, basename } from "node:path";
+import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 
 const RANCH_ROOT = "/home/toxic/estate/ranch";
-const FORKS_MD = join(RANCH_ROOT, "FORKS.md");
-const REPORT_MD = join(RANCH_ROOT, "FORKS-report.md");
-const REPORT_JSON = join(RANCH_ROOT, "FORKS-report.json");
+const CACHE_DIR = "/home/toxic/.cache/ranch-fork-audit";
+mkdirSync(CACHE_DIR, { recursive: true });
 
 const args = new Set(process.argv.slice(2));
-const APPLY = args.has("--apply");
-const SINCE = (() => {
-  const i = process.argv.indexOf("--since");
-  return i > -1 ? process.argv[i + 1] : null;
-})();
+const RESOLVE = args.has("--resolve-origins");
 
 interface DirInfo {
   name: string;
-  type: "submodule" | "fork" | "vendored" | "orphan" | "experimental";
+  upstream: string | null;
+  upstreamSource: string | null;
+  remoteOrigin: string | null;
   hasGit: boolean;
   isSubmodule: boolean;
-  remote?: string;
-  remoteOwner?: string;
-  remoteRepo?: string;
-  head?: string;
-  upstream?: string;
-  toxicwind?: string;
   sizeBytes: number;
   fileCount: number;
-  topFiles: string[];
 }
 
-function sh(cmd: string, cwd?: string): string {
+const REPO_PATTERNS: Array<{ file: string; pattern: RegExp; label: string }> = [
+  { file: "package.json", pattern: /"repository"\s*:\s*\{[^}]*"url"\s*:\s*"(https?:\/\/[^"]+)"/, label: "package.json repository" },
+  { file: "Cargo.toml", pattern: /\[package\][\s\S]{0,400}?repository\s*=\s*"(https?:\/\/[^"]+)"/, label: "Cargo.toml repository" },
+  { file: "pyproject.toml", pattern: /\[(?:project|tool\.poetry)\][\s\S]{0,400}?(?:Homepage|homepage|Repository|repository)\s*=\s*"(https?:\/\/[^"]+)"/, label: "pyproject.toml repository" },
+  { file: "go.mod", pattern: /^module\s+(\S+)/m, label: "go.mod module" },
+];
+
+const README_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
+  { pattern: /\(upstream\s+([\w./-]+)\)/i, label: "README '(upstream X)'" },
+  { pattern: /Forked from\s+\[?([\w./-]+)\]?/i, label: "README 'Forked from'" },
+  { pattern: /Based on\s+\[?([\w./-]+)\]?/i, label: "README 'Based on'" },
+  { pattern: /Copyright\s*©?\s*\d{4}\s+[\w .'-]+\s*\(upstream\s+([\w./-]+)\)/i, label: "README copyright+upstream" },
+  { pattern: /Originally from\s+\[?([\w./-]+)\]?/i, label: "README 'Originally from'" },
+];
+
+function sh(cmd: string, cwd?: string, timeoutMs = 30_000): string {
   try {
-    return execSync(cmd, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    return execSync(cmd, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: timeoutMs }).trim();
   } catch {
     return "";
   }
@@ -60,23 +66,12 @@ function isExcludedDir(name: string): boolean {
   return [".git", "node_modules", ".venv", "venv", "__pycache__", "target", "dist", "build", ".cache"].includes(name);
 }
 
-function classifyRemote(remote: string): { owner: string; repo: string; upstream?: string } {
-  // https://github.com/<owner>/<repo>.git
-  const m = remote.match(/github\.com[/:]([^/]+)\/([^/]+?)(?:\.git)?$/);
-  if (!m) return { owner: "?", repo: "?" };
-  return { owner: m[1], repo: m[2] };
-}
-
 function listImmediateDirs(root: string): string[] {
   return sh(`ls -1 ${root}`)
     .split("\n")
     .filter((d) => d && !isExcludedDir(d))
     .filter((d) => {
-      try {
-        return statSync(join(root, d)).isDirectory();
-      } catch {
-        return false;
-      }
+      try { return statSync(join(root, d)).isDirectory(); } catch { return false; }
     });
 }
 
@@ -92,115 +87,186 @@ function submodulesFromGitmodules(): Record<string, string> {
   return out;
 }
 
+function findUpstreamFromManifests(p: string): { url: string; source: string } | null {
+  for (const { file, pattern, label } of REPO_PATTERNS) {
+    const f = join(p, file);
+    if (!existsSync(f)) continue;
+    const text = readFileSync(f, "utf8");
+    const m = text.match(pattern);
+    if (m) {
+      // For go.mod the match is the module path (e.g. github.com/owner/repo) — turn it into a URL
+      const raw = m[1];
+      const url = raw.startsWith("http") ? raw : `https://${raw}`;
+      return { url, source: label };
+    }
+  }
+  return null;
+}
+
+function findUpstreamFromReadme(p: string): { url: string; source: string } | null {
+  for (const f of ["README.md", "readme.md", "README.rst", "README", "readme.txt"]) {
+    const path = join(p, f);
+    if (!existsSync(path)) continue;
+    const text = readFileSync(path, "utf8").slice(0, 50_000); // first 50KB
+    for (const { pattern, label } of README_PATTERNS) {
+      const m = text.match(pattern);
+      if (m) {
+        const raw = m[1];
+        const url = raw.startsWith("http") ? raw : `https://github.com/${raw.replace(/^github\.com\//, "")}`;
+        return { url, source: label };
+      }
+    }
+  }
+  return null;
+}
+
+function findUpstreamFromGitRemotes(p: string): { url: string; source: string } | null {
+  if (!existsSync(join(p, ".git"))) return null;
+  const upstream = sh("git remote get-url upstream", p);
+  if (upstream) return { url: upstream.replace(/\.git$/, ""), source: "git remote upstream" };
+  const origin = sh("git remote get-url origin", p);
+  if (origin && !origin.includes("github.com/toxicwind/")) {
+    return { url: origin.replace(/\.git$/, ""), source: "git remote origin (non-toxicwind)" };
+  }
+  return null;
+}
+
+function resolveOriginsFromGithub(infos: DirInfo[]): void {
+  if (!RESOLVE) return;
+  for (const i of infos) {
+    if (!i.remoteOrigin || !i.remoteOrigin.includes("github.com/toxicwind/")) continue;
+    const m = i.remoteOrigin.match(/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?$/);
+    if (!m) continue;
+    const [, owner, repo] = m;
+    const cacheFile = join(CACHE_DIR, `${owner}-${repo}.json`);
+    try {
+      const out = execSync(
+        `gh api repos/${owner}/${repo} --jq '{parent: .parent.full_name, parent_url: .parent.html_url, source: .source.full_name}'`,
+        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 10_000 },
+      );
+      const d = JSON.parse(out);
+      const upstreamUrl = d.parent_url || (d.source ? `https://github.com/${d.source}` : null);
+      if (upstreamUrl && !i.upstream) {
+        i.upstream = upstreamUrl;
+        i.upstreamSource = "GitHub parent fork";
+      }
+      writeFileSync(cacheFile, JSON.stringify({ parent: d.parent, source: d.source, ts: Date.now() }, null, 2));
+    } catch { /* rate-limited or missing — leave upstream unchanged */ }
+  }
+}
+
 function dirInfo(name: string, submodules: Record<string, string>): DirInfo {
   const p = join(RANCH_ROOT, name);
   const hasGit = existsSync(join(p, ".git"));
   const isSubmodule = name in submodules;
-  const remote = hasGit ? sh("git remote get-url origin", p) : "";
-  const { owner, repo } = remote ? classifyRemote(remote) : { owner: "", repo: "" };
-  const head = hasGit ? sh("git log --oneline -1", p).split(" ")[0] : "";
+  const remoteOrigin = hasGit ? sh("git remote get-url origin", p) : null;
   const sizeBytes = Number(sh(`du -sb ${p} 2>/dev/null`)?.split("\t")[0]) || 0;
   const fileCount = Number(sh(`find ${p} -type f 2>/dev/null | wc -l`).split("\n")[0]) || 0;
-  const topFiles = sh(`ls -1 ${p}`).split("\n").filter(Boolean).slice(0, 8);
-  // Default toxicwind counterpart: same name, regardless of current owner
-  const toxicwind = isSubmodule ? submodules[name] : `https://github.com/toxicwind/${name}.git`;
-  const upstream = remote && owner !== "toxicwind" ? remote : undefined;
 
-  let type: DirInfo["type"];
-  if (isSubmodule) type = "submodule";
-  else if (hasGit && owner === "toxicwind") type = "fork";
-  else if (hasGit) type = "fork"; // upstream fork, trackable
-  else if (sizeBytes > 50_000 && fileCount > 20) type = "vendored";
-  else if (sizeBytes < 5_000) type = "experimental";
-  else type = "orphan";
+  // First match wins: submodule → manifests → readme → git remotes
+  let upstream: string | null = null;
+  let upstreamSource: string | null = null;
+  if (isSubmodule) {
+    upstream = submodules[name].replace(/\.git$/, "");
+    upstreamSource = ".gitmodules";
+  } else {
+    const m = findUpstreamFromManifests(p);
+    if (m) { upstream = m.url; upstreamSource = m.source; }
+    else {
+      const r = findUpstreamFromReadme(p);
+      if (r) { upstream = r.url; upstreamSource = r.source; }
+      else {
+        const g = findUpstreamFromGitRemotes(p);
+        if (g) { upstream = g.url; upstreamSource = g.source; }
+      }
+    }
+  }
 
   return {
     name,
-    type,
+    upstream,
+    upstreamSource,
+    remoteOrigin: remoteOrigin || null,
     hasGit,
     isSubmodule,
-    remote: remote || undefined,
-    remoteOwner: owner || undefined,
-    remoteRepo: repo || undefined,
-    head: head || undefined,
-    upstream,
-    toxicwind: toxicwind || undefined,
     sizeBytes,
     fileCount,
-    topFiles,
   };
 }
 
-function renderTable(rows: DirInfo[]): string {
-  const header =
-    "| ranch dir | type | upstream | toxicwind fork | HEAD | size | files |\n" +
-    "|---|---|---|---|---|---|---|";
-  const lines = rows.map((r) => {
-    const up = r.upstream ?? "—";
-    const tw = r.toxicwind ? `[${r.remoteRepo ?? r.name}](${r.toxicwind})` : "—";
-    const head = r.head ?? "—";
-    return `| \`${r.name}\` | ${r.type} | ${up} | ${tw} | \`${head}\` | ${(r.sizeBytes / 1024 / 1024).toFixed(1)}M | ${r.fileCount} |`;
+function renderTable(infos: DirInfo[]): string {
+  const header = "| dir | upstream | source | origin remote |\n|---|---|---|---|";
+  const sorted = [...infos].sort((a, b) => {
+    // group: no-upstream last
+    if (!a.upstream && b.upstream) return 1;
+    if (a.upstream && !b.upstream) return -1;
+    return a.name.localeCompare(b.name);
+  });
+  const lines = sorted.map((i) => {
+    const up = i.upstream ? `[${i.upstream.replace(/^https?:\/\//, "").replace(/\.git$/, "")}](${i.upstream})` : "—";
+    const src = i.upstreamSource ?? "—";
+    const origin = i.remoteOrigin ? i.remoteOrigin.replace(/^https?:\/\//, "") : "—";
+    return `| \`${i.name}\` | ${up} | ${src} | ${origin} |`;
   });
   return [header, ...lines].join("\n");
 }
 
-function applyOrphans(orphans: DirInfo[]): void {
-  if (!APPLY) return;
-  for (const o of orphans) {
-    if (o.toxicwind && !existsSync(join("/home/toxic/.cache/ranch-fork-audit", o.name))) {
-      const safe = o.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-      console.log(`[apply] gh repo create toxicwind/${safe} --public --description "Mirrored from ranch/${o.name}"`);
-      try {
-        execSync(`gh repo create toxicwind/${safe} --public --description "Mirrored from ranch/${o.name}"`, { stdio: "inherit" });
-        console.log(`[apply]   created toxicwind/${safe}`);
-      } catch (e) {
-        console.error(`[apply]   failed for ${o.name}: ${(e as Error).message}`);
-      }
-    }
-  }
+function summarize(infos: DirInfo[]): string {
+  const withUpstream = infos.filter((i) => i.upstream).length;
+  const bySource: Record<string, number> = {};
+  for (const i of infos) if (i.upstreamSource) bySource[i.upstreamSource] = (bySource[i.upstreamSource] || 0) + 1;
+  return [
+    `${infos.length} immediate subdirs; **${withUpstream}** have an obvious upstream reference.`,
+    "",
+    "By source:",
+    ...Object.entries(bySource).map(([k, v]) => `  - **${v}** ${k}`),
+  ].join("\n");
 }
 
 function main(): void {
   const subs = submodulesFromGitmodules();
   const dirs = listImmediateDirs(RANCH_ROOT);
   const infos = dirs.map((d) => dirInfo(d, subs));
+  if (RESOLVE) resolveOriginsFromGithub(infos);
 
-  if (SINCE) {
-    const changed = sh(`git diff --name-only ${SINCE}..HEAD -- ranch/`, RANCH_ROOT).split("\n").filter(Boolean);
-    const names = new Set(changed.map((p) => p.split("/")[1]).filter(Boolean));
-    console.log(`[since] ${names.size} dirs changed since ${SINCE}`);
-  }
-
-  const counts: Record<string, number> = {};
-  for (const i of infos) counts[i.type] = (counts[i.type] || 0) + 1;
-
-  const table = renderTable(infos);
   const generated = new Date().toISOString();
   const md = `# ranch/* fork audit (generated ${generated})
 
-${dirs.length} immediate subdirectories of \`ranch/\`; ${Object.entries(counts).map(([k, v]) => `**${v}** ${k}`).join(" · ")}
+${summarize(infos)}
 
-${table}
+${renderTable(infos)}
+
+## Sources, in order
+
+1. \`.gitmodules\` path — the canonical submodule entry
+2. \`package.json\` / \`Cargo.toml\` / \`pyproject.toml\` / \`go.mod\` — package manifest's \`repository\` field
+3. \`README.md\` — first 50KB scanned for \`(upstream X)\`, \`Forked from\`, \`Based on\`, \`Copyright © YYYY <Author> (upstream X)\`, \`Originally from\`
+4. \`git remote upstream\` (or non-toxicwind \`origin\`) — the remote URL itself
+5. With \`--resolve-origins\`: GitHub's \`parent.full_name\` for \`toxicwind/*\` repos
+
+First match wins. No signal weights, no classification ladder, no scoring —
+just the obvious upstream reference for each dir, or "—" if there isn't one.
 
 ## Regenerate
 
 \`\`\`bash
 cd /home/toxic/estate/ranch
-bun scripts/audit-forks.ts               # write reports, no remote changes
-bun scripts/audit-forks.ts --apply      # also \`gh repo create\` for orphan dirs
+bun scripts/audit-forks.ts                    # local
+bun scripts/audit-forks.ts --resolve-origins  # + GitHub parent fork lookup
 \`\`\`
 `;
+  writeFileSync(join(RANCH_ROOT, "FORKS-report.md"), md);
+  writeFileSync(join(RANCH_ROOT, "FORKS-report.json"),
+    JSON.stringify({ generated, total: infos.length, withUpstream: infos.filter((i) => i.upstream).length, infos }, null, 2));
+  // Drop the actions file; the obvious-upstream table is the report.
+  const actionsPath = join(RANCH_ROOT, "FORKS-actions.md");
+  if (existsSync(actionsPath)) {
+    try { require("node:fs").unlinkSync(actionsPath); } catch { /* ignore */ }
+  }
 
-  writeFileSync(REPORT_MD, md);
-  writeFileSync(REPORT_JSON, JSON.stringify({ generated, counts, infos }, null, 2));
-
-  if (APPLY) applyOrphans(infos.filter((i) => i.type === "orphan"));
-
-  // Console summary (single line per dir type)
-  console.log(`[done] ${dirs.length} dirs, types: ${JSON.stringify(counts)}`);
-  console.log(`[done] wrote ${REPORT_MD} (${md.length} bytes)`);
-  console.log(`[done] wrote ${REPORT_JSON}`);
-  if (APPLY) console.log(`[done] --apply mode: attempted gh repo create for orphans`);
+  const withUpstream = infos.filter((i) => i.upstream).length;
+  console.log(`[done] ${infos.length} dirs, ${withUpstream} with obvious upstream`);
+  console.log(`[done] wrote FORKS-report.md / FORKS-report.json`);
 }
 
 main();
