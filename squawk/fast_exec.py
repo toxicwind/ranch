@@ -88,33 +88,48 @@ async def run(cmd: str, deadline: float = DEFAULT_DEADLINE,
                           stderr=f"spawn failed: {e}"[:500],
                           timed_out=False,
                           elapsed=time.monotonic() - t0)
+    was_timeout = False
+    was_cancelled = False
     try:
         out, err = await asyncio.wait_for(proc.communicate(), timeout=deadline)
+    except asyncio.TimeoutError:
+        was_timeout = True
+    except asyncio.CancelledError:
+        # race() cancels losing tasks: kill the child the same way as a
+        # deadline breach so no orphan process leaks, then re-raise to keep
+        # task-cancellation semantics intact.
+        was_cancelled = True
+    else:
         return ExecResult(cmd=cmd, returncode=proc.returncode,
                           stdout=_cap(out), stderr=_cap(err),
                           timed_out=False,
                           elapsed=time.monotonic() - t0)
-    except asyncio.TimeoutError:
+    # Deadline fired or task cancelled: SIGKILL the whole process group.
+    # The kill itself is synchronous (no await) so it lands even while the
+    # task is mid-cancellation; reap/drain below are best-effort and must
+    # never raise.
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+    except Exception:
         try:
-            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-        except Exception:
-            try:
-                proc.kill()
-            except Exception:
-                pass
-        try:
-            await asyncio.wait_for(proc.wait(), timeout=1.0)
+            proc.kill()
         except Exception:
             pass
-        # drain whatever is left without blocking
-        try:
-            out, err = await asyncio.wait_for(proc.communicate(), timeout=0.5)
-        except Exception:
-            out, err = b"", b""
-        return ExecResult(cmd=cmd, returncode=None,
-                          stdout=_cap(out), stderr=_cap(err),
-                          timed_out=True,
-                          elapsed=time.monotonic() - t0)
+    try:
+        await asyncio.wait_for(proc.wait(), timeout=1.0)
+    except BaseException:
+        pass
+    # drain whatever is left without blocking
+    try:
+        out, err = await asyncio.wait_for(proc.communicate(), timeout=0.5)
+    except BaseException:
+        out, err = b"", b""
+    if was_cancelled:
+        raise asyncio.CancelledError()
+    return ExecResult(cmd=cmd, returncode=None,
+                      stdout=_cap(out), stderr=_cap(err),
+                      timed_out=was_timeout,
+                      elapsed=time.monotonic() - t0)
 
 
 async def race(cmds: list[str], deadline: float = DEFAULT_DEADLINE,
@@ -136,6 +151,10 @@ async def race(cmds: list[str], deadline: float = DEFAULT_DEADLINE,
                 tasks.pop(t)
                 try:
                     r = t.result()
+                except asyncio.CancelledError:
+                    r = ExecResult(cmd="", returncode=None, stdout="",
+                                   stderr="race task cancelled",
+                                   timed_out=False, elapsed=0.0)
                 except Exception as e:
                     r = ExecResult(cmd="", returncode=None, stdout="",
                                    stderr=f"race task crashed: {e}"[:300],
