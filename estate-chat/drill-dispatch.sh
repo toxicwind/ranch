@@ -4,7 +4,7 @@
 set -u
 PORT=${PORT:-25121}
 B="http://127.0.0.1:$PORT"
-T=$(cat /home/toxic/.config/sovereign-chat-token)
+T=$(cat /home/toxic/.config/estate-chat-token)
 D=${DISPATCH_DIRECTIVES:-/home/toxic/dispatch-test/directives.md}
 WT=${WT:-/home/toxic/wt/dispatch-e3918e04}
 STATE=${STATE:-/home/toxic/dispatch-test/state}
@@ -111,7 +111,7 @@ print('local classifier agrees:', sigs)" && ok "fleet/wedge.py --local agrees wi
 echo "=== DRILL 4: transport push, since_seq replay, fallback, resume ==="
 rm -f /home/toxic/dispatch-test/ws-frames.jsonl
 cat > /home/toxic/dispatch-test/ws-listen.ts <<EOF
-const t = (await Bun.file("/home/toxic/.config/sovereign-chat-token").text()).trim();
+const t = (await Bun.file("/home/toxic/.config/estate-chat-token").text()).trim();
 const ws = new WebSocket("ws://127.0.0.1:$PORT/v1/stream?subscribe=fleet-claims,fleet-dispatch&token="+t);
 ws.onmessage = async (e) => {
   const prev = await Bun.file("/home/toxic/dispatch-test/ws-frames.jsonl").text().catch(() => "");

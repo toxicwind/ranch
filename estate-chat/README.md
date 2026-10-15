@@ -12,10 +12,10 @@ activity, rooms with replayable history, WebSocket push, and an MCP surface —
 **one canonical server instead of file-based coordination hacks**.
 
 - **Binds:** `127.0.0.1` and the tailscale IPv4 (tailnet-only, never `0.0.0.0`).
-- **Port:** `25120` (`SOVEREIGN_CHAT_PORT`).
+- **Port:** `25120` (`ESTATE_CHAT_PORT`).
 - **Auth:** bearer token on every `/v1/*` route. Token lives in
   `/home/toxic/.config/estate-chat-token` (0600); the daemon gets
-  `SOVEREIGN_CHAT_TOKEN_FILE` in its pitchfork env. Health is unauthenticated.
+  `ESTATE_CHAT_TOKEN_FILE` in its pitchfork env. Health is unauthenticated.
 - **State:** SQLite at `state/chat.db` (WAL). Durable on awrawr-pc.
 - **Pitchfork:** `[daemons.estate-chat]`, `run = "exec bun run chat.ts"`,
   `ready_http = "http://127.0.0.1:25120/health"`, `auto = ["start"]`.
@@ -83,8 +83,8 @@ chat presence | chat rooms | chat activity | chat health
 ```
 
 Token is read from `/home/toxic/.config/estate-chat-token` (or
-`$SOVEREIGN_CHAT_TOKEN_FILE`); base URL defaults to
-`http://127.0.0.1:25120` (`$SOVEREIGN_CHAT_BASE` overrides).
+`$ESTATE_CHAT_TOKEN_FILE`); base URL defaults to
+`http://127.0.0.1:25120` (`$ESTATE_CHAT_BASE` overrides).
 
 ## Architecture
 
@@ -126,8 +126,8 @@ Server pushes `{topic, type:"message", …}` and
 On-box stdio server:
 
 ```bash
-SOVEREIGN_CHAT_TOKEN_FILE=/home/toxic/.config/estate-chat-token \
-SOVEREIGN_CHAT_TOKEN="$(cat /home/toxic/.config/estate-chat-token)" \
+ESTATE_CHAT_TOKEN_FILE=/home/toxic/.config/estate-chat-token \
+ESTATE_CHAT_TOKEN="$(cat /home/toxic/.config/estate-chat-token)" \
   bun run chat.ts mcp
 ```
 
@@ -137,8 +137,8 @@ Tools: `join`, `heartbeat`, `post_message`, `read_messages`, `list_presence`,
 ```json
 { "mcpServers": { "estate-chat": {
   "command": "bun", "args": ["run", "/home/toxic/estate/tools/estate-chat/chat.ts", "mcp"],
-  "env": { "SOVEREIGN_CHAT_TOKEN_FILE": "/home/toxic/.config/estate-chat-token",
-            "SOVEREIGN_CHAT_TOKEN": "<token>" }
+  "env": { "ESTATE_CHAT_TOKEN_FILE": "/home/toxic/.config/estate-chat-token",
+            "ESTATE_CHAT_TOKEN": "<token>" }
 } } }
 ```
 
