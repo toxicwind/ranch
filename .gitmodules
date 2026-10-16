@@ -248,9 +248,6 @@
 [submodule "doorbell"]
 	path = doorbell
 	url = https://github.com/toxicwind/doorbell.git
-[submodule "estate-scripts"]
-	path = estate-scripts
-	url = ./estate-scripts
 [submodule "tools/c8"]
 	path = tools/c8
 	url = https://github.com/bcoe/c8.git
