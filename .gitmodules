@@ -54,7 +54,7 @@
 	path = killer-features/debate-oracle/vendor/llm_debate
 	url = https://github.com/ucl-dark/llm_debate.git
 [submodule "mcpproxy-go"]
-	path = mcpproxy-go
+	path = mcp/mcpproxy-go
 	url = https://github.com/toxicwind/mcpproxy-go.git
 [submodule "muse-cli"]
 	path = muse-cli
@@ -171,7 +171,7 @@
 	path = rig
 	url = https://github.com/toxicwind/rig.git
 [submodule "rsync-mcp"]
-	path = rsync-mcp
+	path = mcp/rsync-mcp
 	url = https://github.com/toxicwind/rsync-mcp.git
 [submodule "safety-review-gate"]
 	path = safety-review-gate
@@ -228,7 +228,7 @@
 	path = borrowed/loom
 	url = https://github.com/rjwalters/loom.git
 [submodule "mcp-prompt-injection-detector"]
-	path = mcp-prompt-injection-detector
+	path = mcp/mcp-prompt-injection-detector
 	url = https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector.git
 [submodule "roundup-site"]
 	path = roundup-site
@@ -243,7 +243,7 @@
 	path = forge/web
 	url = https://github.com/toxicwind/CMSaasStarter.git
 [submodule "tau-extensions"]
-	path = tau-extensions
+	path = tau/tau-extensions
 	url = https://github.com/toxicwind/tau-extensions.git
 [submodule "doorbell"]
 	path = doorbell
@@ -264,14 +264,14 @@
 	path = extensions/drover
 	url = https://github.com/toxicwind/drover.git
 [submodule "kilo-code"]
-	path = kilo-code
+	path = vendor/kilo-code
 	url = https://github.com/toxicwind/kilo-code.git
 [submodule "kilo-cli"]
-	path = kilo-cli
+	path = vendor/kilo-cli
 	url = https://github.com/toxicwind/kilo-cli.git
 
 [submodule "tailnet-doctor"]
-	path = tailnet-doctor
+	path = vendor/tailnet-doctor
 	url = https://github.com/toxicwind/tailnet-doctor.git
 [submodule "websites/effusion-labs-tickets"]
 	path = websites/effusionlabs/tickets
@@ -286,5 +286,5 @@
 	path = websites/arlockworks/app
 	url = https://github.com/toxicwind/arlockworks-next.git
 [submodule "dedicated-server-ops"]
-	path = dedicated-server-ops
+	path = dedicated/dedicated-server-ops
 	url = https://github.com/toxicwind/dedi-ops.git
