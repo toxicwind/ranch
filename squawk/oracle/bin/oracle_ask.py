@@ -204,7 +204,7 @@ def herd_chat(model, prompt, timeout_s=90, max_tokens=1500):
             server = r.headers.get("Server")
             data = json.load(r)
         msg = (data.get("choices") or [{}])[0].get("message") or {}
-        return {"ok": True, "text": msg.get("content"),
+        return {"ok": True, "text": msg.get("content") or msg.get("reasoning_content"),
                 "latency_s": time.time() - t0,
                 "usage": data.get("usage") or {},
                 "http_status": status,
