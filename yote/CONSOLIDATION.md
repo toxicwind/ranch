@@ -1,6 +1,6 @@
 # Yote Consolidation — merge manifest
 
-**Date:** 2026-09-20 · **Directive:** Chris — merge all Yote material on GitHub (private + public) into `estate-projects/projects/`, production-grade, stop using the gist.
+**Date:** 2026-09-20 · **Directive:** the Architect — merge all Yote material on GitHub (private + public) into `estate-projects/projects/`, production-grade, stop using the gist.
 **Coordinator:** subagent e57b7099 · **Plan:** `~/workspace/yote-consolidation/PLAN.md` (also in this repo's workspace copy)
 **Iron rules honored:** no repo deleted; no newer file clobbered by an older one; every move recorded here.
 
@@ -53,6 +53,6 @@
 
 ## Open decisions (not unilaterally resolved)
 
-- **D1 — Rust vs TS gateway:** both preserved; unification is Chris's call.
+- **D1 — Rust vs TS gateway:** both preserved; unification is the Architect's call.
 - **D2 — `awrawr_ws_exec.py` freshness:** SP's copy vs the box's live copy — parent to diff on apply.
 - Excluded as noise: moonbox-*/portal-audit/emergent-august mirrors, cdn-assets XMLs, "coyote time" game-dev hits, `toxicwind/rig/agents/coyote/` (parallel open-source config, left in rig).

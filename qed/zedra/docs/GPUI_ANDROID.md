@@ -2956,7 +2956,7 @@ lives in gpui core, not the wgpu boundary.**
 
 ### Decision: pivot to gpui-internal draw_roots optimisations
 
-Per the user's direction (no app-level `.cached()` changes), the
+Per the architect's direction (no app-level `.cached()` changes), the
 next track is GPUI internals that reduce `draw_roots` cost without
 requiring views to opt in. Candidates from
 `docs/AUDIT_GPUI_DRAW_ROOTS.md`:
@@ -3027,7 +3027,7 @@ batches max     4030           ~250              -94 %
 p50 stable at 64 fps. p95 sometimes reaches 49 fps on the heaviest
 frames (mid-scroll through a code-block dense markdown section).
 The 120 Hz path from here requires app-level `.cached()` adoption
-(the user has deferred) or one of the queued GPUI semantic changes.
+(the architect has deferred) or one of the queued GPUI semantic changes.
 
 ### `skip-active-refresh`: gpui-level fix, marginal impact on p99
 
@@ -3074,11 +3074,11 @@ at the (vsync × 2) boundary.
 To hit p99 < 16 ms on this hardware, every single frame's work must
 fit cleanly inside 8.33 ms with margin for OS jitter. Our p99 work
 is around 13-20 ms. Bringing that under 8 ms requires reducing
-`draw_roots` (GPUI/app changes) which the user has deferred.
+`draw_roots` (GPUI/app changes) which the architect has deferred.
 
 p95 spikes to 49 fps on heaviest frames; the rest of the time scroll
 is at 60-90 fps. Subjectively this is the "less smooth than native"
-feel the user reported, and it is unfortunately bounded by the
+feel the architect reported, and it is unfortunately bounded by the
 architectural choices upstream of `gpui_wgpu`.
 
 ## 2026-05-17 — Pipelined-rendering design (next session)
@@ -3294,7 +3294,7 @@ Further halving p99 would require:
   draw_roots overlaps with the worker), or
 - Pre-clone scene into a swap buffer to avoid the per-frame clone
   cost on the UI thread, or
-- The `.cached()` GPUI work the user has deferred.
+- The `.cached()` GPUI work the architect has deferred.
 
 For now: **`pipelined-render-thread` ships as the new default-on
 target** once verified across rotate / resume / drag scenarios.

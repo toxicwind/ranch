@@ -1,6 +1,6 @@
 # Quickstart: macOS TCC-safe Connect wizard & App-Data denial diagnostics
 
-## What changes for a user
+## What changes for an architect
 
 - Opening the Connect page on macOS **no longer triggers** a "wants to access data from other apps" prompt for every installed MCP client. Status shows which clients are installed (file present) without reading their contents.
 - A client's "connected to mcpproxy?" detail is computed **when you act on that client** (open its detail / connect / disconnect). That is the only moment macOS may prompt — for that one app, in context.

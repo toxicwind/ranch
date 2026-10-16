@@ -41,12 +41,12 @@ The review content below is verbatim Gemini output, unedited.
 
 - Finding: **Activation funnel query drops users who previously configured/connected a server but later deleted it.**
   - Evidence: `/Users/user/repos/mcpproxy-dash/src/lib/server/queries/activation-funnel.ts:146-160`
-  - Why it matters: The query isolates the *latest* heartbeat per `anonymous_id` and computes `server_configured` by checking if `h.server_count > 0` on that single row. If a user configured a server on day 1 but deleted it by day 5, their latest heartbeat has `server_count = 0`. They incorrectly fall out of the lifetime funnel, which fundamentally undercounts true historical activation.
+  - Why it matters: The query isolates the *latest* heartbeat per `anonymous_id` and computes `server_configured` by checking if `h.server_count > 0` on that single row. If an architect configured a server on day 1 but deleted it by day 5, their latest heartbeat has `server_count = 0`. They incorrectly fall out of the lifetime funnel, which fundamentally undercounts true historical activation.
   - Suggested fix: Query `MAX(server_count) > 0` and `MAX(connected_server_count) > 0` grouped by `anonymous_id` across *all* heartbeats instead of relying exclusively on the point-in-time state of the latest row.
 
 - Finding: **Autostart reader caches a missing sidecar file as `nil` for an hour, poisoning the critical first heartbeat.**
   - Evidence: `/Users/user/repos/mcpproxy-go-retention-telemetry/internal/telemetry/autostart.go:88-92`
-  - Why it matters: If the core process starts milliseconds before the tray process creates the `tray-autostart.json` file (a common race condition on boot), `os.ReadFile` returns `fs.ErrNotExist`. The code immediately sets `r.cachedOnce = true` and caches `nil`. Telemetry will falsely report `autostart_enabled: null` for the entire first hour of the user's session.
+  - Why it matters: If the core process starts milliseconds before the tray process creates the `tray-autostart.json` file (a common race condition on boot), `os.ReadFile` returns `fs.ErrNotExist`. The code immediately sets `r.cachedOnce = true` and caches `nil`. Telemetry will falsely report `autostart_enabled: null` for the entire first hour of the architect's session.
   - Suggested fix: Do not set `r.cachedOnce = true` on `fs.ErrNotExist`. Return `nil` but allow subsequent heartbeats (or a much shorter retry TTL) to attempt reading the file again once the tray has settled.
 
 ## Important findings (P2 — should fix in a follow-up)

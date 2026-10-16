@@ -12,7 +12,7 @@
 Our fork carries **4 commits** on top of upstream, all benchmark-quality improvements
 built for our herd benchmarking (2026-09-20). All four are cleanly separable and
 **upstreamable in principle** — but no PRs are opened by this audit. Opening PRs to
-an external repo is an outward-facing action and Chris's call. The fork's history is
+an external repo is an outward-facing action and the Architect's call. The fork's history is
 intact (no squashes, no rewrites); the delta is documented here so the upstream
 decision can be made with full context.
 
@@ -45,19 +45,19 @@ aggregates cover completed requests only. Touches `accumulator.py`, tests.
 
 ## Why not upstreamed now
 
-1. **Outward action.** PRs to `vllm-project/guidellm` speak as Chris/toxicwind to an
-   external project. That is Chris's decision, not an agent's.
+1. **Outward action.** PRs to `vllm-project/guidellm` speak as the Architect/toxicwind to an
+   external project. That is the Architect's decision, not an agent's.
 2. **Harness-specific tuning.** Commits #3–#4 encode our judgment about what counts
    as a measurement vs a skip in *our* benchmark runs. Reasonable people (and
    upstream maintainers) may disagree; a PR needs that debate, not a drive-by.
 3. **No urgency.** The fork serves our benchmarks today; upstream gains nothing
-   until the PRs exist, and nothing is lost by waiting for Chris's call.
+   until the PRs exist, and nothing is lost by waiting for the Architect's call.
 
 ## History preservation
 
 - Fork history is **intact**: 4 commits, full messages, no squashes, no rewrites,
   no force-pushes. `git log 4601968d..6b40c21e` reproduces the delta above.
-- If Chris approves upstreaming: open one PR per commit (or per logical pair
+- If the Architect approves upstreaming: open one PR per commit (or per logical pair
   #3+#4) from a branch cut at the fork HEAD — never rewrite the fork's main.
 - If upstream accepts: merge upstream back into the fork (merge commit, no rebase
   of our history) so the fork's histogram stays honest.

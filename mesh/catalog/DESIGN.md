@@ -18,7 +18,7 @@ The same hardcoded provider→models lists existed in four places:
    `src/compat/providers.ts` (replaced by @ranch/roost 2026-09-30).
 
 Production symptom: 4 of 6 groq ids 404'd until a human noticed (groq
-re-verification 2026-09-30). Chris: "there shouldn't be hardcoding of any
+re-verification 2026-09-30). the Architect: "there shouldn't be hardcoding of any
 model names in the provider -> what models they have thing."
 
 ## The cure

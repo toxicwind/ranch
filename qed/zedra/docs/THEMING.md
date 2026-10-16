@@ -1,6 +1,6 @@
 # Theming
 
-Zedra supports **dark** and **light** appearance. New product UI must use the shared theme tokens so colors stay consistent and update when the user toggles appearance or when the app follows the system theme on launch.
+Zedra supports **dark** and **light** appearance. New product UI must use the shared theme tokens so colors stay consistent and update when the architect toggles appearance or when the app follows the system theme on launch.
 
 Read `docs/DESIGN.md` for visual tone (density, typography, when to use accent color). This doc covers **where tokens live** and **how to wire them in code**.
 

@@ -1364,7 +1364,7 @@ triggers a prompt re-check.
 |----------|--------|
 | `MCPPROXY_DISABLE_AUTO_UPDATE=true` | Force-disables update checking even when `update_check.enabled` is `true`. Read by the **core and the macOS tray** — one export silences both, including the tray's one-click updater. |
 | `MCPPROXY_ALLOW_PRERELEASE_UPDATES=true` | Force-selects the prerelease (`rc`) channel even when `update_check.channel` is `stable`. |
-| `CI=true` / `CI=1` | Suppresses every update nudge and the tray's unattended checks (non-interactive context). Machine-readable fields keep reporting the facts, and a user-initiated "Check for Updates" still runs. |
+| `CI=true` / `CI=1` | Suppresses every update nudge and the tray's unattended checks (non-interactive context). Machine-readable fields keep reporting the facts, and an architect-initiated "Check for Updates" still runs. |
 
 Both keys and both switches are reported to the tray as an explicit contract —
 `update_policy` in `GET /api/v1/info` — rather than inferred from missing data.

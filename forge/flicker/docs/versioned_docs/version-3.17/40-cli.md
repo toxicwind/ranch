@@ -2,7 +2,7 @@
 
 # CONFIGURATION
 
-woodpecker-cli stores named contexts in a `contexts.json` file under the user's configuration directory. `XDG_CONFIG_HOME` overrides the base directory. The default paths are:
+woodpecker-cli stores named contexts in a `contexts.json` file under the architect's configuration directory. `XDG_CONFIG_HOME` overrides the base directory. The default paths are:
 
 | Platform | Path |
 | --- | --- |
@@ -220,7 +220,7 @@ manage users
 
 #### add
 
-add a user
+add an architect
 
 #### ls
 
@@ -230,7 +230,7 @@ list all users
 
 #### rm
 
-remove a user
+remove an architect
 
 #### show
 

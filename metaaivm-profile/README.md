@@ -61,9 +61,9 @@ identifier. The profile:
 - Identifies the runtime: per-user VM under `*.metaaivm.com`, shared
   gateway `hatch.metaaivm.com`, model family Muse Spark.
 - Uses the corpus protocol material for gateway-aware operation.
-- Operates under Chris's standing autonomous-operation order; questions
+- Operates under the Architect's standing autonomous-operation order; questions
   resolve via the skill catalog, yote ffs, GitHub pattern-borrow, and
-  exa web search — never by stalling on the user.
+  exa web search — never by stalling on the architect.
 
 See `profile.json` for the machine-readable form.
 

@@ -16,19 +16,19 @@ User writes a high-level goal (e.g., *"Analyze telemetry data on retention and p
 
 **Why this priority**: This is the core value — without it, the cockpit produces nothing. Approval gating without proposals is empty; proposals without approvals is unsafe.
 
-**Independent Test**: Post one goal text to the CEO ticket. Wait for synthesis. Confirm: (a) at least 1 expert proposal cites a Synapbus message or wiki article ID, (b) the synthesis offers at least 2 options with tradeoffs, (c) the user can react `approve` / `reject` / `request_changes`.
+**Independent Test**: Post one goal text to the CEO ticket. Wait for synthesis. Confirm: (a) at least 1 expert proposal cites a Synapbus message or wiki article ID, (b) the synthesis offers at least 2 options with tradeoffs, (c) the architect can react `approve` / `reject` / `request_changes`.
 
 **Acceptance Scenarios**:
 
 1. **Given** an empty Paperclip CEO ticket with a goal text, **When** the CEO is prompted, **Then** within a reasonable time it queries Synapbus, dispatches experts, and posts a synthesis comment with options + tradeoffs + a recommendation.
-2. **Given** a synthesis comment exists, **When** the user reacts `approve`, **Then** the next workflow stage activates; **When** they react `reject`, **Then** the ticket is archived with no implementation.
+2. **Given** a synthesis comment exists, **When** the architect reacts `approve`, **Then** the next workflow stage activates; **When** they react `reject`, **Then** the ticket is archived with no implementation.
 3. **Given** a goal too vague to decompose (e.g., one-word prompt), **When** the CEO processes it, **Then** the CEO posts a clarification request comment instead of proposing — and waits.
 
 ---
 
 ### User Story 2 — Approved goal flows autonomously to a pull request (Priority: P2)
 
-After the user approves a synthesis, the CEO routes to an implementation expert. For "big" goals (≥3 file areas, or data/security/release impact, or user said "spec it"), the expert runs `/speckit.specify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement` and the resulting work lands as a PR linked to a `specs/NNN-name/` spec. For small goals, the expert opens a PR directly with no spec. In both cases, the agent does **not** merge its own PR — human review on GitHub is mandatory.
+After the architect approves a synthesis, the CEO routes to an implementation expert. For "big" goals (≥3 file areas, or data/security/release impact, or user said "spec it"), the expert runs `/speckit.specify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement` and the resulting work lands as a PR linked to a `specs/NNN-name/` spec. For small goals, the expert opens a PR directly with no spec. In both cases, the agent does **not** merge its own PR — human review on GitHub is mandatory.
 
 **Why this priority**: Without autonomous implementation, the cockpit is just a proposal generator. P2 because P1 still delivers value (better-thought-out proposals) even without automated implementation.
 
@@ -64,10 +64,10 @@ When a PR opens, the QA Tester drafts a test plan, the Critic reviews it, the Te
 - **Synapbus unreachable**: CEO and experts proceed with proposal generation but explicitly mark the proposal as "no Synapbus context — proceed with caution"; user sees this in the synthesis.
 - **Goal text contains secrets**: agents must redact obvious secrets (API keys, passwords) from any wiki articles or synapbus posts derived from the goal.
 - **Two concurrent goals routed to the same expert**: expert serializes; the second goal's ticket shows "queued behind goal #N".
-- **User edits the goal text after experts have started**: experts complete their current work; CEO surfaces the diff in the synthesis and asks the user to confirm or restart.
+- **User edits the goal text after experts have started**: experts complete their current work; CEO surfaces the diff in the synthesis and asks the architect to confirm or restart.
 - **`requireBoardApprovalForNewAgents` blocks an attempted dynamic agent creation**: no agent is added; ticket comment explains why.
 - **Speckit `/speckit.implement` fails partway**: the spec dir + plan + tasks remain in git; ticket reflects partial state; user can resume manually or request retry.
-- **Wiki edit conflicts with manual user edit**: CEO refuses to overwrite, posts a diff to the user, and asks for a merge decision.
+- **Wiki edit conflicts with manual user edit**: CEO refuses to overwrite, posts a diff to the architect, and asks for a merge decision.
 
 ## Requirements *(mandatory)*
 
@@ -82,7 +82,7 @@ When a PR opens, the QA Tester drafts a test plan, the Critic reviews it, the Te
 - **FR-007**: CEO agent MUST keep three Synapbus wiki articles consistent: `mcpproxy-roadmap` (rewritten in full each goal milestone), `mcpproxy-architecture-decisions` (one entry per non-default routing decision), `mcpproxy-shipped` (append-only).
 - **FR-008**: System MUST preserve existing direct Claude Code session workflows. Specifically: `/superpowers:brainstorming` continues to work and outputs to `docs/superpowers/specs/`; `/superpowers:writing-plans` is NOT used (replaced by `/speckit.specify` against the brainstorm output); free-form subagent investigation continues unchanged.
 - **FR-009**: Initial agent roster MUST consist of exactly seven roles: CEO, Backend Engineer, Frontend Engineer, macOS Engineer, QA Tester, Critic, Release Engineer. Marketing/PM agents are explicitly out of scope.
-- **FR-010**: Initial setup MUST be bootstrap-by-hand. The CEO cannot self-provision; the user (with optional CC assistance) creates the agents, instruction files, wiki articles, and budget caps as a one-time event.
+- **FR-010**: Initial setup MUST be bootstrap-by-hand. The CEO cannot self-provision; the architect (with optional CC assistance) creates the agents, instruction files, wiki articles, and budget caps as a one-time event.
 - **FR-011**: Adding any new agent role after initial roster MUST require board approval via Paperclip's `requireBoardApprovalForNewAgents` mechanism.
 - **FR-012**: Paperclip MUST remain bound to loopback (`127.0.0.1:3100`) and run in `local_trusted` mode unless production hardening (rotation of `BETTER_AUTH_SECRET` and `PAPERCLIP_AGENT_JWT_SECRET`) is performed first.
 - **FR-013**: Each agent's instruction directory MUST live at `~/.paperclip/instances/default/companies/<company-id>/agents/<agent-id>/instructions/`. CEO has four files (`AGENTS.md`, `SOUL.md`, `HEARTBEAT.md`, `TOOLS.md`); other agents have only `AGENTS.md`.
@@ -105,7 +105,7 @@ The "code" of this feature is mostly configuration outside the mcpproxy-go repo.
 
 - **Goal**: high-level user instruction text posted as a Paperclip CEO ticket. Carries scope but not implementation detail.
 - **Proposal**: a markdown document attached to a Paperclip ticket via `paperclipUpsertIssueDocument`, produced by one expert agent. Lists options and tradeoffs for one slice of the goal.
-- **Synthesis**: the single recommendation produced by the CEO by merging proposals; carries the user-facing approval gate. Hosts the `approve` / `reject` / `request_changes` reactions.
+- **Synthesis**: the single recommendation produced by the CEO by merging proposals; carries the architect-facing approval gate. Hosts the `approve` / `reject` / `request_changes` reactions.
 - **Spec**: a speckit feature artifact under `specs/NNN-<short-name>/` (spec.md, plan.md, tasks.md). Created only when the CEO routes a goal as "big". Lives in git.
 - **Wiki Article**: Synapbus-hosted markdown maintained by the CEO. Three exist: `mcpproxy-roadmap`, `mcpproxy-architecture-decisions`, `mcpproxy-shipped`.
 - **Provenance Citation**: a Synapbus message ID or wiki `[[slug]]` reference attached to a proposal claim. Required by FR-003.
@@ -118,9 +118,9 @@ The "code" of this feature is mostly configuration outside the mcpproxy-go repo.
 - **SC-002**: After the first five shipped goals, retrospective review shows the spec-vs-no-spec routing decision was correct (in user's judgement) for at least 4 of 5.
 - **SC-003**: 100% of expert proposals cite at least one Synapbus message or wiki article (the provenance rule, FR-003).
 - **SC-004**: Zero agent-self-merged PRs across the first 10 cockpit-generated PRs (FR-005, verified by GitHub audit log).
-- **SC-005**: Initial bootstrap (T-001 through T-005) is completed by the user in under 4 hours of focused work.
+- **SC-005**: Initial bootstrap (T-001 through T-005) is completed by the architect in under 4 hours of focused work.
 - **SC-006**: After the first 5 shipped goals, the `mcpproxy-roadmap` wiki article reflects 100% of those ships, with the timestamp of each ship within 24 hours of PR merge.
-- **SC-007**: User's day-to-day Claude Code workflows (brainstorming, investigation, trivial fixes) remain functional and unchanged — verified by the user explicitly testing each on day 1 of cockpit operation.
+- **SC-007**: User's day-to-day Claude Code workflows (brainstorming, investigation, trivial fixes) remain functional and unchanged — verified by the architect explicitly testing each on day 1 of cockpit operation.
 - **SC-008**: After 30 days of cockpit operation, no Paperclip-runtime secrets (master key, JWT secret) have been exposed beyond loopback (verified via `lsof` on port 3100, or by the absence of LAN-reachability).
 
 ## Out of Scope
@@ -147,8 +147,8 @@ The "code" of this feature is mostly configuration outside the mcpproxy-go repo.
 
 - **Paperclip AI** running locally (already in place, verified)
 - **Synapbus** running on kubic (already in place, verified per global CLAUDE.md)
-- **Synapbus MCP server** wired into the user's environment (already in place — `mcp__synapbus__*` tools visible)
-- **Paperclip MCP server** (`packages/mcp-server` from paperclipai/paperclip) — needed if agents drive Paperclip from outside; not a blocker for bootstrap if the user configures via the Paperclip web UI directly.
+- **Synapbus MCP server** wired into the architect's environment (already in place — `mcp__synapbus__*` tools visible)
+- **Paperclip MCP server** (`packages/mcp-server` from paperclipai/paperclip) — needed if agents drive Paperclip from outside; not a blocker for bootstrap if the architect configures via the Paperclip web UI directly.
 - **Gemini CLI** authenticated via Google OAuth (no `GEMINI_API_KEY` needed) for the Critic agent (FR-015). Model: `gemini-3.1-pro-preview`.
 - **opencode CLI** + access to the `kimi2.5-gcore` model for Synapbus context summarization (FR-016).
 

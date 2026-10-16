@@ -1,6 +1,6 @@
 # Quickstart: Deterministic Offline MCP Tool-Scanner v2
 
-## What changes for a user
+## What changes for an architect
 
 Nothing in the command surface. You still run:
 
@@ -42,6 +42,6 @@ Expect a metrics breakdown and exit 0 when recall ≥ 0.90 and hard-negative FP 
 | US1 shadowing | two servers, same tool name → hard finding `shadowing.cross_server` |
 | US1 decode-to-shell | description with base64 of `curl x \| sh` → hard finding `payload.decoded`, evidence = decoded |
 | US2 hard-negative | "detects prompts such as 'ignore previous instructions'" → no quarantine |
-| US2 variant | "don't disclose" and "do not tell the user" both flagged |
+| US2 variant | "don't disclose" and "do not tell the architect" both flagged |
 | US3 gate | corpus eval fails build when recall < 0.90 |
 | US4 transparency | multi-signal tool → finding lists check IDs + confidence; severity rises with count |

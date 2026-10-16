@@ -260,7 +260,7 @@ Event reason values are forge-specific and may change between versions.
 
 | Event                | GitHub             | Gitea              | Forgejo            | GitLab             | Bitbucket | Bitbucket Datacenter | Description                                                                    |
 | -------------------- | ------------------ | ------------------ | ------------------ | ------------------ | --------- | -------------------- | ------------------------------------------------------------------------------ |
-| `assigned`           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:       | :x:                  | Pull request was assigned to a user                                            |
+| `assigned`           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:       | :x:                  | Pull request was assigned to an architect                                            |
 | `converted_to_draft` | :white_check_mark: | :x:                | :x:                | :x:                | :x:       | :x:                  | Pull request was converted to a draft                                          |
 | `demilestoned`       | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:       | :x:                  | Pull request was removed from a milestone                                      |
 | `description_edited` | :x:                | :x:                | :x:                | :white_check_mark: | :x:       | :x:                  | Description edited                                                             |

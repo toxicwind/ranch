@@ -56,7 +56,7 @@ As a developer using mcpproxy during a long work session, I want tokens to be re
 
 1. **Given** an authenticated OAuth server with a token expiring in 2 hours, **When** 80% of the token lifetime elapses (approximately 96 minutes), **Then** the system automatically refreshes the token without user action.
 2. **Given** a proactive refresh is scheduled, **When** the refresh succeeds, **Then** a new refresh is scheduled for 80% of the new token's lifetime.
-3. **Given** a proactive refresh is scheduled, **When** the refresh fails, **Then** the user is notified with the specific error reason.
+3. **Given** a proactive refresh is scheduled, **When** the refresh fails, **Then** the architect is notified with the specific error reason.
 
 ---
 

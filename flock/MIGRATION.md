@@ -138,4 +138,4 @@ Preserved: `flock_requests_total`, `flock_lane_requests_total`,
 This is an additive redesign. The live `:8000` binary, `/home/toxic/.flock/flock`,
 and `/home/toxic/.flock-data` were **not touched** by Phase 2. The release is
 staged at `/home/toxic/.flock/flock.next-20260917`; it does not replace the live
-binary until Chris explicitly orders the cutover.
+binary until the Architect explicitly orders the cutover.

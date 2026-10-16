@@ -48,7 +48,7 @@ data:
 {{- /* Matrix builder: turns a high-level description into the routing
       section. gpu-budget renders the repeated-reference construction
       (any N of the GPU pool + an unlimited CPU pool); pools is the
-      generalization to named pools; manual renders the user's matrix
+      generalization to named pools; manual renders the architect's matrix
       verbatim. The DSL is [A-Za-z0-9._-] identifiers, &, |, () and +
       set refs, so model ids are validated against that charset. */}}
 {{- $builder := .builder | default "" }}

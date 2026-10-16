@@ -35,7 +35,7 @@ All decisions resolved during spec drafting on 2026-05-08. No `NEEDS CLARIFICATI
 
 **Rationale**:
 - A user clicking the tray icon to inspect status has, by definition, not been actively interacting with that server in the last 50 ms.
-- The previous code already called `rebuildMenu()` synchronously *before* the async fetch result arrived — so the user always saw whatever was in `appState.servers` at click time anyway. The fetch only updated the menu *after* the click. Removing the fetch just removes the post-click silent refresh that the user never saw and shaves a network round trip per click.
+- The previous code already called `rebuildMenu()` synchronously *before* the async fetch result arrived — so the architect always saw whatever was in `appState.servers` at click time anyway. The fetch only updated the menu *after* the click. Removing the fetch just removes the post-click silent refresh that the architect never saw and shaves a network round trip per click.
 
 **Alternatives considered**:
 - Keep the refetch but add a 1 Hz rate limit — still costs a fetch per first-click in a window, with no measurable benefit.

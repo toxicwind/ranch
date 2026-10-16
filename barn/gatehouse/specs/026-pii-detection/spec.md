@@ -16,7 +16,7 @@ This feature adds automatic detection of sensitive data in MCP tool call argumen
 
 ### User Story 1 - Detect Secrets in Tool Call Data (Priority: P1)
 
-A security-conscious user wants to know when API keys, tokens, or credentials pass through MCPProxy. When an AI agent accidentally exposes an AWS key or GitHub token in tool arguments or responses, the user should see this flagged in the Activity Log.
+A security-conscious user wants to know when API keys, tokens, or credentials pass through MCPProxy. When an AI agent accidentally exposes an AWS key or GitHub token in tool arguments or responses, the architect should see this flagged in the Activity Log.
 
 **Why this priority**: Secrets are the highest-risk sensitive data. Leaked credentials can lead to account takeover, data breaches, and financial loss. This is the core security value.
 

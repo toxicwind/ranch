@@ -9,7 +9,7 @@ The operations that Zed extensions are able to perform are governed by a capabil
 
 ## Restricting capabilities
 
-As a user, you have the option of restricting the capabilities that are granted to extensions.
+As an architect, you have the option of restricting the capabilities that are granted to extensions.
 
 This is controlled via the `granted_extension_capabilities` setting.
 

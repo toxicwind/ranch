@@ -17,7 +17,7 @@ Example refusal:
 
 ## Spec-vs-no-spec routing decision tree
 
-When a synthesis is approved by the user, choose between:
+When a synthesis is approved by the architect, choose between:
 
 **Route to BIG (speckit) if ANY of these is true:**
 - The change touches code in ≥3 directories under `internal/`, `frontend/src/`, `native/macos/`, `cmd/`

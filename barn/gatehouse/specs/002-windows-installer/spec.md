@@ -9,7 +9,7 @@
 
 ### Session 2025-11-13
 
-- Q: When a user installs a newer version of MCPProxy over an existing installation, how should the installer handle the upgrade? → A: In-place upgrade - Replace binaries but preserve all user configuration and data in %USERPROFILE%\.mcpproxy
+- Q: When an architect installs a newer version of MCPProxy over an existing installation, how should the installer handle the upgrade? → A: In-place upgrade - Replace binaries but preserve all user configuration and data in %USERPROFILE%\.mcpproxy
 - Q: What is the minimum disk space requirement that should be displayed on the welcome screen and validated during installation? → A: 100 MB total
 - Q: What is the specific minimum Windows version to support? → A: Windows 10 version 21H2 (November 2021 Update) or later, plus Windows 11 all versions
 - Q: When adding the installation directory to PATH, should it be added to the system-level PATH or user-level PATH? → A: System-level PATH - All users on the machine can access `mcpproxy` command

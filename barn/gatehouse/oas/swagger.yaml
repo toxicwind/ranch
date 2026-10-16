@@ -738,7 +738,7 @@ components:
             Provenance is the trust tag for this registry (MCP-866):
             RegistryProvenanceOfficial for built-in defaults, RegistryProvenanceCustom
             for user-added registries. It is authoritatively (re)computed by the
-            registries merge from whether the ID is a shipped default — a user cannot
+            registries merge from whether the ID is a shipped default — an architect cannot
             claim "official" by writing it into their config.
           type: string
         requires_key:
@@ -1447,7 +1447,7 @@ components:
           uniqueItems: false
         skipped_scanners:
           description: |-
-            SkippedScanners lists Docker scanners the user enabled that are skipped
+            SkippedScanners lists Docker scanners the architect enabled that are skipped
             because security.deep_scan.enabled is false (informational).
           items:
             type: string
@@ -4929,7 +4929,7 @@ paths:
       security:
       - ApiKeyAuth: []
       - ApiKeyQuery: []
-      summary: Add a user-supplied registry source
+      summary: Add an architect-supplied registry source
       tags:
       - registries
   /api/v1/registries/{id}:
@@ -4978,7 +4978,7 @@ paths:
       security:
       - ApiKeyAuth: []
       - ApiKeyQuery: []
-      summary: Remove a user-added custom registry source
+      summary: Remove an architect-added custom registry source
       tags:
       - registries
     put:
@@ -5034,7 +5034,7 @@ paths:
       security:
       - ApiKeyAuth: []
       - ApiKeyQuery: []
-      summary: Edit a user-added custom registry source
+      summary: Edit an architect-added custom registry source
       tags:
       - registries
   /api/v1/registries/{id}/refresh:

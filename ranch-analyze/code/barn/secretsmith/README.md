@@ -21,7 +21,7 @@ ln -sf /home/toxic/estate/ranch/mesh/secretsmith/bin/secretsmith \
        ~/.local/bin/secretsmith
 ```
 
-`bin/secretsmith` defaults `DBUS_SESSION_BUS_ADDRESS` to the user's session bus
+`bin/secretsmith` defaults `DBUS_SESSION_BUS_ADDRESS` to the architect's session bus
 when unset.
 
 ## Usage

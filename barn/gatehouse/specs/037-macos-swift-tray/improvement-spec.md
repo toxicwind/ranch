@@ -65,7 +65,7 @@ These gaps force users to switch to the Web UI or CLI for common workflows. The 
 
 ### User Story 1 -- Server Detail View (Priority: P1)
 
-As a user, I want to click a server in the main window to see its tools, logs, and configuration, so I can inspect and manage servers without switching to the Web UI.
+As an architect, I want to click a server in the main window to see its tools, logs, and configuration, so I can inspect and manage servers without switching to the Web UI.
 
 **Why P1**: The ServersView is the main content area but is entirely read-only. Users cannot get any detail about a server beyond name, protocol badge, and health dot.
 
@@ -122,7 +122,7 @@ struct ServerLogsResponse: Codable {
 
 ### User Story 2 -- Add/Import Server Dialog (Priority: P1)
 
-As a user, I want to add a new MCP server or import existing configurations from Claude Desktop directly from the tray app, so I do not have to manually edit JSON files.
+As an architect, I want to add a new MCP server or import existing configurations from Claude Desktop directly from the tray app, so I do not have to manually edit JSON files.
 
 **Why P1**: Adding servers is the most fundamental setup action. Currently requires editing `mcp_config.json` by hand or using the Web UI.
 
@@ -202,9 +202,9 @@ struct ImportSummary: Codable {
 
 ### User Story 3 -- Tool Quarantine Approval (Priority: P1)
 
-As a user, I want to approve quarantined tools directly in the tray app without opening the Web UI, so I can unblock my AI agents quickly.
+As an architect, I want to approve quarantined tools directly in the tray app without opening the Web UI, so I can unblock my AI agents quickly.
 
-**Why P1**: Quarantine blocks tool execution. If a user adds a new server, all its tools are pending approval. The tray app currently only shows quarantined server count and an "Approve" button that unquarantines the entire server -- it does not handle tool-level quarantine (Spec 032).
+**Why P1**: Quarantine blocks tool execution. If an architect adds a new server, all its tools are pending approval. The tray app currently only shows quarantined server count and an "Approve" button that unquarantines the entire server -- it does not handle tool-level quarantine (Spec 032).
 
 **Acceptance Scenarios**:
 
@@ -239,7 +239,7 @@ struct ToolApprovalInfo: Codable {
 
 ### User Story 4 -- Server Actions in Main Window (Priority: P2)
 
-As a user, I want to enable, disable, restart, or log in to a server directly from the main window server list, so I do not have to use the tray menu submenu.
+As an architect, I want to enable, disable, restart, or log in to a server directly from the main window server list, so I do not have to use the tray menu submenu.
 
 **Why P2**: The tray menu submenus work but are hard to discover. Main window context menus are the standard macOS interaction pattern.
 
@@ -259,7 +259,7 @@ As a user, I want to enable, disable, restart, or log in to a server directly fr
 
 ### User Story 5 -- Action Feedback (Priority: P2)
 
-As a user, after I trigger an action (enable, disable, restart, login, approve), I want to see brief visual feedback confirming the action succeeded or failed.
+As an architect, after I trigger an action (enable, disable, restart, login, approve), I want to see brief visual feedback confirming the action succeeded or failed.
 
 **Why P2**: Currently actions fire silently. Users have no way to know if an action worked without checking server status.
 
@@ -282,7 +282,7 @@ As a user, after I trigger an action (enable, disable, restart, login, approve),
 
 ### User Story 6 -- Tool Search (Priority: P2)
 
-As a user, I want to search across all tools from all servers in the main window, so I can quickly find a tool without knowing which server provides it.
+As an architect, I want to search across all tools from all servers in the main window, so I can quickly find a tool without knowing which server provides it.
 
 **Why P2**: Valuable for power users with many servers. The BM25 search infrastructure already exists in the backend.
 

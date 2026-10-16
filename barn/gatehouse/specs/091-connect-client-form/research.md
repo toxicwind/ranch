@@ -16,7 +16,7 @@ Gemini tier sunset); its P1/P2 findings reshaped D1/D2/D6/D8 and added D9/D10.
   operation, so the token and the write cover the same entry. The requested
   name and client are bound too: `resolvedEntryName` is empty for every absent
   target, so without them a token minted for one entry name validated a write
-  under any other, creating a key the user never previewed. The pending entry (unmasked, as it would be
+  under any other, creating a key the architect never previewed. The pending entry (unmasked, as it would be
   written) is included so proxy-side drift (API-key rotation,
   `require_mcp_auth` toggle, listen-address change) also invalidates the token.
   Validation recomputes at write time; mismatch → discriminated 409, no write.

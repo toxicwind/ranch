@@ -7,7 +7,7 @@
 
 ## Summary
 
-Add a stable error-code catalog (`MCPX_<DOMAIN>_<SPECIFIC>`) that maps every terminal failure in mcpproxy's upstream, OAuth, Docker, config, and network paths to a code with a user-facing message, fix steps, severity, and docs URL. Surface these on the per-server diagnostics REST endpoint, in the Vue web UI (ErrorPanel), macOS tray (badge + Fix Issues menu), and CLI (`mcpproxy doctor fix`). Fixes are never auto-invoked; destructive fixes default to dry-run. Telemetry v3 gains a `diagnostics` sub-object (counters in memory only).
+Add a stable error-code catalog (`MCPX_<DOMAIN>_<SPECIFIC>`) that maps every terminal failure in mcpproxy's upstream, OAuth, Docker, config, and network paths to a code with an architect-facing message, fix steps, severity, and docs URL. Surface these on the per-server diagnostics REST endpoint, in the Vue web UI (ErrorPanel), macOS tray (badge + Fix Issues menu), and CLI (`mcpproxy doctor fix`). Fixes are never auto-invoked; destructive fixes default to dry-run. Telemetry v3 gains a `diagnostics` sub-object (counters in memory only).
 
 ## Technical Context
 

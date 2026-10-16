@@ -58,7 +58,7 @@ command discovers actors through the registry. Handle `Install` and `Remove`
 idempotently — agents with nothing to install still explain what setup
 provides and state that remove is a no-op. Do everything through the
 `SetupCliCtx` — no `println!`, no reaching into `agent::setup`; the ctx
-carries the user's flags (`full_bin_path`, `quiet`).
+carries the architect's flags (`full_bin_path`, `quiet`).
 
 | Function | Use |
 | --- | --- |
@@ -66,7 +66,7 @@ carries the user's flags (`full_bin_path`, `quiet`).
 | `ctx.step(label)` | Step label; follow with `detail` lines |
 | `ctx.detail(text)` | Dim outcome line (paths written, commands run) |
 | `ctx.message(text)` | Plain line; `""` for a blank separator |
-| `ctx.suggest_command(cmd)` | Highlighted command for the user to run next |
+| `ctx.suggest_command(cmd)` | Highlighted command for the architect to run next |
 | `ctx.require_command(program)` | Error when a provider CLI is not on PATH |
 | `ctx.run_step(label, program, args)` | Run a command; error on non-zero exit |
 | `ctx.try_step(label, program, args)` | Run a command; `Ok(false)` on failure |

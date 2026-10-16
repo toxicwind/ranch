@@ -79,7 +79,7 @@ Crate hygiene improved. Repository is ready for Task 41 (README Truth Pass).
 3. **Maintenance**: Corrected `RUNLOG.md` formatting by removing accidentally injected task fragments.
 
 ### Why
-To ensure the user-facing documentation is a perfect reflection of the system state before we layer new features.
+To ensure the architect-facing documentation is a perfect reflection of the system state before we layer new features.
 
 ### Verifiers Run
 - **CLI Help**: `./target/release/gh-search --help` → PASSED.

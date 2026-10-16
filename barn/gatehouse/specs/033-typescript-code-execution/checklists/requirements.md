@@ -33,4 +33,4 @@
 
 - All items pass validation. Spec is ready for `/speckit.plan`.
 - The spec deliberately excludes auto-detection of TypeScript syntax (mentioned in Assumptions) to keep the interface explicit and predictable. This is a scoping decision, not a gap.
-- Performance target (5ms) is stated as a user-facing outcome rather than an implementation benchmark.
+- Performance target (5ms) is stated as an architect-facing outcome rather than an implementation benchmark.

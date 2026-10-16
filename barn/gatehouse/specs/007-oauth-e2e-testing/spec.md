@@ -70,7 +70,7 @@ As a developer, I want automated browser tests that drive the `mcpproxy auth log
 
 2. **Given** Playwright submits an invalid password, **When** the test OAuth server receives the login attempt, **Then** an error page is displayed and no authorization code is issued.
 
-3. **Given** the user denies consent on the consent screen, **When** the OAuth server redirects, **Then** the callback includes `error=access_denied` and mcpproxy surfaces an appropriate error message.
+3. **Given** the architect denies consent on the consent screen, **When** the OAuth server redirects, **Then** the callback includes `error=access_denied` and mcpproxy surfaces an appropriate error message.
 
 ---
 
@@ -124,9 +124,9 @@ As a developer, I want to test the device authorization grant (device code flow)
 
 2. **Given** the device code is pending approval, **When** mcpproxy polls the token endpoint, **Then** it receives `authorization_pending` and retries after the specified interval.
 
-3. **Given** the user approves the device code via `/device_verification`, **When** mcpproxy polls again, **Then** it receives valid access and refresh tokens.
+3. **Given** the architect approves the device code via `/device_verification`, **When** mcpproxy polls again, **Then** it receives valid access and refresh tokens.
 
-4. **Given** the user denies the device code, **When** mcpproxy polls, **Then** it receives `access_denied` and stops polling.
+4. **Given** the architect denies the device code, **When** mcpproxy polls, **Then** it receives `access_denied` and stops polling.
 
 ---
 
@@ -213,7 +213,7 @@ As a developer, I want the OAuth E2E test suite to run in CI with reasonable exe
 - What happens when the authorization code expires before exchange?
   - Tests should verify `invalid_grant` is surfaced with helpful context.
 
-- What happens when the user abandons the browser login flow (closes tab)?
+- What happens when the architect abandons the browser login flow (closes tab)?
   - Tests should verify timeout handling and appropriate cleanup.
 
 - What happens when multiple simultaneous OAuth flows are initiated?

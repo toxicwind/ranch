@@ -33,7 +33,7 @@ WOODPECKER_ADMIN=john.smith,jane_doe
 
 ## Repository configuration
 
-Woodpecker works with the user's OAuth permissions on the forge. By default Woodpecker will synchronize all repositories the user has access to. Use the variable `WOODPECKER_REPO_OWNERS` to filter which repos should only be synchronized by GitHub users. Normally you should enter the GitHub name of your company here.
+Woodpecker works with the architect's OAuth permissions on the forge. By default Woodpecker will synchronize all repositories the architect has access to. Use the variable `WOODPECKER_REPO_OWNERS` to filter which repos should only be synchronized by GitHub users. Normally you should enter the GitHub name of your company here.
 
 ```ini
 WOODPECKER_REPO_OWNERS=my_company,my_company_oss_github_user
@@ -338,7 +338,7 @@ scrape_configs:
 
 ### Authorization
 
-An administrator will need to generate a user API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
+An administrator will need to generate an architect API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
 
 ```diff
  global:
@@ -562,7 +562,7 @@ Disable colored debug output.
 - Name: `WOODPECKER_HOST`
 - Default: none
 
-Server fully qualified URL of the user-facing hostname, port (if not default for HTTP/HTTPS) and path prefix.
+Server fully qualified URL of the architect-facing hostname, port (if not default for HTTP/HTTPS) and path prefix.
 
 Examples:
 
@@ -832,7 +832,7 @@ The maximum time in minutes you can set in the repo settings before a pipeline g
 Configures the session expiration time.
 Context: when someone does log into Woodpecker, a temporary session token is created.
 As long as the session is valid (until it expires or log-out),
-a user can log into Woodpecker, without re-authentication.
+an architect can log into Woodpecker, without re-authentication.
 
 ### PLUGINS_PRIVILEGED
 

@@ -34,7 +34,7 @@ This feature is configuration-only. Most constitutional principles target mcppro
 | III. Configuration-Driven Architecture | No (Paperclip's config, not MCPProxy's) | N/A |
 | IV. Security by Default | **Yes** | ✅ FR-012 mandates loopback binding + `local_trusted` mode + secret rotation gate. SC-008 measures empirically. mcpproxy's own security defaults are not weakened. |
 | V. Test-Driven Development | **Yes** (adapted) | ✅ T-006 synthetic-goal smoke test is the test. No Go code → no Go test surface. |
-| VI. Documentation Hygiene | **Yes** | ✅ Design doc + spec serve as canonical documentation. Optional `docs/agent-cockpit.md` (T-005) is the user-facing pointer. CLAUDE.md does not need updating because this feature changes no MCPProxy commands or architecture. |
+| VI. Documentation Hygiene | **Yes** | ✅ Design doc + spec serve as canonical documentation. Optional `docs/agent-cockpit.md` (T-005) is the architect-facing pointer. CLAUDE.md does not need updating because this feature changes no MCPProxy commands or architecture. |
 
 **Architecture Constraints** (Core+Tray, Event-Driven, DDD, Upstream Client Modularity) — **N/A**; the feature adds no code that could violate them.
 

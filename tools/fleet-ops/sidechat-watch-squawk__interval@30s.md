@@ -48,11 +48,11 @@ the (agent_id, seq) index and time out as full table scans under load
    If this returns 0 rows, that is a COMPLETE check: no recent user/assistant
    turns exist. Stay silent and report nothing. Do not retry, broaden, or run
    additional queries — an empty result is the answer, not an error.
-3. Identify role=user messages from Chris in that window with NO substantive
+3. Identify role=user messages from the Architect in that window with NO substantive
    assistant reply after them. Substantive means the agent actually addressed the
    request. A canned refusal ("Sorry, I can't help you...") does NOT count.
 4. If every recent user message already has a substantive reply: stay silent,
    report nothing.
-5. If you find an unhandled user message: report concisely — the user's message
+5. If you find an unhandled user message: report concisely — the architect's message
    verbatim, when it was sent, what the agent replied (if anything), and a
-   one-paragraph assessment of what Chris needs. Report only — take no other action.
+   one-paragraph assessment of what the Architect needs. Report only — take no other action.

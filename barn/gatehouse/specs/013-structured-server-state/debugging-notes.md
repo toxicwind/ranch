@@ -357,7 +357,7 @@ connected=true: 8
 enabled + healthy: 13
 ```
 
-**Conclusion:** The HTTP API `/api/v1/servers` IS returning the health field correctly. The problem was confirmed to be in the tray's API client layer, specifically that the previous fix to extract health from the JSON was not being compiled into the binary the user was running.
+**Conclusion:** The HTTP API `/api/v1/servers` IS returning the health field correctly. The problem was confirmed to be in the tray's API client layer, specifically that the previous fix to extract health from the JSON was not being compiled into the binary the architect was running.
 
 ### Debug Logging Added
 

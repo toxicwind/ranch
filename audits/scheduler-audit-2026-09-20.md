@@ -18,11 +18,11 @@
 - **The three reported timestamps** (`01:37:41`, `02:36:28`, `03:15:12 MDT`) have **no matching suspend broadcast in any preserved record**. They correlate to the second with overnight scheduler/watchdog events during three real incidents (bridge outage, canary rollback, bridge 401s) — the lane going down, not the box going to sleep.
 - **Correction:** the fleet message claiming "the box suspended 3x overnight" (fleet seq 10697, 2026-09-20 08:20:49 MDT, from ember) is **retracted** — it was an unverified causal claim, contradicted by the monotonic-clock test.
 - **Correction:** the four sleep-target masks (`sleep`/`suspend`/`hibernate`/`hybrid-sleep`) were **not** installed this morning in response to the incident. They date to **2026-03-29 20:40** — six months of prior hardening. They are exactly what turned the 00:44:53 suspend initiation into a harmless broadcast. **Recommendation: keep them.**
-- **Likely reconstruction:** Chris saw (or sat near) the genuine 00:44:53 wall broadcast during the night's bridge work; the three later timestamps mark when the *lane* dropped during three distinct overnight incidents. An earlier agent conflated "lane down 3x" with "box suspended 3x".
+- **Likely reconstruction:** the Architect saw (or sat near) the genuine 00:44:53 wall broadcast during the night's bridge work; the three later timestamps mark when the *lane* dropped during three distinct overnight incidents. An earlier agent conflated "lane down 3x" with "box suspended 3x".
 
 ---
 
-## 1. What Chris actually saw
+## 1. What the Architect actually saw
 
 ### 1.1 The one verified suspend notice
 
@@ -176,7 +176,7 @@ None of these jobs emits terminal wall broadcasts on yote — they are hatch-sid
 | H4 | Another host/app notification mistaken for yote-local | Persistent SSH sessions from 10.0.0.77; Tailscale/Funnel in play | No evidence for any specific source | **Plausible, unproven** |
 | H5 | The box actually suspended 3x | — (none) | Monotonic-clock deficit 1 s; unbroken SSH sessions; masked targets; no PM traces | **Disproven** |
 
-**Do not invent Chris's intended word.** The safest statement: the three timestamps mark *observed lane-down episodes*, and the one verified "suspend notice" was a real-but-refused suspend initiation at 00:44:53.
+**Do not invent the Architect's intended word.** The safest statement: the three timestamps mark *observed lane-down episodes*, and the one verified "suspend notice" was a real-but-refused suspend initiation at 00:44:53.
 
 ---
 
@@ -192,11 +192,11 @@ None of these jobs emits terminal wall broadcasts on yote — they are hatch-sid
 
 ## 8. Recommendations
 
-1. **Retract the "suspended 3x" claim** in fleet (done in this audit; point Chris here, not at the 08:20:49 message).
+1. **Retract the "suspended 3x" claim** in fleet (done in this audit; point the Architect here, not at the 08:20:49 message).
 2. **Keep the four sleep-target masks.** They demonstrably saved the box at 00:44:53.
 3. **Add a suspend-canary:** monitor the four mask symlinks + watch for `PM: suspend entry` in the kernel log; alert on change. Cheap, decisive, ends future debates before they start.
 4. **Fix the journal rotation pressure:** the `nft-drop` LOG spam is flooding both the kernel ring buffer and the persistent journal (≈43.7 MB, hours of retention). Rate-limit the nft log rule or move it to a separate log — tonight's forensics were needlessly hamstrung by a rotated-away evidence window.
-5. **Note the 00:44:53 console initiation for Chris:** something on the physical console (`tty1`) invoked suspend at 00:44:53. If that wasn't Chris, find out what it was (hypridle holds a sleep *delay* inhibitor and manages idle sleep on the Hyprland session — worth one look at its config).
+5. **Note the 00:44:53 console initiation for the Architect:** something on the physical console (`tty1`) invoked suspend at 00:44:53. If that wasn't the Architect, find out what it was (hypridle holds a sleep *delay* inhibitor and manages idle sleep on the Hyprland session — worth one look at its config).
 6. **No scheduler changes needed.** No yote timer, cron, or at job is implicated; hatch schedules are behaving as designed.
 
 ---

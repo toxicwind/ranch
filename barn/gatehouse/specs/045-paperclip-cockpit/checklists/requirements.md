@@ -31,7 +31,7 @@
 
 ## Notes
 
-- This spec is intentionally minimal per the user's preference (option C from brainstorming). The full design lives in `docs/superpowers/specs/2026-04-25-paperclip-goal-cockpit-design.md`. Reviewers should read the design doc before judging completeness — many "missing details" in this spec are present there by design.
+- This spec is intentionally minimal per the architect's preference (option C from brainstorming). The full design lives in `docs/superpowers/specs/2026-04-25-paperclip-goal-cockpit-design.md`. Reviewers should read the design doc before judging completeness — many "missing details" in this spec are present there by design.
 - The "≥3 file areas" routing rule (FR-004) is acknowledged as fuzzy. The design doc flags this; SC-002 measures it empirically over the first 5 goals.
 - The spec acknowledges that most implementation lives outside the mcpproxy-go repo. This is unusual for a speckit spec but reflects the feature's actual nature.
 - Items marked incomplete require spec updates before `/speckit.clarify` or `/speckit.plan`. All items currently pass.

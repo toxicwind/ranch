@@ -34,7 +34,7 @@ flowchart TD
 |---|---|
 | [`bin/`](bin/README.md) | `monkeypatch-detect.sh`, `fleet-health.sh`, `sudo-audit.sh`, `missing-files.sh`, `port-audit.sh`, `bg-launch`/`bg-register`/`bg-heartbeat`/`bg-audit`/`bg-kill` — permanent, runnable anytime on yote |
 | [`bg-tracker/`](bg-tracker/README.md) | Background-task registry: who/what/why/pid in a durable per-box registry; read-only audit classifies every detached proc; event-driven, no polling |
-| [`dispatcher/`](dispatcher/README.md) | **Canonical** fleet dispatcher/ledger: mission/coordinator/worker/relay ID issuance, lifecycle + result tracking, direct-Chris precedence, duplicate-admission locks, append-only hash-chained relay records, exactly-four audit lanes |
+| [`dispatcher/`](dispatcher/README.md) | **Canonical** fleet dispatcher/ledger: mission/coordinator/worker/relay ID issuance, lifecycle + result tracking, direct-the Architect precedence, duplicate-admission locks, append-only hash-chained relay records, exactly-four audit lanes |
 | [`stall-detect/`](stall-detect/README.md) | DB-forensics stall detection: executions, tool calls, transcripts, mailbox, recovery ownership — with the executable error-claim runbook |
 
 ## Quick start
@@ -50,7 +50,7 @@ projects/ops/bin/fleet-health.sh         # one-shot fleet health audit (read-onl
 - [MIT](https://github.com/toxicwind/estate-scripts-projects#license).
 - Auditors here are strictly read-only — they never modify, kill, or restart anything. The kill policy: positive orphan confirmation + a fleet evidence note at kill time; when in doubt, leave it running and flag it.
 
-## Standing rules (Chris, 2026-09-20)
+## Standing rules (the Architect, 2026-09-20)
 
 **No monkeypatching. Permanence rule.** Every fix lives in real files — code, configs, systemd units — committed in the correct repo, and must survive a full bridge restart and a full yote reboot. The script is the deliverable; running it once is just proof.
 

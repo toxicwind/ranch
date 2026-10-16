@@ -50,7 +50,7 @@ Main mobile app crate. Owns GPUI application flow, workspace orchestration, plat
 
 - `WorkspaceTerminal` is the seam between app-level terminal management and `zedra-terminal`. Keep terminal attach, resize, title updates, and active-input registration aligned there.
 - If you change connection or sync behavior, verify the interaction among `Workspace`, `Workspaces`, `SessionState`, and `WorkspaceState::sync_from_session`.
-- Keep lifecycle helpers aligned with their names. Entry points that own the user action own policy checks (dedupe, reconnect, stale cleanup); lower-level create/connect/initialize helpers must not also switch entries, disconnect existing state, or hide caller contracts.
+- Keep lifecycle helpers aligned with their names. Entry points that own the architect action own policy checks (dedupe, reconnect, stale cleanup); lower-level create/connect/initialize helpers must not also switch entries, disconnect existing state, or hide caller contracts.
 - For workspace reconnect and duplicate-entry handling, treat `Connected`, `Idle`, and in-flight connecting phases as active entries to switch to. Only `Failed` or `Disconnected` entries are stale reconnect candidates.
 - Saved workspace persistence is intentionally lightweight JSON under the app data directory. Do not mix transient UI state into the persisted model.
 

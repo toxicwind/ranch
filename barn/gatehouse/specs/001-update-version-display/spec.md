@@ -17,10 +17,10 @@ A user wants to quickly verify which version of MCPProxy they are running across
 
 **Acceptance Scenarios**:
 
-1. **Given** the tray application is running, **When** the user opens the tray menu, **Then** they see the current version number (e.g., "MCPProxy v1.2.3") displayed as a menu item
-2. **Given** the Web Control Panel is open, **When** the user views the interface, **Then** the server version is visible without requiring navigation (e.g., in header, footer, or sidebar)
-3. **Given** the user runs `mcpproxy doctor`, **When** the command outputs results, **Then** the current version is displayed in the output
-4. **Given** a development/debug build, **When** the user views the version anywhere, **Then** it shows "development" or the appropriate build identifier
+1. **Given** the tray application is running, **When** the architect opens the tray menu, **Then** they see the current version number (e.g., "MCPProxy v1.2.3") displayed as a menu item
+2. **Given** the Web Control Panel is open, **When** the architect views the interface, **Then** the server version is visible without requiring navigation (e.g., in header, footer, or sidebar)
+3. **Given** the architect runs `mcpproxy doctor`, **When** the command outputs results, **Then** the current version is displayed in the output
+4. **Given** a development/debug build, **When** the architect views the version anywhere, **Then** it shows "development" or the appropriate build identifier
 
 ---
 
@@ -37,7 +37,7 @@ The MCPProxy core server automatically checks for new GitHub releases in the bac
 1. **Given** the core server starts, **When** initialization completes, **Then** it performs an initial check for new GitHub releases
 2. **Given** the core server is running, **When** 4 hours have elapsed since last check, **Then** it automatically checks GitHub for new releases
 3. **Given** a newer version exists on GitHub, **When** the REST API version endpoint is queried, **Then** it returns both current version and latest available version with release URL
-4. **Given** the user is running the latest version, **When** the REST API version endpoint is queried, **Then** it indicates no update is available
+4. **Given** the architect is running the latest version, **When** the REST API version endpoint is queried, **Then** it indicates no update is available
 5. **Given** the GitHub API is unreachable, **When** a background check fails, **Then** the last known state is preserved and error is logged (not surfaced to user)
 
 ---
@@ -52,9 +52,9 @@ When the core detects a new version is available, a "New version available" menu
 
 **Acceptance Scenarios**:
 
-1. **Given** no update is available, **When** the user opens the tray menu, **Then** no update-related menu item is shown (no "Check for Updates...")
-2. **Given** an update is available (v1.3.0), **When** the user opens the tray menu, **Then** they see "New version available (v1.3.0)" menu item
-3. **Given** "New version available" is shown, **When** the user clicks it, **Then** their default browser opens to the GitHub releases page for that version
+1. **Given** no update is available, **When** the architect opens the tray menu, **Then** no update-related menu item is shown (no "Check for Updates...")
+2. **Given** an update is available (v1.3.0), **When** the architect opens the tray menu, **Then** they see "New version available (v1.3.0)" menu item
+3. **Given** "New version available" is shown, **When** the architect clicks it, **Then** their default browser opens to the GitHub releases page for that version
 4. **Given** Homebrew installation is detected, **When** update is available and user clicks menu item, **Then** a message suggests using `brew upgrade mcpproxy` instead of opening browser
 
 ---
@@ -69,10 +69,10 @@ When an update is available, the Web Control Panel displays a non-intrusive noti
 
 **Acceptance Scenarios**:
 
-1. **Given** no update is available, **When** the user views the Web Control Panel, **Then** no update notification is displayed
-2. **Given** an update is available (v1.3.0), **When** the user views the Web Control Panel, **Then** they see a notification banner (e.g., "Update available: v1.3.0")
-3. **Given** update notification is displayed, **When** the user clicks on it or an associated link, **Then** they are directed to the GitHub releases page
-4. **Given** update notification is displayed, **When** the user dismisses it, **Then** it remains dismissed for that session but reappears on next visit
+1. **Given** no update is available, **When** the architect views the Web Control Panel, **Then** no update notification is displayed
+2. **Given** an update is available (v1.3.0), **When** the architect views the Web Control Panel, **Then** they see a notification banner (e.g., "Update available: v1.3.0")
+3. **Given** update notification is displayed, **When** the architect clicks on it or an associated link, **Then** they are directed to the GitHub releases page
+4. **Given** update notification is displayed, **When** the architect dismisses it, **Then** it remains dismissed for that session but reappears on next visit
 
 ---
 
@@ -86,15 +86,15 @@ When running `mcpproxy doctor`, the output includes the current version and indi
 
 **Acceptance Scenarios**:
 
-1. **Given** no update is available, **When** the user runs `mcpproxy doctor`, **Then** output shows "Version: v1.2.3 (latest)"
-2. **Given** an update is available (v1.3.0), **When** the user runs `mcpproxy doctor`, **Then** output shows "Version: v1.2.3 (update available: v1.3.0)" with GitHub release URL
-3. **Given** update check has not completed or failed, **When** the user runs `mcpproxy doctor`, **Then** output shows "Version: v1.2.3" without update status
+1. **Given** no update is available, **When** the architect runs `mcpproxy doctor`, **Then** output shows "Version: v1.2.3 (latest)"
+2. **Given** an update is available (v1.3.0), **When** the architect runs `mcpproxy doctor`, **Then** output shows "Version: v1.2.3 (update available: v1.3.0)" with GitHub release URL
+3. **Given** update check has not completed or failed, **When** the architect runs `mcpproxy doctor`, **Then** output shows "Version: v1.2.3" without update status
 
 ---
 
 ### User Story 6 - Download New Version via GitHub Releases (Priority: P3)
 
-When a user decides to update, they can easily access the GitHub releases page to download the appropriate version for their platform.
+When an architect decides to update, they can easily access the GitHub releases page to download the appropriate version for their platform.
 
 **Why this priority**: While the system doesn't auto-update, providing a direct path to downloads reduces friction for users who want to update.
 
@@ -102,9 +102,9 @@ When a user decides to update, they can easily access the GitHub releases page t
 
 **Acceptance Scenarios**:
 
-1. **Given** an update notification is shown (any interface), **When** the user clicks the action to download, **Then** their default browser opens to `https://github.com/smart-mcp-proxy/mcpproxy-go/releases/tag/vX.Y.Z`
-2. **Given** the user is on macOS with Homebrew installation detected, **When** they interact with update notification, **Then** they see guidance to use `brew upgrade mcpproxy`
-3. **Given** the user is on Windows, **When** they access the releases page, **Then** they can find Windows-specific download assets
+1. **Given** an update notification is shown (any interface), **When** the architect clicks the action to download, **Then** their default browser opens to `https://github.com/smart-mcp-proxy/mcpproxy-go/releases/tag/vX.Y.Z`
+2. **Given** the architect is on macOS with Homebrew installation detected, **When** they interact with update notification, **Then** they see guidance to use `brew upgrade mcpproxy`
+3. **Given** the architect is on Windows, **When** they access the releases page, **Then** they can find Windows-specific download assets
 
 ---
 

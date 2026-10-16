@@ -38,7 +38,7 @@ Run on the built app (`scripts/build-swift-app.sh`) against a dev core
 
 ## Results (executed)
 
-**Status: RUN 2026-08-01 06:22–06:40** — macOS 26 / Darwin 25.5.0; app built from this branch (+ `MCPPROXY_SOCKET_PATH` override), isolated core `:18091` at `/tmp/mp91` with **`HOME=/tmp/mpqa-home`** so the user's real client configs were never touched. Seeded: cursor (entry present, stale port + secret header), windsurf (config, no entry), vscode (malformed JSON), gemini (user-authored entry with `user:pass@…?apikey=` URL), claude-code/codex/opencode (absent).
+**Status: RUN 2026-08-01 06:22–06:40** — macOS 26 / Darwin 25.5.0; app built from this branch (+ `MCPPROXY_SOCKET_PATH` override), isolated core `:18091` at `/tmp/mp91` with **`HOME=/tmp/mpqa-home`** so the architect's real client configs were never touched. Seeded: cursor (entry present, stale port + secret header), windsurf (config, no entry), vscode (malformed JSON), gemini (user-authored entry with `user:pass@…?apikey=` URL), claude-code/codex/opencode (absent).
 
 | # | Check | Result | Evidence |
 |---|-------|--------|----------|

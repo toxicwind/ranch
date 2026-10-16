@@ -29,7 +29,7 @@ is the control plane. Both live here, built and versioned together.
   Chromium if it dies.
 - `keeper.sh` — pitchfork launcher for the isolated display: unsets
   `WAYLAND_DISPLAY`, sets `DISPLAY=:99`, execs keeper.cjs (Forge 2026-09-21
-  — the keeper never renders in Chris's Hyprland session).
+  — the keeper never renders in the Architect's Hyprland session).
 - `pitchfork.fragment.toml` — merge into `[daemons.browser-keeper]` in
   `/home/toxic/estate/pitchfork.toml` (owned sequence from
   `/home/toxic/estate`).
@@ -146,16 +146,16 @@ Quickshell reloads the config live.
 ## Agent display + interactive viewer (Forge 2026-09-21)
 
 The keeper Chromium renders on an **isolated virtual display** — never in
-Chris's Hyprland session. (Root cause of the 2026-09-21 takeover: keeper.sh
+the Architect's Hyprland session. (Root cause of the 2026-09-21 takeover: keeper.sh
 exported `WAYLAND_DISPLAY=wayland-1`, so agent windows stole his mouse and
 focus.)
 
 - `agent-display` — `Xvnc :99`, RFB on `127.0.0.1:5900` only (`-localhost`),
-  VNC password auth via `/home/toxic/.browserless/vncpasswd` (0600, Chris's —
+  VNC password auth via `/home/toxic/.browserless/vncpasswd` (0600, the Architect's —
   never rotated, never stored anywhere else).
 - `agent-viewer` — websockify serving stock noVNC on **`127.0.0.1:6080`
   (loopback-only)**. The viewer is **INTERACTIVE**: noVNC defaults
-  `view_only=false`, so Chris can click, type, and take over the
+  `view_only=false`, so the Architect can click, type, and take over the
   agent browser.
 - External route (2026-09-21, Forge): tailnet-only via `tailscale serve`
   on `:8443` — `/agent-browser` -> `127.0.0.1:6080`. No funnel, no token gate.

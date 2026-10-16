@@ -263,7 +263,7 @@ Types that use non-string status fields or enum variants instead:
 ### FsDocsTree conventions
 
 - `rebuild = true` scans the requested directory, replaces the per-session in-memory docs-tree snapshot, and returns page 0.
-- `rebuild = false` serves a page from the matching `snapshot_id`; `CacheMiss` or `StaleSnapshot` means the client should ask the user to rebuild.
+- `rebuild = false` serves a page from the matching `snapshot_id`; `CacheMiss` or `StaleSnapshot` means the client should ask the architect to rebuild.
 - The host detects markdown files with case-insensitive `.md` and `.markdown` extensions only.
 - The host combines gitignore matching with built-in fallback ignores for dot-prefixed, generated, dependency, and build directories, and never follows symlink directories.
 - Limits: default page size `200`, max page size `1_000`, max offset `5_000`, max visited entries per rebuild `10_000`.

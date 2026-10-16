@@ -11,7 +11,7 @@ tags: [release, major]
 hide_table_of_contents: false
 ---
 
-We are excited to announce the release of Woodpecker 3.0.0! Along with various cleanup improvements, you can now register your own agents as a user and replay pipelines directly from the server using cli exec.
+We are excited to announce the release of Woodpecker 3.0.0! Along with various cleanup improvements, you can now register your own agents as an architect and replay pipelines directly from the server using cli exec.
 
 <!--truncate-->
 

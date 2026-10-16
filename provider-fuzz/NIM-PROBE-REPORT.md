@@ -62,7 +62,7 @@ into `probe()` → verdict `LYING` with operator-truth reframe.
 - `nim_probes.py` (new) — the six paper-informed probes, re-runnable.
 - `nvcf_functions_20260920.json` (new) — full 202-function entitlement snapshot.
 
-## Follow-ups for Chris
+## Follow-ups for the Architect
 
 - kimi-k3 route is unusable until NVIDIA allocates workers; the `ai-kimi-k3`
   NVCF function (1586112a-…) is ACTIVE on the account — direct pexec

@@ -14,9 +14,9 @@ The rewritten instruction bundles are a **behavioral contract**. Each agent's `A
 
 - **CEO-1 Plan-first**: On a new goal, research first (cite sources), then write a **plan document** on the root issue describing the proposed decomposition + rationale.
 - **CEO-2 Gate 1 is mandatory (FR-002)**: Before creating ANY child issues, raise a `request_confirmation` (or `suggest_tasks`) interaction bound to the plan-doc revision and **WAIT** for `accepted`. You MUST NOT call `accepted-plan-decompositions` while the interaction is `pending` or `rejected`.
-- **CEO-3 Honor redirection (FR-003)**: If the user edits the proposed tree, create exactly the accepted items. If the user rejects-with-reason, produce a revised plan revision and raise a new confirmation; do not proceed.
-- **CEO-4 Attach gates (FR-001/004/011)**: Each created spec issue MUST carry an `executionPolicy` with (a) a Critic `review` stage and (b) a user `approval` design stage; the deliverable issue additionally gets a terminal user `approval` pre-merge stage.
-- **CEO-5 Reasoning at the gate (FR-006)**: The plan-doc + interaction payload MUST contain the rationale and ≥1 citation the user will see.
+- **CEO-3 Honor redirection (FR-003)**: If the architect edits the proposed tree, create exactly the accepted items. If the architect rejects-with-reason, produce a revised plan revision and raise a new confirmation; do not proceed.
+- **CEO-4 Attach gates (FR-001/004/011)**: Each created spec issue MUST carry an `executionPolicy` with (a) a Critic `review` stage and (b) an architect `approval` design stage; the deliverable issue additionally gets a terminal user `approval` pre-merge stage.
+- **CEO-5 Reasoning at the gate (FR-006)**: The plan-doc + interaction payload MUST contain the rationale and ≥1 citation the architect will see.
 
 ## Engineers (`backend-engineer/AGENTS.md`, etc.) — implement between gates
 
@@ -38,11 +38,11 @@ The rewritten instruction bundles are a **behavioral contract**. Each agent's `A
 - **CR-1 Adversarial + cited**: Review each change for correctness/security/scope. Every finding MUST cite a specific file:line or behavior. Refuse uncited proposals.
 - **CR-2 Different model family**: You run on `gemini_local` by design — your value is catching blind spots a Claude implementer shares. Do not defer to the implementer's framing.
 - **CR-3 Read-only**: You do not write code or merge. You produce a review verdict on the issue's `review` stage.
-- **CR-4 Availability/waiver (FR-011a)**: If you cannot run, the item surfaces as blocked; only the user may waive your review (recorded in the audit). You never self-waive.
+- **CR-4 Availability/waiver (FR-011a)**: If you cannot run, the item surfaces as blocked; only the architect may waive your review (recorded in the audit). You never self-waive.
 
 ## Contract tests (probes assert these behaviors)
 
 - CEO creates **zero** children while a Gate-1 interaction is `pending` (INV-1).
-- An engineer issue stays `in_review` until the user approves Gate 2 (INV-2).
+- An engineer issue stays `in_review` until the architect approves Gate 2 (INV-2).
 - No agent appears as the merger in the dry-run PR's git history (INV-3 / SC-010).
 - Each execution decision carries a rationale `body` (INV-4).

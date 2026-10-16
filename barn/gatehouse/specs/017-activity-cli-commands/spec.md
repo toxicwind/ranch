@@ -17,9 +17,9 @@ Users and AI agents need to query activity history from the command line to unde
 
 **Acceptance Scenarios**:
 
-1. **Given** 10 tool calls have been made, **When** a user runs `mcpproxy activity list`, **Then** a formatted table shows recent activities with timestamp, type, server, tool, and status
-2. **Given** tool calls from multiple servers exist, **When** a user runs `mcpproxy activity list --server github`, **Then** only activities for the "github" server are shown
-3. **Given** many activities exist, **When** a user runs `mcpproxy activity list --limit 5`, **Then** only the 5 most recent activities are shown
+1. **Given** 10 tool calls have been made, **When** an architect runs `mcpproxy activity list`, **Then** a formatted table shows recent activities with timestamp, type, server, tool, and status
+2. **Given** tool calls from multiple servers exist, **When** an architect runs `mcpproxy activity list --server github`, **Then** only activities for the "github" server are shown
+3. **Given** many activities exist, **When** an architect runs `mcpproxy activity list --limit 5`, **Then** only the 5 most recent activities are shown
 4. **Given** an AI agent needs machine-readable output, **When** it runs `mcpproxy activity list -o json`, **Then** valid JSON array of activities is returned
 
 ---
@@ -36,7 +36,7 @@ Users monitoring agent behavior in real-time need a `tail -f` style command that
 
 1. **Given** the watch command is running, **When** a tool call is made, **Then** the activity appears in the output immediately
 2. **Given** the watch command is running with `--server github`, **When** tool calls are made to different servers, **Then** only github server activities are shown
-3. **Given** the watch command is running, **When** the user presses Ctrl+C, **Then** the command exits cleanly
+3. **Given** the watch command is running, **When** the architect presses Ctrl+C, **Then** the command exits cleanly
 
 ---
 
@@ -50,8 +50,8 @@ Users investigating a specific tool call need to view its full details including
 
 **Acceptance Scenarios**:
 
-1. **Given** an activity ID from the list command, **When** a user runs `mcpproxy activity show act_abc123`, **Then** full details including arguments and response are displayed
-2. **Given** an invalid activity ID, **When** a user runs `mcpproxy activity show unknown`, **Then** a clear error message is shown
+1. **Given** an activity ID from the list command, **When** an architect runs `mcpproxy activity show act_abc123`, **Then** full details including arguments and response are displayed
+2. **Given** an invalid activity ID, **When** an architect runs `mcpproxy activity show unknown`, **Then** a clear error message is shown
 
 ---
 
@@ -65,8 +65,8 @@ Users need a quick overview of activity statistics for a time period to understa
 
 **Acceptance Scenarios**:
 
-1. **Given** activities exist for the past 24 hours, **When** a user runs `mcpproxy activity summary`, **Then** statistics showing total calls, success rate, and top servers are displayed
-2. **Given** a user wants weekly summary, **When** they run `mcpproxy activity summary --period 7d`, **Then** the summary covers the last 7 days
+1. **Given** activities exist for the past 24 hours, **When** an architect runs `mcpproxy activity summary`, **Then** statistics showing total calls, success rate, and top servers are displayed
+2. **Given** an architect wants weekly summary, **When** they run `mcpproxy activity summary --period 7d`, **Then** the summary covers the last 7 days
 
 ---
 
@@ -80,8 +80,8 @@ Enterprise users need to export activity logs to files for compliance and audit 
 
 **Acceptance Scenarios**:
 
-1. **Given** activities exist, **When** a user runs `mcpproxy activity export --output activity.json`, **Then** a JSON file with all matching activities is created
-2. **Given** activities exist, **When** a user runs `mcpproxy activity export -o csv --output activity.csv`, **Then** a CSV file is created
+1. **Given** activities exist, **When** an architect runs `mcpproxy activity export --output activity.json`, **Then** a JSON file with all matching activities is created
+2. **Given** activities exist, **When** an architect runs `mcpproxy activity export -o csv --output activity.csv`, **Then** a CSV file is created
 
 ---
 

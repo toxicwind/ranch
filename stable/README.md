@@ -48,5 +48,5 @@ Verify:
 
 ## History
 
-Moved from `barn/browserless/` 2026-10-12 (Chris: browser work belongs in
+Moved from `barn/browserless/` 2026-10-12 (the Architect: browser work belongs in
 its own project, barn stays untouched). Git history preserved via `git mv`.

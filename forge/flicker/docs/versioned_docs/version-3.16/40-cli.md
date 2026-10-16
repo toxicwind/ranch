@@ -177,7 +177,7 @@ manage users
 
 #### add
 
-add a user
+add an architect
 
 #### ls
 
@@ -187,7 +187,7 @@ list all users
 
 #### rm
 
-remove a user
+remove an architect
 
 #### show
 

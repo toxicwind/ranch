@@ -52,16 +52,16 @@ As a system administrator, I want to see all configuration changes in the activi
 
 **Acceptance Scenarios**:
 
-1. **Given** a user adds a new upstream server, **When** the server is added, **Then** a `config_change` activity record is created with action `server_added`, server name, and configuration summary
-2. **Given** a user removes an upstream server, **When** the server is removed, **Then** a `config_change` activity record is created with action `server_removed` and server name
-3. **Given** a user updates server settings, **When** the update is applied, **Then** a `config_change` activity record is created with action `server_updated`, server name, and changed fields
-4. **Given** a user changes global settings, **When** the settings are saved, **Then** a `config_change` activity record is created with the changed settings
+1. **Given** an architect adds a new upstream server, **When** the server is added, **Then** a `config_change` activity record is created with action `server_added`, server name, and configuration summary
+2. **Given** an architect removes an upstream server, **When** the server is removed, **Then** a `config_change` activity record is created with action `server_removed` and server name
+3. **Given** an architect updates server settings, **When** the update is applied, **Then** a `config_change` activity record is created with action `server_updated`, server name, and changed fields
+4. **Given** an architect changes global settings, **When** the settings are saved, **Then** a `config_change` activity record is created with the changed settings
 
 ---
 
 ### User Story 4 - Filter Activity by Multiple Event Types (Priority: P2)
 
-As a user, I want to filter activity records by multiple event types simultaneously using a multi-select dropdown in the Web UI so that I can focus on specific types of events while excluding others.
+As an architect, I want to filter activity records by multiple event types simultaneously using a multi-select dropdown in the Web UI so that I can focus on specific types of events while excluding others.
 
 **Why this priority**: Multi-select filtering significantly improves usability when investigating issues that involve multiple related event types. Essential for effective log analysis.
 
@@ -95,7 +95,7 @@ As an AI agent developer, I want to see the LLM's declared intent in a dedicated
 
 ### User Story 6 - Sort Activity Table Columns (Priority: P2)
 
-As a user, I want to sort the activity table by clicking column headers so that I can organize data by time, type, server, or status based on my current analysis needs.
+As an architect, I want to sort the activity table by clicking column headers so that I can organize data by time, type, server, or status based on my current analysis needs.
 
 **Why this priority**: Sortable columns are a standard UX expectation for data tables. Sorting by different columns helps users find patterns and anomalies quickly.
 
@@ -113,7 +113,7 @@ As a user, I want to sort the activity table by clicking column headers so that 
 
 ### User Story 7 - View Colored JSON in Activity Details (Priority: P2)
 
-As a user, I want to see input parameters and response data displayed as syntax-highlighted, colored JSON in the activity detail panel so that I can easily read and understand the data structure.
+As an architect, I want to see input parameters and response data displayed as syntax-highlighted, colored JSON in the activity detail panel so that I can easily read and understand the data structure.
 
 **Why this priority**: Syntax highlighting significantly improves readability of JSON data, making it faster to identify keys, values, and structure. This is essential for debugging complex tool calls.
 
@@ -130,7 +130,7 @@ As a user, I want to see input parameters and response data displayed as syntax-
 
 ### User Story 8 - Access Activity Log from Web UI Menu (Priority: P2)
 
-As a user, I want to access the Activity Log from the main navigation menu in the Web UI so that I can easily navigate to it without knowing the direct URL.
+As an architect, I want to access the Activity Log from the main navigation menu in the Web UI so that I can easily navigate to it without knowing the direct URL.
 
 **Why this priority**: Navigation accessibility is fundamental UX. Users expect all features to be discoverable from the main menu.
 
@@ -162,7 +162,7 @@ As a CLI user, I want to filter activity records by event types using the `mcppr
 
 ### User Story 10 - Updated Documentation (Priority: P3)
 
-As a user or developer, I want to read updated documentation about the expanded Activity Log features so that I can understand and use all new event types, filters, and UI enhancements.
+As an architect or developer, I want to read updated documentation about the expanded Activity Log features so that I can understand and use all new event types, filters, and UI enhancements.
 
 **Why this priority**: Documentation ensures users can discover and use new features effectively. Essential for adoption but can follow implementation.
 

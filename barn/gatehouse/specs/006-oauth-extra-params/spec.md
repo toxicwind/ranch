@@ -21,7 +21,7 @@ A developer needs to connect MCPProxy to a Runlayer-hosted MCP server (e.g., Sla
 
 **Acceptance Scenarios**:
 
-1. **Given** a Runlayer MCP server configuration with OAuth enabled and `extra_params.resource` set to the MCP endpoint URL, **When** the user runs `mcpproxy auth login --server=slack`, **Then** the OAuth authorization URL includes the `resource` query parameter and authentication completes successfully
+1. **Given** a Runlayer MCP server configuration with OAuth enabled and `extra_params.resource` set to the MCP endpoint URL, **When** the architect runs `mcpproxy auth login --server=slack`, **Then** the OAuth authorization URL includes the `resource` query parameter and authentication completes successfully
 2. **Given** an OAuth provider that requires custom parameters, **When** the authorization flow is initiated, **Then** all configured extra_params are appended to the authorization URL without overriding standard OAuth 2.0 parameters
 3. **Given** a successfully authenticated session with extra_params, **When** the access token expires and refresh is attempted, **Then** the extra_params are included in the token refresh request
 
@@ -37,7 +37,7 @@ A developer needs to add OAuth extra parameters to their server configuration wi
 
 **Acceptance Scenarios**:
 
-1. **Given** a server configuration file, **When** a user adds `"extra_params": {"resource": "https://example.com/mcp"}` under the `oauth` section, **Then** the configuration loads without errors and the parameters are available for OAuth flows
+1. **Given** a server configuration file, **When** an architect adds `"extra_params": {"resource": "https://example.com/mcp"}` under the `oauth` section, **Then** the configuration loads without errors and the parameters are available for OAuth flows
 2. **Given** a configuration with extra_params containing a reserved OAuth parameter name like `client_id`, **When** the configuration is loaded, **Then** validation fails with a clear error message identifying the reserved parameter
 3. **Given** a configuration with multiple extra parameters, **When** the configuration is loaded and displayed, **Then** all parameters are preserved in order and non-resource parameters are masked in logs for security
 
@@ -53,10 +53,10 @@ A developer encounters OAuth authentication failures and needs to understand why
 
 **Acceptance Scenarios**:
 
-1. **Given** a server with OAuth configured but missing required extra parameters, **When** the user runs `mcpproxy auth status`, **Then** the output shows the authentication failure reason and suggests adding the missing parameter to `extra_params` configuration
-2. **Given** OAuth authentication errors logged during connection attempts, **When** the user runs `mcpproxy doctor`, **Then** the diagnostics output identifies servers with OAuth configuration issues and provides example configurations to fix them
+1. **Given** a server with OAuth configured but missing required extra parameters, **When** the architect runs `mcpproxy auth status`, **Then** the output shows the authentication failure reason and suggests adding the missing parameter to `extra_params` configuration
+2. **Given** OAuth authentication errors logged during connection attempts, **When** the architect runs `mcpproxy doctor`, **Then** the diagnostics output identifies servers with OAuth configuration issues and provides example configurations to fix them
 3. **Given** an OAuth flow that includes extra_params, **When** verbose logging is enabled with `--log-level=debug`, **Then** logs show the complete authorization URL with all parameters (resource parameters visible, others masked) for debugging purposes
-4. **Given** a server with OAuth and extra_params configured, **When** the user runs `mcpproxy auth status`, **Then** the output displays OAuth configuration details including extra_params (with resource URLs visible and other params masked), scopes, PKCE status, and token expiration time
+4. **Given** a server with OAuth and extra_params configured, **When** the architect runs `mcpproxy auth status`, **Then** the output displays OAuth configuration details including extra_params (with resource URLs visible and other params masked), scopes, PKCE status, and token expiration time
 5. **Given** an OAuth login flow initiated with `mcpproxy auth login --log-level=debug`, **When** the authorization browser opens, **Then** the console displays the complete authorization URL preview showing all extra_params before the browser opens
 6. **Given** a token refresh operation with extra_params configured, **When** debug logging is enabled, **Then** logs show the token refresh request including extra_params (with appropriate masking for sensitive values)
 
@@ -80,7 +80,7 @@ Existing users with working OAuth configurations (no extra_params) should contin
 
 ### Edge Cases
 
-- What happens when a user attempts to override a reserved OAuth parameter (e.g., `client_id`, `state`) via extra_params?
+- What happens when an architect attempts to override a reserved OAuth parameter (e.g., `client_id`, `state`) via extra_params?
   - **Expected**: Configuration validation rejects the config at load time with a clear error message listing the reserved parameter name and explaining it cannot be overridden
 
 - How does the system handle empty or null extra_params values?

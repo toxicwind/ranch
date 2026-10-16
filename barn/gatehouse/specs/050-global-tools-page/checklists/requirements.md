@@ -31,6 +31,6 @@
 
 ## Notes
 
-- Spec passes all quality gates on first iteration. Scope was bounded during the brainstorming session with the user (data source, v1 columns, search approach, and disposition of the existing orphaned tools view all decided), so no [NEEDS CLARIFICATION] markers were required.
+- Spec passes all quality gates on first iteration. Scope was bounded during the brainstorming session with the architect (data source, v1 columns, search approach, and disposition of the existing orphaned tools view all decided), so no [NEEDS CLARIFICATION] markers were required.
 - The spec deliberately keeps endpoint/component specifics out of the mandatory sections; the technical decisions agreed during brainstorming are recorded as Assumptions and will be expanded in `plan.md`.
 - Ready for `/speckit.plan`.

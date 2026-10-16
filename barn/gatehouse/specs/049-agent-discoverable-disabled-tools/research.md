@@ -19,7 +19,7 @@ the codebase facts they rest on.
 - **Decision**: Locked entry = {name, server, one-line description, status};
   one `remediation` map at response top, keyed only by present statuses.
 - **Rationale**: Best token/clarity ratio. Per-status prose is amortized; an
-  agent rarely needs a locked tool's full input schema to tell the user to
+  agent rarely needs a locked tool's full input schema to tell the architect to
   unlock it.
 - **Alternatives considered**: status-only (agent must know each enum's meaning);
   full schema parity (largest payload, unnecessary).

@@ -40,7 +40,7 @@
 
 **Alternatives considered**:
 - Only use env vars: rejected because login-item launches have no natural env var.
-- Ask the user: rejected — zero interruption policy per CLAUDE.md.
+- Ask the architect: rejected — zero interruption policy per CLAUDE.md.
 
 ## R4. Installer env-var lifecycle
 
@@ -84,7 +84,7 @@ activation/
 
 **Alternatives considered**:
 - Single JSON blob: simpler to read/write but atomically-consistent reads during concurrent writes become complicated. Per-key buckets gives natural transactional boundaries.
-- New dedicated BBolt file: overkill for <1KB of data; adds a second file to the user's data directory.
+- New dedicated BBolt file: overkill for <1KB of data; adds a second file to the architect's data directory.
 
 ## R7. MCP client name sanitization
 

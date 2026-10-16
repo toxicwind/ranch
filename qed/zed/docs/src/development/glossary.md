@@ -43,7 +43,7 @@ for any type name, such as `AnyElement` or `LspStore`.
 - `WeakEntity`: A runtime checked reference to an `Entity` which may no longer exist. Similar to [`std::rc::Weak`](https://doc.rust-lang.org/std/rc/struct.Weak.html).
 - `Global`: A singleton type which has only one value, that is stored in the `App`.
 - `Event`: A data type that can be sent by an `Entity` to subscribers.
-- `Action`: An event that represents a user's keyboard input that can be handled by listeners
+- `Action`: An event that represents an architect's keyboard input that can be handled by listeners
   Example: {#action file_finder::Toggle}
 - `Observing`: Reacting to notifications that entities have changed.
 - `Subscription`: An event handler that is used to react to the changes of state in the application.

@@ -77,7 +77,7 @@ flowchart LR
 
 ### `etc/udev/rules.d/30-zram.rules` — zswap + swappiness=60 mask
 
-**Root cause (found 2026-09-21):** the `cachyos-settings` package ships `/usr/lib/udev/rules.d/30-zram.rules`, which fires on every `zram0` init and writes `vm.swappiness=150` and `N > /sys/module/zswap/parameters/enabled`. That silently trampled Chris's hand-tuned dual setup:
+**Root cause (found 2026-09-21):** the `cachyos-settings` package ships `/usr/lib/udev/rules.d/30-zram.rules`, which fires on every `zram0` init and writes `vm.swappiness=150` and `N > /sys/module/zswap/parameters/enabled`. That silently trampled the Architect's hand-tuned dual setup:
 
 - `/etc/sysctl.d/99-zswap-vm.conf` → `vm.swappiness=60`
   (lexically wins over `99-znver4-llm.conf`=10 and `/usr/lib/sysctl.d/70-cachyos-settings.conf`=100;

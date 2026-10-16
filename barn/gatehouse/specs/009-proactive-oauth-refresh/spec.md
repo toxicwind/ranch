@@ -21,7 +21,7 @@ Current OAuth implementation has critical UX issues:
 
 As an MCPProxy user with OAuth-enabled servers, I want the system to automatically refresh tokens before they expire so that my tool calls never fail due to expired tokens.
 
-**Why this priority**: This is the root cause of the user-facing issue. Tool calls fail with "authorization required" errors because tokens expire while the connection appears healthy.
+**Why this priority**: This is the root cause of the architect-facing issue. Tool calls fail with "authorization required" errors because tokens expire while the connection appears healthy.
 
 **Independent Test**: Can be tested by configuring an OAuth server with short token lifetime (30s-2min), waiting for 80% of token lifetime, and verifying tokens are refreshed without user intervention.
 
@@ -31,7 +31,7 @@ As an MCPProxy user with OAuth-enabled servers, I want the system to automatical
 
 2. **Given** a background refresh is in progress, **When** a tool call is made, **Then** the tool call waits for refresh to complete rather than triggering a duplicate refresh
 
-3. **Given** a proactive refresh fails, **When** the token actually expires, **Then** an auth error notification is shown to the user and the Login button becomes visible
+3. **Given** a proactive refresh fails, **When** the token actually expires, **Then** an auth error notification is shown to the architect and the Login button becomes visible
 
 4. **Given** multiple OAuth servers with different expiration times, **When** the refresh monitor runs, **Then** each server is refreshed independently at 80% of its respective token lifetime
 
@@ -133,7 +133,7 @@ As a Web UI user, I want to see an "Auth Error" badge when a connected server ha
 
 ### User Story 7 - Token Expiration Display (Priority: P3)
 
-As a user, I want to see when OAuth tokens will expire in the UI and CLI, so I can anticipate when re-authentication might be needed.
+As an architect, I want to see when OAuth tokens will expire in the UI and CLI, so I can anticipate when re-authentication might be needed.
 
 **Why this priority**: Informational improvement that helps with debugging but not critical for functionality.
 

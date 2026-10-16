@@ -9,7 +9,7 @@
 
 ### User Story 1 - View Activity Log Page (Priority: P1)
 
-As a user, I want to view a dedicated Activity Log page in the Web UI so that I can see all agent activity in one place with full details.
+As an architect, I want to view a dedicated Activity Log page in the Web UI so that I can see all agent activity in one place with full details.
 
 **Why this priority**: This is the core functionality - without the Activity Log page, users have no web-based way to view activity records. This is the foundation for all other features.
 
@@ -25,7 +25,7 @@ As a user, I want to view a dedicated Activity Log page in the Web UI so that I 
 
 ### User Story 2 - Real-time Activity Updates (Priority: P1)
 
-As a user, I want to see activity updates in real-time so that I can monitor what AI agents are doing as it happens.
+As an architect, I want to see activity updates in real-time so that I can monitor what AI agents are doing as it happens.
 
 **Why this priority**: Real-time visibility is essential for understanding agent behavior and catching issues immediately. This is a core value proposition of the Activity Log.
 
@@ -41,7 +41,7 @@ As a user, I want to see activity updates in real-time so that I can monitor wha
 
 ### User Story 3 - Filter Activity Records (Priority: P2)
 
-As a user, I want to filter activity records by type, server, status, and time range so that I can focus on specific activities of interest.
+As an architect, I want to filter activity records by type, server, status, and time range so that I can focus on specific activities of interest.
 
 **Why this priority**: Filtering enables users to find specific activities in potentially large datasets. Important for debugging and monitoring but secondary to basic viewing.
 
@@ -59,7 +59,7 @@ As a user, I want to filter activity records by type, server, status, and time r
 
 ### User Story 4 - View Activity Details (Priority: P2)
 
-As a user, I want to click on an activity row to see full details including request arguments and response data so that I can understand exactly what happened.
+As an architect, I want to click on an activity row to see full details including request arguments and response data so that I can understand exactly what happened.
 
 **Why this priority**: Detailed view is necessary for debugging and understanding specific tool calls. Important but depends on the basic table view.
 
@@ -77,7 +77,7 @@ As a user, I want to click on an activity row to see full details including requ
 
 ### User Story 5 - Dashboard Activity Widget (Priority: P2)
 
-As a user, I want to see an activity summary widget on the dashboard so that I can quickly understand recent agent activity at a glance.
+As an architect, I want to see an activity summary widget on the dashboard so that I can quickly understand recent agent activity at a glance.
 
 **Why this priority**: The dashboard widget provides quick overview without navigating to the full Activity Log. Useful for at-a-glance monitoring.
 
@@ -94,7 +94,7 @@ As a user, I want to see an activity summary widget on the dashboard so that I c
 
 ### User Story 6 - Export Activity Records (Priority: P3)
 
-As a user, I want to export activity records to JSON or CSV format so that I can use them for compliance audits or external analysis.
+As an architect, I want to export activity records to JSON or CSV format so that I can use them for compliance audits or external analysis.
 
 **Why this priority**: Export is a compliance feature that adds value but is not essential for core monitoring functionality.
 
@@ -111,7 +111,7 @@ As a user, I want to export activity records to JSON or CSV format so that I can
 
 ### User Story 7 - Paginate Activity Records (Priority: P3)
 
-As a user, I want to navigate through pages of activity records so that I can view historical activity without performance issues.
+As an architect, I want to navigate through pages of activity records so that I can view historical activity without performance issues.
 
 **Why this priority**: Pagination is necessary for handling large datasets but not critical for initial monitoring functionality.
 
@@ -127,7 +127,7 @@ As a user, I want to navigate through pages of activity records so that I can vi
 
 ### User Story 8 - Toggle Auto-refresh (Priority: P3)
 
-As a user, I want to toggle auto-refresh so that I can choose between live updates and a static view.
+As an architect, I want to toggle auto-refresh so that I can choose between live updates and a static view.
 
 **Why this priority**: This is a UX enhancement that gives users control over update behavior but real-time updates should work by default.
 

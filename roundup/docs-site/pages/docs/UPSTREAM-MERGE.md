@@ -34,7 +34,7 @@ box** — only the GitHub remote. To merge, clone it somewhere first.
    histogram has to show that both sides happened.
 3. **One PR per upstreamable commit**, cut from a branch at the fork HEAD.
    Never from `main`.
-4. **PRs to `vllm-project/guidellm` are Chris's call.** They speak as
+4. **PRs to `vllm-project/guidellm` are the Architect's call.** They speak as
    toxicwind to an external maintainer group. Agents audit and prepare; they
    do not open.
 5. **Record every merge.** Append the decision block to `fork/MERGE-DECISIONS.md`.
@@ -59,7 +59,7 @@ happen upstream, which is why they go together in one PR.
 
 ### Why nothing was pushed upstream yet
 
-1. Outward action — Chris's decision, not an agent's.
+1. Outward action — the Architect's decision, not an agent's.
 2. #3–#4 are harness-specific tuning; a PR needs that debate, not a drive-by.
 3. No urgency. The fork serves our benchmarks today; nothing is lost by waiting.
 

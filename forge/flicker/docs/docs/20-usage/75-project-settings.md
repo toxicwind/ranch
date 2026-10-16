@@ -61,7 +61,7 @@ To enable pushing changes, you can inject Git credentials as a secret or use a d
 
 ## Project visibility
 
-You can change the visibility of your project by this setting. If a user has access to a project they can see all builds and their logs and artifacts. Settings, Secrets and Registries can only be accessed by owners.
+You can change the visibility of your project by this setting. If an architect has access to a project they can see all builds and their logs and artifacts. Settings, Secrets and Registries can only be accessed by owners.
 
 - `Public` Every user can see your project without being logged in.
 - `Internal` Only authenticated users of the Woodpecker instance can see this project.

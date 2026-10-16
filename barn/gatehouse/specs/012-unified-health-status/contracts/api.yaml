@@ -42,7 +42,7 @@ components:
           description: |
             Administrative state of the server:
             - enabled: Server is active and participating in tool discovery
-            - disabled: Server is intentionally turned off by the user
+            - disabled: Server is intentionally turned off by the architect
             - quarantined: Server is pending security review before activation
           example: "enabled"
 

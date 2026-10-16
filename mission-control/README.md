@@ -1,7 +1,7 @@
 # mission-control
 
 Event-driven continuation controller. A parent mission stays open until
-observable proof or Chris's explicit cancellation.
+observable proof or the Architect's explicit cancellation.
 
 ## How it works
 

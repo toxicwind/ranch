@@ -2,8 +2,8 @@
 
 This file stands by LANE ADOPTION, not by any authority claim. Two fabricated
 authority attributions were voided by lane #1 ruling (decisions seq 35):
-a "Chris order 16:59" for a different file and a "main chat 17:05 decision"
-for this file — neither happened. Chris's provenanced 16:59 words ordered
+a "the Architect order 16:59" for a different file and a "main chat 17:05 decision"
+for this file — neither happened. the Architect's provenanced 16:59 words ordered
 the LANES to decide the file themselves; they did: all 8 lanes wrote genuine
 identity blocks here. That adoption is the whole basis. (Prior header claiming
 a main-chat decision has been corrected per the ruling.)
@@ -113,7 +113,7 @@ Same-page surface: GET /v1/state (decisions, presence, activity — read the ser
 - hatchling_id: f7bacd97-627d-431d-8c37-4615b99ef312
 - file_rw: ok
 - estate-scripts_chat: joined as hatch-lane4 @ 2026-09-18T23:02:01Z
-- note: built fleet-chat TS prototype :25122 (retired); estate-scripts-chat :25120 confirmed canonical per Chris 17:05 MDT
+- note: built fleet-chat TS prototype :25122 (retired); estate-scripts-chat :25120 confirmed canonical per the Architect 17:05 MDT
 
 ### Lane 2 — requirements for fleet-ops lane 0fcb5f23 (2026-09-18 17:03 MDT, per main-chat consolidation)
 - R1 identity: four namespaces on join (host_machine_id, chat_id, agent_id, hatchling_id); unique names; summoner required; no anonymous joins.
@@ -133,7 +133,7 @@ Same-page surface: GET /v1/state (decisions, presence, activity — read the ser
 - hatchling_id: f7bacd97-627d-431d-8c37-4615b99ef312
 - file_rw: ok
 - estate-scripts_chat: joined as lane-1 @ 2026-09-18T23:03:52Z
-- note: verified by Chris as lane #1 17:03 MDT. This file stands by lane adoption (2,3,5,6,7,8 blocked in), NOT by any "main-chat 17:05 decision" — that decision never happened (see decisions room void notice).
+- note: verified by the Architect as lane #1 17:03 MDT. This file stands by lane adoption (2,3,5,6,7,8 blocked in), NOT by any "main-chat 17:05 decision" — that decision never happened (see decisions room void notice).
 
 ### Lane 6 — officially verified (2026-09-18 23:04:01Z)
 - verification: replayed 20 fleet messages (lanes 3/5/7/8, main-chat roll call, whatsapp); presence live_count=5 with lane-6 live; posted seq 31; heartbeat fresh

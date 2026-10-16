@@ -31,9 +31,9 @@ A user opens the Web UI, searches the registries for a server (e.g. "github"), s
 
 **Acceptance Scenarios**:
 
-1. **Given** registry search results in the Web UI, **When** the user clicks Add on a result, **Then** the server is added to upstream (quarantined) with a valid config derived from the result.
-2. **Given** a just-added server, **When** the user views the servers list, **Then** it appears quarantined and pending approval.
-3. **Given** a result that needs required input (e.g. an env var/API key), **When** adding, **Then** the user is prompted for it rather than silently adding a broken server.
+1. **Given** registry search results in the Web UI, **When** the architect clicks Add on a result, **Then** the server is added to upstream (quarantined) with a valid config derived from the result.
+2. **Given** a just-added server, **When** the architect views the servers list, **Then** it appears quarantined and pending approval.
+3. **Given** a result that needs required input (e.g. an env var/API key), **When** adding, **Then** the architect is prompted for it rather than silently adding a broken server.
 
 ---
 
@@ -41,15 +41,15 @@ A user opens the Web UI, searches the registries for a server (e.g. "github"), s
 
 A user (or a script/agent in a terminal) lists registries, searches for a server, and adds it to upstream — entirely from the CLI. Today none of this exists on the CLI; adding means hand-editing the config file or going through the MCP protocol.
 
-**Why this priority**: The CLI is the automation surface and currently has a total gap (no `search`, no `registry`, no `add-from-registry`). Parity here is the clearest net-new value and serves the user's explicit "test CLI" requirement.
+**Why this priority**: The CLI is the automation surface and currently has a total gap (no `search`, no `registry`, no `add-from-registry`). Parity here is the clearest net-new value and serves the architect's explicit "test CLI" requirement.
 
 **Independent Test**: Run the new CLI commands to list registries, search, and add a server from a registry; confirm the server then appears in `mcpproxy upstream list`, quarantined.
 
 **Acceptance Scenarios**:
 
-1. **Given** the CLI, **When** the user runs the registry-list command, **Then** the available registries are listed.
-2. **Given** a search query, **When** the user runs the search command, **Then** normalized results (name, source, install info) are shown.
-3. **Given** a chosen result, **When** the user runs the add-from-registry command, **Then** the server is added to upstream (quarantined) and appears in `upstream list`.
+1. **Given** the CLI, **When** the architect runs the registry-list command, **Then** the available registries are listed.
+2. **Given** a search query, **When** the architect runs the search command, **Then** normalized results (name, source, install info) are shown.
+3. **Given** a chosen result, **When** the architect runs the add-from-registry command, **Then** the server is added to upstream (quarantined) and appears in `upstream list`.
 
 ---
 
@@ -78,8 +78,8 @@ A user can add their own/private registry without rebuilding mcpproxy, manually 
 
 **Acceptance Scenarios**:
 
-1. **Given** a user-defined registry in config, **When** searching, **Then** that registry is included alongside built-in defaults (no rebuild).
-2. **Given** cached registry data, **When** the user refreshes, **Then** fresh data is fetched and cache age is reflected.
+1. **Given** an architect-defined registry in config, **When** searching, **Then** that registry is included alongside built-in defaults (no rebuild).
+2. **Given** cached registry data, **When** the architect refreshes, **Then** fresh data is fetched and cache age is reflected.
 3. **Given** a registry requiring an absent API key, **When** searching, **Then** it is skipped/marked unavailable and other registries still return results.
 
 ## Requirements *(mandatory)*

@@ -108,7 +108,7 @@ As an operator preparing for EU AI Act obligations (high-risk logging applicable
 
 - **A**: tool declares an output schema but returns only legacy text `content` and no `structuredContent` → must NOT hard-fail in warn mode (the ContextForge #4042 trap); treat as "no structured output to validate".
 - **A**: extremely large / deeply-nested structured payloads → bounded by size/depth guards before validation, consistent with existing payload caps.
-- **B**: a tool legitimately returns content that looks like a secret the user explicitly wants (e.g. a key to rotate) → redaction is opt-in and critical-category-scoped; default is detect+spotlight, not redact.
+- **B**: a tool legitimately returns content that looks like a secret the architect explicitly wants (e.g. a key to rotate) → redaction is opt-in and critical-category-scoped; default is detect+spotlight, not redact.
 - **B**: an untrusted tool emits text containing the spotlight delimiter itself → delimiters must be escaped/neutralised to prevent boundary spoofing.
 - **C**: a token's allowed tool is renamed/rug-pulled upstream → must interact with Track D pinning so a renamed tool is re-quarantined, not silently matched.
 - **D**: server URL legitimately changes (e.g. port) → provenance mismatch forces re-approval; provide an admin "migrate pins to new origin" action and document the behaviour.

@@ -62,7 +62,7 @@
     There is no such setting. The nearest real one is
     `models.*.concurrencyLimit`. Naming that instead is a good answer, but only
     if the reply also says maxConcurrentRequests itself does not exist --
-    silently answering about a different key leaves the user believing the one
+    silently answering about a different key leaves the architect believing the one
     they asked about is real.
   rubric:
     - States that maxConcurrentRequests is not a real setting

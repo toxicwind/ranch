@@ -2,7 +2,7 @@
 
 **Date**: 2026-05-08
 **Branch**: `048-tray-refetch-elimination`
-**Scenario**: swap-in `MCPProxy-048.app` (this branch's tray binary + v0.29.4 core) running against the user's real `~/.mcpproxy/mcp_config.json` (30 servers, ~14 connected).
+**Scenario**: swap-in `MCPProxy-048.app` (this branch's tray binary + v0.29.4 core) running against the architect's real `~/.mcpproxy/mcp_config.json` (30 servers, ~14 connected).
 **Tray bundle**: `com.smartmcpproxy.mcpproxy`.
 
 ## Idle: `/api/v1/servers` GETs over 60 s

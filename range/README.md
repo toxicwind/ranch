@@ -149,7 +149,7 @@ A healthy fleet prints `200` on all four.
   [docs/gemini-tool-retrieval.md](../../docs/gemini-tool-retrieval.md);
   LLM-friendly API reference in
   [docs/gemini-tool-retrieval-reference.md](../../docs/gemini-tool-retrieval-reference.md).
-  BLOCKED on depleted prepay credits -- Chris tops up at ai.studio/projects.
+  BLOCKED on depleted prepay credits -- the Architect tops up at ai.studio/projects.
 
 ---
 

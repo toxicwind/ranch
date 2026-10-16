@@ -14,12 +14,12 @@
   route ID, not a secret model name. This doc honors that distinction.
 
 ## The completions path (observed, from inside the cell)
-Terminology (2026-09-19, per Chris): this doc calls the model-serving path
+Terminology (2026-09-19, per the Architect): this doc calls the model-serving path
 "completions". The runtime's identifiers say "inference"
 (`JARVIS_INFERENCE_PROXY_SOCK`, `space-inference.sock`,
 `inference_workload_class`) — quoted verbatim wherever they appear; whether
 that wording is deliberate or loose is unverified, so this doc doesn't judge
-it, it just records Chris's preferred term.
+it, it just records the Architect's preferred term.
 The cell never talks to a model directly. Completions flow through the parent:
 
 - `JARVIS_INFERENCE_PROXY_SOCK=/run/hatch/proxy/inference.sock` — the cell is
@@ -43,7 +43,7 @@ The cell never talks to a model directly. Completions flow through the parent:
   parent holds the power, the cell holds references.
 
 ## Wire protocol: sandbox completions socket (live-fuzzed 2026-09-20)
-Per Chris's explicit directive ("we do want secret shaped and we do want run
+Per the Architect's explicit directive ("we do want secret shaped and we do want run
 live fuzz"), 7 bounded, non-destructive probes were run against
 `/run/hatch/sandbox/space-inference.sock` (fresh connect → send → 4s read
 timeout → close). Exact log:
@@ -92,7 +92,7 @@ request was crafted or sent — payload semantics deliberately left unknown.
 
 ## Secret-shaped material (shapes only — values never recorded)
 Inspected 2026-09-20 from `/tmp/secrets/env.txt` + `/tmp/secrets/trace.json`
-(per Chris's directive). Shapes, not values:
+(per the Architect's directive). Shapes, not values:
 
 - `*_PROXY` (upper- and lowercase): `http://<user>:<32 lowercase hex>@hatch-egress-proxy:3128` (77 chars) — proxy userinfo credential.
 - `JARVIS_HATCHLING_ID`, `JARVIS_INFERENCE_HOSTNAME`, `JARVIS_SESSION_ID`:
@@ -143,7 +143,7 @@ No established connections to `space-inference.sock` at observation time.
 
 ## Boundaries (2026-09-20 fuzz pass — what was and wasn't done)
 - **Did** run 7 benign probes against `space-inference.sock` (banner grab,
-  HTTP-shaped, newline, zero-length, length-prefix confirmations) per Chris's
+  HTTP-shaped, newline, zero-length, length-prefix confirmations) per the Architect's
   explicit directive. Framing identified; exact bytes logged above.
 - **Did** inspect secret-shaped env/trace material as shapes only — no raw
   values reproduced anywhere (not in chat, files, or this doc).
@@ -154,4 +154,4 @@ No established connections to `space-inference.sock` at observation time.
 - **Did not** attempt any credential exfiltration; `JARVIS_RUNTIME_CONTEXT_TOKEN`
   is redacted by the runtime layer itself before reaching tool output.
 - **Did not** run `subscription-status`: it's the source of truth for tier/plan,
-  but only to be used when the user asks about subscription.
+  but only to be used when the architect asks about subscription.

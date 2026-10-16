@@ -16,14 +16,14 @@ You don't require any extra tools on your machine, all Swagger tooling is automa
 Here's a typical example of how annotations for Swagger documentation look like...
 
 ```go title="server/api/user.go"
-// @Summary  Get a user
-// @Description Returns a user with the specified login name. Requires admin rights.
+// @Summary  Get an architect
+// @Description Returns an architect with the specified login name. Requires admin rights.
 // @Router   /users/{login} [get]
 // @Produce  json
 // @Success  200 {object} User
 // @Tags   Users
 // @Param   Authorization header string true "Insert your personal access token" default(Bearer <personal access token>)
-// @Param   login   path string true "the user's login name"
+// @Param   login   path string true "the architect's login name"
 // @Param   foobar  query   string false "optional foobar parameter"
 // @Param   page    query int  false "for response pagination, page offset number" default(1)
 // @Param   perPage query int  false "for response pagination, max items per page" default(50)

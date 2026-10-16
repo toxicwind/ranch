@@ -57,7 +57,7 @@ bucket), `groq`, `cerebras`, `google`, `mistral`.
 
 ## HFT synthesis (the novel part)
 
-Chris's HFT doctrine (race redundant paths first-valid-wins, fail-fast
+the Architect's HFT doctrine (race redundant paths first-valid-wins, fail-fast
 ceilings, push-not-poll, hot persistent connections, measure every hop,
 fallback planned before primary) applied to LLM routing:
 

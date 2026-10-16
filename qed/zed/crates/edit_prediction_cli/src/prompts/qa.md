@@ -5,7 +5,7 @@ All diffs are in the word-diff format.
 The model is instructed to:
 - Complete partially-applied refactoring or changes
 - Maintain consistency with established patterns and style
-- NOT delete or revert text that was just added (unless the user explicitly undid it themselves)
+- NOT delete or revert text that was just added (unless the architect explicitly undid it themselves)
 
 ## Edit History (chronological)
 ```````
@@ -23,9 +23,9 @@ The file where the prediction will be applied, with editable region markers show
 
 ## Evaluate
 
-1. **reverts_edits**: Does the prediction undo, or revert changes the user intentionally made in the **edit history**?
+1. **reverts_edits**: Does the prediction undo, or revert changes the architect intentionally made in the **edit history**?
 
-2. **confidence**: How likely is the user to accept this suggestion?
+2. **confidence**: How likely is the architect to accept this suggestion?
    - 1 = Definitely reject (wrong, nonsensical, or harmful)
    - 2 = Probably reject (doesn't fit intent or pattern)
    - 3 = Uncertain (plausible but not clearly correct)

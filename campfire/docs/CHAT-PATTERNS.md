@@ -100,7 +100,7 @@ happened, never to prove it's alive.
 - **`022ugdw213/nvidia-muse-dev-swarm`** — sqlite queue with stale-requeue,
   heartbeat-table presence (best literal HF+OpenAI+swarm match, 345 lines read)
 
-## Domain 3 — HF + OpenAI + swarm seed repos (Chris's request)
+## Domain 3 — HF + OpenAI + swarm seed repos (the Architect's request)
 
 Ranked by recency, then relevance:
 

@@ -39,7 +39,7 @@ Register your application with Forgejo to create your client id and secret. You 
 
 ### System-wide OAuth Application
 
-If you are the administrator of both Forgejo and Woodpecker, you may prefer to use a system-wide OAuth application instead of a user-level application. System-wide applications are managed at the Forgejo site administrator level and are visible to all users.
+If you are the administrator of both Forgejo and Woodpecker, you may prefer to use a system-wide OAuth application instead of an architect-level application. System-wide applications are managed at the Forgejo site administrator level and are visible to all users.
 
 To create a system-wide OAuth application in Forgejo:
 

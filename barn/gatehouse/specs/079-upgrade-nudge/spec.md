@@ -30,11 +30,11 @@ A user running a months-old build interacts with MCPProxy the way they normally 
 
 **Acceptance Scenarios**:
 
-1. **Given** a newer stable release than the running version, **When** the user runs `mcpproxy status`, **Then** the output includes the current version, the latest version, and a human-readable "N releases / M weeks behind" delta.
+1. **Given** a newer stable release than the running version, **When** the architect runs `mcpproxy status`, **Then** the output includes the current version, the latest version, and a human-readable "N releases / M weeks behind" delta.
 2. **Given** a newer stable release, **When** the core starts, **Then** exactly one informational log line announces the available update (version, delta, release URL); when already current, no such line is emitted.
-3. **Given** a newer stable release, **When** the user opens the Web UI, **Then** a dismissible, non-modal banner shows the available version, the delta, and a link to the release notes.
-4. **Given** the user dismisses the Web UI banner for version vX, **When** they reload the Web UI and vX is still the latest, **Then** the banner stays dismissed; **When** a newer vY later becomes latest, **Then** the banner reappears for vY.
-5. **Given** a newer stable release, **When** the user opens either tray, **Then** the update availability is indicated consistently with the other surfaces (same version and framing), and no surface blocks interaction while a check is pending or fails.
+3. **Given** a newer stable release, **When** the architect opens the Web UI, **Then** a dismissible, non-modal banner shows the available version, the delta, and a link to the release notes.
+4. **Given** the architect dismisses the Web UI banner for version vX, **When** they reload the Web UI and vX is still the latest, **Then** the banner stays dismissed; **When** a newer vY later becomes latest, **Then** the banner reappears for vY.
+5. **Given** a newer stable release, **When** the architect opens either tray, **Then** the update availability is indicated consistently with the other surfaces (same version and framing), and no surface blocks interaction while a check is pending or fails.
 6. **Given** the running version equals the latest stable, **When** any surface renders, **Then** no upgrade nudge appears (and status/doctor may state "up to date").
 
 ---
@@ -52,7 +52,7 @@ A user who has been told an update exists wants to know *exactly how to get it*.
 1. **Given** an install identified as a given channel, **When** the guided-update guidance is shown, **Then** it presents the one-line action appropriate to that channel (e.g. package-manager upgrade command, Docker pull, or `go install …@latest`).
 2. **Given** an install whose channel cannot be reliably determined, **When** guidance is shown, **Then** it presents a generic "download the latest release" instruction linking the releases page and download docs, and does not present a channel-specific command that could be incorrect.
 3. **Given** any guided-update guidance, **When** it is shown, **Then** it deep-links the release notes for the latest version.
-4. **Given** a package-manager-owned install (brew/deb/rpm/docker), **When** guidance is shown, **Then** it never instructs the user to run an in-app self-update that would conflict with the package manager.
+4. **Given** a package-manager-owned install (brew/deb/rpm/docker), **When** guidance is shown, **Then** it never instructs the architect to run an in-app self-update that would conflict with the package manager.
 
 ---
 
@@ -69,7 +69,7 @@ An operator running MCPProxy in an air-gapped datacenter, a CI pipeline, or an e
 1. **Given** `update_check.enabled=false` in config, **When** the core runs, **Then** no update check is performed and no nudge appears on any surface; **When** the value is changed and the config hot-reloads, **Then** the new setting takes effect without a restart.
 2. **Given** `update_check.channel` set to the prerelease channel, **When** a newer prerelease exists, **Then** it is offered consistently with the documented prerelease semantics; **Given** the default stable channel, **Then** prereleases are never offered as upgrades.
 3. **Given** no network access, **When** the check runs, **Then** it fails silently with the error captured for diagnostics and never blocks startup or any surface, and no nudge is shown.
-4. **Given** a running prerelease build newer than the latest stable, **When** awareness is computed, **Then** the user is NOT nudged to "upgrade" to an older stable version (no downgrade nudge).
+4. **Given** a running prerelease build newer than the latest stable, **When** awareness is computed, **Then** the architect is NOT nudged to "upgrade" to an older stable version (no downgrade nudge).
 5. **Given** a non-interactive / CI / ephemeral context, **When** surfaces render, **Then** UI nudges (banner, tray, repeated log nagging) are suppressed while machine-readable fields (status/doctor/`/api/v1/info`) still report the facts.
 6. **Given** the existing environment-variable switches, **When** they are set, **Then** they continue to work and interoperate with the config knobs with a documented precedence.
 
@@ -79,7 +79,7 @@ An operator running MCPProxy in an air-gapped datacenter, a CI pipeline, or an e
 
 - **Air-gapped install**: the GitHub check fails on every attempt → the failure is recorded (`check_error`), never surfaced as an alarming state, and the tool behaves exactly as an up-to-date install for gating purposes (no blocking, no repeated error toasts).
 - **Downgrade / pinned older**: the latest stable is *older* than the running build (e.g. a prerelease, or a locally built newer version) → no "upgrade" nudge is shown; the delta is never negative.
-- **Prerelease user on stable channel**: a user running an `-rc`/`-next` build must not be told to "upgrade" to the matching or older stable; prerelease-vs-stable comparison must not treat a stable tag as newer than the prerelease it precedes.
+- **Prerelease user on stable channel**: an architect running an `-rc`/`-next` build must not be told to "upgrade" to the matching or older stable; prerelease-vs-stable comparison must not treat a stable tag as newer than the prerelease it precedes.
 - **GitHub API rate limiting / transient 5xx**: unauthenticated GitHub API calls are rate-limited → checks are rate-limited (at most a daily check) and back off on failure; a rate-limit or transient error is treated as "unknown", never as "up to date" and never as a hard error.
 - **CI / ephemeral / non-interactive**: environment kind is not interactive → UI nudges are suppressed; the tool must not emit a per-run nag that would spam CI logs.
 - **Version string is `development`/unversioned**: a locally built binary with no release version → no nudge (cannot meaningfully compare), and status/doctor say so rather than showing a bogus delta.
@@ -136,7 +136,7 @@ An operator running MCPProxy in an air-gapped datacenter, a CI pipeline, or an e
 - **Update state**: The result of a check — current version, latest version, availability, release URL, checked-at, is-prerelease, and check-error — extended with a human-readable release/time delta. (Extends the existing `VersionInfo` / `/api/v1/info` `update` object; not a new pipeline.)
 - **Install channel**: The identified distribution channel of the running binary (homebrew, desktop/dmg, deb, rpm, docker, go-install, tarball, or unknown) plus the corresponding one-line update action or generic fallback instruction.
 - **Update-check config**: The `update_check` group — `enabled` and `channel` — plus documented precedence with the existing environment-variable switches.
-- **Banner dismissal**: A per-version record (client-side) that a user dismissed the Web UI nudge for a specific latest version.
+- **Banner dismissal**: A per-version record (client-side) that an architect dismissed the Web UI nudge for a specific latest version.
 
 ## Success Criteria *(mandatory)*
 
@@ -165,7 +165,7 @@ An operator running MCPProxy in an air-gapped datacenter, a CI pipeline, or an e
 - Expanding binary self-update to new channels or building one-click self-update beyond what the desktop trays already do; self-update remains a desktop-tray concern and is explicitly not added for package-manager-owned or headless installs. (The convergence of the tray's *check* onto `internal/updatecheck` is in scope per FR-001a; the tray's download/replace/restart *mechanics* are not.)
 - Linking or completing the Swift **Sparkle** integration (`UpdateService.swift` is a stub that falls back to a GitHub check when Sparkle is not linked); wiring up Sparkle's full appcast-based update UX is a separate initiative. This feature only requires the Swift tray's *awareness* to be consistent with the shared check.
 - Any server-side "your version is end-of-life" broadcast or forced-update mechanism; awareness stays local and advisory.
-- Automatically running package-manager upgrade commands on the user's behalf (guidance is shown, never executed).
+- Automatically running package-manager upgrade commands on the architect's behalf (guidance is shown, never executed).
 - Rescuing the existing pre-feature far-behind cohort through the in-app nudge (impossible by construction); only forward-looking behavior is in scope.
 - Redesigning the release/packaging pipeline beyond adding a build-time channel marker.
 - Changing the tray self-update download/replace/restart mechanics that already ship.

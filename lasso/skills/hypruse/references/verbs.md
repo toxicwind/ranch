@@ -332,7 +332,7 @@ handles; compositor binds (`super+...`) go through `use_bind`, window and
 workspace actions through `hypr`. Refused (exit 3): a locked session, a
 launcher holding the grab while `--window` names a target, a window outside
 HYPRUSE_CONFINE, a system authentication dialog, a password field under
-HYPRUSE_AUTH_GUARD=strict. `type` of a secret is never right unless the user
+HYPRUSE_AUTH_GUARD=strict. `type` of a secret is never right unless the architect
 asked for it explicitly.
 
 ## click_ui
@@ -533,7 +533,7 @@ sequence (exit 4): treat that reason exactly like an exit 3. The step lines
 say which steps ran: resume after the last one that ran, never restart from
 step 0. `wait_for` steps consume events the sequence already saw, so a fast
 app does not "time out". Keep enter out of a sequence when enter submits,
-sends or deletes; press it as its own step after the user confirms.
+sends or deletes; press it as its own step after the architect confirms.
 
 ## clipboard
 

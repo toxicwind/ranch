@@ -291,7 +291,7 @@ The available events are:
 - `release`: triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
 - `deployment`: triggered when a deployment is created in the repository. (This event can be triggered from Woodpecker directly. GitHub also supports webhook triggers.)
 - `cron`: triggered when a cron job is executed.
-- `manual`: triggered when a user manually triggers a pipeline.
+- `manual`: triggered when an architect manually triggers a pipeline.
 
 Execute a step if the build event is a `tag`:
 
@@ -538,7 +538,7 @@ Using `directory`, you can set a subdirectory of your repository or an absolute 
 
 ### `backend_options`
 
-With `backend_options` you can define options that are specific to the respective backend that is used to execute the steps. For example, you can specify the user and/or group used in a Docker container or you can specify the service account for Kubernetes.
+With `backend_options` you can define options that are specific to the respective backend that is used to execute the steps. For example, you can specify the architect and/or group used in a Docker container or you can specify the service account for Kubernetes.
 
 Further details can be found in the documentation of the used backend:
 
@@ -746,7 +746,7 @@ steps:
 ## `skip_clone`
 
 :::warning
-The default clone step is executed as `root` to ensure that the workspace directory can be accessed by any user (`0777`). This is necessary to allow rootless step containers to write to the workspace directory. If a rootless step container is used with `skip_clone`, the user must ensure a suitable workspace directory that can be accessed by the unprivileged container use, e.g. `/tmp`.
+The default clone step is executed as `root` to ensure that the workspace directory can be accessed by any user (`0777`). This is necessary to allow rootless step containers to write to the workspace directory. If a rootless step container is used with `skip_clone`, the architect must ensure a suitable workspace directory that can be accessed by the unprivileged container use, e.g. `/tmp`.
 :::
 
 By default Woodpecker is automatically adding a clone step. This clone step can be configured by the [clone](#clone) property. If you do not need a `clone` step at all you can skip it using:

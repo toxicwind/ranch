@@ -9,7 +9,7 @@
 
 > Managed `/etc/firefox/policies/` for the yote box — deployed, not hand-edited.
 
-> **Why care? Chris's requirement: no experiments, no studies, no in-browser update fights — while security/update collections keep working. These policies are source-traced to mozilla-central, so every claim about what a policy does (and doesn't touch) is verifiable, not folklore.**
+> **Why care? the Architect's requirement: no experiments, no studies, no in-browser update fights — while security/update collections keep working. These policies are source-traced to mozilla-central, so every claim about what a policy does (and doesn't touch) is verifiable, not folklore.**
 
 - **`DisableAppUpdate` — updates come from `pacman -Syu`, never the browser**
 - **`DisableFirefoxStudies` — kills Nimbus experiments/rollouts, preserves Remote Settings sync + Normandy emergency remediation**
@@ -53,7 +53,7 @@ source and re-run the script (or let the pacman hook / path unit re-apply it).
 
 ## SET: `DisableFirefoxStudies` — source-traced, 2026-09-21
 
-Chris's requirement: no experiments/studies enrolled, Remote Settings
+the Architect's requirement: no experiments/studies enrolled, Remote Settings
 security/update collections keep working, emergency remediation preserved if
 separable from experimentation. The mozilla-central trace (gecko-dev master,
 all citations file:line) says this policy delivers exactly that:

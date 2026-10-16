@@ -1,6 +1,6 @@
 # ⚡ spark — OPERATION SPARKFALL
 
-Google-Spark-themed ranch component. Chris's order (2026-09-30): our Dropbox
+Google-Spark-themed ranch component. the Architect's order (2026-09-30): our Dropbox
 is connected to the estate; stand up a Spark agent here, pull the ENTIRE
 Dropbox down, organize + rename everything, turn every repo-shaped thing into
 a real working repo, push each to GitHub (private by default, public only if
@@ -28,7 +28,7 @@ Coordinator: **Volt** — electric storm-fox, sparkfall coordinator.
 4. Audit + fix — every repo made to actually work, README rewritten,
    secrets stripped, pushed to `toxicwind/<new-name>` (private default)
 5. Push back — organized tree back to Dropbox; original content renamed
-   in place via `move` (Chris-authorized); NEVER delete from Dropbox
+   in place via `move` (the Architect-authorized); NEVER delete from Dropbox
 6. Register — Spark agent as first-class ranch component, KB §2
 
 ## Rules

@@ -17,10 +17,10 @@ A developer using an AI agent (e.g., Claude, Cursor) wants to write code_executi
 
 **Acceptance Scenarios**:
 
-1. **Given** code_execution is enabled, **When** a user submits TypeScript code with `language: "typescript"` (e.g., `const x: number = 42; ({ result: x })`), **Then** the system strips type annotations, executes the resulting JavaScript, and returns `{ ok: true, value: { result: 42 } }`.
-2. **Given** code_execution is enabled, **When** a user submits TypeScript code with interfaces and typed function parameters, **Then** the types are stripped and the logic executes correctly.
-3. **Given** code_execution is enabled, **When** a user submits TypeScript code with syntax errors in the type annotations, **Then** the system returns a clear error indicating the transpilation failed with the specific error location.
-4. **Given** code_execution is enabled, **When** a user submits `language: "javascript"` (or omits the language parameter), **Then** the code executes exactly as before with no transpilation step (backward compatible).
+1. **Given** code_execution is enabled, **When** an architect submits TypeScript code with `language: "typescript"` (e.g., `const x: number = 42; ({ result: x })`), **Then** the system strips type annotations, executes the resulting JavaScript, and returns `{ ok: true, value: { result: 42 } }`.
+2. **Given** code_execution is enabled, **When** an architect submits TypeScript code with interfaces and typed function parameters, **Then** the types are stripped and the logic executes correctly.
+3. **Given** code_execution is enabled, **When** an architect submits TypeScript code with syntax errors in the type annotations, **Then** the system returns a clear error indicating the transpilation failed with the specific error location.
+4. **Given** code_execution is enabled, **When** an architect submits `language: "javascript"` (or omits the language parameter), **Then** the code executes exactly as before with no transpilation step (backward compatible).
 
 ---
 
@@ -34,8 +34,8 @@ A developer or automation tool uses the REST API endpoint (`POST /api/v1/code/ex
 
 **Acceptance Scenarios**:
 
-1. **Given** the REST API is available, **When** a user sends a POST to `/api/v1/code/exec` with `{ "code": "const x: number = 42; ({ result: x })", "language": "typescript" }`, **Then** the response contains `{ "ok": true, "result": { "result": 42 } }`.
-2. **Given** the REST API is available, **When** a user sends a request without the `language` field, **Then** the system defaults to JavaScript execution (backward compatible).
+1. **Given** the REST API is available, **When** an architect sends a POST to `/api/v1/code/exec` with `{ "code": "const x: number = 42; ({ result: x })", "language": "typescript" }`, **Then** the response contains `{ "ok": true, "result": { "result": 42 } }`.
+2. **Given** the REST API is available, **When** an architect sends a request without the `language` field, **Then** the system defaults to JavaScript execution (backward compatible).
 
 ---
 
@@ -49,8 +49,8 @@ A developer uses the CLI command `mcpproxy code exec` to run TypeScript code loc
 
 **Acceptance Scenarios**:
 
-1. **Given** the CLI is available, **When** a user runs `mcpproxy code exec --language typescript --code "..."`, **Then** the TypeScript code is transpiled and executed, with results printed to stdout.
-2. **Given** the CLI is available, **When** a user omits the `--language` flag, **Then** the code is treated as JavaScript (backward compatible).
+1. **Given** the CLI is available, **When** an architect runs `mcpproxy code exec --language typescript --code "..."`, **Then** the TypeScript code is transpiled and executed, with results printed to stdout.
+2. **Given** the CLI is available, **When** an architect omits the `--language` flag, **Then** the code is treated as JavaScript (backward compatible).
 
 ---
 
@@ -74,7 +74,7 @@ A developer uses the CLI command `mcpproxy code exec` to run TypeScript code loc
 - **FR-005**: The transpilation MUST strip all TypeScript-specific syntax (type annotations, interfaces, type aliases, generics, enums, namespaces) and produce valid JavaScript.
 - **FR-006**: The transpiled JavaScript MUST be executed in the existing sandbox with all existing capabilities (input variable, call_tool function, timeout enforcement, tool call limits).
 - **FR-007**: When `language` is `"javascript"` or not specified, the system MUST execute code exactly as before with no transpilation step, preserving full backward compatibility.
-- **FR-008**: Transpilation errors MUST be returned to the user with clear error messages including the error location (line and column number) in the original TypeScript source.
+- **FR-008**: Transpilation errors MUST be returned to the architect with clear error messages including the error location (line and column number) in the original TypeScript source.
 - **FR-009**: The system MUST reject unsupported `language` values with an error message listing the supported languages.
 - **FR-010**: The transpilation overhead MUST be less than 5 milliseconds for typical code submissions (under 10KB of source code).
 - **FR-011**: The system MUST log the language used and transpilation duration in execution logs for observability.

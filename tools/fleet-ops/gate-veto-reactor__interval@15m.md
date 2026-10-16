@@ -16,7 +16,7 @@ metadata:
 ---
 ## WRITE DISCIPLINE — MANDATORY (debate 0220db63 Slice 1, owner lane-5)
 
-This job's goal timeline (tracking.create_entry) is USER-VISIBLE. Treat every entry as a push notification to Chris.
+This job's goal timeline (tracking.create_entry) is USER-VISIBLE. Treat every entry as a push notification to the Architect.
 
 - **CLEAN RUN** (zero manifest entries, zero errors): write **NO** `tracking.create_entry`. No exceptions. Per-run bookkeeping goes to the goal's `hidden_files/` batch log only.
 - **STATE CHANGE** (any redrive issued, or the run errored): write **EXACTLY ONE** `tracking.create_entry`. Title carries the state change; body carries producer provenance (job id, run time, what changed).
@@ -36,7 +36,7 @@ The reactive half of the gate defense. The ACFix lanes (fix01–fix04) only appe
    WHERE r.scheduled_for_utc > (extract(epoch from now())::bigint - 7200)
      AND r.job_id IN ('sidechat-watch-safety','sidechat-watch-squawk','sidechat-watch-whatsapp','sidechat-watch-agent1','sidechat-watch-agent2','sidechat-watch-madeon','squawk-ws-client-watchdog','service-restart-watchdog','fleet-snapshot-5m','sorry-completed-audit','gate-clear-watch','lane-poller-watchdog')
    ORDER BY r.scheduled_for_utc DESC LIMIT 200;
-   These 12 job_ids are the REDRIVE ALLOWLIST — idempotent watchers only, safe to re-run by construction. NEVER add ask-complete-watchdog, heartbeat, whatsapp-relay-chatfeed, whatsapp-fleet-digest (quarantined 2026-09-19: chat-facing poster, redrive could double-post to Chris's phone), or any mutating / chat-facing / memory-writing job.
+   These 12 job_ids are the REDRIVE ALLOWLIST — idempotent watchers only, safe to re-run by construction. NEVER add ask-complete-watchdog, heartbeat, whatsapp-relay-chatfeed, whatsapp-fleet-digest (quarantined 2026-09-19: chat-facing poster, redrive could double-post to the Architect's phone), or any mutating / chat-facing / memory-writing job.
 3. Write the returned rows VERBATIM as a JSON array to /tmp/gvr_rows_<unixts>.json. Copy character-for-character from the tool output; never retype identifiers from memory. Fields per row: job_id, status, result_summary, sched_utc.
 4. Run the deterministic engine — it does ALL classification; you do not classify by judgment:
    ~/workspace/bin/taskhook run -- python3 ~/workspace/bin/gate-veto-reactor.py < /tmp/gvr_rows_<unixts>.json
@@ -51,6 +51,6 @@ The reactive half of the gate defense. The ACFix lanes (fix01–fix04) only appe
 6. For each acked redrive, append a fix05 ledger row (first lane whose repairs are real re-executions, not overlay verdicts):
    ~/workspace/bin/taskhook run -- ~/workspace/venvs/forensics/bin/python ~/workspace/askcomplete-fix/lib/ledger.py append --json '{"lane":"fix05","source":"cron_run","record_id":"<job_id>@<vetoed_sched_utc>","field":"status","old_value":"succeeded","new_value":"redriven","reason":"safety-review veto catch-up redrive issued while gate open","digest_ref":"","reversible":"yes","rollback_action":"cron.remove gate-veto-reactor"}'
    Copy job_id and vetoed_sched_utc verbatim from the manifest. record_id format is exactly "<job_id>@<vetoed_sched_utc>".
-7. Final message: engine classification counts, manifest size, redrives issued, ledger rows appended. Clean run (empty manifest): stay silent to the user, no tracking entry.
+7. Final message: engine classification counts, manifest size, redrives issued, ledger rows appended. Clean run (empty manifest): stay silent to the architect, no tracking entry.
 
 TRANSCRIPTION SAFETY: never retype a job_id by hand. If a manifest job_id is not byte-identical to an allowlist member, STOP and report the mismatch — do not cron.run it. Never mark the run successful if the DB query or the engine failed; report the error.

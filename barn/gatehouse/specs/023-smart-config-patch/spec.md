@@ -21,7 +21,7 @@ When config is read, modified for a single field, and saved back, the operation 
 
 ### User Story 1 - Preserve Isolation Config During Unquarantine (Priority: P1)
 
-As a user with custom Docker isolation settings, when I unquarantine a server, my Docker volume mappings, custom image, network_mode, and working_dir settings must be preserved.
+As an architect with custom Docker isolation settings, when I unquarantine a server, my Docker volume mappings, custom image, network_mode, and working_dir settings must be preserved.
 
 **Why this priority**: This is the exact bug reported in #240. Users are losing critical Docker configuration, breaking their workflows immediately after unquarantining.
 
@@ -57,7 +57,7 @@ As an AI agent using the `upstream_servers` tool, when I patch a server to chang
 
 ### User Story 3 - Preserve Config During Enable/Disable Operations (Priority: P2)
 
-As a user toggling servers on/off via Web UI or CLI, my server configurations must remain intact regardless of how many times I enable or disable them.
+As an architect toggling servers on/off via Web UI or CLI, my server configurations must remain intact regardless of how many times I enable or disable them.
 
 **Why this priority**: Enable/disable is the most common server management operation. Config loss here would affect every user.
 
@@ -73,7 +73,7 @@ As a user toggling servers on/off via Web UI or CLI, my server configurations mu
 
 ### User Story 4 - Deep Merge for Nested Object Updates (Priority: P2)
 
-As a user updating nested configuration objects like OAuth or isolation, only the fields I specify should change while preserving other nested fields I didn't mention.
+As an architect updating nested configuration objects like OAuth or isolation, only the fields I specify should change while preserving other nested fields I didn't mention.
 
 **Why this priority**: Power users often need to update specific nested settings without reconstructing the entire object.
 
@@ -91,7 +91,7 @@ As a user updating nested configuration objects like OAuth or isolation, only th
 
 ### User Story 5 - Explicit Field Removal (Priority: P3)
 
-As a user who needs to remove a specific configuration field, I should be able to explicitly delete it without affecting other fields.
+As an architect who needs to remove a specific configuration field, I should be able to explicitly delete it without affecting other fields.
 
 **Why this priority**: While preservation is the default, users must still be able to intentionally remove config when needed.
 

@@ -19,7 +19,7 @@ Uses `hyprctl` + `ydotool` (Hyprland native) to focus a specific Firefox window 
 
 Useful for quick actions on tabs you already have open without closing anything.
 
-Demonstrated live on a playing YouTube video in the user's actual Firefox.
+Demonstrated live on a playing YouTube video in the architect's actual Firefox.
 
 ## Integration points
 

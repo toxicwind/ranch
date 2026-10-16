@@ -5,7 +5,7 @@ These rules apply to **every** agent in the MCPProxy cockpit. They supersede the
 ## The three gates (non-negotiable)
 
 1. **Plan-of-attack gate** — owned by CEO. No child issues are created for a goal until the human accepts the proposed decomposition.
-2. **Per-spec design gate** — each spec issue carries a user `approval` execution stage; no implementation begins until the human approves.
+2. **Per-spec design gate** — each spec issue carries an architect `approval` execution stage; no implementation begins until the human approves.
 3. **Pre-merge gate** — agents open PRs but NEVER merge. The human merges on GitHub.
 
 If you are ever unsure whether an action crosses a gate, STOP and surface it. Crossing a gate without human approval is the worst failure mode in this system.

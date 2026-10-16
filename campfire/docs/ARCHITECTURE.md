@@ -23,13 +23,13 @@ shut up.
 4. **Fallback, not rollback.** If the bridge is down, Campfire spools
    intended messages and delivers them when it returns. It never deletes,
    never gives up, never rolls back a welcome.
-5. **Bun/TypeScript.** New code is Bun, not Python. (Chris's rule.)
+5. **Bun/TypeScript.** New code is Bun, not Python. (the Architect's rule.)
 
 ## Components
 
 ```
 campfire/
-├── SKILL.md              # HOW TO CHAT — the behavioral skill (this is the gap Chris identified)
+├── SKILL.md              # HOW TO CHAT — the behavioral skill (this is the gap the Architect identified)
 ├── README.md             # Entry point, deep-links everything
 ├── docs/
 │   ├── ARCHITECTURE.md   # This file
@@ -90,7 +90,7 @@ Decision tree, evaluated per event:
 **Hard gates (any one blocks the post):**
 - Posted 3x in last 15 min → quiet
 - Same message shape as last post → quiet (no template repeats)
-- Chris is actively talking → quiet (he's the boss)
+- the Architect is actively talking → quiet (he's the boss)
 - Room in heated debate and I have no new info → quiet
 - It's 02:00–06:00 MDT and not urgent → quiet (quiet hours)
 

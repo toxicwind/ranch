@@ -16,11 +16,11 @@ metadata:
   originating_channel_context_json: '{"originating_channel":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"70daa860e14ee343"}'
   presentation_locale: en-US
 ---
-Ask-complete watchdog (deterministic pipeline): enforce the standing rule "a turn that ends by asking the user anything is blocked, never completed; completion requires verified effects, never a badge."
+Ask-complete watchdog (deterministic pipeline): enforce the standing rule "a turn that ends by asking the architect anything is blocked, never completed; completion requires verified effects, never a badge."
 
 HONEST IDENTIFIER MODEL. Identifiers still transit the worker's transcription path (only agents can call muse.db, and only the worker can save the dumps). The obsolete hand-transcription path corrupted 17 identifiers into the ledger — that path is retired. Every ID reaching the ledger now passes the deterministic producer: structural UUID/int validation + lineage validation against the SAME database's canonical set; anything off is quarantined, never appended. Never claim "identifiers never pass through token generation"; claim the validation gates instead.
 
-REACTIVE (Chris's standing order): the detector repairs live and forward. After the producer appends new ASK/REFUSAL rows, the producer's --reactive flag emits a forward correction into the acfix overlay ledger marking each row status completed -> blocked. The work itself is NEVER re-driven (re-driving would duplicate side effects); the correction moves the record forward, never backward. Never rollback, always forward.
+REACTIVE (the Architect's standing order): the detector repairs live and forward. After the producer appends new ASK/REFUSAL rows, the producer's --reactive flag emits a forward correction into the acfix overlay ledger marking each row status completed -> blocked. The work itself is NEVER re-driven (re-driving would duplicate side effects); the correction moves the record forward, never backward. Never rollback, always forward.
 
 COMPLETION BOUND (2026-09-19): every run finishes inside its 15m cadence. Audit/canonical reads are INCREMENTAL via a durable watermark (~/workspace/ask-complete-guard/watermark.json, shape {"last_epoch": N}), so per-run DB work is bounded by new rows, not the full 48h window. If a step errors, record it and degrade honestly — never hang, never leave a null summary.
 
@@ -42,7 +42,7 @@ Each run:
 4. WATERMARK ADVANCE: only when canonical succeeded, both audit sources succeeded, and every invoked producer exited 0 — write {"last_epoch": NOW} to ~/workspace/ask-complete-guard/watermark.json atomically (write tmp file, then rename). Any failure above: the watermark does NOT advance, and the next run re-scans the gap. A row is never skipped by a degraded run.
 5. Final message — ALWAYS non-empty, always with per-source status. Format:
    ask-complete-watchdog <RUN_ID>: window=<WMQ>..<NOW> (FULL_RESCAN|incremental), canonical=<ok|FAILED>, audit_spawns=<ok|FAILED|skipped>, audit_agents=<ok|FAILED|skipped>, producers=<n ok|FAILED>, appended=<n>, quarantined=<n>, skipped_dupe=<n>, reactive_corrections=<n>. classification=<genuine|degraded|failed>.
-   - genuine: all sources ok. On a fully clean run (0 appended, 0 quarantined) stay quiet toward the user — no notification — but the summary line above still goes in the final message.
+   - genuine: all sources ok. On a fully clean run (0 appended, 0 quarantined) stay quiet toward the architect — no notification — but the summary line above still goes in the final message.
    - degraded: any source FAILED or skipped — this run did partial work; the watermark did not advance.
    - failed: canonical FAILED, both audits FAILED, or a producer exited nonzero.
    Never invent results; never transcribe identifiers into prose (report counts only). If this run was skipped by the scheduled-task safety gate, record that honestly rather than inventing results. Append observations to the daily log ~/memory/YYYY-MM-DD.md; never edit MEMORY.md.

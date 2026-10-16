@@ -17,10 +17,10 @@ Users and AI agents need to add new MCP servers to mcpproxy configuration using 
 
 **Acceptance Scenarios**:
 
-1. **Given** mcpproxy is running, **When** a user runs `mcpproxy upstream add github https://api.github.com/mcp`, **Then** a new HTTP server named "github" is added to the configuration
-2. **Given** mcpproxy is running, **When** a user runs `mcpproxy upstream add myapi https://api.example.com --header "Authorization: Bearer $TOKEN"`, **Then** the server is added with the specified header
-3. **Given** a server named "github" already exists, **When** a user runs `mcpproxy upstream add github https://new-url.com`, **Then** an error is returned indicating the server already exists
-4. **Given** a server named "github" already exists, **When** a user runs `mcpproxy upstream add github https://new-url.com --if-not-exists`, **Then** no error is returned and existing server is unchanged
+1. **Given** mcpproxy is running, **When** an architect runs `mcpproxy upstream add github https://api.github.com/mcp`, **Then** a new HTTP server named "github" is added to the configuration
+2. **Given** mcpproxy is running, **When** an architect runs `mcpproxy upstream add myapi https://api.example.com --header "Authorization: Bearer $TOKEN"`, **Then** the server is added with the specified header
+3. **Given** a server named "github" already exists, **When** an architect runs `mcpproxy upstream add github https://new-url.com`, **Then** an error is returned indicating the server already exists
+4. **Given** a server named "github" already exists, **When** an architect runs `mcpproxy upstream add github https://new-url.com --if-not-exists`, **Then** no error is returned and existing server is unchanged
 
 ---
 
@@ -34,9 +34,9 @@ Users need to add stdio-based MCP servers (local processes) using the `--` separ
 
 **Acceptance Scenarios**:
 
-1. **Given** mcpproxy is running, **When** a user runs `mcpproxy upstream add fs -- npx -y @anthropic/mcp-server-filesystem`, **Then** a stdio server named "fs" is added with the specified command
-2. **Given** mcpproxy is running, **When** a user runs `mcpproxy upstream add db --env DATABASE_URL=postgres://localhost/db -- npx -y @anthropic/mcp-server-postgres`, **Then** the server is added with the environment variable set
-3. **Given** mcpproxy is running, **When** a user runs `mcpproxy upstream add project --working-dir /path/to/project -- node ./server.js`, **Then** the server is configured to run in the specified directory
+1. **Given** mcpproxy is running, **When** an architect runs `mcpproxy upstream add fs -- npx -y @anthropic/mcp-server-filesystem`, **Then** a stdio server named "fs" is added with the specified command
+2. **Given** mcpproxy is running, **When** an architect runs `mcpproxy upstream add db --env DATABASE_URL=postgres://localhost/db -- npx -y @anthropic/mcp-server-postgres`, **Then** the server is added with the environment variable set
+3. **Given** mcpproxy is running, **When** an architect runs `mcpproxy upstream add project --working-dir /path/to/project -- node ./server.js`, **Then** the server is configured to run in the specified directory
 
 ---
 
@@ -50,10 +50,10 @@ Users need to remove MCP servers from configuration using a simple CLI command w
 
 **Acceptance Scenarios**:
 
-1. **Given** a server named "github" exists, **When** a user runs `mcpproxy upstream remove github`, **Then** a confirmation prompt appears and the server is removed upon confirmation
-2. **Given** a server named "github" exists, **When** a user runs `mcpproxy upstream remove github --yes`, **Then** the server is removed without confirmation prompt
-3. **Given** no server named "unknown" exists, **When** a user runs `mcpproxy upstream remove unknown`, **Then** an error is returned indicating the server doesn't exist
-4. **Given** no server named "unknown" exists, **When** a user runs `mcpproxy upstream remove unknown --if-exists`, **Then** no error is returned
+1. **Given** a server named "github" exists, **When** an architect runs `mcpproxy upstream remove github`, **Then** a confirmation prompt appears and the server is removed upon confirmation
+2. **Given** a server named "github" exists, **When** an architect runs `mcpproxy upstream remove github --yes`, **Then** the server is removed without confirmation prompt
+3. **Given** no server named "unknown" exists, **When** an architect runs `mcpproxy upstream remove unknown`, **Then** an error is returned indicating the server doesn't exist
+4. **Given** no server named "unknown" exists, **When** an architect runs `mcpproxy upstream remove unknown --if-exists`, **Then** no error is returned
 
 ---
 
@@ -67,8 +67,8 @@ Power users and automation scripts need to add servers with complex configuratio
 
 **Acceptance Scenarios**:
 
-1. **Given** mcpproxy is running, **When** a user runs `mcpproxy upstream add-json myapi '{"url":"https://api.example.com","headers":{"X-API-Key":"secret"}}'`, **Then** the server is added with all specified configuration
-2. **Given** invalid JSON is provided, **When** a user runs `mcpproxy upstream add-json bad '{invalid}'`, **Then** a clear JSON parse error is returned
+1. **Given** mcpproxy is running, **When** an architect runs `mcpproxy upstream add-json myapi '{"url":"https://api.example.com","headers":{"X-API-Key":"secret"}}'`, **Then** the server is added with all specified configuration
+2. **Given** invalid JSON is provided, **When** an architect runs `mcpproxy upstream add-json bad '{invalid}'`, **Then** a clear JSON parse error is returned
 
 ---
 

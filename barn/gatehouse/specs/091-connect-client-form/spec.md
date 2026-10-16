@@ -13,7 +13,7 @@ A standing product rule (learned from earlier feedback on this exact flow) appli
 
 Two platform realities shape this design:
 
-- The aggregate client list is deliberately cheap (file-existence checks only) so that merely opening a list does not trigger macOS data-access prompts for every client's container. Reading a config's *contents* — needed to know "connected or not" and to build a preview — happens only for a client the user explicitly selects.
+- The aggregate client list is deliberately cheap (file-existence checks only) so that merely opening a list does not trigger macOS data-access prompts for every client's container. Reading a config's *contents* — needed to know "connected or not" and to build a preview — happens only for a client the architect explicitly selects.
 - Undo depends on the backup name returned by the connect that created it; the core keeps no cross-session undo state. Undo is therefore an in-form affordance for the connect you just performed (identical to the Web UI's behavior).
 
 ## User Scenarios & Testing *(mandatory)*
@@ -28,9 +28,9 @@ The user picks "Connect Client…" from the tray menu. A native window lists the
 
 **Acceptance Scenarios**:
 
-1. **Given** the tray menu is open, **When** the user chooses "Connect Client…", **Then** a native window opens listing every registry client with name, icon, and config-presence state — no browser is involved, and no client config *contents* are read yet.
-2. **Given** the user selects a client, **When** its detailed state loads, **Then** the form shows whether it is currently connected and renders the preview: the entry text that will be written, the config path, and — when an entry already exists — a structural summary of the entry being replaced.
-3. **Given** the preview is displayed, **When** the user presses Connect, **Then** the write happens (backup first when the file existed), and the form shows the refreshed state without being reopened.
+1. **Given** the tray menu is open, **When** the architect chooses "Connect Client…", **Then** a native window opens listing every registry client with name, icon, and config-presence state — no browser is involved, and no client config *contents* are read yet.
+2. **Given** the architect selects a client, **When** its detailed state loads, **Then** the form shows whether it is currently connected and renders the preview: the entry text that will be written, the config path, and — when an entry already exists — a structural summary of the entry being replaced.
+3. **Given** the preview is displayed, **When** the architect presses Connect, **Then** the write happens (backup first when the file existed), and the form shows the refreshed state without being reopened.
 4. **Given** a create-capable client whose config file does not exist, **When** the preview renders, **Then** it states that a new file will be created at the path and that Undo will remove that file (no pre-existing content exists to back up).
 5. **Given** the core is unreachable, **When** the form opens, **Then** it shows a clear "core not running" state, retries in the background, and populates when the core becomes reachable without reopening.
 6. **Given** a client the registry marks unsupported on this platform, **When** the list renders, **Then** the client appears disabled with the reason, not hidden.
@@ -39,7 +39,7 @@ The user picks "Connect Client…" from the tray menu. A native window lists the
 
 ### User Story 2 - See client configuration state at a glance (Priority: P2)
 
-The user opens the form to check which of their AI tools have a config the proxy recognizes. The list answers with the cheap truth (config present / no config found / unsupported), and the user drills into any client to see the authoritative state (connected to this proxy or not, and under which entry name) — an explicit, user-initiated read.
+The user opens the form to check which of their AI tools have a config the proxy recognizes. The list answers with the cheap truth (config present / no config found / unsupported), and the architect drills into any client to see the authoritative state (connected to this proxy or not, and under which entry name) — an explicit, user-initiated read.
 
 **Why this priority**: Complements the tray's Clients presence section (spec 090): presence says who *talked* recently; this form says who is *configured* to talk.
 
@@ -55,7 +55,7 @@ The user opens the form to check which of their AI tools have a config the proxy
 
 ### User Story 3 - Undo or disconnect safely (Priority: P2)
 
-After connecting, the user changes their mind. While the form remains open, Undo reverses the connect they just performed: restoring the timestamped backup, or removing the file the connect created. Disconnect (for any connected client, any time) removes the proxy entry after a confirmation that names the file and the entry.
+After connecting, the architect changes their mind. While the form remains open, Undo reverses the connect they just performed: restoring the timestamped backup, or removing the file the connect created. Disconnect (for any connected client, any time) removes the proxy entry after a confirmation that names the file and the entry.
 
 **Why this priority**: A config-writing feature without a visible way back teaches users not to trust it.
 
@@ -63,9 +63,9 @@ After connecting, the user changes their mind. While the form remains open, Undo
 
 **Acceptance Scenarios**:
 
-1. **Given** a connect just performed in this open form, **When** the user chooses Undo, **Then** the pre-connect state is restored (backup restored, or created file removed) and the row reflects it.
+1. **Given** a connect just performed in this open form, **When** the architect chooses Undo, **Then** the pre-connect state is restored (backup restored, or created file removed) and the row reflects it.
 2. **Given** the form was closed and reopened after a connect, **When** the row renders, **Then** Undo is not offered (undo state is scoped to the connect performed in the open form) — Disconnect remains available.
-3. **Given** a connected client, **When** the user chooses Disconnect, **Then** a confirmation names the config file and the entry to be removed before anything happens, and the entry is removed after.
+3. **Given** a connected client, **When** the architect chooses Disconnect, **Then** a confirmation names the config file and the entry to be removed before anything happens, and the entry is removed after.
 
 ---
 
@@ -73,10 +73,10 @@ After connecting, the user changes their mind. While the form remains open, Undo
 
 - **Existing entry pointing elsewhere** (stale port/URL): the preview shows the structural summary of the existing entry alongside the replacement; connecting requires the same explicit confirmation, no silent overwrite.
 - **Credential embedding**: when the pending entry would contain the admin credential, the preview says so explicitly.
-- **Malformed config**: a client whose config cannot be parsed shows a "config unreadable" state with the path; the Connect control is absent (a write would fail) and the user is pointed at the file.
+- **Malformed config**: a client whose config cannot be parsed shows a "config unreadable" state with the path; the Connect control is absent (a write would fail) and the architect is pointed at the file.
 - **Access denied**: a client whose config the core cannot read shows "access not granted" with remediation guidance; the Connect control is absent until access resolves.
 - **Preview staleness**: changing any input (selected client, entry-name override) discards the preview and fetches a fresh one; the Connect button is bound to the currently rendered preview. Every preview carries an opaque, keyed precondition token over the raw pre-write state (file existence + resolved target entry presence and raw value, including an adopted equivalent entry) and the pending entry content; the write echoes it, and the core rejects with a discriminated conflict when anything has drifted — a file appearing after an absent-file preview, disappearing after an add/replace preview, the entry changing (even in ways the summary hides), or the proxy's own config changing what would be written — upon which the form re-previews. Replace-classified connects send the overwrite flag together with the token; the form never sends the overwrite flag without a valid token.
-- **Client requiring an existing config** (e.g. OpenCode): when its config file is absent, the core refuses to create one; the PREVIEW already carries that refusal (the preview runs the same guard the write would), so the Connect control is absent and the refusal is shown verbatim — the user never discovers it by clicking. The generic create statement applies only to clients the core will create configs for.
+- **Client requiring an existing config** (e.g. OpenCode): when its config file is absent, the core refuses to create one; the PREVIEW already carries that refusal (the preview runs the same guard the write would), so the Connect control is absent and the refusal is shown verbatim — the architect never discovers it by clicking. The generic create statement applies only to clients the core will create configs for.
 - **Double-click protection**: action buttons disable while a request is in flight.
 - **Unknown client** (core newer than app): rendered by name with a default icon, fully functional.
 - **Non-socket transport**: when the app is not talking to the core over its private local socket (administrative transport), the mutating actions are disabled with an explanation; the list and previews remain available if the transport permits.
@@ -110,7 +110,7 @@ After connecting, the user changes their mind. While the form remains open, Undo
 
 ### Measurable Outcomes
 
-- **SC-001**: Following the manual protocol (`specs/091-connect-client-form/verification/manual-protocol.md`), a user goes from opening the tray menu to a connected client in under 30 seconds with no browser involved (stopwatch step in the protocol).
+- **SC-001**: Following the manual protocol (`specs/091-connect-client-form/verification/manual-protocol.md`), an architect goes from opening the tray menu to a connected client in under 30 seconds with no browser involved (stopwatch step in the protocol).
 - **SC-002**: Every config write performed through the form is structurally preceded by a rendered preview for the exact (client, entry-name) pair being written — the Connect control does not exist before that preview has rendered, and input changes destroy it; verified by unit tests of the form's state model.
 - **SC-003**: The undo round-trip test restores the client's config to its exact pre-connect content for the existing-file case, and removes the created file for the new-file case.
 - **SC-004**: The tray process performs zero client-config file reads (all state via the core); opening the form's list causes zero config-content reads core-side (existence checks only).

@@ -58,7 +58,7 @@ A developer wants to quickly check which servers are connected and take action o
 
 ### User Story 3 - Receive Security Notifications (Priority: P2)
 
-A developer is working and MCPProxy detects sensitive data (API keys, credentials) in a tool call's input or output. The tray app sends a native macOS notification alerting the user. Similarly, when new or changed tools are detected (quarantine), the user is notified so they can review and approve.
+A developer is working and MCPProxy detects sensitive data (API keys, credentials) in a tool call's input or output. The tray app sends a native macOS notification alerting the architect. Similarly, when new or changed tools are detected (quarantine), the architect is notified so they can review and approve.
 
 **Why this priority**: Security alerts are critical for user trust. Without proactive notifications, sensitive data exposure or tool poisoning attacks could go unnoticed.
 
@@ -68,7 +68,7 @@ A developer is working and MCPProxy detects sensitive data (API keys, credential
 
 1. **Given** MCPProxy detects sensitive data in a tool call, **When** the activity event arrives via SSE, **Then** a macOS notification appears with the server name, tool name, and detection category (e.g., "API key detected in github:search_code response").
 2. **Given** a server's tool descriptions change (rug pull detection), **When** the quarantine event arrives, **Then** a notification appears: "[N] tools pending approval on [server]" with a "Review" action button.
-3. **Given** the user has disabled notifications in macOS System Settings, **When** a security event occurs, **Then** the tray menu still shows the alert section (menu-based indicators work without notification permission).
+3. **Given** the architect has disabled notifications in macOS System Settings, **When** a security event occurs, **Then** the tray menu still shows the alert section (menu-based indicators work without notification permission).
 4. **Given** multiple sensitive data detections occur within 5 minutes for the same server, **When** processing events, **Then** only one notification is sent (rate-limited), but the menu shows all findings.
 
 ---
@@ -84,15 +84,15 @@ A developer is using MCPProxy and a new version is released on GitHub. The tray 
 **Acceptance Scenarios**:
 
 1. **Given** a new version is available on GitHub Releases, **When** the app performs its periodic check (every 4 hours), **Then** a macOS notification appears: "MCPProxy [version] available" and the menu shows "Update Available: v[X.Y.Z]".
-2. **Given** the user clicks "Install & Relaunch" (or approves from menu), **When** the update downloads and verifies, **Then** the core process is gracefully stopped, the .app bundle is replaced, and the app relaunches with the new version.
+2. **Given** the architect clicks "Install & Relaunch" (or approves from menu), **When** the update downloads and verifies, **Then** the core process is gracefully stopped, the .app bundle is replaced, and the app relaunches with the new version.
 3. **Given** user clicks "Check for Updates..." manually, **When** Sparkle checks the appcast, **Then** a dialog shows either "Update available" with release notes or "You're up to date."
-4. **Given** the update signature verification fails, **When** Sparkle detects the mismatch, **Then** the update is rejected and the user sees an error message. The current version continues running unaffected.
+4. **Given** the update signature verification fails, **When** Sparkle detects the mismatch, **Then** the update is rejected and the architect sees an error message. The current version continues running unaffected.
 
 ---
 
 ### User Story 5 - First Launch Setup (Priority: P3)
 
-A new user installs MCPProxy.app for the first time. On first launch, the app creates a symlink at `/usr/local/bin/mcpproxy` pointing to the bundled binary (with authorization prompt), requests notification permissions, and registers as a login item if the user enables "Run at Startup."
+A new user installs MCPProxy.app for the first time. On first launch, the app creates a symlink at `/usr/local/bin/mcpproxy` pointing to the bundled binary (with authorization prompt), requests notification permissions, and registers as a login item if the architect enables "Run at Startup."
 
 **Why this priority**: First-launch experience sets user expectations. The symlink is important for CLI users but is a one-time setup. Lower priority because the app is fully functional without it.
 
@@ -100,8 +100,8 @@ A new user installs MCPProxy.app for the first time. On first launch, the app cr
 
 **Acceptance Scenarios**:
 
-1. **Given** first launch and `/usr/local/bin/mcpproxy` does not exist, **When** the app starts, **Then** it prompts the user for admin authorization to create the symlink. If approved, the symlink is created. If denied, the app continues normally and shows a hint in the menu.
-2. **Given** the user toggles "Run at Startup" in the menu, **When** the toggle is enabled, **Then** the app registers as a login item using the system service. When toggled off, it unregisters.
+1. **Given** first launch and `/usr/local/bin/mcpproxy` does not exist, **When** the app starts, **Then** it prompts the architect for admin authorization to create the symlink. If approved, the symlink is created. If denied, the app continues normally and shows a hint in the menu.
+2. **Given** the architect toggles "Run at Startup" in the menu, **When** the toggle is enabled, **Then** the app registers as a login item using the system service. When toggled off, it unregisters.
 3. **Given** an older version's symlink exists at `/usr/local/bin/mcpproxy`, **When** the app launches, **Then** it detects the stale symlink and offers to update it to point to the current bundled binary.
 
 ---
@@ -130,14 +130,14 @@ A developer wants a quick glance at what MCPProxy has been doing without opening
   - The core exits with code 2. The tray shows "Port conflict" in the menu with options: retry, use an available port, or edit configuration.
 - What happens when the database file is locked by another mcpproxy instance?
   - The core exits with code 3. The tray shows "Database locked" with instructions to stop the other instance.
-- What happens when the user force-quits the tray app (e.g., Activity Monitor)?
+- What happens when the architect force-quits the tray app (e.g., Activity Monitor)?
   - The core process continues running as an orphan. Next tray launch detects it via socket and attaches.
 - What happens during an auto-update if the core is actively handling MCP requests?
-  - The update waits for the user to approve "Install & Relaunch." The core is sent SIGTERM with a 10-second grace period for in-flight requests before SIGKILL.
+  - The update waits for the architect to approve "Install & Relaunch." The core is sent SIGTERM with a 10-second grace period for in-flight requests before SIGKILL.
 - What happens when there is no internet connection during update check?
-  - Sparkle silently fails the check and retries at the next interval. No error shown to the user.
+  - Sparkle silently fails the check and retries at the next interval. No error shown to the architect.
 - What happens when the /usr/local/bin directory does not exist?
-  - The app skips the symlink creation and logs a warning. No error shown to the user.
+  - The app skips the symlink creation and logs a warning. No error shown to the architect.
 - What happens when SSE connection drops and reconnects?
   - The app triggers a full state refresh (servers, activity, status) on reconnect to catch any missed events.
 

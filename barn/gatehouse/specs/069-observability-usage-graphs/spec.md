@@ -22,15 +22,15 @@
 
 A user whose agent burns through context opens the Web UI dashboard, switches to the Usage view, and immediately sees which tools return the largest responses (the "token sinks") and which are called most often. They learn that one tool returns huge blobs on every call, and adjust how their agent uses it — saving tokens.
 
-**Why this priority**: This is the core value — "where do my tokens go?" — and it answers the user's primary goal (save tokens / speed up MCP). It is buildable entirely on data already captured (response bytes + call counts), so it delivers the headline insight with no new capture.
+**Why this priority**: This is the core value — "where do my tokens go?" — and it answers the architect's primary goal (save tokens / speed up MCP). It is buildable entirely on data already captured (response bytes + call counts), so it delivers the headline insight with no new capture.
 
 **Independent Test**: With a populated activity log, open the Usage view; confirm a per-tool ranking by total + average response size and a per-tool call-count histogram render, ordered correctly, matching the underlying records.
 
 **Acceptance Scenarios**:
 
-1. **Given** recorded tool calls with response sizes, **When** the user opens the Usage view, **Then** tools are shown ranked by total response bytes (the token-sink view) and by call count.
-2. **Given** the same data, **When** the user inspects a tool, **Then** its average and total response size and call count are shown.
-3. **Given** no activity yet, **When** the user opens the Usage view, **Then** an empty-state is shown (no error).
+1. **Given** recorded tool calls with response sizes, **When** the architect opens the Usage view, **Then** tools are shown ranked by total response bytes (the token-sink view) and by call count.
+2. **Given** the same data, **When** the architect inspects a tool, **Then** its average and total response size and call count are shown.
+3. **Given** no activity yet, **When** the architect opens the Usage view, **Then** an empty-state is shown (no error).
 
 ---
 
@@ -44,7 +44,7 @@ A user sees an error-rate breakdown per tool and per-tool latency, so they can i
 
 **Acceptance Scenarios**:
 
-1. **Given** tool calls with success/error statuses, **When** the user opens the Usage view, **Then** error rate (and count) per tool is shown.
+1. **Given** tool calls with success/error statuses, **When** the architect opens the Usage view, **Then** error rate (and count) per tool is shown.
 2. **Given** calls with recorded durations, **When** viewed, **Then** per-tool latency (median and a high percentile) is shown.
 
 ---
@@ -59,7 +59,7 @@ A user views a timeline of tool calls (volume over time, sliceable by tool/serve
 
 **Acceptance Scenarios**:
 
-1. **Given** records across a time window, **When** the user opens the timeline, **Then** call volume is shown bucketed over time.
+1. **Given** records across a time window, **When** the architect opens the timeline, **Then** call volume is shown bucketed over time.
 2. **Given** an active filter (tool/server/status), **When** applied, **Then** the timeline reflects only matching calls.
 
 ---
@@ -74,8 +74,8 @@ A user switches between the current status/overview dashboard and the new usage 
 
 **Acceptance Scenarios**:
 
-1. **Given** the dashboard, **When** the user toggles to Usage, **Then** the graphs appear and Overview state is preserved on switch-back.
-2. **Given** a window selector, **When** the user picks 7d, **Then** all graphs reflect that window.
+1. **Given** the dashboard, **When** the architect toggles to Usage, **Then** the graphs appear and Overview state is preserved on switch-back.
+2. **Given** a window selector, **When** the architect picks 7d, **Then** all graphs reflect that window.
 
 ---
 
@@ -98,7 +98,7 @@ The dashboard shows a hero number: tokens saved by serving tool discovery throug
 - **CN-001**: Surface and aggregate EXISTING activity-log data; do not add a parallel telemetry system. (External telemetry, spec 042, is separate and unaffected.)
 - **CN-002**: The graphs backend MUST be fast — incremental precompute + cache, not an on-demand full scan of the log on every request. It MUST NOT block the dashboard's first paint or the request hot path (Constitution I).
 - **CN-003**: Aggregation MUST follow actor-based concurrency (Constitution II) — owned by the activity service, updated on write, snapshot for readers.
-- **CN-004**: All data stays local (no new external calls). Privacy: graphs show the user their own usage; any sensitive-data flags already in the activity log are not exposed in aggregates.
+- **CN-004**: All data stays local (no new external calls). Privacy: graphs show the architect their own usage; any sensitive-data flags already in the activity log are not exposed in aggregates.
 
 ### Functional Requirements
 

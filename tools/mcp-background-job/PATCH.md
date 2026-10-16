@@ -1,6 +1,6 @@
 # PATCH — free slot on complete (not emergent)
 
-Chris: slot free for mcp-background-job is **NOT** emergent — use **pattern-forge**.
+the Architect: slot free for mcp-background-job is **NOT** emergent — use **pattern-forge**.
 
 ## Problem
 

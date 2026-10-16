@@ -14,7 +14,7 @@ description: "Task list for spec 042 — Telemetry Tier 2"
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no inter-task dependencies)
-- **[Story]**: Maps to a user story phase (e.g., US1, US10) — required for user-story phase tasks; absent for Setup, Foundational, and Polish phases.
+- **[Story]**: Maps to an architect story phase (e.g., US1, US10) — required for user-story phase tasks; absent for Setup, Foundational, and Polish phases.
 
 ## Path Conventions
 

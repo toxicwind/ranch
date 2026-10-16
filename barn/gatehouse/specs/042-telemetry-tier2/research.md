@@ -68,7 +68,7 @@ This document resolves the technical unknowns identified in `plan.md` and record
 
 The result is stored in `service.enabled` and never re-checked. The heartbeat goroutine is only started if enabled.
 
-**Rationale**: The [consoledonottrack.com](https://consoledonottrack.com/) convention says any non-empty `DO_NOT_TRACK` value should opt out, not just `1`. We honor this. CI detection follows the convention used by GitHub Actions, GitLab CI, Travis, and Circle (`CI=true`). The precedence puts the user's intent (env var) above config and above default.
+**Rationale**: The [consoledonottrack.com](https://consoledonottrack.com/) convention says any non-empty `DO_NOT_TRACK` value should opt out, not just `1`. We honor this. CI detection follows the convention used by GitHub Actions, GitLab CI, Travis, and Circle (`CI=true`). The precedence puts the architect's intent (env var) above config and above default.
 
 **Alternatives considered**:
 - Only honoring `DO_NOT_TRACK=1` — less compatible with the de-facto standard.

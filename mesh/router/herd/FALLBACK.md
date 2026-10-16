@@ -31,12 +31,12 @@ follows **fallback, not rollback**:
 
 - `estate-reconcile check` — read-only drift report (exit 1 on drift)
 - `estate-reconcile --apply` — HARD-DISABLED (refuses, exit 2).
-  Restoration is dead on every path (Chris 2026-09-30); the warden only
+  Restoration is dead on every path (the Architect 2026-09-30); the warden only
   alerts. Rebuild from a trusted source and redeploy by hand.
 
 If the immutable copy itself is corrupt, rebuild from source:
 `toxicwind/estate-swap` @ `7fc25280816fa7f98764ac46d1435d55ac9dc3c3`
-(or newer upstream — prefer cutting edge per Chris).
+(or newer upstream — prefer cutting edge per the Architect).
 
 ### Verify after recovery
 
@@ -46,7 +46,7 @@ curl -sf http://127.0.0.1:25100/v1/models     # expect: model list JSON
 /home/toxic/estate/bin/estate-reconcile check  # expect: exit 0
 ```
 
-## Why fallback, not rollback (Chris 2026-09-30)
+## Why fallback, not rollback (the Architect 2026-09-30)
 
 "A fallback is not a rollback." Rolling back to the Sep 21 binary would
 discard the Sep 29 rebuild (three iterations: 23MB → 36MB → 37.5MB, the

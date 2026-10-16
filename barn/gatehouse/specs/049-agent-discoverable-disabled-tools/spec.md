@@ -12,9 +12,9 @@
 An AI agent is working a task that requires a capability (e.g. deleting a
 repository). The matching tool exists on an upstream server but is currently
 locked. Today the agent receives nothing — the tool is invisible — so it tells
-the user "that's not possible" instead of "the capability exists but is turned
+the architect "that's not possible" instead of "the capability exists but is turned
 off." The agent should be able to, on demand, discover that the tool exists,
-learn *why* it is unavailable, and relay the *correct* next step to the user or
+learn *why* it is unavailable, and relay the *correct* next step to the architect or
 operator.
 
 **Why this priority**: This is the core value. Without it the other stories have
@@ -22,7 +22,7 @@ nothing to act on. Delivers a working MVP by itself: an agent can opt into
 seeing locked tools and explain them.
 
 **Independent Test**: Configure an upstream with a tool denied by config and
-another disabled by the user. Issue a discovery request with the opt-in flag and
+another disabled by the architect. Issue a discovery request with the opt-in flag and
 confirm both appear with distinct, correct status and remediation, while a
 normal discovery request still hides them.
 
@@ -32,9 +32,9 @@ normal discovery request still hides them.
    with the opt-in flag, **Then** the tool is returned with status
    `disabled_by_config` and remediation stating it is operator policy that the
    user cannot lift from the UI.
-2. **Given** a tool disabled by the user, **When** the agent runs discovery with
+2. **Given** a tool disabled by the architect, **When** the agent runs discovery with
    the opt-in flag, **Then** the tool is returned with status `disabled_by_user`
-   and remediation telling the agent to ask the user to re-enable it.
+   and remediation telling the agent to ask the architect to re-enable it.
 3. **Given** the opt-in flag is absent or false, **When** the agent runs
    discovery, **Then** the response is byte-for-byte identical to today (no
    locked tools, no extra fields).
@@ -64,7 +64,7 @@ nudge.
 
 1. **Given** a config-denied tool, **When** the agent calls it, **Then** the
    rejection message states it is operator policy (not user-overridable) and is
-   distinct from the message for a user-disabled tool.
+   distinct from the message for an architect-disabled tool.
 2. **Given** a query whose only matches are locked, **When** the agent runs
    normal discovery, **Then** the response includes a one-line note with the
    count of locked matches and how to reveal them — but not the entries
@@ -147,7 +147,7 @@ callable one carries none.
   classification, so an agent never sees locked tools on inaccessible servers.
 - **FR-008**: The tool-call rejection message MUST be status-aware: a
   config-denied rejection MUST state it is operator policy and not
-  user-overridable, distinct from the user-disabled/quarantine wording.
+  user-overridable, distinct from the architect-disabled/quarantine wording.
 - **FR-009**: When normal discovery returns zero callable results but relevant
   locked tools exist, the response MUST include a one-line note with the count
   of locked matches and how to reveal them, without including the entries.

@@ -55,12 +55,12 @@ The shared catalog (`hatch/bin/error_claims.py`, `ERROR_CLAIM_CATALOG`) holds th
 
 **transient — retry, don't escalate**:
 - `spawn-lock-timeout`: confirm no spawn row (`SELECT status FROM agent.agents WHERE agent_id='w-stall-slayer-012'` — substitute the agent's own id). Nothing orphaned, nothing to close — the parent retries the spawn. Do not reap errored spawn rows.
-- `bridge-401`: wait 2–3 minutes, retry. Only escalate to Chris (token mint via the vault page) if it persists >5 minutes.
+- `bridge-401`: wait 2–3 minutes, retry. Only escalate to the Architect (token mint via the vault page) if it persists >5 minutes.
 
 **genuine — act on it**:
 - `conn-refused`: `ss -ltnp | grep <port>` + `tailscale serve status`. The listener is usually on the wrong interface (tailscale vs loopback) or the port moved in the serve map — verify before declaring an outage.
 - `provider-rate-limit` (429 / `connector_rate_limited`): HARD STOP for that provider scope this attempt. Report partial progress; no sleep-retry, no delegation around it.
-- `quota-402`: route through a different provider lane; flag to Chris.
+- `quota-402`: route through a different provider lane; flag to the Architect.
 - `eaddrinuse`: `ss -ltnp | grep <port>` vs the supervisor's tracked pid. Pick the canonical holder, remove the loser — never kill loops.
 
 **Anti-false-diagnosis loop**: `agent-reaper --classify-errors candidates.json --fleet-notes` publishes CLAIM-CHECK notes to fleet for high-confidence `mislead` claims (deduped by md5 of the error text, fail-soft), so the fleet learns the required verification BEFORE anyone acts on the string. The reaper never escalates, never closes, never diagnoses unknown text.

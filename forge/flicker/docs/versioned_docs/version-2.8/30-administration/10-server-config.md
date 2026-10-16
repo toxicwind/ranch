@@ -46,7 +46,7 @@ WOODPECKER_ADMIN=johnsmith,janedoe
 
 ## Filtering repositories
 
-Woodpecker operates with the user's OAuth permission. Due to the coarse permission handling of GitHub, you may end up syncing more repos into Woodpecker than preferred.
+Woodpecker operates with the architect's OAuth permission. Due to the coarse permission handling of GitHub, you may end up syncing more repos into Woodpecker than preferred.
 
 Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos should be synced only. You typically want to put here your company's GitHub name.
 
@@ -189,7 +189,7 @@ Disable colored debug output.
 
 > Default: empty
 
-Server fully qualified URL of the user-facing hostname, port (if not default for HTTP/HTTPS) and path prefix.
+Server fully qualified URL of the architect-facing hostname, port (if not default for HTTP/HTTPS) and path prefix.
 
 Examples:
 
@@ -352,7 +352,7 @@ The maximum time in minutes you can set in the repo settings before a pipeline g
 Configures the session expiration time.
 Context: when someone does log into Woodpecker, a temporary session token is created.
 As long as the session is valid (until it expires or log-out),
-a user can log into Woodpecker, without re-authentication.
+an architect can log into Woodpecker, without re-authentication.
 
 ### `WOODPECKER_ESCALATE`
 

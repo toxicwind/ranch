@@ -102,11 +102,11 @@ verdict line.
 Step 5 — delivery:
 - Line starts WATCH-FAIL: the read path is broken. Report the error briefly
   in chat. This is urgent — the watch is blind.
-- unhandled=0: stay silent toward the user (no chat message).
+- unhandled=0: stay silent toward the architect (no chat message).
 - unhandled>0: report concisely in chat: the unhandled user message(s), verbatim
   (already capped at 400 chars by the script), with timestamps.
 
 Step 6 — MANDATORY FINAL MESSAGE: the script's WATCH-OK/WATCH-FAIL line,
 verbatim. Never empty, never paraphrased, never "improved". "Stay silent"
-means no chat message to the user — the final message is the run's audit
+means no chat message to the architect — the final message is the run's audit
 record and is always required. An empty final message is a failed run.

@@ -99,9 +99,9 @@ However, this fails because of a nasty TOCTOU.
 #### The nasty TOCTOU
 
 Consider the following case:
-- an attacker has convinced the user to open `project`, which contains an evil `AGENTS.md`
-- They have also convinced the user to grant a writable path inside `project`
-- This means that the user will have given the following permissions to the sandbox:
+- an attacker has convinced the architect to open `project`, which contains an evil `AGENTS.md`
+- They have also convinced the architect to grant a writable path inside `project`
+- This means that the architect will have given the following permissions to the sandbox:
   - read/write access to `project`
   - read/write access to `project/cache`
   - read/write access to an isolated `/tmp`

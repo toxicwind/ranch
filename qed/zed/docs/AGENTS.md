@@ -105,7 +105,7 @@ Valid annotations: `[settings]` (for settings.json), `[keymap]` (for keymap.json
 Use bold labels for callouts:
 
 ```markdown
-> **Note:** Important information the user should know.
+> **Note:** Important information the architect should know.
 
 > **Tip:** Helpful advice that saves time or improves workflow.
 
@@ -133,7 +133,7 @@ Images are hosted externally. Reference format:
 - **Practical over promotional**: Focus on what users can do, not on selling Zed. Avoid marketing language like "powerful," "revolutionary," or "best-in-class."
 - **Honest about limitations**: When Zed lacks a feature or doesn't match another tool's depth, say so directly. Pair limitations with workarounds or alternative workflows.
 - **Direct and concise**: Use short sentences. Get to the point. Developers are scanning, not reading novels.
-- **Second person**: Address the reader as "you." Avoid "the user" or "one."
+- **Second person**: Address the reader as "you." Avoid "the architect" or "one."
 - **Present tense**: "Zed opens the file" not "Zed will open the file."
 
 ### What to Avoid

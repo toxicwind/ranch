@@ -277,7 +277,7 @@ gcInitContainer:
   enabled: true
   # Security posture for the gc container. runAsNonRoot is deliberately NOT
   # defaulted: the stock image runs as root (as the head-end container
-  # does); set it (and a user) only for non-root image builds. Override
+  # does); set it (and an architect) only for non-root image builds. Override
   # fields individually, or drop the whole context with
   # --set-json gcInitContainer.securityContext=null.
   securityContext:

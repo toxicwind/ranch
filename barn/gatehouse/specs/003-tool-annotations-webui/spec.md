@@ -17,7 +17,7 @@ A user navigates to the server details page to understand the characteristics of
 
 **Acceptance Scenarios**:
 
-1. **Given** a server with tools that have annotations defined, **When** the user views the server details page, **Then** each tool card displays its annotations with appropriate visual indicators (badges/icons)
+1. **Given** a server with tools that have annotations defined, **When** the architect views the server details page, **Then** each tool card displays its annotations with appropriate visual indicators (badges/icons)
 2. **Given** a tool with `title` annotation, **When** displayed in the tool card, **Then** the title appears as the primary tool name/heading
 3. **Given** a tool with `destructiveHint: true`, **When** displayed, **Then** a visual warning indicator (e.g., red badge) is shown
 4. **Given** a tool with `readOnlyHint: true`, **When** displayed, **Then** a visual indicator shows it's safe/read-only (e.g., blue badge)
@@ -36,7 +36,7 @@ A user reviews the tool call history to understand past operations. Each history
 **Acceptance Scenarios**:
 
 1. **Given** a tool call history entry for a tool with annotations, **When** displayed in the history list, **Then** compact icons/badges represent each annotation hint
-2. **Given** a compact annotation icon, **When** the user hovers over it, **Then** a tooltip displays the full annotation description
+2. **Given** a compact annotation icon, **When** the architect hovers over it, **Then** a tooltip displays the full annotation description
 3. **Given** a destructive tool call in history, **When** viewed, **Then** the destructive indicator is visually prominent (e.g., warning color)
 4. **Given** multiple annotations on a tool call, **When** displayed compactly, **Then** all applicable icons appear without cluttering the UI
 
@@ -60,7 +60,7 @@ A user visits the dashboard to get an overview of recent MCP sessions. They see 
 6. **Given** a session with a known client name, **When** displayed, **Then** the client name is shown in the table
 7. **Given** a session without a client name, **When** displayed, **Then** a placeholder or empty value is shown gracefully
 8. **Given** any session, **When** displayed, **Then** the number of tool calls is shown
-9. **Given** a session row in the table, **When** the user clicks on it, **Then** they are navigated to the Tool Call History page with the session filter pre-selected
+9. **Given** a session row in the table, **When** the architect clicks on it, **Then** they are navigated to the Tool Call History page with the session filter pre-selected
 
 ---
 
@@ -75,8 +75,8 @@ A user wants to view all tool calls from a specific MCP session. They use a filt
 **Acceptance Scenarios**:
 
 1. **Given** the Tool Call History page, **When** loaded, **Then** a session filter dropdown/selector is available
-2. **Given** multiple sessions exist, **When** the user selects a session from the filter, **Then** only tool calls belonging to that session are displayed
-3. **Given** a session filter is applied, **When** the user clears the filter, **Then** all tool calls are displayed again
+2. **Given** multiple sessions exist, **When** the architect selects a session from the filter, **Then** only tool calls belonging to that session are displayed
+3. **Given** a session filter is applied, **When** the architect clears the filter, **Then** all tool calls are displayed again
 4. **Given** a session with no tool calls, **When** selected in the filter, **Then** an empty state message is displayed
 
 ---

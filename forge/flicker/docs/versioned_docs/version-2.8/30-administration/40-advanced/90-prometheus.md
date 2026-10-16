@@ -16,7 +16,7 @@ scrape_configs:
 
 ## Authorization
 
-An administrator will need to generate a user API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
+An administrator will need to generate an architect API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
 
 ```diff
  global:

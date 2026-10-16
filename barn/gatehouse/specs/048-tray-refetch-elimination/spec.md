@@ -10,7 +10,7 @@
 
 Spec 047 (PR #450, v0.29.4) eliminated the **burst-storm** refetch path: each `servers.changed` SSE event used to trigger a `GET /api/v1/servers` round trip from the macOS tray, and during upstream retry-storms the rate could exceed 10 fetches/second. The `servers.changed` handler now consumes the embedded payload directly. CPU dropped 92% on the tray-only steady state.
 
-What remains is a smaller residual: the Swift tray has **five other call sites** that still hit `/api/v1/servers`. Live verification with the user's real config showed ~8 fetches in an 18-second window even with no SSE storms, traced to:
+What remains is a smaller residual: the Swift tray has **five other call sites** that still hit `/api/v1/servers`. Live verification with the architect's real config showed ~8 fetches in an 18-second window even with no SSE storms, traced to:
 
 | # | File:line | Trigger | Cadence under load |
 |---|---|---|---|
@@ -18,7 +18,7 @@ What remains is a smaller residual: the Swift tray has **five other call sites**
 | 2 | `CoreProcessManager.swift:608` | `startPeriodicRefresh` — 30 s `Timer.scheduledTimer` calling `refreshState` (which calls `refreshServers`) | Every 30 s |
 | 3 | `CoreProcessManager.swift:640` | `refreshSecurityStatus` — falls through to `apiClient.servers()` when the Docker health check returns false but configured servers exist | Every 30 s (called from `refreshState`) |
 | 4 | `MCPProxyApp.swift:101-110` | 10 s `Timer.publish` that always calls `client.servers()` | Every 10 s |
-| 5 | `MCPProxyApp.swift:172-174` | `menuWillOpen` — refetches each time the user clicks the tray icon | Per user click |
+| 5 | `MCPProxyApp.swift:172-174` | `menuWillOpen` — refetches each time the architect clicks the tray icon | Per user click |
 
 `appState.servers` is already kept fresh by spec 047's SSE handler. These five paths refetch *the same data* that's already in memory.
 
@@ -26,7 +26,7 @@ What remains is a smaller residual: the Swift tray has **five other call sites**
 
 1. Cut steady-state `/api/v1/servers` fetches from the macOS tray to **≤ 1 per minute** at idle (only a long-cadence safety-net refresh remains).
 2. Tray UI reactivity (menu state, dashboard, badges) stays as snappy as today — within ≤ 50 ms of an SSE event.
-3. No behavior change for the user; this is pure cost removal.
+3. No behavior change for the architect; this is pure cost removal.
 4. No changes to the core. Pure Swift-side refactor.
 
 ## Non-Goals
@@ -86,7 +86,7 @@ Per CLAUDE.md TDD rule, every site change is preceded by a failing XCTest.
 
 Replicate the spec 047 verification harness:
 1. Build the Go binary + Swift tray; swap into a clone of `/Applications/MCPProxy.app`.
-2. Launch with the user's real 30-server config.
+2. Launch with the architect's real 30-server config.
 3. With the tray running and only the tray polling, count `/api/v1/servers` GETs in `~/Library/Logs/mcpproxy/http.log` over a 60-second window.
 
 **Acceptance**: ≤ 1 GET per 60 seconds at idle. Ad-hoc clicks on the tray icon should not generate a GET. SSE-driven state changes (toggle a server) should not generate a GET.

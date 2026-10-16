@@ -60,7 +60,7 @@ Article ends with a footer noting the rewrite cadence (every goal milestone, max
 
 **Alternatives considered**:
 - Empty stub initially — rejected because the wiki's value is being current from day one, and the bootstrap human (user + CC) already has the inventory.
-- Generated programmatically by a script — rejected as scope creep; the user can hand-seed once and the CEO maintains thereafter.
+- Generated programmatically by a script — rejected as scope creep; the architect can hand-seed once and the CEO maintains thereafter.
 
 ## R-5: Whether `docs/agent-cockpit.md` is worth adding to the repo
 
@@ -85,7 +85,7 @@ The CEO's `TOOLS.md` enumerates these as the only wiki-edit tools the CEO is all
 **Rationale**: From the global `~/.claude/CLAUDE.md`, Synapbus tools are exposed via `mcp__synapbus__*` and the catch-all `execute` action handles wiki ops. Listing them in `TOOLS.md` makes the allowlist explicit so the CEO doesn't accidentally use undocumented actions.
 
 **Alternatives considered**:
-- Have the user manually maintain wiki articles — rejected because SC-006 (100% roadmap freshness within 24h post-ship) requires automation.
+- Have the architect manually maintain wiki articles — rejected because SC-006 (100% roadmap freshness within 24h post-ship) requires automation.
 - Use a separate per-action tool (e.g., `mcp__synapbus__update_article` direct call) — viable but unconfirmed at this time; if such direct tools exist, the CEO can use them; if not, fall back to `execute`.
 
 ## R-7: How agents call speckit slash commands
@@ -123,11 +123,11 @@ Worked examples: spec 042 telemetry-tier2 (BIG — touches contracts + telemetry
 
 **Decision**: The Critic agent's per-agent CLI runtime in Paperclip is configured to spawn `gemini --yolo --model gemini-3.1-pro-preview` rather than the default Claude Code subprocess. Critic's instructions are authored in `GEMINI.md` (Gemini's native instruction filename) with a mirror copy in `AGENTS.md` for Paperclip adapter compatibility.
 
-**Rationale**: Model diversity surfaces blind spots that any single model misses. The user's prior pattern — dispatching Gemini cross-reviews after spec/PR completion — found 4 P1 bugs and 1 dead-code bug on spec 044 that the project's own Claude-based TDD + E2E testing missed. Making the Critic structurally a different model (rather than a different prompt to the same model) bakes that diversity into the workflow rather than relying on the user remembering to dispatch a manual cross-review.
+**Rationale**: Model diversity surfaces blind spots that any single model misses. The user's prior pattern — dispatching Gemini cross-reviews after spec/PR completion — found 4 P1 bugs and 1 dead-code bug on spec 044 that the project's own Claude-based TDD + E2E testing missed. Making the Critic structurally a different model (rather than a different prompt to the same model) bakes that diversity into the workflow rather than relying on the architect remembering to dispatch a manual cross-review.
 
 **Alternatives considered**:
 - Run Critic on Claude Code with an "adversarial" prompt — rejected because identical training distribution means many blind spots are shared. The point of a critic is to *not* think the same way as the proposal author.
-- Run Critic on a third frontier model (e.g., GPT family) — viable in principle, but the user's existing tooling (`gemini --yolo`) and prior empirical results favor Gemini.
+- Run Critic on a third frontier model (e.g., GPT family) — viable in principle, but the architect's existing tooling (`gemini --yolo`) and prior empirical results favor Gemini.
 - Use Anthropic's smaller model (Haiku) to economize — rejected because Critic's job is rigor, not speed; a cheaper-but-similar model loses the diversity benefit.
 
 **Implications**:
@@ -159,7 +159,7 @@ as inline citations:
 - Have each agent read raw Synapbus output directly — rejected for context-window economics; one rich Synapbus thread can occupy 20k+ tokens of context that would crowd out the agent's actual reasoning.
 - Use Anthropic's prompt caching for repeated Synapbus content — viable but solves a different problem (repeat-read economics, not first-read context bloat).
 - Build a dedicated "Synapbus Reader" agent in the Paperclip org chart (8th agent) — rejected as over-engineering; the procedure is one CLI call and doesn't need budget tracking, an org-chart slot, or a Paperclip ticket lifecycle.
-- Use `kimi2.5-gcore` directly via API rather than through opencode — viable but loses opencode's prompt + tool integration; opencode is the CLI the user already runs locally for this kind of work.
+- Use `kimi2.5-gcore` directly via API rather than through opencode — viable but loses opencode's prompt + tool integration; opencode is the CLI the architect already runs locally for this kind of work.
 
 **Implications**:
 - T005b verifies opencode + kimi2.5-gcore reachable as a Phase 1 prerequisite.

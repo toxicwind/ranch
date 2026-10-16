@@ -8,7 +8,7 @@
 ## Overview
 
 The onboarding wizard's "Clients" step — where mcpproxy registers itself as an MCP
-server inside the user's AI client config files (`~/.claude.json`, Claude Desktop
+server inside the architect's AI client config files (`~/.claude.json`, Claude Desktop
 config, Cursor/VS Code settings, Codex `config.toml`, Gemini, OpenCode) — is the
 biggest drop in the setup funnel. Telemetry (CI-filtered + deduped, 2026-07-02):
 of wizard-engaged users, **72.4% skip** the connect step and only **13.8%
@@ -22,10 +22,10 @@ written, does not show a diff, and does not make the automatic backup visible.
 On macOS the write path can also trigger a "wants to access data from other apps"
 privacy prompt with no forewarning inside the wizard.
 
-This feature closes the trust gap at the exact place the user hesitates: preview
+This feature closes the trust gap at the exact place the architect hesitates: preview
 the change before writing, surface the backup path after writing, offer a visible
 one-click undo, and use plain-language copy (including a pre-emptive macOS
-permission explanation) so the user understands precisely what mcpproxy touches
+permission explanation) so the architect understands precisely what mcpproxy touches
 and that nothing else in the file changes.
 
 ### Context (current behavior, verified)
@@ -42,7 +42,7 @@ and that nothing else in the file changes.
   backups anywhere — they accumulate one-per-operation indefinitely and this is
   undocumented.
 - **There is no preview/diff.** No API returns the exact JSON/TOML that *will*
-  be written before the user confirms. The server entry is built server-side
+  be written before the architect confirms. The server entry is built server-side
   (`buildServerEntry` at `internal/connect/clients.go:185`, per-client shape:
   `{type:"http",url}` for claude-code/vscode, `{command:"npx",args:[...]}` bridge
   for Claude Desktop, `{url,type:"sse"}` for Cursor, etc.) and written
@@ -92,7 +92,7 @@ file or creating a backup.
 
 **Acceptance Scenarios**:
 
-1. **Given** an installed, accessible client, **When** the user opens the connect
+1. **Given** an installed, accessible client, **When** the architect opens the connect
    step for it, **Then** a preview shows the target config path, the key that will
    be added, and the exact entry contents to be written, and the file is not
    modified.
@@ -101,15 +101,15 @@ file or creating a backup.
    added/updated and all existing entries are left untouched.
 3. **Given** the endpoint URL embeds an API key, **When** the preview is shown,
    **Then** the API-key handling is represented honestly (e.g. shown or clearly
-   masked) so the user knows a credential is being written.
-4. **Given** the user confirms after previewing, **When** connect runs, **Then**
+   masked) so the architect knows a credential is being written.
+4. **Given** the architect confirms after previewing, **When** connect runs, **Then**
    the file written matches the previewed entry exactly.
 
 ---
 
 ### User Story 2 - Always-created backup is visible and understood (Priority: P1)
 
-After connecting, the user wants to see that a backup was made and exactly where
+After connecting, the architect wants to see that a backup was made and exactly where
 it is, so they know the operation is reversible outside the app too.
 
 **Why this priority**: The backup already exists but is invisible in the UI,
@@ -125,11 +125,11 @@ case is represented correctly.
 
 1. **Given** a successful connect that modified an existing config, **When** the
    result is shown in the Web UI (wizard and standalone modal), **Then** the
-   timestamped backup path is displayed to the user.
+   timestamped backup path is displayed to the architect.
 2. **Given** a connect that created a new config file (no prior file existed),
    **When** the result is shown, **Then** the UI states that there was no prior
    file to back up (rather than showing an empty/blank backup path).
-3. **Given** repeated connect/disconnect operations, **When** the user reviews
+3. **Given** repeated connect/disconnect operations, **When** the architect reviews
    the documentation, **Then** the backup naming, location, accumulation, and
    retention behavior are documented.
 
@@ -137,7 +137,7 @@ case is represented correctly.
 
 ### User Story 3 - One-click undo that reverts the change (Priority: P2)
 
-After connecting, the user wants a single, visible action in the same place that
+After connecting, the architect wants a single, visible action in the same place that
 reverts what mcpproxy did — ideally restoring the file to its pre-connect state —
 with the change shown again before it is undone.
 
@@ -153,13 +153,13 @@ shown beforehand.
 
 **Acceptance Scenarios**:
 
-1. **Given** a client mcpproxy just connected, **When** the user triggers undo
+1. **Given** a client mcpproxy just connected, **When** the architect triggers undo
    from the same connect surface (wizard row and standalone modal), **Then** the
    mcpproxy entry is removed and the client is reported not-connected.
 2. **Given** connect overwrote a pre-existing entry of the same name, **When**
    undo runs, **Then** the pre-connect state is restored from the backup rather
    than leaving the overwritten entry lost.
-3. **Given** the user requests undo, **When** the revert is about to run, **Then**
+3. **Given** the architect requests undo, **When** the revert is about to run, **Then**
    the change to be reverted is shown (the same preview surface) before it is
    applied.
 4. **Given** other MCP servers exist in the config, **When** undo runs, **Then**
@@ -201,7 +201,7 @@ first read/write that could trigger it.
 
 ### Edge Cases
 
-- The client config already contains an entry named `mcpproxy` that the user
+- The client config already contains an entry named `mcpproxy` that the architect
   created: the preview must show it as an **update/overwrite**, and undo must be
   able to restore the pre-connect entry (not silently discard it).
 - A bridge client (e.g. Claude Desktop) with no existing config file: the preview
@@ -216,7 +216,7 @@ first read/write that could trigger it.
 - TOML clients (Codex) vs JSON clients: the preview must render the correct
   format for the client being connected.
 - The API key embedded in the endpoint URL must never be silently exposed in a
-  way that surprises the user, nor hidden so thoroughly that they don't realize a
+  way that surprises the architect, nor hidden so thoroughly that they don't realize a
   credential is written — the preview represents it deliberately.
 - Backups accumulate with no retention: repeated connect/disconnect must not
   break, and the accumulation behavior must be documented (and optionally bounded)
@@ -237,13 +237,13 @@ first read/write that could trigger it.
   added/updated and that all other content in the config file is left unchanged,
   distinguishing a "create" from an "overwrite of an existing same-named entry".
 - **FR-004**: The preview MUST represent API-key handling honestly (shown or
-  clearly indicated/masked) so the user is aware a credential is written into the
+  clearly indicated/masked) so the architect is aware a credential is written into the
   client config, without accidentally leaking it in logs or telemetry.
 - **FR-005**: Connect MUST continue to create a timestamped backup before
   modifying an existing config (preserving current behavior) and the operation
   result MUST carry the backup path.
 - **FR-006**: The Web UI (both the onboarding wizard connect step and the
-  standalone Connect modal) MUST display the backup path to the user after a
+  standalone Connect modal) MUST display the backup path to the architect after a
   successful connect, and MUST clearly represent the "no prior file to back up"
   case rather than showing a blank path.
 - **FR-007**: The system MUST offer a one-click undo of a connect from the same
@@ -307,7 +307,7 @@ first read/write that could trigger it.
   equal to the entry a subsequent connect writes (same key, same shape), verified
   by test across JSON and TOML clients.
 - **SC-005**: 100% of successful Web UI connects that modified an existing config
-  display the backup path to the user; the "no prior file" case is shown
+  display the backup path to the architect; the "no prior file" case is shown
   distinctly (never a blank path), verified by test.
 - **SC-006**: Undo returns the client to not-connected in 100% of tested cases,
   and restores the pre-connect state when connect overwrote a pre-existing
@@ -329,7 +329,7 @@ first read/write that could trigger it.
   per-client status/connect/disconnect reads.
 - Surgical entry removal is the correct default for undo in the common case (a
   newly added mcpproxy entry); backup-based restore is reserved for the overwrite
-  case where surgical removal would lose the user's prior entry.
+  case where surgical removal would lose the architect's prior entry.
 - Telemetry for the connect step is already captured (complete/skip) and is the
   authoritative measure for the funnel success criteria.
 - The API key written into client configs is a real credential and must be handled

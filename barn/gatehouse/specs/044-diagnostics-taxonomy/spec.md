@@ -29,9 +29,9 @@ A user configures an upstream MCP server but the server fails to connect. The us
 
 **Acceptance Scenarios**:
 
-1. **Given** a user has configured an upstream server with a non-existent stdio command, **When** the user queries that server's diagnostics via REST or CLI, **Then** the response includes `error_code = "MCPX_STDIO_SPAWN_ENOENT"`, a human-readable user_message, an ordered list of fix_steps, and a docs_url pointing to `docs/errors/MCPX_STDIO_SPAWN_ENOENT.md`.
-2. **Given** a user has configured an upstream HTTP server with an OAuth provider whose refresh token has expired, **When** the user queries that server's diagnostics, **Then** the response includes `error_code = "MCPX_OAUTH_REFRESH_EXPIRED"` with fix steps that reference the re-login action.
-3. **Given** a server is healthy and connected, **When** the user queries its diagnostics, **Then** the response includes an empty or null `error_code` and no fix_steps, and existing non-error diagnostics fields remain populated.
+1. **Given** an architect has configured an upstream server with a non-existent stdio command, **When** the architect queries that server's diagnostics via REST or CLI, **Then** the response includes `error_code = "MCPX_STDIO_SPAWN_ENOENT"`, a human-readable user_message, an ordered list of fix_steps, and a docs_url pointing to `docs/errors/MCPX_STDIO_SPAWN_ENOENT.md`.
+2. **Given** an architect has configured an upstream HTTP server with an OAuth provider whose refresh token has expired, **When** the architect queries that server's diagnostics, **Then** the response includes `error_code = "MCPX_OAUTH_REFRESH_EXPIRED"` with fix steps that reference the re-login action.
+3. **Given** a server is healthy and connected, **When** the architect queries its diagnostics, **Then** the response includes an empty or null `error_code` and no fix_steps, and existing non-error diagnostics fields remain populated.
 
 ---
 
@@ -45,9 +45,9 @@ A user does not need to run any CLI to notice a failure. The macOS tray icon sho
 
 **Acceptance Scenarios**:
 
-1. **Given** any server has an active diagnostic with severity=error, **When** the user looks at the macOS tray, **Then** a red indicator is visible and a "Fix issues (N)" menu group lists failing servers by name.
-2. **Given** a server's ErrorPanel is rendered in the web UI, **When** the user clicks a non-destructive fix button, **Then** the fix is executed and a success/failure toast is shown.
-3. **Given** a server's ErrorPanel is rendered, **When** the user clicks a destructive fix button, **Then** the dry-run preview is shown by default with a confirmation affordance before any state mutation.
+1. **Given** any server has an active diagnostic with severity=error, **When** the architect looks at the macOS tray, **Then** a red indicator is visible and a "Fix issues (N)" menu group lists failing servers by name.
+2. **Given** a server's ErrorPanel is rendered in the web UI, **When** the architect clicks a non-destructive fix button, **Then** the fix is executed and a success/failure toast is shown.
+3. **Given** a server's ErrorPanel is rendered, **When** the architect clicks a destructive fix button, **Then** the dry-run preview is shown by default with a confirmation affordance before any state mutation.
 
 ---
 
@@ -61,9 +61,9 @@ A power user wants to diagnose and fix a server from the terminal. `mcpproxy doc
 
 **Acceptance Scenarios**:
 
-1. **Given** a failing server, **When** the user runs `mcpproxy doctor --server <name>`, **Then** the output includes the stable error code, user_message, and fix_steps.
-2. **Given** a fix exists for a given code, **When** the user runs `mcpproxy doctor fix <CODE> --server <name>` without any additional flags, **Then** the command defaults to dry-run for any destructive fix and shows the preview only.
-3. **Given** the user runs `mcpproxy doctor list-codes`, **When** the command completes, **Then** the output enumerates every registered code with its severity, message, and docs URL.
+1. **Given** a failing server, **When** the architect runs `mcpproxy doctor --server <name>`, **Then** the output includes the stable error code, user_message, and fix_steps.
+2. **Given** a fix exists for a given code, **When** the architect runs `mcpproxy doctor fix <CODE> --server <name>` without any additional flags, **Then** the command defaults to dry-run for any destructive fix and shows the preview only.
+3. **Given** the architect runs `mcpproxy doctor list-codes`, **When** the command completes, **Then** the output enumerates every registered code with its severity, message, and docs URL.
 
 ---
 
@@ -78,19 +78,19 @@ mcpproxy reports anonymous telemetry about which error codes are occurring and h
 **Acceptance Scenarios**:
 
 1. **Given** at least one server has reported an error code in the last 24h, **When** a telemetry heartbeat is emitted, **Then** the payload includes a `diagnostics` object with `error_code_counts_24h` capped at the top 20 codes.
-2. **Given** a user has clicked fix buttons or run `doctor fix`, **When** a telemetry heartbeat is emitted, **Then** the payload reports `fix_attempted_24h` and `fix_succeeded_24h` counts.
+2. **Given** an architect has clicked fix buttons or run `doctor fix`, **When** a telemetry heartbeat is emitted, **Then** the payload reports `fix_attempted_24h` and `fix_succeeded_24h` counts.
 3. **Given** telemetry is disabled, **When** any error or fix occurs, **Then** no diagnostics telemetry data is transmitted.
 
 ---
 
 ### Edge Cases
 
-- **Unknown raw error**: If the classifier cannot map a raw error to a known code, the system emits a generic fallback code (e.g. `MCPX_UNKNOWN`) with user_message that asks the user to file a bug report, rather than silently dropping the error.
+- **Unknown raw error**: If the classifier cannot map a raw error to a known code, the system emits a generic fallback code (e.g. `MCPX_UNKNOWN`) with user_message that asks the architect to file a bug report, rather than silently dropping the error.
 - **Concurrent fix attempts**: If two clients trigger the same fix for the same server simultaneously, the system rate-limits or serializes the request so no duplicate state changes occur.
 - **Rate-limited fix endpoint**: The fix endpoint is rate-limited per-server to protect against accidental rapid-fire clicks.
 - **Stale error_code**: When a server transitions from failing to healthy, the diagnostic surface clears the code on the next snapshot; no stale red badge persists.
 - **Docs 404**: If a docs URL is missing at release time, CI fails the build rather than allowing a broken link to ship.
-- **Destructive fix default**: A fix that mutates config, deletes tokens, or restarts a container defaults to dry-run; the user must explicitly opt in to execute.
+- **Destructive fix default**: A fix that mutates config, deletes tokens, or restarts a container defaults to dry-run; the architect must explicitly opt in to execute.
 - **Code rename**: Once a code is registered and shipped, it is never renamed; deprecation marks it hidden and points at the replacement code.
 
 ## Requirements *(mandatory)*
@@ -123,7 +123,7 @@ mcpproxy reports anonymous telemetry about which error codes are occurring and h
 #### Surfacing — macOS Tray
 
 - **FR-011**: macOS tray MUST show a visual indicator when any server has a diagnostic of severity=error, and a lesser indicator when the worst active diagnostic is severity=warn.
-- **FR-012**: macOS tray MUST list failing servers in a "Fix issues (N)" menu group, with each entry routing the user to the corresponding web UI diagnostics panel.
+- **FR-012**: macOS tray MUST list failing servers in a "Fix issues (N)" menu group, with each entry routing the architect to the corresponding web UI diagnostics panel.
 
 #### Surfacing — CLI
 

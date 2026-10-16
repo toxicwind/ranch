@@ -9,7 +9,7 @@ These are the **canonical source** for the rewritten agent brains. They evolve t
 ## Key change vs spec 045
 045 had a single late binary gate (approve the CEO's finished synthesis). 064 inverts the default to **checkpoint at every design-decision boundary** with structured redirection:
 - **Gate 1 (plan-of-attack)** — CEO raises a `request_confirmation`/`suggest_tasks` on its proposed decomposition and waits before creating children.
-- **Gate 2 (per-spec design)** — each spec issue carries a user `approval` execution stage; no code before approval.
+- **Gate 2 (per-spec design)** — each spec issue carries an architect `approval` execution stage; no code before approval.
 - **Gate 3 (pre-merge)** — agents open PRs, never merge; the human merges on GitHub (branch protection enforced).
 
 ## Behavioral contract

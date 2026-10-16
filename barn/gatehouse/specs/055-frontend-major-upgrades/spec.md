@@ -29,8 +29,8 @@ A maintainer upgrades the four major frontend dependencies, rebuilds the binary,
 **Acceptance Scenarios**:
 
 1. **Given** the upgraded dependencies installed, **When** `npm run build` runs, **Then** it completes without TypeScript, PostCSS, or Vite errors and writes `frontend/dist`.
-2. **Given** a running mcpproxy serving the rebuilt UI, **When** a user navigates each main view, **Then** all DaisyUI-styled components (buttons, cards, badges, modals, tabs, toggles, dropdowns) render with the same appearance and behavior as before the upgrade.
-3. **Given** the rebuilt UI, **When** a user interacts with the wizard dialog, server detail panels, and activity filters, **Then** they behave identically to the pre-migration build.
+2. **Given** a running mcpproxy serving the rebuilt UI, **When** an architect navigates each main view, **Then** all DaisyUI-styled components (buttons, cards, badges, modals, tabs, toggles, dropdowns) render with the same appearance and behavior as before the upgrade.
+3. **Given** the rebuilt UI, **When** an architect interacts with the wizard dialog, server detail panels, and activity filters, **Then** they behave identically to the pre-migration build.
 
 ---
 

@@ -109,7 +109,7 @@ rewrite, scripted `scripts/demo/` pipeline, social-preview PNG.
 **Out of scope (this round):** asciinema/terminal GIF; Diátaxis docs restructure;
 website redesign. The glass-pill motif is available to reuse on the website later.
 
-**Requires the user (cannot be scripted):** uploading `social.png` to GitHub
+**Requires the architect (cannot be scripted):** uploading `social.png` to GitHub
 Settings → Social preview.
 
 ## Success criteria

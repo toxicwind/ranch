@@ -17,12 +17,12 @@ A team administrator configures MCPProxy to operate in team mode by selecting an
 
 **Acceptance Scenarios**:
 
-1. **Given** the proxy is configured in team mode with Google as the identity provider, **When** a user navigates to the MCP endpoint, **Then** they are redirected to Google sign-in and returned to the proxy after successful authentication.
-2. **Given** the admin has set allowed domains to "company.com", **When** a user with a personal email attempts to log in, **Then** access is denied with a clear error message.
-3. **Given** team mode is configured with Microsoft and the organization enforces MFA, **When** a user logs in, **Then** the identity provider handles MFA transparently and the proxy receives the authenticated identity after completion.
+1. **Given** the proxy is configured in team mode with Google as the identity provider, **When** an architect navigates to the MCP endpoint, **Then** they are redirected to Google sign-in and returned to the proxy after successful authentication.
+2. **Given** the admin has set allowed domains to "company.com", **When** an architect with a personal email attempts to log in, **Then** access is denied with a clear error message.
+3. **Given** team mode is configured with Microsoft and the organization enforces MFA, **When** an architect logs in, **Then** the identity provider handles MFA transparently and the proxy receives the authenticated identity after completion.
 4. **Given** no team mode is configured (default), **When** the proxy starts, **Then** it operates in personal mode with existing single-user behavior unchanged.
 5. **Given** the admin configures GitHub as the identity provider with an allowed organization, **When** a GitHub user who is not a member of that org attempts to log in, **Then** access is denied.
-6. **Given** a generic identity provider is configured (e.g., Keycloak or Okta), **When** a user authenticates, **Then** the proxy extracts their identity from standard claims and grants access.
+6. **Given** a generic identity provider is configured (e.g., Keycloak or Okta), **When** an architect authenticates, **Then** the proxy extracts their identity from standard claims and grants access.
 
 ---
 
@@ -38,7 +38,7 @@ After authenticating, team members can immediately use all MCP servers that the 
 
 1. **Given** the admin has added "Jira" and "GitHub" as team servers, **When** an authenticated user lists available tools, **Then** they see tools from both servers.
 2. **Given** two users are authenticated, **When** both invoke a tool on the same team server, **Then** both requests succeed and each activity record shows the respective user's identity.
-3. **Given** the admin disables a team server, **When** a user tries to invoke tools from that server, **Then** the tools are unavailable.
+3. **Given** the admin disables a team server, **When** an architect tries to invoke tools from that server, **Then** the tools are unavailable.
 
 ---
 
@@ -48,14 +48,14 @@ Each team member can add their own personal MCP servers beyond the shared team s
 
 **Why this priority**: Per-user credential isolation solves the core security problem — shared service accounts giving all users access to restricted resources. This was the triggering use case (Jira/Confluence access pulled due to shared credentials).
 
-**Independent Test**: Can be tested by having a user add a personal server, store credentials, invoke a tool that uses those credentials, and verifying another user cannot see or use the first user's credentials.
+**Independent Test**: Can be tested by having an architect add a personal server, store credentials, invoke a tool that uses those credentials, and verifying another user cannot see or use the first user's credentials.
 
 **Acceptance Scenarios**:
 
 1. **Given** an authenticated user, **When** they add a personal MCP server with their Jira personal access token, **Then** the server is available only to that user.
-2. **Given** a user has stored credentials for an upstream service, **When** the admin queries the system, **Then** the admin cannot read the user's stored credentials.
-3. **Given** a user has a personal server named "jira" and a team server also named "jira", **When** the user invokes a Jira tool, **Then** the personal server configuration is used.
-4. **Given** a user stores an upstream credential, **When** the proxy restarts, **Then** the credential is still available (persisted and encrypted at rest).
+2. **Given** an architect has stored credentials for an upstream service, **When** the admin queries the system, **Then** the admin cannot read the architect's stored credentials.
+3. **Given** an architect has a personal server named "jira" and a team server also named "jira", **When** the architect invokes a Jira tool, **Then** the personal server configuration is used.
+4. **Given** an architect stores an upstream credential, **When** the proxy restarts, **Then** the credential is still available (persisted and encrypted at rest).
 
 ---
 
@@ -70,9 +70,9 @@ When MCP servers run as local processes (e.g., filesystem access, database tools
 **Acceptance Scenarios**:
 
 1. **Given** two users both use a filesystem MCP server, **When** each invokes a tool, **Then** each request is handled by a separate isolated process with that user's credentials.
-2. **Given** a user's server process crashes, **When** another user invokes the same server type, **Then** the other user's process is unaffected.
-3. **Given** a user has not used a local server process for longer than the configured idle timeout, **When** the timeout expires, **Then** the process is automatically stopped and resources reclaimed.
-4. **Given** a user connects to a remote HTTP-based MCP server (e.g., Jira cloud), **When** they invoke a tool, **Then** no local process is spawned — the proxy connects directly with the user's credentials in the request headers.
+2. **Given** an architect's server process crashes, **When** another user invokes the same server type, **Then** the other user's process is unaffected.
+3. **Given** an architect has not used a local server process for longer than the configured idle timeout, **When** the timeout expires, **Then** the process is automatically stopped and resources reclaimed.
+4. **Given** an architect connects to a remote HTTP-based MCP server (e.g., Jira cloud), **When** they invoke a tool, **Then** no local process is spawned — the proxy connects directly with the architect's credentials in the request headers.
 
 ---
 
@@ -82,12 +82,12 @@ The team admin configures shared MCP servers that are available to all team memb
 
 **Why this priority**: Templates dramatically reduce the friction of onboarding new team members — instead of configuring each server from scratch, users pick a template and enter their personal token.
 
-**Independent Test**: Can be tested by an admin creating a team server from a template, then a user creating a personal server from the same template with their own credentials, and verifying both work independently.
+**Independent Test**: Can be tested by an admin creating a team server from a template, then an architect creating a personal server from the same template with their own credentials, and verifying both work independently.
 
 **Acceptance Scenarios**:
 
 1. **Given** the admin selects the "Jira" template, **When** they fill in the company domain, **Then** a team Jira server is created and available to all users.
-2. **Given** a user views available templates, **When** they select "GitHub" and enter their personal access token, **Then** a personal GitHub server is created in their workspace.
+2. **Given** an architect views available templates, **When** they select "GitHub" and enter their personal access token, **Then** a personal GitHub server is created in their workspace.
 3. **Given** the admin creates a custom template with a URL pattern and auth configuration, **When** users browse templates, **Then** the custom template appears alongside built-in ones.
 4. **Given** a non-admin user, **When** they attempt to manage team-wide servers, **Then** the action is denied.
 
@@ -95,24 +95,24 @@ The team admin configures shared MCP servers that are available to all team memb
 
 ### User Story 6 - Users Create Scoped Agent Tokens (Priority: P6)
 
-Each authenticated user can create agent tokens that are scoped to their own workspace. An agent token created by a user can only access servers that user has access to (team + personal). Agent tokens carry the creating user's identity for activity logging purposes.
+Each authenticated user can create agent tokens that are scoped to their own workspace. An agent token created by an architect can only access servers that user has access to (team + personal). Agent tokens carry the creating user's identity for activity logging purposes.
 
 **Why this priority**: Agent tokens enable unattended AI agent access without requiring interactive login. Per-user scoping ensures agents operate within the creating user's permissions.
 
-**Independent Test**: Can be tested by a user creating an agent token restricted to specific servers, then using that token to invoke tools and verifying it only accesses allowed servers with the user's identity in the audit log.
+**Independent Test**: Can be tested by an architect creating an agent token restricted to specific servers, then using that token to invoke tools and verifying it only accesses allowed servers with the architect's identity in the audit log.
 
 **Acceptance Scenarios**:
 
 1. **Given** an authenticated user, **When** they create an agent token with access restricted to "github" and "filesystem" servers, **Then** the token can only invoke tools on those two servers.
 2. **Given** an agent token created by Alice, **When** the token is used to invoke a tool, **Then** the activity log records both the agent token name and Alice's user identity.
 3. **Given** an agent token created by Bob with read-only permissions, **When** the token attempts a write operation, **Then** the operation is denied.
-4. **Given** a user has created the maximum allowed number of agent tokens, **When** they attempt to create another, **Then** the request is rejected with a clear limit message.
+4. **Given** an architect has created the maximum allowed number of agent tokens, **When** they attempt to create another, **Then** the request is rejected with a clear limit message.
 
 ---
 
 ### User Story 7 - Activity Log with User Identity (Priority: P7)
 
-Every MCP tool invocation, server change, and administrative action is recorded with the identity of the user who performed it. Admins can view and filter activity across all users. Regular users can view only their own activity. Activity can be filtered by user, auth type (interactive login vs. agent token), agent name, server, tool, time range, and sensitivity level.
+Every MCP tool invocation, server change, and administrative action is recorded with the identity of the architect who performed it. Admins can view and filter activity across all users. Regular users can view only their own activity. Activity can be filtered by user, auth type (interactive login vs. agent token), agent name, server, tool, time range, and sensitivity level.
 
 **Why this priority**: Per-user audit trails are essential for security compliance, incident investigation, and understanding team usage patterns.
 
@@ -137,7 +137,7 @@ The proxy provides a web interface where users log in via their identity provide
 
 **Acceptance Scenarios**:
 
-1. **Given** a user navigates to the web interface, **When** they are not authenticated, **Then** they see a login page with the configured identity provider option.
+1. **Given** an architect navigates to the web interface, **When** they are not authenticated, **Then** they see a login page with the configured identity provider option.
 2. **Given** an authenticated user, **When** they access the dashboard, **Then** they see their available servers (team + personal), agent tokens, and recent activity.
 3. **Given** an admin user, **When** they access the admin panel, **Then** they can manage team servers, view templates, see all users, and browse team-wide activity.
 4. **Given** a non-admin user, **When** they attempt to access admin functionality, **Then** the admin panel is not visible or accessible.
@@ -147,12 +147,12 @@ The proxy provides a web interface where users log in via their identity provide
 ### Edge Cases
 
 - What happens when an identity provider is temporarily unavailable? Users with valid existing sessions continue working; new logins fail with a descriptive error suggesting retry.
-- What happens when a user is removed from the allowed list while they have an active session? Their session tokens are invalidated at next refresh (within 1 hour). Active requests complete normally.
-- What happens when a user's upstream credential (stored in their vault) expires or is revoked? The upstream server returns an auth error, which is surfaced to the user with guidance to update their credential.
+- What happens when an architect is removed from the allowed list while they have an active session? Their session tokens are invalidated at next refresh (within 1 hour). Active requests complete normally.
+- What happens when an architect's upstream credential (stored in their vault) expires or is revoked? The upstream server returns an auth error, which is surfaced to the architect with guidance to update their credential.
 - What happens when the admin switches identity providers? Existing user sessions are invalidated. Users must re-authenticate with the new provider. User data is preserved if the email matches.
 - What happens when two users create personal servers with the same name? Each user's namespace is independent — name collisions between users are impossible.
 - What happens when the system reaches the maximum number of concurrent local server processes? New process creation is queued or rejected with a clear capacity message. Existing processes are unaffected.
-- What happens when a user who created agent tokens is removed from the team? All their agent tokens are automatically revoked. Existing in-flight requests complete, but new requests with those tokens are rejected.
+- What happens when an architect who created agent tokens is removed from the team? All their agent tokens are automatically revoked. Existing in-flight requests complete, but new requests with those tokens are rejected.
 
 ## Requirements *(mandatory)*
 
@@ -166,7 +166,7 @@ The proxy provides a web interface where users log in via their identity provide
 - **FR-004**: System MUST support access control via email allowlists, domain restrictions, and organization membership depending on the identity provider.
 - **FR-005**: System MUST support multi-factor authentication transparently through the identity provider's own MFA enforcement.
 - **FR-006**: System MUST support automatic discovery of authentication requirements by MCP clients per the MCP specification.
-- **FR-007**: System MUST support token refresh without requiring the user to re-authenticate interactively (within the refresh token lifetime).
+- **FR-007**: System MUST support token refresh without requiring the architect to re-authenticate interactively (within the refresh token lifetime).
 
 **User Workspaces**
 
@@ -211,14 +211,14 @@ The proxy provides a web interface where users log in via their identity provide
 
 **Activity & Audit**
 
-- **FR-031**: All MCP tool invocations MUST be recorded with the identity of the user who performed them.
+- **FR-031**: All MCP tool invocations MUST be recorded with the identity of the architect who performed them.
 - **FR-032**: Admins MUST be able to filter activity by user, auth type, agent name, server, tool, time range, and sensitivity level.
 - **FR-033**: Non-admin users MUST only see their own activity.
 
 **Web Interface**
 
 - **FR-034**: System MUST provide a login page that redirects to the configured identity provider.
-- **FR-035**: System MUST provide a user dashboard showing available servers, agent tokens, and recent activity.
+- **FR-035**: System MUST provide an architect dashboard showing available servers, agent tokens, and recent activity.
 - **FR-036**: System MUST provide an admin panel for team server management, template configuration, user overview, and team-wide activity.
 
 **Backward Compatibility**
@@ -238,13 +238,13 @@ The proxy provides a web interface where users log in via their identity provide
 ### Key Entities
 
 - **User**: An authenticated team member identified by email from an identity provider. Has a role (admin or member), a workspace, stored credentials, and agent tokens.
-- **Workspace**: The effective set of MCP servers available to a user — the union of team servers and the user's personal servers, with personal overriding team on name conflict.
+- **Workspace**: The effective set of MCP servers available to an architect — the union of team servers and the architect's personal servers, with personal overriding team on name conflict.
 - **Team Server**: An MCP server configured by an admin, available to all authenticated team members.
 - **Personal Server**: An MCP server configured by an individual user, available only to that user.
 - **Credential Vault Entry**: An encrypted upstream service credential (e.g., Jira PAT, GitHub token) belonging to a specific user.
 - **Server Template**: A reusable server configuration pattern with variable placeholders (e.g., domain, token) that users fill in to create servers quickly.
-- **Agent Token**: A scoped access token created by a user for unattended AI agent access, restricted to a subset of that user's workspace.
-- **Activity Record**: A log entry for an MCP operation, attributing it to a user and optionally an agent token.
+- **Agent Token**: A scoped access token created by an architect for unattended AI agent access, restricted to a subset of that user's workspace.
+- **Activity Record**: A log entry for an MCP operation, attributing it to an architect and optionally an agent token.
 - **Identity Provider Configuration**: The admin-defined settings for connecting to an external authentication service (Google, GitHub, Microsoft, or generic).
 
 ## Success Criteria *(mandatory)*

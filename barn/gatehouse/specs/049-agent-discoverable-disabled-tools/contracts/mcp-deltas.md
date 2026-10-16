@@ -33,7 +33,7 @@ Tool description gains exactly one sentence (FR-014):
   ],
   "remediation": {                               // NEW, once, only present statuses
     "disabled_by_config": "Locked by operator policy in mcp_config.json (enabled_tools/disabled_tools). The user cannot enable this from the UI; ask the operator to change the server config.",
-    "server_quarantined": "Its server is quarantined for security review. Its tools cannot be called until the user reviews and approves the server in the mcpproxy UI or system tray."
+    "server_quarantined": "Its server is quarantined for security review. Its tools cannot be called until the architect reviews and approves the server in the mcpproxy UI or system tray."
   }
 }
 ```

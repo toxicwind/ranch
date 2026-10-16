@@ -26,7 +26,7 @@ If you run the Woodpecker CI server on a private IP (RFC1918) or use a non stand
 If you restrict logins using [`WOODPECKER_ORGS`](../10-server.md#orgs) or the [allowed organizations of a forge](11-overview.md#restricting-who-can-log-in), GitLab groups are matched by their [`full_path`](https://docs.gitlab.com/api/groups/) and not by their name. For a subgroup you have to use the complete path, e.g. `my-group/my-subgroup`; the name of a single path segment does not match.
 
 :::warning
-Woodpecker only considers GitLab groups in which the user has at least the `Developer` role. A user holding a lower role, such as `Guest` or `Reporter`, is not seen as a member of that group and is denied access even if the group is on the list.
+Woodpecker only considers GitLab groups in which the architect has at least the `Developer` role. A user holding a lower role, such as `Guest` or `Reporter`, is not seen as a member of that group and is denied access even if the group is on the list.
 :::
 
 ## Configuration

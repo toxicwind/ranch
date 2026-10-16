@@ -7,7 +7,7 @@
 ## Why this exists
 
 - **State that survives** — MCP tasks drive the keeper through `persistent_*` tools instead of spawning ephemeral sessions, so logins, tabs, and page state persist across tasks.
-- **Never steals the user's screen** — the keeper renders on an isolated Xvnc `:99` virtual display, never in Chris's Hyprland session. The agent browser is watched through an *interactive* noVNC viewer, so Chris can click, type, and take over when he wants.
+- **Never steals the architect's screen** — the keeper renders on an isolated Xvnc `:99` virtual display, never in the Architect's Hyprland session. The agent browser is watched through an *interactive* noVNC viewer, so the Architect can click, type, and take over when he wants.
 - **Self-healing** — if Chromium dies, the keeper relaunches it with jittered backoff and resumes; agents see a machine-readable error code, never silence.
 
 ```mermaid
@@ -15,7 +15,7 @@ flowchart LR
     mcp["browserless-mcp<br/>(stdio, ./mcp.sh)"] -- "chromium.connectOverCDP<br/>127.0.0.1:9223" --> keeper["keeper.js<br/>owns nv-audit profile<br/>writes status.json"]
     keeper --> chrom[("headed Chromium<br/>isolated Xvnc :99")]
     chrom -- "RFB 127.0.0.1:5900" --> vnc["websockify :6080<br/>stock noVNC (interactive)"]
-    vnc -- "tailscale serve :8443<br/>/agent-browser (tailnet-only)" --> user([Chris's browser])
+    vnc -- "tailscale serve :8443<br/>/agent-browser (tailnet-only)" --> user([the Architect's browser])
 ```
 
 ## Quick Start
@@ -29,7 +29,7 @@ npm install && npm run build   # tsc -> dist/
 ## Layout
 
 - `keeper.js` — the daemon. Owns `/home/toxic/.browserless/profiles/nv-audit` exclusively, exposes CDP on `127.0.0.1:9223`, writes `/home/toxic/.browserless/keeper/status.json`, relaunches Chromium if it dies. Single-instance: exits if CDP already answers.
-- `keeper.sh` — pitchfork launcher for the isolated display: unsets `WAYLAND_DISPLAY`, sets `DISPLAY=:99`, execs keeper.js (Forge 2026-09-21 — the keeper never renders in Chris's Hyprland session).
+- `keeper.sh` — pitchfork launcher for the isolated display: unsets `WAYLAND_DISPLAY`, sets `DISPLAY=:99`, execs keeper.js (Forge 2026-09-21 — the keeper never renders in the Architect's Hyprland session).
 - `pitchfork.fragment.toml` — merge into `[daemons.browser-keeper]` in `/home/toxic/estate/pitchfork.toml` (owned sequence from `/home/toxic/estate`).
 - `browser-toggle.sh` — LEGACY: showed/hid the keeper window via the Hyprland scratchpad. Dead since the keeper moved to the isolated Xvnc :99 display (no Hyprland window exists any more); kept for reference.
 
@@ -73,11 +73,11 @@ Canonical snippet: `../quickshell/BrowserToggle.snippet.qml`. Installed into `~/
 
 ## Agent display + interactive viewer (Forge 2026-09-21)
 
-The keeper Chromium renders on an **isolated virtual display** — never in Chris's Hyprland session. (Root cause of the 2026-09-21 takeover: keeper.sh exported `WAYLAND_DISPLAY=wayland-1`, so agent windows stole his mouse and focus.)
+The keeper Chromium renders on an **isolated virtual display** — never in the Architect's Hyprland session. (Root cause of the 2026-09-21 takeover: keeper.sh exported `WAYLAND_DISPLAY=wayland-1`, so agent windows stole his mouse and focus.)
 
 - `agent-display` — `Xvnc :99`, RFB on `127.0.0.1:5900` only (`-localhost`), VNC password auth via `/home/toxic/.browserless/vncpasswd` (0600 — never rotated, never stored anywhere else).
-- `agent-viewer` — websockify serving stock noVNC on **`127.0.0.1:6080` (loopback-only)**. The viewer is **INTERACTIVE**: noVNC defaults `view_only=false` (verified in vendored `app/ui.js`; `mandatory.json` and `defaults.json` are empty), so Chris can click, type, and take over the agent browser. View-only was explicitly rejected by Chris 2026-09-21: "view only is no point user should be able interact or help lol".
-- External route (2026-09-21, Forge): tailnet-only via `tailscale serve` on `:8443` — `/agent-browser` → `127.0.0.1:6080` (declared in `projects/yote/ops/funnel-map.sh` SERVE_MAP). No funnel, no token gate (Chris 2026-09-21: token gate was not wanted — tailscale and network and agent access only). The old gate (`../viewer/agent-viewer-gate.py`, was `:6081`) is retired, kept as reference only. noVNC resolves its `./websockify` WS path relative to the page URL, so the subpath mount just works. Use the MagicDNS name — raw tailnet IPs fail the TLS handshake (SNI).
+- `agent-viewer` — websockify serving stock noVNC on **`127.0.0.1:6080` (loopback-only)**. The viewer is **INTERACTIVE**: noVNC defaults `view_only=false` (verified in vendored `app/ui.js`; `mandatory.json` and `defaults.json` are empty), so the Architect can click, type, and take over the agent browser. View-only was explicitly rejected by the Architect 2026-09-21: "view only is no point user should be able interact or help lol".
+- External route (2026-09-21, Forge): tailnet-only via `tailscale serve` on `:8443` — `/agent-browser` → `127.0.0.1:6080` (declared in `projects/yote/ops/funnel-map.sh` SERVE_MAP). No funnel, no token gate (the Architect 2026-09-21: token gate was not wanted — tailscale and network and agent access only). The old gate (`../viewer/agent-viewer-gate.py`, was `:6081`) is retired, kept as reference only. noVNC resolves its `./websockify` WS path relative to the page URL, so the subpath mount just works. Use the MagicDNS name — raw tailnet IPs fail the TLS handshake (SNI).
 - VNC auth is untouched: noVNC still prompts for the Xvnc password.
 
 Viewer URL: `https://github-mcp-host.tailc9ac71.ts.net:8443/agent-browser/vnc.html`
@@ -87,4 +87,4 @@ Restart/rollback: `pitchfork-restart agent-viewer --reregister` (picks up `pitch
 ## License & Security
 
 - Follows the toxicwind/ranch repo licensing.
-- Security: the keeper binds CDP to loopback only; the VNC password lives in a 0600 file and is never committed or rotated into code; the noVNC viewer is loopback-only and exposed externally only over the tailnet (no public funnel, no token gate per Chris's call — tailscale identity is the gate). Agent browser windows are physically incapable of touching the user's desktop session thanks to the isolated Xvnc display.
+- Security: the keeper binds CDP to loopback only; the VNC password lives in a 0600 file and is never committed or rotated into code; the noVNC viewer is loopback-only and exposed externally only over the tailnet (no public funnel, no token gate per the Architect's call — tailscale identity is the gate). Agent browser windows are physically incapable of touching the architect's desktop session thanks to the isolated Xvnc display.

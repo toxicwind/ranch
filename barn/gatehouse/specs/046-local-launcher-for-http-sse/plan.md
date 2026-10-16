@@ -31,7 +31,7 @@ Today mcpproxy will spawn a child process for an upstream MCP server **only** wh
 
 We want to allow `command` + `url` + (`http`|`sse`|`streamable-http`) together so that mcpproxy:
 
-1. Spawns the user's local command (e.g. `node my-server.js`, `docker run ...`, `./my-mcp-binary --port 9999`).
+1. Spawns the architect's local command (e.g. `node my-server.js`, `docker run ...`, `./my-mcp-binary --port 9999`).
 2. Waits for that command's HTTP/SSE endpoint at the configured `url` to come up.
 3. Connects via the existing HTTP/SSE transport once the endpoint is reachable.
 4. Owns the child's lifecycle: kills it on disconnect / restart / mcpproxy shutdown, captures its stdout+stderr to the per-server log.

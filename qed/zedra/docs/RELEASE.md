@@ -58,7 +58,7 @@ you restart them after the update.
 
 The Unix script installs to `~/.local/bin/zedra` by default. Override with `--prefix /usr/local/bin` or `ZEDRA_PREFIX`.
 
-The Windows script installs to `%LOCALAPPDATA%\Programs\zedra\bin\zedra.exe` by default and adds that directory to the user `Path`. Override with `-Prefix` or `ZEDRA_PREFIX`.
+The Windows script installs to `%LOCALAPPDATA%\Programs\zedra\bin\zedra.exe` by default and adds that directory to the architect `Path`. Override with `-Prefix` or `ZEDRA_PREFIX`.
 
 ## Verify a release locally
 

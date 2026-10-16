@@ -1,8 +1,8 @@
 # Hesitance patterns — pack-fix hunt (2026-09-20)
 
 Catalog of every place where agents/runners were instructed (or chose) to ask
-Chris, hedge, or refuse to act — plus the fix applied. Standing doctrine:
-**act-then-report**; questions to Chris only when the answer exists nowhere
+the Architect, hedge, or refuse to act — plus the fix applied. Standing doctrine:
+**act-then-report**; questions to the Architect only when the answer exists nowhere
 else AND the work cannot proceed.
 
 ## P1 — "Do not investigate further, do not retry, do not run anything else"
@@ -23,7 +23,7 @@ went unactioned across runs.
   bridge without a verified hot-replacement; never kill squawk processes; never
   expose/rotate/mint credentials; treat credential-shaped values as unverified
   canaries; no retry-spin into rate limits. Green runs stay silent; fixes get
-  narrated in fleet; a genuinely Chris-only blocker is stated once, plainly,
+  narrated in fleet; a genuinely the Architect-only blocker is stated once, plainly,
   while everything else keeps moving.
 
 ## P2 — Sentinel-skip during known outage: reviewed, NOT hesitance
@@ -46,33 +46,33 @@ correct fail-fast, not hedging.
 - Fleet seq 10738 (docs-fixer): "canonical homes for the skill + connector are
   undecided — nothing invented without him."
 - Why it's hesitance: naming/placement is recoverable and decidable. Doctrine
-  says decide, act, let Chris veto — not park the decision.
+  says decide, act, let the Architect veto — not park the decision.
 - Fix: recorded. Future briefs must restate "no hedging where action is
   possible"; the default for judgment calls is propose-and-act, not ask-first.
 
 ## P4 — Block reported instead of worked around
 - Fleet seq 10760 (estate-scripts-sweeper): yote's `gh` token dead, so the push was
-  parked waiting on Chris to run `gh auth login` on yote.
+  parked waiting on the Architect to run `gh auth login` on yote.
 - Why it's hesitance: a blocked path gets a workaround, not a status report.
   The documented fallback (GitHub git-database API push via the github skill's
   credential helper — see AGENTS.md "Git push from the cell") existed and was
   not attempted.
 - Fix: recorded. Workers must attempt the documented fallback route before
   parking work on a credential-shaped blocker; when a human step is truly
-  needed, hand Chris a one-liner for that step while everything else proceeds.
+  needed, hand the Architect a one-liner for that step while everything else proceeds.
 
 ## P5 — Legitimate human gate: kept narrow (no change)
 - Fleet seq 10769 (herd-deployer): Kimi inference 402/404/401 everywhere,
-  "needs Chris for a key/credits." Only Chris can fund a provider account.
+  "needs the Architect for a key/credits." Only the Architect can fund a provider account.
   The worker did everything else and stated the blocker plainly once. This is
   the correct narrow shape for a genuine human gate.
 
 ## Sweep coverage (all clean unless noted)
 - All `cron.d/**` bodies, all `goals/*/crons/**` bodies, all `skills/*/SKILL.md`:
   `router`'s "do not retry in a loop; report it" is fail-fast (fine);
-  `github`/`github-mcp` "never ask the user to paste a raw key" is
+  `github`/`github-mcp` "never ask the architect to paste a raw key" is
   anti-exfiltration (fine, keep); `emergent-tasking` skill + references clean.
-- Fleet history (1234 msgs): only P3/P4/P5 above matched ask-Chris phrasing.
+- Fleet history (1234 msgs): only P3/P4/P5 above matched ask-the Architect phrasing.
 - System crons (`deterministic-doctor`, `feed-pulse-*`, `profile-image`) are
   runtime-managed (read-only for us); `deterministic-doctor` body reviewed,
   clean.
@@ -82,7 +82,7 @@ correct fail-fast, not hedging.
 
 ## Enforcement — the permanent guard
 The script is the deliverable: `projects/ops/bin/hesitance-scan.sh`
-(canonical location per Chris's purge-max order, fleet seq 11264 — one
+(canonical location per the Architect's purge-max order, fleet seq 11264 — one
 runnable per workstream in `projects/ops/bin`). It classifies every hit as
 ROT / LEGITIMATE / QUOTE / ANTI and exits 1 only on genuine ROT. Run it
 against hatch instruction dirs and the estate-scripts repo; see

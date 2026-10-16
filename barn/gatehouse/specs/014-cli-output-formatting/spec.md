@@ -34,7 +34,7 @@ Developers debugging mcpproxy need clean, formatted table output that's easy to 
 
 **Acceptance Scenarios**:
 
-1. **Given** the daemon is running, **When** a user runs `mcpproxy upstream list` without flags, **Then** output displays as a formatted table with headers (NAME, STATUS, HEALTH, etc.)
+1. **Given** the daemon is running, **When** an architect runs `mcpproxy upstream list` without flags, **Then** output displays as a formatted table with headers (NAME, STATUS, HEALTH, etc.)
 2. **Given** a table has columns of varying widths, **When** the table is rendered, **Then** columns are aligned and readable
 3. **Given** NO_COLOR=1 is set, **When** table output is rendered, **Then** no ANSI color codes are included
 
@@ -66,7 +66,7 @@ Some users prefer YAML format for configuration export/import scenarios. YAML is
 
 **Acceptance Scenarios**:
 
-1. **Given** the daemon is running, **When** a user runs `mcpproxy upstream list -o yaml`, **Then** output is valid YAML matching JSON structure
+1. **Given** the daemon is running, **When** an architect runs `mcpproxy upstream list -o yaml`, **Then** output is valid YAML matching JSON structure
 
 ---
 

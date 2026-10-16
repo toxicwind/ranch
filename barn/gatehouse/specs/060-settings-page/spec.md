@@ -47,7 +47,7 @@ As a power user, I want the remaining subsystems (code execution, Docker isolati
 
 ### Edge Cases
 
-- Saving must never clobber secrets: because the config read masks the API key and secret headers, a save sends only the fields the user changed (partial update), not the whole masked config.
+- Saving must never clobber secrets: because the config read masks the API key and secret headers, a save sends only the fields the architect changed (partial update), not the whole masked config.
 - Deprecated/internal options (`top_k`, `enable_tray`, `features`/`enable_web_ui`, telemetry bookkeeping) are not shown.
 - Options managed elsewhere (upstream servers, registries) are not duplicated; the page links to those pages instead.
 - A change that requires a restart is applied/persisted but clearly marked as taking effect after restart.
@@ -59,7 +59,7 @@ As a power user, I want the remaining subsystems (code execution, Docker isolati
 
 - **FR-001**: The settings page MUST present configuration in prioritized sections: Security & Access (top), General, Advanced (grouped accordions), Raw JSON (full editor), and Teams (server edition only).
 - **FR-002**: The Security & Access section MUST include, at minimum: API key (masked, show, regenerate), require MCP auth, quarantine enabled, global Docker isolation enabled, code execution enabled, read-only mode, sensitive-data detection enabled, reveal secret headers, and listen address.
-- **FR-003**: Saving a section MUST persist only the fields the user changed (partial update), so masked secrets are never overwritten by a save of unrelated fields.
+- **FR-003**: Saving a section MUST persist only the fields the architect changed (partial update), so masked secrets are never overwritten by a save of unrelated fields.
 - **FR-004**: After a save, the system MUST persist the change, apply it live where possible, and clearly indicate when a restart is required (and which fields).
 - **FR-005**: Changing a dangerous option (reveal secret headers, disabling management, binding to a non-loopback address, disabling quarantine) MUST require explicit confirmation.
 - **FR-006**: Each control MUST use the appropriate input type (toggle, select/enum, number with bounds, text, duration, list) and validate input before allowing save.

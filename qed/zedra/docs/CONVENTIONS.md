@@ -19,7 +19,7 @@ Avoid panic-prone shortcuts in normal code paths.
 - Be careful with indexing. Prefer checked access when out-of-bounds input is possible.
 - Do not silently discard fallible results with `let _ = ...` when the error affects behavior or observability.
 - When an error is intentionally ignored, make the reason visible with explicit handling such as `.log_err()` where available, a `tracing` warning, or a short comment for expected shutdown paths.
-- Async operations that can fail should propagate errors to the layer that can show useful feedback to the user.
+- Async operations that can fail should propagate errors to the layer that can show useful feedback to the architect.
 
 ## Imports
 
@@ -75,7 +75,7 @@ fix(host): <description>
 chore(rpc): <description>
 ```
 
-Keep the description concise and describe the user-visible or maintainer-visible change.
+Keep the description concise and describe the architect-visible or maintainer-visible change.
 
 Keep each commit scoped to the current feature or fix. This repo often has multiple active edits in the same worktree, so do not stage or commit unrelated files or hunks.
 

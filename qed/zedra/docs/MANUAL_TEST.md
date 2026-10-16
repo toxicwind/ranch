@@ -461,7 +461,7 @@ app still builds, but push registration reports an error instead of a token.
 ## 1d. Windows Host CLI
 
 1. On an x86_64 Windows machine, run `irm https://zedra.dev/install.ps1 | iex` from PowerShell
-2. Expected: `zedra.exe` is installed under `%LOCALAPPDATA%\Programs\zedra\bin`, the directory is added to the user `Path`, and `zedra --help` works from the current shell
+2. Expected: `zedra.exe` is installed under `%LOCALAPPDATA%\Programs\zedra\bin`, the directory is added to the architect `Path`, and `zedra --help` works from the current shell
 3. Start the daemon from PowerShell: `zedra start --workdir C:\path\to\repo --detach`
 4. Expected: startup succeeds, Windows may show a firewall prompt, and `daemon.lock` plus `daemon.log` are written under `%APPDATA%\zedra\workspaces\` using their respective workspace hashes
 5. Run `zedra status --workdir C:\path\to\repo`
@@ -1743,7 +1743,7 @@ id in production). The trailing shows the aggregate `done/total` rollup.
 ### Host compatibility and cleanup
 1. Point the app at a host binary built before this feature and repeat the
    Upload flow.
-2. Expected: an alert appears telling the user to update the Zedra host; no crash.
+2. Expected: an alert appears telling the architect to update the Zedra host; no crash.
 3. On a current macOS host, manually age a file under
    `~/.cache/zedra/uploads/` past the
    cleanup grace period (or reduce the grace period locally for testing) and

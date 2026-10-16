@@ -17,7 +17,7 @@ store so `/v1/models` can serve it while the model is unloaded.
 ## Precedence
 
 Configured values win **field by field**. Discovery only fills fields the
-config leaves at their zero value, so a user who hand-sets one field still
+config leaves at their zero value, so an architect who hand-sets one field still
 benefits from discovery for the rest. This matters most for vLLM, where
 context length is discoverable but tool support is not.
 

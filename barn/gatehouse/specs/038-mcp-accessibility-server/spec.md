@@ -69,7 +69,7 @@ A developer wants to check the tray icon state, the header text (version, server
 
 ### User Story 4 - Check Accessibility Permission (Priority: P3)
 
-A developer starts `mcpproxy-ui-test` for the first time. The server checks if it has Accessibility permission and guides the user if not.
+A developer starts `mcpproxy-ui-test` for the first time. The server checks if it has Accessibility permission and guides the architect if not.
 
 **Why this priority**: Usability — without this, users get cryptic AX errors.
 

@@ -7,7 +7,7 @@ This feature introduces **no new persistent storage**. It maps the spec's logica
 ### 1. Goal
 - **Backing**: Paperclip `goals` (the high-level objective) + a root `issue` under it.
 - **Key fields**: `id`, `title`, `description`, `level` (`company|team|agent|task`), `status` (`planned|active|achieved|cancelled`), `parentId`, `ownerAgentId`.
-- **Glass Cockpit use**: the user posts one goal; the dry-run goal = "Add a 'Running the test suite' note to CONTRIBUTING.md". A **fresh** goal is created per run (CN-002 non-destructive).
+- **Glass Cockpit use**: the architect posts one goal; the dry-run goal = "Add a 'Running the test suite' note to CONTRIBUTING.md". A **fresh** goal is created per run (CN-002 non-destructive).
 - **Transitions**: `planned → active → achieved|cancelled`.
 
 ### 2. Plan-of-attack proposal
@@ -15,7 +15,7 @@ This feature introduces **no new persistent storage**. It maps the spec's logica
 - **Key fields (interaction)**: `id`, `issueId`, `kind`, `status` (`pending|accepted|rejected|answered|cancelled|expired|failed`), `payload` (proposed children + rationale), `result` (user's edits/decision), `continuationPolicy`, `supersedeOnUserComment`.
 - **Key fields (decomposition)**: `acceptedPlanRevisionId`, `requestedChildren[]` (each: `title`, `description`, `acceptanceCriteria[]`, `blockedByIssueIds[]`, `blockParentUntilDone`), `childIssueIds[]`, `status` (`in_flight|completed`), `requestFingerprint` (idempotent).
 - **Glass Cockpit use**: **Gate 1**. CEO MUST raise the interaction and WAIT for `accepted` before calling `accepted-plan-decompositions`. The user edits the selectable tree (drop/keep/split) or rejects-with-reason (→ revised proposal).
-- **Transitions**: `pending → accepted` (→ create children) | `pending → rejected` (→ re-plan) | `pending → expired` (superseded by a user comment).
+- **Transitions**: `pending → accepted` (→ create children) | `pending → rejected` (→ re-plan) | `pending → expired` (superseded by an architect comment).
 
 ### 3. Spec work item
 - **Backing**: Paperclip `issue` (one node in the tree; `parentId` for hierarchy, `issue_relations` type `blocks` for dependencies).
@@ -28,13 +28,13 @@ This feature introduces **no new persistent storage**. It maps the spec's logica
 - **Glass Cockpit use**:
   - **Gate 2 (per-spec design)**: stage `{type:"approval", participants:[{type:"user", userId:<board>}]}`. On engineer "ready for review", issue → `in_review`, blocks; user `approved` → proceed; `changes_requested` (with `body`) → bounce to `returnAssignee`.
   - **Gate 3 (pre-merge)**: terminal `approval` stage on the deliverable issue, paired with GitHub branch protection.
-  - **Adversarial review (FR-011)**: a `{type:"review", participants:[{type:"agent", agentId:<Critic>}]}` stage before the user gate; FR-011a waiver = a user `approved` decision substituting for the missing review, recorded in `issue_execution_decisions`.
+  - **Adversarial review (FR-011)**: a `{type:"review", participants:[{type:"agent", agentId:<Critic>}]}` stage before the architect gate; FR-011a waiver = an architect `approved` decision substituting for the missing review, recorded in `issue_execution_decisions`.
 - **Transitions (executionState)**: `idle → pending` (enter stage) `→ completed` (approved → next stage or done) | `pending → changes_requested` (→ returnAssignee → back to `pending` after revision).
 
 ### 5. Reasoning + provenance
 - **Backing**: plan `document` body; `issue_comments` (agent rationale, `createdByRunId`); `issue_execution_decisions.body` (required at each decision); run `promptMetrics` + recovery/liveness fields; `activity_log`.
 - **Glass Cockpit use**: surfaced at each gate (FR-006). Instruction-level rule (FR-014): every decision-driving claim cites a source (a comment/run/`[[wiki]]`); uncited material must not silently drive decisions.
-- **Invariant**: a gate presented to the user MUST have an associated rationale + ≥1 citation reachable from the approval surface.
+- **Invariant**: a gate presented to the architect MUST have an associated rationale + ≥1 citation reachable from the approval surface.
 
 ### 6. Hold (pause / cancel)
 - **Backing**: `issue_tree_holds` (`mode pause|resume|cancel|restore`, `status active|released`, `releasePolicy.strategy manual|after_active_runs_finish`). `getActivePauseHoldGate` walks ancestors so a hold on a root freezes the whole subtree.

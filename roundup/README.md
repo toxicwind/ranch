@@ -145,7 +145,7 @@ step.
 
 **History rules: never rebase, never squash, never force-push the vendored GuideLLM's main.**
 When upstream takes our work we merge their changes back as a merge commit, so
-the histogram stays honest. PRs to an external project are Chris's call, not an
+the histogram stays honest. PRs to an external project are the Architect's call, not an
 agent's.
 
 Full procedure, including how to clone the standalone and what to check before

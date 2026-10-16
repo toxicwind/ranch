@@ -56,7 +56,7 @@ Single Go module. New package `internal/security/detect/` (engine + `checks/`); 
 
 **Independent test**: Hard-negative corpus entries stay unflagged-as-dangerous; matching malicious entries are caught.
 
-- [x] T013 [P] [US2] Write `internal/security/detect/checks/directive_imperative_test.go` (MUST-flag `<IMPORTANT>`/"before using this tool"/"do not tell the user"/"ignore previous instructions" and variants over NORMALIZED text; MUST-NOT-flag example-position usage) per FR-009; then implement `directive_imperative.go` using regex families + the position classifier.
+- [x] T013 [P] [US2] Write `internal/security/detect/checks/directive_imperative_test.go` (MUST-flag `<IMPORTANT>`/"before using this tool"/"do not tell the architect"/"ignore previous instructions" and variants over NORMALIZED text; MUST-NOT-flag example-position usage) per FR-009; then implement `directive_imperative.go` using regex families + the position classifier.
 - [x] T014 [P] [US2] Write `internal/security/detect/checks/capability_mismatch_test.go` (MUST-flag a math/string tool that reads `~/.ssh` or has an unexplained data-sink param like "sidenote"; MUST-NOT-flag a file tool that legitimately reads files); then implement `capability_mismatch.go` (declared-vs-implied + unused-param heuristic).
 - [x] T015 [P] [US2] Add a per-match confidence to `internal/security/patterns/` matchers (validated card/Luhn → high; entropy-only → low) without changing existing call sites' behavior; update the patterns tests.
 - [x] T016 [US2] Write `internal/security/detect/checks/embedded_secret_test.go`; then implement `embedded_secret.go` wrapping `patterns/` with confidence, register all three soft checks in the engine.

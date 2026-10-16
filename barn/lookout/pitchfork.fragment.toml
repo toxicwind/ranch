@@ -18,7 +18,7 @@ boot_start = true
 auto = ["start"]
 
 [daemons.agent-viewer]
-# noVNC web viewer. INTERACTIVE (Chris 2026-09-21); loopback-only.
+# noVNC web viewer. INTERACTIVE (the Architect 2026-09-21); loopback-only.
 # External access: tailnet-only via tailscale serve :8443 (no funnel, no token gate).
 port = 6080
 run = "exec /home/toxic/.local/bin/websockify --web /home/toxic/.browserless/novnc 127.0.0.1:6080 127.0.0.1:5900"

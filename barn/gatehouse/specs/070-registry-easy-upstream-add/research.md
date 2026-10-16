@@ -28,7 +28,7 @@ This reframing must be ratified at the design gate before implementation (Gate 2
 
 ### CLI surface
 - **`search-servers` ALREADY EXISTS** (`cmd/mcpproxy/main.go:234-349`) with `--list-registries`, `--registry`, `--search`, `--tag`, `--limit`, `-o table|json|yaml`. Runs **standalone, in-process** (loads config, calls `registries.SearchServers` directly — `main.go:286-308`), NOT through the running daemon.
-- **The real CLI gap**: results only print; there is **no add-from-result command** — the user must hand-copy into `upstream add`. Closing search→add on the CLI is the genuine net-new work (FR-004 remainder).
+- **The real CLI gap**: results only print; there is **no add-from-result command** — the architect must hand-copy into `upstream add`. Closing search→add on the CLI is the genuine net-new work (FR-004 remainder).
 
 ### Web UI surface
 - `Repositories.vue` searches (`loadRegistries`/`searchServers`, lines 301-338) and **already renders an "Add to MCP" button** (lines 161-168) → `api.addServerFromRepository(server)` (`frontend/src/services/api.ts:646-678`).

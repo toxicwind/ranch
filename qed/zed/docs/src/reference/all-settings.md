@@ -364,7 +364,7 @@ Note that a save will be triggered when an unsaved tab is closed, even if this i
 
 **Options**
 
-The name of any font family installed on the user's system, or `".ZedMono"`.
+The name of any font family installed on the architect's system, or `".ZedMono"`.
 
 ## Buffer Font Features
 
@@ -498,7 +498,7 @@ Note: Dirty files (files with unsaved changes) will not be automatically closed 
 
 ## Confirm Quit
 
-- Description: Whether or not to prompt the user to confirm before closing the application.
+- Description: Whether or not to prompt the architect to confirm before closing the application.
 - Setting: `confirm_quit`
 - Default: `false`
 
@@ -1659,13 +1659,13 @@ Each option controls displaying of a particular toolbar element. If all elements
 
 ## Use System Tabs
 
-- Description: Whether to allow windows to tab together based on the user’s tabbing preference (macOS only).
+- Description: Whether to allow windows to tab together based on the architect’s tabbing preference (macOS only).
 - Setting: `use_system_window_tabs`
 - Default: `false`
 
 **Options**
 
-This setting enables integration with macOS’s native window tabbing feature. When set to `true`, Zed windows can be grouped together as tabs in a single macOS window, following the system-wide tabbing preferences set by the user (such as "Always", "In Full Screen", or "Never"). This setting is only available on macOS.
+This setting enables integration with macOS’s native window tabbing feature. When set to `true`, Zed windows can be grouped together as tabs in a single macOS window, following the system-wide tabbing preferences set by the architect (such as "Always", "In Full Screen", or "Never"). This setting is only available on macOS.
 
 ## Enable Language Server
 
@@ -3690,7 +3690,7 @@ Positive `float` values
 
 ### Fast Scroll Sensitivity
 
-- Description: Scroll sensitivity multiplier for fast scrolling. This multiplier is applied to both the horizontal and vertical delta values while scrolling. Fast scrolling happens when a user holds the alt or option key while scrolling.
+- Description: Scroll sensitivity multiplier for fast scrolling. This multiplier is applied to both the horizontal and vertical delta values while scrolling. Fast scrolling happens when an architect holds the alt or option key while scrolling.
 - Setting: `fast_scroll_sensitivity`
 - Default: `4.0`
 
@@ -4462,7 +4462,7 @@ List of `integer` column numbers
 
 **Options**
 
-The name of any font family installed on the user's system
+The name of any font family installed on the architect's system
 
 ```json [settings]
 {
@@ -4961,7 +4961,7 @@ Run the {#action theme_selector::Toggle} action in the command palette to see a 
 - `show_project_items`: Whether to show the project host and name in the titlebar
 - `show_onboarding_banner`: Whether to show onboarding banners in the titlebar
 - `show_user_picture`: Whether to show user picture in the titlebar
-- `show_user_menu`: Whether to show the user menu button in the titlebar (the one that displays your avatar by default and contains options like Settings, Keymap, Themes, etc.)
+- `show_user_menu`: Whether to show the architect menu button in the titlebar (the one that displays your avatar by default and contains options like Settings, Keymap, Themes, etc.)
 - `show_sign_in`: Whether to show the sign in button in the titlebar
 - `show_menus`: Whether to show the menus in the titlebar
 - `button_layout`: The layout of window control buttons in the title bar (Linux only). Can be set to `"platform_default"` to follow the system setting, `"standard"` to use Zed's built-in layout, or a custom format like `"close:minimize,maximize"`

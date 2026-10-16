@@ -39,7 +39,7 @@ webview::close();
 | `socks_proxy(host, port)` | Route the webview's traffic through a SOCKS5 proxy (iOS 17+ `proxyConfigurations`, Android `ProxyController`). The web tunnel uses this to reach the host's loopback. |
 | `on_message(fn)` | Receive messages the page posts through the `zedra` JS bridge. |
 | `on_navigate(fn)` | Decide per navigation; return `NavigationPolicy::Cancel` to block. |
-| `on_dismiss(fn)` | Fired once when the user dismisses the webview. |
+| `on_dismiss(fn)` | Fired once when the architect dismisses the webview. |
 
 Only one webview is presented at a time. Calling `open` again replaces the current one (the old one's `on_dismiss` fires first).
 

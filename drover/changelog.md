@@ -44,7 +44,7 @@
 
 ### Added
 - **Native VS Code Language Model Provider**: Registers ModelPilot as a native `vscode.LanguageModelChatProvider`, allowing users to select ModelPilot's routed models directly in VS Code's native model picker (dropdown next to the chat input). Set the model family to `'modelpilot'` and enabled `toolCalling: true` capability definitions for seamless compatibility.
-- **Google AI Studio Direct Provider**: Integrates Gemini 2.5 Pro (1M context) and Gemini 2.5 Flash as direct providers, running completions directly with the user's Google API key.
+- **Google AI Studio Direct Provider**: Integrates Gemini 2.5 Pro (1M context) and Gemini 2.5 Flash as direct providers, running completions directly with the architect's Google API key.
 - **Proactive Tool Use in Ask Mode**: Enabled tool usage for non-chitchat queries under `/ask` mode, allowing the model to inspect the system and workspace to answer questions.
 - **Quick Chat Access**: Added a status bar button `(💬 ModelPilot)` and a default keyboard shortcut (`Ctrl+Alt+M` / `Cmd+Alt+M`) to start a new ModelPilot chat session instantly.
 - **Startup Tool Detection**: Automatically detects available system tools at startup and injects them into the `[WORKSPACE CONTEXT]` block.

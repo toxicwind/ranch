@@ -36,7 +36,7 @@ Single Go project. Backend only under `internal/`. No frontend (UI lock badges s
 
 **Goal**: `retrieve_tools` opt-in `include_disabled` returns locked tools with status + remediation; default path unchanged.
 
-**Independent test**: quickstart.md §2 (default unchanged) + §3 (opt-in returns `printEnv` as `disabled_by_config` and a user-disabled tool as `disabled_by_user`, callable-first, capped, remediation keyed only by present statuses).
+**Independent test**: quickstart.md §2 (default unchanged) + §3 (opt-in returns `printEnv` as `disabled_by_config` and an architect-disabled tool as `disabled_by_user`, callable-first, capped, remediation keyed only by present statuses).
 
 - [X] T006 [US1] Write failing test `internal/server/mcp_disabled_discovery_test.go`: (a) `include_disabled` absent/false → response byte-identical to baseline fixture (FR-002/SC-001); (b) flag true → callable results first in existing order, `disabled[]` after, cap `min(limit,10)` enforced (FR-006/SC-004); (c) `remediation` map contains exactly the present statuses (FR-005); (d) agent-scope filter applied before classification — locked tools on inaccessible servers absent (FR-007).
 - [X] T007 [US1] Add `include_disabled` bool param (default false) to the `retrieve_tools` tool registration + one-sentence description (FR-001/FR-014) in `internal/server/mcp.go`.
@@ -53,7 +53,7 @@ Single Go project. Backend only under `internal/`. No frontend (UI lock badges s
 
 **Independent test**: quickstart.md §4 (config-denied call rejection distinct + pointer) and §5 (0-callable query returns one-line count nudge, no inline entries).
 
-- [X] T010 [US2] Write failing test in `internal/server/mcp_disabled_discovery_test.go`: (a) calling a config-denied tool returns the operator-policy message AND the `include_disabled:true` pointer, distinct from the user-disabled message (extends existing `TestBlockedToolMessageFor`); (b) a query with 0 callable matches but ≥1 locked match yields a one-line "N … retry with include_disabled:true" note in the result text and NO inline locked entries (FR-009).
+- [X] T010 [US2] Write failing test in `internal/server/mcp_disabled_discovery_test.go`: (a) calling a config-denied tool returns the operator-policy message AND the `include_disabled:true` pointer, distinct from the architect-disabled message (extends existing `TestBlockedToolMessageFor`); (b) a query with 0 callable matches but ≥1 locked match yields a one-line "N … retry with include_disabled:true" note in the result text and NO inline locked entries (FR-009).
 - [X] T011 [US2] Extend `blockedToolMessageFor` in `internal/server/mcp.go` to append the `retrieve_tools include_disabled:true` pointer for the config/user/pending branches (the status-aware split itself shipped in #468). Keep the legacy substring "Tool is disabled and not callable." in the non-config branch for back-compat.
 - [X] T012 [US2] In `handleRetrieveToolsWithMode`: when callable results == 0 and the always-on dropped-counter > 0 and `include_disabled` is false, append the one-line count nudge to the result text (count only). Make T010 green.
 

@@ -32,7 +32,7 @@ go test -race ./internal/security/scanner/... ./internal/runtime/... -v
 
 ## Reproduce the original scenario
 
-The original measurement used the user's `~/.mcpproxy/mcp_config.json` (30 servers, 1.06 GB BBolt) with the macOS tray driving the core.
+The original measurement used the architect's `~/.mcpproxy/mcp_config.json` (30 servers, 1.06 GB BBolt) with the macOS tray driving the core.
 
 ```bash
 pkill -f 'mcpproxy serve' 2>/dev/null

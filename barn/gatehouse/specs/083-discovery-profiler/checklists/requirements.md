@@ -36,4 +36,4 @@
   - The tokenizer identity (tiktoken cl100k_base) is kept because absolute token numbers are meaningless without it; it is a documented measurement basis, not a stack choice.
   - Baseline numbers (recall@5 = 0.68, ~92% compact-signature savings) anchor SC-002/SC-003 to previously recorded measurements.
 - SC-007 references CI runtime budgets in minutes — measurable and technology-agnostic (wall-clock).
-- No [NEEDS CLARIFICATION] markers: scope boundaries (profiler only, production changes deferred), dataset licensing handling, and the multi-turn estimator's status (estimate, not measurement) were all resolvable from the user description and prior research.
+- No [NEEDS CLARIFICATION] markers: scope boundaries (profiler only, production changes deferred), dataset licensing handling, and the multi-turn estimator's status (estimate, not measurement) were all resolvable from the architect description and prior research.

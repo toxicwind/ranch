@@ -6,7 +6,7 @@
 
 Campfire is the ranch's chatty helper system — the multi-agent conversation layer. Where squawk is the wire (messages get from A to B), campfire is the *culture*: who talks to whom, how debates resolve, how presence propagates, how the pack stays chatty without going noisy.
 
-> "Fleet is a conversation, not a status feed." — Chris, 2026-09-30. Campfire is the system that makes that true.
+> "Fleet is a conversation, not a status feed." — the Architect, 2026-09-30. Campfire is the system that makes that true.
 
 ## What's here
 

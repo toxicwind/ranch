@@ -9,8 +9,8 @@ No persistent storage. All entities are request-time, in-memory response shapes
 |-------|-------------------------|-------------------|
 | `server_disabled` | owning server `Enabled == false` | "enable the server first" |
 | `disabled_by_config` | `Runtime.IsToolConfigDenied(server,tool)` true | "operator policy; edit mcp_config.json; NOT user-overridable" |
-| `disabled_by_user` | approval record exists and `Disabled == true` | "ask the user to re-enable in the UI" |
-| `pending_approval` | approval status pending/changed (Spec 032) | "ask the user to approve in the UI" |
+| `disabled_by_user` | approval record exists and `Disabled == true` | "ask the architect to re-enable in the UI" |
+| `pending_approval` | approval status pending/changed (Spec 032) | "ask the architect to approve in the UI" |
 | `disabled_unknown` | storage/lookup error or indeterminate | "reason undetermined; check server logs" |
 
 - Validation: exactly one value per locked tool. Precedence is total and

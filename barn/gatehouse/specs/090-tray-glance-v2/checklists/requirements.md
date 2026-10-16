@@ -31,6 +31,6 @@
 
 ## Notes
 
-- UI-surface vocabulary (menu row, tooltip, VoiceOver) is retained deliberately: the feature *is* a menu, so these are the user-facing concepts, not implementation choices.
+- UI-surface vocabulary (menu row, tooltip, VoiceOver) is retained deliberately: the feature *is* a menu, so these are the architect-facing concepts, not implementation choices.
 - Presence thresholds (5 min / 30 min / 24 h) are stated as fixed policy in Assumptions; SC-005 exercises the idle boundary.
 - Grouping is defined as consecutive-only in FR-003 and reinforced by US1 scenario 3 to prevent a cross-timeline clustering interpretation.

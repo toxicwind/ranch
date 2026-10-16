@@ -778,7 +778,7 @@ List configured registries.
 
 #### POST /api/v1/registries
 
-Add a user-supplied custom registry source. JSON body:
+Add an architect-supplied custom registry source. JSON body:
 `{ "url": "https://…", "protocol": "…", "id": "…", "name": "…" }` (only `url`
 required). The source is always tagged `custom`. Errors share a stable
 code: `invalid_registry_url` (400), `registries_locked` (403),
@@ -786,7 +786,7 @@ code: `invalid_registry_url` (400), `registries_locked` (403),
 
 #### PUT /api/v1/registries/{id}
 
-Edit a user-added custom registry source. JSON body:
+Edit an architect-added custom registry source. JSON body:
 `{ "name": "…", "url": "https://…", "servers_url": "https://…" }` (all optional;
 an omitted/empty field is left unchanged). Returns `data.registry` echoing the
 updated entry. Built-in registries are refused with `registry_shadows_builtin`
@@ -795,7 +795,7 @@ updated entry. Built-in registries are refused with `registry_shadows_builtin`
 
 #### DELETE /api/v1/registries/{id}
 
-Remove a user-added custom registry source. Returns `data.registry` echoing the
+Remove an architect-added custom registry source. Returns `data.registry` echoing the
 removed entry. Built-in registries are refused with `registry_shadows_builtin`
 (409); an unknown id returns `registry_not_found` (404); a `registries_locked`
 policy returns 403.
@@ -897,7 +897,7 @@ kinds:
 | `action` | Meaning | Caller should |
 |----------|---------|---------------|
 | `precondition_failed` | The preview is stale — the config file, the existing entry, or the entry mcpproxy would now write has changed. | Re-fetch the preview; do not blindly retry. |
-| `already_exists` | Pre-existing semantics: an entry with that name is present and `force` was not set. | Confirm with the user, then retry with `force=true` (and a fresh token). |
+| `already_exists` | Pre-existing semantics: an entry with that name is present and `force` was not set. | Confirm with the architect, then retry with `force=true` (and a fresh token). |
 
 See [Connect Clients](../features/connect-clients.md) for the token's contents
 and threat model.

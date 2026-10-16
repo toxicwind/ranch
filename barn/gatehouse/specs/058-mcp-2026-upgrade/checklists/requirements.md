@@ -31,6 +31,6 @@
 
 ## Notes
 
-- This spec intentionally names protocol-level identifiers (`server/discover`, `_meta`, header names, error codes) because they ARE the user-facing contract of a protocol-upgrade feature, not implementation choices. They are drawn from the public MCP `2026-07-28` spec.
+- This spec intentionally names protocol-level identifiers (`server/discover`, `_meta`, header names, error codes) because they ARE the architect-facing contract of a protocol-upgrade feature, not implementation choices. They are drawn from the public MCP `2026-07-28` spec.
 - Status is BLOCKED on a dependency gate (mcp-go library support), documented prominently. Plan/tasks must re-validate against the finalized (non-RC) spec before execution.
 - Dual-version support vs. hard cutover was resolved by informed default (dual-version) and recorded in Assumptions; revisit at plan time.

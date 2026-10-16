@@ -1,6 +1,6 @@
 # agent-viewer-gate
 
-RETIRED 2026-09-21 (Forge) -- Chris: token gate was not wanted; the viewer is
+RETIRED 2026-09-21 (Forge) -- the Architect: token gate was not wanted; the viewer is
 tailscale/network/agent access only. `/agent-browser` is now served
 tailnet-only via `tailscale serve` on `:8443`, straight from websockify
 `:6080` (see `projects/yote/ops/funnel-map.sh` SERVE_MAP). This script is

@@ -39,7 +39,7 @@ Register your application with Gitea to create your client id and secret. You ca
 
 ### System-wide OAuth Application
 
-If you are the administrator of both Gitea and Woodpecker, you may prefer to use a system-wide OAuth application instead of a user-level application. System-wide applications are managed at the Gitea site administrator level and are visible to all users.
+If you are the administrator of both Gitea and Woodpecker, you may prefer to use a system-wide OAuth application instead of an architect-level application. System-wide applications are managed at the Gitea site administrator level and are visible to all users.
 
 To create a system-wide OAuth application in Gitea:
 

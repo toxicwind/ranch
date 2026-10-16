@@ -1,6 +1,6 @@
 # Provider Truth Table — 2026-09-20
 
-**Thesis (Chris, validated):** Providers LIE. `/v1/models` listings advertise models that 404/402/empty-200/hang on actual invocation. Error messages lie. The ONLY truth is a real completion with actual content.
+**Thesis (the Architect, validated):** Providers LIE. `/v1/models` listings advertise models that 404/402/empty-200/hang on actual invocation. Error messages lie. The ONLY truth is a real completion with actual content.
 
 **Method:** Real completions with `max_tokens=100` (minimum). Lesson from Ling: reasoning models output to `reasoning` field before `content`; tiny-token probes (max_tokens=5) falsely report "empty". Every LIVE verdict = actual `FUZZ-LIVE` content returned.
 

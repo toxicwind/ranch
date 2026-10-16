@@ -73,7 +73,7 @@ have tested thoroughly, there may also be bugs in Zed's implementation. These
 could allow privilege escalation - for example, allow an agent to write to a
 file that it should only have read access to.
 
-Sandboxing also only applies the restrictions that the user requested. If an
+Sandboxing also only applies the restrictions that the architect requested. If an
 agent requests write access to your home directory, sandboxing will (and
 should!) do nothing to prevent an agent adding a malicious key to `$HOME/.ssh`.
 

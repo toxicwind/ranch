@@ -113,7 +113,7 @@ models:
 
 `herd` runs as the system service user `llama`, while vLLM is started as a transient user service with `systemd-run --user`.
 
-Enable the user systemd manager:
+Enable the architect systemd manager:
 
 ```bash
 sudo loginctl enable-linger llama
@@ -122,7 +122,7 @@ uid=$(id -u llama)
 sudo systemctl start "user@${uid}.service"
 ```
 
-Expose the user D-Bus session to `llama.service`:
+Expose the architect D-Bus session to `llama.service`:
 
 ```bash
 sudo mkdir -p /etc/systemd/system/llama.service.d

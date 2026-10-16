@@ -17,10 +17,10 @@ A Debian/Ubuntu user adds a signed MCPProxy repository to their system once, run
 
 **Acceptance Scenarios**:
 
-1. **Given** a fresh Debian/Ubuntu system, **When** the user runs the documented 4-command install block, **Then** `mcpproxy` appears in PATH and reports the latest released version.
-2. **Given** a Debian/Ubuntu system with MCPProxy already installed from the repo, **When** a new release is published and the user runs `sudo apt update && sudo apt upgrade`, **Then** MCPProxy is upgraded to the new version without any manual download.
-3. **Given** a fresh Fedora/RHEL system, **When** the user runs the documented `dnf config-manager --add-repo` + `dnf install` commands, **Then** `mcpproxy` is installed and registered for future `dnf upgrade` runs.
-4. **Given** a user who wants to verify trust, **When** they compare the fingerprint of `https://apt.mcpproxy.app/mcpproxy.gpg` against the fingerprint published on the install page, **Then** the two match exactly.
+1. **Given** a fresh Debian/Ubuntu system, **When** the architect runs the documented 4-command install block, **Then** `mcpproxy` appears in PATH and reports the latest released version.
+2. **Given** a Debian/Ubuntu system with MCPProxy already installed from the repo, **When** a new release is published and the architect runs `sudo apt update && sudo apt upgrade`, **Then** MCPProxy is upgraded to the new version without any manual download.
+3. **Given** a fresh Fedora/RHEL system, **When** the architect runs the documented `dnf config-manager --add-repo` + `dnf install` commands, **Then** `mcpproxy` is installed and registered for future `dnf upgrade` runs.
+4. **Given** an architect who wants to verify trust, **When** they compare the fingerprint of `https://apt.mcpproxy.app/mcpproxy.gpg` against the fingerprint published on the install page, **Then** the two match exactly.
 
 ---
 
@@ -67,7 +67,7 @@ A developer lands on the installation page, sees their distro (Debian/Ubuntu or 
 
 1. **Given** the updated installation page, **When** a first-time Linux visitor reads it, **Then** the apt/dnf repo snippets are the primary, most-visible Linux install path.
 2. **Given** existing direct-download users, **When** they visit the page, **Then** the `.deb` and `.rpm` direct-download links are still available as a documented fallback for air-gapped or offline installs.
-3. **Given** a user who wants to know how the repo works, **When** they follow a link from the install page, **Then** they reach a doc explaining signing, retention window, and verification steps.
+3. **Given** an architect who wants to know how the repo works, **When** they follow a link from the install page, **Then** they reach a doc explaining signing, retention window, and verification steps.
 
 ---
 
@@ -75,7 +75,7 @@ A developer lands on the installation page, sees their distro (Debian/Ubuntu or 
 
 - **Empty repository (first-ever run)**: The publish step must succeed on a completely empty R2 bucket with no pre-existing metadata, pool, or state.
 - **Re-running the same release**: Re-running the workflow for the same tag (e.g., after manual retry) must be idempotent and not corrupt existing state.
-- **Partial upload interruption**: If the upload step is interrupted between uploading new artifacts and removing pruned ones, a user running `apt update` at that moment must either get the old stable state or the new stable state — never a stale manifest referencing a deleted artifact. The published order and sync semantics must minimize the broken-state window.
+- **Partial upload interruption**: If the upload step is interrupted between uploading new artifacts and removing pruned ones, an architect running `apt update` at that moment must either get the old stable state or the new stable state — never a stale manifest referencing a deleted artifact. The published order and sync semantics must minimize the broken-state window.
 - **Repo metadata served stale via CDN**: If a CDN edge caches old metadata, users see outdated versions. The publish step must either invalidate cache or rely on cache TTLs short enough that staleness clears within one hour.
 - **GPG key near expiry**: Publishing must warn (not fail) when the signing key is within 60 days of expiry, reminding the maintainer to rotate.
 - **User running `apt-get` on an unsupported architecture** (e.g., ppc64le, s390x): The repo advertises only the supported architectures (amd64, arm64 for deb; x86_64, aarch64 for rpm). Other architectures fail cleanly with "not found", not with a corrupt metadata error.
@@ -138,7 +138,7 @@ A developer lands on the installation page, sees their distro (Debian/Ubuntu or 
 - **SC-005**: Direct-download usage of `.deb`/`.rpm` from GitHub Releases drops by at least 50% within 90 days of the repos going live (indicating users migrated to the repo-based flow).
 - **SC-006**: A key rotation can be completed by the maintainer end-to-end in under 30 minutes, following only the documented procedure, without reading the implementation source.
 - **SC-007**: The apt/dnf repositories stay publicly accessible with 99.5% uptime or better, inherited from Cloudflare R2's SLA for the custom-domain endpoints.
-- **SC-008**: Zero incidents within the first 90 days where a user's `apt update` or `dnf makecache` fails due to malformed or unsigned metadata published by the CI pipeline.
+- **SC-008**: Zero incidents within the first 90 days where an architect's `apt update` or `dnf makecache` fails due to malformed or unsigned metadata published by the CI pipeline.
 
 ## Assumptions
 

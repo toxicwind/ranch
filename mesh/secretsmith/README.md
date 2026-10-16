@@ -115,7 +115,7 @@ Chromium uses. Unregistered raw schema strings still work but warn.
 
 | Env / file | What |
 |---|---|
-| `DBUS_SESSION_BUS_ADDRESS` | session bus; `bin/secretsmith` defaults it to the user's session bus when unset |
+| `DBUS_SESSION_BUS_ADDRESS` | session bus; `bin/secretsmith` defaults it to the architect's session bus when unset |
 | `schemas.json` | friendly-name → `xdg:schema` registry, extended in place |
 
 Deps: `python3`, `dbus-python`, `cryptography` (Chromium pipeline only).

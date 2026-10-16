@@ -60,7 +60,7 @@ Before attempting OAuth, the daemon validates the server and returns actionable 
 
 The login response includes browser opening status so clients can decide whether to show the URL manually.
 
-**Why this priority**: This is the core fix - clients need to know if the user can see the browser.
+**Why this priority**: This is the core fix - clients need to know if the architect can see the browser.
 
 **Independent Test**: Can be tested by triggering login in headless environment and verifying `browser_opened: false` with `auth_url` in response.
 

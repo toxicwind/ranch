@@ -717,11 +717,11 @@ Email: {{ .Email }})
 
 ### add
 
-adds a user
+adds an architect
 
 ### rm
 
-remove a user
+remove an architect
 
 ## lint
 

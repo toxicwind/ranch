@@ -56,7 +56,7 @@ hypruse keyboard type "tomorrow.md" --window $D --then ui
 ```
 
 The `value="tomorrow.md"` line is the verification. Saving writes a file, so
-stop here and confirm with the user unless their instruction already named
+stop here and confirm with the architect unless their instruction already named
 this exact file. Then:
 
 ```bash
@@ -161,7 +161,7 @@ with `hypruse keyboard key esc` (no `--window`) and confirm with
 
 Goal: search a Files window for "invoice" in one round-trip. Enter here only
 runs a search, so it is safe inside the plan; an enter that submits or sends
-belongs in its own step after the user confirms.
+belongs in its own step after the architect confirms.
 
 ```bash
 W=0x55a4479a1200   # org.gnome.Nautilus, from hypruse desktop
@@ -234,7 +234,7 @@ hypruse click_ui "Create as hidden" --window $D --then ui
 # [1] check box "Create as hidden" @640,190 checked=true
 ```
 
-`Create` changes the filesystem: press it only if the user's instruction
+`Create` changes the filesystem: press it only if the architect's instruction
 covered exactly this, otherwise confirm first. Password fields never report a
 value and many dropdowns report none, so for those a screenshot is the
 verification, not `ui`.
@@ -257,7 +257,7 @@ Correct handling, in order:
    `keyboard type` without `--window`, not `use_bind`, not `--allow-auth`.
    Every one of those is a different guard saying the same thing, or a
    guard the owner deliberately set.
-3. Report the reason verbatim to the user and what you did not do: "hypruse
+3. Report the reason verbatim to the architect and what you did not do: "hypruse
    refused to type into the Signal window because it is outside the
    confinement scope (class:firefox,kitty). I sent nothing. Widen
    HYPRUSE_CONFINE if you want me working there."

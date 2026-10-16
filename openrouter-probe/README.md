@@ -79,4 +79,4 @@ Supersedes `RANKING-eval-20260920-final.md`.
 
 ## Contribute
 
-Standing rules (Chris, 2026-09-20): **no monkeypatching, permanence rule.** The runner is the deliverable; a ranking run is just proof. Keep scorer semantics documented in the report metadata (instrument, tokenizer policy, scope, formality tier, prompt, timestamp).
+Standing rules (the Architect, 2026-09-20): **no monkeypatching, permanence rule.** The runner is the deliverable; a ranking run is just proof. Keep scorer semantics documented in the report metadata (instrument, tokenizer policy, scope, formality tier, prompt, timestamp).

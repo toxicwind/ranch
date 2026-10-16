@@ -8,7 +8,7 @@ daemon restart.
 
 The compaction trigger is **not lazy** — it is read **once at daemon startup**
 by a single init function (`.text` ~`0x993703c`). No reload path exists in the
-binary for it. Chris's "if it's lazy we can fix that": the answer is no — the
+binary for it. the Architect's "if it's lazy we can fix that": the answer is no — the
 durable fix is launch-env + host-initiated restart, never an in-place tweak.
 
 ## The reader (proven)

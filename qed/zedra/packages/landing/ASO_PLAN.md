@@ -181,10 +181,10 @@ Confirm `Developer Tools` in Play Console. If the listing isn't set up fully (ve
 ### iOS: `SKStoreReviewController`
 
 - **Not yet implemented** in the codebase (verified 2026-07-09 — no StoreKit review calls found).
-- Implement: prompt after a high-value moment — a successful session connect, or after the user approves an agent prompt and the agent completes a task.
+- Implement: prompt after a high-value moment — a successful session connect, or after the architect approves an agent prompt and the agent completes a task.
 - Apple caps at **3 prompts per 365-day period** per device. Don't waste prompts on app launch or low-engagement moments.
 - Use the standard system prompt (do not build a custom review dialog — Apple rejects those).
-- Gate the prompt: only show if the user has had at least one successful session (don't prompt users who haven't paired yet).
+- Gate the prompt: only show if the architect has had at least one successful session (don't prompt users who haven't paired yet).
 
 ### Google Play: in-app review API
 
@@ -196,7 +196,7 @@ Confirm `Developer Tools` in Play Console. If the listing isn't set up fully (ve
 
 - Respond to every review via App Store Connect / Play Console.
 - Reviewer is notified and can update their rating. A thoughtful response to a 1-2 star review can flip it to 4-5.
-- Only the latest review + response per user displays — re-respond when a user updates.
+- Only the latest review + response per user displays — re-respond when an architect updates.
 
 ### Benchmark
 

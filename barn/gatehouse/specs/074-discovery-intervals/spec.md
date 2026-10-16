@@ -14,7 +14,7 @@ Two independent mechanisms generate this traffic today, both with hardcoded inte
 1. A periodic **liveness probe** (~every 30s per connected, non-Docker server) that issues a full `tools/list` purely to confirm the connection is alive.
 2. A periodic **tool-discovery sweep** (~every 5 minutes) that re-lists tools from every server to rebuild the search index.
 
-Using the heavyweight `tools/list` as a liveness check is the dominant, and least necessary, source of the traffic the user sees. mcpproxy already receives push notifications (`notifications/tools/list_changed`) and re-discovers reactively, so the periodic sweep is a fallback rather than the primary freshness mechanism.
+Using the heavyweight `tools/list` as a liveness check is the dominant, and least necessary, source of the traffic the architect sees. mcpproxy already receives push notifications (`notifications/tools/list_changed`) and re-discovers reactively, so the periodic sweep is a fallback rather than the primary freshness mechanism.
 
 ## User Scenarios & Testing *(mandatory)*
 

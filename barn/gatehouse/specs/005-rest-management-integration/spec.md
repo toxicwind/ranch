@@ -34,9 +34,9 @@ CLI commands that use socket communication (from PR #152: `tools list`, `auth lo
 
 **Acceptance Scenarios**:
 
-1. **Given** the daemon is running and `disable_management` is enabled, **When** a user runs `mcpproxy auth login --server=test-server`, **Then** the operation is blocked with a clear error message explaining management is disabled
-2. **Given** the daemon is running, **When** a user runs `mcpproxy tools list --server=test-server`, **Then** the tools are retrieved via the management service and any connection errors are reported consistently
-3. **Given** a user triggers OAuth via `mcpproxy auth login`, **When** OAuth completes successfully, **Then** a `servers.changed` event is emitted and the tray UI updates automatically
+1. **Given** the daemon is running and `disable_management` is enabled, **When** an architect runs `mcpproxy auth login --server=test-server`, **Then** the operation is blocked with a clear error message explaining management is disabled
+2. **Given** the daemon is running, **When** an architect runs `mcpproxy tools list --server=test-server`, **Then** the tools are retrieved via the management service and any connection errors are reported consistently
+3. **Given** an architect triggers OAuth via `mcpproxy auth login`, **When** OAuth completes successfully, **Then** a `servers.changed` event is emitted and the tray UI updates automatically
 
 ---
 
@@ -50,8 +50,8 @@ Tray application users managing servers through GUI menus need the same consiste
 
 **Acceptance Scenarios**:
 
-1. **Given** a user clicks "Authenticate Server" in the tray menu, **When** OAuth is triggered, **Then** the operation goes through `ManagementService.TriggerOAuthLogin()` with consistent error handling
-2. **Given** `read_only` mode is enabled, **When** a user attempts to restart a server via tray menu, **Then** the operation is blocked at the management service layer with appropriate error message
+1. **Given** an architect clicks "Authenticate Server" in the tray menu, **When** OAuth is triggered, **Then** the operation goes through `ManagementService.TriggerOAuthLogin()` with consistent error handling
+2. **Given** `read_only` mode is enabled, **When** an architect attempts to restart a server via tray menu, **Then** the operation is blocked at the management service layer with appropriate error message
 
 ---
 

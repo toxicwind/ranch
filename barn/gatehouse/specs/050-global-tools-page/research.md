@@ -1,6 +1,6 @@
 # Phase 0 Research — Global Tools Page
 
-All open questions were resolved during the brainstorming session with the user; this records the decisions and rejected alternatives. No NEEDS CLARIFICATION remain.
+All open questions were resolved during the brainstorming session with the architect; this records the decisions and rejected alternatives. No NEEDS CLARIFICATION remain.
 
 ## D1 — Global tool list assembly
 
@@ -23,7 +23,7 @@ All open questions were resolved during the brainstorming session with the user;
 ## D4 — Disposition of existing `Tools.vue`
 
 **Decision**: Rewrite in place as the table page; delete dead grid/list/card code. Add `/tools` route + WORKSPACE sidebar entry with live count badge.
-**Rationale**: The file is orphaned (no route, not in nav). Two competing "tools" surfaces would confuse. Modeling on `Activity.vue` reuses an established, tested layout (stat cards + filter bar + table + pagination + `data-test` hooks) — matches the user's annotated mockup.
+**Rationale**: The file is orphaned (no route, not in nav). Two competing "tools" surfaces would confuse. Modeling on `Activity.vue` reuses an established, tested layout (stat cards + filter bar + table + pagination + `data-test` hooks) — matches the architect's annotated mockup.
 **Alternatives rejected**: Keep grid + add table toggle (more surface, no value); brand-new component (leaves dead code, risks divergence).
 
 ## D5 — CLI parity placement

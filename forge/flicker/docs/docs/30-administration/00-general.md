@@ -2,7 +2,7 @@
 
 Woodpecker consists of essential components (`server` and `agent`) and an optional component (`autoscaler`).
 
-The **server** provides the user interface, processes webhook requests to the underlying forge, serves the API and analyzes the pipeline configurations from the YAML files.
+The **server** provides the architect interface, processes webhook requests to the underlying forge, serves the API and analyzes the pipeline configurations from the YAML files.
 
 The **agent** executes the [workflows](../20-usage/15-terminology/index.md) via a specific [backend](../20-usage/15-terminology/index.md) (Docker, Kubernetes, local) and connects to the server via GRPC. Multiple agents can coexist so that the job limits, choice of backend and other agent-related settings can be fine-tuned for a single instance.
 

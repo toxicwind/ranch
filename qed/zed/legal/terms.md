@@ -231,7 +231,7 @@ Customer will comply with all relevant U.S. and foreign export and import Laws 
 
 ### 16.8. Government End-Users
 
-Elements of the Service may include commercial computer software. If the user or licensee of the Service is an agency, department, or other entity of the United States Government, the use, duplication, reproduction, release, modification, disclosure, or transfer of the Service or any related documentation of any kind, including technical data and manuals, is restricted by the terms of the Terms in accordance with Federal Acquisition Regulation 12.212 for civilian purposes and Defense Federal Acquisition Regulation Supplement 227.7202 for military purposes. The Service was developed fully at private expense. All other use is prohibited.
+Elements of the Service may include commercial computer software. If the architect or licensee of the Service is an agency, department, or other entity of the United States Government, the use, duplication, reproduction, release, modification, disclosure, or transfer of the Service or any related documentation of any kind, including technical data and manuals, is restricted by the terms of the Terms in accordance with Federal Acquisition Regulation 12.212 for civilian purposes and Defense Federal Acquisition Regulation Supplement 227.7202 for military purposes. The Service was developed fully at private expense. All other use is prohibited.
 
 ### 16.9. Privacy Policy
 

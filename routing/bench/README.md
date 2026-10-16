@@ -46,7 +46,7 @@ MIT — see the [canonical LICENSE](https://github.com/toxicwind/estate-scripts-
 ## Known environment substitutions (disclosed, not hidden)
 
 - The extension's default classifier/tier models are Anthropic (`claude-haiku` etc.); no Anthropic key exists here. Tiers map to live herd models: high → `herd/gemini/gemini-3-flash-preview`, medium → `herd/beellama/qwen-flash-128k`, low → `herd/beellama/exaone-4-0-1-2b-iq4xs`.
-- The extension's adaptive classifier was attempted with every available model and is non-functional in this environment (reasoning models burn the hardcoded 200-token budget on thinking tokens; exaone mangles the two-line verdict format). The extension's designed heuristic fallback engages — which is exactly what a user here would get. See [VERDICT.md](./VERDICT.md).
+- The extension's adaptive classifier was attempted with every available model and is non-functional in this environment (reasoning models burn the hardcoded 200-token budget on thinking tokens; exaone mangles the two-line verdict format). The extension's designed heuristic fallback engages — which is exactly what an architect here would get. See [VERDICT.md](./VERDICT.md).
 
 ## Files
 

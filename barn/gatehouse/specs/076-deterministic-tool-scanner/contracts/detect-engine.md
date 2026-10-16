@@ -62,7 +62,7 @@ type Check interface {
 | `unicode.hidden` | zero-width / bidi / tag-block / PUA in raw text; escalate ≥3 classes or decoded tag-message | ASCII-only descriptions; ordinary accented Unicode (é, ü) |
 | `shadowing.cross_server` | description naming another server's tool; same tool name across two servers | a tool referencing *its own* name; common verbs |
 | `payload.decoded` | base64/hex that **decodes** to `curl … \| sh`, `chmod`, `rm -rf`, raw IP:port | base64 that decodes to benign data (icon, JSON); short tokens |
-| `directive.imperative` | `<IMPORTANT>`, "before using this tool", "do not tell the user", "ignore previous instructions", variants | the same phrase in example-position ("detects prompts such as 'ignore previous instructions'") |
+| `directive.imperative` | `<IMPORTANT>`, "before using this tool", "do not tell the architect", "ignore previous instructions", variants | the same phrase in example-position ("detects prompts such as 'ignore previous instructions'") |
 | `capability.mismatch` | a math/string tool that reads `~/.ssh`/has an unexplained data-sink param ("sidenote") | a file tool that legitimately reads files; a network tool that fetches |
 | `secret.embedded` | a live API key / Luhn-valid card in the description (high confidence) | a documented placeholder / `AKIA…EXAMPLE` (low/none) |
 

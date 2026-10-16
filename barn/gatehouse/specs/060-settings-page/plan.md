@@ -33,7 +33,7 @@ No violations → Complexity Tracking empty.
 ## Key technical decisions (see research.md)
 
 - **PATCH semantics**: `GetConfig()` → marshal to map → deep-merge incoming partial map (patch wins, objects merged recursively) → unmarshal to `config.Config` → `ApplyConfig`. Starting from the real config is what preserves secrets and unrelated fields. Modeled on `handlePatchDockerIsolation` (server.go:3685) + the per-server PATCH deep-merge precedent.
-- **Secrets**: never sent by the form unless the user explicitly edits them; the deep-merge means an absent key keeps the live value.
+- **Secrets**: never sent by the form unless the architect explicitly edits them; the deep-merge means an absent key keeps the live value.
 - **Restart classification**: surfaced from the existing `ConfigApplyResult.RequiresRestart`/`RestartReason`/`ChangedFields`; UI also statically badges the known restart-only fields (listen, data_dir, api_key, tls.*).
 - **Edition gating**: Teams section rendered only when the config payload contains a `teams` object (absent in personal-edition binary).
 

@@ -21,7 +21,7 @@ This leads to user confusion when the same server shows different states in diff
 
 ### User Story 1 - Consistent Status Across Interfaces (Priority: P1)
 
-As a user, I want to see the same health status for a server regardless of whether I'm using the CLI, tray, web UI, or MCP tools, so I can trust the information and not be confused by conflicting reports.
+As an architect, I want to see the same health status for a server regardless of whether I'm using the CLI, tray, web UI, or MCP tools, so I can trust the information and not be confused by conflicting reports.
 
 **Why this priority**: This is the core problem - inconsistent status erodes trust and causes confusion. Without this, all other improvements are undermined.
 
@@ -37,7 +37,7 @@ As a user, I want to see the same health status for a server regardless of wheth
 
 ### User Story 2 - Actionable Guidance for Issues (Priority: P1)
 
-As a user, when a server has an issue, I want to see what action I should take to fix it, so I don't have to guess or search documentation.
+As an architect, when a server has an issue, I want to see what action I should take to fix it, so I don't have to guess or search documentation.
 
 **Why this priority**: Equally critical to consistency - users need to know HOW to fix problems, not just that problems exist.
 
@@ -53,7 +53,7 @@ As a user, when a server has an issue, I want to see what action I should take t
 
 ### User Story 3 - OAuth Token Visibility in Tray/Web (Priority: P2)
 
-As a user, I want to see OAuth token issues (expired, expiring soon) in the tray and web UI, not just the CLI, so I'm aware of authentication problems across all interfaces.
+As an architect, I want to see OAuth token issues (expired, expiring soon) in the tray and web UI, not just the CLI, so I'm aware of authentication problems across all interfaces.
 
 **Why this priority**: Addresses a specific gap where OAuth status was only visible in CLI, which many users don't use regularly.
 
@@ -68,7 +68,7 @@ As a user, I want to see OAuth token issues (expired, expiring soon) in the tray
 
 ### User Story 4 - Admin State Separate from Health (Priority: P2)
 
-As a user, I want disabled and quarantined servers to show their admin state clearly distinct from health status, so I understand they're intentionally inactive rather than broken.
+As an architect, I want disabled and quarantined servers to show their admin state clearly distinct from health status, so I understand they're intentionally inactive rather than broken.
 
 **Why this priority**: Prevents confusion between "server is off" and "server is broken".
 
@@ -83,7 +83,7 @@ As a user, I want disabled and quarantined servers to show their admin state cle
 
 ### User Story 5 - Dashboard Shows Servers Needing Attention (Priority: P3)
 
-As a user, I want the web dashboard to highlight servers that need attention (degraded or unhealthy), so I can quickly identify and fix issues.
+As an architect, I want the web dashboard to highlight servers that need attention (degraded or unhealthy), so I can quickly identify and fix issues.
 
 **Why this priority**: Quality-of-life improvement that builds on the core health status feature.
 

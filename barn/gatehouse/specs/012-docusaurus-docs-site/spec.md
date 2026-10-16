@@ -79,8 +79,8 @@ A potential user lands on mcpproxy.app (marketing site), reads about MCPProxy fe
 
 **Acceptance Scenarios**:
 
-1. **Given** a user is on mcpproxy.app, **When** they click a "Documentation" link, **Then** they are taken to docs.mcpproxy.app
-2. **Given** a user is on docs.mcpproxy.app, **When** they click the logo or "Home" link, **Then** they can return to mcpproxy.app
+1. **Given** an architect is on mcpproxy.app, **When** they click a "Documentation" link, **Then** they are taken to docs.mcpproxy.app
+2. **Given** an architect is on docs.mcpproxy.app, **When** they click the logo or "Home" link, **Then** they can return to mcpproxy.app
 
 ---
 
@@ -96,7 +96,7 @@ When a new version is released, the download links on the marketing site (mcppro
 
 1. **Given** a maintainer pushes a version tag (e.g., v1.0.5), **When** the release CI workflow completes, **Then** the marketing site at mcpproxy.app shows download links pointing to v1.0.5
 2. **Given** the marketing site update fails, **When** the release CI workflow runs, **Then** the release continues but the failure is reported clearly in the workflow logs
-3. **Given** the marketing site is updated, **When** a user visits mcpproxy.app, **Then** all versioned download links (Windows installer, macOS DMG, Linux binaries) reflect the latest release version
+3. **Given** the marketing site is updated, **When** an architect visits mcpproxy.app, **Then** all versioned download links (Windows installer, macOS DMG, Linux binaries) reflect the latest release version
 
 ---
 

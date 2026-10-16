@@ -23,7 +23,7 @@ A maintainer wants to know whether to invest engineering time in the macOS tray,
 
 **Acceptance Scenarios**:
 
-1. **Given** a fresh `mcpproxy serve` process with no requests yet, **When** the user runs `mcpproxy telemetry show-payload`, **Then** the payload contains a `surface_requests` object with all four keys (`mcp`, `cli`, `webui`, `tray`) set to 0 and an `unknown` key also set to 0.
+1. **Given** a fresh `mcpproxy serve` process with no requests yet, **When** the architect runs `mcpproxy telemetry show-payload`, **Then** the payload contains a `surface_requests` object with all four keys (`mcp`, `cli`, `webui`, `tray`) set to 0 and an `unknown` key also set to 0.
 2. **Given** a running daemon, **When** the macOS tray issues a request including `X-MCPProxy-Client: tray/<version>`, **Then** the next `show-payload` reflects an incremented `tray` counter.
 3. **Given** a running daemon, **When** an HTTP client calls `/api/v1/status` with no `X-MCPProxy-Client` header, **Then** the request is counted under the `unknown` surface key.
 4. **Given** a running daemon, **When** any request hits the `/mcp` endpoint, **Then** it is counted under `mcp` regardless of any header value.
@@ -177,7 +177,7 @@ A privacy-conscious user wants to inspect what mcpproxy would send to the teleme
 3. **Given** the precedence chain `DO_NOT_TRACK=1 CI=true MCPPROXY_TELEMETRY=true`, **When** mcpproxy starts, **Then** telemetry is disabled (DO_NOT_TRACK wins).
 4. **Given** the config file has no `telemetry_notice_shown` field, **When** `mcpproxy serve` starts for the first time, **Then** a notice is printed to stderr and the field is persisted as `true`.
 5. **Given** the config has `telemetry_notice_shown: true`, **When** `mcpproxy serve` starts, **Then** no notice is printed.
-6. **Given** any state, **When** the user runs `mcpproxy telemetry show-payload`, **Then** the command prints pretty JSON to stdout and makes no network call.
+6. **Given** any state, **When** the architect runs `mcpproxy telemetry show-payload`, **Then** the command prints pretty JSON to stdout and makes no network call.
 
 ---
 
@@ -300,7 +300,7 @@ A privacy-conscious user wants to inspect what mcpproxy would send to the teleme
 These are reasonable defaults chosen to avoid blocking on clarification. Each can be revisited.
 
 1. **Header convention is `<surface>/<version>` not just `<surface>`** because some downstream telemetry analysis may want to correlate by client version. Only the `<surface>` prefix is used for surface classification; the version is recorded only as part of the existing `version` heartbeat field, not duplicated per request.
-2. **CLI `cli/<version>` value is set by the CLI HTTP client wrapper** and applies to every Cobra subcommand that talks to the daemon. There is no way for a user-supplied script to spoof the surface other than setting the header manually, which is acceptable for anonymous aggregates.
+2. **CLI `cli/<version>` value is set by the CLI HTTP client wrapper** and applies to every Cobra subcommand that talks to the daemon. There is no way for an architect-supplied script to spoof the surface other than setting the header manually, which is acceptable for anonymous aggregates.
 3. **Web UI version is the build version of mcpproxy** (the same version embedded at build time), since the web UI is shipped from the same binary.
 4. **Doctor check names are a fixed enum** sourced from `internal/doctor`, never user-supplied. If new doctor checks are added later, their names automatically appear in the next heartbeat without needing telemetry-spec updates.
 5. **Bucket boundaries for `upstream_tool_call_count_bucket` are `0`, `1-10`, `11-100`, `101-1000`, `1000+`**. These are log-scale buckets following Homebrew's convention, sufficient to distinguish casual from heavy users without revealing exact counts.

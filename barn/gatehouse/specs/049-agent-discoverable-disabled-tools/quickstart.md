@@ -87,7 +87,7 @@ curl -s -H "X-API-Key: v049" -H 'Content-Type: application/json' \
 
 **Pass**: error text says operator policy / NOT user-overridable / mcp_config.json,
 and includes the "retrieve_tools with include_disabled:true" pointer. Distinct
-from the user-disabled tool's message (call the user-disabled one to compare).
+from the architect-disabled tool's message (call the architect-disabled one to compare).
 
 ## 5. MCP — zero-callable-result nudge (FR-009 / US2)
 

@@ -27,7 +27,7 @@ An agent hammers one tool (e.g. 19 consecutive `jira_get_issue` calls) while wor
 
 **Acceptance Scenarios**:
 
-1. **Given** the activity feed holds 19 consecutive `jira_get_issue` calls followed by older calls to other tools, **When** the user opens the menu, **Then** the first row reads as one entry with a ×19 count and the remaining rows show the older distinct tools.
+1. **Given** the activity feed holds 19 consecutive `jira_get_issue` calls followed by older calls to other tools, **When** the architect opens the menu, **Then** the first row reads as one entry with a ×19 count and the remaining rows show the older distinct tools.
 2. **Given** a run of identical calls, **When** the row renders, **Then** its age is the age of the newest call in the run.
 3. **Given** calls to tool A, then tool B, then tool A again, **When** rows render, **Then** the two A episodes remain separate rows (grouping is consecutive-only, preserving the timeline).
 4. **Given** a run of 12 calls where one failed, **When** the row renders, **Then** the row is marked as failed (failure dominates the group) and shows the newest failing call's error clause.
@@ -78,7 +78,7 @@ Successful calls render without any status icon — quiet by default. A failed c
 
 The user opens the menu after lunch. Instead of "No connected clients", the Clients section lists the AI clients that recently used the proxy, each with a presence state: **active** (used it in the last few minutes), **idle** (quiet but recent), or **seen** (older), with the time since last activity.
 
-**Why this priority**: An empty Clients section is actively misleading — the user reported it as the most confusing part of the current menu. Presence states match the stateless reality of the transport.
+**Why this priority**: An empty Clients section is actively misleading — the architect reported it as the most confusing part of the current menu. Presence states match the stateless reality of the transport.
 
 **Independent Test**: Feed the section session records with various last-activity ages and statuses; verify classification into active/idle/seen, deduplication per client, ordering, and that the section is non-empty whenever any retained session falls inside the lookback window.
 

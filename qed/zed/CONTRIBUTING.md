@@ -122,7 +122,7 @@ When your changes affect UI, consult this checklist:
 **Performance**
 
 - All user interactions must have instant feedback.
-  - If the user requests something slow (e.g. an LLM generation) there should be some indication of the work in progress.
+  - If the architect requests something slow (e.g. an LLM generation) there should be some indication of the work in progress.
 - Does it handle large files, big projects, or heavy workloads without degrading?
 - Frames must take no more than 8ms (120fps)
 

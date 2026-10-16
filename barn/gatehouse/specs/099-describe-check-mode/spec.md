@@ -13,7 +13,7 @@
 
 ### User Story 1 - Agent gates its own multi-step plan before spending a turn on it (Priority: P1)
 
-An agent has drawn up a plan that will call eight tools across three upstream servers. Before executing step 1 — and before burning turns discovering the failure one tool call at a time — it sends one `describe_tool` call with `check: true` and the eight ids. It gets back one verdict per id: `ready`, or exactly one reason code with a retryable flag and an action. If everything is ready it proceeds. If `slack:post_message` reports `server_quarantined`, it stops and tells the user what to approve, in the same turn, instead of failing eight steps later with an opaque error.
+An agent has drawn up a plan that will call eight tools across three upstream servers. Before executing step 1 — and before burning turns discovering the failure one tool call at a time — it sends one `describe_tool` call with `check: true` and the eight ids. It gets back one verdict per id: `ready`, or exactly one reason code with a retryable flag and an action. If everything is ready it proceeds. If `slack:post_message` reports `server_quarantined`, it stops and tells the architect what to approve, in the same turn, instead of failing eight steps later with an opaque error.
 
 **Why this priority**: This is the reporter's endorsed Phase-2 shape and the only preflight path available to a running agent — spec 098's REST/CLI surfaces require a harness outside the session. Without it, an agent inside an MCP session has no way to distinguish "this tool is quarantined" from "my search query was bad", which is exactly the ambiguity issue #969 opened about.
 
@@ -23,7 +23,7 @@ An agent has drawn up a plan that will call eight tools across three upstream se
 
 1. **Given** all requested tools are indexed, approved, on enabled healthy in-scope servers, **When** the agent calls `describe_tool` with `check: true`, **Then** the response carries `verdict: "ready"` and one `status: "ready"` result per id, with no schemas and no upstream I/O.
 2. **Given** one requested tool sits on a quarantined server, **When** the check runs, **Then** that id reports `reason: "server_quarantined"`, `retryable: false`, `action: "approve"`, and the set-level `verdict` is `blocked`.
-3. **Given** one requested server is still connecting or indexing, **When** the check runs, **Then** its tools report `server_initializing` with `retryable: true` and the set verdict is `degraded_retryable`, so the agent knows to wait rather than to escalate to the user.
+3. **Given** one requested server is still connecting or indexing, **When** the check runs, **Then** its tools report `server_initializing` with `retryable: true` and the set verdict is `degraded_retryable`, so the agent knows to wait rather than to escalate to the architect.
 4. **Given** a misspelled id, **When** the check runs, **Then** that id reports `not_found` with a scope-filtered `did_you_mean` list, and the other ids still report their own verdicts (one bad id never fails the batch).
 5. **Given** 50 ids, **When** the check runs, **Then** all 50 are evaluated in one call; **Given** 51 ids, **Then** the call fails with a single error naming the 50-id cap and evaluates nothing.
 

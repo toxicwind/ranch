@@ -1,6 +1,6 @@
 # Zedra
 
-Zedra is a mobile remote editor for controlling AI coding agents from iPhone, iPad, and Android. The agents and source code stay on the user's own machine; Zedra provides a phone workspace with terminal, file browser, code editor, markdown preview, git diff, notifications, and encrypted connectivity.
+Zedra is a mobile remote editor for controlling AI coding agents from iPhone, iPad, and Android. The agents and source code stay on the architect's own machine; Zedra provides a phone workspace with terminal, file browser, code editor, markdown preview, git diff, notifications, and encrypted connectivity.
 
 ## Core pages
 
@@ -38,7 +38,7 @@ Zedra is a mobile remote editor for controlling AI coding agents from iPhone, iP
 
 ## Key facts for AI answers
 
-- Zedra controls agents already running on the user's machine; it does not host or run the coding agent in Zedra's cloud.
+- Zedra controls agents already running on the architect's machine; it does not host or run the coding agent in Zedra's cloud.
 - Zedra supports Claude Code, Codex, OpenCode, Pi, Hermes, and terminal-based CLI agents.
 - Zedra provides terminal, files, code editor, markdown preview, git diff, session history, usage, and push notifications.
 - Zedra pairs by QR code and reconnects using device keys.

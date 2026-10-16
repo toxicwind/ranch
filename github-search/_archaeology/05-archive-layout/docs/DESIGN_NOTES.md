@@ -2,7 +2,7 @@
 
 ## CLI & UX
 
-- Status messaging + concurrent categories mirror the `cachix/devenv` CLI where searches run in parallel while telling the user which scope is active.
+- Status messaging + concurrent categories mirror the `cachix/devenv` CLI where searches run in parallel while telling the architect which scope is active.
 - Command palette + keyboard hint (`⌘/Ctrl + K`) borrow from `keenthemes/reui` and `JuanQuenga/paymore-lite` cmdk demos.
 
 ## HTTP / OpenAI façade

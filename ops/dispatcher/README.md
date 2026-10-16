@@ -12,7 +12,7 @@
 ## Why should I care?
 
 - **Atomic ID issuance** — `mission`/`coordinator`/`worker`/`relay` IDs, atomic across processes (flock counters, O_EXCL relay claims)
-- **direct-Chris precedence, enforced in code** — `chris-direct` (100) preempts `coordinator` (50), `oracle` (40), `agent` (10)
+- **direct-the Architect precedence, enforced in code** — `chris-direct` (100) preempts `coordinator` (50), `oracle` (40), `agent` (10)
 - **Tamper-evident** — append-only hash-chained ledger + per-relay hash-chained records; `dispatch audit` replays every chain and re-checks every lane
 - **No daemon to restart** — everything is files; kill the process, reboot the box, construct a new `Dispatcher` on the same dir and IDs, locks, and the ledger chain continue
 

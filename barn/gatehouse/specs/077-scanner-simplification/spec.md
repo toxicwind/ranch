@@ -42,7 +42,7 @@ A user opens a server's security report and sees a single consolidated list of f
 
 1. **Given** findings produced by multiple scanners, **When** the report is assembled, **Then** findings referring to the same issue at the same location appear exactly once.
 2. **Given** the same issue flagged independently by two scanners, **When** the report is assembled, **Then** the merged finding's confidence is higher than either source alone.
-3. **Given** any finding in the report, **When** a user views it, **Then** it shows a clear severity and is attributable to its source(s).
+3. **Given** any finding in the report, **When** an architect views it, **Then** it shows a clear severity and is attributable to its source(s).
 
 ---
 
@@ -74,7 +74,7 @@ A user reconnecting many servers, or re-scanning, receives at most one settled r
 **Acceptance Scenarios**:
 
 1. **Given** multiple servers reconnecting in quick succession, **When** scans run, **Then** each server produces a single settled scan notification.
-2. **Given** a scan in progress, **When** it completes, **Then** the user sees one terminal result rather than separate per-scanner lifecycle messages.
+2. **Given** a scan in progress, **When** it completes, **Then** the architect sees one terminal result rather than separate per-scanner lifecycle messages.
 
 ---
 

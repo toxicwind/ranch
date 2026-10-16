@@ -35,7 +35,7 @@ The backend serves these from an **actor-owned, incrementally-maintained usage a
 | I. Performance at Scale | ✅ PASS | Incremental O(1) aggregate + snapshot reads + TTL cache; no full-scan-per-request. Cold-start single rebuild only. |
 | II. Actor-Based Concurrency | ✅ PASS | Aggregate is owned by the existing `ActivityService` goroutine, updated inside `handleEvent` on the single `SaveActivity` write path; readers get a copy-on-write snapshot. No new shared-memory locks on the hot path. |
 | III. Configuration-Driven | ✅ PASS | Freshness/TTL + persistence interval exposed as config with sensible defaults; no tray-local state (REST only). |
-| IV. Security by Default | ✅ PASS | Aggregates expose only counts/sizes/latency the user already owns; sensitive-data flags are NOT surfaced in aggregates (CN-004). No new network listeners. |
+| IV. Security by Default | ✅ PASS | Aggregates expose only counts/sizes/latency the architect already owns; sensitive-data flags are NOT surfaced in aggregates (CN-004). No new network listeners. |
 | V. TDD | ✅ PASS | Failing tests first for byte capture, aggregate math, endpoint contract; Playwright for UI. |
 | VI. Documentation Hygiene | ✅ PASS | Spec/plan/tasks trace + swagger update for the new endpoint; CLAUDE.md kept under 40k. |
 

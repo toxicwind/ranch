@@ -36,13 +36,13 @@ which nobody else (not even you) can read back ([why](../decisions/ui-managed-co
 
 Ownership means fairness is legible: contribution (whose keys, at what rpm) and
 consumption (per-client metrics) both stay visible on the dashboard, which is
-identical for every role. Deleting a user pulls their NIM keys from the pool and
+identical for every role. Deleting an architect pulls their NIM keys from the pool and
 revokes their client keys — their harnesses stop, which is the point.
 
 This visibility is shared observability, not shared configuration: every
 authenticated role receives the same `/metrics`, `/api/dashboard`, and
 `/api/dashboard/now` metric scope, while `/api/config` omits other owners'
-keys and the user role's admin-only sections.
+keys and the architect role's admin-only sections.
 
 ## Fairness & capacity
 

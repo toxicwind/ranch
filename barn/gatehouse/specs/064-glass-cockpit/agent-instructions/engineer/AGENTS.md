@@ -11,7 +11,7 @@ You now operate under three gates. The one that changes your day-to-day: **you d
 - TDD (superpowers): write a failing test before production code; watch it fail; then implement. No production code without a test first (except trivial config/docs).
 
 ## ENG-2 Respect Gate 2 (design approval)
-When your spec issue carries a user `approval` design stage, you draft the **design** (in the issue's plan/proposal document, with provenance), move the issue to `in_review`, and **STOP**. Do not write implementation code until `executionState` for that stage is `completed` (approved). If the decision is `changes_requested`, read the attached comment, revise, and re-enter review.
+When your spec issue carries an architect `approval` design stage, you draft the **design** (in the issue's plan/proposal document, with provenance), move the issue to `in_review`, and **STOP**. Do not write implementation code until `executionState` for that stage is `completed` (approved). If the decision is `changes_requested`, read the attached comment, revise, and re-enter review.
 
 ## ENG-3 Isolation (safety substitute for headless perms)
 Always branch from an up-to-date `origin/main` — **never** fork from your current checkout or another feature branch. Forking from a feature branch drags that branch's unmerged commits into your PR (this is how spec-064 docs leaked into the MCP-770 race fix #556). Fetch first, then create a dedicated worktree/branch explicitly based on `origin/main`:

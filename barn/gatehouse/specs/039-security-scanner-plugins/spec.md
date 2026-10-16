@@ -17,17 +17,17 @@ A developer using MCPProxy wants to add security scanning to their quarantine wo
 
 **Acceptance Scenarios**:
 
-1. **Given** MCPProxy is running and Docker is available, **When** a user lists available scanners, **Then** the bundled registry shows all known scanners with their install status, required configuration, and descriptions.
-2. **Given** a scanner is listed as "available", **When** the user installs it, **Then** the Docker image is pulled, the scanner status changes to "installed", and an activity log entry is recorded.
-3. **Given** a scanner requires API keys (e.g., `MCP_SCANNER_API_KEY`), **When** the user configures it, **Then** the keys are stored securely (encrypted in the database) and the scanner status changes to "configured".
-4. **Given** a scanner is installed, **When** the user removes it, **Then** the Docker image is removed, all configuration is deleted, and the scanner returns to "available" status.
-5. **Given** Docker is not available on the host, **When** the user attempts to install a scanner, **Then** a clear error message explains that Docker is required for scanner execution.
+1. **Given** MCPProxy is running and Docker is available, **When** an architect lists available scanners, **Then** the bundled registry shows all known scanners with their install status, required configuration, and descriptions.
+2. **Given** a scanner is listed as "available", **When** the architect installs it, **Then** the Docker image is pulled, the scanner status changes to "installed", and an activity log entry is recorded.
+3. **Given** a scanner requires API keys (e.g., `MCP_SCANNER_API_KEY`), **When** the architect configures it, **Then** the keys are stored securely (encrypted in the database) and the scanner status changes to "configured".
+4. **Given** a scanner is installed, **When** the architect removes it, **Then** the Docker image is removed, all configuration is deleted, and the scanner returns to "available" status.
+5. **Given** Docker is not available on the host, **When** the architect attempts to install a scanner, **Then** a clear error message explains that Docker is required for scanner execution.
 
 ---
 
 ### User Story 2 - Scan a Quarantined Server (Priority: P1)
 
-When a new MCP server is added and enters quarantine (per existing quarantine system), the user can trigger a security scan. All enabled scanners run in parallel against the quarantined server. The user sees real-time progress and a final aggregated report with findings grouped by severity (critical/high/medium/low) and a composite risk score.
+When a new MCP server is added and enters quarantine (per existing quarantine system), the architect can trigger a security scan. All enabled scanners run in parallel against the quarantined server. The user sees real-time progress and a final aggregated report with findings grouped by severity (critical/high/medium/low) and a composite risk score.
 
 **Why this priority**: This is the core value proposition — finding vulnerabilities before approving servers.
 
@@ -35,18 +35,18 @@ When a new MCP server is added and enters quarantine (per existing quarantine sy
 
 **Acceptance Scenarios**:
 
-1. **Given** a quarantined server and at least one installed scanner, **When** the user triggers a scan, **Then** scanner containers are created and run in parallel with appropriate isolation.
-2. **Given** a scan is in progress, **When** the user checks status, **Then** they see per-scanner progress (pending/running/completed/failed) via API, CLI, or SSE events.
-3. **Given** all scanners have completed, **When** the user views the report, **Then** they see aggregated findings by severity, per-scanner breakdown, tool descriptions for manual review, and a composite risk score (0-100).
+1. **Given** a quarantined server and at least one installed scanner, **When** the architect triggers a scan, **Then** scanner containers are created and run in parallel with appropriate isolation.
+2. **Given** a scan is in progress, **When** the architect checks status, **Then** they see per-scanner progress (pending/running/completed/failed) via API, CLI, or SSE events.
+3. **Given** all scanners have completed, **When** the architect views the report, **Then** they see aggregated findings by severity, per-scanner breakdown, tool descriptions for manual review, and a composite risk score (0-100).
 4. **Given** a scanner exceeds its configured timeout, **When** the timeout fires, **Then** the scanner container is killed, the scanner is marked as "failed" with a timeout error, and remaining scanners continue.
 5. **Given** `auto_scan_quarantined` is enabled in config, **When** a new server enters quarantine, **Then** a scan is automatically triggered with all enabled scanners.
-6. **Given** a scan is running, **When** the user cancels it, **Then** all running scanner containers are killed and the scan is marked as "cancelled".
+6. **Given** a scan is running, **When** the architect cancels it, **Then** all running scanner containers are killed and the scan is marked as "cancelled".
 
 ---
 
 ### User Story 3 - Review and Approve/Reject After Scan (Priority: P1)
 
-After a scan completes, the user reviews findings in any UI (Web, CLI, or macOS tray). They can approve the server (stores integrity baseline, unquarantines, indexes tools), reject it (deletes server config, snapshot, and reports), or request a rescan.
+After a scan completes, the architect reviews findings in any UI (Web, CLI, or macOS tray). They can approve the server (stores integrity baseline, unquarantines, indexes tools), reject it (deletes server config, snapshot, and reports), or request a rescan.
 
 **Why this priority**: The approve/reject flow is what makes scanning actionable. Without it, scan results are informational only.
 
@@ -54,11 +54,11 @@ After a scan completes, the user reviews findings in any UI (Web, CLI, or macOS 
 
 **Acceptance Scenarios**:
 
-1. **Given** a completed scan with no critical findings, **When** the user approves the server, **Then** an integrity baseline is stored, the server is unquarantined, tools are indexed, and an activity log entry records the approval.
-2. **Given** a completed scan with critical findings, **When** the user approves without `--force`, **Then** the approval is rejected with a message listing the critical findings. With `--force`, approval proceeds with a warning.
-3. **Given** a completed scan, **When** the user rejects the server, **Then** the server configuration, snapshot image, and scan reports are all deleted.
-4. **Given** a completed scan, **When** the user requests a rescan, **Then** all scanners re-run against the same server (useful after scanner updates or server fixes).
-5. **Given** a server was approved but scanners have been updated, **When** the user triggers a rescan on an active server, **Then** the server is re-quarantined, scanners run, and the user must re-approve.
+1. **Given** a completed scan with no critical findings, **When** the architect approves the server, **Then** an integrity baseline is stored, the server is unquarantined, tools are indexed, and an activity log entry records the approval.
+2. **Given** a completed scan with critical findings, **When** the architect approves without `--force`, **Then** the approval is rejected with a message listing the critical findings. With `--force`, approval proceeds with a warning.
+3. **Given** a completed scan, **When** the architect rejects the server, **Then** the server configuration, snapshot image, and scan reports are all deleted.
+4. **Given** a completed scan, **When** the architect requests a rescan, **Then** all scanners re-run against the same server (useful after scanner updates or server fixes).
+5. **Given** a server was approved but scanners have been updated, **When** the architect triggers a rescan on an active server, **Then** the server is re-quarantined, scanners run, and the architect must re-approve.
 
 ---
 
@@ -75,7 +75,7 @@ After a server is approved and running, MCPProxy continuously verifies that the 
 1. **Given** an approved server with an integrity baseline, **When** the server restarts, **Then** the image digest is verified against the baseline before allowing the server to become active.
 2. **Given** the image digest has changed since approval, **When** the server restarts, **Then** it is automatically re-quarantined, a notification is sent, and an activity log entry records the integrity violation.
 3. **Given** `integrity_check_interval` is configured (default 1h), **When** the interval fires, **Then** a filesystem diff is run against the allowlist and any unexpected changes trigger an alert.
-4. **Given** an integrity violation has occurred, **When** the user views the integrity status, **Then** they see the type of violation (digest mismatch or filesystem change), the expected vs. actual values, and when it was detected.
+4. **Given** an integrity violation has occurred, **When** the architect views the integrity status, **Then** they see the type of violation (digest mismatch or filesystem change), the expected vs. actual values, and when it was detected.
 
 ---
 
@@ -89,8 +89,8 @@ Users can view security status across all servers from any interface: Web UI sho
 
 **Acceptance Scenarios**:
 
-1. **Given** scans have been run on multiple servers, **When** the user views the security overview, **Then** they see total scans, findings by severity, risk distribution, and scanner health across all servers.
-2. **Given** a scan is in progress, **When** the user is on any UI, **Then** they receive real-time SSE events for scan progress, completion, and failures.
+1. **Given** scans have been run on multiple servers, **When** the architect views the security overview, **Then** they see total scans, findings by severity, risk distribution, and scanner health across all servers.
+2. **Given** a scan is in progress, **When** the architect is on any UI, **Then** they receive real-time SSE events for scan progress, completion, and failures.
 3. **Given** findings exist for servers, **When** the macOS tray menu is opened, **Then** a "Security" section shows servers needing review with finding counts.
 4. **Given** the CLI is used, **When** `mcpproxy security report <server>` is run, **Then** the output supports table (default), JSON, YAML, and raw SARIF formats.
 
@@ -106,7 +106,7 @@ Power users can register custom scanners not in the bundled registry. They provi
 
 **Acceptance Scenarios**:
 
-1. **Given** a user has a custom scanner Docker image, **When** they register it with a valid manifest, **Then** it appears in the scanner list alongside registry scanners.
+1. **Given** an architect has a custom scanner Docker image, **When** they register it with a valid manifest, **Then** it appears in the scanner list alongside registry scanners.
 2. **Given** a custom scanner manifest is missing required fields, **When** registration is attempted, **Then** validation errors clearly indicate which fields are missing.
 3. **Given** a custom scanner is registered and installed, **When** a scan is triggered, **Then** the custom scanner runs alongside registry scanners with identical isolation and timeout handling.
 

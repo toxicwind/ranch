@@ -22,7 +22,7 @@ nothing as `/tmp` scratch.
 | [`openfang/`](openfang/) | OpenFang agent OS mirror (daemon `axiom`) | `:25103` |
 | [`mesh/`](mesh/) | Tool federation & routing layer — MCP gateway, estate-router | `:25104` |
 | [`qed/`](qed/) | Editor layer: the zed fork + zedra remote substrate | — |
-| [`shell/`](shell/) | Chris's quickshell home (`ii` fork of end-4 illogical-impulse) | — |
+| [`shell/`](shell/) | the Architect's quickshell home (`ii` fork of end-4 illogical-impulse) | — |
 
 ## Research & probes
 

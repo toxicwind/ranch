@@ -134,7 +134,7 @@ US1 is completely independent and can ship first. US2/US3 must be sequenced (US3
 
 ## MVP scope
 
-**US1 alone** is the MVP. It cuts ~80% of the observed CPU and ships independently. US2-US5 lift the remaining ~20% by eliminating the round trip. We ship all five together in this PR per the user's preference, but the breakdown is preserved here so a partial revert is possible if needed.
+**US1 alone** is the MVP. It cuts ~80% of the observed CPU and ships independently. US2-US5 lift the remaining ~20% by eliminating the round trip. We ship all five together in this PR per the architect's preference, but the breakdown is preserved here so a partial revert is possible if needed.
 
 ## Format validation
 

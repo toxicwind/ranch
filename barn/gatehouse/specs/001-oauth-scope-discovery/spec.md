@@ -23,7 +23,7 @@
 
 ### User Story 1 - Automatic OAuth Scope Discovery (Priority: P1)
 
-As a user configuring OAuth MCP servers (like GitHub MCP, Google MCP, Azure MCP), I want mcpproxy to automatically discover the correct OAuth scopes without manual configuration, so that I can connect to OAuth servers with zero configuration effort.
+As an architect configuring OAuth MCP servers (like GitHub MCP, Google MCP, Azure MCP), I want mcpproxy to automatically discover the correct OAuth scopes without manual configuration, so that I can connect to OAuth servers with zero configuration effort.
 
 **Why this priority**: This is the core fix for issue #131. Without this, users cannot use OAuth MCP servers without manual scope configuration and trial-and-error. This delivers immediate value by enabling OAuth servers to "just work" out of the box.
 
@@ -31,7 +31,7 @@ As a user configuring OAuth MCP servers (like GitHub MCP, Google MCP, Azure MCP)
 
 **Acceptance Scenarios**:
 
-1. **Given** a user adds GitHub MCP server with no `oauth.scopes` config, **When** OAuth flow starts, **Then** mcpproxy automatically discovers scopes from `https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/readonly` and uses `["repo", "user:email", ...]`
+1. **Given** an architect adds GitHub MCP server with no `oauth.scopes` config, **When** OAuth flow starts, **Then** mcpproxy automatically discovers scopes from `https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/readonly` and uses `["repo", "user:email", ...]`
 2. **Given** an OAuth server returns `401` with `WWW-Authenticate` header containing `resource_metadata` URL, **When** mcpproxy attempts authentication, **Then** it fetches the metadata URL and extracts `scopes_supported` array
 3. **Given** an OAuth server supports RFC 8414 Authorization Server Metadata, **When** Protected Resource Metadata is unavailable, **Then** mcpproxy falls back to fetching `/.well-known/oauth-authorization-server` and uses its `scopes_supported`
 4. **Given** an OAuth server has no metadata endpoints, **When** scope discovery fails, **Then** mcpproxy uses empty scopes `[]` and lets the server specify requirements via `WWW-Authenticate` header
@@ -48,15 +48,15 @@ As an advanced user or developer, I want to manually specify OAuth scopes in the
 
 **Acceptance Scenarios**:
 
-1. **Given** a user specifies `oauth.scopes` in server config, **When** OAuth flow starts, **Then** mcpproxy uses the config-specified scopes and logs "Using config-specified OAuth scopes"
-2. **Given** a user specifies empty `oauth.scopes: []` in config, **When** OAuth flow starts, **Then** mcpproxy respects the empty array and doesn't perform discovery
-3. **Given** a user specifies invalid scopes in config, **When** OAuth server rejects them, **Then** mcpproxy provides clear error message suggesting scope discovery or checking server metadata
+1. **Given** an architect specifies `oauth.scopes` in server config, **When** OAuth flow starts, **Then** mcpproxy uses the config-specified scopes and logs "Using config-specified OAuth scopes"
+2. **Given** an architect specifies empty `oauth.scopes: []` in config, **When** OAuth flow starts, **Then** mcpproxy respects the empty array and doesn't perform discovery
+3. **Given** an architect specifies invalid scopes in config, **When** OAuth server rejects them, **Then** mcpproxy provides clear error message suggesting scope discovery or checking server metadata
 
 ---
 
 ### User Story 3 - Clear Error Messages for Scope Failures (Priority: P3)
 
-As a user troubleshooting OAuth issues, I want clear error messages that explain exactly why OAuth failed and how to fix it, so that I don't waste time debugging obscure authentication errors.
+As an architect troubleshooting OAuth issues, I want clear error messages that explain exactly why OAuth failed and how to fix it, so that I don't waste time debugging obscure authentication errors.
 
 **Why this priority**: This enhances user experience but isn't blocking. Users can still succeed with P1/P2, but might need to look at logs. Better error messages reduce support burden and improve UX.
 
@@ -72,7 +72,7 @@ As a user troubleshooting OAuth issues, I want clear error messages that explain
 
 ### User Story 4 - Scope Discovery Caching (Priority: P4)
 
-As a user with multiple servers or frequent OAuth flows, I want scope discovery results to be cached, so that I don't experience delays from repeated metadata fetches during normal operation.
+As an architect with multiple servers or frequent OAuth flows, I want scope discovery results to be cached, so that I don't experience delays from repeated metadata fetches during normal operation.
 
 **Why this priority**: This is a performance optimization, not a functional requirement. P1-P3 deliver full functionality. Caching improves UX by reducing latency but isn't critical for MVP.
 
@@ -267,7 +267,7 @@ Add:
 
 ## Non-Goals
 
-- **Scope validation**: We do NOT validate that discovered scopes are actually required. If the server's metadata is wrong, OAuth will fail and the user must manually configure.
+- **Scope validation**: We do NOT validate that discovered scopes are actually required. If the server's metadata is wrong, OAuth will fail and the architect must manually configure.
 - **Scope selection logic**: We do NOT implement smart selection of subset of scopes. We use all `scopes_supported` from metadata.
 - **OAuth 1.0 support**: This feature only applies to OAuth 2.x servers.
 - **Persistent scope cache**: Cache is in-memory only, cleared on restart.

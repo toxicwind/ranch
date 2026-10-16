@@ -51,7 +51,7 @@ The generated release notes file is included in the macOS DMG installer package,
 
 **Acceptance Scenarios**:
 
-1. **Given** a release notes file has been generated and committed, **When** the DMG installer is created, **Then** the release notes file is included in the DMG contents visible to the user.
+1. **Given** a release notes file has been generated and committed, **When** the DMG installer is created, **Then** the release notes file is included in the DMG contents visible to the architect.
 
 ---
 
@@ -65,7 +65,7 @@ The generated release notes file is included in the Windows installer package, a
 
 **Acceptance Scenarios**:
 
-1. **Given** a release notes file has been generated and committed, **When** the Windows installer is built, **Then** the release notes file is included and accessible to the user post-installation.
+1. **Given** a release notes file has been generated and committed, **When** the Windows installer is built, **Then** the release notes file is included and accessible to the architect post-installation.
 
 ---
 

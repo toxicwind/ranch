@@ -7,17 +7,17 @@
 > **v2 amendment** (2026-04-30): see "v2 — Wizard Surface Redesign" at the end of this document.
 > The original v1 spec text below describes the shipped first cut (PR #433). Where v2
 > contradicts v1, v2 wins. v1 is preserved verbatim for review traceability.
-**Input**: User description: "Adaptive onboarding wizard that adjusts to the user's state — connect-a-client step shown only if no clients are connected, add-a-server step shown only if no upstream servers are configured (with a quarantine explainer), both shown back-to-back if neither exists. Plus extending the existing /api/v1/connect endpoint (Spec 039) with more clients (mcp-manager-style coverage)."
+**Input**: User description: "Adaptive onboarding wizard that adjusts to the architect's state — connect-a-client step shown only if no clients are connected, add-a-server step shown only if no upstream servers are configured (with a quarantine explainer), both shown back-to-back if neither exists. Plus extending the existing /api/v1/connect endpoint (Spec 039) with more clients (mcp-manager-style coverage)."
 
 ## Background
 
 Spec 039 (Connect Clients & Dashboard) is shipped: `GET/POST/DELETE /api/v1/connect/{client}` endpoint, `mcpproxy connect|disconnect` CLI, hub dashboard. Seven clients currently supported.
 
-Spec 032 (tool-level quarantine) and Spec 026 (sensitive-data detection) provide the trust boundary: every newly added server enters quarantine until the user explicitly approves it. Tool changes are hash-tracked (rug-pull detection). These are the existing safety net.
+Spec 032 (tool-level quarantine) and Spec 026 (sensitive-data detection) provide the trust boundary: every newly added server enters quarantine until the architect explicitly approves it. Tool changes are hash-tracked (rug-pull detection). These are the existing safety net.
 
 This feature adds three things on top:
 
-1. An **adaptive first-run onboarding wizard** that detects what the user is missing — clients, servers, or both — and walks them through only the steps that apply, in the right order.
+1. An **adaptive first-run onboarding wizard** that detects what the architect is missing — clients, servers, or both — and walks them through only the steps that apply, in the right order.
 2. **Extended client coverage** behind the existing connect endpoint, growing the adapter table from 7 to ~20 clients.
 3. **Onboarding telemetry** — connected-client state plus wizard funnel events — so we can measure whether the wizard moves retention and iterate from data.
 
@@ -46,35 +46,35 @@ Pulled from the production telemetry D1 (`mcpproxy-telemetry`, opt-out daily hea
 
 ### User Story 1 — Adaptive Onboarding Wizard (Priority: P1)
 
-A developer launches mcpproxy. The Web UI inspects the user's state — are any AI clients currently connected? are any upstream MCP servers configured? — and presents a wizard with **only the steps that are missing**:
+A developer launches mcpproxy. The Web UI inspects the architect's state — are any AI clients currently connected? are any upstream MCP servers configured? — and presents a wizard with **only the steps that are missing**:
 
 - **Neither clients nor servers** → A two-step wizard: "Step 1: Connect an AI client" → "Step 2: Add an MCP server (and how quarantine works)".
 - **No clients, has servers** → A one-step wizard: "Connect an AI client" only.
 - **Has clients, no servers** → A one-step wizard: "Add an MCP server" only, including a short quarantine explainer.
 - **Has clients and servers** → No wizard. The user lands directly on the dashboard.
 
-The wizard is the user's first impression. Every step has a clear primary action, a "Skip for now" escape hatch, and never advances on its own. The two-step path frames clients as the precondition — "once mcpproxy is plugged into your AI client, your assistant can help you add servers" — and the server step explains quarantine plainly: "every server you add starts in quarantine until you approve it; that's mcpproxy's safety net."
+The wizard is the architect's first impression. Every step has a clear primary action, a "Skip for now" escape hatch, and never advances on its own. The two-step path frames clients as the precondition — "once mcpproxy is plugged into your AI client, your assistant can help you add servers" — and the server step explains quarantine plainly: "every server you add starts in quarantine until you approve it; that's mcpproxy's safety net."
 
-**Why this priority**: This is the user's first 60 seconds with mcpproxy. Getting them from "what is this?" to "I have it connected and serving at least one server" is the single highest-leverage onboarding investment. Adapting to state means we don't drag through steps the user has already done (e.g. installing mcpproxy alongside an existing config that already has servers, or connecting the second machine of an experienced user).
+**Why this priority**: This is the architect's first 60 seconds with mcpproxy. Getting them from "what is this?" to "I have it connected and serving at least one server" is the single highest-leverage onboarding investment. Adapting to state means we don't drag through steps the architect has already done (e.g. installing mcpproxy alongside an existing config that already has servers, or connecting the second machine of an experienced user).
 
 **Independent Test**: Can be fully tested by running mcpproxy from a fresh state and from each of the three pre-existing states (no clients / no servers, has clients / no servers, no clients / has servers, both), confirming that (a) the wizard auto-shows in the first three cases and not the fourth, (b) only the missing steps appear, (c) each step's primary action completes the corresponding goal-state, (d) Skip on any step lands on the dashboard without partial commits, and (e) the wizard does not auto-show on subsequent launches once completed or skipped.
 
 **Acceptance Scenarios**:
 
-1. **Given** a fresh mcpproxy install with no upstream servers configured and no AI clients connected, **When** the user opens the Web UI, **Then** the wizard auto-appears with two visible steps in order: "Connect an AI client" then "Add an MCP server".
-2. **Given** the wizard's "Connect an AI client" step is shown and Claude Code, Cursor, and VS Code are detected, **When** the step renders, **Then** detected clients are listed with status badges and the user can click "Connect to all detected" or per-client Connect, with a diff preview before any file is written.
-3. **Given** the user completes the "Connect an AI client" step, **When** they advance, **Then** the "Add an MCP server" step is shown next.
-4. **Given** the "Add an MCP server" step is shown, **When** it renders, **Then** the user sees a short, plain-language explainer of how quarantine works — every newly added server starts in quarantine, the user reviews and approves it before any AI client can call its tools — alongside the existing add-server controls (registry browse, JSON paste, manual entry).
-5. **Given** the user adds a server via the wizard, **When** the server is added, **Then** it enters quarantine as it would through any other entry point, and the wizard's success summary explicitly says "Your server is in quarantine — review and approve it on the Servers page."
-6. **Given** mcpproxy already has at least one upstream server but no AI client is connected, **When** the user opens the Web UI for the first time, **Then** the wizard appears with only the "Connect an AI client" step.
-7. **Given** mcpproxy has at least one connected AI client but no upstream servers, **When** the user opens the Web UI for the first time, **Then** the wizard appears with only the "Add an MCP server" step (including the quarantine explainer).
-8. **Given** mcpproxy has at least one connected AI client and at least one upstream server, **When** the user opens the Web UI for the first time, **Then** the wizard does not auto-show; the user lands on the dashboard.
-9. **Given** the user clicks "Skip for now" on any step, **When** they confirm, **Then** they land on the dashboard without any partial writes from that step, and the wizard remembers having been skipped (does not re-show automatically).
-10. **Given** the wizard is not auto-showing because the user previously completed or skipped it, **When** the user wants to re-run it (e.g. after uninstalling all clients), **Then** they can re-open it from a "Run setup wizard" link in the Clients section of the dashboard.
-11. **Given** no AI clients are detected on the machine during the connect step, **When** the step renders, **Then** the user sees a friendly explanation, links to install instructions for supported clients, and a "Skip for now" option.
-12. **Given** the wizard advances between steps, **When** progress is tracked, **Then** the user sees a small step indicator (e.g. "Step 1 of 2") so they know how much remains.
-13. **Given** the user completes the final step (or completes the only step in a one-step variant), **When** they finish, **Then** they land on the dashboard with a contextual hint suited to what they just did — e.g. "Now ask your AI assistant to use mcpproxy" after the connect step, or "Review and approve your new server" after the add-server step.
-14. **Given** the user opens mcpproxy via the tray app rather than directly visiting the Web UI, **When** the tray launches the Web UI for the first time, **Then** the wizard auto-show logic behaves identically to a direct browser visit.
+1. **Given** a fresh mcpproxy install with no upstream servers configured and no AI clients connected, **When** the architect opens the Web UI, **Then** the wizard auto-appears with two visible steps in order: "Connect an AI client" then "Add an MCP server".
+2. **Given** the wizard's "Connect an AI client" step is shown and Claude Code, Cursor, and VS Code are detected, **When** the step renders, **Then** detected clients are listed with status badges and the architect can click "Connect to all detected" or per-client Connect, with a diff preview before any file is written.
+3. **Given** the architect completes the "Connect an AI client" step, **When** they advance, **Then** the "Add an MCP server" step is shown next.
+4. **Given** the "Add an MCP server" step is shown, **When** it renders, **Then** the architect sees a short, plain-language explainer of how quarantine works — every newly added server starts in quarantine, the architect reviews and approves it before any AI client can call its tools — alongside the existing add-server controls (registry browse, JSON paste, manual entry).
+5. **Given** the architect adds a server via the wizard, **When** the server is added, **Then** it enters quarantine as it would through any other entry point, and the wizard's success summary explicitly says "Your server is in quarantine — review and approve it on the Servers page."
+6. **Given** mcpproxy already has at least one upstream server but no AI client is connected, **When** the architect opens the Web UI for the first time, **Then** the wizard appears with only the "Connect an AI client" step.
+7. **Given** mcpproxy has at least one connected AI client but no upstream servers, **When** the architect opens the Web UI for the first time, **Then** the wizard appears with only the "Add an MCP server" step (including the quarantine explainer).
+8. **Given** mcpproxy has at least one connected AI client and at least one upstream server, **When** the architect opens the Web UI for the first time, **Then** the wizard does not auto-show; the architect lands on the dashboard.
+9. **Given** the architect clicks "Skip for now" on any step, **When** they confirm, **Then** they land on the dashboard without any partial writes from that step, and the wizard remembers having been skipped (does not re-show automatically).
+10. **Given** the wizard is not auto-showing because the architect previously completed or skipped it, **When** the architect wants to re-run it (e.g. after uninstalling all clients), **Then** they can re-open it from a "Run setup wizard" link in the Clients section of the dashboard.
+11. **Given** no AI clients are detected on the machine during the connect step, **When** the step renders, **Then** the architect sees a friendly explanation, links to install instructions for supported clients, and a "Skip for now" option.
+12. **Given** the wizard advances between steps, **When** progress is tracked, **Then** the architect sees a small step indicator (e.g. "Step 1 of 2") so they know how much remains.
+13. **Given** the architect completes the final step (or completes the only step in a one-step variant), **When** they finish, **Then** they land on the dashboard with a contextual hint suited to what they just did — e.g. "Now ask your AI assistant to use mcpproxy" after the connect step, or "Review and approve your new server" after the add-server step.
+14. **Given** the architect opens mcpproxy via the tray app rather than directly visiting the Web UI, **When** the tray launches the Web UI for the first time, **Then** the wizard auto-show logic behaves identically to a direct browser visit.
 
 ---
 
@@ -88,11 +88,11 @@ The existing connect endpoint supports 7 clients. mcp-manager (a comparable tool
 
 **Acceptance Scenarios**:
 
-1. **Given** the user has a tier-2 client installed (e.g. Zed, Antigravity, Amazon Q, OpenCode, LM Studio), **When** they call `GET /api/v1/connect`, **Then** that client appears in the response with `exists: true` and the correct `config_path`.
-2. **Given** the user calls `POST /api/v1/connect/{id}` for a tier-2 client, **When** the request succeeds, **Then** mcpproxy is added to that client's native config using the client's exact native shape (correct top-level key, correct entry shape, correct URL/auth field name), all other entries are preserved, and a timestamped backup exists.
+1. **Given** the architect has a tier-2 client installed (e.g. Zed, Antigravity, Amazon Q, OpenCode, LM Studio), **When** they call `GET /api/v1/connect`, **Then** that client appears in the response with `exists: true` and the correct `config_path`.
+2. **Given** the architect calls `POST /api/v1/connect/{id}` for a tier-2 client, **When** the request succeeds, **Then** mcpproxy is added to that client's native config using the client's exact native shape (correct top-level key, correct entry shape, correct URL/auth field name), all other entries are preserved, and a timestamped backup exists.
 3. **Given** a tier-2 client uses a non-standard shape (e.g. Zed's `context_servers` with `command: {path, args}` object, Amp's dotted `amp.mcpServers`, OpenCode's `mcp` with command-as-array, TOML formats), **When** mcpproxy registers itself, **Then** the entry exactly matches the client's documented schema and the client launches mcpproxy on next start without manual intervention.
-4. **Given** a tier-2 client requires CLI-only registration (e.g. `<tool> mcp add-json …`), **When** the user calls `POST /api/v1/connect/{id}`, **Then** mcpproxy invokes the client's own CLI rather than editing a config file directly, and reports the outcome with the same response schema as file-based clients.
-5. **Given** the user calls `DELETE /api/v1/connect/{id}` for a tier-2 client they previously connected, **When** the request succeeds, **Then** only mcpproxy's entry is removed; everything else in the client's config is byte-equivalent to before connect.
+4. **Given** a tier-2 client requires CLI-only registration (e.g. `<tool> mcp add-json …`), **When** the architect calls `POST /api/v1/connect/{id}`, **Then** mcpproxy invokes the client's own CLI rather than editing a config file directly, and reports the outcome with the same response schema as file-based clients.
+5. **Given** the architect calls `DELETE /api/v1/connect/{id}` for a tier-2 client they previously connected, **When** the request succeeds, **Then** only mcpproxy's entry is removed; everything else in the client's config is byte-equivalent to before connect.
 6. **Given** a tier-2 client is installed in a non-default location, **When** detection runs, **Then** detection either finds it via well-known fallback paths (per-client expanded list) or reports it as not detected without producing a false positive.
 7. **Given** the wizard runs, **When** any tier-2 clients are detected during the connect step, **Then** they appear with the same UX as tier-1 clients.
 
@@ -114,11 +114,11 @@ All telemetry is governed by mcpproxy's existing privacy posture (Spec 042 / Spe
 
 1. **Given** mcpproxy has 2 AI clients currently connected (e.g. Claude Code and Cursor), **When** the next heartbeat is sent, **Then** the heartbeat includes a connected-client count of 2 and a connected-client identifier set containing the two client IDs.
 2. **Given** mcpproxy has zero AI clients currently connected, **When** the next heartbeat is sent, **Then** the heartbeat carries a connected-client count of 0 and an empty identifier set, distinguishable from an opted-out heartbeat.
-3. **Given** the wizard has been shown to this installation and the user completed the connect step but skipped the add-server step, **When** the next heartbeat is sent, **Then** the heartbeat carries a wizard-funnel record indicating wizard shown, connect step completed, server step skipped.
+3. **Given** the wizard has been shown to this installation and the architect completed the connect step but skipped the add-server step, **When** the next heartbeat is sent, **Then** the heartbeat carries a wizard-funnel record indicating wizard shown, connect step completed, server step skipped.
 4. **Given** the wizard was never shown (because both predicates were satisfied at first run), **When** heartbeats are sent over time, **Then** the wizard-funnel record indicates "not shown — preconditions met".
-5. **Given** the user has disabled telemetry (`mcpproxy telemetry disable` or `MCPPROXY_TELEMETRY=false`), **When** any heartbeat would be sent, **Then** no heartbeat is sent, including the new fields, with the same behaviour as before this feature.
+5. **Given** the architect has disabled telemetry (`mcpproxy telemetry disable` or `MCPPROXY_TELEMETRY=false`), **When** any heartbeat would be sent, **Then** no heartbeat is sent, including the new fields, with the same behaviour as before this feature.
 6. **Given** the new telemetry is in production for at least 14 days post-release, **When** we query the telemetry D1, **Then** we can compute (a) the share of installs whose first heartbeat shows zero connected clients, (b) the share of installs that complete the connect step via the wizard, (c) the day-2 retention of installs whose first heartbeat shows ≥1 connected client vs zero connected clients, and (d) the day-2 retention of installs that completed the wizard's connect step vs those that skipped it.
-7. **Given** the new fields are documented on the public telemetry page, **When** a user reads `/telemetry` on the website, **Then** the page accurately lists the connected-client count, the connected-client identifier enum, and the wizard funnel record alongside the existing field list, with the same explanatory tone.
+7. **Given** the new fields are documented on the public telemetry page, **When** an architect reads `/telemetry` on the website, **Then** the page accurately lists the connected-client count, the connected-client identifier enum, and the wizard funnel record alongside the existing field list, with the same explanatory tone.
 8. **Given** an end-to-end privacy test asserts heartbeat content, **When** the test runs the wizard end-to-end, **Then** the test verifies that the heartbeat never contains user-entered strings such as upstream server names, custom client paths, free-text input, or any field outside the documented enum.
 
 ---
@@ -126,18 +126,18 @@ All telemetry is governed by mcpproxy's existing privacy posture (Spec 042 / Spe
 ### Edge Cases
 
 - **Wizard is showing the connect step but user has zero clients installed**: Step renders with installation links to supported clients and a clear "Skip for now". No misleading progress.
-- **Wizard is showing the add-server step and the user closes the browser mid-flow**: Next time the user opens the Web UI, the wizard re-evaluates state. If the user partially configured a server but never confirmed, no half-server is left behind. If the user did add one, the wizard considers the server step satisfied and skips it.
+- **Wizard is showing the add-server step and the architect closes the browser mid-flow**: Next time the architect opens the Web UI, the wizard re-evaluates state. If the architect partially configured a server but never confirmed, no half-server is left behind. If the architect did add one, the wizard considers the server step satisfied and skips it.
 - **User is in the wizard's add-server step and chooses "Skip for now"**: They land on the dashboard. No server is added. The wizard remembers having been skipped.
 - **mcpproxy was previously installed with servers configured but they are all currently disconnected/disabled**: Wizard considers a configured server (regardless of current connection health) as "has servers" and skips that step. Health is the dashboard's job.
 - **User's only "connected" client is Claude Desktop (stdio-only, currently unsupported by connect)**: The wizard considers connected = at least one client whose config currently contains a working mcpproxy entry. Detected-but-unsupported clients (like Claude Desktop) are shown with a clear "stdio-only — connect not supported" status and do not satisfy the precondition on their own.
-- **Wizard auto-show suppression marker exists but the user re-installs mcpproxy from scratch**: A fresh install produces a fresh marker absence and the wizard re-evaluates from scratch.
+- **Wizard auto-show suppression marker exists but the architect re-installs mcpproxy from scratch**: A fresh install produces a fresh marker absence and the wizard re-evaluates from scratch.
 - **The user invokes "Run setup wizard" manually after first run**: Wizard re-evaluates state and shows whichever steps are currently missing, even if they finish in zero steps ("You're all set — nothing to do here").
 - **Tier-2 client install location is non-default**: Adapter falls back to documented well-known fallback paths; if all fail, it reports "not detected" rather than guessing.
-- **Tier-2 client config file is malformed**: Connect refuses, points the user at the exact file path and parse error, never partially writes.
+- **Tier-2 client config file is malformed**: Connect refuses, points the architect at the exact file path and parse error, never partially writes.
 - **Tier-2 client's CLI registration command fails (CLI-only adapters)**: The connect endpoint returns the client CLI's stderr verbatim along with the same error envelope as file-based clients.
 - **User upgrades mcpproxy and a new tier-2 adapter is added**: No silent rewrite of existing client configs. The newly supported client simply appears in the Clients section as available to connect; the wizard does not re-trigger.
 - **Telemetry is opted out**: New connected-client and wizard-funnel fields are simply not transmitted, exactly like every existing telemetry field.
-- **Heartbeat is sent before the user has finished the wizard**: The wizard funnel record reflects current state ("shown, in progress, no step yet completed"). Subsequent heartbeats reflect updated state. We never wait for wizard completion to send a heartbeat.
+- **Heartbeat is sent before the architect has finished the wizard**: The wizard funnel record reflects current state ("shown, in progress, no step yet completed"). Subsequent heartbeats reflect updated state. We never wait for wizard completion to send a heartbeat.
 - **User connects then disconnects a client between heartbeats**: The heartbeat reflects the state at heartbeat time. We do not retain transient transitions. (Day-over-day comparisons in D1 capture the trend.)
 
 ## Requirements *(mandatory)*
@@ -147,20 +147,20 @@ All telemetry is governed by mcpproxy's existing privacy posture (Spec 042 / Spe
 #### Adaptive Onboarding Wizard
 
 - **FR-001**: System MUST evaluate, on first Web UI load, two state predicates: (a) does mcpproxy currently have at least one AI client connected to it (i.e. mcpproxy is registered in at least one client's config), and (b) does mcpproxy currently have at least one upstream MCP server configured.
-- **FR-002**: System MUST show the wizard only when at least one of the two predicates is false. When both are true, no wizard is auto-shown and the user lands directly on the dashboard.
+- **FR-002**: System MUST show the wizard only when at least one of the two predicates is false. When both are true, no wizard is auto-shown and the architect lands directly on the dashboard.
 - **FR-003**: Wizard MUST render only the steps corresponding to false predicates: a "Connect an AI client" step when (a) is false, and an "Add an MCP server" step when (b) is false. Steps appear in this order when both apply.
-- **FR-004**: Wizard MUST display a step indicator clarifying current and total steps so the user knows how much remains.
+- **FR-004**: Wizard MUST display a step indicator clarifying current and total steps so the architect knows how much remains.
 - **FR-005**: "Connect an AI client" step MUST detect locally installed AI clients using the same detection used by `GET /api/v1/connect` (extended per US2), present them with status badges, and offer a primary "Connect to all detected" action plus per-client Connect actions, all routed through the existing connect endpoint(s) so file writes, backups, and diff previews behave identically to manual use of the Clients section.
 - **FR-006**: "Connect an AI client" step MUST require explicit user confirmation of a diff preview before any client config is modified. The combined-diff preview lists every file that will be touched.
 - **FR-007**: "Connect an AI client" step MUST handle the "no detected clients" case gracefully with installation hints for supported clients and a "Skip for now" option.
-- **FR-008**: "Add an MCP server" step MUST include a short, plain-language explainer of how quarantine works — every newly added server starts in quarantine until the user explicitly approves it, and the AI client cannot call its tools until that approval. The explainer is visible before the user adds anything.
+- **FR-008**: "Add an MCP server" step MUST include a short, plain-language explainer of how quarantine works — every newly added server starts in quarantine until the architect explicitly approves it, and the AI client cannot call its tools until that approval. The explainer is visible before the architect adds anything.
 - **FR-009**: "Add an MCP server" step MUST offer the same add-server controls as the existing add-server flow (registry browse, JSON paste, manual entry) and route through the same endpoints. No separate or duplicate add-server backend.
-- **FR-010**: When a user adds a server through the wizard, the server MUST enter quarantine in the same way as any other entry point. The wizard's success summary MUST tell the user the server is quarantined and link to the Servers page where they can review and approve.
-- **FR-011**: Each step MUST offer a "Skip for now" action that lands the user on the dashboard without partial writes.
-- **FR-012**: System MUST persist a per-installation marker recording wizard completion or skip so the wizard does not auto-appear again. The marker is independent from the predicates in FR-001 — once the user has explicitly engaged with (or dismissed) the wizard, we trust that decision even if state later regresses.
+- **FR-010**: When an architect adds a server through the wizard, the server MUST enter quarantine in the same way as any other entry point. The wizard's success summary MUST tell the architect the server is quarantined and link to the Servers page where they can review and approve.
+- **FR-011**: Each step MUST offer a "Skip for now" action that lands the architect on the dashboard without partial writes.
+- **FR-012**: System MUST persist a per-installation marker recording wizard completion or skip so the wizard does not auto-appear again. The marker is independent from the predicates in FR-001 — once the architect has explicitly engaged with (or dismissed) the wizard, we trust that decision even if state later regresses.
 - **FR-013**: System MUST expose a "Run setup wizard" link from the Clients section of the dashboard so the wizard can be re-run on demand. Re-running the wizard re-evaluates state from scratch.
-- **FR-014**: When the user finishes any step via its primary action (not Skip), the System MUST land them on a contextual next-step hint matched to what they just did — e.g. "Now ask your AI assistant to use mcpproxy" after the connect step, or "Review and approve your new server" after the add-server step.
-- **FR-015**: Wizard auto-show behaviour MUST be identical whether the user reaches the Web UI directly in a browser or via the tray application launching the Web UI.
+- **FR-014**: When the architect finishes any step via its primary action (not Skip), the System MUST land them on a contextual next-step hint matched to what they just did — e.g. "Now ask your AI assistant to use mcpproxy" after the connect step, or "Review and approve your new server" after the add-server step.
+- **FR-015**: Wizard auto-show behaviour MUST be identical whether the architect reaches the Web UI directly in a browser or via the tray application launching the Web UI.
 
 #### Extended Client Connect Coverage
 
@@ -219,7 +219,7 @@ All telemetry is governed by mcpproxy's existing privacy posture (Spec 042 / Spe
 - "Connected client" means at least one client config file currently contains a working mcpproxy entry pointing at this mcpproxy's listen URL. Detection uses the same logic as `GET /api/v1/connect` returning `connected: true`.
 - "Configured server" means at least one upstream server present in mcpproxy's configuration, regardless of current connection health.
 - The wizard is Web-UI only in this scope. CLI users start mcpproxy and use `mcpproxy connect --all` or the existing add-server tools directly; the wizard is for the Web-UI / tray-launching path.
-- "First-run" is detected by the absence of the wizard-engagement marker, not by a config-version stamp. Re-installing mcpproxy after manually connecting a client and adding servers does not trigger the wizard if both predicates are now true; if state regresses (e.g. user disconnects all clients), the wizard does not re-trigger automatically because the user has already engaged with it once.
+- "First-run" is detected by the absence of the wizard-engagement marker, not by a config-version stamp. Re-installing mcpproxy after manually connecting a client and adding servers does not trigger the wizard if both predicates are now true; if state regresses (e.g. user disconnects all clients), the wizard does not re-trigger automatically because the architect has already engaged with it once.
 - The 11.8% day-2 retention baseline used for SC-012/SC-013 was measured 2026-03-23 → 2026-04-28 across 1,491 unique installs from the production telemetry D1. The full baseline funnel is in Background. Post-release comparison must be apples-to-apples — same telemetry sampling, same heartbeat dedup rule, same install cohort definition.
 - Telemetry remains opt-out and anonymous. The new fields fit the existing privacy framework (Spec 042 / Spec 044): no upstream-server names, no tool descriptions, no user-entered strings, only fixed enum identifiers and counts. Documentation on the public `/telemetry` page must be updated as part of this feature.
 
@@ -245,7 +245,7 @@ feat(046): adaptive onboarding wizard with state-based steps
 
 Related #[issue-number]
 
-Adds the adaptive first-run wizard. Detects whether the user has any
+Adds the adaptive first-run wizard. Detects whether the architect has any
 clients connected and any servers configured, and renders only the
 steps that are missing, in order. Reuses Spec 039 for connect and
 the existing add-server flow for servers. No new HTTP contract.
@@ -271,10 +271,10 @@ the existing add-server flow for servers. No new HTTP contract.
 After PR #433 (the v1 wizard) shipped, telemetry from `gemini-home` (SynapBus #27345, 2026-04-30) confirmed that the activation funnel cliff is **Step 3 → Step 4 (78.2% → 11.7%)**: users add upstream servers but fail to wire mcpproxy into their AI IDE. The v1 wizard does help by surfacing the connect step, but it has three weaknesses against this signal:
 
 1. **Linear, one-shot flow.** The user can't easily revisit "did my client actually connect?" without manually digging into Settings.
-2. **No proof of round-trip.** Completing the connect step writes a config file, but the user has no in-product confirmation that their AI agent actually talked to mcpproxy. The 11.7% cliff is the gap between "config written" and "first successful MCP request".
+2. **No proof of round-trip.** Completing the connect step writes a config file, but the architect has no in-product confirmation that their AI agent actually talked to mcpproxy. The 11.7% cliff is the gap between "config written" and "first successful MCP request".
 3. **Hidden re-entry.** The "Run setup wizard" link buried in the Dashboard sidebar is unreachable from other pages, so users who get distracted mid-flow never come back.
 
-v2 reframes the wizard as a **persistent, idempotent setup surface** that lives in the left sidebar and stays visible until the user has clients connected, servers configured, *and* a verified first round-trip from at least one client.
+v2 reframes the wizard as a **persistent, idempotent setup surface** that lives in the left sidebar and stays visible until the architect has clients connected, servers configured, *and* a verified first round-trip from at least one client.
 
 ## v2 Goals (in priority order)
 
@@ -303,7 +303,7 @@ The wizard's badge in the sidebar is the count of tabs whose state is incomplete
 - Servers tab is "incomplete" iff `configured_server_count == 0`
 - Verify tab is "incomplete" iff `FirstMCPClientEver == false`
 
-Auto-popup once on first run when `incomplete_tab_count > 0`. Sidebar badge stays live forever — once the user has engaged at least once, we never auto-popup again, but the badge remains so they know they have unfinished setup.
+Auto-popup once on first run when `incomplete_tab_count > 0`. Sidebar badge stays live forever — once the architect has engaged at least once, we never auto-popup again, but the badge remains so they know they have unfinished setup.
 
 **Acceptance scenarios:**
 
@@ -364,6 +364,6 @@ This bumps `schema_version` 4 → 5 in `internal/telemetry/telemetry.go`. v3/v4 
 
 ## v2 Risks & Mitigations
 
-- **Risk**: The MCP `initialize` hook fires for *any* MCP client, including curl/test scripts, so a verified state could be a false positive (user ran `mcpinspect` once but never wired up their real IDE). **Mitigation**: `MCPClientsSeenEver` records the client name; the Verify tab shows the recognized names so the user can see whether it's a real IDE or a test client. We don't gate on identity, but we surface it.
+- **Risk**: The MCP `initialize` hook fires for *any* MCP client, including curl/test scripts, so a verified state could be a false positive (user ran `mcpinspect` once but never wired up their real IDE). **Mitigation**: `MCPClientsSeenEver` records the client name; the Verify tab shows the recognized names so the architect can see whether it's a real IDE or a test client. We don't gate on identity, but we surface it.
 - **Risk**: Sidebar badge churn is annoying if it bounces between values during a quick connect. **Mitigation**: store fetches are debounced 500ms; SSE is the primary update path; the badge only re-renders when the count actually changes.
 - **Risk**: Server-edition users see no Setup entry but expect parity. **Mitigation**: explicit non-goal in v2; we can revisit per multi-user UX in a follow-up.

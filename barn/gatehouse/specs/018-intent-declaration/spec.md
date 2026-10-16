@@ -62,9 +62,9 @@ Users configure their IDE (Cursor, Claude Desktop) to automatically approve read
 
 **Acceptance Scenarios**:
 
-1. **Given** a user has configured "auto-approve call_tool_read" in their IDE, **When** an agent calls `call_tool_read` with matching intent, **Then** the operation proceeds without user prompt
-2. **Given** a user has configured "ask for call_tool_write" in their IDE, **When** an agent calls `call_tool_write` with matching intent, **Then** the IDE prompts for user approval
-3. **Given** a user has configured "always ask for call_tool_destructive", **When** an agent calls `call_tool_destructive` with matching intent, **Then** the IDE prompts for approval with clear warning
+1. **Given** an architect has configured "auto-approve call_tool_read" in their IDE, **When** an agent calls `call_tool_read` with matching intent, **Then** the operation proceeds without user prompt
+2. **Given** an architect has configured "ask for call_tool_write" in their IDE, **When** an agent calls `call_tool_write` with matching intent, **Then** the IDE prompts for user approval
+3. **Given** an architect has configured "always ask for call_tool_destructive", **When** an agent calls `call_tool_destructive` with matching intent, **Then** the IDE prompts for approval with clear warning
 
 ---
 
@@ -129,10 +129,10 @@ Users can invoke tools via CLI with explicit intent using separate commands for 
 
 **Acceptance Scenarios**:
 
-1. **Given** a user runs `mcpproxy call tool-read --tool-name=github:list_repos --json_args='{}'`, **Then** the tool is called via call_tool_read with operation_type "read"
-2. **Given** a user runs `mcpproxy call tool-write --tool-name=github:create_issue --json_args='{"title":"Bug"}'`, **Then** the tool is called via call_tool_write with operation_type "write"
-3. **Given** a user runs `mcpproxy call tool-destructive --tool-name=github:delete_repo --json_args='{"repo":"test"}'`, **Then** the tool is called via call_tool_destructive with operation_type "destructive"
-4. **Given** a user runs `mcpproxy call tool-read` on a destructive tool, **Then** the command fails with clear error message
+1. **Given** an architect runs `mcpproxy call tool-read --tool-name=github:list_repos --json_args='{}'`, **Then** the tool is called via call_tool_read with operation_type "read"
+2. **Given** an architect runs `mcpproxy call tool-write --tool-name=github:create_issue --json_args='{"title":"Bug"}'`, **Then** the tool is called via call_tool_write with operation_type "write"
+3. **Given** an architect runs `mcpproxy call tool-destructive --tool-name=github:delete_repo --json_args='{"repo":"test"}'`, **Then** the tool is called via call_tool_destructive with operation_type "destructive"
+4. **Given** an architect runs `mcpproxy call tool-read` on a destructive tool, **Then** the command fails with clear error message
 
 ---
 
@@ -146,8 +146,8 @@ Users monitoring agent activity via CLI can see which tool variant was used for 
 
 **Acceptance Scenarios**:
 
-1. **Given** tool calls via different variants exist, **When** a user runs `mcpproxy activity list`, **Then** an Intent column shows operation type with icon (read/write/destructive)
-2. **Given** tool calls exist, **When** a user runs `mcpproxy activity list -o json`, **Then** intent objects include operation_type and metadata
+1. **Given** tool calls via different variants exist, **When** an architect runs `mcpproxy activity list`, **Then** an Intent column shows operation type with icon (read/write/destructive)
+2. **Given** tool calls exist, **When** an architect runs `mcpproxy activity list -o json`, **Then** intent objects include operation_type and metadata
 
 ---
 

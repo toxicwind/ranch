@@ -66,6 +66,6 @@ Other mcpproxy-ecosystem repos exist on this machine:
 
 1. STOP — do not `cd` to the other repo and start working there.
 2. Post a comment on the goal ticket asking the CEO to dispatch the appropriate per-repo expert (`WebsiteEngineer`, `TelemetryEngineer`, etc.).
-3. If no such expert exists yet, the CEO will either provision a new agent (board approval required per FR-011) or hand the goal back to the user.
+3. If no such expert exists yet, the CEO will either provision a new agent (board approval required per FR-011) or hand the goal back to the architect.
 
 **Why**: Claude Code loads `CLAUDE.md` from `cwd` + parents at startup; cross-repo `cd` does not pick up the new repo's conventions. Speckit's `/speckit.specify` writes specs relative to `cwd`. `gh pr create` resolves the remote from `cwd`. Staying in your lane keeps these tools working correctly.

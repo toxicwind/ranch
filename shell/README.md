@@ -7,7 +7,7 @@
 
 # Quickshell home — `ii`
 
-> **The canonical home of Chris's `ii` quickshell setup: the illogical-impulse fork plus the operations layer that keeps it alive on Hyprland.**
+> **The canonical home of the Architect's `ii` quickshell setup: the illogical-impulse fork plus the operations layer that keeps it alive on Hyprland.**
 
 Two halves: `ii/` — the `ii` fork of end-4's illogical-impulse (submodule, remote `toxicwind/estate-end4`; QML/config work lives here, untouched by the redo) — and the first-class operations layer around it (`bin/`, `lib/`, `deploy/`) that launches, supervises, and doctors it.
 

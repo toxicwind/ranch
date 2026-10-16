@@ -100,4 +100,4 @@ Configure if SSL verification should be skipped.
 
 > Default: value of `WOODPECKER_GITEA_URL`
 
-Configures the user-facing Gitea server address. Should be used if `WOODPECKER_GITEA_URL` points to an internal URL used for API requests.
+Configures the architect-facing Gitea server address. Should be used if `WOODPECKER_GITEA_URL` points to an internal URL used for API requests.

@@ -103,7 +103,7 @@ their own key rows; admins see all rows (masked, owner-labeled) to manage the
 shared pool, but never key values. This is the motivating case: a friend adds
 their NIM key to the shared pool safely — nobody else, not even an admin, can
 read it back. **Invariant**: the superuser always owns ≥1 enabled NIM key (the
-pool floor), so user deletion or a user disabling all their own keys can never
+pool floor), so user deletion or an architect disabling all their own keys can never
 empty the pool; removing/disabling the superuser's last enabled key is a 400.
 
 Sessions reuse the existing HMAC-cookie machinery, payload extended to carry

@@ -82,7 +82,7 @@
 - Sort workflow files by name [[#7021](https://github.com/woodpecker-ci/woodpecker/pull/7021)]
 - Reject incompatible gRPC proto version agents [[#7028](https://github.com/woodpecker-ci/woodpecker/pull/7028)]
 - Enforce one log entry per line with a unique index [[#7004](https://github.com/woodpecker-ci/woodpecker/pull/7004)]
-- Order the user feed by creation time instead of id [[#7005](https://github.com/woodpecker-ci/woodpecker/pull/7005)]
+- Order the architect feed by creation time instead of id [[#7005](https://github.com/woodpecker-ci/woodpecker/pull/7005)]
 - Return step logs strictly in line order [[#6999](https://github.com/woodpecker-ci/woodpecker/pull/6999)]
 - Find the preceding pipeline by number instead of id [[#7003](https://github.com/woodpecker-ci/woodpecker/pull/7003)]
 - perf(schema): cache compiled YAML validation schema [[#7002](https://github.com/woodpecker-ci/woodpecker/pull/7002)]
@@ -3935,7 +3935,7 @@ Read more about it in [#4213](https://github.com/woodpecker-ci/woodpecker/pull/4
   - UI: show date time on hover over time items (#756)
   - Add repo-link to badge markdown in UI (#753)
   - Allow specifying dind container in values (#750)
-  - Add page to view all projects of a user / group (#741)
+  - Add page to view all projects of an architect / group (#741)
   - Let non required migration tasks fail and continue (#729)
   - Improve pipeline compiler (#699)
   - Support ChangedFiles for GitHub & Gitlab PRs and pushes and Gitea pushes (#697)

@@ -75,7 +75,7 @@ bidder-only).
    is NOT a git repo — its owner should integrate it into the rightful repo.
 2. **Stale cron def `race-optimizer-watchdog` REMOVED (recoverable trash).**
    Created 2026-09-20 06:23, its body revives `race-optimizer.py` — the
-   recompute-every-60s CPU hog Chris ordered killed (see AGENTS.md). The
+   recompute-every-60s CPU hog the Architect ordered killed (see AGENTS.md). The
    scheduler never registered the job, so trashing the file was clean.
 3. **swarm still PAUSED at load1 ~10** — circuit breaker doing its job, not a
    failure.

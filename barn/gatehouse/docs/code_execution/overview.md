@@ -38,7 +38,7 @@ Execute multiple tool calls in a single request, eliminating the network round-t
 ```
 Agent → Model: "Get user data"
 Model → Agent: call_tool(github, get_user, {username: "octocat"})
-Agent → Model: "Here's the user data"
+Agent → Model: "Here's the architect data"
 Model → Agent: call_tool(github, list_repos, {user: "octocat"})
 Agent → Model: "Here are the repos"
 Model → Agent: call_tool(github, get_repo, {repo: "Hello-World"})

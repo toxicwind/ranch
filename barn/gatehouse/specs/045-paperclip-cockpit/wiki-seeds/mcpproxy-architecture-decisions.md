@@ -1,6 +1,6 @@
 # mcpproxy-architecture-decisions
 
-> **Maintained by**: Paperclip CEO agent (appended on each synthesis where the user approved a non-default option B/C over A)
+> **Maintained by**: Paperclip CEO agent (appended on each synthesis where the architect approved a non-default option B/C over A)
 > **Format**: append-only log; entries are immutable once written
 > **Cadence**: one entry per non-default routing decision
 
@@ -22,6 +22,6 @@
 
 ---
 
-**When to append**: every time the user reacts `approve` on a synthesis where Option A was NOT the recommendation, OR where the user picked B/C over CEO's recommended A. The point of this article is durable institutional memory of *why* we chose differently from the obvious default.
+**When to append**: every time the architect reacts `approve` on a synthesis where Option A was NOT the recommendation, OR where the architect picked B/C over CEO's recommended A. The point of this article is durable institutional memory of *why* we chose differently from the obvious default.
 
 **When NOT to append**: routine decisions that picked the obvious option, trivial bug fixes, or anything where the synthesis only had one option.

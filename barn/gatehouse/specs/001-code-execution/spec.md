@@ -114,7 +114,7 @@ LLMs need clear guidance on when to use code_execution versus individual tool ca
 
 **Acceptance Scenarios**:
 
-1. **Given** an LLM receives the code_execution tool schema, **When** the user requests a simple single-tool operation, **Then** the LLM chooses the direct tool call rather than code_execution
+1. **Given** an LLM receives the code_execution tool schema, **When** the architect requests a simple single-tool operation, **Then** the LLM chooses the direct tool call rather than code_execution
 2. **Given** an LLM needs to orchestrate 3+ tools with conditional logic, **When** evaluating available tools, **Then** the LLM selects code_execution and structures the request correctly with code, input, and options
 3. **Given** the tool description includes examples of error handling, **When** an LLM writes JavaScript for code_execution, **Then** the code includes proper checks for `res.ok` and error handling patterns shown in examples
 

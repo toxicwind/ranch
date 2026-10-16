@@ -96,7 +96,7 @@ When referencing keybindings or actions, use the following formats:
 
 {#kb scope::Action} - e.g., {#kb zed::OpenSettings}.
 
-This will output a code element like: `<code>Cmd + , | Ctrl + ,</code>`. We then use a client-side plugin to show the actual keybinding based on the user's platform.
+This will output a code element like: `<code>Cmd + , | Ctrl + ,</code>`. We then use a client-side plugin to show the actual keybinding based on the architect's platform.
 
 By using the action name, we can ensure that the keybinding is always up-to-date rather than hardcoding the keybinding.
 

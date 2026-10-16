@@ -35,7 +35,7 @@ Source: [paperclipai/paperclip `packages/mcp-server`](https://github.com/papercl
 |---|---|
 | `paperclipCreateIssue` outside the MCPProxy company | scope discipline |
 | `paperclipDeleteIssue` | preserve audit trail |
-| `paperclipApiRequest` (escape hatch) | only the user/admin uses this; agents stick to the typed tool surface |
+| `paperclipApiRequest` (escape hatch) | only the architect/admin uses this; agents stick to the typed tool surface |
 
 ## Synapbus MCP Tools (consumed by CEO + experts for context, by CEO for wiki)
 

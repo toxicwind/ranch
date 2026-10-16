@@ -1,6 +1,6 @@
 # Orphan sweep — 2026-09-20 (orphan-sweep, pack-fix crew)
 
-Lane: **yote processes only** (Chris directive). /tmp file triage → kimi-unlock-audit.
+Lane: **yote processes only** (the Architect directive). /tmp file triage → kimi-unlock-audit.
 Repo orphan integration → repo-integrator-max. Stale pid files stay in this lane.
 
 Permanent deliverable: [bin/orphan-sweep.sh](bin/orphan-sweep.sh) — repeatable

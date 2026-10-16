@@ -53,7 +53,7 @@ Live on `main` now (`PUT /repos/smart-mcp-proxy/mcpproxy-go/branches/main/protec
 - The two AI reviewers post their verdicts (as Paperclip review stages + PR comments), required CI must be green, but the **human performs the final merge click**. This keeps the model-diverse review gate without needing the bot identity. Current `main` protection already requires 1 approval; raise to 2 + add the reviewer checks when the bot identity lands.
 
 ## Reviewer roster — SUBSCRIPTION AUTH ONLY (user directive 2026-05-31)
-Both AI reviewers use the user's **paid subscription logins**, NOT API keys.
+Both AI reviewers use the architect's **paid subscription logins**, NOT API keys.
 
 - **Gemini Critic** — `gemini_local` adapter, **subscription/OAuth auth** (`~/.gemini/google_accounts.json`; no API key). CLI = `@google/gemini-cli` 0.42.0, `previewFeatures: true`.
   - **Model:** pinned `gemini-2.5-pro` (best confirmed). **Gemini 3.5/3 could NOT be verified** — is it available? Unknown: every probe on 2026-05-31 hit `"You have exhausted your capacity on this model"` (subscription **quota exhausted**), so neither model-listing nor a test call succeeded. If a `gemini-3.x` exists on the subscription, switch the pin to it once quota recovers and it's confirmed.

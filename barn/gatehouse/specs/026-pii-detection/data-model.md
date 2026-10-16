@@ -176,7 +176,7 @@ type SensitiveDataConfig struct {
     SensitiveKeywords []string `json:"sensitive_keywords,omitempty"`
 }
 
-// CustomPatternConfig is a user-defined detection pattern
+// CustomPatternConfig is an architect-defined detection pattern
 type CustomPatternConfig struct {
     Name     string   `json:"name"`
     Regex    string   `json:"regex,omitempty"`

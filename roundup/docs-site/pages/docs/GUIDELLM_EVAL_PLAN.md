@@ -21,7 +21,7 @@ Evidence from the fork source (verified 2026-09-20, not from docs):
 - Verified live 2026-09-20 ~14:30 MDT through the free key: 446/446 models
   probed, 15 HTTP 200, 8 exact instruction-following matches.
 
-## 2. Why GuideLLM needs a tokenizer (Chris asked)
+## 2. Why GuideLLM needs a tokenizer (the Architect asked)
 
 Verified in `src/guidellm/data/tokenizers/huggingface.py`: the tokenizer is
 used ONLY for synthetic workload shaping (building prompts of N tokens) and
@@ -54,7 +54,7 @@ Fallback order: same-family public tokenizer -> gpt2 proxy (last resort).
 - Layer 2 — GuideLLM (availability/latency/throughput): synchronous profile
   over the Layer-1 passing set, per-model real tokenizers, file-data prompts.
 - Composite order: abstract score -> free-on-provider -> GuideLLM p50 latency.
-  Cost is NOT a factor (Chris directive).
+  Cost is NOT a factor (the Architect directive).
 
 ## 4. Concrete next commands (run on yote)
 
@@ -78,7 +78,7 @@ Sweep outputs land in ranch/roundup/results/*.json (gitignored).
 
 - Reasoning models (nemotron-3-nano-omni-30b-a3b-reasoning, nemotron-3.5-lightning)
   wrap answers in thinking blocks -> scorer needs a thinking-strip adapter.
-- Gated tokenizers need a HF token (Chris's call) or family fallback.
+- Gated tokenizers need a HF token (the Architect's call) or family fallback.
 - Beyond instruction-following (tool use, reasoning retention, context
   behavior): future customization IN the fork (toxicwind/roundup), not a new
   harness. The fork is currently uncustomized upstream @ 4601968.

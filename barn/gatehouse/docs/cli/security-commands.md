@@ -92,7 +92,7 @@ The status column is consistent between table and JSON output:
 | `available`  | Known to the registry, Docker image not pulled yet |
 | `pulling`    | Background pull in progress after `enable` |
 | `installed`  | Docker image cached locally, no extra env needed |
-| `configured` | Installed AND the user has set one or more env vars via `configure` |
+| `configured` | Installed AND the architect has set one or more env vars via `configure` |
 | `error`      | The last operation on this scanner failed — see the error message |
 
 ### Examples

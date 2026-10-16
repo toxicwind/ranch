@@ -50,7 +50,7 @@ overhead and never delay rendering, connection setup, or terminal I/O.
   `FirebaseCrashlyticsCollectionEnabled=NO`) and Android manifest placeholders
   (`firebase_analytics_collection_enabled=false`, `firebase_crashlytics_collection_enabled=false`,
   even in release). `apply_persisted_optout()` re-enables collection at runtime only when
-  the user is opted-in, via `set_enabled(true)` → `set_collection_enabled(true)`.
+  the architect is opted-in, via `set_enabled(true)` → `set_collection_enabled(true)`.
 - **App (runtime)**: `zedra_telemetry::set_enabled(false)` flips an `AtomicBool`, all
   subsequent telemetry operations become no-ops, and disables Firebase SDK collection.
   The Settings toggle updates the single persisted preference through

@@ -41,8 +41,8 @@ A product owner needs to know, for today's real-human first-runs, what percentag
 
 **Acceptance Scenarios**:
 
-1. **Given** a brand-new install with no activation history, **When** the user connects their first server successfully, **Then** the next heartbeat carries `activation.first_connected_server_ever=true`.
-2. **Given** an install where `first_connected_server_ever=true`, **When** the user disconnects all servers and the process restarts, **Then** the heartbeat still carries `first_connected_server_ever=true` (flag is monotonic).
+1. **Given** a brand-new install with no activation history, **When** the architect connects their first server successfully, **Then** the next heartbeat carries `activation.first_connected_server_ever=true`.
+2. **Given** an install where `first_connected_server_ever=true`, **When** the architect disconnects all servers and the process restarts, **Then** the heartbeat still carries `first_connected_server_ever=true` (flag is monotonic).
 3. **Given** a running mcpproxy instance, **When** an MCP client performs an `initialize` handshake identifying itself as `claude-code`, **Then** subsequent heartbeats list `claude-code` in `activation.mcp_clients_seen_ever`.
 4. **Given** a running mcpproxy instance, **When** the builtin `retrieve_tools` is called 12 times within 24 hours, **Then** the next heartbeat reports `activation.retrieve_tools_calls_24h=12` and `activation.first_retrieve_tools_call_ever=true`.
 5. **Given** the process has tracked 250,000 token-equivalents of schema savings in the last 24 hours, **When** the heartbeat fires, **Then** `activation.estimated_tokens_saved_24h_bucket="100k_plus"` (bucketed, never a raw number).
@@ -59,8 +59,8 @@ Users who install mcpproxy via the DMG expect the tray icon to start automatical
 
 **Acceptance Scenarios**:
 
-1. **Given** a fresh macOS install from DMG, **When** the user accepts the first-run defaults, **Then** a login item is registered with the OS and the next heartbeat reports `autostart_enabled=true`.
-2. **Given** a user explicitly unchecks "Launch at login" during first-run, **When** the install completes, **Then** no login item is registered and the heartbeat reports `autostart_enabled=false`.
+1. **Given** a fresh macOS install from DMG, **When** the architect accepts the first-run defaults, **Then** a login item is registered with the OS and the next heartbeat reports `autostart_enabled=true`.
+2. **Given** an architect explicitly unchecks "Launch at login" during first-run, **When** the install completes, **Then** no login item is registered and the heartbeat reports `autostart_enabled=false`.
 3. **Given** the installer launches the tray as its final step, **When** the first heartbeat fires within 60 seconds of install, **Then** `launch_source=installer`.
 4. **Given** the tray was started by the OS as a login item, **When** the heartbeat fires, **Then** `launch_source=login_item`.
 
@@ -77,7 +77,7 @@ A privacy-conscious user (and the project's own constitution) requires that no p
 **Acceptance Scenarios**:
 
 1. **Given** CI markers like `GITHUB_TOKEN=ghp_abc123` are set in the environment, **When** the heartbeat is built, **Then** the payload contains `env_markers.has_ci_env=true` and nowhere contains the string `ghp_abc123`.
-2. **Given** the user's home directory is `/Users/alice`, **When** the heartbeat is built, **Then** the payload does not contain the string `alice` or `/Users/alice` anywhere.
+2. **Given** the architect's home directory is `/Users/alice`, **When** the heartbeat is built, **Then** the payload does not contain the string `alice` or `/Users/alice` anywhere.
 3. **Given** an MCP client identifies with an unrecognized name containing user data like `"claude-code /Users/alice/projects/foo"`, **When** the activation bucket records it, **Then** the recorded value is `"unknown"` (never the raw identifier).
 4. **Given** an existing install with a stable `anonymous_id`, **When** the client upgrades from schema v2 to v3, **Then** `anonymous_id` is byte-identical to the v2 payload's value.
 
@@ -94,7 +94,7 @@ A privacy-conscious user (and the project's own constitution) requires that no p
 - **Login-item API fails on macOS**: if registering the login item fails (SMLoginItemSetEnabled returns false, or SMAppService throws), the tray logs a warning, leaves `autostart_enabled=false` in the socket response, and continues to run normally.
 - **Launch source disambiguation**: when none of the detection rules match (e.g., detached shell + no env var + no parent-process hint), `launch_source=unknown`.
 - **First-run detection**: installer-set env var `MCPPROXY_LAUNCHED_BY=installer` persists only for one heartbeat, then the client clears it so subsequent launches report `launch_source=login_item` or `tray`.
-- **Env-kind cache invalidation**: detection runs once per process lifetime; if the environment changes mid-process (e.g., a user sets `CI=true` in a running shell), the cached value is not updated until the next process start (documented behavior).
+- **Env-kind cache invalidation**: detection runs once per process lifetime; if the environment changes mid-process (e.g., an architect sets `CI=true` in a running shell), the cached value is not updated until the next process start (documented behavior).
 
 ## Requirements *(mandatory)*
 
@@ -113,7 +113,7 @@ A privacy-conscious user (and the project's own constitution) requires that no p
 - **FR-011**: The client MUST NOT transmit env-var values, usernames, hostnames, email addresses, absolute file paths, or any other identifier that can correlate to a human. The payload builder MUST include a self-check that scans the serialized payload for known user-path prefixes and rejects the payload if any are found.
 - **FR-012**: The client MUST bump `schema_version` from 2 to 3 for payloads containing the new fields. The v2 payload builder MUST remain callable from unit tests to verify backward compatibility.
 - **FR-013**: When telemetry is disabled (`MCPPROXY_TELEMETRY=false` or `mcpproxy telemetry disable`), the client MUST NOT compute, persist, or transmit any of the new fields; the activation bucket MAY exist in BBolt but MUST not be populated.
-- **FR-014**: The macOS tray MUST, on first launch (no prior login-item state detected), register itself as a login item by default and present a clear opt-out control to the user.
+- **FR-014**: The macOS tray MUST, on first launch (no prior login-item state detected), register itself as a login item by default and present a clear opt-out control to the architect.
 - **FR-015**: The macOS tray MUST expose the current login-item state via the existing tray-to-core socket so the core can populate `autostart_enabled` in each heartbeat without re-querying the OS.
 - **FR-016**: The macOS installer (DMG post-install script) MUST launch the tray once with `MCPPROXY_LAUNCHED_BY=installer` set in the child environment so the first heartbeat correctly attributes the install.
 - **FR-017**: The `anonymous_id` field MUST be byte-identical in v2 and v3 payloads for the same installation; upgrading from v2 to v3 MUST NOT regenerate, rotate, or modify it.

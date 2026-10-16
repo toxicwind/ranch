@@ -20,7 +20,7 @@ Source: `internal/config/config.go:866-912`, `internal/registries/types.go:6-15`
 | **RequiresKey** | bool | **NEW (FR-008)** — when true and no key configured, registry is skipped/marked unavailable, not erroring the whole search. |
 | **Builtin** | bool | **NEW (derived, FR-006)** — true for the 5 defaults; used to render merge provenance, not persisted. |
 
-**Merge rule (FR-006 / decision D4)**: effective list = built-in defaults ∪ user config `Registries`, keyed by `ID`; a user entry with a colliding ID overrides the default. Today `SetRegistriesFromConfig` *replaces* — change to merge (`registry_data.go:10-42`).
+**Merge rule (FR-006 / decision D4)**: effective list = built-in defaults ∪ user config `Registries`, keyed by `ID`; an architect entry with a colliding ID overrides the default. Today `SetRegistriesFromConfig` *replaces* — change to merge (`registry_data.go:10-42`).
 
 ## Normalized server search result (`registries.ServerEntry`)
 Source: `internal/registries/types.go:18-32`.

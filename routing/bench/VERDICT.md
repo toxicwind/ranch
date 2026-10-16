@@ -49,7 +49,7 @@ row would look different; in *this* window it measures what it measures.
 **Resilience — the decisive row.** Failure-injection probe (`failover-probe.ts`):
 low tier pointed at `herd/nonexistent-model-xyz`. The extension routed to it
 without validation, the serve 404'd, and **nothing re-routed or retried another
-tier** — the user gets an empty error. The extension has no provider failover,
+tier** — the architect gets an empty error. The extension has no provider failover,
 no model liveness check, no quarantine-then-recover. estate-scripts, in the same
 afternoon, raced a live 429 storm and kept answering via `freeCandidates` →
 local `herd` roles — degraded mode as designed, not as accident.
@@ -60,7 +60,7 @@ in this environment: qwen-flash-128k and gemini-3-flash-preview burn the
 hardcoded 200-token budget on reasoning tokens (200 reasoning, 0 text);
 exaone answers but mangles the two-line verdict format (`Tier: medium|…`) so
 the parser rejects it; gemma-128k also thinks. The extension's designed
-fallback engages (heuristic), which is what a user here gets. Cost of the
+fallback engages (heuristic), which is what an architect here gets. Cost of the
 attempt: **3.7–10s of dead latency per request** (heuristic-only routes in
 0–1ms) for a classifier that always fails. And the heuristic itself is crude
 keyword matching: a capital-city lookup tiered *medium*, a code-writing task
@@ -88,7 +88,7 @@ tiered *low* because the word "brief" matched "faster or lighter response".
 
 ## Bottom line
 
-Chris asked: *"are you saying our router is better than whatever router
+the Architect asked: *"are you saying our router is better than whatever router
 extension — if thats the case thats fine, but prove it."*
 
 Proven, with the receipts in `results/`: **yes — at being a router.** estate-scripts

@@ -1,6 +1,6 @@
 # Visual & Reactivity Verification
 
-Captured live on 2026-05-08 against the swap-in `MCPProxy-047.app` (built from this branch) running with the user's real `~/.mcpproxy/mcp_config.json` (30 servers, 12-14 connected). The test toggled `context7` via the REST API and observed both UIs.
+Captured live on 2026-05-08 against the swap-in `MCPProxy-047.app` (built from this branch) running with the architect's real `~/.mcpproxy/mcp_config.json` (30 servers, 12-14 connected). The test toggled `context7` via the REST API and observed both UIs.
 
 ## Web UI (Chrome)
 

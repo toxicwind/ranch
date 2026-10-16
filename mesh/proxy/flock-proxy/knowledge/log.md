@@ -83,7 +83,7 @@ query diagnostics do not report a later reset early. See
 
 ## [2026-08-01] maintenance — publish the v0.6.6 upgrade boundary
 
-Task 17 reconciles the user-facing release documents with the completed
+Task 17 reconciles the architect-facing release documents with the completed
 foundation rather than the early partial integration state. The current
 contract is 443 canonical English messages, 16 generated OpenAPI operations,
 split same-origin public/operator assets, production `en-US` only, an
@@ -798,7 +798,7 @@ Recorded in [message-catalog-and-escaping](decisions/message-catalog-and-escapin
   which shadowed the new global `t()`. Renamed the locals to `at`. Nothing was
   broken yet — no `t()` call sat inside those scopes — but the next one added
   there would have failed silently, and `cargo test` cannot see it.
-- Adversarial review found a user-visible bug the tests could not: `applyStatic`
+- Adversarial review found an architect-visible bug the tests could not: `applyStatic`
   ran after the tab-restore loop, so deep-linking to any non-Overview tab showed
   that section under a topbar reading "Overview". It also found `sortTable`
   double-escaping every catalog column header, four blind spots in

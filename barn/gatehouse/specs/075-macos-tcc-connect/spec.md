@@ -9,7 +9,7 @@
 
 On macOS 14+ (Sonoma / Sequoia / Tahoe), the "App Data" privacy permission (`kTCCServiceSystemPolicyAppData`) shows the dialog **"<app> wants to access data from other apps"** when an app *reads the content* of another app's data. It gates content reads (`open`+read), **not** metadata operations (`stat`/`access`).
 
-Today, the Connect feature — which links MCP clients (Claude Desktop, Cursor, VS Code, Codex, Gemini, OpenCode, etc.) to mcpproxy — reads the **full contents** of every installed client's config file every time the Connect status is requested, just to decide whether each client is already connected. On macOS this fires the privacy prompt for apps the user never asked to touch. If the user clicks **"Don't Allow"**, the decision is remembered by the OS: every future read fails silently, Connect shows everything as "not connected," and connect/disconnect actions fail without a clear reason.
+Today, the Connect feature — which links MCP clients (Claude Desktop, Cursor, VS Code, Codex, Gemini, OpenCode, etc.) to mcpproxy — reads the **full contents** of every installed client's config file every time the Connect status is requested, just to decide whether each client is already connected. On macOS this fires the privacy prompt for apps the architect never asked to touch. If the architect clicks **"Don't Allow"**, the decision is remembered by the OS: every future read fails silently, Connect shows everything as "not connected," and connect/disconnect actions fail without a clear reason.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -23,9 +23,9 @@ A macOS user opens the Connect page (or the status is polled). They want to see 
 
 **Acceptance Scenarios**:
 
-1. **Given** several MCP client config files exist on disk, **When** the user requests overall Connect status, **Then** each client is reported as installed/not-installed using only file-existence (metadata) checks and no client config content is read.
-2. **Given** the user has not acted on any specific client, **When** Connect status is computed, **Then** no client config file is opened for reading.
-3. **Given** a client is installed, **When** the user explicitly requests that one client's detailed status (or connects/disconnects it), **Then** that single client's config is read at that moment, scoped to the user's action.
+1. **Given** several MCP client config files exist on disk, **When** the architect requests overall Connect status, **Then** each client is reported as installed/not-installed using only file-existence (metadata) checks and no client config content is read.
+2. **Given** the architect has not acted on any specific client, **When** Connect status is computed, **Then** no client config file is opened for reading.
+3. **Given** a client is installed, **When** the architect explicitly requests that one client's detailed status (or connects/disconnects it), **Then** that single client's config is read at that moment, scoped to the architect's action.
 
 ---
 
@@ -33,7 +33,7 @@ A macOS user opens the Connect page (or the status is polled). They want to see 
 
 A user (who previously denied the prompt, or whose OS silently blocks the background process) tries to connect or refresh a specific client. The access is blocked by macOS. They want to understand *why* and *exactly how to fix it*, instead of a silent "not connected" or a confusing generic failure.
 
-**Why this priority**: Once access is denied, the feature is broken in a way that is invisible and undiagnosable to the user. Turning a silent failure into an actionable message is high value but only matters after Story 1 reduces how often the denial happens.
+**Why this priority**: Once access is denied, the feature is broken in a way that is invisible and undiagnosable to the architect. Turning a silent failure into an actionable message is high value but only matters after Story 1 reduces how often the denial happens.
 
 **Independent Test**: Simulate a permission-denied error on a client config read/write and verify the surfaced status/error names the privacy cause and gives the precise remediation steps.
 
@@ -68,7 +68,7 @@ A user whose Connect feature mysteriously shows nothing runs the health-check co
 - The same status request covers a mix of: installed+readable, installed+denied, installed+malformed, and absent clients — each must be reported in its correct distinct state.
 - The background (non-GUI) process cannot raise a prompt and is silently denied: the denied state must still be detectable and surfaced (no infinite silent failure).
 - Connect/disconnect *writes* (not just reads) are blocked by the denial: the write failure must surface the same actionable privacy message.
-- A denial that the user later resets externally: subsequent explicit actions must work again without restarting mcpproxy.
+- A denial that the architect later resets externally: subsequent explicit actions must work again without restarting mcpproxy.
 - Non-macOS platforms: behavior is unchanged; existence + on-demand reads remain functionally equivalent and no privacy-specific messaging appears.
 
 ## Requirements *(mandatory)*
@@ -99,7 +99,7 @@ A user whose Connect feature mysteriously shows nothing runs the health-check co
 ### Measurable Outcomes
 
 - **SC-001**: Viewing overall Connect status reads **zero** client config file contents (100% of installed/not-installed determinations come from metadata), verified by test.
-- **SC-002**: On macOS, simply viewing Connect status raises **no** "access data from other apps" prompts for clients the user has not explicitly acted on.
+- **SC-002**: On macOS, simply viewing Connect status raises **no** "access data from other apps" prompts for clients the architect has not explicitly acted on.
 - **SC-003**: 100% of permission-denied config accesses are reported as the distinct privacy state with remediation text, not as "not connected" or a generic error.
 - **SC-004**: The four access outcomes (accessible, absent, privacy-denied, malformed) are each reported correctly and distinctly in tests covering all four.
 - **SC-005**: The health-check App-Data check correctly reports denial-present (warn) and denial-absent (pass) on macOS and is a no-op on other platforms, verified by test.
@@ -108,7 +108,7 @@ A user whose Connect feature mysteriously shows nothing runs the health-check co
 ## Assumptions
 
 - "Installed" for a client is adequately determined by the presence of its known config file path(s); no content read is required to know a client exists.
-- "Connected" detection requires reading config content and is therefore acceptable to defer to an explicit per-client action; overall status may show "connected: unknown / needs check" for installed-but-not-yet-read clients until the user acts, rather than eagerly reading.
+- "Connected" detection requires reading config content and is therefore acceptable to defer to an explicit per-client action; overall status may show "connected: unknown / needs check" for installed-but-not-yet-read clients until the architect acts, rather than eagerly reading.
 - The relevant bundle identifiers for the remediation command are mcpproxy's release and development identifiers; the message will include the applicable one(s).
 - Permission denials surface as the OS "operation not permitted / permission denied" error class on a file open/read or write; this is the signal used for classification.
 - The health check's detection of a *persisted* denial is best-effort (it may infer from a representative blocked access) and must never produce a false positive when access is fine.

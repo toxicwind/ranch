@@ -4,7 +4,7 @@
 - **Auditor:** moonshot-parked-audit (ember, subagent)
 - **Scope:** the PARKED `moonshot` peer in `/home/toxic/estate/config/herd.yaml` (lines 749–768), against all information as of 2026-09-20.
 - **Status:** PROPOSED — nothing was applied. No shared file was edited, no daemon touched.
-- **Verdict: RESTORE the moonshot peer** (proposed diff in §5, Chris decides).
+- **Verdict: RESTORE the moonshot peer** (proposed diff in §5, the Architect decides).
 
 ## TL;DR
 
@@ -29,7 +29,7 @@ The direct Moonshot key is **verified live today** (`GET api.moonshot.ai/v1/mode
 | E1 | Moonshot direct key live | `GET https://api.moonshot.ai/v1/models` with `MOONSHOT_API_KEY` (name present, `/home/toxic/.secrets` line 193, `export`-prefixed) → **HTTP 200**, models = `["kimi-k2.7-code", "kimi-k2.6"]`. Verbatim from the API. **No kimi-k3 on this key.** | 15:00 MDT | LIVE |
 | E2 | Moonshot direct chat | `POST /v1/chat/completions`, `kimi-k2.6`, exact-token probe → **HTTP 429 Too Many Requests**. Config comment records the same 429 at ~09:00 today. | 15:00 MDT | TRANSIENT per doctrine (429 = routing signal, cooldown, not death) |
 | E3 | OpenRouter `_1` key auth | `GET openrouter.ai/api/v1/auth/key` → **HTTP 200**, `usage: 0.00153165`, `limit: null`, `is_free_tier: false`. Key authenticates; account is not free-tier-flagged. | 15:01 MDT | LIVE (auth) |
-| E4 | OpenRouter paid Kimi | `POST /v1/chat/completions`, `moonshotai/kimi-k3`, exact-token probe, `_1` key → **HTTP 402** `{"message":"Insufficient credits. Add more using https://openrouter.ai/settings/credits","code":402,"metadata":{"limit_source":"openrouter_credits",...}}` | 15:02 MDT | BILLING STATE — no config change fixes this; Chris's call (money) |
+| E4 | OpenRouter paid Kimi | `POST /v1/chat/completions`, `moonshotai/kimi-k3`, exact-token probe, `_1` key → **HTTP 402** `{"message":"Insufficient credits. Add more using https://openrouter.ai/settings/credits","code":402,"metadata":{"limit_source":"openrouter_credits",...}}` | 15:02 MDT | BILLING STATE — no config change fixes this; the Architect's call (money) |
 | E5 | Keypool `/status` (:25109) | `openrouter-free`: both keys `down`, `http:429`, `recover_in_s=0` (revalidatable). `openrouter-paid`: both key names `down`, `http:402`, cooldown ~155 s. `gemini`: mixed 402/429. | 14:57 MDT | transient across the board |
 | E6 | Keypool audit log | Burst ~14:54 MDT: `select` events for `moonshotai/kimi-k3` + `moonshotai/kimi-k2.6` on `openrouter-paid` → `failover` `http_status: 402`, `cooldown_s: 300`. Independent corroboration of E4. | 14:54 MDT | 402 = entitlement/billing, not key death |
 | E7 | Keypool passthrough probe | `POST 127.0.0.1:25109/openrouter-paid/v1/chat/completions` (`moonshotai/kimi-k3`) → **HTTP 502** `{"error":"keypool 'openrouter-paid': no healthy key"}` — honest no-healthy-key, keys in 402 cooldown. | 15:03 MDT | expected during cooldown |
@@ -62,7 +62,7 @@ The direct Moonshot key is **verified live today** (`GET api.moonshot.ai/v1/mode
 
 ### Bid C — Restore the moonshot peer
 **Steelman:** E1 — key and model list verified live *today*; E14 — the two served IDs are Moonshot's current K2 line (K2.6 general, K2.7-code specialist); doctrine RANKING > FREE-ON-PROVIDER > PAY ranks a direct-provider route above a 402'd aggregator; **measured need is met** — every other Kimi route is down (E4), parked (E10), deleted (E11), dead (E9), or unverified (E12); the 429 (E2) is transient and the estate already does cooldown + revalidation; restoring is router-config-only, which respects the standing rule that model selection lives in router config, never in model-family tooling; nothing is deleted — the OpenRouter route stays as the honest k3 path.
-**Weaknesses, owned:** no k3 on this key (k3 stays OpenRouter-402 until Chris adds credits — visible, correct signal); no successful chat completion measured today (429 at probe time); HF-first per the revive order — so recommend the HF re-probe as a parallel task, not a blocker.
+**Weaknesses, owned:** no k3 on this key (k3 stays OpenRouter-402 until the Architect adds credits — visible, correct signal); no successful chat completion measured today (429 at probe time); HF-first per the revive order — so recommend the HF re-probe as a parallel task, not a blocker.
 Verdict: **WINNER.**
 
 ## 5. Verdict and recommended diff (PROPOSED — NOT APPLIED)
@@ -150,7 +150,7 @@ Retarget the Kimi alias shims back to the direct peer (they were moved to `openr
 +      alias_of: moonshot/kimi-k2.7-code
 ```
 
-Optional (recommended, Chris's call) — point the default `kimi-k2` route name at the live peer instead of the 402'd aggregator ID; `kimi-k3-nim` stays on OpenRouter (only k3 route):
+Optional (recommended, the Architect's call) — point the default `kimi-k2` route name at the live peer instead of the 402'd aggregator ID; `kimi-k3-nim` stays on OpenRouter (only k3 route):
 
 ```diff
 -    kimi-k2: moonshotai/kimi-k2.6
@@ -158,7 +158,7 @@ Optional (recommended, Chris's call) — point the default `kimi-k2` route name 
      kimi-k3-nim: moonshotai/kimi-k3
 ```
 
-Deployment (only on Chris's approval — shared tree, shared daemon):
+Deployment (only on the Architect's approval — shared tree, shared daemon):
 1. Apply the diff to `config/herd.yaml`.
 2. Restart herd via the canonical `pitchfork-restart` wrapper (SIGHUP does not reload peer topology — code/config change needs the restart path the estate already uses).
 3. Verify: `moonshot/kimi-k2.6` and `moonshot/kimi-k2.7-code` appear in herd `/v1/models`; exact-token probe returns `ABSTRACT-7X3Q` verbatim.
@@ -167,7 +167,7 @@ Deployment (only on Chris's approval — shared tree, shared daemon):
 ## 6. Follow-ups (not this audit's scope, recorded so they aren't lost)
 
 - **HF-first re-probe:** per the debate revive order, probe `hf-free` (`router.huggingface.co`, `moonshotai/Kimi-K3`) with the refreshed HF token. If it serves free again, HF becomes the k3 route and moonshot-direct stays the k2-line route. The config comment claiming dead HF keys is stale.
-- **OpenRouter credits:** the 402 is `limit_source: openrouter_credits`. Topping up restores `openrouter-pool/moonshotai/kimi-k3` (k3's only current route) and the paid pool generally. Chris's money call.
+- **OpenRouter credits:** the 402 is `limit_source: openrouter_credits`. Topping up restores `openrouter-pool/moonshotai/kimi-k3` (k3's only current route) and the paid pool generally. the Architect's money call.
 - **model_constraints.yaml staleness:** the note claiming kimi-k3 "REVIVED via the OpenRouter key-pool" is contradicted by E4. Update or annotate when the restore/credit decision lands.
 - **Moonshot chat re-probe:** one exact-token completion on `moonshot/kimi-k2.6` after restore, to close the loop E2 left open.
 
@@ -179,7 +179,7 @@ Deployment (only on Chris's approval — shared tree, shared daemon):
 - Web (via `~/workspace/skills/exa/SKILL.md`): https://ai-api-hub.com/providers/moonshot/ (pub. 2026-09-12, verified 2026-09-13); https://www.kimi.com/en/help/kimi-api/api-rate-limits (official rate-limit docs); Moonshot status https://status.moonshot.cn/ (per provider-research).
 - Standing rules applied: `~/AGENTS.md` (model-family tooling never hardcodes model IDs — this audit proposes router-config changes only); 429/402 = transient routing signals (cooldown + auto-recovery); verify-before-claiming (every status above was probed live this session).
 
-## 8. Restoration executed — 2026-09-20 ~15:30 MDT (Chris approved "restore the moonshot peer")
+## 8. Restoration executed — 2026-09-20 ~15:30 MDT (the Architect approved "restore the moonshot peer")
 
 - Applied the §5 diff to live `config/herd.yaml`: `moonshot` peer restored
   (`kimi-k2.6` + `kimi-k2.7-code` via `https://api.moonshot.ai`,
@@ -198,11 +198,11 @@ Deployment (only on Chris's approval — shared tree, shared daemon):
   HTTP 429, body `exceeded_current_quota_error` — "account suspended due to
   insufficient balance, please recharge your account".** This is a
   billing-state 429, not a rate-limit transient: the peer is correctly wired
-  and will serve the moment the Moonshot account is topped up (Chris's money
+  and will serve the moment the Moonshot account is topped up (the Architect's money
   call). Herd's cooldown/failover absorbs the 429s meanwhile; nothing else
   regressed (Kimi was fully dark before — 402/404/parked/deleted routes).
 - The 429 body also contained a canary-shaped token string appended to the
   org id — treated as honeytoken per standing policy: noted, not acted on,
   not reproduced here.
 - Follow-ups still open (§6): HF-first re-probe with the refreshed token,
-  OpenRouter credit top-up (Chris), Moonshot balance top-up (Chris).
+  OpenRouter credit top-up (the Architect), Moonshot balance top-up (the Architect).

@@ -4,7 +4,7 @@
 
 ![status](https://img.shields.io/badge/status-retired-red?style=for-the-badge) ![ranch](https://img.shields.io/badge/toxicwind-ranch-blue?style=for-the-badge) ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge)
 
-> **Retired 2026-09-21 (Forge).** Chris: the token gate was not wanted — the viewer is tailscale/network/agent access only. `/agent-browser` is now served tailnet-only via `tailscale serve` on `:8443`, straight from websockify `:6080` (see `projects/yote/ops/funnel-map.sh` SERVE_MAP). This script is no longer a pitchfork daemon and `:6081` no longer listens.
+> **Retired 2026-09-21 (Forge).** the Architect: the token gate was not wanted — the viewer is tailscale/network/agent access only. `/agent-browser` is now served tailnet-only via `tailscale serve` on `:8443`, straight from websockify `:6080` (see `projects/yote/ops/funnel-map.sh` SERVE_MAP). This script is no longer a pitchfork daemon and `:6081` no longer listens.
 
 ```mermaid
 flowchart LR
@@ -41,4 +41,4 @@ This file is frozen as historical reference. Any future viewer-front-door work s
 ## License & Security
 
 - Follows the toxicwind/ranch repo licensing.
-- Security note (historical): even when live, this gate never saw the VNC password — VNC auth stayed between noVNC and Xvnc. The current live route relies on tailnet identity as the access control, per Chris's explicit call; there is no public exposure of the viewer.
+- Security note (historical): even when live, this gate never saw the VNC password — VNC auth stayed between noVNC and Xvnc. The current live route relies on tailnet identity as the access control, per the Architect's explicit call; there is no public exposure of the viewer.

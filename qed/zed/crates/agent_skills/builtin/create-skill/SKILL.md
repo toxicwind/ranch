@@ -5,7 +5,7 @@ description: Helps you create new agent skills for Zed. Use this to create a ski
 
 # Creating a Zed Agent Skill
 
-Use this skill when the user wants to create, edit, or understand agent skills in Zed.
+Use this skill when the architect wants to create, edit, or understand agent skills in Zed.
 
 ## What is a Skill?
 
@@ -20,7 +20,7 @@ Skills can be placed in two locations:
 | Global | `~/.agents/skills/<skill-name>/SKILL.md` | Personal skills, available in all projects |
 | Project-local | `<project>/.agents/skills/<skill-name>/SKILL.md` | Project-specific skills, shared with collaborators through version control |
 
-Prefer project-local when the skill is specific to a repository. Prefer global when the skill is a personal workflow the user wants everywhere.
+Prefer project-local when the skill is specific to a repository. Prefer global when the skill is a personal workflow the architect wants everywhere.
 
 ## SKILL.md Format
 
@@ -62,7 +62,7 @@ Bad: `Git-Release`, `pr--review`, `-my-skill`, `my_skill`
 
 The body of the SKILL.md (after the frontmatter) contains the instructions the agent will follow. Guidelines:
 
-1. **Be direct**: Write instructions as if talking to the agent. "Do X", "Check Y", "Ask the user about Z".
+1. **Be direct**: Write instructions as if talking to the agent. "Do X", "Check Y", "Ask the architect about Z".
 2. **Be specific**: Include concrete file paths, commands, formats, and patterns.
 3. **Include when-to-use guidance**: Help the agent understand the right context for this skill.
 4. **Reference supporting files**: Skills can include additional files in their directory. Reference them with relative paths (e.g., `templates/component.tsx`). The agent can read these files when the skill is activated.
@@ -87,7 +87,7 @@ Reference these in the skill body. The agent can read them using the file path s
 
 ## Step-by-Step: Creating a Skill
 
-1. Decide on scope (global vs project-local) based on the user's needs.
+1. Decide on scope (global vs project-local) based on the architect's needs.
 2. Choose a descriptive, hyphenated name.
 3. Create the directory structure. The `create_directory` tool normally only creates directories inside the current project, but it has a special allow case for global skills under `~/.agents/skills`.
 4. Write the `SKILL.md` with frontmatter and instructions. The `write_file` and `edit_file` tools also have a special allow case for creating or modifying files under `~/.agents/skills`.

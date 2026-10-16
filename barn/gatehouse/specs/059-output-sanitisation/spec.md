@@ -53,7 +53,7 @@ As an operator in a high-assurance environment, I want the option to block a too
 
 ### Edge Cases
 
-- A tool legitimately returns content that *looks* like a secret the user wants (e.g. a key to rotate): redaction/block are opt-in and critical-category-scoped; the default path only spotlights, never redacts.
+- A tool legitimately returns content that *looks* like a secret the architect wants (e.g. a key to rotate): redaction/block are opt-in and critical-category-scoped; the default path only spotlights, never redacts.
 - An untrusted tool returns only non-text blocks: spotlighting is a no-op; blocks are forwarded unmodified.
 - Spotlighting interacts with Track A's truncation and caching: spotlighting wraps the (possibly truncated) text; the cached full payload is the original unspotlighted content.
 - Server edition vs personal edition: behaviour is identical and config-gated; no server-only divergence.

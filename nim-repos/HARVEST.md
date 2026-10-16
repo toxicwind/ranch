@@ -166,7 +166,7 @@ subset below.
 - Mostly generic (SSE reconnect, daemon respawn). NIM-specific: three.ws
   `upstream-fetch.js` honors `retryAfter`; NVCF gateway retry on 502/503/504
   (cold-model 504 is the most common transient — retry lands on warmed nodes).
-  WTF: ★★★☆☆ — note Chris's no-artificial-delay doctrine: these are
+  WTF: ★★★☆☆ — note the Architect's no-artificial-delay doctrine: these are
   *response-driven* retries (honor server's retryAfter / 202-poll), not sleeps.
 
 **What AST found that grep missed**

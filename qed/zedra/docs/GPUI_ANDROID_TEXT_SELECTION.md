@@ -286,7 +286,7 @@ dismisses the native interaction.
 
 Dismiss selection when:
 
-- the user taps outside active selection UI
+- the architect taps outside active selection UI
 - the active handler is cleared
 - the selectable document disappears
 - the active window or surface is destroyed

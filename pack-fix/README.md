@@ -15,7 +15,7 @@ Every estate accumulates strays: processes with no known owner, pid files for de
 
 - **Repeats, permanently** — [`bin/orphan-sweep.sh`](bin/orphan-sweep.sh) is the permanent, repeatable process-orphan audit. Report-only; disposition (adopt/kill) is announced in the fleet channel.
 - **Evidence, not vibes** — [`orphan-sweep.md`](orphan-sweep.md) is the evidence log of the 2026-09-20 sweep.
-- **Lanes with owners** — per Chris: yote processes only (process inventory vs known daemons, stale pid files); /tmp triage routes to kimi-unlock-audit; repo orphan integration routes to repo-integrator-max.
+- **Lanes with owners** — per the Architect: yote processes only (process inventory vs known daemons, stale pid files); /tmp triage routes to kimi-unlock-audit; repo orphan integration routes to repo-integrator-max.
 
 ```mermaid
 flowchart TD

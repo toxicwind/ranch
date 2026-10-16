@@ -126,7 +126,7 @@ Changes land as commits in the toxicwind/ranch repo. The vendored npm app is nev
 ## License & Security
 
 - MCP server source follows the toxicwind/ranch repo licensing; the browserless.io server itself is SSPL (stock npm install, untouched).
-- Security: the server token lives only in `/home/toxic/.browserless/.env` (0600), sourced at launch and never logged; gitignore scrubs token-shaped files; the MCP server refuses to start without a live keeper rather than serving degraded. See also the isolated display in `keeper/README.md` — the agent Chromium never renders in the user's own desktop session.
+- Security: the server token lives only in `/home/toxic/.browserless/.env` (0600), sourced at launch and never logged; gitignore scrubs token-shaped files; the MCP server refuses to start without a live keeper rather than serving degraded. See also the isolated display in `keeper/README.md` — the agent Chromium never renders in the architect's own desktop session.
 
 ## Links
 

@@ -16,7 +16,7 @@
 - [x] No [NEEDS CLARIFICATION] markers remain and no requirement is reopened elsewhere — the three input-locked choices are DECIDED in the FRs, with their measured price and rejected alternative recorded under "Priced Alternatives" (non-blocking, owner-override only)
 - [x] Requirements are testable and unambiguous (each FR names an observable behavior; FR-015's budget is a measured number, not an adjective)
 - [x] Success criteria are measurable (SC-001…SC-007)
-- [x] Success criteria are technology-agnostic where they can be (SC-003/SC-005 quote token counts because token cost IS the user-facing currency of this product)
+- [x] Success criteria are technology-agnostic where they can be (SC-003/SC-005 quote token counts because token cost IS the architect-facing currency of this product)
 - [x] All acceptance scenarios are defined (Stories 1–4)
 - [x] Edge cases are identified (explicit `check:false`, `check:null`/non-boolean, filters/pins without check, orphan and blank pin values, dedup + id normalization, malformed ids, empty batch with mode-accurate wording, degraded runtime, unwritable activity record, unauthenticated `/mcp`, profile-pinned and `set_profile` sessions, batch cost, no side effects)
 - [x] Scope is clearly bounded (Non-Goals enumerates every deferred phase and explicitly closes the enum)

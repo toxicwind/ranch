@@ -85,7 +85,7 @@ This document records the decisions made during brainstorming and backfills rati
 
 **Alternatives considered**:
 - **Keep all versions forever**: storage grows unbounded, makes historical debugging easier but blows past the free tier over time.
-- **Keep last 3**: too aggressive; a user pinning an older version has minutes, not days, to fetch it before it's pruned.
+- **Keep last 3**: too aggressive; an architect pinning an older version has minutes, not days, to fetch it before it's pruned.
 
 ## Decision 7 — Channels
 

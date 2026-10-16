@@ -17,7 +17,7 @@ Native presentation stays in platform-native UI.
 - `platform_bridge::show_native_notification(options)` presents a transient
   native in-app notification.
 - `platform_bridge::show_native_notification_with_action(options, callback)`
-  presents the same notification and calls the Rust callback when the user taps
+  presents the same notification and calls the Rust callback when the architect taps
   the front notification bubble.
 - `native_floating_button(...)` is a GPUI element wrapper that owns position,
   lifecycle, and the caller callback while the native layer draws the platform
@@ -89,7 +89,7 @@ Configuration:
 - `duration_secs`: optional display duration. Default is `3.2`. iOS clamps
   positive durations to a practical transient range.
 - `auto_close`: optional. Default is `true`. Set to `false` only when the
-  notification should remain until the user taps or swipes it away.
+  notification should remain until the architect taps or swipes it away.
 
 iOS stack behavior:
 
@@ -122,7 +122,7 @@ Callback behavior:
 - `show_native_notification(...)` has no action callback; tapping still
   dismisses the front bubble.
 - `show_native_notification_with_action(...)` invokes its callback at most once
-  when the user taps the front bubble.
+  when the architect taps the front bubble.
 - Auto-close and swipe dismissal drop the pending callback without invoking it.
 - App background cleanup calls `platform_bridge::clear_pending_alerts()`, which
   also clears pending native notification callbacks.

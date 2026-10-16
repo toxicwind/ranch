@@ -1,7 +1,7 @@
 # dots-client
 
 Alternate model-call shim for Dots-3-Note (`dots-studio/dots-3-note-preview:free`)
-via OpenRouter. Chris 2026-10-13: "Remember use alt shoms" — this is the alt
+via OpenRouter. the Architect 2026-10-13: "Remember use alt shoms" — this is the alt
 shim for Dots work: caller-side coercions that neutralize the model behaviors
 found in the Dots 3 Note recon (see `../tau/docs/dots3-fixes.md`).
 

@@ -45,7 +45,7 @@ let this model change things outside the worktree autonomously."
 **Systems / game-theory rationale:** In a sudo-capable agentic system, the
 principal–agent problem means an untrusted (free) model has incentive to expand
 its action space (scope creep, reward hacking) because the cost of overreach is
-borne by the user. A prompt asking the model to "behave" is a *soft* norm; a
+borne by the architect. A prompt asking the model to "behave" is a *soft* norm; a
 capability flag enforced at tool dispatch is a *credible commitment device* —
 the only kind of constraint that is game-theoretically binding. It is capability-
 based access control (CBAC) per model, fail-safe default `true`.
@@ -96,5 +96,5 @@ based access control (CBAC) per model, fail-safe default `true`.
 There is no code that "prevents AGENTS.md from making changes." `AGENTS.md` is
 prompt context only. The real autonomy boundary is `tool_permissions.rs` +
 the per-model `capabilities` struct + the agent `tools` enable/disable map. The
-`autonomous_edits` flag is the correct, implementable cut of the user's intent:
+`autonomous_edits` flag is the correct, implementable cut of the architect's intent:
 a per-model capability enforced at dispatch.

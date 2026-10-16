@@ -21,7 +21,7 @@ Two mechanisms drive the load:
 At `internal/storage/scanner.go:103`, `ListScanJobs(serverName)` iterates the entire `security_scan_jobs` bucket and calls `record.UnmarshalBinary(v)` on each record *before* checking whether the record's `ServerName` matches the requested `serverName`. With a bucket grown over months of normal use, this is an O(N) JSON-decode operation on every call.
 
 **B. Tray re-fetches `/api/v1/servers` on every `servers.changed` SSE event.**
-The macOS tray (`native/macos/MCPProxy/MCPProxy/Core/CoreProcessManager.swift:524`) handles `servers.changed` SSE events by calling `refreshServers()`, which performs a `GET /api/v1/servers`. The handler at `internal/httpapi/server.go:1014` enriches every one of the user's servers via `securityController.GetScanSummary(name)` — and the existing summary cache in `internal/security/scanner/service.go:1417` does *not* cache the "no scans found" result, so untouched servers re-trigger the full bucket scan from (A) every time.
+The macOS tray (`native/macos/MCPProxy/MCPProxy/Core/CoreProcessManager.swift:524`) handles `servers.changed` SSE events by calling `refreshServers()`, which performs a `GET /api/v1/servers`. The handler at `internal/httpapi/server.go:1014` enriches every one of the architect's servers via `securityController.GetScanSummary(name)` — and the existing summary cache in `internal/security/scanner/service.go:1417` does *not* cache the "no scans found" result, so untouched servers re-trigger the full bucket scan from (A) every time.
 
 When upstreams retry-storm during reconnection, each state transition publishes a `servers.changed` event, the tray re-fetches, and the handler runs N full bucket scans (where N is the configured server count). At 30 servers and a fast retry storm, this exceeds 10 full bucket scans per second.
 
@@ -52,7 +52,7 @@ A separate follow-up spec will cover the durable redesigns: in-memory `(serverNa
 
 ## User-Visible Behavior
 
-For the user, the only observable change is that the tray, the Web UI, and the dashboard feel snappier and the core process no longer pegs a CPU core. There are no new screens, settings, or commands. The fix is invisible except via Activity Monitor / `top`.
+For the architect, the only observable change is that the tray, the Web UI, and the dashboard feel snappier and the core process no longer pegs a CPU core. There are no new screens, settings, or commands. The fix is invisible except via Activity Monitor / `top`.
 
 ## Architecture
 
@@ -159,7 +159,7 @@ Per CLAUDE.md autonomous-operation rules, every sub-task is preceded by a failin
 
 **Verification (per CLAUDE.md "Verifying Web UI changes" pattern)**
 
-Pprof on the same scenario as the original report (MCPProxy.app + 30 servers, the user's existing 1.06 GB BBolt). Capture a 60-second CPU profile. Assert in `specs/047-cpu-hotpath-fix/verification/`:
+Pprof on the same scenario as the original report (MCPProxy.app + 30 servers, the architect's existing 1.06 GB BBolt). Capture a 60-second CPU profile. Assert in `specs/047-cpu-hotpath-fix/verification/`:
 
 - `bbolt.(*DB).View` cum < 5% (was 56%).
 - `encoding/json.checkValid` flat < 5% (was 13%).
@@ -192,7 +192,7 @@ Commit the post-fix profile (`cpu.pb.gz`, `top` output, screenshots of Activity 
 - Post-fix `bbolt.(*DB).View` cum-CPU is < 5%.
 - All new tests pass; existing test suite still passes; `go test -tags server ./...` is green.
 - Swift tray + Vue Web UI updated to consume payload, with a manual smoke test in MCPProxy.app showing the dashboard updates within 50 ms of a server state change without any HTTP refetch.
-- README / docs updated only if a user-visible knob changes (none is expected).
+- README / docs updated only if an architect-visible knob changes (none is expected).
 
 ## Open Questions
 

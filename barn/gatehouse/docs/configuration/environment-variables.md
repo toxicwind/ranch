@@ -154,7 +154,7 @@ The tray application doesn't read the config file directly. It launches the core
 
 `CI=true` (or `CI=1`) additionally suppresses every update nudge and the tray's
 unattended checks — a non-interactive run has nobody to nudge. Machine-readable
-fields keep reporting the facts, and a user-initiated "Check for Updates" still
+fields keep reporting the facts, and an architect-initiated "Check for Updates" still
 runs.
 
 Update checking can also be controlled from the config file via the

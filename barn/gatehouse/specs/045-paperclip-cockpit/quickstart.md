@@ -1,7 +1,7 @@
 # Phase 1 — Quickstart: Bootstrapping the Cockpit
 
 **Date**: 2026-04-25
-**Audience**: User (one-time bootstrap) and Claude Code assisting the user
+**Audience**: User (one-time bootstrap) and Claude Code assisting the architect
 **Estimated time**: under 4 hours of focused work (per SC-005)
 
 This walkthrough takes you from "Paperclip is running but has no agents configured for MCPProxy work" to "first synthetic goal completes the P1+P2+P3 flow."
@@ -79,7 +79,7 @@ Write these as plain markdown. No code; no templating engine needed.
 
 ## Step 3 — Seed the three Synapbus wiki articles (T-003)
 
-Use the CEO's tools (since the CEO's `TOOLS.md` mandates wiki ops via the CEO only). Or, for bootstrap convenience, use the user's interactive Synapbus access via Claude Code:
+Use the CEO's tools (since the CEO's `TOOLS.md` mandates wiki ops via the CEO only). Or, for bootstrap convenience, use the architect's interactive Synapbus access via Claude Code:
 
 ```
 mcp__synapbus__execute(action="create_article", slug="mcpproxy-roadmap", content=<R-4 seed content>)

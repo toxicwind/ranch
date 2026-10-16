@@ -66,6 +66,6 @@ The specification is ready for planning:
 
 ## Notes
 
-The specification successfully avoids implementation details while providing clear, testable requirements. It focuses on the user-facing outcome (complete API documentation with correct authentication markers) rather than the technical implementation (OAS annotations, Swagger generation tools, etc.). The three user stories are well-prioritized with P1 for immediate API consumer value and P2 for long-term maintenance automation.
+The specification successfully avoids implementation details while providing clear, testable requirements. It focuses on the architect-facing outcome (complete API documentation with correct authentication markers) rather than the technical implementation (OAS annotations, Swagger generation tools, etc.). The three user stories are well-prioritized with P1 for immediate API consumer value and P2 for long-term maintenance automation.
 
 Ready to proceed with `/speckit.plan` or `/speckit.clarify`.

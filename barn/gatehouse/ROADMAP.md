@@ -206,7 +206,7 @@ graph LR
 
 | Task | Status | Refs |
 | --- | --- | --- |
-| T1: wizard metric fix - on dismiss record connect step as completed_external (not skipped) when the user already connected via another path | 🟢 Done | #813 |
+| T1: wizard metric fix - on dismiss record connect step as completed_external (not skipped) when the architect already connected via another path | 🟢 Done | #813 |
 | T2: funnel observability fields (wizard_shown, web_ui_opened counter, days_since_install, active_days_30d) | 🟢 Done | #813 |
 | T3: pre-churn snapshot (previous_shutdown clean\|crash via BBolt flag, last_error_code) so the final heartbeat doubles as cause-of-death | 🟢 Done | #813 |
 | first_real_tool_call_ever activation flag (symmetric to first_retrieve_tools_call_ever) so the retrieve->call funnel step is measurable lifetime-vs-lifetime | 🟢 Done | — |

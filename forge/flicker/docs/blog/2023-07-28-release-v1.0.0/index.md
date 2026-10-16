@@ -43,7 +43,7 @@ Effortlessly manage user accounts, agents, and tasks, including adding new agent
 
 ### Localize Web-UI
 
-Embrace internationalization by changing your locale in the user settings.
+Embrace internationalization by changing your locale in the architect settings.
 Interact with Woodpecker in the language of your choice, tailored to your preferences.
 If your language is not available or only partially translated, consider contributing to our [Weblate](https://translate.woodpecker-ci.org/engage/woodpecker-ci/).
 
