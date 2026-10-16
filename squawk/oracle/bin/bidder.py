@@ -56,7 +56,7 @@ RALPH_CAP_S = 1740  # 29 min ceiling: Super Ralph runs are slow (~11 min
 # 2026-10-13 (osprey root-cause, verified live): kimi-k3-nim 404s on
 # :25193. Default to the verified-working executor model.
 RALPH_MODEL = os.environ.get("RALPH_MODEL",
-                            "nvidia/nemotron-3-ultra-550b-a55b")
+                            "z-ai/glm-5.3-flash")
 RALPH_BASE_URL = os.environ.get("RALPH_BASE_URL",
                                 "http://127.0.0.1:25193/v1")  # flock (NIM-backed); 2026-10-13 Chris corrective: do NOT use local herd :25100
 # cuttinggate's auth gate requires a "Bearer " prefix (any non-empty value;
@@ -187,6 +187,7 @@ RALPH_MODEL_CANDIDATES = [
     # content" on :25200. nvidia/nemotron-3-ultra-550b-a55b verified 200 +
     # non-empty on both routes. Verified-first ordering; the resolver's
     # non-empty probe promotes whatever actually answers.
+    "z-ai/glm-5.3-flash",  # 2026-10-15 Chris verified working on NVIDIA
     "nvidia/nemotron-3-ultra-550b-a55b",
     "openai/gpt-oss-20b",
 ]
@@ -255,7 +256,7 @@ def _resolve_ralph_model(base_url, timeout=15):
             content = ""
             if choices:
                 msg = choices[0].get("message") or {}
-                content = (msg.get("content") or "").strip()
+                content = (msg.get("content") or msg.get("reasoning_content") or "").strip()
             if content:
                 _ralph_model_cache.update(model=cand, ts=now)
                 return cand
@@ -867,7 +868,7 @@ class Bidder:
                 content = ""
                 if choices:
                     msg = choices[0].get("message") or {}
-                    content = (msg.get("content") or "").strip()
+                    content = (msg.get("content") or msg.get("reasoning_content") or "").strip()
                 if content:
                     return content
             except Exception:
