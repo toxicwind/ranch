@@ -28,7 +28,7 @@ import { Lock } from './lock.js';
 import { snapshotRepo, FreshnessGuard, FreshnessViolation, type RepoSnapshot } from './snapshot.js';
 import { ROLE_SPECS, selectWinner, type Cluster, type ExpertOutput } from './cluster.js';
 import { detectTrigger, diagnosticPivot } from './websift.js';
-import { boundedCommand, clampBudget, DEFAULT_BUDGET_MS } from './timeout.js';
+import { boundedCommand, clampBudget, modelBudget, modelIsKnownBroken, DEFAULT_BUDGET_MS } from './timeout.js';
 
 export interface ChronosConfig {
   repoRoot: string;
@@ -39,7 +39,12 @@ export interface ChronosConfig {
   maxCycles?: number;
   /** Shell out for real? When false, APPLY/PROOF are simulated. */
   dryRun?: boolean;
-  /** Hard per-execution ceiling in ms (default 2000). */
+  /**
+   * Model backing the agent, used to derive the proof budget from measured
+   * latency (MODEL_BUDGET_MS). Ignored when executionBudgetMs is set.
+   */
+  model?: string;
+  /** Hard per-execution ceiling in ms. Overrides the model-derived budget. */
   executionBudgetMs?: number;
 }
 
@@ -204,12 +209,22 @@ export class ChronosForge {
     let rc = 0;
     let excerpt = '';
 
+    // Budget: explicit override > measured per-model budget > default.
+    // A known-broken model (budget 0) fails fast instead of stalling the loop.
+    const ceiling = modelBudget(this.cfg.model, DEFAULT_BUDGET_MS);
+    const budgetMs = this.cfg.executionBudgetMs !== undefined
+      ? clampBudget(this.cfg.executionBudgetMs, Math.max(ceiling, DEFAULT_BUDGET_MS))
+      : ceiling;
+
     if (this.cfg.dryRun) {
       excerpt = `[dry-run] would execute: ${command}`;
+    } else if (budgetMs <= 0 || modelIsKnownBroken(this.cfg.model)) {
+      rc = 1;
+      excerpt = `[budget] model ${this.cfg.model ?? '(unknown)'} is known-broken; proof skipped rather than stalled`;
     } else {
       const res = boundedCommand(command, {
         cwd: this.cfg.repoRoot,
-        budgetMs: clampBudget(this.cfg.executionBudgetMs, DEFAULT_BUDGET_MS),
+        budgetMs,
       });
       rc = res.rc;
       excerpt = `${res.stdout}${res.stderr}`;
