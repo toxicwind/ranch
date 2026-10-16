@@ -209,7 +209,7 @@ type Config struct {
 	RequiredAPIKeys        []string             `yaml:"apiKeys"`
 	Peers                  PeerDictionaryConfig `yaml:"peers"`
 	Upstream               UpstreamConfig       `yaml:"upstream"`
-	// AstMatrix configures the AST Matrix cloud router (Sovereign extension - autonomous first-class).
+	// AstMatrix configures the AST Matrix cloud router (estate-scripts extension - autonomous first-class).
 	// When enabled, cloud model requests are routed through the matrix to remote providers.
 	AstMatrix *AstMatrixConfig `yaml:"astMatrix"`
 

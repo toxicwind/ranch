@@ -1,12 +1,12 @@
-# Router Proof: sovereign-router vs dumb direct (2026-09-21)
+# Router Proof: estate-scripts-router vs dumb direct (2026-09-21)
 
-Head-to-head benchmark. Question: is the sovereign router measurably better than
+Head-to-head benchmark. Question: is the estate-scripts router measurably better than
 a dumb direct route, or is the "intelligence" narration? Measured, no cheerleading.
 
 ## Method
 
 - **Contender A (intelligent):** `POST 127.0.0.1:25104/v1/chat/completions`
-  `{"model":"sovereign/free"}` — sovereign-router v3.2 (Bun/TS; hybrid strategy:
+  `{"model":"estate-scripts/free"}` — estate-scripts-router v3.2 (Bun/TS; hybrid strategy:
   sticky_affinity → ast_race → circuit_chain; SQLite HealthDB with Elo, latency
   EMA, circuit breakers, flap tracker).
 - **Contender B (dumb direct):** `POST 127.0.0.1:25100/v1/chat/completions`

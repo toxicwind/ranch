@@ -1,8 +1,0 @@
-# ranch/stream-broker — project-owned daemon manifest. Source of truth for 'sovereign-stream-broker'.
-# Owned by the ranch/stream-broker project; the parent only composes it.
-
-[daemons.sovereign-stream-broker]
-dir = "/home/toxic/estate/ranch/stream-broker"
-run = "exec bun run src/index.ts"
-port = 25215
-ready_port = 25215

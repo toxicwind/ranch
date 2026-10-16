@@ -5,7 +5,7 @@
   "author": "Aman Sharma Dev",
   "icon": "images/icon.png",
   "description": "Herd-level model routing with Gemini EAP tool retrieval for VS Code Insiders.",
-  "version": "1.0.0-sovereign",
+  "version": "1.0.0-estate-scripts",
   "preview": true,
   "engines": {
     "vscode": "^1.129.0"
@@ -346,11 +346,11 @@
     ]
   },
   "scripts": {
-    "package": "node esbuild.js && npx --no-install @vscode/vsce package --no-dependencies --target linux-x64 --out drover-1.0.0-sovereign.vsix",
+    "package": "node esbuild.js && npx --no-install @vscode/vsce package --no-dependencies --target linux-x64 --out drover-1.0.0-estate-scripts.vsix",
     "compile": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "typecheck": "tsc --noEmit",
-    "install-extension": "code-insiders --install-extension drover-1.0.0-sovereign.vsix --force",
+    "install-extension": "code-insiders --install-extension drover-1.0.0-estate-scripts.vsix --force",
     "sidecar:build": "cd sidecar && node esbuild.js",
     "sidecar:package": "cd sidecar && node esbuild.js && npx --no-install @vscode/vsce package --no-dependencies --out drover-eap-0.1.0.vsix",
     "sidecar:install": "code-insiders --install-extension sidecar/drover-eap-0.1.0.vsix --force"

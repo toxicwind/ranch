@@ -2,7 +2,7 @@ cd /home/toxic/estate/ranch/rust-algo-web
 
 cat > Cargo.toml <<'CT'
 [package]
-name = "sovereign_web"
+name = "estate-scripts_web"
 version = "0.1.0"
 edition = "2021"
 

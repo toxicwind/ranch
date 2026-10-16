@@ -4,7 +4,7 @@
 
 This is the **toxicwind fork** of `github-advanced-search-mcp` (repo: `toxicwind/github-advanced-search-mcp`),
 a GitHub Advanced Search MCP server that exposes ~25 search tools through both REST API
-(ports from `sovereign/config/ports.env`: `GHAS_API_PORT=25112`, `GHAS_MCP_PORT=25113`,
+(ports from `estate-scripts/config/ports.env`: `GHAS_API_PORT=25112`, `GHAS_MCP_PORT=25113`,
 `GHAS_FRONTEND_PORT=25114`) and an MCP over Streamable HTTP endpoint (`/mcp`, port 25113).
 
 The MCP server is dispatched/used by `pi-agent` (the `toxicwind/pi` fork) and `mcpproxy`
@@ -70,4 +70,4 @@ the MCP Streamable HTTP spec (2025-06-18 / 2025-03-26):
 ## Files
 - `apps/mcp/src/mcp-transport.ts` (new)
 - `apps/mcp/src/server.ts` (rewrite transport wiring)
-- `sovereign/pitchfork.toml` (if daemon restart needed)
+- `estate-scripts/pitchfork.toml` (if daemon restart needed)

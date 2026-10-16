@@ -2,7 +2,7 @@
 /**
  * flock/ts/bench — reusable provider benchmark runner (Bun/TS).
  *
- * Ported from sovereign-router's provider-bench.ts. For each configured
+ * Ported from estate-scripts-router's provider-bench.ts. For each configured
  * model on a provider it measures:
  *   1. liveness: one real completion, semantic-failure aware
  *      (empty output, echo of the prompt, or refusal markers = unhealthy)

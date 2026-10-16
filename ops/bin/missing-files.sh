@@ -19,7 +19,7 @@
 #   --quiet    print only MISSING blocks (no progress chatter)
 #   --docs     scan docs only; --units units only; --configs configs only
 # Exit 0 = nothing missing, 1 = one or more missing references.
-# Part of sovereign/projects/ops/bin/ (toxicwind/sovereign-projects).
+# Part of estate-scripts/projects/ops/bin/ (toxicwind/estate-scripts-projects).
 set -u
 QUIET=0; DO_UNITS=1; DO_CONFIGS=1; DO_DOCS=1
 for a in "$@"; do

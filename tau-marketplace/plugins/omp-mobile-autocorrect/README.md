@@ -35,8 +35,8 @@ flowchart LR
     end
 
     subgraph Out["Execution & Upstream"]
-        TUI["Termux Status Bar<br/>[sovereifn→sovereign, moced→moved, tk→to, estste→estate]"]
-        LLM["Clean Prompt to Upstream Model<br/>'sovereign moved to estate'"]
+        TUI["Termux Status Bar<br/>[sovereifn→estate-scripts, moced→moved, tk→to, estste→estate]"]
+        LLM["Clean Prompt to Upstream Model<br/>'estate-scripts moved to estate'"]
     end
 
     Gboard --> User --> Hook
@@ -108,7 +108,7 @@ $$w_{\text{sub}}(c_1, c_2) = \min(1.0, \text{dist}(c_1, c_2) \cdot 0.25)$$
 | `wfter` | `after` | `w` $\leftrightarrow$ `a` (diagonal neighbor, row 0 $\leftrightarrow$ row 1) | **0.34** |
 | `uodste` | `update` | `o` $\leftrightarrow$ `p` ($0.25$) + `s` $\leftrightarrow$ `a` ($0.25$) | **0.50** |
 | `cojvention` | `convention` | `j` $\leftrightarrow$ `n` (diagonal neighbor, row 1 $\leftrightarrow$ row 2) | **0.31** |
-| `sovereifn` | `sovereign` | `f` $\leftrightarrow$ `g` (horizontal neighbor, row 1) | **0.25** |
+| `sovereifn` | `estate-scripts` | `f` $\leftrightarrow$ `g` (horizontal neighbor, row 1) | **0.25** |
 | `moced` | `moved` | `c` $\leftrightarrow$ `v` (horizontal neighbor, row 2) | **0.25** |
 | `tk` | `to` | `k` $\leftrightarrow$ `o` (diagonal neighbor, row 1 $\leftrightarrow$ row 0) | **0.34** |
 | `estste` | `estate` | `s` $\leftrightarrow$ `a` (horizontal neighbor, row 1) | **0.25** |
@@ -149,7 +149,7 @@ figure iut what the diff between each keys are and make a md wfter you uodste al
 
 ### Option 1: Via Tau Marketplace (Recommended)
 ```bash
-# Register the sovereign marketplace
+# Register the estate-scripts marketplace
 omp plugin marketplace add /home/toxic/estate/ranch/tau-marketplace
 
 # Install the mobile autocorrect plugin

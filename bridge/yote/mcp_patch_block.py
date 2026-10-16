@@ -1,6 +1,6 @@
 # --- bridge-max: multitask + background dispatch ---------------------------
 # Added 2026-09-20 by bridge-max. Canonical source:
-# projects/bridge/yote/awrawr_mcp.py in toxicwind/sovereign-projects
+# projects/bridge/yote/awrawr_mcp.py in toxicwind/estate-scripts-projects
 # (live file /home/toxic/awrawr_mcp.py is deployed from there).
 import threading as _threading
 import uuid as _uuid

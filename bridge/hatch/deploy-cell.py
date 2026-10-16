@@ -5,7 +5,7 @@ Cell-side deploy script. Pulls the canonical files from yote via the bridge,
 installs them to the managed cell paths, verifies SHA256, and restarts the
 connector.
 
-Canonical sources (toxicwind/sovereign-projects on yote):
+Canonical sources (toxicwind/estate-scripts-projects on yote):
   projects/bridge/hatch/connector.py           -> ~/workspace/yote-connector/connector.py
   projects/bridge/hatch/supervise-connector.py  -> ~/workspace/yote-connector/supervise-connector.py
   projects/bridge/hatch/start-detached.py       -> ~/workspace/yote-connector/start-detached.py

@@ -201,7 +201,7 @@ export const GHAS_TOOLS: ToolDef[] = [
   { name: "github_get_file_contents", description: "[alias] → ghas_get_file_contents", category: "meta", inputSchema: { type: "object", properties: { owner: q, repo: q, path: q, ref: { type: "string" } }, required: ["owner", "repo", "path"] } },
   { name: "github_search_issues", description: "[alias] → ghas_query_issues", category: "meta", inputSchema: { type: "object", properties: { query: q, per_page: perPage, state: { type: "string", enum: ["open", "closed", "all"] } }, required: ["query"] } },
   { name: "github_list_issues", description: "[alias] → ghas_list_repo_issues", category: "meta", inputSchema: { type: "object", properties: { owner: q, repo: q, state: { type: "string", enum: ["open", "closed", "all"] }, per_page: perPage, labels: { type: "string" } }, required: ["owner", "repo"] } },
-  { name: "sovereign_simple_search", description: "[alias] → ghas_simple_search", category: "unified", inputSchema: { type: "object", properties: { query: q, per_page: { type: "number" } }, required: ["query"] } },
+  { name: "estate-scripts_simple_search", description: "[alias] → ghas_simple_search", category: "unified", inputSchema: { type: "object", properties: { query: q, per_page: { type: "number" } }, required: ["query"] } },
 ];
 
 export const TOOL_BY_NAME = new Map(GHAS_TOOLS.map((t) => [t.name, t]));

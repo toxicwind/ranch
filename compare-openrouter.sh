@@ -7,7 +7,7 @@ set -euo pipefail
 ZED_ROOT="/home/toxic/projects/zed"
 GROK_ROOT="/home/toxic/.grok"
 PI_ROOT="/home/toxic/projects/pi-agent"
-KIMI_ROOT="/home/toxic/projects/kimi-code-sovereign"
+KIMI_ROOT="/home/toxic/projects/kimi-code-estate-scripts"
 AST_GREP="/home/toxic/.local/share/mise/shims/ast-grep"
 
 PATTERN="${1:-openrouter}"

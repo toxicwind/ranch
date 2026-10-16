@@ -20,7 +20,7 @@
     },
     "url": ""
   },
-  "deviceId": "sovereign-yote-kimiclaw-a",
+  "deviceId": "estate-scripts-yote-kimiclaw-a",
   "gateway": {
     "agentId": "main",
     "clientId": "gateway-client",
@@ -29,7 +29,7 @@
     "url": "ws://127.0.0.1:18789"
   },
   "instance": "a",
-  "instanceId": "sovereign-yote-kimiclaw-a",
+  "instanceId": "estate-scripts-yote-kimiclaw-a",
   "openfangAgent": "kimiclaw-1",
   "routing": {
     "herdUrl": "http://127.0.0.1:25100/v1",

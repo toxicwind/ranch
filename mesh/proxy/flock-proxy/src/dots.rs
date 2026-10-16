@@ -1,4 +1,4 @@
-//! Sovereign Dots-3-Note Coercion Layer (`custom/dots`).
+//! estate-scripts Dots-3-Note Coercion Layer (`custom/dots`).
 //!
 //! Neutralizes: Ghost outputs, list:string mismatches, 22s latency, and replay crashes
 //! for `dots-studio/dots-3-note-preview:free` (and alias `custom/dots`).
@@ -16,7 +16,7 @@ pub fn is_dots_model_or_path(model: &str, path: &str) -> bool {
         || model == "openrouter/dots-studio/dots-3-note-preview:free"
 }
 
-/// Apply the SovereignDotsClient coercion rules to a parsed JSON chat completion body.
+/// Apply the estate-scriptsDotsClient coercion rules to a parsed JSON chat completion body.
 pub fn coerce_dots_payload(mut body: Value, session_id: &str) -> Value {
     let Some(obj) = body.as_object_mut() else {
         return body;
@@ -52,7 +52,7 @@ pub fn coerce_dots_payload(mut body: Value, session_id: &str) -> Value {
         }
     }
 
-    // 3. Construct sovereign payload fields
+    // 3. Construct estate-scripts payload fields
     if !obj.contains_key("sessionId") {
         obj.insert("sessionId".to_string(), json!(session_id));
     }

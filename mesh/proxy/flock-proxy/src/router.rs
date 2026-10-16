@@ -505,7 +505,7 @@ impl RouterHandle {
         let strategy = if model == "free" {
             Strategy::Free
         } else if model == "auto" {
-            // "auto" is the sovereign router's intelligent-lane directive
+            // "auto" is the estate-scripts router's intelligent-lane directive
             // (routeAuto): the caller classifies the task from the prompt
             // text and passes the lane's Strategy as the override. Fall back
             // to Free (zero-cost first) when no override was supplied.
@@ -1566,7 +1566,7 @@ impl RouterHandle {
         // requested max_tokens. Models that provably cannot hold the request
         // are demoted (not dropped) in the candidate chain.
         let budget = crate::router::needed_tokens(&body);
-        // Sovereign `routeAuto` intelligence: model="auto" classifies the
+        // estate-scripts `routeAuto` intelligence: model="auto" classifies the
         // task from the prompt text and picks the lane (code -> ast race,
         // reasoning -> hybrid chain, default -> free race then hybrid
         // fallback). This is the TS ROUTERS["auto"] path, natively.

@@ -1,11 +1,11 @@
 /**
  * flock/ts/strategy/strategy — routing strategies for Flock.
  *
- * Ported from sovereign-router's router_strategy.ts (v3.2). The behavioral
+ * Ported from estate-scripts-router's router_strategy.ts (v3.2). The behavioral
  * details are preserved exactly:
  *
  * - callOne: the single provider-call primitive. Entitlement-404 fail-fast
- *   guard → circuit guard → headers (Sovereign-Flock UA, openrouter referer
+ *   guard → circuit guard → headers (estate-scripts-Flock UA, openrouter referer
  *   + title, nvidia pool rotation with honest 429 when buckets are dry) →
  *   governor admission → AbortSignal fail-fast stack (CONNECT_MS headers
  *   budget, TTFT_MS first-chunk budget for streams, ATTEMPT_MS total cap)
@@ -161,7 +161,7 @@ export async function callOne(
   }
   if (provider === "openrouter") {
     headers["HTTP-Referer"] = "https://zed.dev";
-    headers["X-Title"] = "Sovereign-Router";
+    headers["X-Title"] = "estate-scripts-Router";
   }
   // Model-pressure governor (AIMD, per provider/model): refused fast with
   // 429 when the model is at its worker cap or draining.
@@ -384,7 +384,7 @@ export function firstUsableModelFor(
 // the race score: +5 is tie-break scale against elo (hundreds-thousands),
 // the latency penalty (elo − latencyEMA/50), and the existing rand*10
 // jitter — it nudges ties, never overrides the breaker or elo.
-// Reversible: SOVEREIGN_MODEL_BONUS=0.
+// Reversible: estate-scripts_MODEL_BONUS=0.
 const PROBE_VERIFIED_MODELS: Record<string, Set<string>> = {
   nvidia: new Set([
     // 1M needle retrieval verified at 100k/500k/1M, exact every time.
@@ -395,7 +395,7 @@ const PROBE_VERIFIED_MODELS: Record<string, Set<string>> = {
 };
 const PROBE_VERIFIED_BONUS = 5;
 export function modelProbeBonus(p: string, mid: string): number {
-  if (process.env.SOVEREIGN_MODEL_BONUS === "0") return 0;
+  if (process.env.estate-scripts_MODEL_BONUS === "0") return 0;
   return PROBE_VERIFIED_MODELS[p]?.has(mid) ? PROBE_VERIFIED_BONUS : 0;
 }
 
@@ -805,7 +805,7 @@ export async function routeCascade(
 // the normal race; never fight the breaker. On pinned failure the caller
 // falls back to the race exactly once. The pin never sets session
 // stickiness — it is size-deterministic, not session-affine.
-// Operational kill switch: SOVEREIGN_LONGCTX_PIN=0 disables the pin.
+// Operational kill switch: estate-scripts_LONGCTX_PIN=0 disables the pin.
 // ---------------------------------------------------------------------------
 export const LONGCTX_PIN_PROVIDER = "nvidia";
 // KEYED lane ONLY — never the :free id (provider cap 262144 tokens).
@@ -815,7 +815,7 @@ export const LONGCTX_PIN_DAILY_CAP = 10;
 const LONGCTX_PIN_STRATEGY = "longctx-pinned";
 
 export function longctxPinEnabled(): boolean {
-  return process.env.SOVEREIGN_LONGCTX_PIN !== "0";
+  return process.env.estate-scripts_LONGCTX_PIN !== "0";
 }
 
 /**

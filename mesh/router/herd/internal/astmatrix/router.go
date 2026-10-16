@@ -100,7 +100,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Pick strategy from header or config
-	strategyName := req.Header.Get("X-Sovereign-Strategy")
+	strategyName := req.Header.Get("X-estate-scripts-Strategy")
 	if strategyName == "" {
 		strategyName = r.config.Strategy
 	}
@@ -195,7 +195,7 @@ func callOne(ctx context.Context, m *Matrix, provider, model string, body map[st
 	url := strings.TrimRight(prov.base, "/") + "/chat/completions"
 	headers := map[string]string{
 		"Content-Type":    "application/json",
-		"User-Agent":      "SovereignASTMatrix/3.1",
+		"User-Agent":      "estate-scriptsASTMatrix/3.1",
 		"Accept-Encoding": "identity",
 	}
 	if !prov.noAuth {
@@ -205,7 +205,7 @@ func callOne(ctx context.Context, m *Matrix, provider, model string, body map[st
 	}
 	if provider == "openrouter" {
 		headers["HTTP-Referer"] = "https://zed.dev"
-		headers["X-Title"] = "Sovereign-AST-Matrix"
+		headers["X-Title"] = "estate-scripts-AST-Matrix"
 	}
 
 	payload := make(map[string]interface{})

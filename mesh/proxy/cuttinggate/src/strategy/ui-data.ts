@@ -1,7 +1,7 @@
 /**
  * flock/ts/strategy/ui-data — /ui data contract for the Flock serve layer.
  *
- * Ported from sovereign-router's router_ui.ts. Two exports:
+ * Ported from estate-scripts-router's router_ui.ts. Two exports:
  *
  * - uiData(deps): the /ui/data JSON payload — per-provider key state,
  *   circuit state, Elo, candidate score, serving model counts, and the

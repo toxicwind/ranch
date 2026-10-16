@@ -10,7 +10,7 @@
 
 </div>
 
-> **The official Sovereign Estate marketplace for [Tau](https://github.com/toxicwind/tau) and [Oh-My-Pi](https://github.com/toxicwind/oh-my-pi) extensions, ambient tools, and agent plugins.**
+> **The official estate-scripts Estate marketplace for [Tau](https://github.com/toxicwind/tau) and [Oh-My-Pi](https://github.com/toxicwind/oh-my-pi) extensions, ambient tools, and agent plugins.**
 
 From in-process mobile touchscreen autocorrect and dynamic local inference routers to auto-committing git workflows and real-time Kafka streams — install what you need in one command, with zero external daemons.
 
@@ -35,7 +35,7 @@ flowchart TD
         TL["tau-loops"]
     end
 
-    subgraph EstateServices["Sovereign Mesh Services"]
+    subgraph EstateServices["estate-scripts Mesh Services"]
         LLM["Local / Remote LLMs"]
         VANS["VansRouter (:20128)"]
         HERD["Herd Daemon (:25100)"]
@@ -181,4 +181,4 @@ ALL MARKETPLACE PLUGINS VALID!
 
 Licensed under the [MIT License](./LICENSE).
 
-Contributions are welcome! Please follow the established [Sovereign Contributor Guidelines](./CONTRIBUTING.md) and verify your changes with `bun run validate` before submitting.
+Contributions are welcome! Please follow the established [estate-scripts Contributor Guidelines](./CONTRIBUTING.md) and verify your changes with `bun run validate` before submitting.

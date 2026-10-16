@@ -26,7 +26,7 @@ import { homedir } from "node:os";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import { YAML } from "bun";
 
-const SOVEREIGN_ROOT = "/home/toxic/estate";
+const estate-scripts_ROOT = "/home/toxic/estate";
 const TAU_ROOT = "/home/toxic/estate/ranch/stockyard/tau";
 const AGENT_CONFIG = "/home/toxic/estate/config/tau/agent/config.yml";
 const TAU_CONFIG = "/home/toxic/.tau/config.yml";
@@ -96,7 +96,7 @@ function collectPlugins(): PluginEntry[] {
 			role: typeof p.role === "string" ? p.role : undefined,
 			merged,
 			// `source` is repo-relative to the estate root, not to the tau package.
-			sourceExists: source !== "" && existsSync(resolve(SOVEREIGN_ROOT, source)),
+			sourceExists: source !== "" && existsSync(resolve(estate-scripts_ROOT, source)),
 			// `merged` holds alias NAMES ("estate-swap"), not paths, so it is
 			// reported but never path-checked. Checking them said nothing.
 			mergedAllExist: true,

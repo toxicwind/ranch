@@ -31,7 +31,7 @@ Enforcement moved to the actual pre-agent layer, in code:
   atomic rename claim = exactly-once).
 - `src/daemon.ts` — yote-side executor. Event-driven via inotify
   (`Bun.watch`); no timers, no polling. Managed by pitchfork
-  (`[daemons.task-launch]` in `sovereign/pitchfork.toml`).
+  (`[daemons.task-launch]` in `estate-scripts/pitchfork.toml`).
 - `src/profile.ts` — agent profile: matches the Hatch autoloaded
   identifier, `*.metaaivm.com` VM FQDN, or `ipnext/` model identifiers,
   and injects the directive through the verified pre-agent path.

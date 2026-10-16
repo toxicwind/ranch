@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part_of_the_estate-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part_of_the_estate-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 ![polyglot](https://img.shields.io/badge/bun-python-perl-orange?style=for-the-badge)
 
 </div>
@@ -76,6 +76,6 @@ bun install && bun test
 
 ## License + security
 
-MIT — [sovereign-projects](https://github.com/toxicwind/sovereign-projects) ([license](https://github.com/toxicwind/sovereign-projects#license)).
+MIT — [estate-scripts-projects](https://github.com/toxicwind/estate-scripts-projects) ([license](https://github.com/toxicwind/estate-scripts-projects#license)).
 
 **Security note:** research scaffold — the lottery scraper hits public Colorado Lottery pages (respect their robots/rate limits), and the refusal-geometry prompts are meta-analytical by design (they study routing behavior, never request harmful content). No credentials anywhere in the tree; `ble-lint.pl --fix` only comments out lines in `~/.blerc` with a timestamped backup.

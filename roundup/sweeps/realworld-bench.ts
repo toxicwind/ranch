@@ -24,7 +24,7 @@
  *
  * Output: results.jsonl (roundup-realworld/1) + weights.json
  *   weights.json = model_id -> { score, ttft_ms, p50_ms, tokens_per_s,
- *   error_rate, timestamp } — the contract the sovereign router's
+ *   error_rate, timestamp } — the contract the estate-scripts router's
  *   bench-priors merge reads, quality-descending then p50-ascending.
  *
  * Usage:
@@ -120,7 +120,7 @@ async function callModel(model: string, apiKey: string): Promise<{ ok: boolean; 
     headers: {
       "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": "https://github.com/toxicwind/sovereign-projects",
+      "HTTP-Referer": "https://github.com/toxicwind/estate-scripts-projects",
       "X-Title": "realworld-bench",
     },
     body: JSON.stringify({

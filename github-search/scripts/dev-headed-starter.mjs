@@ -101,19 +101,19 @@ async function main() {
     await waitForServer(WEB_URL);
   }
 
-  // Sovereign Firefox live control integration (added during complete install of this repo)
+  // estate-scripts Firefox live control integration (added during complete install of this repo)
   // Supports the original request: drive the user's real logged-in Firefox (with GitHub cookies etc.)
   // via Playwright remote + profile takeover, or zero-restart ydotool fallback.
   const browserMode = (process.env.GHAS_BROWSER || process.env.BROWSER || "chromium").toLowerCase();
 
   if (browserMode === "firefox" || browserMode === "ff") {
     console.log("[dev-headed] Firefox live mode requested — launching controllable profile (the real one you use)");
-    // This calls the sovereign-browser scripts we installed as part of "complete github-advanced-search-mcp install"
+    // This calls the estate-scripts-browser scripts we installed as part of "complete github-advanced-search-mcp install"
     const { spawnSync } = await import("node:child_process");
-    const launcher = path.join(ROOT, "scripts/sovereign-browser/launch-firefox-from-profile.sh");
+    const launcher = path.join(ROOT, "scripts/estate-scripts-browser/launch-firefox-from-profile.sh");
     spawnSync("bash", [launcher], { stdio: "inherit", cwd: ROOT });
     console.log("[dev-headed] Firefox profile launcher started (or reused). Use its ws:// endpoint with the playwright MCP for full browser_* tools.");
-    console.log("[dev-headed] You can now point sovereign-playwright-fork or this MCP's browser flows at your live Firefox.");
+    console.log("[dev-headed] You can now point estate-scripts-playwright-fork or this MCP's browser flows at your live Firefox.");
   } else {
     // Default / original Chromium headed dev browser
     const browser = await chromium.launch({ headless: false, args: ["--window-size=1720,1080"] });

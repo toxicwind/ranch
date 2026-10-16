@@ -1,6 +1,6 @@
-//! bodybuilder — Rust port of the sovereign router's bodybuilder workflow.
+//! bodybuilder — Rust port of the estate-scripts router's bodybuilder workflow.
 //!
-//! Source: `sovereign-router-ts/router_strategy.ts`
+//! Source: `estate-scripts-router-ts/router_strategy.ts`
 //! (`buildBodybuilderRequests` + `runBodybuilderAutonomous`), the estate-owned
 //! openrouter/bodybuilder equivalent: a natural-language multi-model job is
 //! decomposed into parallel LLM request bodies (`{requests:[...]}`) and,
@@ -236,7 +236,7 @@ pub fn chunked_request_bodies(job: &str, max_requests: usize) -> Vec<Value> {
 ///
 /// `allow_ids` is the live free-pool `provider/model` list. It is `None` in
 /// flock today because the live free-pool catalog still belongs to the
-/// sovereign router (Worker D's routing-intelligence port); with `None` the
+/// estate-scripts router (Worker D's routing-intelligence port); with `None` the
 /// model field passes through untouched and only the sampling clamps apply.
 /// NOTE (Worker D): `resolveSigmaAlias` (TS sigma-catalog alias resolution)
 /// has no Rust equivalent yet — wire it here when the catalog lands.

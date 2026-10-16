@@ -64,9 +64,9 @@ sidecar over localhost HTTP, replacing the embedded Go ASTMatrix in herd.
 stays untouched — removal happens only after the sidecar is deployed,
 supervised, and verified end-to-end.
 
-- `SOVEREIGN_LIVE_CATALOG` — live catalog file path
+- `estate-scripts_LIVE_CATALOG` — live catalog file path
   (default `/home/toxic/estate/.state/provider-catalog.live.json`)
-- `SOVEREIGN_CATALOG_404_URL` — Roost's serve-404 intake
+- `estate-scripts_CATALOG_404_URL` — Roost's serve-404 intake
   (default `http://127.0.0.1:25200/admin/catalog/serve-404`)
 - `ASTMATRIX_STRATEGY` — default routing strategy (default `hybrid`)
 

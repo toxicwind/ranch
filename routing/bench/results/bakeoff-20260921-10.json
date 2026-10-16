@@ -1,10 +1,10 @@
 {
- "bakeoff": "tau-extension-vs-sovereign-router",
+ "bakeoff": "tau-extension-vs-estate-scripts-router",
  "startedAt": "2026-09-21T20:19:05.427Z",
  "config": {
   "legs": [
    "tau",
-   "sovereign"
+   "estate-scripts"
   ],
   "retries": 3,
   "maxTokens": 600,
@@ -60,7 +60,7 @@
     },
     "serveError": null
    },
-   "sovereign": {
+   "estate-scripts": {
     "attempts": [
      {
       "attempt": 0,
@@ -140,7 +140,7 @@
     },
     "serveError": null
    },
-   "sovereign": {
+   "estate-scripts": {
     "attempts": [
      {
       "attempt": 0,
@@ -237,7 +237,7 @@
     },
     "serveError": null
    },
-   "sovereign": {
+   "estate-scripts": {
     "attempts": [
      {
       "attempt": 0,
@@ -335,7 +335,7 @@
     },
     "serveError": null
    },
-   "sovereign": {
+   "estate-scripts": {
     "attempts": [
      {
       "attempt": 0,
@@ -421,7 +421,7 @@
     },
     "serveError": null
    },
-   "sovereign": {
+   "estate-scripts": {
     "attempts": [
      {
       "attempt": 0,
@@ -501,7 +501,7 @@
     },
     "serveError": null
    },
-   "sovereign": {
+   "estate-scripts": {
     "attempts": [
      {
       "attempt": 0,
@@ -581,7 +581,7 @@
     },
     "serveError": null
    },
-   "sovereign": {
+   "estate-scripts": {
     "attempts": [
      {
       "attempt": 0,
@@ -661,7 +661,7 @@
     },
     "serveError": null
    },
-   "sovereign": {
+   "estate-scripts": {
     "attempts": [
      {
       "attempt": 0,
@@ -740,7 +740,7 @@
     },
     "serveError": null
    },
-   "sovereign": {
+   "estate-scripts": {
     "attempts": [
      {
       "attempt": 0,
@@ -819,7 +819,7 @@
     },
     "serveError": null
    },
-   "sovereign": {
+   "estate-scripts": {
     "attempts": [
      {
       "attempt": 0,

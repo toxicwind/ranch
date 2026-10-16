@@ -1,5 +1,5 @@
-//! Routing intelligence ported from the sovereign-router TypeScript
-//! (`sovereign-router-ts/router_config.ts` + `router_strategy.ts`): task
+//! Routing intelligence ported from the estate-scripts-router TypeScript
+//! (`estate-scripts-router-ts/router_config.ts` + `router_strategy.ts`): task
 //! classification, cost tiers, free-pool candidate selection, and the
 //! model-selection / failover helpers behind `routeFree` and `routeAuto`.
 //!
@@ -556,7 +556,7 @@ pub fn auto_lane(task: TaskType) -> AutoLane {
 // Model-selection helpers
 // ---------------------------------------------------------------------------
 
-/// `parseStickyOpt` — `X-Sovereign-Sticky` header parsing: "1"/"true"/"yes"/
+/// `parseStickyOpt` — `X-estate-scripts-Sticky` header parsing: "1"/"true"/"yes"/
 /// "on" -> opt-in; "0"/"false"/"no"/"off" -> opt-out; absent/unparseable ->
 /// `None` (legacy behavior).
 pub fn parse_sticky_opt(h: Option<&str>) -> Option<bool> {
@@ -697,7 +697,7 @@ pub fn prompt_text(body: &[u8]) -> String {
 mod tests {
     use super::*;
 
-    // Mirrors sovereign-router-ts/tests/router_max.test.ts expectations.
+    // Mirrors estate-scripts-router-ts/tests/router_max.test.ts expectations.
 
     #[test]
     fn classify_code_snippets() {

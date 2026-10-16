@@ -270,5 +270,5 @@ of these in `aggregate_models` / `provider_metadata`:
 ## 5. Not in scope
 
 - Herd's first-class flock delegation re-enablement (separate lane).
-- sovereign-router `:25104` thinning (separate lane).
+- estate-scripts-router `:25104` thinning (separate lane).
 - Changing Roost's catalog data itself (no provider additions/removals here).

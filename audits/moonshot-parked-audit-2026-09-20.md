@@ -190,7 +190,7 @@ Deployment (only on Chris's approval — shared tree, shared daemon):
 - `config/model_constraints.yaml`: corrected the stale "kimi-k3 REVIVED via
   the OpenRouter key-pool" note — OpenRouter Kimi is 402
   "Insufficient credits" as of 15:02 MDT (billing state, `_1` key).
-- Herd restarted via `bin/pitchfork-restart sovereign/herd`
+- Herd restarted via `bin/pitchfork-restart estate-scripts/herd`
   (pid 1607234 → 1695100, `:25100` health 200). `moonshot/kimi-k2.6` and
   `moonshot/kimi-k2.7-code` now appear in herd `/v1/models` (93 total, was
   91); Kimi aliases resolve.

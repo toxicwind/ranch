@@ -31,7 +31,7 @@ const manifest = {
   target_dir: targetDir,
   metadata: input?.metadata ?? {},
   staged_files: stagedFiles,
-  sync_target: "dropbox:Sovereign/runs",
+  sync_target: "dropbox:estate-scripts/runs",
   sync_policy: "autonomous_host_runner"
 };
 

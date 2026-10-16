@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 export const DEFAULT_SOCKET_PATH =
-  "/run/user/1000/sovereign-stream-broker.sock";
+  "/run/user/1000/estate-scripts-stream-broker.sock";
 export const DEFAULT_TCP_PORT = 25215;
 export const DEFAULT_TCP_HOST = "127.0.0.1";
 

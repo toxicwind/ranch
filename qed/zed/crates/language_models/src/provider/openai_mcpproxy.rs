@@ -1,7 +1,7 @@
 //! OpenAI-compatible provider hardened for MCP-proxy (mcpproxy) tool routing.
 //!
 //! This is a sibling of `open_ai_compatible` that targets endpoints fronted by
-//! an mcpproxy compact router (e.g. `mcpproxy-sovereign` at `:25109`). It diverges
+//! an mcpproxy compact router (e.g. `mcpproxy-estate-scripts` at `:25109`). It diverges
 //! from the generic provider in exactly the ways those endpoints require:
 //!
 //! * `tool_input_format` is **full JSON Schema** (draft07), NOT the OpenAI subset.

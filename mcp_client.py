@@ -43,7 +43,7 @@ class Session:
         return self._post("initialize", {
             "protocolVersion": "2024-11-05",
             "capabilities": {},
-            "clientInfo": {"name": "sovereign-tools", "version": "0.1.0"},
+            "clientInfo": {"name": "estate-scripts-tools", "version": "0.1.0"},
         })
 
     def initialized(self):

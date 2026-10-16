@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-1f6feb?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-1f6feb?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -36,14 +36,14 @@ cat /sys/module/zswap/parameters/enabled  # -> Y
 
 ## License & security
 
-- **License:** [MIT](https://github.com/toxicwind/sovereign-projects#license)
+- **License:** [MIT](https://github.com/toxicwind/estate-scripts-projects#license)
 - **Security:** `apply.sh` needs sudo and writes host `/etc` — review the diff before applying on a live box. The zram mask survives `cachyos-settings` upgrades precisely because it doesn't edit `/usr/lib` directly.
 
 ---
 
 <div align="right">
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge)
+![estate-scripts](https://img.shields.io/badge/estate-scripts--projects-blue?style=for-the-badge)
 ![bash](https://img.shields.io/badge/bash-4EAA25?style=for-the-badge)
 ![systemd](https://img.shields.io/badge/systemd-2D2D2D?style=for-the-badge)
 ![arch-linux](https://img.shields.io/badge/arch--linux-1793D1?style=for-the-badge)
@@ -129,5 +129,5 @@ The full investigation record (4 lanes: swappiness provenance, page-alloc failur
 
 ## License + Security
 
-- This directory ships **no standalone LICENSE file**; it is declarative host config in the sovereign-projects tree.
+- This directory ships **no standalone LICENSE file**; it is declarative host config in the estate-scripts-projects tree.
 - **Security posture:** no secrets live here — only tuning values, masks, and drop-ins. `apply.sh` is idempotent and re-runnable; the live `/etc` files name their repo source in a comment so any drift is attributable. Review the diff before applying after major package upgrades.

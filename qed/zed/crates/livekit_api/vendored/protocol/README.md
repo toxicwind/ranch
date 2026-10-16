@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -30,7 +30,7 @@ cargo build -p livekit_api   # builds against this vendored protocol
 ## License & security
 
 - LiveKit protocol carries its own upstream license; see the [livekit/protocol](https://github.com/livekit/protocol) repo. Vendoring is pinning, not relicensing.
-- Zed code around it is **GPL-3.0-or-later**; sovereign-authored files are [MIT](https://github.com/toxicwind/sovereign-projects#license).
+- Zed code around it is **GPL-3.0-or-later**; estate-scripts-authored files are [MIT](https://github.com/toxicwind/estate-scripts-projects#license).
 
 ## Contribute
 

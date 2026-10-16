@@ -167,7 +167,7 @@ export async function dispatchTool(name: string, args: Record<string, unknown>) 
     return { repository: `${args.owner}/${args.repo}`, count: items.length, items };
   }
 
-  if (name === "ghas_simple_search" || name === "sovereign_simple_search") {
+  if (name === "ghas_simple_search" || name === "estate-scripts_simple_search") {
     const payload = await performSearch(String(args.query), Math.min(perPage, 5), ["unified"], false, false);
     return {
       query: payload.query,

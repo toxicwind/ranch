@@ -1,7 +1,7 @@
 <div align="right">
 
-[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/part_of-sovereign--projects-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/part_of-estate-scripts--projects-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -34,7 +34,7 @@ cat quarantine/MANIFEST.md   # what's parked and why
 
 ## License & security
 
-MIT — see the [canonical LICENSE](https://github.com/toxicwind/sovereign-projects#license). Contents here are legacy/dead code by definition — do not resurrect anything into the live path without review.
+MIT — see the [canonical LICENSE](https://github.com/toxicwind/estate-scripts-projects#license). Contents here are legacy/dead code by definition — do not resurrect anything into the live path without review.
 
 ## Currently parked
 

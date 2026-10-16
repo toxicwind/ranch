@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sovereign Maximal Dashboard - REAL</title>
+<title>estate-scripts Maximal Dashboard - REAL</title>
 <style>
 :root{--bg:#080808;--card:#111;--border:#222;--muted:#888}
 *{box-sizing:border-box} body{margin:0 auto;max-width:1200px;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:var(--bg);color:#e5e5e5;padding:16px;line-height:1.5}
@@ -22,7 +22,7 @@ button{min-height:34px}
 @media (max-width:760px){.live-grid{grid-template-columns:1fr !important}}
 </style>
 </head><body>
-<h1>Sovereign Maximal Dashboard — REAL — YOLO Approved</h1>
+<h1>estate-scripts Maximal Dashboard — REAL — YOLO Approved</h1>
 <div class="small">No placeholder. Works when saved to /home/toxic/estate/tools/dashboard/index.html and served via files 34567 or python -m http.server. Interacts with your real daemons on 127.0.0.1. You approved, so JS can hit localhost.</div>
 
 <div class="card">
@@ -43,12 +43,12 @@ button{min-height:34px}
 <div class="card">
 <div class="grid live-grid" style="grid-template-columns:1fr 1fr">
 <div>
-<label>Endpoint — your sovereign-router 25104 or nvidia direct</label>
+<label>Endpoint — your estate-scripts-router 25104 or nvidia direct</label>
 <input id="endpoint" value="http://127.0.0.1:25104/v1/chat/completions">
 <label>Model — Sep 2026 SOTA</label>
 <select id="modelSel">
 <option value="nvidia/nemotron-3.5-lightning-30b-a3b">nvidia/nemotron-3.5-lightning-30b-a3b — 86% PinchBench 4x speed execution layer</option>
-<option value="nex-agi/nex-n2.5-mini:free">nex-agi/nex-n2.5-mini:free — sovereign default FREE BEATS LOCAL</option>
+<option value="nex-agi/nex-n2.5-mini:free">nex-agi/nex-n2.5-mini:free — estate-scripts default FREE BEATS LOCAL</option>
 <option value="nvidia/nemotron-3-super-120b-a12b">nvidia/nemotron-3-super-120b-a12b — 85.6% PinchBench best open</option>
 <option value="nvidia/nemotron-3-ultra-550b-a55b">nvidia/nemotron-3-ultra-550b-a55b — 535.4/600 IOI beats human</option>
 <option value="openai/gpt-5.4-xhigh">openai/gpt-5.4-xhigh — 59.1 SWE Pro Rank 1</option>
@@ -57,7 +57,7 @@ button{min-height:34px}
 <option value="google/gemini-3.1-pro-preview">google/gemini-3.1-pro-preview — 72.4% Android coding</option>
 <option value="moonshotai/kimi-k3:free">moonshotai/kimi-k3:free — maximal free-Kimi routing</option>
 </select>
-<label>API Key — leave empty to use sovereign keypool rotation</label>
+<label>API Key — leave empty to use estate-scripts keypool rotation</label>
 <input id="apikey" placeholder="Bearer key or empty">
 <label>Prompt</label>
 <textarea id="prompt" rows="5">Explain why Function 5beba52c-65a9-4f46-8cd9-656689a1b205 deletion broke ModelPilot and how resilientRoute fixes it by stripping tools on 404</textarea>
@@ -84,7 +84,7 @@ button{min-height:34px}
 <div class="card">
 <pre id="fixCode"></pre>
 <div class="row"><button id="btnCopyFix">Copy fallback.json</button><button id="btnDownloadFix">Download fallback.json</button></div>
-<div class="small">Save to ~/.config/modelpilot/fallback.json then Reload Window in VSCode Insiders. Patched extension.js at ~/.vscode-insiders/extensions/a-man-sharma-04.modelpilot-1.0.0-sovereign/dist/extension.js</div>
+<div class="small">Save to ~/.config/modelpilot/fallback.json then Reload Window in VSCode Insiders. Patched extension.js at ~/.vscode-insiders/extensions/a-man-sharma-04.modelpilot-1.0.0-estate-scripts/dist/extension.js</div>
 </div>
 
 <h2>Weird Non-Conventional Inventory — Collected No Skim</h2>
@@ -105,56 +105,56 @@ button{min-height:34px}
 <script>
 // ==== NO /mnt/ hardcode in runtime JS ====
 const DAEMONS = [
- {id:"sovereign/gatehouse", port:25127, health:"http://127.0.0.1:25127/health", dir:"projects/range/ranch/barn/gatehouse", run:"gatehouse-serve.sh", weird:"retry 1 last_exit_success false, must be first, gatehouse FIRST per Pf-New-Cleaned.toml"},
- {id:"sovereign/herd", port:25100, health:"http://127.0.0.1:25100/health", depends:["gatehouse"], weird:"depends gatehouse, retry 1 last_exit_success false, local provider offline llama-swap error http://localhost:25100/v1/models when down"},
- {id:"sovereign/keypool", port:25109, health:"http://127.0.0.1:25109/health", run:"herd-keypool.py", weird:"rotates all candidate keys including NVIDIA_API_KEY list, real keypool"},
- {id:"sovereign/sovereign-router", port:25104, health:"http://127.0.0.1:25104/health", depends:["gatehouse","keypool"], weird:"bun router.ts retry 1 last_exit_success false, FREE BEATS LOCAL doctrine"},
- {id:"sovereign/mesh-hub", port:25115, health:"http://127.0.0.1:25115/health", depends:["gatehouse"], weird:"bun src/services/mesh-hub.ts retry 1 last_exit_success false"},
- {id:"sovereign/openfang", port:25196, health:"http://127.0.0.1:25196/api/health", dir:"/home/toxic/projects/rig-work", weird:"errored 137 OOM killed retry 17, sources .secrets, --yolo, re-registers fleet triggers every boot because kernel-memory-only, sqlite self-heal from backups"},
- {id:"sovereign/openfang-front", port:25103, health:"http://127.0.0.1:25103/api/health", depends:["gatehouse"], weird:"retry 51 massive loop, mise true"},
- {id:"sovereign/beellama-fast", port:25122, health:"http://127.0.0.1:25122/health", weird:"fast llm"},
- {id:"sovereign/byte-vision", port:25121, health:"http://127.0.0.1:25121/health", depends:["gatehouse"], weird:"mise true"},
- {id:"sovereign/coyote", port:25143, health:"http://127.0.0.1:25143/health", depends:["gatehouse","herd"], weird:"mise true"},
- {id:"sovereign/hf-downloader", port:25106, health:"http://127.0.0.1:25106/health", depends:["gatehouse"], weird:"mise true"},
- {id:"sovereign/hindsight", port:25117, health:"http://127.0.0.1:25117/health", depends:["gatehouse"], weird:"retry 1"},
- {id:"sovereign/flock", port:25193, health:"http://127.0.0.1:25193/health", weird:"env VANSROUTER_API_KEY local-sovereign plaintext"},
- {id:"sovereign/grafana", port:25110, health:"http://127.0.0.1:25110/api/health", weird:"grafana-mesh.sh mise true"},
- {id:"sovereign/prometheus", port:25105, health:"http://127.0.0.1:25105/-/healthy", weird:"prometheus-hot.sh mise true"},
- {id:"sovereign/qdrant", port:25133, health:"http://127.0.0.1:25133/healthz", ports:[25133,25134], weird:"two ports but active_port only 25133"},
- {id:"sovereign/redis", port:25199, health:"http://127.0.0.1:25199/", weird:"valkey-server --bind 0.0.0.0 --protected-mode no --save '' --appendonly no — yolo bind all no persistence"},
- {id:"sovereign/search-api", port:25112, health:"http://127.0.0.1:25112/health", depends:["gatehouse"], weird:"bun --hot run — hot reload in prod, last_exit_success false"},
- {id:"sovereign/search-ui", port:25114, health:"http://127.0.0.1:25114/", depends:["gatehouse"], weird:"stopped, next dev"},
- {id:"sovereign/sovereign-chat", port:25120, health:"http://127.0.0.1:25120/health", weird:"bun run chat.ts token file .config/sovereign-chat-token"},
- {id:"sovereign/kimi-code", port:25126, health:"http://127.0.0.1:25126/health", depends:["gatehouse"], weird:"claim-port wrapper"},
- {id:"sovereign/kimi-auto-shim", port:25153, health:"http://127.0.0.1:25153/health", weird:"target openrouter-free/moonshotai/kimi-k3:free 5 standbys advance-on 5xx,conn,429,402,404 includes 404, SHIM_CONNECT_TIMEOUT 240 long hang"},
- {id:"sovereign/nim-kimi-sidecar", port:25163, health:"http://127.0.0.1:25163/health", weird:"sidecar"},
- {id:"sovereign/oracle-core", port:25151, health:"http://127.0.0.1:25151/health", weird:"oracle-market"},
- {id:"sovereign/paper-poller", port:25149, health:"http://127.0.0.1:25149/ready", weird:"interval 30"},
- {id:"sovereign/mbx-cache", port:25148, health:"http://127.0.0.1:25148/health", weird:"remote task cache, formerly buildsrv/brand"},
- {id:"sovereign/nativelink", port:25155, health:"http://127.0.0.1:25155/status", weird:"Bazel REAPI build server and remote cache"},
- {id:"sovereign/bench-radar", port:25181, health:"http://127.0.0.1:25181/health", weird:"bun server.ts"},
- {id:"sovereign/boundless", port:25197, health:"http://127.0.0.1:25197/api/health", weird:"uvicorn with ${BOUNDLESS_PORT} expansion inside exec"},
- {id:"sovereign/awrawr-mcp", port:25198, health:"http://127.0.0.1:25198/", weird:"MCP_FUNNEL_HOST github-mcp-host.tailc9ac71.ts.net tailnet hardcoded"},
- {id:"sovereign/awrawr-ws-exec", port:25204, health:"", weird:"ready_delay 3 no http"},
- {id:"sovereign/ralph-dashboard", port:25194, health:"http://127.0.0.1:25194/api/health", weird:"uvicorn"},
- {id:"sovereign/rust-web", port:25201, health:"http://127.0.0.1:25201/health", depends:["gatehouse"], weird:"mise true"},
- {id:"sovereign/mesh-landing", port:25207, health:"http://127.0.0.1:25207/health", weird:"landing.py"},
- {id:"sovereign/ml-serve", port:25180, health:"http://127.0.0.1:25180/health", weird:"python server.py"},
- {id:"sovereign/model-guard", port:25101, health:"http://127.0.0.1:25101/v1/models", weird:"health is /v1/models not /health"},
- {id:"sovereign/nats", port:4222, health:"", weird:"port 4222 outside 251xx range"},
- {id:"sovereign/nginx", port:25208, health:"", weird:"pid /tmp/nginx-pitchfork.pid daemon off"},
- {id:"sovereign/node-exporter", port:25211, health:"http://127.0.0.1:25211/health", weird:"prometheus exporter"},
- {id:"sovereign/null-g-proxy", port:25107, health:"http://127.0.0.1:25107/health", depends:["gatehouse"], weird:"bun src/index.ts mise true"},
- {id:"sovereign/whatsapp-mcp", port:25146, health:"http://127.0.0.1:25146/health", weird:"bash -c set -a source pitchfork-secrets/whatsapp-mcp.env"},
- {id:"sovereign/yote", port:25102, health:"http://127.0.0.1:25102/health", depends:["gatehouse"], weird:"bun yote.ts"},
- {id:"sovereign/kimi-audit-dash", port:25116, health:"http://127.0.0.1:25116/health", weird:"bun dashboard"},
- {id:"sovereign/toolcall-llm", port:25152, health:"http://127.0.0.1:25152/health", weird:"llama.cpp -m qwen3.5-9b-dflash-Q5_K_M.gguf -ngl 99 -c 32768 alias qwen3.5-9b-tool retry 5 local fallback"},
- {id:"sovereign/agent-display", port:5900, health:"", weird:"Xvnc :99 1600x900 depth 24 rfbport 5900 SecurityTypes VncAuth rfbauth .browserless/vncpasswd — VNC inside sovereign"},
- {id:"sovereign/agent-viewer", port:6080, health:"http://127.0.0.1:6080/", weird:"websockify --web .browserless/novnc 127.0.0.1:6080 127.0.0.1:5900 — noVNC web folder baked"},
+ {id:"estate-scripts/gatehouse", port:25127, health:"http://127.0.0.1:25127/health", dir:"projects/range/ranch/barn/gatehouse", run:"gatehouse-serve.sh", weird:"retry 1 last_exit_success false, must be first, gatehouse FIRST per Pf-New-Cleaned.toml"},
+ {id:"estate-scripts/herd", port:25100, health:"http://127.0.0.1:25100/health", depends:["gatehouse"], weird:"depends gatehouse, retry 1 last_exit_success false, local provider offline llama-swap error http://localhost:25100/v1/models when down"},
+ {id:"estate-scripts/keypool", port:25109, health:"http://127.0.0.1:25109/health", run:"herd-keypool.py", weird:"rotates all candidate keys including NVIDIA_API_KEY list, real keypool"},
+ {id:"estate-scripts/estate-scripts-router", port:25104, health:"http://127.0.0.1:25104/health", depends:["gatehouse","keypool"], weird:"bun router.ts retry 1 last_exit_success false, FREE BEATS LOCAL doctrine"},
+ {id:"estate-scripts/mesh-hub", port:25115, health:"http://127.0.0.1:25115/health", depends:["gatehouse"], weird:"bun src/services/mesh-hub.ts retry 1 last_exit_success false"},
+ {id:"estate-scripts/openfang", port:25196, health:"http://127.0.0.1:25196/api/health", dir:"/home/toxic/projects/rig-work", weird:"errored 137 OOM killed retry 17, sources .secrets, --yolo, re-registers fleet triggers every boot because kernel-memory-only, sqlite self-heal from backups"},
+ {id:"estate-scripts/openfang-front", port:25103, health:"http://127.0.0.1:25103/api/health", depends:["gatehouse"], weird:"retry 51 massive loop, mise true"},
+ {id:"estate-scripts/beellama-fast", port:25122, health:"http://127.0.0.1:25122/health", weird:"fast llm"},
+ {id:"estate-scripts/byte-vision", port:25121, health:"http://127.0.0.1:25121/health", depends:["gatehouse"], weird:"mise true"},
+ {id:"estate-scripts/coyote", port:25143, health:"http://127.0.0.1:25143/health", depends:["gatehouse","herd"], weird:"mise true"},
+ {id:"estate-scripts/hf-downloader", port:25106, health:"http://127.0.0.1:25106/health", depends:["gatehouse"], weird:"mise true"},
+ {id:"estate-scripts/hindsight", port:25117, health:"http://127.0.0.1:25117/health", depends:["gatehouse"], weird:"retry 1"},
+ {id:"estate-scripts/flock", port:25193, health:"http://127.0.0.1:25193/health", weird:"env VANSROUTER_API_KEY local-estate-scripts plaintext"},
+ {id:"estate-scripts/grafana", port:25110, health:"http://127.0.0.1:25110/api/health", weird:"grafana-mesh.sh mise true"},
+ {id:"estate-scripts/prometheus", port:25105, health:"http://127.0.0.1:25105/-/healthy", weird:"prometheus-hot.sh mise true"},
+ {id:"estate-scripts/qdrant", port:25133, health:"http://127.0.0.1:25133/healthz", ports:[25133,25134], weird:"two ports but active_port only 25133"},
+ {id:"estate-scripts/redis", port:25199, health:"http://127.0.0.1:25199/", weird:"valkey-server --bind 0.0.0.0 --protected-mode no --save '' --appendonly no — yolo bind all no persistence"},
+ {id:"estate-scripts/search-api", port:25112, health:"http://127.0.0.1:25112/health", depends:["gatehouse"], weird:"bun --hot run — hot reload in prod, last_exit_success false"},
+ {id:"estate-scripts/search-ui", port:25114, health:"http://127.0.0.1:25114/", depends:["gatehouse"], weird:"stopped, next dev"},
+ {id:"estate-scripts/estate-scripts-chat", port:25120, health:"http://127.0.0.1:25120/health", weird:"bun run chat.ts token file .config/estate-scripts-chat-token"},
+ {id:"estate-scripts/kimi-code", port:25126, health:"http://127.0.0.1:25126/health", depends:["gatehouse"], weird:"claim-port wrapper"},
+ {id:"estate-scripts/kimi-auto-shim", port:25153, health:"http://127.0.0.1:25153/health", weird:"target openrouter-free/moonshotai/kimi-k3:free 5 standbys advance-on 5xx,conn,429,402,404 includes 404, SHIM_CONNECT_TIMEOUT 240 long hang"},
+ {id:"estate-scripts/nim-kimi-sidecar", port:25163, health:"http://127.0.0.1:25163/health", weird:"sidecar"},
+ {id:"estate-scripts/oracle-core", port:25151, health:"http://127.0.0.1:25151/health", weird:"oracle-market"},
+ {id:"estate-scripts/paper-poller", port:25149, health:"http://127.0.0.1:25149/ready", weird:"interval 30"},
+ {id:"estate-scripts/mbx-cache", port:25148, health:"http://127.0.0.1:25148/health", weird:"remote task cache, formerly buildsrv/brand"},
+ {id:"estate-scripts/nativelink", port:25155, health:"http://127.0.0.1:25155/status", weird:"Bazel REAPI build server and remote cache"},
+ {id:"estate-scripts/bench-radar", port:25181, health:"http://127.0.0.1:25181/health", weird:"bun server.ts"},
+ {id:"estate-scripts/boundless", port:25197, health:"http://127.0.0.1:25197/api/health", weird:"uvicorn with ${BOUNDLESS_PORT} expansion inside exec"},
+ {id:"estate-scripts/awrawr-mcp", port:25198, health:"http://127.0.0.1:25198/", weird:"MCP_FUNNEL_HOST github-mcp-host.tailc9ac71.ts.net tailnet hardcoded"},
+ {id:"estate-scripts/awrawr-ws-exec", port:25204, health:"", weird:"ready_delay 3 no http"},
+ {id:"estate-scripts/ralph-dashboard", port:25194, health:"http://127.0.0.1:25194/api/health", weird:"uvicorn"},
+ {id:"estate-scripts/rust-web", port:25201, health:"http://127.0.0.1:25201/health", depends:["gatehouse"], weird:"mise true"},
+ {id:"estate-scripts/mesh-landing", port:25207, health:"http://127.0.0.1:25207/health", weird:"landing.py"},
+ {id:"estate-scripts/ml-serve", port:25180, health:"http://127.0.0.1:25180/health", weird:"python server.py"},
+ {id:"estate-scripts/model-guard", port:25101, health:"http://127.0.0.1:25101/v1/models", weird:"health is /v1/models not /health"},
+ {id:"estate-scripts/nats", port:4222, health:"", weird:"port 4222 outside 251xx range"},
+ {id:"estate-scripts/nginx", port:25208, health:"", weird:"pid /tmp/nginx-pitchfork.pid daemon off"},
+ {id:"estate-scripts/node-exporter", port:25211, health:"http://127.0.0.1:25211/health", weird:"prometheus exporter"},
+ {id:"estate-scripts/null-g-proxy", port:25107, health:"http://127.0.0.1:25107/health", depends:["gatehouse"], weird:"bun src/index.ts mise true"},
+ {id:"estate-scripts/whatsapp-mcp", port:25146, health:"http://127.0.0.1:25146/health", weird:"bash -c set -a source pitchfork-secrets/whatsapp-mcp.env"},
+ {id:"estate-scripts/yote", port:25102, health:"http://127.0.0.1:25102/health", depends:["gatehouse"], weird:"bun yote.ts"},
+ {id:"estate-scripts/kimi-audit-dash", port:25116, health:"http://127.0.0.1:25116/health", weird:"bun dashboard"},
+ {id:"estate-scripts/toolcall-llm", port:25152, health:"http://127.0.0.1:25152/health", weird:"llama.cpp -m qwen3.5-9b-dflash-Q5_K_M.gguf -ngl 99 -c 32768 alias qwen3.5-9b-tool retry 5 local fallback"},
+ {id:"estate-scripts/agent-display", port:5900, health:"", weird:"Xvnc :99 1600x900 depth 24 rfbport 5900 SecurityTypes VncAuth rfbauth .browserless/vncpasswd — VNC inside estate-scripts"},
+ {id:"estate-scripts/agent-viewer", port:6080, health:"http://127.0.0.1:6080/", weird:"websockify --web .browserless/novnc 127.0.0.1:6080 127.0.0.1:5900 — noVNC web folder baked"},
  {id:"daemons.agent-viewer-gate", port:6081, health:"http://127.0.0.1:6081/healthz", weird:"python viewer gate"},
- {id:"sovereign/browser-keeper", port:9223, health:"http://127.0.0.1:9223/json/version", weird:"duplicate definition global and sovereign both 9223 DISPLAY :99 XDG_RUNTIME_DIR"},
- {id:"sovereign/dnsmasq", port:53, health:"", weird:"own dnsmasq on :53 conflicts systemd-resolved fd00::1 explains REFUSED"},
- {id:"sovereign/files", port:34567, health:"http://127.0.0.1:34567/health", weird:"FILES_ROOT /home/toxic/files high port"},
+ {id:"estate-scripts/browser-keeper", port:9223, health:"http://127.0.0.1:9223/json/version", weird:"duplicate definition global and estate-scripts both 9223 DISPLAY :99 XDG_RUNTIME_DIR"},
+ {id:"estate-scripts/dnsmasq", port:53, health:"", weird:"own dnsmasq on :53 conflicts systemd-resolved fd00::1 explains REFUSED"},
+ {id:"estate-scripts/files", port:34567, health:"http://127.0.0.1:34567/health", weird:"FILES_ROOT /home/toxic/files high port"},
 ];
 
 function log(msg){ const el=document.getElementById('log'); el.textContent+= '\n'+msg; el.scrollTop=el.scrollHeight; }
@@ -253,7 +253,7 @@ function getFallback(){
 renderDaemons();
 document.getElementById('btnScan').onclick=scanAll;
 document.getElementById('btnChain').onclick=async()=>{
-  log('Chain start requested — run in terminal: pitchfork start sovereign/gatehouse && sleep 3 && curl -sf http://127.0.0.1:25127/health && pitchfork start sovereign/herd sovereign/keypool && sleep 3 && pitchfork start sovereign/sovereign-router sovereign/mesh-hub');
+  log('Chain start requested — run in terminal: pitchfork start estate-scripts/gatehouse && sleep 3 && curl -sf http://127.0.0.1:25127/health && pitchfork start estate-scripts/herd estate-scripts/keypool && sleep 3 && pitchfork start estate-scripts/estate-scripts-router estate-scripts/mesh-hub');
   log('Gatehouse must be healthy first, then herd 25100, keypool 25109, router 25104, mesh-hub 25115 per Pf-New-Cleaned.toml dependency.');
 };
 document.getElementById('btnFixModelPilot').onclick=()=>{

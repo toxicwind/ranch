@@ -11,7 +11,7 @@
   - Read-only Bitwarden backend today
   - Apps using libsecret can read from Bitwarden
 - Migrate ~/.secrets entries into Bitwarden collections
-- Drop SOVEREIGN_ env prefix (already done in READMEs)
+- Drop estate-scripts_ env prefix (already done in READMEs)
 
 ## Next steps
 1. Install/configure rosec with Bitwarden provider

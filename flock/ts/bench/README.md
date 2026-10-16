@@ -1,6 +1,6 @@
 # @flock/bench
 
-Reusable provider benchmark runner, ported from sovereign-router's
+Reusable provider benchmark runner, ported from estate-scripts-router's
 `provider-bench.ts`. For each configured model on a provider it measures:
 
 1. **liveness** — one real completion, semantic-failure aware (empty output

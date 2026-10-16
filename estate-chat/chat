@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# chat — CLI client for sovereign-chat (fleet coordination plane, :25120).
-# Token: /home/toxic/.config/sovereign-chat-token (0600, never printed).
-#   SOVEREIGN_CHAT_TOKEN_FILE / SOVEREIGN_CHAT_BASE override.
+# chat — CLI client for estate-scripts-chat (fleet coordination plane, :25120).
+# Token: /home/toxic/.config/estate-scripts-chat-token (0600, never printed).
+#   estate-scripts_CHAT_TOKEN_FILE / estate-scripts_CHAT_BASE override.
 # Usage:
 #   chat join --name NAME --summoner SUMMONER [--chat-id ID] [--agent-id ID]
 #             [--surface S] [--host-machine-id M] [--hostname H] [--hatchling-id G] [--activity A]
@@ -11,8 +11,8 @@
 #   chat presence | chat rooms | chat activity | chat health
 set -u
 
-TOKEN_FILE="${SOVEREIGN_CHAT_TOKEN_FILE:-/home/toxic/.config/sovereign-chat-token}"
-BASE="${SOVEREIGN_CHAT_BASE:-http://127.0.0.1:25120}"
+TOKEN_FILE="${estate-scripts_CHAT_TOKEN_FILE:-/home/toxic/.config/estate-scripts-chat-token}"
+BASE="${estate-scripts_CHAT_BASE:-http://127.0.0.1:25120}"
 
 if [ ! -r "$TOKEN_FILE" ]; then echo "chat: cannot read token file $TOKEN_FILE" >&2; exit 1; fi
 TOKEN="$(cat "$TOKEN_FILE")"

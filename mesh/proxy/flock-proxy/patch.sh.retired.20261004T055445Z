@@ -57,7 +57,7 @@ done | sort -u >> "$RUN/binaries.txt"
 
 # 0b. every live flock-family process
 : > "$RUN/procs.txt"
-pgrep -af 'flock|nim-proxy|sovereign-router|cuttinggate|flock-py' 2>/dev/null | while read -r line; do
+pgrep -af 'flock|nim-proxy|estate-scripts-router|cuttinggate|flock-py' 2>/dev/null | while read -r line; do
   pid=$(printf '%s' "$line" | awk '{print $1}')
   exe=$(readlink -f "/proc/$pid/exe" 2>/dev/null)
   cmd=$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null)
@@ -106,7 +106,7 @@ if dry :; then :; else
     echo ""
     echo "# --- canonical ---"
     echo "FLOCK_PORT=25193"
-    echo "SOVEREIGN_ROUTER_PORT=25104"
+    echo "estate-scripts_ROUTER_PORT=25104"
     echo "ASTMATRIX_PORT=25214"
     echo "HERD_PORT=25100"
     echo "KIMI_AUTO_SHIM_PORT=25153"
@@ -116,12 +116,12 @@ if dry :; then :; else
     echo "GEMINI_MCP_PORT=25202"
     echo ""
     echo "# --- legacy (do not use; kept for compat) ---"
-    echo "SOVEREIGN_PORT="
+    echo "estate-scripts_PORT="
     echo "NIM_PROXY_PORT="
     echo ""
     echo "# --- derived ---"
     echo "FLOCK_URL=http://127.0.0.1:\${FLOCK_PORT}/v1"
-    echo "SOVEREIGN_ROUTER_URL=http://127.0.0.1:\${SOVEREIGN_ROUTER_PORT}/v1"
+    echo "estate-scripts_ROUTER_URL=http://127.0.0.1:\${estate-scripts_ROUTER_PORT}/v1"
   } > "$PORTS.tmp" && mv "$PORTS.tmp" "$PORTS"
 fi
 log "wrote $PORTS"
@@ -155,8 +155,8 @@ if dry :; then :; else
     printf 'FLOCK_DATA_DIR\tDATA_DIR\tproxy state\n'
     printf 'NIM_API_KEYS\tNVIDIA_API_KEYS,NVIDIA_API_KEY\tupstream provider\n'
     printf 'NIM_BASE_URL\tNVIDIA_BASE_URL\tupstream base\n'
-    printf 'SOVEREIGN_ROUTER_PORT\tSOVEREIGN_PORT\trouter listen\n'
-    printf 'SOVEREIGN_CLIENT_KEYS\t-\trouter client auth\n'
+    printf 'estate-scripts_ROUTER_PORT\testate-scripts_PORT\trouter listen\n'
+    printf 'estate-scripts_CLIENT_KEYS\t-\trouter client auth\n'
     printf 'KIMI_AUTO_SHIM_KEY\t-\tshim auth\n'
     printf 'HERD_API_KEY\t-\therd auth\n'
   } > "$ENVMAP.tmp" && mv "$ENVMAP.tmp" "$ENVMAP"
@@ -193,7 +193,7 @@ declare -A ROUTERS=(
   [rust]="$HOME/estate/ranch/mesh/proxy/flock-proxy"
   [ts]="$HOME/estate/ranch/flock/ts/strategy/router.ts"
   [py]="$HOME/estate/ranch/mesh/router/flock-py/router_server.py"
-  [sov]="$HOME/estate/ranch/mesh/router/sovereign-router/sovereign-router-ts/router.ts"
+  [sov]="$HOME/estate/ranch/mesh/router/estate-scripts-router/estate-scripts-router-ts/router.ts"
   [cut]="$HOME/estate/ranch/mesh/proxy/cuttinggate/src/strategy/router.ts"
 )
 for k in "${!ROUTERS[@]}"; do
@@ -253,7 +253,7 @@ fi
 hdr "3. port normalization (SKIPPED)"
 log "  section 3 disabled 2026-10-04 — live targets already patched."
 log "  canonical port is 25193 (never 8000)."
-log "  live files: estate/ranch/flock/flock-final.sh, sovereign-end4/dots/.bashrc.env"
+log "  live files: estate/ranch/flock/flock-final.sh, estate-scripts-end4/dots/.bashrc.env"
 hdr "4. header normalization"
 
 # 4a. Write the alias table for reference
@@ -262,7 +262,7 @@ if dry :; then :; else
   {
     printf 'canonical\taliases\tnote\n'
     printf 'X-Flock-Deadline-Ms\tX-Nim-Proxy-Deadline-Ms\tabsolute wall-clock ms deadline\n'
-    printf 'X-Flock-Trace-Id\tX-Routed-Via, X-Sovereign-Timings\ttrace id + provider/model/timings\n'
+    printf 'X-Flock-Trace-Id\tX-Routed-Via, X-estate-scripts-Timings\ttrace id + provider/model/timings\n'
     printf 'X-Flock-Overhead-Ms\tX-Router-Overhead-Ms\tinternal routing overhead\n'
   } > "$HDRMAP.tmp" && mv "$HDRMAP.tmp" "$HDRMAP"
 fi
@@ -307,8 +307,8 @@ if dry :; then :; else
     echo 'export DATA_DIR="$FLOCK_DATA_DIR"'
     echo ""
     echo "# Router port"
-    echo ': "${SOVEREIGN_ROUTER_PORT:=25104}"'
-    echo 'export SOVEREIGN_PORT="$SOVEREIGN_ROUTER_PORT"'
+    echo ': "${estate-scripts_ROUTER_PORT:=25104}"'
+    echo 'export estate-scripts_PORT="$estate-scripts_ROUTER_PORT"'
     echo ""
     echo "# Header translation (for Rust binary that reads X-Nim-Proxy-*)"
     echo 'export FLOCK_HEADER_DEADLINE="X-Nim-Proxy-Deadline-Ms"'
@@ -407,13 +407,13 @@ mapfile -t PF < <(grep -rl 'flock' "$HOME" --include='pitchfork.toml' 2>/dev/nul
                   | grep -vE '/target/|/node_modules/|/\.git/' | sort -u)
 for f in "${PF[@]}"; do
   [ -f "$f" ] || continue
-  if grep -q 'sovereign-router' "$f" && ! grep -q 'fleet-ui' "$f"; then
-    rec toml "$f" "has sovereign-router, missing fleet-ui"
+  if grep -q 'estate-scripts-router' "$f" && ! grep -q 'fleet-ui' "$f"; then
+    rec toml "$f" "has estate-scripts-router, missing fleet-ui"
     plan add "fleet-ui to daemons in $f"
   fi
-  if grep -q 'fleet-ui' "$f" && ! grep -q 'sovereign-router' "$f"; then
-    rec toml "$f" "has fleet-ui, missing sovereign-router"
-    plan add "sovereign-router to daemons in $f"
+  if grep -q 'fleet-ui' "$f" && ! grep -q 'estate-scripts-router' "$f"; then
+    rec toml "$f" "has fleet-ui, missing estate-scripts-router"
+    plan add "estate-scripts-router to daemons in $f"
   fi
 done
 
@@ -491,7 +491,7 @@ if dry :; then :; else
     echo "|---|---|---|---|"
     echo "| TS router | \`flock/ts/strategy/router.ts\` | \`all_stream_providers_exhausted\` | deprecated |"
     echo "| Py router | \`mesh/router/flock-py/router_server.py\` | \`all_stream_providers_exhausted\` | deprecated |"
-    echo "| Sov router | \`mesh/router/sovereign-router/sovereign-router-ts/\` | \`all_stream_providers_exhausted\` (SSE) | deprecated |"
+    echo "| Sov router | \`mesh/router/estate-scripts-router/estate-scripts-router-ts/\` | \`all_stream_providers_exhausted\` (SSE) | deprecated |"
     echo "| Cuttinggate | \`mesh/proxy/cuttinggate/src/strategy/router.ts\` | \`all_stream_providers_exhausted\` | deprecated |"
     echo ""
     echo "## Why the \`all_stream_providers_exhausted\` mystery happened"

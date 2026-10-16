@@ -159,7 +159,7 @@ export async function refreshSigmaCatalog(): Promise<{
   let res: Response;
   try {
     res = await fetch(SIGMA_UPSTREAM_URL, {
-      headers: { "user-agent": "sovereign-router/sigma-refresh" },
+      headers: { "user-agent": "estate-scripts-router/sigma-refresh" },
     });
   } catch (e) {
     return { ok: false, rows: 0, snapshot: snapshotDate, reason: "fetch_error" };

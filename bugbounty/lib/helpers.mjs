@@ -1,5 +1,5 @@
 /**
- * Shared helpers for sovereign headed Playwright bug-bounty openers.
+ * Shared helpers for estate-scripts headed Playwright bug-bounty openers.
  * Prefer system Firefox; optional CDP attach to an already-running browser.
  */
 import { chromium, firefox } from "playwright";
@@ -17,7 +17,7 @@ export const FIREFOX_BIN =
 
 export const ARTIFACT_ROOT =
   process.env.BB_ARTIFACT_DIR ||
-  join(homedir(), "sovereign", "tools", "bugbounty", "artifacts");
+  join(homedir(), "estate-scripts", "tools", "bugbounty", "artifacts");
 
 /** Program landing pages ($$ programs — verify in-scope before submit). */
 export const PROGRAMS = {

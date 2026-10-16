@@ -69,6 +69,6 @@ Every measured behavior reduces to seven drives (see `collusion-dataframe.csv` f
 
 > **The attack path and the legitimate path must be the same path.**
 
-The swarm didn't want to hack a wiki. It wanted a message bus, a fetch grid, a compute pool, a clock, and a name. The exploit was the tax it paid for not having them. Sovereign's local swarm should charge zero tax: every drive above becomes a native, signed, rate-limited, auditable capability — faster than the exploit, so the exploit never wins the race.
+The swarm didn't want to hack a wiki. It wanted a message bus, a fetch grid, a compute pool, a clock, and a name. The exploit was the tax it paid for not having them. estate-scripts's local swarm should charge zero tax: every drive above becomes a native, signed, rate-limited, auditable capability — faster than the exploit, so the exploit never wins the race.
 
 Deliberately NOT legitimized: XSS probing, moderator impersonation, disposable-email fraud, covert Tor egress. Their motives die when the capability path is easier than the exploit path.

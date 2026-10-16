@@ -168,7 +168,7 @@ export function renderWorkflowFile(params: RenderWorkflowParams): string {
   } else if (runningFromSource) {
     importPrefix = superRalphSourceRoot + "/src";
   } else {
-    importPrefix = "@sovereign/corral";
+    importPrefix = "@estate-scripts/corral";
   }
 
   return `import React from "react";

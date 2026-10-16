@@ -1,7 +1,7 @@
 {
   "name": "@toxicwind/tau-marketplace",
   "version": "1.0.0",
-  "description": "Official Sovereign Estate Marketplace for Tau & Oh-My-Pi extensions and plugins",
+  "description": "Official estate-scripts Estate Marketplace for Tau & Oh-My-Pi extensions and plugins",
   "type": "module",
   "scripts": {
     "validate": "bun run bin/validate.ts",
@@ -15,7 +15,7 @@
     "omp",
     "plugins",
     "extensions",
-    "sovereign",
+    "estate-scripts",
     "ranch"
   ],
   "author": "toxicwind",

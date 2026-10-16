@@ -4,7 +4,7 @@
 
 The same hardcoded provider→models lists existed in four places:
 
-1. `ranch/mesh/router/sovereign-router/sovereign-router-ts/router_config.ts` — `PROVIDER_MODELS`
+1. `ranch/mesh/router/estate-scripts-router/estate-scripts-router-ts/router_config.ts` — `PROVIDER_MODELS`
    (curated arrays) unioned with `LIVE_MODELS` (discovery), curated first.
    Discovery could only ADD; dead curated ids stayed routable forever.
 2. `herd/internal/astmatrix/providers.go` (Go) — hardcoded
@@ -26,7 +26,7 @@ model names in the provider -> what models they have thing."
 One Bun/TypeScript package — `roost` (`@ranch/roost`)
 in the ranch monorepo — as the single source of truth. Consumers:
 
-- **sovereign-router-ts**: imports the TS package directly.
+- **estate-scripts-router-ts**: imports the TS package directly.
 - **tau** (`ranch/tau`, toxicwind/tau): @ranch/roost is the main-class provider
   system — it replaced pi-catalog's KDL provider entries, provider-models data,
   and discovery.
@@ -134,7 +134,7 @@ the herd audit to be a drop-in data replacement.
 ## Open items
 
 - Rook's borrow results may add adapter/refresh patterns — fold in before land.
-- Nested duplicate `sovereign-router-ts/sovereign-router-ts/`: reconcile
+- Nested duplicate `estate-scripts-router-ts/estate-scripts-router-ts/`: reconcile
   (git history + unique content) then remove.
 - Restart-prove the router on the new catalog without rebooting; keep
   Squawk/bridge alive.

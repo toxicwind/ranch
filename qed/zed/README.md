@@ -2,8 +2,8 @@
 
 [![Zed](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/zed-industries/zed/main/assets/badge/v0.json&style=for-the-badge)](https://zed.dev)
 [![CI](https://img.shields.io/github/actions/workflow/status/zed-industries/zed/run_tests.yml?label=CI&style=for-the-badge)](https://github.com/zed-industries/zed/actions/workflows/run_tests.yml)
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -32,7 +32,7 @@ flowchart TD
     F --> T["🔧 tool-call reliability<br/>gemini const sanitizer · arg normalizer · cd default"]
     F --> S["🔍 search<br/>grep .ignore · ast-grep helpers"]
     F --> B["⚙️ build<br/>sccache + mold"]
-    A --> H["sovereign providers<br/>:25100 herd · :25104 router · NIM direct"]
+    A --> H["estate-scripts providers<br/>:25100 herd · :25104 router · NIM direct"]
 ```
 
 ### What's different
@@ -47,7 +47,7 @@ Patches are grouped by surface area. Every patch is upstream-bound — they just
 | **`openai-mcpproxy`** | Full JSON Schema · `interleaved_reasoning` · self-healing mapper | OpenAI-compatible endpoint fronted by an mcpproxy compact router. Same hardening as `nvidia` + recovers malformed tool-call args as `{}` instead of looping. |
 | **`openai-mcpproxy-nvidia`** | Full JSON Schema · `interleaved_reasoning` · NVIDIA identity | Inkling reached through a third-party OpenAI-compatible gateway (e.g. OpenRouter→Inkling). Avoids the same subset-500 loop on non-NVIDIA routes. |
 
-All three share a **non-destructive tool-schema normalizer** (repairs missing root `type`, untyped properties, bare `null` in multi-type arrays — no tool-count cap, no description truncation) and a **self-healing event mapper** that turns a malformed tool-call parse error into a valid `ToolUse` with `{}` input. This is what breaks the infinite retry loop on 120+ tool sets via `mcpproxy-sovereign`.
+All three share a **non-destructive tool-schema normalizer** (repairs missing root `type`, untyped properties, bare `null` in multi-type arrays — no tool-count cap, no description truncation) and a **self-healing event mapper** that turns a malformed tool-call parse error into a valid `ToolUse` with `{}` input. This is what breaks the infinite retry loop on 120+ tool sets via `mcpproxy-estate-scripts`.
 
 *Files:* `crates/language_models/src/provider/{nvidia,openai_mcpproxy,openai_mcpproxy_nvidia}.rs`, `crates/nvidia/`
 
@@ -98,7 +98,7 @@ fork    https://github.com/toxicwind/zed.git         (this repo)
 ## License & security
 
 - Zed source code is licensed primarily under **GPL-3.0-or-later**, with Apache-2.0 components where marked. License information for third party dependencies must be correctly provided for CI to pass (via [`cargo-about`](https://github.com/EmbarkStudios/cargo-about); see the licensing section below).
-- Sovereign-authored files in this monorepo are [MIT](https://github.com/toxicwind/sovereign-projects#license).
+- estate-scripts-authored files in this monorepo are [MIT](https://github.com/toxicwind/estate-scripts-projects#license).
 - Provider endpoints and API URLs live in user settings (`~/.config/zed/settings.json`), never in this git delta.
 
 ## Architecture — crate tour

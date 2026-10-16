@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Add Groq models to sovereign-ast-matrix router."""
+"""Add Groq models to estate-scripts-ast-matrix router."""
 import re
 
-ROUTER = "/home/toxic/estate/tools/ast-matrix/sovereign-ast-matrix/router.py"
+ROUTER = "/home/toxic/estate/tools/ast-matrix/estate-scripts-ast-matrix/router.py"
 
 with open(ROUTER) as f:
     src = f.read()

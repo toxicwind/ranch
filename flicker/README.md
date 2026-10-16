@@ -42,7 +42,7 @@ Identical job specs (command, workdir, sorted env, cache key, sorted artifacts) 
 - `/home/toxic/flicker/` — state on yote
 - Ports: `:25148` HTTP API, `:25240` gRPC
 
-Pitchfork supervises `sovereign/flicker` (server) and `sovereign/flicker-agent` (local execution agent).
+Pitchfork supervises `estate-scripts/flicker` (server) and `estate-scripts/flicker-agent` (local execution agent).
 
 ## History
 

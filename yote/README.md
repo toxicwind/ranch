@@ -32,7 +32,7 @@ export LLM_ENDPOINT=http://127.0.0.1:25100/v1
 ./target/release/yote
 ```
 
-## Ports (Sovereign SSOT)
+## Ports (estate-scripts SSOT)
 
 | Service | Port | Env Var |
 |---------|------|---------|

@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -47,7 +47,7 @@ projects/ops/bin/fleet-health.sh         # one-shot fleet health audit (read-onl
 
 ## License & security
 
-- [MIT](https://github.com/toxicwind/sovereign-projects#license).
+- [MIT](https://github.com/toxicwind/estate-scripts-projects#license).
 - Auditors here are strictly read-only — they never modify, kill, or restart anything. The kill policy: positive orphan confirmation + a fleet evidence note at kill time; when in doubt, leave it running and flag it.
 
 ## Standing rules (Chris, 2026-09-20)

@@ -92,8 +92,8 @@ mise run upstream-status
 | `mise run bench` | [`roundup-bench.sh`](./sweeps/roundup-bench.sh) | Which **provider** is best, using the vendored GuideLLM's `instruction_following` scorer via scenario YAML? | flock + NIM + vLLM remote |
 | `mise run bench-v3` | [`roundup-bench-v3.sh`](./sweeps/roundup-bench-v3.sh) | Same, with capability probing so unsupported backends fail loudly instead of silently. | flock + NIM + vLLM remote |
 | `mise run sweep` | [`roundup_sweep.sh`](./sweeps/roundup_sweep.sh) | Quick sanity pass over working OpenRouter models. | OpenRouter |
-| `mise run estate-sweep` | [`roundup-estate-sweep.ts`](./sweeps/roundup-estate-sweep.ts) | **One-command estate sweep**: discovers models live from herd, flock, and the sovereign router; benchmarks each with the vendored GuideLLM's `instruction_following` scorer; emits `roundup-bench/1` JSONL (`results.jsonl`), `roundup-weights/1` (`weights.json`), and `ranking.md`. | herd `:25100` · flock `:25193` · sov `:25104` |
-| `mise run emit-weights` | [`emit-router-weights.ts`](./sweeps/emit-router-weights.ts) | Converts sweep `results.jsonl` into the sovereign router's `schema_version: 2` weight contract (`provider_priors` + `model_priors`), which the router hot-reloads. | — |
+| `mise run estate-sweep` | [`roundup-estate-sweep.ts`](./sweeps/roundup-estate-sweep.ts) | **One-command estate sweep**: discovers models live from herd, flock, and the estate-scripts router; benchmarks each with the vendored GuideLLM's `instruction_following` scorer; emits `roundup-bench/1` JSONL (`results.jsonl`), `roundup-weights/1` (`weights.json`), and `ranking.md`. | herd `:25100` · flock `:25193` · sov `:25104` |
+| `mise run emit-weights` | [`emit-router-weights.ts`](./sweeps/emit-router-weights.ts) | Converts sweep `results.jsonl` into the estate-scripts router's `schema_version: 2` weight contract (`provider_priors` + `model_priors`), which the router hot-reloads. | — |
 | `mise run dump` | [`dump-roundup.sh`](./sweeps/dump-roundup.sh) | Give me everything in this directory as one readable dump. | — |
 
 All of them rank the same way — quality desc, p50 latency asc — and the

@@ -74,7 +74,7 @@ def check_router(timeout=600):
         try:
             req = urllib.request.Request(
                 ROUTER + "/v1/chat/completions",
-                data=json.dumps({"model": os.environ.get("AUTO1M_MODEL", "sovereign/free"),
+                data=json.dumps({"model": os.environ.get("AUTO1M_MODEL", "estate-scripts/free"),
                                  "messages": [{"role": "user", "content": "Reply with exactly: READY"}],
                                  "max_tokens": 8}).encode(),
                 headers={"Content-Type": "application/json"})
@@ -154,7 +154,7 @@ def main():
         "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "router": ROUTER,
         "serving_model": serving_model,
-        "worker": os.environ.get("AUTO1M_MODEL", "sovereign/free"),
+        "worker": os.environ.get("AUTO1M_MODEL", "estate-scripts/free"),
         "corpus_files": CORPUS_DIRS + CORPUS_EXTRA_FILES,
         "corpus_sources": len(sources),
         "est_tokens": sum(est_tokens(t) for t, _ in sources),

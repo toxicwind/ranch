@@ -1,11 +1,11 @@
 #!/usr/bin/env zsh
-# Complete install + sovereign Firefox live control wiring for github-advanced-search-mcp
+# Complete install + estate-scripts Firefox live control wiring for github-advanced-search-mcp
 # Run this after cloning (or as part of "youaretoinstallthatgithubcompletelyplease")
 # It ensures:
 # - All JS/TS deps (bun)
 # - Python deps (uv)
 # - Playwright browsers (firefox + chromium for the browser control story)
-# - The sovereign-browser/ launchers are present and executable (the Firefox "cdp-like" integration)
+# - The estate-scripts-browser/ launchers are present and executable (the Firefox "cdp-like" integration)
 # - Dev tools are ready
 # - Optional: registers the MCP in your main Grok TUI config
 
@@ -24,11 +24,11 @@ echo "[2/6] uv sync (Python test / tooling side)..."
 uv sync --frozen || echo "uv sync had warnings (non-fatal)"
 
 echo "[3/6] Playwright browsers (critical for Firefox live attach + headed dev)..."
-bunx playwright install firefox chromium --with-deps || echo "Playwright install partial (common in custom Linux envs — browsers from sovereign stack are usually sufficient)"
+bunx playwright install firefox chromium --with-deps || echo "Playwright install partial (common in custom Linux envs — browsers from estate-scripts stack are usually sufficient)"
 
-echo "[4/6] Sovereign Firefox launchers (the actual feature you asked for)..."
-chmod +x scripts/sovereign-browser/*.sh scripts/sovereign-browser/*.js || true
-ls -l scripts/sovereign-browser/
+echo "[4/6] estate-scripts Firefox launchers (the actual feature you asked for)..."
+chmod +x scripts/estate-scripts-browser/*.sh scripts/estate-scripts-browser/*.js || true
+ls -l scripts/estate-scripts-browser/
 
 echo "[5/6] Rust crates note: the active crates/ workspace members may live in your private full checkout."
 echo "      The public clone primarily ships the Bun MCP + API surface (what the operator uses day-to-day)."
@@ -48,7 +48,7 @@ args = ["run", "apps/mcp/src/server.ts", "--mode", "stdio"]
 enabled = true
 
 [mcp_servers.ghas.env]
-GHAS_BROWSER = "firefox"   # uses the sovereign profile takeover + remote endpoint under the hood
+GHAS_BROWSER = "firefox"   # uses the estate-scripts profile takeover + remote endpoint under the hood
 # When starting headed dev, run: GHAS_BROWSER=firefox bun run dev:headed
 TOML
     echo "Appended ghas MCP entry (Firefox mode) to $GROK_CFG"
@@ -64,11 +64,11 @@ echo "=== INSTALL COMPLETE ==="
 echo "Useful commands from this repo now:"
 echo "  bun run dev:mcp"
 echo "  bun run dev:headed          # now supports GHAS_BROWSER=firefox"
-echo "  ./scripts/sovereign-browser/launch-firefox-from-profile.sh"
+echo "  ./scripts/estate-scripts-browser/launch-firefox-from-profile.sh"
 echo "  just dev"
 echo ""
-echo "Your real logged-in Firefox (GitHub cookies, tabs, etc.) can now be driven live by this MCP and the sovereign playwright tools."
-echo "See scripts/sovereign-browser/README.md for the exact flows."
+echo "Your real logged-in Firefox (GitHub cookies, tabs, etc.) can now be driven live by this MCP and the estate-scripts playwright tools."
+echo "See scripts/estate-scripts-browser/README.md for the exact flows."
 echo ""
 echo "To start everything with Firefox live control:"
 echo "  GHAS_BROWSER=firefox bun run dev:headed"

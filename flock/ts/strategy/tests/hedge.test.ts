@@ -1,4 +1,4 @@
-// HFT-synthesis tests for sovereign-router v3.2:
+// HFT-synthesis tests for estate-scripts-router v3.2:
 //  1. Speculative hedging (hedgedChain): slow first lane loses to a hedged
 //     second lane, and the loser's abort is NOT recorded as a provider failure.
 //  2. Model-spec normalization (router-side Openfang-shim parsing).
@@ -10,9 +10,9 @@ import { describe, test, expect, afterAll } from "bun:test";
 // catalog state path are read once at import). The catalog path is unique
 // per run: noteEntitlement404 persists quarantine to it, and a reused path
 // would leak a bench into the next run.
-process.env.SOVEREIGN_DB = "/tmp/sovereign_router_hedge_test.db";
-process.env.SOVEREIGN_CATALOG_STATE =
-  `/tmp/sovereign_router_hedge_test.catalog.${process.pid}.json`;
+process.env.estate-scripts_DB = "/tmp/estate-scripts_router_hedge_test.db";
+process.env.estate-scripts_CATALOG_STATE =
+  `/tmp/estate-scripts_router_hedge_test.catalog.${process.pid}.json`;
 
 const { state } = await import("../router_matrix");
 const { hedgedChain, substantive } = await import("../router_strategy");

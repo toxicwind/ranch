@@ -1,13 +1,13 @@
-// Bake-off runner: TAU omp-model-router extension vs Sovereign router.
+// Bake-off runner: TAU omp-model-router extension vs estate-scripts router.
 // Usage (on yote):
-//   bun run.ts --prompts prompts.json --out results/<stamp>.json [--legs tau,sovereign] [--retries 3]
+//   bun run.ts --prompts prompts.json --out results/<stamp>.json [--legs tau,estate-scripts] [--retries 3]
 //
 // TAU leg exercises the REAL extension routing core (src/routing/compose.ts
 // resolveRouting: heuristic + adaptive classifier attempt) and serves the
 // chosen tier model through pi-ai's streamSimple — the same provider path the
 // extension's provider.ts uses. The modelRegistry is a thin stub that maps
 // provider refs to the estate's real routers; no routing logic is stubbed.
-// Sovereign leg POSTs :25104/v1/chat/completions model=sovereign/free.
+// estate-scripts leg POSTs :25104/v1/chat/completions model=estate-scripts/free.
 // Raw JSON (every trial, every attempt) goes to --out. Judge separately.
 import { plugin } from "bun";
 plugin({
@@ -32,7 +32,7 @@ const fs = await import("node:fs/promises");
 const args: Record<string, string> = {};
 for (let i = 2; i < process.argv.length; i += 2)
 	args[process.argv[i].replace(/^--/, "")] = process.argv[i + 1];
-const legs = (args.legs ?? "tau,sovereign").split(",");
+const legs = (args.legs ?? "tau,estate-scripts").split(",");
 const retries = parseInt(args.retries ?? "3", 10);
 const maxTokens = parseInt(args["max-tokens"] ?? "600", 10);
 const promptsFile = args.prompts ?? "prompts.json";
@@ -144,7 +144,7 @@ async function serveTauModel(modelId: string, prompt: string) {
 	return { text, ms: Date.now() - t0, firstTokenMs, usage, error };
 }
 
-async function serveSovereign(prompt: string) {
+async function serveestate-scripts(prompt: string) {
 	const attempts: any[] = [];
 	let final: any = null;
 	for (let a = 0; a <= retries; a++) {
@@ -154,7 +154,7 @@ async function serveSovereign(prompt: string) {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					model: "sovereign/free",
+					model: "estate-scripts/free",
 					messages: [{ role: "user", content: prompt }],
 					max_tokens: maxTokens,
 				}),
@@ -230,9 +230,9 @@ for (const p of spec.prompts) {
 			text: served.text, usage: served.usage, serveError: served.error,
 		};
 	}
-	if (legs.includes("sovereign")) {
-		const sov = await serveSovereign(p.text);
-		trial.sovereign = sov;
+	if (legs.includes("estate-scripts")) {
+		const sov = await serveestate-scripts(p.text);
+		trial.estate-scripts = sov;
 	}
 	results.trials.push(trial);
 	console.error(`trial ${p.id} done`);

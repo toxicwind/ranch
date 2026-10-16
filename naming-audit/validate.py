@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sovereign naming validator — enforces naming-grammar.md.
+"""estate-scripts naming validator — enforces naming-grammar.md.
 Loads live configs, fails non-zero on any violation. Re-runnable.
 Usage: python3 validate.py [--no-live]  (--no-live skips the /v1/models + :25104 probes)
 """
@@ -100,9 +100,9 @@ def main():
         if not isinstance(ref, str) or '/' not in ref:
             err(f'{name}: malformed ref {ref!r}'); continue
         lane, mid = ref.split('/', 1)
-        if lane == 'sovereign':
+        if lane == 'estate-scripts':
             if not no_live and mid not in sov_live:
-                err(f'{name}: sovereign/{mid} not on live :25104 catalog')
+                err(f'{name}: estate-scripts/{mid} not on live :25104 catalog')
             continue
         if lane != 'herd':
             err(f'{name}: unknown lane {lane!r} in {ref!r}'); continue

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * emit-router-weights.ts — convert a roundup-estate-sweep results.jsonl
- * (roundup-bench/1 records) into the sovereign router's benchmark-weight
+ * (roundup-bench/1 records) into the estate-scripts router's benchmark-weight
  * contract (schema_version 2), as specified by the router-max lane:
  *
  *   { schema_version: 2, generated_ts, provider_priors: { <provider>:

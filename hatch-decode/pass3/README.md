@@ -1,7 +1,7 @@
 <div align="right">
 
-[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
-[![sovereign--projects](https://img.shields.io/badge/sovereign--projects-monorepo-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
+[![estate-scripts--projects](https://img.shields.io/badge/estate-scripts--projects-monorepo-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -82,7 +82,7 @@ the binary is rebuilt (addresses go stale across builds).
 
 ## License + security
 
-Licensed under the sovereign-projects monorepo terms (MIT family —
+Licensed under the estate-scripts-projects monorepo terms (MIT family —
 see the [herd fork license](../../herd/LICENSE.md)). Read-only static
 analysis: disassembly windows via Capstone, no execution of the target
 binary, no ptrace, no writes outside this directory.

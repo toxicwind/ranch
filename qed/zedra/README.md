@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -44,7 +44,7 @@ Scan the QR code with the Zedra app. That's it.
 
 ## License & security
 
-- [MIT](https://github.com/toxicwind/sovereign-projects#license) © [Tan Le](https://github.com/tanlethanh)
+- [MIT](https://github.com/toxicwind/estate-scripts-projects#license) © [Tan Le](https://github.com/tanlethanh)
 - **Security model:** e2e encryption, direct connection, zero-trust. Security concerns: [tanle@zedra.dev](mailto:tanle@zedra.dev).
 - **Relay:** Zedra uses direct P2P connections when possible, but may fallback to relays if blocked by `Symmetric NAT` or `CGNAT` (common in home networks). Works best on LANs and supported relay regions. Learn more: [How NAT traversal works](https://tailscale.com/blog/how-nat-traversal-works). Self-hosted relay deployment: [`deploy/relay/`](deploy/relay/README.md).
 

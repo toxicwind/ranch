@@ -3,7 +3,7 @@
 # (~/.cache/mcp-bg) with bg_list/bg_kill; adds native fleet (squawk),
 # yote_load, port_map, pitchfork_daemon tools so the fleet stops shelling
 # out for them. Canonical source: projects/bridge/yote/ in
-# toxicwind/sovereign-projects (deployed to /home/toxic/awrawr_mcp.py via
+# toxicwind/estate-scripts-projects (deployed to /home/toxic/awrawr_mcp.py via
 # apply_mcp_patch_mcp_smith.py — same idempotent pattern as bridge-max).
 import signal as _signal
 import shutil as _shutil

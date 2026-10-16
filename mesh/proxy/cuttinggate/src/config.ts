@@ -29,7 +29,7 @@ const Schema = z.object({
 
   /**
    * Provider base URLs. Observed live on 2026-10-02 from the incumbent
-   * sovereign-router-ts /status: every provider the live catalog serves
+   * estate-scripts-router-ts /status: every provider the live catalog serves
    * gets a base here, otherwise Router.call throws "no base url" at
    * serve time. Local-first: herd (:25100), nim-local (:8000) and
    * kimi-auto (:25153) stay on the box.
@@ -77,7 +77,7 @@ function readKeys(): Record<string, string> {
     const m = /^([A-Z0-9]+)_API_KEY$/.exec(k);
     if (m && v) out[m[1]!.toLowerCase()] = v;
   }
-  // OpenCode Zen key env is OPENCODE_API_KEY (mirrors sovereign-router-ts
+  // OpenCode Zen key env is OPENCODE_API_KEY (mirrors estate-scripts-router-ts
   // keyEnv); ZEN_API_KEY is accepted as an alias by the generic rule above.
   if (!out["zen"] && process.env.OPENCODE_API_KEY)
     out["zen"] = process.env.OPENCODE_API_KEY;
@@ -104,7 +104,7 @@ function readRpm(): Record<string, number> {
 
 /**
  * Load the estate secrets files into process.env (no overwrite).
- * Mirrors sovereign-router-ts so the cutover keeps the same credential
+ * Mirrors estate-scripts-router-ts so the cutover keeps the same credential
  * sources: ~/.secrets and /home/toxic/.secrets. Called from main() before
  * loadConfig so *_API_KEY entries are visible to readKeys().
  */

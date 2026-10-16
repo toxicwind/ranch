@@ -58,7 +58,7 @@ if (!_portRaw) {
 export const PORT = parseInt(_portRaw, 10);
 
 export const DB_PATH =
-  process.env.SOVEREIGN_DB || "/home/toxic/estate/var/data/sovereign_router.db";
+  process.env.estate-scripts_DB || "/home/toxic/estate/var/data/estate-scripts_router.db";
 
 export const MAX_PARALLEL = 4;
 

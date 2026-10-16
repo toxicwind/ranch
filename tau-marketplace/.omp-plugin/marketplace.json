@@ -6,9 +6,9 @@
     "email": "toxicwind@users.noreply.github.com"
   },
   "metadata": {
-    "description": "Official Sovereign Estate Marketplace for Tau & Oh-My-Pi extensions, plugins, and ambient tools",
+    "description": "Official estate-scripts Estate Marketplace for Tau & Oh-My-Pi extensions, plugins, and ambient tools",
     "version": "1.0.0",
-    "homepage": "https://github.com/toxicwind/sovereign-projects/tree/main/ranch/tau-marketplace",
+    "homepage": "https://github.com/toxicwind/estate-scripts-projects/tree/main/ranch/tau-marketplace",
     "pluginRoot": "plugins"
   },
   "plugins": [
@@ -26,7 +26,7 @@
         "ergonomics"
       ],
       "source": "./plugins/omp-mobile-autocorrect",
-      "homepage": "https://github.com/toxicwind/sovereign-projects/tree/main/ranch/tau-marketplace/plugins/omp-mobile-autocorrect",
+      "homepage": "https://github.com/toxicwind/estate-scripts-projects/tree/main/ranch/tau-marketplace/plugins/omp-mobile-autocorrect",
       "license": "MIT"
     },
     {
@@ -42,7 +42,7 @@
         "routing"
       ],
       "source": "./plugins/vansrouter",
-      "homepage": "https://github.com/toxicwind/sovereign-projects/tree/main/ranch/tau-marketplace/plugins/vansrouter",
+      "homepage": "https://github.com/toxicwind/estate-scripts-projects/tree/main/ranch/tau-marketplace/plugins/vansrouter",
       "license": "MIT"
     },
     {
@@ -58,7 +58,7 @@
         "enforcement"
       ],
       "source": "./plugins/strict-bash-guard",
-      "homepage": "https://github.com/toxicwind/sovereign-projects/tree/main/ranch/tau-marketplace/plugins/strict-bash-guard",
+      "homepage": "https://github.com/toxicwind/estate-scripts-projects/tree/main/ranch/tau-marketplace/plugins/strict-bash-guard",
       "license": "MIT"
     },
     {
@@ -74,7 +74,7 @@
         "tokens"
       ],
       "source": "./plugins/omp-model-router",
-      "homepage": "https://github.com/toxicwind/sovereign-projects/tree/main/ranch/tau-marketplace/plugins/omp-model-router",
+      "homepage": "https://github.com/toxicwind/estate-scripts-projects/tree/main/ranch/tau-marketplace/plugins/omp-model-router",
       "license": "MIT"
     },
     {
@@ -90,7 +90,7 @@
         "resilience"
       ],
       "source": "./plugins/tau-kimi-auto",
-      "homepage": "https://github.com/toxicwind/sovereign-projects/tree/main/ranch/tau-marketplace/plugins/tau-kimi-auto",
+      "homepage": "https://github.com/toxicwind/estate-scripts-projects/tree/main/ranch/tau-marketplace/plugins/tau-kimi-auto",
       "license": "MIT"
     },
     {
@@ -106,7 +106,7 @@
         "review"
       ],
       "source": "./plugins/omp-edit-committer",
-      "homepage": "https://github.com/toxicwind/sovereign-projects/tree/main/ranch/tau-marketplace/plugins/omp-edit-committer",
+      "homepage": "https://github.com/toxicwind/estate-scripts-projects/tree/main/ranch/tau-marketplace/plugins/omp-edit-committer",
       "license": "MIT"
     },
     {
@@ -122,7 +122,7 @@
         "extension"
       ],
       "source": "./plugins/omp-kafka",
-      "homepage": "https://github.com/toxicwind/sovereign-projects/tree/main/ranch/tau-marketplace/plugins/omp-kafka",
+      "homepage": "https://github.com/toxicwind/estate-scripts-projects/tree/main/ranch/tau-marketplace/plugins/omp-kafka",
       "license": "MIT"
     },
     {
@@ -138,7 +138,7 @@
         "diff"
       ],
       "source": "./plugins/tau-loops",
-      "homepage": "https://github.com/toxicwind/sovereign-projects/tree/main/ranch/tau-marketplace/plugins/tau-loops",
+      "homepage": "https://github.com/toxicwind/estate-scripts-projects/tree/main/ranch/tau-marketplace/plugins/tau-loops",
       "license": "MIT"
     }
   ]

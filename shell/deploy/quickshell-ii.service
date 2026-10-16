@@ -1,5 +1,5 @@
 [Unit]
-Description=quickshell ii shell (sovereign/projects/shell)
+Description=quickshell ii shell (estate-scripts/projects/shell)
 Documentation=file:///home/toxic/estate/ranch/shell/README.md
 After=graphical-session.target
 PartOf=graphical-session.target

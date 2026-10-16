@@ -140,7 +140,7 @@ Directories with similar README content (Jaccard on first 500 chars):
 |---|---|---|
 | `pd-mcp-standalone` | `pearlctl` | 45.9% |
 | `mcpproxy-go` | `squawk` | 41.3% |
-| `sovereign` | `squawk` | 38.9% |
+| `estate-scripts` | `squawk` | 38.9% |
 | `repo-first-class` | `squawk` | 35.4% |
 | `outlier-toolkit` | `refusal-hunt` | 35.1% |
 | `strudel-dev-vite` | `strudel-sampler-server-vite` | 34.9% |

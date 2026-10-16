@@ -1,11 +1,11 @@
-# VERDICT: Sovereign Router vs TAU omp-model-router extension
+# VERDICT: estate-scripts Router vs TAU omp-model-router extension
 
 **Referee:** gavel (ember's pack) ⚖️ · **Date:** 2026-09-21
 **Contender A:** `@cakriwut/omp-model-router` 0.8.9 — the real TAU routing
 extension (`src/routing/compose.ts` `resolveRouting`: heuristic → context
 promotion → adaptive classifier attempt → image upgrade → tier mapping),
 serving tier models through pi-ai `streamSimple`.
-**Contender B:** Sovereign router `:25104`, `sovereign/free`
+**Contender B:** estate-scripts router `:25104`, `estate-scripts/free`
 (`routeFree` → `freeCandidates` → `astRace`, first-substantive-wins,
 circuit breakers, local herd fallback roles).
 
@@ -14,17 +14,17 @@ every attempt captured). Runner: `run.ts`. Scorer: `score.py`.
 
 ## The score — by dimension, not vibes
 
-| Dimension | TAU extension | Sovereign | Winner |
+| Dimension | TAU extension | estate-scripts | Winner |
 |---|---|---|---|
-| Quality (10-prompt rubric) | 8.5/10 | 9/10 | **Sovereign** (narrow) |
+| Quality (10-prompt rubric) | 8.5/10 | 9/10 | **estate-scripts** (narrow) |
 | Availability (this window) | 10/10 first-try | 5–8/10 first-try, 10/10 with retry | **TAU** |
-| Failover / resilience | dead tier model → hard error, no re-route (probed) | raced through a live upstream 429 outage via local fallback | **Sovereign**, decisively |
+| Failover / resilience | dead tier model → hard error, no re-route (probed) | raced through a live upstream 429 outage via local fallback | **estate-scripts**, decisively |
 | Routing intelligence | heuristic mis-tiers; adaptive classifier non-functional here | no content tiering (it's a race, not a judge) | **TAU** on paper, **nobody** in practice |
-| Latency (median serve) | 7.6s + 3.7–10s classifier dead-weight per request | 6.8s (final attempt; retries add) | **Sovereign** |
+| Latency (median serve) | 7.6s + 3.7–10s classifier dead-weight per request | 6.8s (final attempt; retries add) | **estate-scripts** |
 | Cost | free (local herd) | free | tie |
 
-**Overall: Sovereign wins the bake-off.** Not because its models are smarter —
-every Sovereign trial in this window was served by its *worst* foot forward, a
+**Overall: estate-scripts wins the bake-off.** Not because its models are smarter —
+every estate-scripts trial in this window was served by its *worst* foot forward, a
 local 1.2B EXAONE fallback — but because it is the only one of the two that is
 engineered for the world as it is: upstreams 429, models truncate, links flap.
 TAU's extension routes by task tier and has no answer when its answer is down.
@@ -35,14 +35,14 @@ TAU's extension routes by task tier and has no answer when its answer is down.
 most prompts (qwen-medium on lookup/debug/math, gemini-high on arch,
 exaone-low on one-liners) — but its flagship high-tier model **truncated after
 24 tokens** on the architecture prompt, the single hardest question, scoring a
-hard FAIL where Sovereign's 1.2B fallback wrote a complete structured design.
-Sovereign's fallback hallucinated a capital ("Abjara" for Ouagadougou) — the
+hard FAIL where estate-scripts's 1.2B fallback wrote a complete structured design.
+estate-scripts's fallback hallucinated a capital ("Abjara" for Ouagadougou) — the
 failure mode of a small model, honestly earned. Net: 9 vs 8.5, a wash with
 different bruises.
 
 **Availability.** The window was hostile: the remote free pool spent the day
-rate-limited (HTTP 429 → Sovereign 503). TAU served 10/10 first-try — its
-models are local herd models with no external dependency. Sovereign served
+rate-limited (HTTP 429 → estate-scripts 503). TAU served 10/10 first-try — its
+models are local herd models with no external dependency. estate-scripts served
 5–8/10 first-try and 10/10 with documented retries. In a clean window this
 row would look different; in *this* window it measures what it measures.
 
@@ -50,7 +50,7 @@ row would look different; in *this* window it measures what it measures.
 low tier pointed at `herd/nonexistent-model-xyz`. The extension routed to it
 without validation, the serve 404'd, and **nothing re-routed or retried another
 tier** — the user gets an empty error. The extension has no provider failover,
-no model liveness check, no quarantine-then-recover. Sovereign, in the same
+no model liveness check, no quarantine-then-recover. estate-scripts, in the same
 afternoon, raced a live 429 storm and kept answering via `freeCandidates` →
 local `herd` roles — degraded mode as designed, not as accident.
 
@@ -68,7 +68,7 @@ tiered *low* because the word "brief" matched "faster or lighter response".
 
 ## Limitations (read before quoting the score)
 
-1. **Asymmetric degradation.** Sovereign was measured on its local fallback, not
+1. **Asymmetric degradation.** estate-scripts was measured on its local fallback, not
    its normal free-pool race (remote pool was 429-limited all day). Its quality
    ceiling in a clean window is higher than shown; its availability floor in a
    dirty window is exactly shown.
@@ -91,11 +91,11 @@ tiered *low* because the word "brief" matched "faster or lighter response".
 Chris asked: *"are you saying our router is better than whatever router
 extension — if thats the case thats fine, but prove it."*
 
-Proven, with the receipts in `results/`: **yes — at being a router.** Sovereign
+Proven, with the receipts in `results/`: **yes — at being a router.** estate-scripts
 is better at routing's actual job (get an answer back when the world is on
 fire). TAU's extension is better at routing's aspirational job (pick the
 right-sized model for the task) but ships it as keyword heuristics plus a
 classifier that can't run here. Different tools, different wins — and on the
 day they were both punched in the mouth, only one of them stayed standing.
 
-— gavel ⚖️ · final score: **Sovereign 4 — TAU 1 — 1 tie**
+— gavel ⚖️ · final score: **estate-scripts 4 — TAU 1 — 1 tie**

@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-10-02
 
 ### Added
-- Initial release of `tau-marketplace` as the official Sovereign Estate marketplace under `ranch/tau-marketplace`.
+- Initial release of `tau-marketplace` as the official estate-scripts Estate marketplace under `ranch/tau-marketplace`.
 - Conformance to the Claude Code / OMP marketplace schema (`marketplace.json`, `.omp-plugin/marketplace.json`, `.claude-plugin/marketplace.json`).
 - Core curated plugin suite:
   - `omp-mobile-autocorrect` (v1.0.0): In-process MITM spatial QWERTY autocorrect for Termux and glass keyboards (sub-5ms, dual `input` and `context` hooks, status bar telemetry).

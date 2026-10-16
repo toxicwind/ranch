@@ -14,7 +14,7 @@
  * never overriding the circuit breaker or live Elo.
  *
  * Hot-reload: getBenchPriors() caches by file mtime; a new roundup sweep
- * lands without a restart. SOVEREIGN_BENCH_PRIORS=0 disables model bonuses.
+ * lands without a restart. estate-scripts_BENCH_PRIORS=0 disables model bonuses.
  */
 import { existsSync, readFileSync, statSync } from "node:fs";
 
@@ -131,7 +131,7 @@ export function getBenchPriors(path = DEFAULT_PATH): BenchPriors {
 
 /** Per-candidate score bonus from roundup benchmark data. 0 when disabled. */
 export function benchModelBonus(provider: string, model: string): number {
-  if (process.env.SOVEREIGN_BENCH_PRIORS === "0") return 0;
+  if (process.env.estate-scripts_BENCH_PRIORS === "0") return 0;
   return getBenchPriors().modelBonus.get(`${provider}/${model}`) ?? 0;
 }
 

@@ -21,7 +21,7 @@ ts/src/
                                                      <- from providers.rs pool.rs circuit.rs
                                                         ratelimit.rs roost_providers.rs
   auth/         tokens.ts  users.ts                   <- from auth.rs
-  strategy/     (already present: sovereign-router's TS strategy layer, vendored)
+  strategy/     (already present: estate-scripts-router's TS strategy layer, vendored)
   roost/        (already present: provider catalog SSOT)
   astmatrix/    (already present: Elo matrix)
 ```

@@ -114,8 +114,8 @@ describe("LiveCatalogReader", () => {
         return new Response("ok");
       },
     });
-    const prev = process.env.SOVEREIGN_CATALOG_404_URL;
-    process.env.SOVEREIGN_CATALOG_404_URL = `http://127.0.0.1:${srv.port}/admin/catalog/serve-404`;
+    const prev = process.env.estate-scripts_CATALOG_404_URL;
+    process.env.estate-scripts_CATALOG_404_URL = `http://127.0.0.1:${srv.port}/admin/catalog/serve-404`;
     try {
       await reportServe404("groq", "m-gone");
       // reportServe404 awaits internally, so the post has landed.
@@ -123,8 +123,8 @@ describe("LiveCatalogReader", () => {
       expect(gotProvider).toBe("groq");
       expect(gotModel).toBe("m-gone");
     } finally {
-      if (prev === undefined) delete process.env.SOVEREIGN_CATALOG_404_URL;
-      else process.env.SOVEREIGN_CATALOG_404_URL = prev;
+      if (prev === undefined) delete process.env.estate-scripts_CATALOG_404_URL;
+      else process.env.estate-scripts_CATALOG_404_URL = prev;
       srv.stop();
     }
   });

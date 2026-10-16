@@ -1,6 +1,6 @@
-# flock/ts/policy — sovereign-router policy engine (TypeScript)
+# flock/ts/policy — estate-scripts-router policy engine (TypeScript)
 
-Port of the sovereign-router policy layer (`sovereign/tools/sovereign-router/sovereign-router-ts/`)
+Port of the estate-scripts-router policy layer (`estate-scripts/tools/estate-scripts-router/estate-scripts-router-ts/`)
 into Flock as the **policy tier**. Bun/TypeScript throughout.
 
 ## The boundary (read before touching)

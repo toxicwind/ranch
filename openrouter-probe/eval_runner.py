@@ -64,8 +64,8 @@ def api(path, data=None, timeout=TIMEOUT):
         BASE + path, data=body, method="POST" if body else "GET",
         headers={"Authorization": "Bearer " + KEY,
                  "Content-Type": "application/json",
-                 "HTTP-Referer": "https://sovereign.local",
-                 "X-Title": "sovereign-eval"})
+                 "HTTP-Referer": "https://estate-scripts.local",
+                 "X-Title": "estate-scripts-eval"})
     t0 = time.time()
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -98,8 +98,8 @@ def discover_free_models(timeout=60):
     """
     req = urllib.request.Request(
         "https://openrouter.ai/api/v1/models",
-        headers={"HTTP-Referer": "https://sovereign.local",
-                 "X-Title": "sovereign-eval"})
+        headers={"HTTP-Referer": "https://estate-scripts.local",
+                 "X-Title": "estate-scripts-eval"})
     t0 = time.time()
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:

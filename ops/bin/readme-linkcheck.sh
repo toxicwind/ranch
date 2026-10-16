@@ -7,7 +7,7 @@
 #   - #anchors exist as headings in the same file (GitHub slug rules)
 #   - absolute /home/toxic/* and /home/hatch/* estate paths exist on this box
 #     (set README_LINKCHECK_BOX=hatch|yote to skip the other box's paths)
-#   - github.com/toxicwind/sovereign-projects blob/tree links resolve via
+#   - github.com/toxicwind/estate-scripts-projects blob/tree links resolve via
 #     `git cat-file` against the local clone (no network needed); #L12-L31
 #     line anchors are verified against the real line count
 #   - other http(s) URLs are checked only with --check-external (warnings unless
@@ -206,9 +206,9 @@ class Checker:
         return None
 
     def check_github_sp(self, target, root):
-        # github.com/toxicwind/sovereign-projects/(blob|tree)/<ref>/<path>[#frag]
+        # github.com/toxicwind/estate-scripts-projects/(blob|tree)/<ref>/<path>[#frag]
         m = re.match(
-            r"https://github\.com/toxicwind/sovereign-projects/(blob|tree)/([^/]+)/([^#]+)(?:#(.+))?$",
+            r"https://github\.com/toxicwind/estate-scripts-projects/(blob|tree)/([^/]+)/([^#]+)(?:#(.+))?$",
             target)
         if not m:
             return "EXTERNAL"

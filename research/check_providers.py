@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Sovereign AST Matrix — Provider Health Checker
+estate-scripts AST Matrix — Provider Health Checker
 Tests every provider + model with a tiny prompt, respecting rate limits.
 Reports: OK / FAIL / SLOW / RATE-LIMITED with latency and error details.
 
@@ -143,7 +143,7 @@ def test_model(
     }
     if provider_key == "openrouter":
         headers["HTTP-Referer"] = "https://zed.dev"
-        headers["X-Title"] = "Sovereign-Checker"
+        headers["X-Title"] = "estate-scripts-Checker"
 
     body = json.dumps(
         {
@@ -267,7 +267,7 @@ def main():
         providers_to_check = {args.provider: PROVIDERS[args.provider]}
 
     print("=" * 72)
-    print("  Sovereign AST Matrix — Provider Health Check")
+    print("  estate-scripts AST Matrix — Provider Health Check")
     print(f"  Time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"  Prompt: {PROMPT!r} | Max tokens: {MAX_TOKENS} | Timeout: {TIMEOUT}s")
     print("=" * 72)

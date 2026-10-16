@@ -6,10 +6,10 @@
   "quarantine_enabled": true,
   "mcpServers": [
     {
-      "name": "sovereign-tools",
+      "name": "estate-scripts-tools",
       "protocol": "stdio",
       "command": "bun",
-      "args": ["/home/toxic/estate/helpers/sovereign-mcp-server.ts"],
+      "args": ["/home/toxic/estate/helpers/estate-scripts-mcp-server.ts"],
       "enabled": true
     }
   ]

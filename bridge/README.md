@@ -4,8 +4,8 @@ The bridge is the control plane between **hatch** (this cell) and **yote** (the 
 
 <div align="right">
 
-[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-main-6e56cf?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-main-6e56cf?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -134,4 +134,4 @@ truth lives in files on yote), no monkeypatching, no `/tmp` dependencies.
 
 ## License & security
 
-MIT where marked — [LICENSE](https://github.com/toxicwind/sovereign-projects#license). This is the fleet's control plane — the kill semantics are deliberately conservative: `bg-kill` verifies `/proc/<pid>/cmdline` before signaling, so a reused pid is never killed; `bg-status` reaps stale runners on read instead of leaving zombies. Never bypass the pid-reuse guards for convenience. Deploys go through `deploy-cell.py` (SHA-verified, atomic) — never hand-copy the connector onto the cell.
+MIT where marked — [LICENSE](https://github.com/toxicwind/estate-scripts-projects#license). This is the fleet's control plane — the kill semantics are deliberately conservative: `bg-kill` verifies `/proc/<pid>/cmdline` before signaling, so a reused pid is never killed; `bg-status` reaps stale runners on read instead of leaving zombies. Never bypass the pid-reuse guards for convenience. Deploys go through `deploy-cell.py` (SHA-verified, atomic) — never hand-copy the connector onto the cell.

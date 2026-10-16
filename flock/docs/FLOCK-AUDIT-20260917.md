@@ -3,7 +3,7 @@
 ## 1. Operational Summary & Telemetry
 
 **Scope:** Maximal audit of Flock (Rust NVIDIA NIM proxy/router) plus
-implementation of killer features ported from the TypeScript sovereign-router
+implementation of killer features ported from the TypeScript estate-scripts-router
 reference: substance guard, empty-completion failover, and empty-strike
 tracking.
 
@@ -39,7 +39,7 @@ tracking.
 `{"choices":[{"message":{},"finish_reason":"stop"}]}` produced a blank HTTP 200
 to the client — indistinguishable from success at the HTTP layer. Root cause:
 success was defined by HTTP status, not payload substance. This mirrors the
-sovereign-router `routeAstRace` hole closed in commit `b32fc60690`
+estate-scripts-router `routeAstRace` hole closed in commit `b32fc60690`
 (gather-then-pick set `best` = first ok result in candidate order even with
 empty content).
 
@@ -144,10 +144,10 @@ No reverts. Additive only.
 
 ## 6. Ecosystem Cross-References & Downstream Sync
 
-- **sovereign-router-ts (live, :25104)** — the reference implementation this
+- **estate-scripts-router-ts (live, :25104)** — the reference implementation this
   ports from. The substance guard closed the identical hole there (commit
   `b32fc60690`); the flap tracker with empty strikes is already live at
-  /metrics (`sovereign_router_model_empty_strikes`). Flock's
+  /metrics (`estate-scripts_router_model_empty_strikes`). Flock's
   `flock_model_empty_strikes` mirrors that metric name family for cross-stack
   correlation.
 - **Herd / herd (:25100)** — two defects observed during the audit, both
@@ -170,18 +170,18 @@ Remaining work, in priority order:
    path (the `handleStream` equivalent); streaming currently stays on the
    legacy NVIDIA-only route.
 2. **Strike-driven routing** — consume `flock_model_empty_strikes` in
-   candidate ordering (bench models with strikes, as sovereign-router does
+   candidate ordering (bench models with strikes, as estate-scripts-router does
    after 3 empties in 10 min).
 3. **Persistent strikes** — strikes currently live in memory; persist across
    restarts (sled/sqlite or metrics-backed restore).
 4. **Six remaining providers** — together, fireworks, hyperbolic, github,
-   openai, perplexity, siliconflow (per the sovereign-router consolidation
+   openai, perplexity, siliconflow (per the estate-scripts-router consolidation
    plan).
 5. **Herd path fix** — correct the doubled `/v1/v1/models` path; resolve
    pitchfork's stale ownership of PID 2022955 without disturbing the healthy
    daemon.
 6. **Router strategy gaps** — coalescing, least-latency, and round-robin in
-   Flock's router, matching sovereign-router's remaining gaps.
+   Flock's router, matching estate-scripts-router's remaining gaps.
 
 ---
 

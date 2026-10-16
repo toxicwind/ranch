@@ -89,7 +89,7 @@ export class Router {
 
     const session = req.headers.get("X-Session-Id") || "default";
     const strategyName =
-      req.headers.get("X-Sovereign-Strategy") || this.config.strategy;
+      req.headers.get("X-estate-scripts-Strategy") || this.config.strategy;
     const strategyFn = strategies[strategyName] ?? strategies["hybrid"];
     const stream = bodyMap["stream"] === true;
 
@@ -148,7 +148,7 @@ export class Router {
       };
     }
     return {
-      router: "sovereign-router-ts",
+      router: "estate-scripts-router-ts",
       version: "v3.1",
       strategy: this.config.strategy,
       providers,
@@ -198,7 +198,7 @@ async function callOne(
   const url = prov.base.replace(/\/+$/, "") + "/chat/completions";
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "User-Agent": "SovereignASTMatrix/3.1",
+    "User-Agent": "estate-scriptsASTMatrix/3.1",
     "Accept-Encoding": "identity",
   };
   if (!prov.noAuth) {
@@ -208,7 +208,7 @@ async function callOne(
   }
   if (provider === "openrouter") {
     headers["HTTP-Referer"] = "https://zed.dev";
-    headers["X-Title"] = "Sovereign-AST-Matrix";
+    headers["X-Title"] = "estate-scripts-AST-Matrix";
   }
 
   const stream = body["stream"] === true;

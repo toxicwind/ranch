@@ -49,7 +49,7 @@ def main():
     rows = []
     for tr in res["trials"]:
         pid = tr["promptId"]; chk = tr["check"]
-        for side in ("tau", "sovereign"):
+        for side in ("tau", "estate-scripts"):
             s = tr.get(side)
             if s is None: continue
             if side == "tau":

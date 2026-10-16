@@ -1,7 +1,7 @@
 /**
  * flock/ts/strategy/catalog — provider catalog helpers for the strategy tier.
  *
- * Adapted from sovereign-router's router_config.ts. The master provider
+ * Adapted from estate-scripts-router's router_config.ts. The master provider
  * definitions live in the Roost package (../../roost/src); this module
  * projects them into routing-relevant ProviderViews and ports the pure
  * catalog functions the strategies need: key resolution, model-spec
@@ -21,22 +21,22 @@ import type { ProviderView } from "./types.ts";
 // ---------------------------------------------------------------------------
 export const MAX_PARALLEL = 4;
 export const FIFO_MAX = 64;
-export const DEFAULT_STRATEGY = process.env.SOVEREIGN_STRATEGY || "hybrid";
-export const UA = "Mozilla/5.0 (compatible; Sovereign-Flock/3.1)";
+export const DEFAULT_STRATEGY = process.env.estate-scripts_STRATEGY || "hybrid";
+export const UA = "Mozilla/5.0 (compatible; estate-scripts-Flock/3.1)";
 
 /** Connect (headers) budget per attempt. */
-export const CONNECT_MS = parseInt(process.env.SOVEREIGN_CONNECT_MS || "8000", 10);
+export const CONNECT_MS = parseInt(process.env.estate-scripts_CONNECT_MS || "8000", 10);
 /** Time-to-first-byte budget for streams. */
-export const TTFT_MS = parseInt(process.env.SOVEREIGN_TTFT_MS || "45000", 10);
+export const TTFT_MS = parseInt(process.env.estate-scripts_TTFT_MS || "45000", 10);
 /** Total per-attempt cap (non-stream). */
-export const ATTEMPT_MS = parseInt(process.env.SOVEREIGN_ATTEMPT_MS || "120000", 10);
+export const ATTEMPT_MS = parseInt(process.env.estate-scripts_ATTEMPT_MS || "120000", 10);
 /** Total per-attempt cap (stream). */
 export const ATTEMPT_STREAM_MS = parseInt(
-  process.env.SOVEREIGN_ATTEMPT_STREAM_MS || "300000",
+  process.env.estate-scripts_ATTEMPT_STREAM_MS || "300000",
   10,
 );
 /** Hedge delay: preferred lane gets this long before the field races. 0 = sequential. */
-export const HEDGE_MS = parseInt(process.env.SOVEREIGN_HEDGE_MS || "1500", 10);
+export const HEDGE_MS = parseInt(process.env.estate-scripts_HEDGE_MS || "1500", 10);
 
 /** Code-shaped output detector (AST race preference). */
 export const AST_RE =
@@ -185,7 +185,7 @@ export function isLocalSwapModelId(
   if (model === roles.fast || model === roles.quality || model === roles.longctx) {
     return true;
   }
-  // sovereign naming prefixes / known local ids
+  // estate-scripts naming prefixes / known local ids
   return /^(beellama|mradermacher|jackrong|turboquant|ik_llama|ik_turboquant|holo|qwen\/|gemma-4|exaone)/i.test(
     model,
   );

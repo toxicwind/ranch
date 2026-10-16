@@ -68,7 +68,7 @@ else
 fi
 
 step "5. /usr/local/bin/qs delegation"
-if [ -x /usr/local/bin/qs ] && grep -q "sovereign/projects/shell/bin/qs-launch" /usr/local/bin/qs 2>/dev/null; then
+if [ -x /usr/local/bin/qs ] && grep -q "estate-scripts/projects/shell/bin/qs-launch" /usr/local/bin/qs 2>/dev/null; then
   echo "   already delegates to qs-launch"
 else
   echo "   NOTE: /usr/local/bin/qs not delegating (needs root to change)"

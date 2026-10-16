@@ -6,9 +6,9 @@
 // catalog state path are read once at import). A static import would hoist
 // above this assignment, so the values come in via dynamic import; the
 // type-only import is erased at runtime and stays static.
-process.env.SOVEREIGN_DB = "/tmp/sovereign_router_governor_test.db";
-process.env.SOVEREIGN_CATALOG_STATE =
-  `/tmp/sovereign_router_governor_test.catalog.${process.pid}.json`;
+process.env.estate-scripts_DB = "/tmp/estate-scripts_router_governor_test.db";
+process.env.estate-scripts_CATALOG_STATE =
+  `/tmp/estate-scripts_router_governor_test.catalog.${process.pid}.json`;
 
 import type { ModelPermit } from "./router_matrix.ts";
 const { Governor, isWorkerExhausted } = await import("./router_matrix.ts");

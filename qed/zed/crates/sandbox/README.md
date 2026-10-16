@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -35,7 +35,7 @@ sandbox.run(command)?;                 // constrained by the policy
 
 ## License & security
 
-- Zed upstream code is **GPL-3.0-or-later**; this fork ships inside the sovereign-projects monorepo ([MIT](https://github.com/toxicwind/sovereign-projects#license) for sovereign-authored files).
+- Zed upstream code is **GPL-3.0-or-later**; this fork ships inside the estate-scripts-projects monorepo ([MIT](https://github.com/toxicwind/estate-scripts-projects#license) for estate-scripts-authored files).
 - **Security model:** the sandbox assumes all untrusted code is maximally hostile. Practical limitations make the default profile in Zed not secure against all attacks (see below). The exact policy is defined in `src/macos_seatbelt.rs` and the Linux implementation in this crate.
 
 ## Overview

@@ -9,7 +9,7 @@
 - `apps/mcp`: MCP service (`:25113`) with stdio + HTTP modes
 - `packages/github-client`: Direct GitHub search client with multi-category expand, cache, retry, and rescue logic
 
-## Runtime Contract (Sovereign Ports)
+## Runtime Contract (estate-scripts Ports)
 
 ```text
 Frontend: http://127.0.0.1:25114
@@ -32,14 +32,14 @@ Hot reload loop for all surfaces:
 bun run dev:headed
 ```
 
-**With live Firefox control** (the full sovereign integration added on complete install):
+**With live Firefox control** (the full estate-scripts integration added on complete install):
 
 ```bash
 GHAS_BROWSER=firefox bun run dev:headed
 # or
 just firefox-dev
 # or the direct profile takeover
-./scripts/sovereign-browser/launch-firefox-from-profile.sh
+./scripts/estate-scripts-browser/launch-firefox-from-profile.sh
 ```
 
 One-command complete install (deps + Python + Playwright + Firefox launchers + Grok MCP wiring):

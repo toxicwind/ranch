@@ -10,7 +10,7 @@ and re-record.
 | doorbell | (none) | toxicwind/doorbell | 24d228c | first-party |
 | estate-scripts | (none) | (estates internal) | 5150e09 | first-party |
 | ferret-den | (none) | toxicwind/ferret-den | aa575f7 | first-party |
-| gayxxx-sovereign | (none) | toxicwind/ranch | 57d56a3 | estate-internal |
+| gayxxx-estate-scripts | (none) | toxicwind/ranch | 57d56a3 | estate-internal |
 | gear | (none) | (estate internal) | 326d7bd | first-party |
 | hyprgrid | Aetherall/hyprgrid | (none) | 5c6bbb1 | upstream-only |
 | Hyprgrid-gestures | jairnarvaez/Hyprgrid | (none) | af395bc | upstream-only |

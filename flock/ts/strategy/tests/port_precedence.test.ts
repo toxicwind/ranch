@@ -1,6 +1,6 @@
-// Regression test: service-specific SOVEREIGN_ROUTER_PORT must win over the
-// generic SOVEREIGN_PORT when both are set.
-// (2026-09-30: a phantom SOVEREIGN_PORT=20128 in the daemon environment sent
+// Regression test: service-specific estate-scripts_ROUTER_PORT must win over the
+// generic estate-scripts_PORT when both are set.
+// (2026-09-30: a phantom estate-scripts_PORT=20128 in the daemon environment sent
 // the router at vansrouter's port -> EADDRINUSE crash loop. The specific var
 // is the SSOT; the generic one is legacy fallback only.)
 import { describe, test, expect } from "bun:test";
@@ -34,18 +34,18 @@ async function resolvePort(
 }
 
 describe("port precedence (router_config.ts)", () => {
-  test("SOVEREIGN_ROUTER_PORT wins when both are set", async () => {
+  test("estate-scripts_ROUTER_PORT wins when both are set", async () => {
     const port = await resolvePort({
-      SOVEREIGN_ROUTER_PORT: "25298",
-      SOVEREIGN_PORT: "20128",
+      estate-scripts_ROUTER_PORT: "25298",
+      estate-scripts_PORT: "20128",
     });
     expect(port).toBe("25298");
   });
 
-  test("SOVEREIGN_ROUTER_PORT alone resolves", async () => {
+  test("estate-scripts_ROUTER_PORT alone resolves", async () => {
     const port = await resolvePort(
-      { SOVEREIGN_ROUTER_PORT: "25296" },
-      "delete process.env.SOVEREIGN_PORT;",
+      { estate-scripts_ROUTER_PORT: "25296" },
+      "delete process.env.estate-scripts_PORT;",
     );
     expect(port).toBe("25296");
   });

@@ -47,16 +47,16 @@ upstream name. The local rename frees `shep` for the unrelated
 
 ---
 
-## sovereign-router — TS multi-provider gateway (:25104)
+## estate-scripts-router — TS multi-provider gateway (:25104)
 
 The live multi-provider gateway: 7 providers (herd, openrouter, nvidia,
 groq, cerebras, google, mistral), 7 routing strategies, built-in `/ui`
-dashboard. Source: `tools/sovereign-router/sovereign-router-ts/` (estate root).
+dashboard. Source: `tools/estate-scripts-router/estate-scripts-router-ts/` (estate root).
 
 Override the strategy per request:
 
 ```bash
-curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25104/v1/chat/completions
+curl -H "X-estate-scripts-Strategy: free" http://127.0.0.1:25104/v1/chat/completions
 ```
 
 | Strategy | Behavior |
@@ -71,16 +71,16 @@ curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25104/v1/chat/completions
 
 ---
 
-## Sovereign MCP gateway (:25120)
+## estate-scripts MCP gateway (:25120)
 
-`ranch/mesh/router/sovereign-mcp-gateway/` is a trust boundary in
+`ranch/mesh/router/estate-scripts-mcp-gateway/` is a trust boundary in
 front of upstream MCP servers: per-upstream circuit breakers quarantine
 poisoned servers, `notifications/initialized` pins sticky sessions, and
 `tools/list` is served as a provenance-namespaced union (`<upstream>__<tool>`)
 with 502 failover.
 
 **Not yet supervised.** The code is in the tree but is not wired into
-pitchfork, and `:25120` is currently held by the `sovereign-chat` daemon.
+pitchfork, and `:25120` is currently held by the `estate-scripts-chat` daemon.
 
 ---
 
@@ -100,7 +100,7 @@ openai-compatible:
 
 ```bash
 for s in "gatehouse:25127/health" "mesh-hub:25115/health" \
-         "sovereign-router:25104/health" "herd:25100/v1/models"; do
+         "estate-scripts-router:25104/health" "herd:25100/v1/models"; do
   printf '%-16s %s\n' "${s%%:*}" \
     "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:${s#*:}")"
 done
@@ -121,7 +121,7 @@ A healthy fleet prints `200` on all four.
   `openrouter/inclusionai/ling-3.0-flash-fin:free:high`, but nothing consumes
   it — declared intent, not active routing. The live free pool is
   `freeCandidates()` in
-  `ranch/stockyard/router-legacy/sovereign-router-ts/router_config.ts`. Ling
+  `ranch/stockyard/router-legacy/estate-scripts-router-ts/router_config.ts`. Ling
   PASSED the gate 2026-09-17 (corrected 8/8 benchmark, warm TTFT < 2 s; earlier
   0/8 was a probe bug using the invalid double-prefixed model ID) and is now IN
   the pool: 14 candidates verified live, router restarted via pitchfork 04:25

@@ -1,4 +1,4 @@
-# ![Corral](https://img.shields.io/badge/🐴_Sovereign_Corral-Multi--Agent_Orchestration-black?style=for-the-badge)
+# ![Corral](https://img.shields.io/badge/🐴_estate-scripts_Corral-Multi--Agent_Orchestration-black?style=for-the-badge)
 
 > **Ticket-driven development & speculative merge queue — evolved from super-ralph lineage**
 
@@ -10,7 +10,7 @@
 [![Effect](https://img.shields.io/badge/Effect-4.0.0--beta.102-ff0000?style=flat-square)](https://effect.website)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](./CONTRIBUTING.md)
 
-**Corral** is a hardened fork of [super-ralph](https://github.com/roninjin10/super-ralph) built for sovereign agent fleets — parallel ticket execution, speculative landing, and zero-merge-conflict orchestration on top of [Smithers / smthrs](https://github.com/roninjin10/smithers).
+**Corral** is a hardened fork of [super-ralph](https://github.com/roninjin10/super-ralph) built for estate-scripts agent fleets — parallel ticket execution, speculative landing, and zero-merge-conflict orchestration on top of [Smithers / smthrs](https://github.com/roninjin10/smithers).
 
 If your original fork was a mess of hardcoded `/home/toxic` paths, 1189-line CLI files, duplicate deps, and ranch-specific shims — this is the clean replacement you can `rm -rf` and drop in.
 
@@ -130,7 +130,7 @@ export CLAUDE_REAL_BIN=~/.local/bin/claude.nim-shim-real
 - Git colocated repo (`jj git init --colocate`)
 
 ```bash
-bun add @sovereign/corral
+bun add @estate-scripts/corral
 # or clone
 git clone https://github.com/roninjin10/super-ralph.git corral
 cd corral
@@ -185,8 +185,8 @@ All secrets loading is now portable (no `/home/toxic/.secrets` hardcoded):
 |---|---|---|
 | `CORRAL_SECRETS_PATH` | Explicit secrets file | `~/.secrets` → `~/.config/corral/secrets` → `.env` |
 | `ANTHROPIC_API_KEY` | Anthropic key | — |
-| `SOVEREIGN_ROUTER_URL` / `CUTTINGGATE_URL` | Router URL | `http://127.0.0.1` |
-| `SOVEREIGN_ROUTER_PORT` / `CUTTINGGATE_PORT` | Router port | `25200` |
+| `estate-scripts_ROUTER_URL` / `CUTTINGGATE_URL` | Router URL | `http://127.0.0.1` |
+| `estate-scripts_ROUTER_PORT` / `CUTTINGGATE_PORT` | Router port | `25200` |
 | `FLOCK_API_KEY` | Flock proxy (comma-separated for rotation) | falls back to `NIM_PROXY_API_KEY` |
 | `GATEHOUSE_BIN` | Gatehouse binary | `gatehouse` |
 | `GATEHOUSE_CONFIG` | Gatehouse MCP config | `~/.config/corral/gatehouse/mcp_config.json` |
@@ -304,7 +304,7 @@ Tests moved from `src/` to `tests/`:
 
 MIT — see [LICENSE](./LICENSE)
 
-Original super-ralph lineage: William Cory → Ronin Jin → Sovereign Fleet
+Original super-ralph lineage: William Cory → Ronin Jin → estate-scripts Fleet
 
 ---
 
@@ -336,6 +336,6 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md)
 ---
 
 <p align="center">
-  <b>🐴 Sovereign Corral — Run 8 agents in parallel, land without conflicts</b><br/>
+  <b>🐴 estate-scripts Corral — Run 8 agents in parallel, land without conflicts</b><br/>
   <code>rm -rf corral && tar -xzf corral-clean.tar.gz && bun install && corral "ship it"</code>
 </p>

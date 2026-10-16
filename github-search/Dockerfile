@@ -1,4 +1,4 @@
-# Sovereign GitHub Advanced Search MCP (ghas)
+# estate-scripts GitHub Advanced Search MCP (ghas)
 # Canonical production Dockerfile for gh-search-mcp (Rust).
 #
 # Build modes (use --build-arg MODE=...):

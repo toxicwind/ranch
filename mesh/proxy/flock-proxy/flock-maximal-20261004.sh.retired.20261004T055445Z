@@ -27,7 +27,7 @@ ALL_CLEAN=1
 for f in \
   "$HOME/estate/ranch/flock/flock-final.sh" \
   "$HOME/estate/ranch/flock/bin/flock-run.sh" \
-  "$HOME/estate/ranch/sovereign-end4/dots/.bashrc.env" \
+  "$HOME/estate/ranch/estate-scripts-end4/dots/.bashrc.env" \
   "$HOME/estate/ranch/shell/ii/dots/.bashrc.env" \
   "$HOME/estate/migration/staged/sysd-migrate-daemons.toml" \
 ; do
@@ -90,5 +90,5 @@ hdr "DONE — $LOG"
 log ""
 log "  canonical port: 25193"
 log "  Rust flock is the :25193 owner (pid $PID)."
-log "  TS/Py/sovereign/cuttinggate routers are bannered DEPRECATED."
+log "  TS/Py/estate-scripts/cuttinggate routers are bannered DEPRECATED."
 log "  'all_stream_providers_exhausted' is TS/Python-only — never from Rust flock."

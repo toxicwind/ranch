@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -35,7 +35,7 @@ projects/pack-fix/bin/orphan-sweep.sh   # report-only orphan audit
 
 ## License & security
 
-- [MIT](https://github.com/toxicwind/sovereign-projects#license).
+- [MIT](https://github.com/toxicwind/estate-scripts-projects#license).
 - Sweeps are report-only by design — nothing is killed or deleted by the script. Disposition is announced in the fleet channel before any destructive action.
 
 ## Crew notes
@@ -47,4 +47,4 @@ projects/pack-fix/bin/orphan-sweep.sh   # report-only orphan audit
 
 Every sweep lands evidence in an evidence log (like `orphan-sweep.md`) and dispositions go to fleet. Dead files get deleted deliberately, never silently.
 
-Docs: [sovereign docs](../../docs/) · [master README](../../README.md) · [fleet knowledgebase](../../docs/fleet-knowledgebase.md)
+Docs: [estate-scripts docs](../../docs/) · [master README](../../README.md) · [fleet knowledgebase](../../docs/fleet-knowledgebase.md)

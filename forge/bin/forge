@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * forge — Sovereign Ranch Build, Merge & VCS Triad CLI.
+ * forge — estate-scripts Ranch Build, Merge & VCS Triad CLI.
  *
  * The public master entrypoint. Unifies three layers:
  *   1. forge build — NativeLink (REAPI) remote cache/execution (:25155 grpc, :25157 http) + Bazel.
@@ -40,7 +40,7 @@ function check(url: string): boolean {
 
 switch (cmd) {
   case "status": {
-    console.log("🔨 forge — Sovereign Build, Merge & VCS Triad");
+    console.log("🔨 forge — estate-scripts Build, Merge & VCS Triad");
     console.log("---------------------------------------------");
     const nlUp = check(NATIVELINK_HTTP);
     console.log(`[build]  NativeLink REAPI  ${NATIVELINK_GRPC}  ${nlUp ? "ACTIVE" : "OFFLINE (http: " + NATIVELINK_HTTP + ")"}`);

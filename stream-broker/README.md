@@ -3,7 +3,7 @@
 > 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map.
 
 Socket fan-in for token streams on the mesh, supervised as
-`sovereign-stream-broker` on `127.0.0.1:25215`.
+`estate-scripts-stream-broker` on `127.0.0.1:25215`.
 
 > **This is a placeholder.** 57 lines in `src/index.ts`, no dependency beyond
 > Node's `net`/`fs`/`path`, and the handler is a byte echo — the source says so
@@ -19,7 +19,7 @@ Two listeners, one handler:
 
 ```
   clients ──┬── TCP    127.0.0.1:25215          (default)
-            └── UNIX   /run/user/1000/sovereign-stream-broker.sock
+            └── UNIX   /run/user/1000/estate-scripts-stream-broker.sock
 ```
 
 The handler reads a chunk, writes the identical chunk back, and logs the peer on
@@ -40,7 +40,7 @@ framing, backpressure, per-client routing, any notion of a subscription.
 | :--- | :--- | :--- |
 | `TCP_HOST` | `127.0.0.1` | TCP bind address |
 | `TCP_PORT` | `25215` | TCP bind port |
-| `SOCKET_PATH` | `/run/user/1000/sovereign-stream-broker.sock` | UNIX socket path |
+| `SOCKET_PATH` | `/run/user/1000/estate-scripts-stream-broker.sock` | UNIX socket path |
 
 Any process that can reach either socket gets its own bytes back.
 
@@ -59,7 +59,7 @@ Any process that can reach either socket gets its own bytes back.
 ## Daemon
 
 ```toml
-[daemons.sovereign-stream-broker]
+[daemons.estate-scripts-stream-broker]
 dir        = "/home/toxic/estate/projects/range/ranch/stream-broker"
 run        = "exec bun run src/index.ts"
 port       = 25215
@@ -76,10 +76,10 @@ it will not come up with the usual groups. Treat it as defined but not enrolled.
 
 ## The declared dependency
 
-`package.json` declares `@sovereign/utils` as `workspace:*`, and
+`package.json` declares `@estate-scripts/utils` as `workspace:*`, and
 `src/index.ts` imports nothing from it — only `node:net`, `node:fs`,
-`node:path`. The package itself lives at `packages/sovereign-utils/` in the
-outer sovereign repo, and this directory carries no workspace manifest or
+`node:path`. The package itself lives at `packages/estate-scripts-utils/` in the
+outer estate-scripts repo, and this directory carries no workspace manifest or
 lockfile to resolve the protocol against, so `bun install` here has nothing to
 resolve. It is declared-but-unused: drop it, or wire it up and add the
 workspace — do not assume it works.
@@ -88,7 +88,7 @@ workspace — do not assume it works.
 
 ## See also
 
-- [`pitchfork.toml`](/home/toxic/estate/pitchfork.toml) — the `sovereign-stream-broker` unit
+- [`pitchfork.toml`](/home/toxic/estate/pitchfork.toml) — the `estate-scripts-stream-broker` unit
 - [`../herd/`](../herd/) — the local-model side of the same mesh
 
 ## Build
@@ -101,5 +101,5 @@ locally through mise; eligible task artifacts restore through mbx-cache:
 ```
 
 The build is a compile check (`bun build src/index.ts`); there is no test suite
-yet, and the declared `@sovereign/utils` workspace dependency does not resolve
+yet, and the declared `@estate-scripts/utils` workspace dependency does not resolve
 (it is not in the ranch workspace list), so no install step runs.

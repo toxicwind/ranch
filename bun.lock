@@ -38,7 +38,7 @@
       "version": "0.1.0",
     },
     "corral": {
-      "name": "@sovereign/corral",
+      "name": "@estate-scripts/corral",
       "version": "1.0.0",
       "bin": {
         "corral": "src/cli/index.ts",
@@ -61,7 +61,7 @@
     },
     "drover": {
       "name": "drover",
-      "version": "1.0.0-sovereign",
+      "version": "1.0.0-estate-scripts",
       "devDependencies": {
         "@types/mocha": "^10.0.10",
         "@types/node": "22.x",
@@ -113,7 +113,7 @@
       "version": "0.1.0",
     },
     "mesh/keypool": {
-      "name": "@sovereign/keypool",
+      "name": "@estate-scripts/keypool",
       "version": "0.1.0",
       "dependencies": {
         "@google/genai": "2.22.0",
@@ -157,7 +157,7 @@
       },
     },
     "stream-broker": {
-      "name": "@sovereign/stream-broker",
+      "name": "@estate-scripts/stream-broker",
       "version": "0.1.0",
     },
     "switchboard": {
@@ -1106,11 +1106,11 @@
 
     "@smthrs/xstate": ["@smthrs/xstate@0.35.0", "", { "dependencies": { "@smthrs/errors": "0.35.0", "@smthrs/react-reconciler": "0.35.0", "react": "^19.2.7" }, "peerDependencies": { "xstate": "^5.19.0" }, "optionalPeers": ["xstate"] }, "sha512-Rm3hX17W88UU0Jod1zgyiTkXE716qtlCM10naa6DC2VvWY5l5CdsL9Yqx99FyRqhjtcdUoC4liP6p3a/wn2BMw=="],
 
-    "@sovereign/corral": ["@sovereign/corral@workspace:corral"],
+    "@estate-scripts/corral": ["@estate-scripts/corral@workspace:corral"],
 
-    "@sovereign/keypool": ["@sovereign/keypool@workspace:mesh/keypool"],
+    "@estate-scripts/keypool": ["@estate-scripts/keypool@workspace:mesh/keypool"],
 
-    "@sovereign/stream-broker": ["@sovereign/stream-broker@workspace:stream-broker"],
+    "@estate-scripts/stream-broker": ["@estate-scripts/stream-broker@workspace:stream-broker"],
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 

@@ -65,7 +65,7 @@ const day = getDailyCost("2026-09-30");
 
 ## Wiring into a router
 
-The sovereign router hooks `recordUsage` into the non-streaming `callOne` path
+The estate-scripts router hooks `recordUsage` into the non-streaming `callOne` path
 for **every** provider — the response's `usage` block fires the record, gated
 only on tokens being present. Best-effort and wrapped: accounting never throws
 into the response path. (Streaming SSE accumulation is still open.)

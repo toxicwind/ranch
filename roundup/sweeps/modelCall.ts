@@ -8,7 +8,7 @@ export async function callModel(model: string, apiKey: string): Promise<{ ok: bo
     headers: {
       "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": "https://github.com/toxicwind/sovereign-projects",
+      "HTTP-Referer": "https://github.com/toxicwind/estate-scripts-projects",
       "X-Title": "realworld-bench",
     },
     body: JSON.stringify({

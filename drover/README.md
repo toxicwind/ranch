@@ -6,7 +6,7 @@ VS Code extension for herd-level model routing with Gemini EAP tool retrieval.
 
 ## Structure
 
-- `drover-1.0.0-sovereign.vsix` — working built extension (installable)
+- `drover-1.0.0-estate-scripts.vsix` — working built extension (installable)
 - `sidecar/` — Gemini EAP tool-retrieval sidecar (real source, builds clean)
   - `src/sidecar.ts` — LM Chat Provider using `interactions.create` with `tool_search`
   - Builds to `dist/sidecar.js` via `node esbuild.js`
@@ -21,7 +21,7 @@ source rebuild is future work — the sidecar is the actively maintained piece.
 
 ```sh
 # Main extension (from vsix — no source rebuild available)
-code-insiders --install-extension drover-1.0.0-sovereign.vsix --force
+code-insiders --install-extension drover-1.0.0-estate-scripts.vsix --force
 
 # Sidecar (real source)
 cd sidecar && node esbuild.js

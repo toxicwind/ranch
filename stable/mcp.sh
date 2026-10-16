@@ -1,5 +1,5 @@
 #!/bin/bash
-# browserless-mcp stdio launcher (sovereign mesh, first-class keeper wiring).
+# browserless-mcp stdio launcher (estate-scripts mesh, first-class keeper wiring).
 #
 # Spawns the repo MCP server (dist/index.js) on stdio. No port, no daemon:
 # MCP clients launch this per session. The persistent_* tools attach to the

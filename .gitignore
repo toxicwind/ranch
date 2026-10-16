@@ -1,4 +1,4 @@
-# Sovereign standard sensitive & ephemeral patterns added by auditor
+# estate-scripts standard sensitive & ephemeral patterns added by auditor
 .secrets
 *.key
 *.pat
@@ -38,7 +38,7 @@ dist/
 #
 # Compiled gateway binaries. These are in-tree `make build` products; the
 # deployed build is projects/range/bin/gatehouse, owned and ignored by the
-# sovereign monorepo. mcpproxy-go alone was 49.5 MiB of build output.
+# estate-scripts monorepo. mcpproxy-go alone was 49.5 MiB of build output.
 /barn/gatehouse/mcpproxy-go
 /barn/gatehouse/mcpproxy
 /barn/gatehouse/mcpproxy-tray
@@ -112,7 +112,7 @@ yote/sessions/
 /android-fleet/nuvio/nuvio-platform/*.tar.gz
 
 # shell/ii is a nested standalone checkout (ex-submodule; its gitdir
-# ranch/.git/modules/shell/sovereign-end4 is gone and .gitmodules no
+# ranch/.git/modules/shell/estate-scripts-end4 is gone and .gitmodules no
 # longer declares it). Not ranch content - keep it out of the tree.
 shell/ii/
 

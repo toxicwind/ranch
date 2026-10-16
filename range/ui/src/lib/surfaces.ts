@@ -1,9 +1,9 @@
-// surfaces: the inventory of every browser-reachable service in the sovereign
+// surfaces: the inventory of every browser-reachable service in the estate-scripts
 // stack, so the master dashboard can present the whole stack as one set of
 // tabs instead of N half-wired dashboards that each know about one daemon.
 //
 // Provenance: ports and health paths are transcribed from the `[daemons.*]`
-// blocks in `sovereign/pitchfork.toml`, which is the authoritative service
+// blocks in `estate-scripts/pitchfork.toml`, which is the authoritative service
 // list. Daemon names are carried through verbatim so a tab can name the thing
 // that has to be running for it to answer.
 //
@@ -268,12 +268,12 @@ export const SURFACES: readonly Surface[] = [
 		description: "Yote fleet bus.",
 	},
 	{
-		id: "sovereign-chat",
-		label: "Sovereign Chat",
+		id: "estate-scripts-chat",
+		label: "estate-scripts Chat",
 		group: "Mesh",
-		origin: loopback("SOVEREIGN_CHAT_PORT"),
+		origin: loopback("estate-scripts_CHAT_PORT"),
 		kind: "ui",
-		daemon: "sovereign-chat",
+		daemon: "estate-scripts-chat",
 		healthPath: "/health",
 		description: "First-class fleet chat plane.",
 	},
@@ -428,12 +428,12 @@ export const SURFACES: readonly Surface[] = [
 		description: "Host metrics.",
 	},
 	{
-		id: "sovereign-exporter",
-		label: "Sovereign Exporter",
+		id: "estate-scripts-exporter",
+		label: "estate-scripts Exporter",
 		group: "Ops",
-		origin: loopback("SOVEREIGN_EXPORTER_PORT"),
+		origin: loopback("estate-scripts_EXPORTER_PORT"),
 		kind: "api",
-		daemon: "sovereign-exporter",
+		daemon: "estate-scripts-exporter",
 		healthPath: "/metrics",
 		description: "Stack-level Prometheus exporter.",
 	},
@@ -533,7 +533,7 @@ export const SURFACES: readonly Surface[] = [
 		group: "Automation",
 		origin: loopback("STREAM_BROKER_PORT"),
 		kind: "api",
-		daemon: "sovereign-stream-broker",
+		daemon: "estate-scripts-stream-broker",
 		description: "Fleet event stream broker.",
 	},
 	{

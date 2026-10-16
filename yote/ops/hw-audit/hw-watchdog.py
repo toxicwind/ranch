@@ -14,7 +14,7 @@ State file schema (watchdog-state.json):
    "failed": ["dnsmasq.service", ...], "orphans": [...],
    "last_run": "2026-09-14T03:58:07-06:00"}
 
-MASTER: toxicwind/sovereign-projects projects/yote/ops/hw-audit/
+MASTER: toxicwind/estate-scripts-projects projects/yote/ops/hw-audit/
 Live copy deployed to /home/toxic/hw-watchdog.py (see hw-audit.service).
 """
 import glob

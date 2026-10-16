@@ -1,7 +1,7 @@
 <div align="right">
 
-[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/part_of-sovereign--projects-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/part_of-estate-scripts--projects-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -53,7 +53,7 @@ Tap the underlined link — the page opens in the in-app webview through the tun
 
 ## License & security
 
-MIT — see the [canonical LICENSE](https://github.com/toxicwind/sovereign-projects#license). Loopback-only by design: all three servers bind `localhost`, nothing is exposed to the network.
+MIT — see the [canonical LICENSE](https://github.com/toxicwind/estate-scripts-projects#license). Loopback-only by design: all three servers bind `localhost`, nothing is exposed to the network.
 
 ## Native JS bridge (optional)
 

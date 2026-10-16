@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-1f6feb?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-1f6feb?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -13,7 +13,7 @@
 
 - **Telegram + Discord in one binary — unified message ingress**
 - **LLM-backed — routes through herd (`:25100`)**
-- **Sovereign port discipline — `:25102` via `YOTE_PORT`, per the ports SSOT**
+- **estate-scripts port discipline — `:25102` via `YOTE_PORT`, per the ports SSOT**
 - **Extracted from OpenFang — `crates/openfang-channels` lineage, standalone future**
 
 ```mermaid
@@ -35,8 +35,8 @@ TELEGRAM_BOT_TOKEN=... DISCORD_BOT_TOKEN=... LLM_ENDPOINT=http://127.0.0.1:25100
 
 ## License & security
 
-- **License:** [MIT](https://github.com/toxicwind/sovereign-projects#license)
-- **Security:** Bot tokens via environment variables — never in the repo. Binds per the sovereign ports SSOT (`YOTE_PORT`).
+- **License:** [MIT](https://github.com/toxicwind/estate-scripts-projects#license)
+- **Security:** Bot tokens via environment variables — never in the repo. Binds per the estate-scripts ports SSOT (`YOTE_PORT`).
 
 ---
 
@@ -72,7 +72,7 @@ export LLM_ENDPOINT=http://127.0.0.1:25100/v1
 ./target/release/yote
 ```
 
-## Ports (Sovereign SSOT)
+## Ports (estate-scripts SSOT)
 
 | Service | Port | Env Var |
 |---------|------|---------|

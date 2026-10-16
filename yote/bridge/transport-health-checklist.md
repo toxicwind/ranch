@@ -32,7 +32,7 @@ READ-ONLY reference. Do NOT modify; document only.
   subscriptions fall back to capped polling.
 
 ### awrawr-pc side — server `~/awrawr_ws_exec.py`
-- Managed by pitchfork as `sovereign/awrawr-ws-exec`; funnel route
+- Managed by pitchfork as `estate-scripts/awrawr-ws-exec`; funnel route
   `/exec-ws → 127.0.0.1:8379/exec-ws`. stdlib-only asyncio WS server.
   The push upgrade would need a server-side log-stream subscription frame
   (new frame type on the SAME connection) — that work is out of scope for

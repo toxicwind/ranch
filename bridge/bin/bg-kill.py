@@ -13,7 +13,7 @@ Prints one JSON doc: {"handle", "signaled": pid} or
 {"handle", "state": "not-running"/"bad-handle", ...}.
 
 Canonical source: projects/bridge/bin/bg-kill.py in
-toxicwind/sovereign-projects (bridge-max, 2026-09-20).
+toxicwind/estate-scripts-projects (bridge-max, 2026-09-20).
 """
 import json
 import os

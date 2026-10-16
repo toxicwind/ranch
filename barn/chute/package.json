@@ -1,5 +1,5 @@
 {
-  "name": "@sovereign/chute",
+  "name": "@estate-scripts/chute",
   "version": "0.1.0",
   "description": "TCP<->stdio ACP passage for the herd",
   "type": "module",

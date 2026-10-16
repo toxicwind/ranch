@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Dynamic model discovery for Sovereign AST Matrix
+Dynamic model discovery for estate-scripts AST Matrix
 Queries each provider's /models endpoint and builds the CODING dict.
 """
 
@@ -38,7 +38,7 @@ if os.getenv("NVIDIA_API_KEY"):
     results["nvidia"] = fetch("https://integrate.api.nvidia.com/v1", os.getenv("NVIDIA_API_KEY")); time.sleep(0.5)
 if os.getenv("OPENROUTER_API_KEY"):
     results["openrouter"] = fetch("https://openrouter.ai/api/v1", os.getenv("OPENROUTER_API_KEY"),
-        {"HTTP-Referer": "https://zed.dev", "X-Title": "Sovereign-Discovery"}); time.sleep(0.5)
+        {"HTTP-Referer": "https://zed.dev", "X-Title": "estate-scripts-Discovery"}); time.sleep(0.5)
 if os.getenv("GOOGLE_API_KEY"):
     results["google"] = fetch("https://generativelanguage.googleapis.com/v1beta/openai", os.getenv("GOOGLE_API_KEY")); time.sleep(0.5)
 if os.getenv("MISTRAL_API_KEY"):

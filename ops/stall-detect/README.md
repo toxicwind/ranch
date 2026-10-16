@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -37,7 +37,7 @@ Run on demand, never as a polling daemon (event-driven fleet reporting only).
 
 ## License & security
 
-- [MIT](https://github.com/toxicwind/sovereign-projects#license).
+- [MIT](https://github.com/toxicwind/estate-scripts-projects#license).
 - Diagnosis is hands-off unless the resume path says so. **Never kill anything from forensics alone** — the reaper never escalates, never closes, never diagnoses unknown text.
 
 ## Error-claim runbook (Q8/Q9/Q10) — executable, not prose

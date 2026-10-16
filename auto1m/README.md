@@ -4,8 +4,8 @@ No ceiling: an automatic composite that operates over ~1M tokens using the whole
 
 <div align="right">
 
-[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-main-6e56cf?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-main-6e56cf?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -13,14 +13,14 @@ No ceiling: an automatic composite that operates over ~1M tokens using the whole
 
 Some questions need a corpus bigger than any single model's window. The naive answer — "use a bigger model" — caps out; the real answer is a composite: chunk the corpus, extract facts in parallel, score them, collapse the tree until it fits, and cite every claim back to its chunk. This is that composite, model-agnostic, with a proof test over a real ~740k-token corpus. Never claim a model that doesn't serve — probe first.
 
-Status 2026-09-21: implemented, committed (`projects/auto1m/` on toxicwind/sovereign-projects main), 30/30 unit tests green on yote. Full proof green pending a capable worker (see Worker model).
+Status 2026-09-21: implemented, committed (`projects/auto1m/` on toxicwind/estate-scripts-projects main), 30/30 unit tests green on yote. Full proof green pending a capable worker (see Worker model).
 
 ```mermaid
 flowchart TB
     Q[query + oversized corpus] --> FIT{native-1M budget?}
     FIT -->|yes| DIRECT[direct call<br/>DeepSeek-V4-Pro via API]
     FIT -->|no| CHUNK[query-aware chunking<br/>sentence-aware · token-budgeted · overlap]
-    CHUNK --> MAP[MAP: parallel extractions<br/>sovereign router :25104<br/>one fact/line · Cxxxx tags]
+    CHUNK --> MAP[MAP: parallel extractions<br/>estate-scripts router :25104<br/>one fact/line · Cxxxx tags]
     MAP --> SCORE[SCORE: batched LLM relevance<br/>ExtAgents-style · keyword fallback]
     SCORE --> REDUCE[REDUCE: tree-collapse loop<br/>until facts fit]
     REDUCE --> ANS[final answer<br/>mandatory Cxxxx citations]
@@ -35,8 +35,8 @@ query + oversized corpus
   └─ no ──▶ COMPOSITE
                ├─ query-aware chunking (sentence-aware, token-budgeted, overlap;
                │   chunks ranked by query-term overlap — most relevant maps first)
-               ├─ MAP: parallel extractions via sovereign router :25104
-               │   (model sovereign/free), one fact per line, [Cxxxx] tags.
+               ├─ MAP: parallel extractions via estate-scripts router :25104
+               │   (model estate-scripts/free), one fact per line, [Cxxxx] tags.
                │   Fail-fast per call (120s), errors recorded, never retried.
                ├─ SCORE: batched LLM relevance scoring (ExtAgents-style),
                │   keyword fallback if scoring fails
@@ -68,15 +68,15 @@ AUTO1M_MODEL=<honest-worker> python3 test_auto1m.py
 
 | Var | Default | Meaning |
 |---|---|---|
-| `AUTO1M_ROUTER` | `http://127.0.0.1:25104` | OpenAI-compatible chat endpoint (sovereign router on yote) |
-| `AUTO1M_MODEL` | `sovereign/free` | map/score/reduce worker (see below) |
+| `AUTO1M_ROUTER` | `http://127.0.0.1:25104` | OpenAI-compatible chat endpoint (estate-scripts router on yote) |
+| `AUTO1M_MODEL` | `estate-scripts/free` | map/score/reduce worker (see below) |
 | `AUTO1M_DIRECT_MODEL` | `deepseek/deepseek-v4-pro-0813` | native-1M direct lane (must serve via router) |
 | `AUTO1M_WORKERS` | `8` | parallel map threads |
 | `AUTO1M_RETRIES` | `3` | bounded retry on transient 503/429 only |
 
 ## Worker model
 
-Map/score/reduce calls default to `sovereign/free` (task spec: the Sovereign Router picks the worker and fails over). Override with `AUTO1M_MODEL`:
+Map/score/reduce calls default to `estate-scripts/free` (task spec: the estate-scripts Router picks the worker and fails over). Override with `AUTO1M_MODEL`:
 
 ```bash
 AUTO1M_MODEL=beellama/qwen-flash-256k python3 test_auto1m.py
@@ -84,7 +84,7 @@ AUTO1M_MODEL=beellama/qwen-flash-256k python3 test_auto1m.py
 
 Measured, not assumed (2026-09-21, live probes on yote):
 
-- `sovereign/free` on :25104 served the local **EXAONE-4.0-1.2B** (1.6s/call). Perfect mini-extraction on a toy chunk, but on real doc chunks it echoed schema words ("chunk", "ok", "facts", "secs") instead of extracting, and inverted/hallucinated facts on the full corpus. Not a proof-capable worker.
+- `estate-scripts/free` on :25104 served the local **EXAONE-4.0-1.2B** (1.6s/call). Perfect mini-extraction on a toy chunk, but on real doc chunks it echoed schema words ("chunk", "ok", "facts", "secs") instead of extracting, and inverted/hallucinated facts on the full corpus. Not a proof-capable worker.
 - `deepseek/deepseek-v4-pro-0813` listed on :25104/v1/models but 503'd (OpenRouter 429 / provider outage wave; at one point ALL :25104 chat completions 503'd with every provider circuit open or lane-dead).
 - Local herd models (qwen-flash-256k/64k, gemma-128k) returned HTTP 200 with EMPTY content (broken backend); only EXAONE-4.0-1.2B produced text.
 - Briefly, `gemini/gemini-3.5-flash` routed to the REAL keyed nvidia/nemotron-3-super-120b-a12b but returned truncated output, then the route flapped 503. The keyed nemotron lane itself passed a genuine 1M needle retrieval earlier the same day (1m-prober, 41.4s) — the lane is real, its router circuit is flapping.
@@ -92,7 +92,7 @@ Measured, not assumed (2026-09-21, live probes on yote):
 
 The architecture is model-agnostic: proof runs name the actual serving worker in `test-evidence.json`. Never claim a model that doesn't serve — probe first. Probe scripts: `tools/` in the repo.
 
-`sovereign/free` stays the DEFAULT because it is the router's auto-pick lane (Elo + health) — but the proof test names the worker that actually served.
+`estate-scripts/free` stays the DEFAULT because it is the router's auto-pick lane (Elo + health) — but the proof test names the worker that actually served.
 
 ## Proof (2026-09-21)
 
@@ -108,10 +108,10 @@ Pass criteria: composite lane chosen for all questions, all EXPECT phrases prese
 
 ## Non-goals
 
-- Does not modify `sovereign-router-ts`, herd, or any live config — it is a consumer of the routers, and model selection belongs to router config.
+- Does not modify `estate-scripts-router-ts`, herd, or any live config — it is a consumer of the routers, and model selection belongs to router config.
 - No local 1M inference: DeepSeek-V4-Pro is 1.6T MoE — the direct lane is API-only, never local.
 - Token estimates are chars/4 (no tiktoken on yote); budgets are conservative.
 
 ## License & security
 
-MIT where marked — [LICENSE](https://github.com/toxicwind/sovereign-projects#license). The proof's integrity rule is stated in the pass criteria: citations that don't resolve to real chunks fail closed, and fabricated citations are rewritten, not passed through. `test-evidence.json` names the actual serving worker — never present a composite answer as model-direct.
+MIT where marked — [LICENSE](https://github.com/toxicwind/estate-scripts-projects#license). The proof's integrity rule is stated in the pass criteria: citations that don't resolve to real chunks fail closed, and fabricated citations are rewritten, not passed through. `test-evidence.json` names the actual serving worker — never present a composite answer as model-direct.

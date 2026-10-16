@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # orphan-sweep.sh — repeatable yote PROCESS orphan audit (processes scope ONLY).
-# Part of the pack-fix crew, sovereign-projects: projects/pack-fix/bin/orphan-sweep.sh
+# Part of the pack-fix crew, estate-scripts-projects: projects/pack-fix/bin/orphan-sweep.sh
 #
 # What it does:
 #   1. Snapshots the full userspace process table on yote.
@@ -63,7 +63,7 @@ ALLOW=(
   'ml-serve/server\.py'
   'bench-radar/server\.ts'
   'mesh-front\.ts|mesh-hub\.ts|mesh-landing|landing\.py'
-  'router\.ts|chat\.ts|src/server\.ts|sovereign_web|next-server|next dev|postcss\.js|dashboard/server\.ts|ralph-dashboard|kimi-code'
+  'router\.ts|chat\.ts|src/server\.ts|estate-scripts_web|next-server|next dev|postcss\.js|dashboard/server\.ts|ralph-dashboard|kimi-code'
   'qdrant-server|prometheus|grafana|node_exporter|nginx: (master|worker) process'
   'valkey-server|redis-server'
   'dnsmasq.*cni|dagger-engine'

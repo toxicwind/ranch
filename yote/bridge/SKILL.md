@@ -69,7 +69,7 @@ head. Quiet long commands survive up to the requested command timeout
 Server side: `~/awrawr_ws_exec.py` on awrawr-pc, a stdlib-only asyncio
 websocket server (handshake/framing borrowed from
 `/home/toxic/squawk-ws/squawk_ws_server.py`). Managed by pitchfork as
-`sovereign/awrawr-ws-exec`; funnel route `/exec-ws -> 127.0.0.1:8379/exec-ws`
+`estate-scripts/awrawr-ws-exec`; funnel route `/exec-ws -> 127.0.0.1:8379/exec-ws`
 (added surgically via LocalAPI, existing routes untouched). It reuses the
 token, command policy, and audit log of `~/awrawr_mcp.py` — same auth
 boundary, audit records carry `"transport": "ws"`. It runs under the

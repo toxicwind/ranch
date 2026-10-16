@@ -52,7 +52,7 @@ func NewOpenRouterProvider() *OpenRouterProvider {
 				r.Out.Header.Set("Authorization", "Bearer "+p.apiKey)
 				r.Out.Header.Set("x-api-key", p.apiKey)
 				r.Out.Header.Set("HTTP-Referer", "https://github.com/toxicwind/herd")
-				r.Out.Header.Set("X-Title", "Herd Sovereign")
+				r.Out.Header.Set("X-Title", "Herd estate-scripts")
 			}
 		},
 		ModifyResponse: func(resp *http.Response) error {

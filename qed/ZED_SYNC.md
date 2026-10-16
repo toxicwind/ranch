@@ -11,7 +11,7 @@ merge itself is a separate, scheduled operation (see §5).
 | History in estate-projects | 2 commits (imported 2026-09-07, `1900610cf3` de-submodule) | Not present |
 | Shared ancestry | **None** — file copy, not subtree/filter-repo | Full upstream + fork history |
 | Version (workspace `Cargo.toml`) | 0.61 (app 1.13.0-era) | 0.61 (app 1.17.0-era) |
-| Sovereign deltas | Schema-normalizer extraction (`a87f5e5189`), provider set | Custom providers (pre-extraction triplicated normalizers) |
+| estate-scripts deltas | Schema-normalizer extraction (`a87f5e5189`), provider set | Custom providers (pre-extraction triplicated normalizers) |
 | Diff surface (2026-09-20) | 697 differing files, 16 paths only here, 299 only there | — |
 
 Neither tree is blindly replaceable: the embedded tree carries today's
@@ -56,7 +56,7 @@ and a repeatable forward-sync path.
    for c in a87f5e5189 db4179319a 7ac0dc03b6; do git cherry-pick -n "$c"; done
    ```
    Conflict strategy per file class:
-   - Sovereign-authored files (`schema_normalizer.rs`, `zedra/*`,
+   - estate-scripts-authored files (`schema_normalizer.rs`, `zedra/*`,
      `README.md`, `ZED_SYNC.md`) — take the QED version outright.
    - `settings_ui` 2-line `autonomous_edits` fix — apply by hand if the
      fork's provider page drifted.

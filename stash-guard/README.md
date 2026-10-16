@@ -8,7 +8,7 @@
 </div>
 
 Autonomous WIP flight-recorder + drop-proof stash vault for the
-sovereign/tau monorepo (and, in `--deep` mode, every git repo on the box).
+estate-scripts/tau monorepo (and, in `--deep` mode, every git repo on the box).
 `git stash drop` and `git stash clear` can no longer lose work — every live
 stash entry is pinned at a guard ref that survives.
 

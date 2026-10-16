@@ -5,7 +5,7 @@
   "visibility": "private",
   "status": "pushed",
   "duplicate_path": "",
-  "notes": "Dedupe: ffs hits only in spark migration manifests, not estate code. USPS presort-line/permit-indicia/address-plate/campaign-disclaimer/Gutenberg-layout OCR parsing engine, zero-dependency ESM. Renamed package @sovereign/postal-spectre -> postal-spectre-usps; removed 5 unused deps and dead lint/format/build scripts; added repository/bugs/homepage; fixed 2 stale name refs; wrote README with API ver",
+  "notes": "Dedupe: ffs hits only in spark migration manifests, not estate code. USPS presort-line/permit-indicia/address-plate/campaign-disclaimer/Gutenberg-layout OCR parsing engine, zero-dependency ESM. Renamed package @estate-scripts/postal-spectre -> postal-spectre-usps; removed 5 unused deps and dead lint/format/build scripts; added repository/bugs/homepage; fixed 2 stale name refs; wrote README with API ver",
   "batch": 1
  },
  {
@@ -18,8 +18,8 @@
   "batch": 1
  },
  {
-  "new_name": "sovereign-hatch-toolkit",
-  "github_repo": "toxicwind/sovereign-hatch-toolkit",
+  "new_name": "estate-scripts-hatch-toolkit",
+  "github_repo": "toxicwind/estate-scripts-hatch-toolkit",
   "visibility": "private",
   "status": "pushed",
   "duplicate_path": "",
@@ -27,8 +27,8 @@
   "batch": 1
  },
  {
-  "new_name": "sovereign-mesh",
-  "github_repo": "toxicwind/sovereign-mesh",
+  "new_name": "estate-scripts-mesh",
+  "github_repo": "toxicwind/estate-scripts-mesh",
   "visibility": "private",
   "status": "pushed",
   "duplicate_path": "",
@@ -113,7 +113,7 @@
   "visibility": "private",
   "status": "pushed",
   "duplicate_path": "",
-  "notes": "Tests/benchmarks 3/3 pass. package.json renamed @sovereign/dual-space-code-retriever -> dualspace-ast-bm25. ls-remote verified.",
+  "notes": "Tests/benchmarks 3/3 pass. package.json renamed @estate-scripts/dual-space-code-retriever -> dualspace-ast-bm25. ls-remote verified.",
   "batch": 3
  },
  {
@@ -131,7 +131,7 @@
   "visibility": "private",
   "status": "pushed",
   "duplicate_path": "",
-  "notes": "Real fixes: 5 tsc errors — typed MCPInitializeResult/MCPToolCallResult contracts added to src/protocol/mcp.ts, duplicate SearchResult/ToonSavingsResult interfaces deleted from src/types.ts. bun test 62/62. README rewritten (org sovereign-systems -> toxicwind); package.json @sovereign/gatehouse -> gatehouse. ls-remote verified.",
+  "notes": "Real fixes: 5 tsc errors — typed MCPInitializeResult/MCPToolCallResult contracts added to src/protocol/mcp.ts, duplicate SearchResult/ToonSavingsResult interfaces deleted from src/types.ts. bun test 62/62. README rewritten (org estate-scripts-systems -> toxicwind); package.json @estate-scripts/gatehouse -> gatehouse. ls-remote verified.",
   "batch": 3
  },
  {
@@ -140,7 +140,7 @@
   "visibility": "private",
   "status": "pushed",
   "duplicate_path": "",
-  "notes": "node --test 22/22. README rewritten (clone URL sovereign-infrastructure -> toxicwind); package.json @sovereign/keypool -> herd-keypool-gateway. ls-remote verified.",
+  "notes": "node --test 22/22. README rewritten (clone URL estate-scripts-infrastructure -> toxicwind); package.json @estate-scripts/keypool -> herd-keypool-gateway. ls-remote verified.",
   "batch": 3
  },
  {
@@ -180,12 +180,12 @@
   "batch": 4
  },
  {
-  "new_name": "sovereign-skills-hub",
-  "github_repo": "toxicwind/sovereign-skills-hub",
+  "new_name": "estate-scripts-skills-hub",
+  "github_repo": "toxicwind/estate-scripts-skills-hub",
   "visibility": "private",
   "status": "pushed",
   "duplicate_path": "",
-  "notes": "Zero-dep Node.js skill monorepo engine (GraSP router, paper finder, validator, loader). Only 1 skill (sovereign-master-orchestrator) is staged under skills/ — the other 83 of the original 84-skill manifest were never staged anywhere (searched all dropbox shards + tarballs); a separate consolidation lane staged real skill bodies to ~/workspace/skills and /home/toxic/estate/skills, not into this ",
+  "notes": "Zero-dep Node.js skill monorepo engine (GraSP router, paper finder, validator, loader). Only 1 skill (estate-scripts-master-orchestrator) is staged under skills/ — the other 83 of the original 84-skill manifest were never staged anywhere (searched all dropbox shards + tarballs); a separate consolidation lane staged real skill bodies to ~/workspace/skills and /home/toxic/estate/skills, not into this ",
   "batch": 4
  },
  {
@@ -194,7 +194,7 @@
   "visibility": "private",
   "status": "pushed",
   "duplicate_path": "",
-  "notes": "Bun/Node dual-runtime AI keypool gateway (hedged key racing, status-aware circuit breakers, model virtualization, OpenAI-compatible /v1). 17/17 tests pass (node --test), node --check lint clean, no code fixes needed. Renamed package keypool -> @sovereign/universal-keypool-bun. Secret scan clean.",
+  "notes": "Bun/Node dual-runtime AI keypool gateway (hedged key racing, status-aware circuit breakers, model virtualization, OpenAI-compatible /v1). 17/17 tests pass (node --test), node --check lint clean, no code fixes needed. Renamed package keypool -> @estate-scripts/universal-keypool-bun. Secret scan clean.",
   "batch": 4
  },
  {

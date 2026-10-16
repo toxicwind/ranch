@@ -1,13 +1,13 @@
 {
   "shard": "a",
   "entries": [
-    "Sovereign",
-    "Sovereign_Artifacts_Bundle",
+    "estate-scripts",
+    "estate-scripts_Artifacts_Bundle",
     "Functional Programming in Scala.pdf",
-    "Sovereign_Star_Repo_Ranch_Interlock_20260929T220000",
-    "sovereign-master-fix.sh",
-    "Sovereign_Star_Repo_Olfactory_Headspace_Engine_20260929T134000",
-    "Sovereign_Star_Repo_Universal_KeyPool_Bun_20260929T141500"
+    "estate-scripts_Star_Repo_Ranch_Interlock_20260929T220000",
+    "estate-scripts-master-fix.sh",
+    "estate-scripts_Star_Repo_Olfactory_Headspace_Engine_20260929T134000",
+    "estate-scripts_Star_Repo_Universal_KeyPool_Bun_20260929T141500"
   ],
   "files": 96,
   "bytes": 13005903,

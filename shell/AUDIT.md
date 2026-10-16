@@ -86,7 +86,7 @@ IPC reachability and fails loudly if it regresses.
 
 ## F. Git state (pre-existing, preserved)
 
-- Sovereign repo root `/home/toxic/estate`; `fff4dcae9f` verified on origin/main
+- estate-scripts repo root `/home/toxic/estate`; `fff4dcae9f` verified on origin/main
   (`merge-base --is-ancestor fff4dcae9f origin/main` → yes).
 - Pre-existing dirt, NOT touched by this redo:
   - `M pitchfork.toml` — +5 comment lines (chat-coord retirement note, unrelated).

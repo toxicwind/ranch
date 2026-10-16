@@ -4,7 +4,7 @@
  * Ported from proxy/src/observation.rs
  *
  * Metric names are LOAD-BEARING.  flock_model_empty_strikes intentionally
- * mirrors sovereign_router_model_empty_strikes so the two stacks can be
+ * mirrors estate-scripts_router_model_empty_strikes so the two stacks can be
  * correlated during the migration.  Renaming a metric silently breaks dashboards.
  */
 

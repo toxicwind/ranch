@@ -3,7 +3,7 @@
 
 No single model here has a 1M-token window, so this route *composes* one:
 oversized inputs are chunked, mapped in parallel across the model fleet via
-the sovereign router, and tree-reduced to a single answer with provenance.
+the estate-scripts router, and tree-reduced to a single answer with provenance.
 When the prompt fits a native 1M model, it routes direct (no map-reduce tax).
 
 Design lineage (repos cloned + read on yote, code-verified):
@@ -26,14 +26,14 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Router base: env-overridable. On yote the sovereign router is :25104;
+# Router base: env-overridable. On yote the estate-scripts router is :25104;
 # elsewhere point AUTO1M_ROUTER at whatever OpenAI-compatible router serves.
 ROUTER = os.environ.get("AUTO1M_ROUTER", "http://127.0.0.1:25104")
 # Worker model for map/score/reduce calls. Default is the task-spec'd
-# sovereign/free route; override via env for runs needing a stronger worker,
+# estate-scripts/free route; override via env for runs needing a stronger worker,
 # e.g. AUTO1M_MODEL=beellama/qwen-flash-256k (the free route currently serves
 # a 1.2B local model whose extractions are unreliable — proven 2026-09-21).
-MAP_MODEL = os.environ.get("AUTO1M_MODEL", "sovereign/free")
+MAP_MODEL = os.environ.get("AUTO1M_MODEL", "estate-scripts/free")
 DIRECT_MODEL = os.environ.get("AUTO1M_DIRECT_MODEL", "deepseek/deepseek-v4-pro-0813")  # native ~1M lane; must serve through ROUTER (probe before trusting)
 CHUNK_TOKENS = 4000                        # safe for free-tier / local workers
 CHUNK_OVERLAP_TOKENS = 200

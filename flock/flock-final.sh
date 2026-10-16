@@ -27,8 +27,8 @@ WIZARD_URL="http://127.0.0.1:25193/"
 REPO="${FLOCK_REPO:-$HOME/projects/flock}"
 BIN_DST="$HOME/.flock/flock"
 DATA_DIR="$HOME/.flock-data"
-PITCHFORK_TOML="$HOME/projects/sovereign-projects/pitchfork.toml"
-ENGINE="$HOME/projects/sovereign-projects/tau/engine"
+PITCHFORK_TOML="$HOME/projects/estate-scripts-projects/pitchfork.toml"
+ENGINE="$HOME/projects/estate-scripts-projects/tau/engine"
 
 say()  { echo "  $*"; }
 dry()  { echo "  [dry-run] $*"; }

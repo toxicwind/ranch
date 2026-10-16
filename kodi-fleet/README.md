@@ -1,7 +1,7 @@
 <div align="right">
 
-[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-kodi-fleet-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-kodi-fleet-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -16,7 +16,7 @@ flowchart LR
 
 # kodi-fleet
 
-One-shot Kodi tooling + audit for the two-box fleet. Lives in the sovereign repo;
+One-shot Kodi tooling + audit for the two-box fleet. Lives in the estate-scripts repo;
 runs from awrawr-pc (has the LAN route + SSH).
 
 ## Boxes
@@ -81,7 +81,7 @@ Keep the repo source canonical; re-deploy after edits.
 
 ## License & security
 
-**License:** MIT — [sovereign-projects LICENSE](https://github.com/toxicwind/sovereign-projects#license).
+**License:** MIT — [estate-scripts-projects LICENSE](https://github.com/toxicwind/estate-scripts-projects#license).
 
 - Box 246 is reached over SSH (`root`/`coreelec`) and both boxes expose JSON-RPC on `:8080` **with no auth** — this tooling assumes a trusted LAN. Change the CoreELEC default credentials and never expose these ports beyond your LAN.
 - `kodi-audit settings --dupe` and `kodi-resume --apply` mutate box state; every mutating path defaults to dry-run / report-only by design.

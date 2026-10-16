@@ -273,10 +273,10 @@ def _resolve_ralph_model(base_url, timeout=15):
 # overlapping work. The oracle rejects unattested bids
 # (bid_rejected{reason:no-attestation}, SPEC §10) — so a bidder
 # that cannot attest must skip the bid loudly, never bid blind.
-KB_COMMITS_API = ("https://api.github.com/repos/toxicwind/sovereign-projects"
+KB_COMMITS_API = ("https://api.github.com/repos/toxicwind/estate-scripts-projects"
                   "/commits?path=docs/fleet-knowledgebase.md&per_page=1")
 KB_RAW_URL = ("https://raw.githubusercontent.com/toxicwind/"
-              "sovereign-projects/main/docs/fleet-knowledgebase.md")
+              "estate-scripts-projects/main/docs/fleet-knowledgebase.md")
 KB_CACHE = BIN.parent / "work" / "kb-attestation-cache.json"  # runtime cache: regenerable, untracked
 KB_HTTP_TIMEOUT = 10
 
@@ -944,7 +944,7 @@ class Bidder:
 
         Corral is the ticket-driven agent orchestrator (Smithers); the task
         payload IS the ticket prompt. Model calls route through the claude
-        NIM shim (CORRAL_BASE_URL, default :25104 sovereign router --
+        NIM shim (CORRAL_BASE_URL, default :25104 estate-scripts router --
         verified live 2026-10-12). Headless stdout carries the final reply.
         On corral failure the caller falls back to super-ralph -- a dead
         backend must never no-result a task another backend could run.
@@ -960,7 +960,7 @@ class Bidder:
         cenv = dict(env)
         cenv["NIM_BASE_URL"] = CORRAL_BASE_URL
         cenv["ANTHROPIC_BASE_URL"] = CORRAL_BASE_URL
-        cenv["SOVEREIGN_ROUTER_URL"] = CORRAL_BASE_URL
+        cenv["estate-scripts_ROUTER_URL"] = CORRAL_BASE_URL
         # 2026-10-12 (oracle-repair): the oracle's exec deadline is
         # assign_ts + timeout_ms/1000, but the bidder starts the
         # subprocess after assignment. Leave room to preserve evidence

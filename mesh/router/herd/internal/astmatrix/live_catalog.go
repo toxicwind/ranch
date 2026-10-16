@@ -35,7 +35,7 @@ import (
 // LiveCatalogPath resolves the live catalog file path: env override first,
 // then the TS router's default state location.
 func LiveCatalogPath() string {
-	if p := os.Getenv("SOVEREIGN_LIVE_CATALOG"); p != "" {
+	if p := os.Getenv("estate-scripts_LIVE_CATALOG"); p != "" {
 		return p
 	}
 	return "/home/toxic/estate/.state/provider-catalog.live.json"
@@ -49,7 +49,7 @@ type liveCatalogProvider struct {
 
 const (
 	liveCatalogContract       = "ranch-roost/live-catalog/v1"
-	legacyLiveCatalogContract = "sovereign-providers/live-catalog/v1"
+	legacyLiveCatalogContract = "estate-scripts-providers/live-catalog/v1"
 )
 
 type liveCatalogData struct {
@@ -165,9 +165,9 @@ func (r *LiveCatalogReader) SyncProviderModels(providers map[string]*provider) {
 // ------------------------------------------------------------------
 
 // serve404Endpoint is the TS router's 404 intake. Override with
-// SOVEREIGN_CATALOG_404_URL. Empty disables reporting.
+// estate-scripts_CATALOG_404_URL. Empty disables reporting.
 func serve404Endpoint() string {
-	if u := os.Getenv("SOVEREIGN_CATALOG_404_URL"); u != "" {
+	if u := os.Getenv("estate-scripts_CATALOG_404_URL"); u != "" {
 		return u
 	}
 	return "http://127.0.0.1:25104/admin/catalog/serve-404"
@@ -188,7 +188,7 @@ func reportServe404(provider, model string) {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	if tok := os.Getenv("SOVEREIGN_CATALOG_ADMIN_TOKEN"); tok != "" {
+	if tok := os.Getenv("estate-scripts_CATALOG_ADMIN_TOKEN"); tok != "" {
 		req.Header.Set("Authorization", "Bearer "+tok)
 	}
 	client := &http.Client{Timeout: 5 * time.Second}

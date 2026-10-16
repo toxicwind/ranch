@@ -154,7 +154,7 @@ describe("Router", () => {
     const resp = await r.handleRequest(
       new Request("http://x/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-Sovereign-Strategy": "free" },
+        headers: { "Content-Type": "application/json", "X-estate-scripts-Strategy": "free" },
         body: JSON.stringify({ model: "auto", messages: [] }),
       }),
     );

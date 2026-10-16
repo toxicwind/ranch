@@ -10,7 +10,7 @@
    "visibility": "private",
    "status": "pushed",
    "sha": "b6d32041c3a1c1d94342c6fed0224e7f1128c435",
-   "notes": "Tests/benchmarks 3/3 pass. package.json renamed @sovereign/dual-space-code-retriever -> dualspace-ast-bm25. ls-remote verified."
+   "notes": "Tests/benchmarks 3/3 pass. package.json renamed @estate-scripts/dual-space-code-retriever -> dualspace-ast-bm25. ls-remote verified."
   },
   {
    "source_dir": "dualspace-ast-bm25-v2",
@@ -28,7 +28,7 @@
    "visibility": "private",
    "status": "pushed",
    "sha": "a5eb1e265e98c3120c0831eba8046e05bdfa89b4",
-   "notes": "Real fixes: 5 tsc errors — typed MCPInitializeResult/MCPToolCallResult contracts added to src/protocol/mcp.ts, duplicate SearchResult/ToonSavingsResult interfaces deleted from src/types.ts. bun test 62/62. README rewritten (org sovereign-systems -> toxicwind); package.json @sovereign/gatehouse -> gatehouse. ls-remote verified."
+   "notes": "Real fixes: 5 tsc errors — typed MCPInitializeResult/MCPToolCallResult contracts added to src/protocol/mcp.ts, duplicate SearchResult/ToonSavingsResult interfaces deleted from src/types.ts. bun test 62/62. README rewritten (org estate-scripts-systems -> toxicwind); package.json @estate-scripts/gatehouse -> gatehouse. ls-remote verified."
   },
   {
    "source_dir": "herd-keypool-gateway",
@@ -37,7 +37,7 @@
    "visibility": "private",
    "status": "pushed",
    "sha": "deeb7a0f4e973c3e53da97105051153d6462c830",
-   "notes": "node --test 22/22. README rewritten (clone URL sovereign-infrastructure -> toxicwind); package.json @sovereign/keypool -> herd-keypool-gateway. ls-remote verified."
+   "notes": "node --test 22/22. README rewritten (clone URL estate-scripts-infrastructure -> toxicwind); package.json @estate-scripts/keypool -> herd-keypool-gateway. ls-remote verified."
   },
   {
    "source_dir": "hyper-racer",

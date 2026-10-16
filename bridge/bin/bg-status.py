@@ -17,7 +17,7 @@ resume from; feed them back to the next call). Negative offset means
 "last N bytes".
 
 Canonical source: projects/bridge/bin/bg-status.py in
-toxicwind/sovereign-projects (bridge-max, 2026-09-20; offset attach
+toxicwind/estate-scripts-projects (bridge-max, 2026-09-20; offset attach
 added by lane-oracle-connector, 2026-09-20).
 """
 import base64

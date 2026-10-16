@@ -1,5 +1,5 @@
 #!/bin/bash
-# qs-launch — canonical quickshell launcher (sovereign/projects/shell).
+# qs-launch — canonical quickshell launcher (estate-scripts/projects/shell).
 # Usage: qs-launch [-c CONFIG] [--systemd] [quickshell args...]
 #   default: single-instance guarded, env auto-detected, detached via setsid,
 #            logs to ~/.local/state/quickshell/launch.log, DP-1/DP-2 sanity check.

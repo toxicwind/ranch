@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * lock.ts — advisory file lock for sovereign shared config files.
+ * lock.ts — advisory file lock for estate-scripts shared config files.
  *
  * Uses atomic mkdir(2) + PID file for cross-process locking.
  * Every agent that modifies config.yaml, opencode.json, or any shared
@@ -18,7 +18,7 @@ import { mkdir, rmdir, writeFile, readFile } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 
-const LOCK_DIR = "/tmp/sovereign-locks";
+const LOCK_DIR = "/tmp/estate-scripts-locks";
 
 function lockPath(name: string): string {
   const safe = name.replace(/[^a-zA-Z0-9._-]/g, "_");

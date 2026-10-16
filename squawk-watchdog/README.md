@@ -11,9 +11,9 @@ Keeps the two Squawk fleet transports alive on awrawr-pc — because the
 fleet's nervous system is useless if the wires are down:
 
 - `squawk-ws` — WebSocket push feed, `127.0.0.1:25147` (pitchfork
-  `sovereign/squawk-ws`)
+  `estate-scripts/squawk-ws`)
 - `squawk-feed` — fat long-poll relay-out, `127.0.0.1:25135` (pitchfork
-  `sovereign/squawk-feed`)
+  `estate-scripts/squawk-feed`)
 
 ```mermaid
 flowchart LR

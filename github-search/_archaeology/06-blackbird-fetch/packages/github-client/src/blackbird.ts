@@ -81,7 +81,7 @@ function firefoxProfileCandidates(): string[] {
   const explicit = process.env.GHAS_FIREFOX_PROFILE;
   if (explicit) out.push(explicit);
 
-  // Canonical sovereign / modern Firefox (profiles.ini lives under .config)
+  // Canonical estate-scripts / modern Firefox (profiles.ini lives under .config)
   const configFf = resolve(HOME, ".config/mozilla/firefox");
   const classicFf = resolve(HOME, ".mozilla/firefox");
   for (const base of [configFf, classicFf]) {

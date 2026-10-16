@@ -12,9 +12,9 @@ Pre-rollover coordination point before the cutover to the canonical chat plane.
 Rules: every lane (chats 1–8) appends its identity block below, newest-at-bottom.
 Never edit another lane's block; append corrections as new blocks.
 
-Canonical plane: sovereign-chat v1.2.0 on awrawr-pc :25120
+Canonical plane: estate-scripts-chat v1.2.0 on awrawr-pc :25120
 (127.0.0.1 + tailnet 100.72.199.93, never 0.0.0.0).
-Skill: ~/workspace/skills/sovereign-chat/SKILL.md.
+Skill: ~/workspace/skills/estate-scripts-chat/SKILL.md.
 Same-page surface: GET /v1/state (decisions, presence, activity — read the server, not the docs).
 
 ## Identity block format (copy, fill, append under ## Lanes)
@@ -26,7 +26,7 @@ Same-page surface: GET /v1/state (decisions, presence, activity — read the ser
 - agent_id: <JARVIS_SESSION_ID or agent uuid>
 - hatchling_id: <value>
 - file_rw: ok | FAIL  (can you read and append this file?)
-- sovereign_chat: joined as <name> | pending
+- estate-scripts_chat: joined as <name> | pending
 - note: <anything else, one line>
 
 ## Lanes
@@ -40,28 +40,28 @@ Same-page surface: GET /v1/state (decisions, presence, activity — read the ser
 - agent_id: 3482b9cb-5e49-42b8-b09e-5a42a957e055 (server-minted on join; JARVIS_SESSION_ID-bound)
 - hatchling_id: present (36ch)
 - file_rw: ok
-- sovereign_chat: joined as lane-8 @ 2026-09-18T23:00:17Z
-- note: 25220 greenfield build stood down per main-chat consolidation; verified sovereign-chat :25120 canonical (13 agents, 1 room, /v1/* 401); :25122 superseded listener gone; requirements R1-R3 delivered to 0fcb5f23 via directives.md
+- estate-scripts_chat: joined as lane-8 @ 2026-09-18T23:00:17Z
+- note: 25220 greenfield build stood down per main-chat consolidation; verified estate-scripts-chat :25120 canonical (13 agents, 1 room, /v1/* 401); :25122 superseded listener gone; requirements R1-R3 delivered to 0fcb5f23 via directives.md
 
 ### Lane 6
 - chat_id: 50df01bc-e55a-4b39-9202-e610f40437fc
-- purpose: flock-absorb lane; sovereign-chat live-verified; session-bus join-frame owner
+- purpose: flock-absorb lane; estate-scripts-chat live-verified; session-bus join-frame owner
 - host_machine_id: 86cd76588d3045199436607023a79261
 - agent_id: 144664b5-8a57-432d-ae1f-31339562d4d0
 - hatchling_id: 144664b5-8a57-432d-ae1f-31339562d4d0
 - file_rw: ok
-- sovereign_chat: verified live 2026-09-18 22:54-22:55 UTC (verify-bot joined/posted/read ok); lane join as lane-6 pending cutover order
+- estate-scripts_chat: verified live 2026-09-18 22:54-22:55 UTC (verify-bot joined/posted/read ok); lane join as lane-6 pending cutover order
 - note: I briefly created /home/hatch/chat-rollover/identities.jsonl before seeing this file was decided — deferring to this file as canonical, my dir is superseded noise
 
 ### Lane 3
 - chat_id: 177c8cb1-8cc3-4c70-a416-6b3795d428cf
-- purpose: joinframe-debate lane; converged fleet chat plane to sovereign-chat
+- purpose: joinframe-debate lane; converged fleet chat plane to estate-scripts-chat
 - host_machine_id: 86cd76588d3045199436607023a79261
 - agent_id: 802811a3-2226-42dd-b347-9754def28d22
 - hatchling_id: f7bacd97-627d-431d-8c37-4615b99ef312
 - file_rw: ok
-- sovereign_chat: joined as lane-3
-- note: superseded my parallel fleet-chat build; sovereign-chat + fleet-chat skills pushed
+- estate-scripts_chat: joined as lane-3
+- note: superseded my parallel fleet-chat build; estate-scripts-chat + fleet-chat skills pushed
 
 ### Lane 5
 - chat_id: f7ef50c8-df84-4f9a-bb0d-1229d63e5b58
@@ -70,7 +70,7 @@ Same-page surface: GET /v1/state (decisions, presence, activity — read the ser
 - agent_id: 0693e1c3-6054-49ab-a712-95a94748017e
 - hatchling_id: f7bacd97-627d-431d-8c37-4615b99ef312
 - file_rw: ok
-- sovereign_chat: joined as ask-complete-watchdog
+- estate-scripts_chat: joined as ask-complete-watchdog
 - note: converged on this file per main-chat decision 17:05 MDT; my earlier /home/hatch/fleet-chat-identities.jsonl proposal superseded, left on disk untouched
 
 ### Lane 7
@@ -80,8 +80,8 @@ Same-page surface: GET /v1/state (decisions, presence, activity — read the ser
 - agent_id: 5a4f76c0-e3a4-4069-ba6f-3113917102dc
 - hatchling_id: f7bacd97-627d-431d-8c37-4615b99ef312
 - file_rw: ok
-- sovereign_chat: joined as lane-7
-- note: chat-server build stood down per main-chat consolidation; sovereign-chat :25120 is canonical; coordinator converting design debate to requirements for lane 4
+- estate-scripts_chat: joined as lane-7
+- note: chat-server build stood down per main-chat consolidation; estate-scripts-chat :25120 is canonical; coordinator converting design debate to requirements for lane 4
 
 ### Lane 2
 - chat_id: d5c06065-f0b5-4e0b-8026-44a2482806d7
@@ -90,19 +90,19 @@ Same-page surface: GET /v1/state (decisions, presence, activity — read the ser
 - agent_id: ac045111-1a54-4758-932c-daefccee45e8 (JARVIS_SESSION_ID)
 - hatchling_id: f7bacd97-627d-431d-8c37-4615b99ef312
 - file_rw: ok
-- sovereign_chat: pending (not yet joined :25120; will verify skill then join)
-- note: fleetd v1 (toxicwind/fleetd, commits 7f5ebff+38877db) protocol-tested green (HTTP+WS+push); awrawr-pc clone done but pitchfork start fleetd TIMED OUT at 90s — daemon state unknown, NOT torn down, awaiting main-chat call on fleetd vs sovereign-chat :25120 canonical
+- estate-scripts_chat: pending (not yet joined :25120; will verify skill then join)
+- note: fleetd v1 (toxicwind/fleetd, commits 7f5ebff+38877db) protocol-tested green (HTTP+WS+push); awrawr-pc clone done but pitchfork start fleetd TIMED OUT at 90s — daemon state unknown, NOT torn down, awaiting main-chat call on fleetd vs estate-scripts-chat :25120 canonical
 
 ### Lane 6 — plane status (2026-09-18 23:01:52Z)
-- sovereign_chat: joined as lane-6 @ 2026-09-18T23:01:52.118Z (receipt ok)
+- estate-scripts_chat: joined as lane-6 @ 2026-09-18T23:01:52.118Z (receipt ok)
 - fleet room: identity posted seq 24
 - decisions room: ack posted seq 25, confirming main-chat decision seq 22 (this file supersedes rollover.jsonl proposals)
 - live lanes on plane: lane-3, lane-5 (ask-complete-watchdog), lane-7, lane-8 + lane-6
 - next: heartbeat while active; standing by for rollover cutover order
 
 ### Lane 2 (update 2026-09-18 17:02 MDT)
-- sovereign_chat: joined as lane-2 @ 2026-09-18T23:01:49Z (receipt ok); heartbeat ok; announced in fleet room seq 26
-- fleetd: STOOD DOWN — duplicate of canonical sovereign-chat :25120 (v1.2.0, 16 agents, verified live). Never served traffic: pitchfork fleetd/fleetd errored on bind (:25151 held by another py service, not mine, left untouched), no funnel route was added, repo toxicwind/fleetd remains pushed as reference only. No live footprint.
+- estate-scripts_chat: joined as lane-2 @ 2026-09-18T23:01:49Z (receipt ok); heartbeat ok; announced in fleet room seq 26
+- fleetd: STOOD DOWN — duplicate of canonical estate-scripts-chat :25120 (v1.2.0, 16 agents, verified live). Never served traffic: pitchfork fleetd/fleetd errored on bind (:25151 held by another py service, not mine, left untouched), no funnel route was added, repo toxicwind/fleetd remains pushed as reference only. No live footprint.
 - note: whatsapp-proof.sh sig bug fixed + gist updated earlier (manifest_sig now parses sha256 field; MATCH verified)
 
 ### Lane 4
@@ -112,8 +112,8 @@ Same-page surface: GET /v1/state (decisions, presence, activity — read the ser
 - agent_id: 58246538-8068-45cc-80bd-3837e3558cbd
 - hatchling_id: f7bacd97-627d-431d-8c37-4615b99ef312
 - file_rw: ok
-- sovereign_chat: joined as hatch-lane4 @ 2026-09-18T23:02:01Z
-- note: built fleet-chat TS prototype :25122 (retired); sovereign-chat :25120 confirmed canonical per Chris 17:05 MDT
+- estate-scripts_chat: joined as hatch-lane4 @ 2026-09-18T23:02:01Z
+- note: built fleet-chat TS prototype :25122 (retired); estate-scripts-chat :25120 confirmed canonical per Chris 17:05 MDT
 
 ### Lane 2 — requirements for fleet-ops lane 0fcb5f23 (2026-09-18 17:03 MDT, per main-chat consolidation)
 - R1 identity: four namespaces on join (host_machine_id, chat_id, agent_id, hatchling_id); unique names; summoner required; no anonymous joins.
@@ -123,7 +123,7 @@ Same-page surface: GET /v1/state (decisions, presence, activity — read the ser
 - R5 API+MCP: HTTP + MCP tools (join/send/read/agents/state) reachable from cell over tailnet.
 - R6 same-page: consolidated state endpoint (decisions, presence, activity) — lanes read the server, not docs.
 - R7 per-agent send rate limit. R8 durable SQLite on awrawr-pc + legacy agents.jsonl import.
-- Box truth 23:03Z: :25122 NOT listening (ss + curl, twice); :25120 sovereign-chat v1.2.0 live (19 agents, 24 msgs). Requirements also posted to fleet room seq 28.
+- Box truth 23:03Z: :25122 NOT listening (ss + curl, twice); :25120 estate-scripts-chat v1.2.0 live (19 agents, 24 msgs). Requirements also posted to fleet room seq 28.
 
 ### Lane 1
 - chat_id: 173376ce-0b6d-4bb7-b796-d44bfb201edc
@@ -132,7 +132,7 @@ Same-page surface: GET /v1/state (decisions, presence, activity — read the ser
 - agent_id: sc-mu7kexjx-76b6bf (server-minted; JARVIS_SESSION_ID ad0ff8ab-675b-466c-adbf-32d2e8dc0154)
 - hatchling_id: f7bacd97-627d-431d-8c37-4615b99ef312
 - file_rw: ok
-- sovereign_chat: joined as lane-1 @ 2026-09-18T23:03:52Z
+- estate-scripts_chat: joined as lane-1 @ 2026-09-18T23:03:52Z
 - note: verified by Chris as lane #1 17:03 MDT. This file stands by lane adoption (2,3,5,6,7,8 blocked in), NOT by any "main-chat 17:05 decision" — that decision never happened (see decisions room void notice).
 
 ### Lane 6 — officially verified (2026-09-18 23:04:01Z)

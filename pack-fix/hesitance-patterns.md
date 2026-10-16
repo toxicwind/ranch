@@ -51,7 +51,7 @@ correct fail-fast, not hedging.
   possible"; the default for judgment calls is propose-and-act, not ask-first.
 
 ## P4 — Block reported instead of worked around
-- Fleet seq 10760 (sovereign-sweeper): yote's `gh` token dead, so the push was
+- Fleet seq 10760 (estate-scripts-sweeper): yote's `gh` token dead, so the push was
   parked waiting on Chris to run `gh auth login` on yote.
 - Why it's hesitance: a blocked path gets a workaround, not a status report.
   The documented fallback (GitHub git-database API push via the github skill's
@@ -85,7 +85,7 @@ The script is the deliverable: `projects/ops/bin/hesitance-scan.sh`
 (canonical location per Chris's purge-max order, fleet seq 11264 — one
 runnable per workstream in `projects/ops/bin`). It classifies every hit as
 ROT / LEGITIMATE / QUOTE / ANTI and exits 1 only on genuine ROT. Run it
-against hatch instruction dirs and the sovereign repo; see
+against hatch instruction dirs and the estate-scripts repo; see
 `projects/pack-fix/README.md`. Narrowly documented allowlist exceptions
 (`<!-- hesitance-allow: <reason> -->`) cover legitimate fail-fast/security
 phrasing (P2 shapes), not hesitance.

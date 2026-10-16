@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -61,4 +61,4 @@ For more information see: [The FAQ](https://github.com/ryanoasis/nerd-fonts/wiki
 ## License & security
 
 - Font licensing: see the [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts/) project and [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono) upstream for license terms (JetBrains Mono is under the OFL). This vendored copy is an archive, not a redistribution decision by this repo.
-- This monorepo's own files are [MIT](https://github.com/toxicwind/sovereign-projects#license).
+- This monorepo's own files are [MIT](https://github.com/toxicwind/estate-scripts-projects#license).

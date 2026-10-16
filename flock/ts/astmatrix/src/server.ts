@@ -9,8 +9,8 @@
  * Env:
  *   ASTMATRIX_PORT   listen port (default 25214)
  *   ASTMATRIX_STRATEGY default strategy (default "hybrid")
- *   (plus SOVEREIGN_LIVE_CATALOG, SOVEREIGN_CATALOG_404_URL,
- *    SOVEREIGN_CATALOG_ADMIN_TOKEN from live-catalog.ts)
+ *   (plus estate-scripts_LIVE_CATALOG, estate-scripts_CATALOG_404_URL,
+ *    estate-scripts_CATALOG_ADMIN_TOKEN from live-catalog.ts)
  */
 import { Router } from "./router.ts";
 import { serveUI, uiData } from "./ui.ts";

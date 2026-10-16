@@ -3,4 +3,4 @@
 # zram0 init and silently wrote swappiness=150 + zswap=N, trampling
 # /etc/sysctl.d/99-zswap-vm.conf and the zswap.enabled=1 cmdline. Same filename
 # in /etc/udev/rules.d takes precedence and survives package upgrades.
-# Source of truth: sovereign/projects/yote/host/etc/udev/rules.d/30-zram.rules
+# Source of truth: estate-scripts/projects/yote/host/etc/udev/rules.d/30-zram.rules

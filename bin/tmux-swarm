@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * tmux-swarm — Universal multi-agent terminal orchestrator for the Sovereign Estate.
+ * tmux-swarm — Universal multi-agent terminal orchestrator for the estate-scripts Estate.
  *
  * Consolidates tau-tmux.sh, tmux-mcp, and swarm grid layouts into a single
  * high-performance CLI with live tok telemetry and multi-socket discovery.

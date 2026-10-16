@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # hw-audit.sh — nightly hardware inventory audit (JSONL).
 #
-# MASTER: toxicwind/sovereign-projects projects/yote/ops/hw-audit/
+# MASTER: toxicwind/estate-scripts-projects projects/yote/ops/hw-audit/
 # Live copy deployed to /home/toxic/hw-audit.sh (see hw-audit.service).
 #
 # Usage: hw-audit.sh <output.jsonl>

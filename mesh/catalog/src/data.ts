@@ -2,7 +2,7 @@
  * Canonical provider data — the single source of truth for the estate.
  *
  * Reconciled 2026-09-30 from:
- * - ranch/mesh/router/sovereign-router/sovereign-router-ts/router_config.ts
+ * - ranch/mesh/router/estate-scripts-router/estate-scripts-router-ts/router_config.ts
  *   (PROVIDERS, PROVIDER_MODELS, CODING, DEAD_MODEL_IDS)
  * - ranch/mesh/router/herd/internal/astmatrix/providers.go
  *   (defaultProviders, codingAlias)
@@ -605,7 +605,7 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     // OpenCode Zen free tier (opencode.ai/zen/v1). Client-identity headers
     // (opencode UA + x-opencode-*) are injected by the strategy layer;
     // see cuttinggate/src/strategy/router_strategy.ts and
-    // sovereign-router-ts/router_strategy.ts. Anonymous quota is gated on
+    // estate-scripts-router-ts/router_strategy.ts. Anonymous quota is gated on
     // those headers; Chris-provided OPENCODE_API_KEY via secrets.
     name: "zen",
     baseUrl: "https://opencode.ai/zen/v1",
@@ -1215,7 +1215,7 @@ export const PROVIDER_DEFS: ProviderDef[] = [
 /**
  * MODEL_ALIASES — friendly alias → [provider, model] (UX layer).
  *
- * Union of sovereign-router-ts CODING and herd codingAlias (see header for
+ * Union of estate-scripts-router-ts CODING and herd codingAlias (see header for
  * the exclusion rules). Strategy directives and runtime-dynamic local-role
  * aliases stay router-local overlays.
  */

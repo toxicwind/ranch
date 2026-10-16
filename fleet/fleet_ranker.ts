@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * fleet_ranker.ts — GGUF context + throughput profiler
- * Sovereign Mesh | June 2026
+ * estate-scripts Mesh | June 2026
  *
  * Scans model dir, sends graduated context probes to llama-server,
  * measures TPS + stability, writes ranked JSON.
@@ -15,7 +15,7 @@ import { serve } from "bun";
 import { readdir } from "fs/promises";
 import { join } from "path";
 
-// Sovereign defaults (2026-07): rank via llama-swap front door; graduated ctx only.
+// estate-scripts defaults (2026-07): rank via llama-swap front door; graduated ctx only.
 const PORT = parseInt(Bun.env.RANK_PORT ?? "25111");
 const UPSTREAM = Bun.env.MODEL_URL ?? "http://127.0.0.1:25100";
 const SCAN_DIR =
@@ -31,7 +31,7 @@ const CTX_PROBES = (Bun.env.FLEET_CTX_PROBES ?? "4096,8192,16384,32768,65536")
 const PROBE_TOKENS = 32;
 const RESULTS_DIR =
   Bun.env.FLEET_RESULTS ??
-  `${Bun.env.HOME ?? "/home/toxic"}/sovereign/tools/fleet/results`;
+  `${Bun.env.HOME ?? "/home/toxic"}/estate-scripts/tools/fleet/results`;
 
 interface RankResult {
   file: string;

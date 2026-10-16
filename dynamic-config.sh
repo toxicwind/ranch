@@ -8,8 +8,8 @@ set -euo pipefail
 # =============================================================================
 # CONFIG FILES (SSOT - Single Source of Truth)
 # =============================================================================
-export SOVEREIGN_ROOT="${SOVEREIGN_ROOT:-/home/toxic/estate}"
-export PORTS_ENV="$SOVEREIGN_ROOT/config/ports.env"
+export estate-scripts_ROOT="${estate-scripts_ROOT:-/home/toxic/estate}"
+export PORTS_ENV="$estate-scripts_ROOT/config/ports.env"
 export SECRETS_FILE="$HOME/.secrets"
 
 # =============================================================================
@@ -136,7 +136,7 @@ route_request() {
     
     curl -s -X POST "${base_url}/v1/chat/completions" \
         -H "Content-Type: application/json" \
-        -H "X-Sovereign-Strategy: $strategy" \
+        -H "X-estate-scripts-Strategy: $strategy" \
         -d "{\"model\":\"$model\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}"
 }
 

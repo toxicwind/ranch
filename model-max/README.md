@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part_of_the_estate-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part_of_the_estate-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 ![measured](https://img.shields.io/badge/healthy_=_observed_completion-green?style=for-the-badge)
 
 </div>
@@ -83,6 +83,6 @@ at the top of that file (`_schema` key).
 
 ## License + security
 
-MIT — [sovereign-projects](https://github.com/toxicwind/sovereign-projects) ([license](https://github.com/toxicwind/sovereign-projects#license)).
+MIT — [estate-scripts-projects](https://github.com/toxicwind/estate-scripts-projects) ([license](https://github.com/toxicwind/estate-scripts-projects#license)).
 
 **Security note:** the harness talks to the herd gateway on localhost — it never touches provider keys directly (that's the herd's job). Sweep logs record model outputs; treat them as untrusted text. The hard lesson is in the layout section: never hand herd.yaml an env var the pitchfork daemon doesn't have, or herd exits on reload.

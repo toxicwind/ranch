@@ -26,12 +26,12 @@ import { statSync, readFileSync } from "node:fs";
 export const LIVE_CATALOG_CONTRACT = "ranch-roost/live-catalog/v1";
 
 /** The pre-rename name, still emitted by older writers. Accepted on read. */
-export const LEGACY_CATALOG_CONTRACT = "sovereign-providers/live-catalog/v1";
+export const LEGACY_CATALOG_CONTRACT = "estate-scripts-providers/live-catalog/v1";
 
 /** Resolve the live catalog file path: env override first, then default. */
 export function liveCatalogPath(): string {
   return (
-    process.env.SOVEREIGN_LIVE_CATALOG ||
+    process.env.estate-scripts_LIVE_CATALOG ||
     "/home/toxic/estate/.state/provider-catalog.live.json"
   );
 }
@@ -154,7 +154,7 @@ export class LiveCatalogReader {
 
 function serve404Endpoint(): string {
   return (
-    process.env.SOVEREIGN_CATALOG_404_URL ||
+    process.env.estate-scripts_CATALOG_404_URL ||
     "http://127.0.0.1:25200/admin/catalog/serve-404"
   );
 }
@@ -173,7 +173,7 @@ export async function reportServe404(
   if (!url) return;
   try {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
-    const tok = process.env.SOVEREIGN_CATALOG_ADMIN_TOKEN;
+    const tok = process.env.estate-scripts_CATALOG_ADMIN_TOKEN;
     if (tok) headers["Authorization"] = `Bearer ${tok}`;
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 5000);

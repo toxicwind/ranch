@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -38,7 +38,7 @@ curl -I http://ap1.relay.zedra.dev/generate_204   # expect HTTP 204
 
 ## License & security
 
-- This repo's own files are [MIT](https://github.com/toxicwind/sovereign-projects#license). The relay binary is `iroh-relay` (upstream license); base images are Debian slim.
+- This repo's own files are [MIT](https://github.com/toxicwind/estate-scripts-projects#license). The relay binary is `iroh-relay` (upstream license); base images are Debian slim.
 - **Secrets live in `deploy/relay/.env` (gitignored)** — at minimum `DISCORD_WEBHOOK`. Never commit it; `deploy.sh` merges and uploads it per-instance. SSH keys stay in your local `~/.ssh/`.
 - The relay only forwards traffic it is configured to forward; it never stores payloads. Budget alerts are notification-only on both providers — they don't stop instances, so treat runaway egress as an incident, not a bill.
 

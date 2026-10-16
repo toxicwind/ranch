@@ -24,7 +24,7 @@ lane; /tmp/os-test.out is my own script-test artifact (6.6KB) — kimi-unlock-au
 |---------|--------|
 | cloudflared quick tunnel pid 2960494 → `https://suse-hydrocodone-motherboard-sperm.trycloudflare.com` → `localhost:8379` (exec-ws) | **UNCLAIMED, security-relevant.** Owner launcher script not found (searched ops/yote-ops/bin/tools). Started 01:08 by a "quick tunnel fallback" launcher. Left running; flagged in fleet — claim it or it dies next sweep. Note: backend still requires the bridge token (401s apply), so this is exposure, not an auth bypass. |
 | tmux `tau-hyperfix` ×2 (default socket + `-L tauhyperfix`, identical 4-window layout, idle bash, no clients) | Live `wt-tau-hyperfix` worktree with active tau worker (probe ran 15:18). Duplicate layout but not touching a live worker's consoles. |
-| `eval_runner.py` (sovereign-eval-wt), `bench.sh --all` + guidellm runs | guidellm lane — do not stomp (directive). |
+| `eval_runner.py` (estate-scripts-eval-wt), `bench.sh --all` + guidellm runs | guidellm lane — do not stomp (directive). |
 | phone-lane `phone-vitals` + `phone-lane-keeper` | **Adopted**: systemd user units exist (`phone-lane-keeper.service`, `phone-vitals.service`). Legit infra. |
 | ralph-dashboard uvicorn :8420 | Brand-new (started during sweep), likely live worker spinning it up. |
 | 7 zombies under shep (2883915) | Reported in fleet; shep's owner should reap. Harmless. |
@@ -48,7 +48,7 @@ so nobody re-hunts them:
 - `/home/toxic/estate/var/scratch/{service-health-poller,squawk-ws-client}.pid` (dead)
 - `/home/toxic/paper-poller/state/poller.pid` (dead; poller now runs under pitchfork — pid file was a pre-pitchfork lie)
 - `/home/toxic/brand/brandd.pid` (dead; brandd runs under pitchfork)
-- `sovereign-wt-provider-surgeon-2/scratch/`, `sovereign-eval-wt/scratch/`, `wt-tau-hyperfix/scratch/` — `service-health-poller.pid` + `squawk-ws-client.pid` (dead)
+- `estate-scripts-wt-provider-surgeon-2/scratch/`, `estate-scripts-eval-wt/scratch/`, `wt-tau-hyperfix/scratch/` — `service-health-poller.pid` + `squawk-ws-client.pid` (dead)
 - `/tmp/bench-all.pid` → pids 1517072/1517076 dead (live bench is 1600478) — **fed to kimi-unlock-audit** (/tmp lane), not deleted by me
 
 ## Permanent script
@@ -69,7 +69,7 @@ iterations (tmux panes, desktop infra, MCP servers, build tools all classified).
 
 The `codex-readme/scratch/{service-health-poller,squawk-ws-client}.pid` pair was
 deleted twice and **recreated** — something reseeds worktree scratch dirs with
-this dead pair. No seeder found in `sovereign/bin|scripts` or `~/bin`. Flagged
+this dead pair. No seeder found in `estate-scripts/bin|scripts` or `~/bin`. Flagged
 for the fleet: whoever owns worktree bootstrapping should stop seeding these.
 
 ## Follow-ups

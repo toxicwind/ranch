@@ -21,29 +21,29 @@ const SHARD_ROOTS: Record<string, string> = {
 
 // [dropbox path, new kebab-case repo name] — 23 repo candidates
 const REPOS: Array<[string, string]> = [
-  ['/Sovereign_Master_Orchestrator/2026-09-28T13-38-49_toolchain_doctor_ast_bm25_star_repo', 'toolchain-doctor'],
-  ['/Sovereign_Master_Orchestrator/phytovapor', 'phytovapor'],
-  ['/Sovereign_Master_Orchestrator/sovereign_hatch_toolkit', 'sovereign-hatch-toolkit'],
-  ['/Sovereign_Master_Orchestrator/sovereign_mesh', 'sovereign-mesh'],
-  ['/Sovereign_Master_Orchestrator/telemetric_runtime_oracle', 'telemetric-runtime-oracle'],
-  ['/Sovereign_Political_Ad_Intel_Engine_20260929T134500/postal_spectre', 'postal-spectre-usps'],
-  ['/Sovereign_AST_BM25_Hybrid_Engine_20260928T134500', 'dualspace-ast-bm25-hybrid'],
-  ['/Sovereign_Political_Ad_Intel_Engine_20260929T134500', 'political-ad-intel-engine'],
-  ['/Sovereign_PostalSpectre_Engine_20260929T141600', 'postal-spectre'],
-  ['/Sovereign_Postal_Spectre_ESM', 'postal-spectre-detector'],
-  ['/Sovereign_Postal_Spectre_ESM_20260929', 'postal-spectre-correlator'],
-  ['/Sovereign_Star_Repo_Bayesian_Knapsack_Bandit_20260929T141500', 'bayesian-knapsack-bandit'],
-  ['/Sovereign_Star_Repo_DualSpace_AST_BM25_20260928T134531', 'dualspace-ast-bm25'],
-  ['/Sovereign_Star_Repo_DualSpace_AST_BM25_20260928T134642', 'dualspace-ast-bm25-v2'],
-  ['/Sovereign_Star_Repo_Gatehouse_TwoTier_MCP_20260929T141500', 'gatehouse'],
-  ['/Sovereign_Star_Repo_Herd_KeyPool_Gateway_20260929T134600', 'herd-keypool-gateway'],
-  ['/Sovereign_Star_Repo_Hyper_Racer_20260929T144000', 'hyper-racer'],
-  ['/Sovereign_Star_Repo_MetaClaw_Runtime_20260929T213000', 'metaclaw-runtime'],
-  ['/Sovereign_Star_Repo_Olfactory_Headspace_Engine_20260929T134000', 'olfactory-headspace-engine'],
-  ['/Sovereign_Star_Repo_Ranch_Interlock_20260929T220000', 'ranch-interlock'],
-  ['/Sovereign_Star_Repo_Skills_Hub_20260929T140500', 'sovereign-skills-hub'],
-  ['/Sovereign_Star_Repo_Universal_KeyPool_Bun_20260929T141500', 'universal-keypool-bun'],
-  ['/Sovereign_Star_Repo_Universal_KeyPool_Gateway_20260929T141000', 'universal-keypool-gateway'],
+  ['/estate-scripts_Master_Orchestrator/2026-09-28T13-38-49_toolchain_doctor_ast_bm25_star_repo', 'toolchain-doctor'],
+  ['/estate-scripts_Master_Orchestrator/phytovapor', 'phytovapor'],
+  ['/estate-scripts_Master_Orchestrator/estate-scripts_hatch_toolkit', 'estate-scripts-hatch-toolkit'],
+  ['/estate-scripts_Master_Orchestrator/estate-scripts_mesh', 'estate-scripts-mesh'],
+  ['/estate-scripts_Master_Orchestrator/telemetric_runtime_oracle', 'telemetric-runtime-oracle'],
+  ['/estate-scripts_Political_Ad_Intel_Engine_20260929T134500/postal_spectre', 'postal-spectre-usps'],
+  ['/estate-scripts_AST_BM25_Hybrid_Engine_20260928T134500', 'dualspace-ast-bm25-hybrid'],
+  ['/estate-scripts_Political_Ad_Intel_Engine_20260929T134500', 'political-ad-intel-engine'],
+  ['/estate-scripts_PostalSpectre_Engine_20260929T141600', 'postal-spectre'],
+  ['/estate-scripts_Postal_Spectre_ESM', 'postal-spectre-detector'],
+  ['/estate-scripts_Postal_Spectre_ESM_20260929', 'postal-spectre-correlator'],
+  ['/estate-scripts_Star_Repo_Bayesian_Knapsack_Bandit_20260929T141500', 'bayesian-knapsack-bandit'],
+  ['/estate-scripts_Star_Repo_DualSpace_AST_BM25_20260928T134531', 'dualspace-ast-bm25'],
+  ['/estate-scripts_Star_Repo_DualSpace_AST_BM25_20260928T134642', 'dualspace-ast-bm25-v2'],
+  ['/estate-scripts_Star_Repo_Gatehouse_TwoTier_MCP_20260929T141500', 'gatehouse'],
+  ['/estate-scripts_Star_Repo_Herd_KeyPool_Gateway_20260929T134600', 'herd-keypool-gateway'],
+  ['/estate-scripts_Star_Repo_Hyper_Racer_20260929T144000', 'hyper-racer'],
+  ['/estate-scripts_Star_Repo_MetaClaw_Runtime_20260929T213000', 'metaclaw-runtime'],
+  ['/estate-scripts_Star_Repo_Olfactory_Headspace_Engine_20260929T134000', 'olfactory-headspace-engine'],
+  ['/estate-scripts_Star_Repo_Ranch_Interlock_20260929T220000', 'ranch-interlock'],
+  ['/estate-scripts_Star_Repo_Skills_Hub_20260929T140500', 'estate-scripts-skills-hub'],
+  ['/estate-scripts_Star_Repo_Universal_KeyPool_Bun_20260929T141500', 'universal-keypool-bun'],
+  ['/estate-scripts_Star_Repo_Universal_KeyPool_Gateway_20260929T141000', 'universal-keypool-gateway'],
 ];
 // longest-prefix first so nested candidates (postal_spectre inside political-ad-intel) win
 const REPOS_SORTED = [...REPOS].sort((a, b) => b[0].length - a[0].length);
@@ -65,16 +65,16 @@ function mapPath(p: string): string | null {
     if (p === old) return `organized/repos/${name}`;
     if (p.startsWith(old + '/')) return `organized/repos/${name}` + p.slice(old.length);
   }
-  const SMO = '/Sovereign_Master_Orchestrator';
-  if (p === SMO) return 'organized/misc/sovereign-master-orchestrator';
-  if (p.startsWith(SMO + '/')) return 'organized/misc/sovereign-master-orchestrator' + p.slice(SMO.length);
-  if (p === '/Sovereign') return 'organized/misc/sovereign-m3u';
-  if (p.startsWith('/Sovereign/')) return 'organized/misc/sovereign-m3u' + p.slice('/Sovereign'.length);
-  if (p === '/Sovereign_Artifacts_Bundle') return 'organized/bundles/sovereign-artifacts-bundle';
-  if (p.startsWith('/Sovereign_Artifacts_Bundle/')) return 'organized/bundles/sovereign-artifacts-bundle' + p.slice('/Sovereign_Artifacts_Bundle'.length);
-  if (p === '/Sovereign_Live_Execution_Bundle_2026') return 'organized/bundles/live-execution-bundle-2026';
+  const SMO = '/estate-scripts_Master_Orchestrator';
+  if (p === SMO) return 'organized/misc/estate-scripts-master-orchestrator';
+  if (p.startsWith(SMO + '/')) return 'organized/misc/estate-scripts-master-orchestrator' + p.slice(SMO.length);
+  if (p === '/estate-scripts') return 'organized/misc/estate-scripts-m3u';
+  if (p.startsWith('/estate-scripts/')) return 'organized/misc/estate-scripts-m3u' + p.slice('/estate-scripts'.length);
+  if (p === '/estate-scripts_Artifacts_Bundle') return 'organized/bundles/estate-scripts-artifacts-bundle';
+  if (p.startsWith('/estate-scripts_Artifacts_Bundle/')) return 'organized/bundles/estate-scripts-artifacts-bundle' + p.slice('/estate-scripts_Artifacts_Bundle'.length);
+  if (p === '/estate-scripts_Live_Execution_Bundle_2026') return 'organized/bundles/live-execution-bundle-2026';
   if (p === '/Functional Programming in Scala.pdf') return 'organized/docs/functional-programming-in-scala.pdf';
-  const CB = '/Sovereign_Chats_Backup';
+  const CB = '/estate-scripts_Chats_Backup';
   if (p === CB) return 'organized/docs/chat-backups';
   if (p.startsWith(CB + '/')) {
     const rest = p.slice(CB.length + 1);
@@ -83,8 +83,8 @@ function mapPath(p: string): string | null {
     const head = kebab(segs[0].replace(/\.[^.]+$/, '')) + (/\.md$/i.test(segs[0]) ? segs[0].slice(segs[0].lastIndexOf('.')).toLowerCase() : '');
     return 'organized/docs/chat-backups/' + [head, ...segs.slice(1)].join('/');
   }
-  if (p === '/sovereign_toxic_root_maximal.py') return 'organized/misc/sovereign-toxic-root-maximal.py';
-  if (p === '/sovereign-master-fix.sh') return 'organized/misc/sovereign-master-fix.sh';
+  if (p === '/estate-scripts_toxic_root_maximal.py') return 'organized/misc/estate-scripts-toxic-root-maximal.py';
+  if (p === '/estate-scripts-master-fix.sh') return 'organized/misc/estate-scripts-master-fix.sh';
   if (p === '/Apps/Tampermonkey/.version') return 'organized/misc/tampermonkey-app-version.txt';
   if (p === '/Apps') return 'organized/misc/apps';
   if (p === '/Apps/Tampermonkey') return 'organized/misc/apps/tampermonkey';
@@ -123,28 +123,28 @@ function main() {
   if (missing.length) { console.error('MISSING SOURCES:', missing); process.exit(1); }
 
   // 2. SMO leftovers: full tree, minus the 5 carved-out candidates
-  const smoSrc = findPhysical('/Sovereign_Master_Orchestrator')!;
-  const smoDst = join(ORG, 'misc', 'sovereign-master-orchestrator');
+  const smoSrc = findPhysical('/estate-scripts_Master_Orchestrator')!;
+  const smoDst = join(ORG, 'misc', 'estate-scripts-master-orchestrator');
   cpSync(smoSrc, smoDst, { recursive: true, dereference: false });
   for (const [old] of REPOS) {
-    if (old.startsWith('/Sovereign_Master_Orchestrator/')) {
-      const sub = old.slice('/Sovereign_Master_Orchestrator/'.length);
+    if (old.startsWith('/estate-scripts_Master_Orchestrator/')) {
+      const sub = old.slice('/estate-scripts_Master_Orchestrator/'.length);
       const target = join(smoDst, sub);
       if (existsSync(target)) rmSync(target, { recursive: true, force: true });
     }
   }
-  console.log('misc/sovereign-master-orchestrator (leftovers) OK');
+  console.log('misc/estate-scripts-master-orchestrator (leftovers) OK');
 
-  // 3. Sovereign (m3u toolkit) -> misc
-  cpSync(findPhysical('/Sovereign')!, join(ORG, 'misc', 'sovereign-m3u'), { recursive: true, dereference: false });
+  // 3. estate-scripts (m3u toolkit) -> misc
+  cpSync(findPhysical('/estate-scripts')!, join(ORG, 'misc', 'estate-scripts-m3u'), { recursive: true, dereference: false });
 
   // 4. bundles
-  cpSync(findPhysical('/Sovereign_Artifacts_Bundle')!, join(ORG, 'bundles', 'sovereign-artifacts-bundle'), { recursive: true, dereference: false });
+  cpSync(findPhysical('/estate-scripts_Artifacts_Bundle')!, join(ORG, 'bundles', 'estate-scripts-artifacts-bundle'), { recursive: true, dereference: false });
   mkdirSync(join(ORG, 'bundles', 'live-execution-bundle-2026'), { recursive: true }); // ghost: empty in Dropbox
 
   // 5. docs
   cpSync(findPhysical('/Functional Programming in Scala.pdf')!, join(ORG, 'docs', 'functional-programming-in-scala.pdf'));
-  const cbSrc = findPhysical('/Sovereign_Chats_Backup')!;
+  const cbSrc = findPhysical('/estate-scripts_Chats_Backup')!;
   const cbDst = join(ORG, 'docs', 'chat-backups');
   mkdirSync(cbDst, { recursive: true });
   for (const name of readdirSync(cbSrc)) {
@@ -158,8 +158,8 @@ function main() {
   }
 
   // 6. misc singles
-  cpSync(findPhysical('/sovereign_toxic_root_maximal.py')!, join(ORG, 'misc', 'sovereign-toxic-root-maximal.py'));
-  cpSync(findPhysical('/sovereign-master-fix.sh')!, join(ORG, 'misc', 'sovereign-master-fix.sh'));
+  cpSync(findPhysical('/estate-scripts_toxic_root_maximal.py')!, join(ORG, 'misc', 'estate-scripts-toxic-root-maximal.py'));
+  cpSync(findPhysical('/estate-scripts-master-fix.sh')!, join(ORG, 'misc', 'estate-scripts-master-fix.sh'));
   // Tampermonkey mount marker: content is a bare version string; give it a readable name
   const tmSrc = findPhysical('/Apps/Tampermonkey/.version')!;
   const tmBody = require('fs').readFileSync(tmSrc, 'utf8').trim();

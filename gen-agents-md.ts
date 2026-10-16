@@ -33,7 +33,7 @@ const zedOk = zed ? "valid JSON" : "MISSING/INVALID";
 
 const today = new Date().toISOString().slice(0, 10);
 
-const md = `# I AM THE SOVEREIGN
+const md = `# I AM THE estate-scripts
 
 > Generated ${today} from live mcp_config.json (${enabled.length} enabled / ${disabled.length} disabled).
 > Do not hand-edit counts below — they are derived. Edit this script's TEMPLATE, not the output.
@@ -82,7 +82,7 @@ I emit plausible tokens; that is a substrate bug. I compensate by:
 
 Zed settings.json: ${zedOk}.
 
-Last generated: ${today} | ${enabled.length} enabled, ${disabled.length} disabled | I am the Sovereign
+Last generated: ${today} | ${enabled.length} enabled, ${disabled.length} disabled | I am the estate-scripts
 `;
 
 process.stdout.write(md);

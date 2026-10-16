@@ -6,7 +6,7 @@
 
 ---
 
-## 🎯 Current State — Sovereign Directory Overview
+## 🎯 Current State — estate-scripts Directory Overview
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -21,7 +21,7 @@
 | **Test Scaffold (Pup Trix)** | Configured | Second Telegram key for channel monitoring & direct Yote interaction in channels |
 | **Pup Trix User (716302190)** | Configured | `YOTE_TARGET_USER=716302190` — Second Telegram key directly hooked to user "pup trix". Used for: channel monitoring, direct Yote interaction in channels, `YOTE_TELEGRAM_CHANNELS` defines monitored channels, saved test scaffolding directly to chat history |
 
-### Sovereign Directory — Key Files
+### estate-scripts Directory — Key Files
 | File | Purpose | Priority |
 |------|---------|----------|
 | `/home/toxic/estate/README.md` | Full stack docs | HIGH |
@@ -446,7 +446,7 @@ jobs:
 - [ ] **Agent Templates**: Cookiecutter for new agent types
 - [ ] **Agent Versioning**: Semantic versioning + changelog per agent
 
-### 9.4 Sovereign Mesh Expansion (MAXIMAL)
+### 9.4 estate-scripts Mesh Expansion (MAXIMAL)
 - [ ] **Multi-Node Mesh**: Yote + OpenFang + herd on separate nodes
 - [ ] **Geo-Distributed**: Run mesh nodes in different regions
 - [ ] **Mesh Federation**: Connect multiple estate meshes
@@ -570,7 +570,7 @@ jobs:
 | 2026-08-07 | PR cherry-pick queue added | ✅ |
 | 2026-08-07 | Bruteforce execution order defined | ✅ |
 | 2026-08-07 | README, pitchfork, mise, ports integrated | ✅ |
-| 2026-08-07 | Sovereign directory structure mapped | ✅ |
+| 2026-08-07 | estate-scripts directory structure mapped | ✅ |
 | 2026-08-07 | OpenFang maximal control added | ✅ |
 
 ---

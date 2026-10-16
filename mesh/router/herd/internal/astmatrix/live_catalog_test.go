@@ -129,7 +129,7 @@ func TestReportServe404PostsEvent(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	t.Setenv("SOVEREIGN_CATALOG_404_URL", srv.URL+"/admin/catalog/serve-404")
+	t.Setenv("estate-scripts_CATALOG_404_URL", srv.URL+"/admin/catalog/serve-404")
 	reportServe404("groq", "m-gone")
 	if gotPath != "/admin/catalog/serve-404" || gotProvider != "groq" || gotModel != "m-gone" {
 		t.Fatalf("unexpected report: path=%q provider=%q model=%q", gotPath, gotProvider, gotModel)

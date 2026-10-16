@@ -40,7 +40,7 @@ Service proxying is HTTP-over-exec via /home/toxic/.cache/yote_svc_proxy.py
 on yote: one exec call per proxied request, no new yote ports, no server
 changes. Only 127.0.0.1 is bound (cell-local callers).
 
-Canonical source: projects/bridge/hatch/connector.py in toxicwind/sovereign-projects.
+Canonical source: projects/bridge/hatch/connector.py in toxicwind/estate-scripts-projects.
 """
 import base64
 import importlib.util
@@ -63,7 +63,7 @@ PORT = int(os.environ.get("YOTE_CONNECTOR_PORT", "18301"))
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 _START_TIME = time.time()  # process boot; reported by /livez
-# exec.py canonical source: gear/awrawr-mcp/bin/exec.py in toxicwind/sovereign-projects.
+# exec.py canonical source: gear/awrawr-mcp/bin/exec.py in toxicwind/estate-scripts-projects.
 # The cell-side copy at ~/workspace/awrawr-bridge/exec.py must be synced from there.
 BRIDGE_EXEC = os.path.expanduser("~/workspace/awrawr-bridge/exec.py")
 YOTE_HELPER = "/home/toxic/.cache/yote_svc_proxy.py"

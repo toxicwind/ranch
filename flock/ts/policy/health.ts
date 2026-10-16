@@ -1,6 +1,6 @@
 /**
  * flock/ts/policy/health.ts — provider health aggregation ported from
- * sovereign-router's router_health.ts (HealthDB, SQLite WAL).
+ * estate-scripts-router's router_health.ts (HealthDB, SQLite WAL).
  *
  * Boundary with the Rust proxy: proxy/src/health.rs owns live provider
  * health STATE (healthy/last-probe/latency EMA/stickies, write-behind

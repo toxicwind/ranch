@@ -385,7 +385,7 @@ mod tests {
     }
 
     #[test]
-    fn test_sovereign_forks() {
+    fn test_estate-scripts_forks() {
         let forks = soverign_forks();
         assert_eq!(forks.len(), 4);
         assert_eq!(forks[0].name, "beellama");

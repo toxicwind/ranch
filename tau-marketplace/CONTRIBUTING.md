@@ -1,6 +1,6 @@
 # Contributing to tau-marketplace
 
-Thank you for contributing to the official Sovereign Estate marketplace for Tau and Oh-My-Pi.
+Thank you for contributing to the official estate-scripts Estate marketplace for Tau and Oh-My-Pi.
 
 ## Standards
 

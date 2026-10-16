@@ -10,10 +10,10 @@ import { GHAS_TOOLS } from "./tools";
 import { dispatchTool, performCompare, performSearch } from "./handlers";
 import { GhasStreamableHttpTransport } from "./gas-transport.js";
 
-// Ports only from env (sovereign/config/ports.env via stack or export)
+// Ports only from env (estate-scripts/config/ports.env via stack or export)
 function requirePort(name: string): number {
   const v = process.env[name];
-  if (!v) throw new Error(`${name} required (sovereign/config/ports.env)`);
+  if (!v) throw new Error(`${name} required (estate-scripts/config/ports.env)`);
   return Number(v);
 }
 const modeArg = Bun.argv.includes("--mode") ? Bun.argv[Bun.argv.indexOf("--mode") + 1] : "http";
@@ -42,7 +42,7 @@ function createMcpServer() {
 }
 
 async function startMcpHttp() {
-  // Lazy mesh (sovereign lib) — optional if path missing
+  // Lazy mesh (estate-scripts lib) — optional if path missing
   let handleMesh: ((req: Request, ctx: any) => Promise<Response | null>) | null = null;
   try {
     const mod = await import("/home/toxic/estate/src/lib/ghas-mesh-features.ts");
@@ -67,7 +67,7 @@ async function startMcpHttp() {
     async fetch(request) {
       const url = new URL(request.url);
 
-      // Mesh features (sovereign lib)
+      // Mesh features (estate-scripts lib)
       if (url.pathname.startsWith("/mesh") && handleMesh) {
         const m = await handleMesh(request, {
           service: "ghas-mcp",

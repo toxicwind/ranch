@@ -74,7 +74,7 @@ DEFAULT_EXCLUDES = [
     "merge-*/",
     "gear-*/",
     "*-scratch-*/",
-    "sovereign-merge-stash-*/",
+    "estate-scripts-merge-stash-*/",
     "mesh-bruteforce-*/",
     "tau-ext-forks/",
     "tau-extensions-merge/",

@@ -48,11 +48,11 @@ By source:
 | `secretsmith` | [github.com/toxicwind/secretsmith](https://github.com/toxicwind/secretsmith) | .gitmodules | github.com/toxicwind/secretsmith.git |
 | `session-bus-refresh` | [github.com/toxicwind/session-bus-refresh](https://github.com/toxicwind/session-bus-refresh) | .gitmodules | github.com/toxicwind/session-bus-refresh.git |
 | `skillforge` | [github.com/toxicwind/skillforge](https://github.com/toxicwind/skillforge) | .gitmodules | github.com/toxicwind/skillforge.git |
-| `sovereign` | [github.com/toxicwind/sovereign](https://github.com/toxicwind/sovereign) | .gitmodules | github.com/toxicwind/sovereign.git |
-| `sovereign-dispersal` | [github.com/toxicwind/sovereign-dispersal](https://github.com/toxicwind/sovereign-dispersal) | .gitmodules | github.com/toxicwind/sovereign-dispersal.git |
-| `sovereign-end4` | [github.com/toxicwind/sovereign-end4](https://github.com/toxicwind/sovereign-end4) | .gitmodules | github.com/toxicwind/sovereign-end4.git |
-| `sovereign-scripts` | [github.com/toxicwind/sovereign-scripts](https://github.com/toxicwind/sovereign-scripts) | .gitmodules | github.com/toxicwind/sovereign-scripts.git |
-| `sovereign-skills` | [github.com/toxicwind/sovereign-skills](https://github.com/toxicwind/sovereign-skills) | .gitmodules | github.com/toxicwind/sovereign-skills.git |
+| `estate-scripts` | [github.com/toxicwind/estate-scripts](https://github.com/toxicwind/estate-scripts) | .gitmodules | github.com/toxicwind/estate-scripts.git |
+| `estate-scripts-dispersal` | [github.com/toxicwind/estate-scripts-dispersal](https://github.com/toxicwind/estate-scripts-dispersal) | .gitmodules | github.com/toxicwind/estate-scripts-dispersal.git |
+| `estate-scripts-end4` | [github.com/toxicwind/estate-scripts-end4](https://github.com/toxicwind/estate-scripts-end4) | .gitmodules | github.com/toxicwind/estate-scripts-end4.git |
+| `estate-scripts-scripts` | [github.com/toxicwind/estate-scripts-scripts](https://github.com/toxicwind/estate-scripts-scripts) | .gitmodules | github.com/toxicwind/estate-scripts-scripts.git |
+| `estate-scripts-skills` | [github.com/toxicwind/estate-scripts-skills](https://github.com/toxicwind/estate-scripts-skills) | .gitmodules | github.com/toxicwind/estate-scripts-skills.git |
 | `strudel-dev-vite` | [github.com/toxicwind/strudel-dev-vite](https://github.com/toxicwind/strudel-dev-vite) | .gitmodules | github.com/toxicwind/strudel-dev-vite.git |
 | `strudel-sampler-server-vite` | [github.com/toxicwind/strudel-sampler-server-vite](https://github.com/toxicwind/strudel-sampler-server-vite) | .gitmodules | github.com/toxicwind/strudel-sampler-server-vite.git |
 | `tau` | [github.com/can1357/oh-my-pi](https://github.com/can1357/oh-my-pi) | git remote upstream | github.com/toxicwind/tau.git |
@@ -123,7 +123,7 @@ By source:
 | `flock` | — | — | — |
 | `forge` | — | — | — |
 | `gatehouse-staging` | — | — | — |
-| `gayxxx-sovereign` | — | — | github.com/toxicwind/ranch |
+| `gayxxx-estate-scripts` | — | — | github.com/toxicwind/ranch |
 | `gear` | — | — | — |
 | `gguf-read` | — | — | — |
 | `github-search` | — | — | — |
@@ -183,9 +183,9 @@ By source:
 | `saturation-guard` | — | — | — |
 | `scripts` | — | — | — |
 | `shell` | — | — | — |
-| `sovereign-dispersal-monolith` | — | — | — |
-| `sovereign-monitor` | — | — | — |
-| `sovereign-whoa-breakthrough` | — | — | — |
+| `estate-scripts-dispersal-monolith` | — | — | — |
+| `estate-scripts-monitor` | — | — | — |
+| `estate-scripts-whoa-breakthrough` | — | — | — |
 | `spark` | — | — | — |
 | `spark-harvest` | — | — | — |
 | `squawk` | — | — | github.com/toxicwind/squawk.git |

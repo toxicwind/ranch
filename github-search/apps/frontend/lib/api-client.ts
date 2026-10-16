@@ -8,7 +8,7 @@ function resolveApiBaseUrlFromEnv(): string {
         process.env.GHAS_API_HOST ||
         process.env.NEXT_PUBLIC_GHAS_API_HOST ||
         '127.0.0.1';
-    // Default matches sovereign/config/ports.env (GHAS_API_PORT=25112).
+    // Default matches estate-scripts/config/ports.env (GHAS_API_PORT=25112).
     const port =
         process.env.GHAS_API_PORT || process.env.NEXT_PUBLIC_GHAS_API_PORT || '25112';
     return `http://${host}:${port}`;

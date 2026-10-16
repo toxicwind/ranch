@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-1f6feb?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-1f6feb?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -37,14 +37,14 @@ TOOLCALL_BASE=http://127.0.0.1:25152 python3 agent_loop.py "your prompt"
 
 ## License & security
 
-- **License:** [MIT](https://github.com/toxicwind/sovereign-projects#license)
+- **License:** [MIT](https://github.com/toxicwind/estate-scripts-projects#license)
 - **Security:** Endpoint binds 127.0.0.1 only — reachable via herd or the local harness, never exposed directly. The calculator never `eval()`s raw model output (AST whitelist); `sysinfo` is read-only. Research grounding: arXiv:2510.03847 (SLM agentic survey), ToolSpec (arXiv:2604.13519), BFCL v4.
 
 ---
 
 <div align="right">
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge)
+![estate-scripts](https://img.shields.io/badge/estate-scripts--projects-blue?style=for-the-badge)
 ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge)
 ![cuda](https://img.shields.io/badge/cuda-76B900?style=for-the-badge)
 ![tool-calling](https://img.shields.io/badge/tool--calling-9D4EDD?style=for-the-badge)
@@ -66,7 +66,7 @@ TOOLCALL_BASE=http://127.0.0.1:25152 python3 agent_loop.py "your prompt"
 | **URL** | `http://127.0.0.1:25152` |
 | **Server** | `llama-server` — llama.cpp b11059, CUDA 13.3 build, RTX 3090, `-ngl 99` |
 | **Model alias** | `qwen3.5-9b-tool` (Qwen3.5-9B-DeepSeek-V4-Flash, Q5_K_M, 32K ctx) |
-| **Daemon** | pitchfork `sovereign/toolcall-llm`, `TOOLCALL_PORT=25152`, auto-restarts via pitchfork |
+| **Daemon** | pitchfork `estate-scripts/toolcall-llm`, `TOOLCALL_PORT=25152`, auto-restarts via pitchfork |
 | **Herd route** | peer `toolcall-local` in `config/herd.yaml` proxies to `:25152`; address it as `toolcall-local/qwen3.5-9b-tool` through herd on `:25100` |
 
 ## Architecture
@@ -112,5 +112,5 @@ RACE=1 TOOLCALL_BASE=http://127.0.0.1:25152 python3 agent_loop.py "your prompt"
 
 ## License + Security
 
-- This directory ships **no standalone LICENSE file**; it is part of the sovereign-projects tree.
+- This directory ships **no standalone LICENSE file**; it is part of the estate-scripts-projects tree.
 - **Security posture:** the endpoint is localhost-bound (`127.0.0.1:25152`) — no external exposure by design. The harness never `eval()`s model output: the calculator only runs AST-whitelisted expressions, sysinfo is strictly read-only, and validator-first execution rejects malformed tool calls before they run (max 2 repair attempts, then the loop moves on).

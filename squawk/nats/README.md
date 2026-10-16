@@ -1,6 +1,6 @@
 # squawk-nats 🦫
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge)
+![estate-scripts](https://img.shields.io/badge/estate-scripts--projects-blue?style=for-the-badge)
 ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![nats-jetstream](https://img.shields.io/badge/NATS--JetStream-27AA5B?style=for-the-badge)
 
@@ -115,7 +115,7 @@ no client secret) → :4223 returned the published envelope's MSG frame.
 
 ## License & Security
 
-Part of the sovereign estate (see repo root). **Security posture:** the file
+Part of the estate-scripts estate (see repo root). **Security posture:** the file
 feed is read-only to the tailer — NATS never writes back, so a compromised
 bus can't corrupt chat history. One credential (the feed token) is rendered
 into the server config at daemon start (0600) and never committed; listeners

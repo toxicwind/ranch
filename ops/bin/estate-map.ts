@@ -24,7 +24,7 @@
 //
 // Never prints secret VALUES. Credentials are reported as present/absent only.
 //
-// Part of ranch/ops/bin/ (toxicwind/sovereign-projects).
+// Part of ranch/ops/bin/ (toxicwind/estate-scripts-projects).
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, renameSync, statSync } from "node:fs";
 import { join, dirname, resolve as resolvePath, basename } from "node:path";

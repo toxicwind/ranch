@@ -52,8 +52,8 @@ def api(path, data=None, timeout=TIMEOUT):
         BASE + path, data=body, method="POST" if body else "GET",
         headers={"Authorization": "Bearer " + KEY,
                  "Content-Type": "application/json",
-                 "HTTP-Referer": "https://sovereign.local",
-                 "X-Title": "sovereign-probe"})
+                 "HTTP-Referer": "https://estate-scripts.local",
+                 "X-Title": "estate-scripts-probe"})
     t0 = time.time()
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:

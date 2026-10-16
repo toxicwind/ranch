@@ -1,4 +1,4 @@
-# AGENTS.md — github-advanced-search-mcp (Sovereign Cutting Edge)
+# AGENTS.md — github-advanced-search-mcp (estate-scripts Cutting Edge)
 
 **GitHub:** [toxicwind/github-advanced-search-mcp](https://github.com/toxicwind/github-advanced-search-mcp)  
 **Local:** `/home/toxic/github-advanced-search-mcp`  
@@ -26,20 +26,20 @@
 
 Legacy aliases (`github_search`, `github_list_issues`, …) still work. Refresh Cursor descriptors: `./scripts/sync-grok-mcp-descriptors.sh`
 
-This repo is maintained as part of the toxicwind sovereign stack (May 2026 max level).
+This repo is maintained as part of the toxicwind estate-scripts stack (May 2026 max level).
 
 ## Core Philosophy
 - We own everything. No workarounds — only proper, cutting-edge fixes.
 - Full git history is always available for archaeology (no shallow clones for serious work).
-- Browser control = real logged-in user sessions via sovereign Firefox profile takeover (not throwaway instances).
+- Browser control = real logged-in user sessions via estate-scripts Firefox profile takeover (not throwaway instances).
 
-## Sovereign Firefox Live Control (the correct way)
+## estate-scripts Firefox Live Control (the correct way)
 We have first-class support for driving a real, persistent, logged-in Firefox exactly like the Chromium CDP workflow.
 
 ### One-time setup (already done in this tree)
 ```bash
 cd /home/toxic/github-advanced-search-mcp
-./scripts/sovereign-browser/launch-firefox-from-profile.sh
+./scripts/estate-scripts-browser/launch-firefox-from-profile.sh
 ```
 
 This launches (or takes over) your daily Firefox profile under Playwright remote control and prints a `ws://` endpoint.
@@ -49,7 +49,7 @@ This launches (or takes over) your daily Firefox profile under Playwright remote
 # In another terminal / your MCP config
 PLAYWRIGHT_MCP_BROWSER=firefox \
 PLAYWRIGHT_MCP_REMOTE_ENDPOINT=ws://... \
-  node /home/toxic/estate-maximal/mcp-forks/playwright-mcp/sovereign-launch.js
+  node /home/toxic/estate-maximal/mcp-forks/playwright-mcp/estate-scripts-launch.js
 ```
 
 Or via the ghas dev flow:
@@ -59,7 +59,7 @@ GHAS_BROWSER=firefox bun run dev:headed
 
 All normal `browser_*` tools (click, evaluate, snapshots, etc.) now work against your real GitHub-logged-in tabs, advanced search, etc.
 
-The scripts live in `scripts/sovereign-browser/` and are also symlinked/copied from the main sovereign playwright-mcp fork for consistency.
+The scripts live in `scripts/estate-scripts-browser/` and are also symlinked/copied from the main estate-scripts playwright-mcp fork for consistency.
 
 ## Exploring History / Finding Previous LLM Weirdness
 This repo has been through many aggressive agent cycles. To investigate "what the previous LLM did":
@@ -85,7 +85,7 @@ Never use shallow clones when doing this kind of archaeology.
 We are moving away from dozens of random .env / secrets.env files and their backups in graveyards and config_backup_* dirs.
 
 **Correct pattern (cutting edge):**
-- Central store: `~/.config/sovereign/secrets.env` (or sops + age / Infisical)
+- Central store: `~/.config/estate-scripts/secrets.env` (or sops + age / Infisical)
 - All projects source from it or use symlinks.
 - The genesis `secrets.env.example` (in graveyard) shows the old scattered pattern.
 
@@ -94,11 +94,11 @@ When you find old .env backups containing `GITHUB` + `HUGGING` (or `API_KEY_GITH
 ## Running the Stack
 See the main README and `just` targets (including the Firefox ones we added).
 
-This AGENTS.md exists so future agents (and you) don't have to rediscover the sovereign Firefox integration or repeat the history archaeology process.
+This AGENTS.md exists so future agents (and you) don't have to rediscover the estate-scripts Firefox integration or repeat the history archaeology process.
 
 ## Secrets (Master Grok Agent)
 
-All secrets for the entire sovereign stack live in the master Grok build:
+All secrets for the entire estate-scripts stack live in the master Grok build:
 
 `~/.secrets`
 
@@ -110,14 +110,14 @@ echo 'source ~/.secrets' >> ~/.zshrc
 ```
 
 ## Autonomous Loop Control (Cycle 1, scheduler 019e8e679e12)
-Grok sovereign autonomous-iteration loop (durable 5m) is actively controlling ghas: health verified, explicit searches for sovereign/openfang/plan/iteration, "we control ghas" asserted, bridge issues noted for maximization via profile. 
+Grok estate-scripts autonomous-iteration loop (durable 5m) is actively controlling ghas: health verified, explicit searches for estate-scripts/openfang/plan/iteration, "we control ghas" asserted, bridge issues noted for maximization via profile. 
 - Agents coordinated (orchestrator-max activated from Crashed, messages sent to max hands for iteration help using ghas + git sync).
 - Git sync live: previous auto-iter-0 commit pushed; this AGENTS updated for cycle.
-- Plan and sovereign docs kept in sync.
+- Plan and estate-scripts docs kept in sync.
 High attention: full ghas + openfang audits every cycle. Durable resume supported.
 See ~/.grok/skills/autonomous-iteration/ and session plan.md for details.
 
-The Grok agent, ralph, ghas-mcp, sovereign playwright fork, openfang agents, etc. are expected to source `~/.secrets` on startup (either directly or via MCP wrappers like `ghas-mcp-stdio.sh` / `mcp-source-secrets.sh`).
+The Grok agent, ralph, ghas-mcp, estate-scripts playwright fork, openfang agents, etc. are expected to source `~/.secrets` on startup (either directly or via MCP wrappers like `ghas-mcp-stdio.sh` / `mcp-source-secrets.sh`).
 
 Do **not** create additional scattered `.env` or `secrets.env` files in project roots or graveyards. Everything funnels through the master agent secrets.
 
@@ -246,16 +246,16 @@ ast-grep scan -p 'NVIDIA_MODELS' -l ts --json=stream /home/toxic/projects/pi-age
 - **Coverage floor 82%**: `npx vitest run --coverage --bail` after code. Lint (`biome`) + typecheck.
 - See TODO Wave 5 for the worker-limit `/32` redo + timeout/failfast threading.
 
-## 🔌 MCP / mcpproxy (sovereign-owned)
+## 🔌 MCP / mcpproxy (estate-scripts-owned)
 
 - **mcpproxy** is the single MCP federation gateway: `http://127.0.0.1:25109/mcp`, owned by
-sovereign (`pitchfork start mcpproxy` / `mise run restart-mcpproxy` -> `mcpproxy serve
+estate-scripts (`pitchfork start mcpproxy` / `mise run restart-mcpproxy` -> `mcpproxy serve
 --config=/home/toxic/.mcpproxy/mcp_config.json`). 43 real upstreams (ghas + 42 others).
 - **pi MUST list ONLY `mcpproxy`** in `~/.pi/agent/mcp.json` (no duplicate direct `ghas`/
   `nvidia-nim` entries). All MCP tools reach pi through the proxy via `retrieve_tools`.
-- **nvidia-nim is NOT an MCP server.** It is a herd/sovereign-router **completions API**
+- **nvidia-nim is NOT an MCP server.** It is a herd/estate-scripts-router **completions API**
   (OpenAI-compatible, on `:25100`). NVIDIA models are first-class via pi-agent's `nvidia`
-  provider (`packages/ai/src/providers/`) -> sovereign-router/herd, not an MCP upstream.
+  provider (`packages/ai/src/providers/`) -> estate-scripts-router/herd, not an MCP upstream.
 - **Subagents**: `config.yaml` `can_spawn_subagents:true` + whitelist + `subagents.defaultModel:
   opencode/hy3-free`. The `subagent` spawn tool is a LIVE-PI builtin (not callable from a
   plain assistant context) — fanout only works inside an interactive pi session.

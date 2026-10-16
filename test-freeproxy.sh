@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Tester for sovereign freeproxy — global cache home/toxic
+# Tester for estate-scripts freeproxy — global cache home/toxic
 # Uses herd (llama-swap) on :25100 with freeproxy (pollinations, ovh, openrouter, cf-gw)
 set -euo pipefail
 HERD="${HERD:-http://127.0.0.1:25100}"
 CACHE_DIR="${CACHE_DIR:-/home/toxic/cache/freeproxy}"
 GOCACHE="${GOCACHE:-$(go env GOCACHE 2>/dev/null || echo /home/toxic/cache/go-build)}"
 
-echo "=== sovereign freeproxy tester ==="
+echo "=== estate-scripts freeproxy tester ==="
 echo "HERD: $HERD"
 echo "build cache: $GOCACHE (global home/toxic)"
 echo "freeproxy cache: $CACHE_DIR"

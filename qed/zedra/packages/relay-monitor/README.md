@@ -1,7 +1,7 @@
 <div align="right">
 
-[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/part_of-sovereign--projects-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/part_of-estate-scripts--projects-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -39,7 +39,7 @@ Deploy via [`deploy/relay/deploy.sh`](../../deploy/relay/deploy.sh) — see the 
 
 ## License & security
 
-MIT — see the [canonical LICENSE](https://github.com/toxicwind/sovereign-projects#license). Keep `DISCORD_WEBHOOK` out of the repo — it lives in the merged `.env` on the relay hosts only.
+MIT — see the [canonical LICENSE](https://github.com/toxicwind/estate-scripts-projects#license). Keep `DISCORD_WEBHOOK` out of the repo — it lives in the merged `.env` on the relay hosts only.
 
 ## Architecture
 

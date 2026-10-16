@@ -5,7 +5,7 @@
  */
 import { resolve } from "path";
 
-const ROOT = process.env.SOVEREIGN_ROOT || resolve(import.meta.dir, "../..");
+const ROOT = process.env.estate-scripts_ROOT || resolve(import.meta.dir, "../..");
 const cfgPath =
   process.env.LLAMA_SWAP_CONFIG ||
   resolve(ROOT, "tools/llama-swap/config.yaml");

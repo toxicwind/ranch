@@ -1,6 +1,6 @@
 # Flock merge gaps — endpoints the Rust proxy does not serve yet
 
-The TS reference router (`sovereign-router-ts/router.ts`) exposes several
+The TS reference router (`estate-scripts-router-ts/router.ts`) exposes several
 operational endpoints that the Rust proxy (`flock/`) does not implement.
 These are SPECS for whoever wires the proxy (or the TS shim behind it) —
 not code. Each section gives the contract the reference implementation
@@ -8,7 +8,7 @@ established, so the proxy's behavior matches what herd, the fleet, and the
 dashboard already expect.
 
 All admin/operator endpoints sit behind the same auth as the reference:
-client-key gate when `SOVEREIGN_CLIENT_KEYS` is set (everything except
+client-key gate when `estate-scripts_CLIENT_KEYS` is set (everything except
 `/health` requires a key), and the operator-surface gate when AUTH users
 are configured (`WWW-Authenticate: Bearer` on 401). `/health` stays open
 for liveness probes.
@@ -66,7 +66,7 @@ counts, error breakdowns, latency aggregates. On failure:
 
 ## /mesh
 
-`handleMeshRequest(req, { service: "sovereign-router", version: "v3.2" })`
+`handleMeshRequest(req, { service: "estate-scripts-router", version: "v3.2" })`
 from the mesh features lib — the standard mesh control plane (peer
 discovery, gossip, task routing). The proxy must mount the mesh handler at
 `/mesh*` with the service name updated to the proxy's own

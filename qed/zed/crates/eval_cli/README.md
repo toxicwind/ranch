@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -33,7 +33,7 @@ cargo run -p eval_cli --release -- <harness> <dataset>
 
 ## License & security
 
-- Zed upstream code is **GPL-3.0-or-later**; this fork ships inside the sovereign-projects monorepo ([MIT](https://github.com/toxicwind/sovereign-projects#license) for sovereign-authored files).
+- Zed upstream code is **GPL-3.0-or-later**; this fork ships inside the estate-scripts-projects monorepo ([MIT](https://github.com/toxicwind/estate-scripts-projects#license) for estate-scripts-authored files).
 - Eval runs execute the full agent loop headlessly, including tool calls — run it against datasets and environments you trust, with credentials scoped to what the eval needs.
 
 This binary is for evaluating the performance of our agent on a chosen dataset against a chosen harness. For more details, see the [zed_eval README](zed_eval/README.md).

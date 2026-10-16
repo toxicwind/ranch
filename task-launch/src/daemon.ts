@@ -12,7 +12,7 @@
  * result (stdout/stderr/exitCode in the receipt). A task with no exec
  * payload is recorded as "not-executed" — never upgraded to "executed".
  *
- * Managed by pitchfork (sovereign/pitchfork.toml, [daemons.task-launch]).
+ * Managed by pitchfork (estate-scripts/pitchfork.toml, [daemons.task-launch]).
  */
 
 import { existsSync, watch } from "node:fs";

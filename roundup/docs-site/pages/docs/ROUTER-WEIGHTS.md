@@ -1,6 +1,6 @@
-# Router weights — roundup → sovereign router
+# Router weights — roundup → estate-scripts router
 
-The estate sweep's output feeds the sovereign router as routing-weight
+The estate sweep's output feeds the estate-scripts router as routing-weight
 input. Two shapes exist; the router's `schema_version: 2` is the contract.
 
 ## The two shapes
@@ -9,7 +9,7 @@ input. Two shapes exist; the router's `schema_version: 2` is the contract.
 |---|---|---|---|
 | `results/estate/<date>/results.jsonl` | `roundup-bench/1` | `sweeps/roundup-estate-sweep.ts` | humans, audits |
 | `results/estate/<date>/weights.json` | `roundup-weights/1` | `sweeps/roundup-estate-sweep.ts` | archives |
-| `results/estate/<date>/router-weights.json` | **router `schema_version: 2`** | `sweeps/emit-router-weights.ts --in results.jsonl` | the sovereign router |
+| `results/estate/<date>/router-weights.json` | **router `schema_version: 2`** | `sweeps/emit-router-weights.ts --in results.jsonl` | the estate-scripts router |
 
 ## Router contract (`schema_version: 2`)
 
@@ -59,7 +59,7 @@ bun sweeps/emit-router-weights.ts \
 
 # 3. land it where the router reads it and flag the router lane in fleet
 cp results/estate/2026-10-02/router-weights.json \
-   /home/toxic/estate/tools/sovereign-router/sovereign-router-ts/roundup-weights.json
+   /home/toxic/estate/tools/estate-scripts-router/estate-scripts-router-ts/roundup-weights.json
 ```
 
 The router's `bench-priors.ts` loader reads both the legacy

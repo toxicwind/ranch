@@ -808,7 +808,7 @@
       "signalTotal": 0
     },
     {
-      "name": "gayxxx-sovereign",
+      "name": "gayxxx-estate-scripts",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": "https://github.com/toxicwind/ranch",
@@ -1882,10 +1882,10 @@
       "signalTotal": 0
     },
     {
-      "name": "sovereign",
-      "upstream": "https://github.com/toxicwind/sovereign",
+      "name": "estate-scripts",
+      "upstream": "https://github.com/toxicwind/estate-scripts",
       "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/sovereign.git",
+      "remoteOrigin": "https://github.com/toxicwind/estate-scripts.git",
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 425210325,
@@ -1894,10 +1894,10 @@
       "signalTotal": 0
     },
     {
-      "name": "sovereign-dispersal",
-      "upstream": "https://github.com/toxicwind/sovereign-dispersal",
+      "name": "estate-scripts-dispersal",
+      "upstream": "https://github.com/toxicwind/estate-scripts-dispersal",
       "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/sovereign-dispersal.git",
+      "remoteOrigin": "https://github.com/toxicwind/estate-scripts-dispersal.git",
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 94412,
@@ -1906,7 +1906,7 @@
       "signalTotal": 0
     },
     {
-      "name": "sovereign-dispersal-monolith",
+      "name": "estate-scripts-dispersal-monolith",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
@@ -1918,10 +1918,10 @@
       "signalTotal": 0
     },
     {
-      "name": "sovereign-end4",
-      "upstream": "https://github.com/toxicwind/sovereign-end4",
+      "name": "estate-scripts-end4",
+      "upstream": "https://github.com/toxicwind/estate-scripts-end4",
       "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/sovereign-end4.git",
+      "remoteOrigin": "https://github.com/toxicwind/estate-scripts-end4.git",
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 32936200,
@@ -1930,7 +1930,7 @@
       "signalTotal": 0
     },
     {
-      "name": "sovereign-monitor",
+      "name": "estate-scripts-monitor",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
@@ -1942,10 +1942,10 @@
       "signalTotal": 0
     },
     {
-      "name": "sovereign-scripts",
-      "upstream": "https://github.com/toxicwind/sovereign-scripts",
+      "name": "estate-scripts-scripts",
+      "upstream": "https://github.com/toxicwind/estate-scripts-scripts",
       "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/sovereign-scripts.git",
+      "remoteOrigin": "https://github.com/toxicwind/estate-scripts-scripts.git",
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 149399,
@@ -1954,10 +1954,10 @@
       "signalTotal": 0
     },
     {
-      "name": "sovereign-skills",
-      "upstream": "https://github.com/toxicwind/sovereign-skills",
+      "name": "estate-scripts-skills",
+      "upstream": "https://github.com/toxicwind/estate-scripts-skills",
       "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/sovereign-skills.git",
+      "remoteOrigin": "https://github.com/toxicwind/estate-scripts-skills.git",
       "hasGit": true,
       "isSubmodule": true,
       "sizeBytes": 64302,
@@ -1966,7 +1966,7 @@
       "signalTotal": 0
     },
     {
-      "name": "sovereign-whoa-breakthrough",
+      "name": "estate-scripts-whoa-breakthrough",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,

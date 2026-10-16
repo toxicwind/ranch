@@ -141,7 +141,7 @@ Reasonable people saw three things and fused them:
 ### 4.4 Broadcast-capable paths on yote: audited
 
 - **journald:** default config (`[Journal]` only, no `ForwardToWall` override, no drop-ins) — journald does not wall on yote. (Reference: the 2026-04 oss-security advisory on journald emergency messages being wall-broadcast, and the Arch discussion of `ForwardToWall` — neither applies; yote is default-off.)
-- **Direct `wall(1)` callers:** narrow source scan of core sovereign scripts and the canary tree found no `wall`/`utmp`/`broadcast` callers (the `wall` hits in `analyze.py`/`resolver.py` are "wall-clock time" variables). `systemd-cat`/emergency-priority logging paths: no evidence.
+- **Direct `wall(1)` callers:** narrow source scan of core estate-scripts scripts and the canary tree found no `wall`/`utmp`/`broadcast` callers (the `wall` hits in `analyze.py`/`resolver.py` are "wall-clock time" variables). `systemd-cat`/emergency-priority logging paths: no evidence.
 - **logind:** `HandleLidSwitch=ignore`, `IdleAction=ignore` — no automatic sleep initiation. The *manual* initiation path (D-Bus `Suspend()`) is live but neutered by the masks (proven §1.2).
 
 ---
@@ -230,7 +230,7 @@ None of these jobs emits terminal wall broadcasts on yote — they are hatch-sid
 | yote system timers (10) | None fired at the three timestamps |
 | yote user timers (5) | None match |
 | journald `ForwardToWall` | Default (off) — no drop-ins |
-| `wall(1)` callers in sovereign/canary scripts | None found |
+| `wall(1)` callers in estate-scripts/canary scripts | None found |
 | Squawk fleet/lead at the three timestamps | No suspend notices (nearest: agent-joined 02:34:42) |
 | Canary runlog / memory log | ROLLBACK pages 01:24:24/01:29:25; 401s from 03:04:19; no suspend text |
 | Hatch `cron.list` | Inventoried (§5); run records anchor §2 correlations |

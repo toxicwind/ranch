@@ -71,7 +71,7 @@ chrono.workspace = true
 [target.'cfg(target_os = "android")'.dependencies]
 # NOTE (zed-qed 2026-10-01): the mobile gpui crates gpui_wgpu and gpui_ios
 # exist in no zed tree on this estate -- neither the canonical
-# projects/qed/zed (1.13.0) nor toxicwind/sovereign-zed (1.17.0) carries
+# projects/qed/zed (1.13.0) nor toxicwind/estate-scripts-zed (1.17.0) carries
 # them; they stay disabled so host (linux/macos) builds resolve. gpui_android
 # now lives in-tree as a structural crate at crates/gpui_android: API-complete
 # against the Android entry code, compiling for aarch64-linux-android, with

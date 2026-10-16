@@ -1,7 +1,7 @@
 /**
  * flock/ts/strategy/deps — StrategyDeps backed by the policy tier.
  *
- * This is the composition root that replaces sovereign-router's global
+ * This is the composition root that replaces estate-scripts-router's global
  * `state` singleton (the RouterState/Matrix trio). PolicyBackedDeps wires
  * EloEngine + CircuitPolicy + PolicyHealthDB (../policy) together with a
  * Roost-backed ModelCatalog and the Governor, and exposes them through

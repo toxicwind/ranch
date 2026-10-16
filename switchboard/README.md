@@ -11,14 +11,14 @@ The estate has three kinds of routers and none of them route *capabilities*:
 | Router | Routes | Port |
 |---|---|---|
 | herd (`:25100`) | models → herd backends | 25100 |
-| sovereign-router (`:25104`) | model requests → providers (strategies, Elo, circuits) | 25104 |
+| estate-scripts-router (`:25104`) | model requests → providers (strategies, Elo, circuits) | 25104 |
 | flock (`:25193`) | (model routing variant) | 25193 |
 
 Meanwhile **skills** — the estate's actual capabilities (`SKILL.md` files with
 `name:` + `description:` frontmatter in `/home/toxic/estate/skills/` and
 `~/workspace/skills/`) — have no index and no router. OpenFang agents declare
 `skills = []` and `mcp_servers = []` in `agent.toml`, but nothing resolves
-those fields (verified: zero matches for "skill router" across 152k sovereign
+those fields (verified: zero matches for "skill router" across 152k estate-scripts
 files; every agent's lists are empty).
 
 **Switchboard is the missing router: agent intents → skills/capabilities →

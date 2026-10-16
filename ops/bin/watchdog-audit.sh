@@ -8,7 +8,7 @@
 #   ./watchdog-audit.sh --verbose  # show every probe
 # Exit 0 = all watchdogs real. Exit 1 = at least one FAKE/DOWN finding.
 #
-# Permanent home: sovereign-projects/projects/ops/bin/
+# Permanent home: estate-scripts-projects/projects/ops/bin/
 # First run: 2026-09-20 (watchdog-hunter) — caught kimi-auto-canary-judge idle
 # loop (removed), kimi-auto-shim pitchfork desync (fixed via pitchfork-restart),
 # 11 auto-start pitchfork daemons down, 10 stale yote pidfiles (cleaned).

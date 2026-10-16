@@ -1,5 +1,5 @@
 {
- "bakeoff": "tau-extension-vs-sovereign-router",
+ "bakeoff": "tau-extension-vs-estate-scripts-router",
  "version": 1,
  "note": "Same prompts go to both contenders. check.type=auto means mechanically verifiable; manual means rubric-scored by the referee from raw text.",
  "prompts": [

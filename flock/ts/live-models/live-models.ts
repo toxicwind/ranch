@@ -1,7 +1,7 @@
 /**
  * flock/ts/live-models — live model discovery scheduler (Bun/TS).
  *
- * Ported from sovereign-router's router_live_models.ts. A thin scheduler
+ * Ported from estate-scripts-router's router_live_models.ts. A thin scheduler
  * around the Roost package (../roost/src): for every provider with a
  * configured key, run Roost's adapter-aware discovery (OpenAI / Google
  * v1beta / Mistral / static / none shapes), feed the result into the

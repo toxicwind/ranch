@@ -9,7 +9,7 @@
 #
 # Usage: sudo-audit.sh [--json]
 # Exit 0 = no blockers, 1 = one or more blockers found.
-# Part of sovereign/projects/ops/bin/ (toxicwind/sovereign-projects).
+# Part of estate-scripts/projects/ops/bin/ (toxicwind/estate-scripts-projects).
 set -u
 JSON=0
 [ "${1:-}" = "--json" ] && JSON=1

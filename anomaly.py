@@ -13,7 +13,7 @@ from pathlib import Path
 BASE = "https://generativelanguage.googleapis.com"
 PROJ = "gen-lang-client-0111199472"
 STAMP = time.strftime("%Y%m%d-%H%M%S")
-DATA = Path.home() / "sovereign" / "data"
+DATA = Path.home() / "estate-scripts" / "data"
 DATA.mkdir(parents=True, exist_ok=True)
 RAW = DATA / f"anomaly-{STAMP}"
 RAW.mkdir(exist_ok=True)

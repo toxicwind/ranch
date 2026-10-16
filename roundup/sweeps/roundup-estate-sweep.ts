@@ -3,7 +3,7 @@
  * roundup-estate-sweep.ts — one-command benchmark sweep across the estate's
  * live inference endpoints, emitting router-consumable results.
  *
- * Endpoints: herd :25100, flock :25193, sovereign :25104 (skipped if down).
+ * Endpoints: herd :25100, flock :25193, estate-scripts :25104 (skipped if down).
  * Method: guidellm (the roundup fork's CLI) per model, synchronous profile,
  * fixed prompt/output token budgets, instruction_following quality scorer.
  *
@@ -15,7 +15,7 @@
  * exact=2 / contains=1 / miss=0).
  *
  * Plus weights.json — model_id -> { tokens_per_s, ttft_ms, p50_ms,
- * error_rate, quality, timestamp } — the contract the sovereign router's
+ * error_rate, quality, timestamp } — the contract the estate-scripts router's
  * bench-priors merge reads. Weights are computed quality-descending,
  * p50-latency-ascending, matching the estate ranking rule.
  *

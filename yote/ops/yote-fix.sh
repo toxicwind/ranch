@@ -21,7 +21,7 @@
 #     comes from `tailscale serve status --json`; a dead backend's server file
 #     is found by searching .py sources for the backend's port number.
 #   - Deploy pulls exec.py / ws_daemon.py from LIVE GitHub raw:
-#     raw.githubusercontent.com/toxicwind/sovereign-projects/main/projects/yote/bridge/bin
+#     raw.githubusercontent.com/toxicwind/estate-scripts-projects/main/projects/yote/bridge/bin
 #     (the old gist mirror e817e044162bb59c386615f89b1baeb0 is DEPRECATED 2026-09-20).
 #   - All TLS probes use the tailnet DNS name for SNI. Probing the raw tail IP
 #     (or 127.0.0.1 with SNI=localhost) through Tailscale Serve/Funnel causes
@@ -384,7 +384,7 @@ fi
 # exec.py / ws_daemon.py run on HATCH, not yote — this just keeps the checkout
 # in sync. v1's raw.githubusercontent.com/toxicwind/gear fallback is dead (no such repo);
 # v2/v3's gist mirror (e817e044162bb59c386615f89b1baeb0) is DEPRECATED 2026-09-20 —
-# canonical source is now live GitHub raw (sovereign-projects, projects/yote/bridge/bin).
+# canonical source is now live GitHub raw (estate-scripts-projects, projects/yote/bridge/bin).
 YF_CACHE="/var/cache/yote-fix/bridge-dir"
 if [ -z "$BRIDGE_DIR" ] && [ -f "$YF_CACHE" ]; then
   _cached="$(cat "$YF_CACHE" 2>/dev/null)"
@@ -404,7 +404,7 @@ if [ -z "$BRIDGE_DIR" ]; then
     echo "$BRIDGE_DIR" > "$YF_CACHE" 2>/dev/null
   fi
 fi
-SP_RAW="https://raw.githubusercontent.com/toxicwind/sovereign-projects/main/projects/yote/bridge/bin"
+SP_RAW="https://raw.githubusercontent.com/toxicwind/estate-scripts-projects/main/projects/yote/bridge/bin"
 if [ -n "${BRIDGE_DIR:-}" ] && [ -d "$BRIDGE_DIR" ] && have curl; then
   note ok "deploy:dir" "$BRIDGE_DIR"
   for f in exec.py ws_daemon.py; do

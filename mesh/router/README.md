@@ -8,7 +8,7 @@
 
 ## ⚡ Canonical Active Service
 
-The TypeScript router on port `:25104` (`sovereign-router-ts`) is the active sovereign router daemon composed under `pitchfork` (`auto = ["start"]`). It front-ends all local and remote LLM execution: local GPU inference via `herd` (`:25100`), NVIDIA NIM local proxies, Groq, Cerebras, OpenRouter, Mistral, and Google.
+The TypeScript router on port `:25104` (`estate-scripts-router-ts`) is the active estate-scripts router daemon composed under `pitchfork` (`auto = ["start"]`). It front-ends all local and remote LLM execution: local GPU inference via `herd` (`:25100`), NVIDIA NIM local proxies, Groq, Cerebras, OpenRouter, Mistral, and Google.
 
 ### Why This Exists
 
@@ -23,7 +23,7 @@ The TypeScript router on port `:25104` (`sovereign-router-ts`) is the active sov
 
 ```mermaid
 flowchart TB
-    client([client<br/>OpenAI-compatible]) -->|"POST /v1/chat/completions<br/>X-Sovereign-Strategy"| r[("sovereign-router :25104<br/>Obelisk Engine")]
+    client([client<br/>OpenAI-compatible]) -->|"POST /v1/chat/completions<br/>X-estate-scripts-Strategy"| r[("estate-scripts-router :25104<br/>Obelisk Engine")]
     r --> tree[Latent Task Descent<br/>getTaskPath]
     tree --> rank[Ranked Pairs<br/>sample Beta + Gamma]
     rank --> hedge{Speculative Hedge<br/>K=3, delta=100ms}
@@ -95,7 +95,7 @@ Ran across 100 requests against 5 heterogeneous upstream providers:
 
 ```text
 ranch/mesh/router/
-├── sovereign-router-ts/         # Canonical live TS router daemon (:25104)
+├── estate-scripts-router-ts/         # Canonical live TS router daemon (:25104)
 │   ├── router.ts                # Core Bun HTTP server & hedged speculative dispatcher
 │   ├── obelisk_engine.ts        # @takk/bayesroute wrapper & latent task path descent
 │   ├── model_disabler.ts        # BeliefField, CredentialBuckets & Gamma/Beta sampling
@@ -127,5 +127,5 @@ curl -s -N -H 'Content-Type: application/json' \
 curl -s http://127.0.0.1:25104/belief | python3 -m json.tool
 
 # Run the evolutionary variant race:
-cd sovereign-router-ts && bun run race/run.ts
+cd estate-scripts-router-ts && bun run race/run.ts
 ```

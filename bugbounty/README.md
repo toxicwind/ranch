@@ -1,4 +1,4 @@
-# bugbounty — sovereign bug-bounty openers
+# bugbounty — estate-scripts bug-bounty openers
 
 <div align="right">
 

@@ -16,7 +16,7 @@ install-tools:
 
 # Firefox live control (the feature added during "install that github completely")
 firefox-profile:
-    @bash scripts/sovereign-browser/launch-firefox-from-profile.sh
+    @bash scripts/estate-scripts-browser/launch-firefox-from-profile.sh
 
 firefox-dev:
     @GHAS_BROWSER=firefox just dev:headed

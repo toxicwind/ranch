@@ -35,7 +35,7 @@ unshare -pf true >/dev/null 2>&1 && note INFO unshare-bare-pf "works (unexpected
 
 # 3. ownership of hot paths — no root-owned strays
 # NOTE: resolve symlinks first. /home/toxic/.fleet-bus is
-# a symlink into the sovereign repo; a bare `find` on a symlink start-point
+# a symlink into the estate-scripts repo; a bare `find` on a symlink start-point
 # without trailing slash only stats the link itself (standard find behavior),
 # which silently skips the real directory. realpath avoids the false-negative.
 HOT=(/home/toxic/estate /home/toxic/.fleet-bus /home/toxic/.config /home/toxic/.local /home/toxic/.tau /home/toxic/estate/config)

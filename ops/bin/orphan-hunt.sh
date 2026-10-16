@@ -12,7 +12,7 @@
 # exception-free rule: /tmp is Trench's lane; this script lists but does not
 # triage /tmp contents.
 #
-# Permanent home: sovereign-projects/projects/ops/bin/
+# Permanent home: estate-scripts-projects/projects/ops/bin/
 # First run: 2026-09-20 (watchdog-hunter) — cleaned 10 stale yote pidfiles,
 # 1 stale hatch race-optimizer.pid; adopted tau-lab tmux (owner unknown, idle).
 set -u
@@ -152,7 +152,7 @@ if [ "$BOX" = yote ]; then
         echo "$body" | grep -q '"start"' || continue
         st=$("$PF" status "$d" 2>/dev/null | grep -m1 "Status:" | awk '{print $2}')
         if [ "$st" != "running" ]; then
-          found "DOWN-EXPECTED" "pitchfork/$d status=$st but auto=[start]" "ADOPT: bin/pitchfork-restart sovereign/$d (if wanted) or remove auto=start (if retired)"
+          found "DOWN-EXPECTED" "pitchfork/$d status=$st but auto=[start]" "ADOPT: bin/pitchfork-restart estate-scripts/$d (if wanted) or remove auto=start (if retired)"
         fi
       done
     fi

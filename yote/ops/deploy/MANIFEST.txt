@@ -1,5 +1,5 @@
 # Yote deploy bundle — MANIFEST
-# Repository: toxicwind/sovereign-projects (public)
+# Repository: toxicwind/estate-scripts-projects (public)
 # Status: APPLIED 2026-09-20 (~05:48 UTC) via the authenticated exec bridge.
 # All VERIFY.md checks passed post-apply: serve map intact (incl. /exec-ws,
 # /squawk-ws, /squawk-feed/seq), pitchfork daemons running, /exec-ws probes 400
@@ -10,9 +10,9 @@
 Raw-URL verification (hatch, 2026-09-20):
   PASS — all three canonical raw URLs served content byte-identical to the
   GitHub API blob content (sha256 of raw bytes == sha256 of blob bytes):
-    https://raw.githubusercontent.com/toxicwind/sovereign-projects/main/projects/yote/ops/yote-fix.sh
-    https://raw.githubusercontent.com/toxicwind/sovereign-projects/main/projects/yote/ops/yote-doctor.sh
-    https://raw.githubusercontent.com/toxicwind/sovereign-projects/main/shingle-workspace/awrawr_ws_exec.py
+    https://raw.githubusercontent.com/toxicwind/estate-scripts-projects/main/projects/yote/ops/yote-fix.sh
+    https://raw.githubusercontent.com/toxicwind/estate-scripts-projects/main/projects/yote/ops/yote-doctor.sh
+    https://raw.githubusercontent.com/toxicwind/estate-scripts-projects/main/shingle-workspace/awrawr_ws_exec.py
   (No 404s, no mismatches. The gist URLs are deprecated per consolidation plan §0.5.)
 
 Format: SP_SOURCE | GIT_BLOB_SHA | BYTES -> YOTE_DESTINATION | EXPECTED_SHA256

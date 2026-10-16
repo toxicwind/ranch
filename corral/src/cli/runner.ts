@@ -199,7 +199,7 @@ export async function runWorkflow(opts: RunWorkflowOpts): Promise<void> {
   }
 
   if (!headless) {
-    console.log(`🚀 Sovereign Corral — Multi-Agent Ticket Orchestration`);
+    console.log(`🚀 estate-scripts Corral — Multi-Agent Ticket Orchestration`);
     console.log(`📁 Repo: ${repoRoot}`);
     console.log(`🆔 Run ID: ${runId}`);
     kv([["concurrency", String(maxConcurrency)], ["max iterations", String(maxIterations)], ["smithers", smithersSubcommand]]);

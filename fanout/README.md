@@ -66,7 +66,7 @@ contends under bulk dispatch:
 
 ## Placement
 
-- Durable home: `sovereign/tools/fanout/` in `toxicwind/estate`
+- Durable home: `estate-scripts/tools/fanout/` in `toxicwind/estate`
   (this repo is the source of truth).
 - Working copy on awrawr-pc: `/home/toxic/bin/fanout`.
 - Cell copy: `~/workspace/bin/fanout` (cell storage is disposable).

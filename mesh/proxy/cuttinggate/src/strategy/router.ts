@@ -3,7 +3,7 @@
 // Kept for reference; do not deploy. See flock-ssot/ROUTER_CANON.md.
 /**
  * Estate Router v3.2 (Bun/TypeScript)
- * Port of sovereign-router/router.py — same strategies, HealthDB WAL, circuit breakers.
+ * Port of estate-scripts-router/router.py — same strategies, HealthDB WAL, circuit breakers.
  *
  * Strategies: fifo_matrix (alias fifo_flock) | ast_race (alias flock_race) | sticky_affinity | weighted_elo | circuit_chain | hybrid
  * Default hybrid: sticky → ast_race → circuit_chain; explicit CODING aliases go direct.
@@ -190,7 +190,7 @@ const server = Bun.serve({
 
     if (path.startsWith("/mesh")) {
       const m = await handleMeshRequest(req, {
-        service: "sovereign-router",
+        service: "estate-scripts-router",
         version: "v3.2",
       });
       if (m) return m;
@@ -300,7 +300,7 @@ const server = Bun.serve({
       }
       return json({
         status: "ok",
-        router: "sovereign-router-ts",
+        router: "estate-scripts-router-ts",
         version: "v3.2",
 strategy: STRATEGY,
 strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free race (default) -> hybrid (fallback); per-request X-Strategy/X-Routed-Via headers show the chosen lane" : STRATEGY,
@@ -392,7 +392,7 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
       }
       return json({
         status: "ok",
-        router: "sovereign-router-ts",
+        router: "estate-scripts-router-ts",
         version: "v3.2",
         strategy: STRATEGY,
         parallel: MAX_PARALLEL,

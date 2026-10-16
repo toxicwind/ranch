@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects#license)
+[![estate-scripts-projects](https://img.shields.io/badge/estate-scripts--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-scripts-projects)
 
 </div>
 
@@ -40,7 +40,7 @@ cat > /tmp/claim.json <<'EOF'
   "lane": "wave4-router-max",
   "claim": "restarted",
   "claimed_at": "2026-10-02T11:48:00Z",
-  "watch_dirs": ["/home/toxic/estate/tools/sovereign-router"],
+  "watch_dirs": ["/home/toxic/estate/tools/estate-scripts-router"],
   "checkpoint_file": "/home/toxic/estate/checkpoints/wave4.json"
 }
 EOF
@@ -96,6 +96,6 @@ appended to the checkpoint file in the wave4 event schema.
 
 ## License & security
 
-- [MIT](https://github.com/toxicwind/sovereign-projects#license).
+- [MIT](https://github.com/toxicwind/estate-scripts-projects#license).
 - Read-only against the box except `--append-checkpoint` writes to the
   checkpoint file you name. Never touches credentials, money, or network.

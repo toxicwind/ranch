@@ -223,12 +223,12 @@ describe("catalog helpers", () => {
     expect(modelProbeBonus("nvidia", "nvidia/gpt-oss-20b")).toBe(0);
     expect(modelProbeBonus("openrouter", "inclusionai/ling-3.0-flash-fin:free")).toBe(0);
   });
-  test("modelProbeBonus is killed by SOVEREIGN_MODEL_BONUS=0", () => {
-    process.env.SOVEREIGN_MODEL_BONUS = "0";
+  test("modelProbeBonus is killed by estate-scripts_MODEL_BONUS=0", () => {
+    process.env.estate-scripts_MODEL_BONUS = "0";
     try {
       expect(modelProbeBonus("nvidia", "nvidia/nemotron-3-super-120b-a12b")).toBe(0);
     } finally {
-      delete process.env.SOVEREIGN_MODEL_BONUS;
+      delete process.env.estate-scripts_MODEL_BONUS;
     }
   });
 
@@ -369,12 +369,12 @@ describe("longctxPinEligible", () => {
   test("disabled kill switch", () => {
     const deps = stubDeps();
     try {
-      process.env.SOVEREIGN_LONGCTX_PIN = "0";
+      process.env.estate-scripts_LONGCTX_PIN = "0";
       const v = longctxPinEligible(deps, bigBody(LONGCTX_PIN_GATE_TOKENS * 4 + 4));
       expect(v.ok).toBe(false);
       expect(v.reason).toBe("disabled");
     } finally {
-      delete process.env.SOVEREIGN_LONGCTX_PIN;
+      delete process.env.estate-scripts_LONGCTX_PIN;
       (deps as unknown as { _cleanup: () => void })._cleanup();
     }
   });

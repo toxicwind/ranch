@@ -3,8 +3,8 @@
 # check alive/claim/reality per runner, report broken/dead/duplicates in a
 # table. Exit 0 = all healthy, exit 1 = findings.
 #
-# Durable home: sovereign/projects/ops/bin/runner-audit.sh (canonical repo
-# toxicwind/sovereign-projects). Run on demand; never as a polling daemon.
+# Durable home: estate-scripts/projects/ops/bin/runner-audit.sh (canonical repo
+# toxicwind/estate-scripts-projects). Run on demand; never as a polling daemon.
 #
 # Design: hatch checks run locally; yote checks go through the yote-conn
 # bridge (read-only probes only — this script NEVER restarts, kills, or
@@ -144,7 +144,7 @@ echo
 echo "== verified distinct pairs (not duplicates) =="
 printf '  %-28s %-28s %s\n' "progress-watchdog (hatch 3m)" "fleet-watchdog-sweepd (yote 60s)" "supervisor vs presence heartbeat"
 printf '  %-28s %-28s %s\n' "bridge-watchdog (hatch 5m)" "yote-connector-watch (hatch 5m)" "yote WS vs cell listener :18301"
-printf '  %-28s %-28s %s\n' "progress-watchdog (hatch)" "sovereign/market-watchdog" "fleet supervisor vs inotify bidder-only restart"
+printf '  %-28s %-28s %s\n' "progress-watchdog (hatch)" "estate-scripts/market-watchdog" "fleet supervisor vs inotify bidder-only restart"
 
 # ---------------------------------------------------------------- summary
 echo

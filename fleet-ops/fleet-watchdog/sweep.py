@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fleet presence + rollover watchdog v2 (lane 7, owner).
 
-Runs ON awrawr-pc (sovereign-chat is local: no bridge hop).
+Runs ON awrawr-pc (estate-scripts-chat is local: no bridge hop).
 Cell-side driver (driver.sh) syncs the rollover mirror, then runs
 supervise.sh, which keeps the direct 60s sweeper alive and runs a backstop
 sweep only when the last sweep is stale.
@@ -21,7 +21,7 @@ Each sweep:
      Steady state = silence. Heartbeat still posts every sweep (plane TTL).
 
 Cadence: 60s via sweepd.sh — a direct lightweight looper on awrawr-pc with
-no agent-wrapper dispatch and no bridge hop. sovereign-chat presence TTL is
+no agent-wrapper dispatch and no bridge hop. estate-scripts-chat presence TTL is
 120s, so the 60s sweep keeps the lane-7 heartbeat alive with 60s of margin
 and pages a gap only after 2 missed sweeps (>120s). The platform cron
 (fleet-presence-rollover-watchdog, every 2m) supervises sweepd through
@@ -48,11 +48,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 STATE_PATH = os.path.join(HERE, "state.json")
 ROLLOVER = os.path.join(HERE, "fleet-rollover.md")
 MANIFEST_PATH = os.path.join(HERE, "lane_manifest.json")
-TOKEN_PATH = "/home/toxic/.config/sovereign-chat-token"
+TOKEN_PATH = "/home/toxic/.config/estate-scripts-chat-token"
 CHAT = "http://127.0.0.1:25120"
 MY_AGENT = "5a4f76c0-e3a4-4069-ba6f-3113917102dc"
 MY_NAME = "lane-7"
-INTERVAL_S = 60            # sweepd cadence: direct 60s loop on awrawr-pc; sovereign-chat presence TTL is 120s
+INTERVAL_S = 60            # sweepd cadence: direct 60s loop on awrawr-pc; estate-scripts-chat presence TTL is 120s
 GAP_S = 2 * INTERVAL_S     # gap page at > 2x interval (two missed sweeps = 120s)
 MAP_ERROR_REPAGE_S = 3600  # re-page a blind-map condition at most hourly
 TRANSITION_CAP = 50

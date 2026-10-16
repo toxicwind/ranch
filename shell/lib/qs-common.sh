@@ -1,4 +1,4 @@
-# qs-common.sh — shared helpers for the qs-* entrypoints (sovereign/projects/shell).
+# qs-common.sh — shared helpers for the qs-* entrypoints (estate-scripts/projects/shell).
 # Source it from a qs-* script AFTER computing QS_HOME:
 #   QS_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 #   . "$QS_HOME/lib/qs-common.sh"

@@ -1,7 +1,7 @@
 /**
  * flock/ts/strategy/strategy — routing strategies for Flock.
  *
- * Ported from sovereign-router's router_strategy.ts (v3.2). The behavioral
+ * Ported from estate-scripts-router's router_strategy.ts (v3.2). The behavioral
  * details are preserved exactly:
  *
  * - callOne: the single provider-call primitive. Entitlement-404 fail-fast

@@ -7,7 +7,7 @@ venv/
 .env*
 .secrets*
 
-# Sovereign standard sensitive & ephemeral patterns added by auditor
+# estate-scripts standard sensitive & ephemeral patterns added by auditor
 .secrets
 *.key
 *.pat

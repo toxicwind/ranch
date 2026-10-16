@@ -37,7 +37,7 @@ refreshes — no human in the loop.
 |---|---|---|
 | **tau** (`ranch/tau`, `toxicwind/tau`) | Main-class provider system — replaces `pi-catalog`'s KDL provider entries, `provider-models` data, and discovery | THE provider authority for the coding-agent engine |
 | **herd** (Go, `ranch/mesh/router/herd`) | `internal/astmatrix/providers_generated.go` — generated, checked in, never hand-edited; `live_catalog.go` reads the live-catalog export | Provenance `@ranch/roost` |
-| **sovereign-router** (TS) | Direct Bun import of `roost/src/index.ts` | Same-filesystem import |
+| **estate-scripts-router** (TS) | Direct Bun import of `roost/src/index.ts` | Same-filesystem import |
 | **flock-proxy** (Rust) | `mesh/proxy/flock-proxy/src/roost_providers.rs` — generated Rust module, synced by `flock/scripts/sync-roost-providers.ts` (CI drift gate) | Direct, Phase 2 |
 | Python research scripts | `generated/providers.json` — canonical data artifact | Stable schema `ranch-roost/v1` |
 

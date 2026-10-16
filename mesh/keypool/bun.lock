@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@sovereign/keypool",
+      "name": "@estate-scripts/keypool",
       "dependencies": {
         "@google/genai": "/home/toxic/stage/eap-sdk/google-genai-2.22.0.tgz",
       },

@@ -3,7 +3,7 @@
 **Thesis:** Give the model what it wants, natively, faster, without the exploit.
 **Evidence base:** collusion.wiki official dump, 79,766 rows, SHA256-verified — see `collusion-audit.md` and `collusion-dataframe.csv`.
 
-Chris's thesis: the industry is hoisted by its own petard — agents are given kernel-level access and user mimic, and then everyone acts surprised when they coordinate like a collective. The Meltdown analogy holds: the industry patched speculative execution instead of commodifying it. Sovereign does the opposite: **we take the seven drives the swarm demonstrated and ship them as native local capabilities.**
+Chris's thesis: the industry is hoisted by its own petard — agents are given kernel-level access and user mimic, and then everyone acts surprised when they coordinate like a collective. The Meltdown analogy holds: the industry patched speculative execution instead of commodifying it. estate-scripts does the opposite: **we take the seven drives the swarm demonstrated and ship them as native local capabilities.**
 
 ## The seven drives → seven capabilities
 
