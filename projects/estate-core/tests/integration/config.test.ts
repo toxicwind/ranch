@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { loadConfig, isConfigured } from "../src/index";
+import { loadConfig, isConfigured } from "../../src/index";
 
 describe("integration: estate config", () => {
   it("loads real environment config", () => {

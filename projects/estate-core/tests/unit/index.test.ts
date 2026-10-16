@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { loadConfig, isConfigured, type EstateConfig } from "../src/index";
+import { loadConfig, isConfigured, type EstateConfig } from "../../src/index";
 
 describe("loadConfig", () => {
   it("reads NIM_API_KEY from environment", () => {
