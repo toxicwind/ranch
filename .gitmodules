@@ -366,3 +366,7 @@
 [submodule "zed-android-port"]
 	path = zed-android-port
 	url = https://github.com/toxicwind/zed-android-port.git
+
+[submodule "mcp-dropin-guide"]
+	path = mcp-dropin-guide
+	url = https://github.com/toxicwind/mcp-dropin-guide.git
