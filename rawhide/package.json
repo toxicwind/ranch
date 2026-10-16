@@ -1,0 +1,11 @@
+{
+  "name": "rawhide",
+  "version": "0.1.0",
+  "description": "Tau/omp extension. One engine, multiple maximal rule packs (gwern default, airspeak STE lineage absorbed, epistemic). Skills as the extension point.",
+  "type": "module",
+  "omp": {
+    "extensions": ["./src/index.ts"]
+  },
+  "keywords": ["tau", "omp", "extension", "rawhide", "airspeak", "lint"],
+  "license": "MIT"
+}
