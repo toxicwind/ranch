@@ -364,10 +364,10 @@ export function resolveConfigPath(explicit?: string): string {
 		const candidate = join(agentDir, "config.yml");
 		if (existsSync(candidate)) return candidate;
 	}
-	const estate-scriptsAgentConfig = join(homedir(), "estate-scripts", "config", "tau", "agent", "config.yml");
-	if (existsSync(estate-scriptsAgentConfig)) return estate-scriptsAgentConfig;
+	const estateScriptsAgentConfig = join(homedir(), "estate-scripts", "config", "tau", "agent", "config.yml");
+	if (existsSync(estateScriptsAgentConfig)) return estateScriptsAgentConfig;
 	fail(
-		`no agent config.yml found; tried $PI_CODING_AGENT_DIR and ${estate-scriptsAgentConfig}. Note: $PI_CONFIG_DIR/config.yml is NOT loaded for settings.`,
+		`no agent config.yml found; tried $PI_CODING_AGENT_DIR and ${estateScriptsAgentConfig}. Note: $PI_CONFIG_DIR/config.yml is NOT loaded for settings.`,
 	);
 }
 
