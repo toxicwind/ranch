@@ -1,12 +1,12 @@
-# ranch/* fork audit (generated 2026-10-15T06:16:29.578Z)
+# ranch/* fork audit (generated 2026-10-16T06:09:04.535Z)
 
-194 immediate subdirs; **48** have an obvious upstream reference.
+201 immediate subdirs; **44** have an obvious upstream reference.
 
 By source:
-  - **37** .gitmodules
+  - **33** .gitmodules
+  - **2** git remote origin (non-toxicwind)
   - **3** package.json repository
   - **1** go.mod module
-  - **2** git remote origin (non-toxicwind)
   - **2** git remote upstream
   - **1** README 'Forked from'
   - **1** GitHub parent fork
@@ -48,13 +48,9 @@ By source:
 | `secretsmith` | [github.com/toxicwind/secretsmith](https://github.com/toxicwind/secretsmith) | .gitmodules | github.com/toxicwind/secretsmith.git |
 | `session-bus-refresh` | [github.com/toxicwind/session-bus-refresh](https://github.com/toxicwind/session-bus-refresh) | .gitmodules | github.com/toxicwind/session-bus-refresh.git |
 | `skillforge` | [github.com/toxicwind/skillforge](https://github.com/toxicwind/skillforge) | .gitmodules | github.com/toxicwind/skillforge.git |
-| `estate-scripts` | [github.com/toxicwind/estate-scripts](https://github.com/toxicwind/estate-scripts) | .gitmodules | github.com/toxicwind/estate-scripts.git |
-| `estate-scripts-dispersal` | [github.com/toxicwind/estate-scripts-dispersal](https://github.com/toxicwind/estate-scripts-dispersal) | .gitmodules | github.com/toxicwind/estate-scripts-dispersal.git |
-| `estate-scripts-end4` | [github.com/toxicwind/estate-scripts-end4](https://github.com/toxicwind/estate-scripts-end4) | .gitmodules | github.com/toxicwind/estate-scripts-end4.git |
-| `estate-scripts-scripts` | [github.com/toxicwind/estate-scripts-scripts](https://github.com/toxicwind/estate-scripts-scripts) | .gitmodules | github.com/toxicwind/estate-scripts-scripts.git |
-| `estate-scripts-skills` | [github.com/toxicwind/estate-scripts-skills](https://github.com/toxicwind/estate-scripts-skills) | .gitmodules | github.com/toxicwind/estate-scripts-skills.git |
 | `strudel-dev-vite` | [github.com/toxicwind/strudel-dev-vite](https://github.com/toxicwind/strudel-dev-vite) | .gitmodules | github.com/toxicwind/strudel-dev-vite.git |
 | `strudel-sampler-server-vite` | [github.com/toxicwind/strudel-sampler-server-vite](https://github.com/toxicwind/strudel-sampler-server-vite) | .gitmodules | github.com/toxicwind/strudel-sampler-server-vite.git |
+| `tailnet-doctor` | [github.com/toxicwind/tailnet-doctor](https://github.com/toxicwind/tailnet-doctor) | .gitmodules | github.com/toxicwind/tailnet-doctor.git |
 | `tau` | [github.com/can1357/oh-my-pi](https://github.com/can1357/oh-my-pi) | git remote upstream | github.com/toxicwind/tau.git |
 | `tau-extensions` | [github.com/toxicwind/tau-extensions](https://github.com/toxicwind/tau-extensions) | .gitmodules | github.com/toxicwind/tau-extensions.git |
 | `toxicwind-repos` | [github.com/toxicwind/toxicwind-repos](https://github.com/toxicwind/toxicwind-repos) | .gitmodules | github.com/toxicwind/toxicwind-repos |
@@ -87,6 +83,7 @@ By source:
 | `campfire` | — | — | — |
 | `cell-mirror` | — | — | — |
 | `chat-coord` | — | — | — |
+| `chronos-forge` | — | — | — |
 | `classifier` | — | — | — |
 | `classifier-preflight` | — | — | — |
 | `codebase-memory` | — | — | — |
@@ -108,7 +105,14 @@ By source:
 | `effusion-labs` | — | — | — |
 | `effusion-labs-tickets` | — | — | — |
 | `emergent` | — | — | — |
+| `estate` | — | — | github.com/toxicwind/estate-scripts.git |
 | `estate-chat` | — | — | — |
+| `estate-dispersal` | — | — | github.com/toxicwind/sovereign-dispersal.git |
+| `estate-dispersal-monolith` | — | — | — |
+| `estate-end4` | — | — | github.com/toxicwind/sovereign-end4.git |
+| `estate-monitor` | — | — | — |
+| `estate-skills` | — | — | github.com/toxicwind/sovereign-skills.git |
+| `estate-whoa-breakthrough` | — | — | — |
 | `evidence-locker` | — | — | — |
 | `examples` | — | — | — |
 | `extagents` | — | — | — |
@@ -123,7 +127,7 @@ By source:
 | `flock` | — | — | — |
 | `forge` | — | — | — |
 | `gatehouse-staging` | — | — | — |
-| `gayxxx-estate-scripts` | — | — | github.com/toxicwind/ranch |
+| `gayxxx-estate` | — | — | github.com/toxicwind/ranch |
 | `gear` | — | — | — |
 | `gguf-read` | — | — | — |
 | `github-search` | — | — | — |
@@ -151,12 +155,14 @@ By source:
 | `meta-research-toolkit` | — | — | — |
 | `metaaivm` | — | — | — |
 | `metaaivm-profile` | — | — | — |
+| `mise` | — | — | — |
 | `mission-control` | — | — | — |
 | `ml-serve` | — | — | — |
 | `model-max` | — | — | — |
 | `monad-forge` | — | — | — |
 | `namespace-concealment-explorer` | — | — | — |
 | `naming-audit` | — | — | — |
+| `nim-omnibus` | — | — | github.com/toxicwind/nim-omnibus.git |
 | `nim-repos` | — | — | — |
 | `null-g-proxy` | — | — | — |
 | `omp-test-runner-watchdog-OzX7V0` | — | — | — |
@@ -165,7 +171,10 @@ By source:
 | `ops` | — | — | — |
 | `pack-fix` | — | — | — |
 | `phone-ocr-sweep` | — | — | — |
+| `plugin-ecosystem` | — | — | — |
+| `plugins` | — | — | — |
 | `pollinations-proxy` | — | — | — |
+| `projects` | — | — | — |
 | `provider-fuzz` | — | — | — |
 | `qed` | — | — | — |
 | `ranch-analyze` | — | — | — |
@@ -181,11 +190,7 @@ By source:
 | `rustdesk-server` | — | — | — |
 | `ryzen3090-whoa` | — | — | — |
 | `saturation-guard` | — | — | — |
-| `scripts` | — | — | — |
 | `shell` | — | — | — |
-| `estate-scripts-dispersal-monolith` | — | — | — |
-| `estate-scripts-monitor` | — | — | — |
-| `estate-scripts-whoa-breakthrough` | — | — | — |
 | `spark` | — | — | — |
 | `spark-harvest` | — | — | — |
 | `squawk` | — | — | github.com/toxicwind/squawk.git |
@@ -201,6 +206,7 @@ By source:
 | `tau-marketplace` | — | — | — |
 | `tmux-mcp` | — | — | — |
 | `toolcall-agent` | — | — | — |
+| `toolkit` | — | — | — |
 | `tools` | — | — | — |
 | `websearch-mcp` | — | — | — |
 | `windmill` | — | — | — |
@@ -208,6 +214,7 @@ By source:
 | `wtf-orch` | — | — | — |
 | `wtf-orthogonal-seed` | — | — | — |
 | `yote-maximal` | — | — | — |
+| `zero-transport` | — | — | — |
 
 
 ## GitHub parent-fork lookups (canonical)

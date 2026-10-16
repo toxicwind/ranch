@@ -1,10 +1,22 @@
 {
-  "generated": "2026-10-15T06:16:29.578Z",
-  "total": 194,
-  "withUpstream": 48,
+  "generated": "2026-10-16T06:09:04.535Z",
+  "total": 201,
+  "withUpstream": 44,
   "infos": [
     {
-      "name": "additional-lens-profiles",
+      "name": "AgentForensics",
+      "upstream": "https://github.com/aparnaa19/AgentForensics",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/aparnaa19/AgentForensics.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 1512088,
+      "fileCount": 81,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "ComfyUI-TTools",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
@@ -16,14 +28,38 @@
       "signalTotal": 0
     },
     {
-      "name": "AgentForensics",
-      "upstream": "https://github.com/aparnaa19/AgentForensics",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/aparnaa19/AgentForensics.git",
+      "name": "Hyprgrid-gestures",
+      "upstream": "https://github.com/jairnarvaez/Hyprgrid",
+      "upstreamSource": "git remote origin (non-toxicwind)",
+      "remoteOrigin": "https://github.com/jairnarvaez/Hyprgrid.git",
       "hasGit": true,
-      "isSubmodule": true,
-      "sizeBytes": 1512078,
-      "fileCount": 81,
+      "isSubmodule": false,
+      "sizeBytes": 89394,
+      "fileCount": 40,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "RSSLive",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 0,
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "additional-lens-profiles",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 0,
+      "fileCount": 0,
       "signals": [],
       "signalTotal": 0
     },
@@ -58,7 +94,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 32376818,
+      "sizeBytes": 32660246,
       "fileCount": 6427,
       "signals": [],
       "signalTotal": 0
@@ -118,7 +154,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 2210,
+      "sizeBytes": 2235,
       "fileCount": 1,
       "signals": [],
       "signalTotal": 0
@@ -130,7 +166,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 41663,
+      "sizeBytes": 41678,
       "fileCount": 2,
       "signals": [],
       "signalTotal": 0
@@ -142,7 +178,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 101748,
+      "sizeBytes": 101893,
       "fileCount": 10,
       "signals": [],
       "signalTotal": 0
@@ -190,7 +226,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 2362669338,
+      "sizeBytes": 2635636983,
       "fileCount": 12945,
       "signals": [],
       "signalTotal": 0
@@ -238,7 +274,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 8564,
+      "sizeBytes": 8569,
       "fileCount": 2,
       "signals": [],
       "signalTotal": 0
@@ -262,7 +298,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 721643,
+      "sizeBytes": 721798,
       "fileCount": 53,
       "signals": [],
       "signalTotal": 0
@@ -274,7 +310,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 5629632,
+      "sizeBytes": 5629667,
       "fileCount": 34,
       "signals": [],
       "signalTotal": 0
@@ -286,7 +322,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 119843,
+      "sizeBytes": 119853,
       "fileCount": 28,
       "signals": [],
       "signalTotal": 0
@@ -312,6 +348,18 @@
       "isSubmodule": false,
       "sizeBytes": 0,
       "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "chronos-forge",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 26341380,
+      "fileCount": 332,
       "signals": [],
       "signalTotal": 0
     },
@@ -412,18 +460,6 @@
       "signalTotal": 0
     },
     {
-      "name": "ComfyUI-TTools",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 0,
-      "fileCount": 0,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
       "name": "computer-use-linux",
       "upstream": null,
       "upstreamSource": null,
@@ -442,7 +478,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 604087464,
+      "sizeBytes": 604087599,
       "fileCount": 53702,
       "signals": [],
       "signalTotal": 0
@@ -454,7 +490,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 101137,
+      "sizeBytes": 101142,
       "fileCount": 6,
       "signals": [],
       "signalTotal": 0
@@ -466,7 +502,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 24178,
+      "sizeBytes": 24513,
       "fileCount": 1,
       "signals": [],
       "signalTotal": 0
@@ -526,7 +562,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4203,
+      "sizeBytes": 4228,
       "fileCount": 2,
       "signals": [],
       "signalTotal": 0
@@ -550,7 +586,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 8072,
+      "sizeBytes": 8132,
       "fileCount": 3,
       "signals": [],
       "signalTotal": 0
@@ -562,7 +598,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 11208574,
+      "sizeBytes": 11208599,
       "fileCount": 25,
       "signals": [],
       "signalTotal": 0
@@ -604,14 +640,74 @@
       "signalTotal": 0
     },
     {
+      "name": "estate",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": "https://github.com/toxicwind/estate-scripts.git",
+      "hasGit": true,
+      "isSubmodule": false,
+      "sizeBytes": 425160157,
+      "fileCount": 548,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "estate-chat",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 5992160,
+      "sizeBytes": 5992410,
       "fileCount": 528,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "estate-dispersal",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": "https://github.com/toxicwind/sovereign-dispersal.git",
+      "hasGit": true,
+      "isSubmodule": false,
+      "sizeBytes": 94552,
+      "fileCount": 52,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "estate-dispersal-monolith",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 3716,
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "estate-end4",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": "https://github.com/toxicwind/sovereign-end4.git",
+      "hasGit": true,
+      "isSubmodule": false,
+      "sizeBytes": 32936585,
+      "fileCount": 1284,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "estate-monitor",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 34628,
+      "fileCount": 7,
       "signals": [],
       "signalTotal": 0
     },
@@ -622,8 +718,32 @@
       "remoteOrigin": null,
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 6899544,
+      "sizeBytes": 6900024,
       "fileCount": 279,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "estate-skills",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": "https://github.com/toxicwind/sovereign-skills.git",
+      "hasGit": true,
+      "isSubmodule": false,
+      "sizeBytes": 64347,
+      "fileCount": 38,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "estate-whoa-breakthrough",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 36295568,
+      "fileCount": 1055,
       "signals": [],
       "signalTotal": 0
     },
@@ -670,7 +790,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 5886648,
+      "sizeBytes": 5886688,
       "fileCount": 51,
       "signals": [],
       "signalTotal": 0
@@ -682,7 +802,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 19642,
+      "sizeBytes": 19647,
       "fileCount": 2,
       "signals": [],
       "signalTotal": 0
@@ -694,7 +814,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 38628,
+      "sizeBytes": 38638,
       "fileCount": 3,
       "signals": [],
       "signalTotal": 0
@@ -718,7 +838,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 103374,
+      "sizeBytes": 103404,
       "fileCount": 18,
       "signals": [],
       "signalTotal": 0
@@ -754,7 +874,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 299489,
+      "sizeBytes": 299759,
       "fileCount": 45,
       "signals": [],
       "signalTotal": 0
@@ -766,7 +886,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 172108102,
+      "sizeBytes": 172110477,
       "fileCount": 1616,
       "signals": [],
       "signalTotal": 0
@@ -778,7 +898,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 10091669,
+      "sizeBytes": 10092829,
       "fileCount": 723,
       "signals": [],
       "signalTotal": 0
@@ -790,7 +910,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 516157,
+      "sizeBytes": 516167,
       "fileCount": 113,
       "signals": [],
       "signalTotal": 0
@@ -802,20 +922,20 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 6678488,
+      "sizeBytes": 6679858,
       "fileCount": 35,
       "signals": [],
       "signalTotal": 0
     },
     {
-      "name": "gayxxx-estate-scripts",
+      "name": "gayxxx-estate",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": "https://github.com/toxicwind/ranch",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 5126360,
-      "fileCount": 412,
+      "sizeBytes": 1171584,
+      "fileCount": 16,
       "signals": [],
       "signalTotal": 0
     },
@@ -826,7 +946,7 @@
       "remoteOrigin": null,
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 8180800,
+      "sizeBytes": 8180810,
       "fileCount": 65,
       "signals": [],
       "signalTotal": 0
@@ -850,7 +970,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 2262995028,
+      "sizeBytes": 2264550703,
       "fileCount": 45093,
       "signals": [],
       "signalTotal": 0
@@ -874,7 +994,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 716838,
+      "sizeBytes": 716888,
       "fileCount": 42,
       "signals": [],
       "signalTotal": 0
@@ -964,25 +1084,13 @@
       "signalTotal": 0
     },
     {
-      "name": "Hyprgrid-gestures",
-      "upstream": "https://github.com/jairnarvaez/Hyprgrid",
-      "upstreamSource": "git remote origin (non-toxicwind)",
-      "remoteOrigin": "https://github.com/jairnarvaez/Hyprgrid.git",
-      "hasGit": true,
-      "isSubmodule": false,
-      "sizeBytes": 89394,
-      "fileCount": 40,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
       "name": "keep",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 867554004,
+      "sizeBytes": 1064471836,
       "fileCount": 2836,
       "signals": [],
       "signalTotal": 0
@@ -994,7 +1102,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 101339471,
+      "sizeBytes": 101344791,
       "fileCount": 4424,
       "signals": [],
       "signalTotal": 0
@@ -1006,7 +1114,7 @@
       "remoteOrigin": "https://github.com/toxicwind/kilo-cli.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 433906912,
+      "sizeBytes": 433906917,
       "fileCount": 3762,
       "signals": [],
       "signalTotal": 0
@@ -1018,7 +1126,7 @@
       "remoteOrigin": "https://github.com/toxicwind/kilo-code.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 864387900,
+      "sizeBytes": 864387910,
       "fileCount": 10978,
       "signals": [],
       "signalTotal": 0
@@ -1030,7 +1138,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 1300419,
+      "sizeBytes": 1300524,
       "fileCount": 160,
       "signals": [],
       "signalTotal": 0
@@ -1042,7 +1150,7 @@
       "remoteOrigin": "https://github.com/toxicwind/kitty-mcp-server.git",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 42183502,
+      "sizeBytes": 42204253,
       "fileCount": 3861,
       "signals": [
         {
@@ -1060,7 +1168,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 15752179,
+      "sizeBytes": 15752229,
       "fileCount": 703,
       "signals": [],
       "signalTotal": 0
@@ -1072,7 +1180,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 73214661,
+      "sizeBytes": 73217276,
       "fileCount": 2156,
       "signals": [],
       "signalTotal": 0
@@ -1096,7 +1204,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 34420,
+      "sizeBytes": 34425,
       "fileCount": 3,
       "signals": [],
       "signalTotal": 0
@@ -1108,7 +1216,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 3222,
+      "sizeBytes": 3232,
       "fileCount": 1,
       "signals": [],
       "signalTotal": 0
@@ -1192,7 +1300,7 @@
       "remoteOrigin": "https://github.com/toxicwind/mcpproxy-go.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 424400607,
+      "sizeBytes": 424400622,
       "fileCount": 3752,
       "signals": [],
       "signalTotal": 0
@@ -1204,8 +1312,20 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 20290980287,
-      "fileCount": 322548,
+      "sizeBytes": 16767053470,
+      "fileCount": 166806,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "meta-research-toolkit",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 241306748,
+      "fileCount": 8874,
       "signals": [],
       "signalTotal": 0
     },
@@ -1234,14 +1354,14 @@
       "signalTotal": 0
     },
     {
-      "name": "meta-research-toolkit",
+      "name": "mise",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 241290403,
-      "fileCount": 8874,
+      "sizeBytes": 0,
+      "fileCount": 0,
       "signals": [],
       "signalTotal": 0
     },
@@ -1264,7 +1384,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 30304,
+      "sizeBytes": 30329,
       "fileCount": 6,
       "signals": [],
       "signalTotal": 0
@@ -1276,7 +1396,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 1455071,
+      "sizeBytes": 1455116,
       "fileCount": 15,
       "signals": [],
       "signalTotal": 0
@@ -1300,7 +1420,7 @@
       "remoteOrigin": "https://github.com/toxicwind/muse-cli.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 1922437,
+      "sizeBytes": 1922442,
       "fileCount": 79,
       "signals": [
         {
@@ -1330,7 +1450,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 6218,
+      "sizeBytes": 6233,
       "fileCount": 1,
       "signals": [],
       "signalTotal": 0
@@ -1348,13 +1468,25 @@
       "signalTotal": 0
     },
     {
+      "name": "nim-omnibus",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": "https://github.com/toxicwind/nim-omnibus.git",
+      "hasGit": true,
+      "isSubmodule": false,
+      "sizeBytes": 74228,
+      "fileCount": 35,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "nim-repos",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 2841478486,
+      "sizeBytes": 2841478801,
       "fileCount": 63117,
       "signals": [],
       "signalTotal": 0
@@ -1366,7 +1498,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 30382225,
+      "sizeBytes": 30382245,
       "fileCount": 1203,
       "signals": [],
       "signalTotal": 0
@@ -1378,7 +1510,7 @@
       "remoteOrigin": "https://github.com/toxicwind/nvidia-alive.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 406722,
+      "sizeBytes": 406752,
       "fileCount": 121,
       "signals": [],
       "signalTotal": 0
@@ -1426,7 +1558,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 22183,
+      "sizeBytes": 22293,
       "fileCount": 2,
       "signals": [],
       "signalTotal": 0
@@ -1438,7 +1570,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 3729306,
+      "sizeBytes": 3729436,
       "fileCount": 64,
       "signals": [],
       "signalTotal": 0
@@ -1450,7 +1582,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 422356,
+      "sizeBytes": 422711,
       "fileCount": 62,
       "signals": [],
       "signalTotal": 0
@@ -1462,7 +1594,7 @@
       "remoteOrigin": "https://github.com/toxicwind/outlier-toolkit.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 3755308,
+      "sizeBytes": 3755313,
       "fileCount": 288,
       "signals": [],
       "signalTotal": 0
@@ -1474,7 +1606,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 32745,
+      "sizeBytes": 32815,
       "fileCount": 6,
       "signals": [],
       "signalTotal": 0
@@ -1486,7 +1618,7 @@
       "remoteOrigin": "https://github.com/toxicwind/paper-poller.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 99266,
+      "sizeBytes": 99276,
       "fileCount": 42,
       "signals": [],
       "signalTotal": 0
@@ -1546,6 +1678,30 @@
       "signalTotal": 0
     },
     {
+      "name": "plugin-ecosystem",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 69577477,
+      "fileCount": 70,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "plugins",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 19245,
+      "fileCount": 16,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "pollinations-proxy",
       "upstream": null,
       "upstreamSource": null,
@@ -1558,13 +1714,25 @@
       "signalTotal": 0
     },
     {
+      "name": "projects",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 4279,
+      "fileCount": 5,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "provider-fuzz",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 147701,
+      "sizeBytes": 147711,
       "fileCount": 16,
       "signals": [],
       "signalTotal": 0
@@ -1576,8 +1744,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 66804921350,
-      "fileCount": 358476,
+      "sizeBytes": 8576908421,
+      "fileCount": 56803,
       "signals": [],
       "signalTotal": 0
     },
@@ -1588,7 +1756,7 @@
       "remoteOrigin": "https://github.com/toxicwind/ralph-dashboard.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 445758770,
+      "sizeBytes": 456867341,
       "fileCount": 22189,
       "signals": [],
       "signalTotal": 0
@@ -1600,7 +1768,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 312143905,
+      "sizeBytes": 312159050,
       "fileCount": 6125,
       "signals": [],
       "signalTotal": 0
@@ -1612,7 +1780,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 367278551,
+      "sizeBytes": 367832673,
       "fileCount": 16645,
       "signals": [],
       "signalTotal": 0
@@ -1624,7 +1792,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 548739649,
+      "sizeBytes": 550480831,
       "fileCount": 16987,
       "signals": [],
       "signalTotal": 0
@@ -1636,7 +1804,7 @@
       "remoteOrigin": "https://github.com/toxicwind/refusal-hunt.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 132468526,
+      "sizeBytes": 132468661,
       "fileCount": 3258,
       "signals": [],
       "signalTotal": 0
@@ -1672,7 +1840,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 3660891,
+      "sizeBytes": 3660951,
       "fileCount": 90,
       "signals": [],
       "signalTotal": 0
@@ -1684,7 +1852,7 @@
       "remoteOrigin": "https://github.com/toxicwind/rig.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 203883752,
+      "sizeBytes": 203883787,
       "fileCount": 747,
       "signals": [],
       "signalTotal": 0
@@ -1696,7 +1864,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 706199118,
+      "sizeBytes": 707940687,
       "fileCount": 18013,
       "signals": [],
       "signalTotal": 0
@@ -1708,7 +1876,7 @@
       "remoteOrigin": "https://github.com/owieth/turborepo-example",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 428805,
+      "sizeBytes": 428815,
       "fileCount": 74,
       "signals": [],
       "signalTotal": 0
@@ -1720,7 +1888,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 86740,
+      "sizeBytes": 87265,
       "fileCount": 10,
       "signals": [],
       "signalTotal": 0
@@ -1738,25 +1906,13 @@
       "signalTotal": 0
     },
     {
-      "name": "RSSLive",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 0,
-      "fileCount": 0,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
       "name": "rsync-mcp",
       "upstream": "https://github.com/toxicwind/rsync-mcp",
       "upstreamSource": ".gitmodules",
       "remoteOrigin": "https://github.com/toxicwind/rsync-mcp.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 247469,
+      "sizeBytes": 247489,
       "fileCount": 101,
       "signals": [],
       "signalTotal": 0
@@ -1768,7 +1924,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 3476144650,
+      "sizeBytes": 3802426714,
       "fileCount": 11657,
       "signals": [],
       "signalTotal": 0
@@ -1780,8 +1936,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 19718235,
-      "fileCount": 11,
+      "sizeBytes": 19664715,
+      "fileCount": 9,
       "signals": [],
       "signalTotal": 0
     },
@@ -1792,7 +1948,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 36303185,
+      "sizeBytes": 36303200,
       "fileCount": 1056,
       "signals": [],
       "signalTotal": 0
@@ -1818,18 +1974,6 @@
       "isSubmodule": false,
       "sizeBytes": 41105,
       "fileCount": 7,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "scripts",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 19792,
-      "fileCount": 3,
       "signals": [],
       "signalTotal": 0
     },
@@ -1864,8 +2008,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4013783164,
-      "fileCount": 14599,
+      "sizeBytes": 4587540011,
+      "fileCount": 14952,
       "signals": [],
       "signalTotal": 0
     },
@@ -1882,109 +2026,13 @@
       "signalTotal": 0
     },
     {
-      "name": "estate-scripts",
-      "upstream": "https://github.com/toxicwind/estate-scripts",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/estate-scripts.git",
-      "hasGit": true,
-      "isSubmodule": true,
-      "sizeBytes": 425210325,
-      "fileCount": 548,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "estate-scripts-dispersal",
-      "upstream": "https://github.com/toxicwind/estate-scripts-dispersal",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/estate-scripts-dispersal.git",
-      "hasGit": true,
-      "isSubmodule": true,
-      "sizeBytes": 94412,
-      "fileCount": 52,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "estate-scripts-dispersal-monolith",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 3716,
-      "fileCount": 1,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "estate-scripts-end4",
-      "upstream": "https://github.com/toxicwind/estate-scripts-end4",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/estate-scripts-end4.git",
-      "hasGit": true,
-      "isSubmodule": true,
-      "sizeBytes": 32936200,
-      "fileCount": 1284,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "estate-scripts-monitor",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 34593,
-      "fileCount": 7,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "estate-scripts-scripts",
-      "upstream": "https://github.com/toxicwind/estate-scripts-scripts",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/estate-scripts-scripts.git",
-      "hasGit": true,
-      "isSubmodule": true,
-      "sizeBytes": 149399,
-      "fileCount": 52,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "estate-scripts-skills",
-      "upstream": "https://github.com/toxicwind/estate-scripts-skills",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/estate-scripts-skills.git",
-      "hasGit": true,
-      "isSubmodule": true,
-      "sizeBytes": 64302,
-      "fileCount": 38,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "estate-scripts-whoa-breakthrough",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 36295563,
-      "fileCount": 1055,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
       "name": "spark",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 340006,
+      "sizeBytes": 352206,
       "fileCount": 15,
       "signals": [],
       "signalTotal": 0
@@ -2008,8 +2056,8 @@
       "remoteOrigin": "https://github.com/toxicwind/squawk.git",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 20771929,
-      "fileCount": 1796,
+      "sizeBytes": 21511261,
+      "fileCount": 1831,
       "signals": [],
       "signalTotal": 0
     },
@@ -2020,7 +2068,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 6912,
+      "sizeBytes": 6922,
       "fileCount": 4,
       "signals": [],
       "signalTotal": 0
@@ -2032,7 +2080,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 305095,
+      "sizeBytes": 305120,
       "fileCount": 19,
       "signals": [],
       "signalTotal": 0
@@ -2044,7 +2092,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 140249520,
+      "sizeBytes": 185911909,
       "fileCount": 14109,
       "signals": [],
       "signalTotal": 0
@@ -2056,7 +2104,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 6315,
+      "sizeBytes": 6335,
       "fileCount": 11,
       "signals": [],
       "signalTotal": 0
@@ -2068,7 +2116,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 26750,
+      "sizeBytes": 26760,
       "fileCount": 2,
       "signals": [],
       "signalTotal": 0
@@ -2080,7 +2128,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 11252,
+      "sizeBytes": 11317,
       "fileCount": 8,
       "signals": [],
       "signalTotal": 0
@@ -2128,8 +2176,20 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 36023,
+      "sizeBytes": 36038,
       "fileCount": 10,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "tailnet-doctor",
+      "upstream": "https://github.com/toxicwind/tailnet-doctor",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/tailnet-doctor.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 63157121,
+      "fileCount": 634,
       "signals": [],
       "signalTotal": 0
     },
@@ -2140,7 +2200,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 39004,
+      "sizeBytes": 39014,
       "fileCount": 11,
       "signals": [],
       "signalTotal": 0
@@ -2152,8 +2212,8 @@
       "remoteOrigin": "https://github.com/toxicwind/tau.git",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 5334916648,
-      "fileCount": 48433,
+      "sizeBytes": 5350548302,
+      "fileCount": 48439,
       "signals": [],
       "signalTotal": 0
     },
@@ -2164,7 +2224,7 @@
       "remoteOrigin": "https://github.com/toxicwind/tau-extensions.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 5018936635,
+      "sizeBytes": 5018937030,
       "fileCount": 77624,
       "signals": [],
       "signalTotal": 0
@@ -2176,7 +2236,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 694344,
+      "sizeBytes": 694709,
       "fileCount": 126,
       "signals": [],
       "signalTotal": 0
@@ -2200,8 +2260,20 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 40636,
+      "sizeBytes": 40686,
       "fileCount": 5,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "toolkit",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 36894,
+      "fileCount": 4,
       "signals": [],
       "signalTotal": 0
     },
@@ -2224,7 +2296,7 @@
       "remoteOrigin": "https://github.com/toxicwind/toxicwind-repos",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 215158331,
+      "sizeBytes": 215158341,
       "fileCount": 897,
       "signals": [],
       "signalTotal": 0
@@ -2236,7 +2308,7 @@
       "remoteOrigin": "https://github.com/toxicwind/trading-post.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 1703946355,
+      "sizeBytes": 1744586162,
       "fileCount": 94699,
       "signals": [
         {
@@ -2266,7 +2338,7 @@
       "remoteOrigin": "https://github.com/toxicwind/wezterm.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 8526433284,
+      "sizeBytes": 9304137018,
       "fileCount": 31543,
       "signals": [
         {
@@ -2326,7 +2398,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4909,
+      "sizeBytes": 4934,
       "fileCount": 3,
       "signals": [],
       "signalTotal": 0
@@ -2350,7 +2422,7 @@
       "remoteOrigin": "https://github.com/toxicwind/ranch",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 30192642,
+      "sizeBytes": 31944448,
       "fileCount": 2122,
       "signals": [],
       "signalTotal": 0
@@ -2362,8 +2434,20 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 6729,
+      "sizeBytes": 6739,
       "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "zero-transport",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 21910,
+      "fileCount": 3,
       "signals": [],
       "signalTotal": 0
     }

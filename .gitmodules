@@ -269,3 +269,7 @@
 [submodule "kilo-cli"]
 	path = kilo-cli
 	url = https://github.com/toxicwind/kilo-cli.git
+
+[submodule "tailnet-doctor"]
+	path = tailnet-doctor
+	url = https://github.com/toxicwind/tailnet-doctor.git
