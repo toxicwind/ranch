@@ -1,121 +1,49 @@
-# 🤗 Hugging Face MCP Server
-
 <div align="right">
 
-[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](./LICENSE)
-[![smithery](https://img.shields.io/badge/smithery-%40shreyaskarnik%2Fhuggingface--mcp--server-blue?style=for-the-badge)](https://smithery.ai/server/@shreyaskarnik/huggingface-mcp-server)
-[![estate](https://img.shields.io/badge/estate-monorepo-blue?style=for-the-badge)](https://github.com/toxicwind/estate)
+[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](LICENSE)
+[![ranch/mcp](https://img.shields.io/badge/ranch%2Fmcp-fork-blue?style=for-the-badge)](https://github.com/toxicwind/huggingface-mcp-server)
+[![smithery](https://img.shields.io/badge/install-smithery-black?style=for-the-badge)](smithery.yaml)
 
 </div>
 
-> Vendored from
-> [`shreyaskarnik/huggingface-mcp-server`](https://github.com/shreyaskarnik/huggingface-mcp-server)
-> (MIT © 2025 Shreyas Karnik) — also installable via
-> [Smithery](https://smithery.ai/server/@shreyaskarnik/huggingface-mcp-server).
+# huggingface-mcp-server
 
-A Model Context Protocol (MCP) server that gives LLMs read-only access to
-the Hugging Face Hub: models, datasets, spaces, papers, and collections —
-search, inspect, compare, and summarize, all through MCP tools.
+Fork of [`shreyaskarnik/huggingface-mcp-server`](https://github.com/shreyaskarnik/huggingface-mcp-server)
+(MIT © 2025 Shreyas Karnik) — Hugging Face models, datasets, Spaces, collections,
+papers, and Hub files as MCP tools. Maintained as a ranch fork with locked
+uv resolution (`.python-version` + `uv.lock` vendored for reproducible installs).
 
-```mermaid
-flowchart LR
-    llm[Claude / agent] -->|MCP stdio| srv[huggingface_mcp_server.py]
-    srv -->|search/info| hub[Hugging Face Hub API]
-    srv -->|hf:// URIs| res[models · datasets · spaces]
-    srv -->|prompts| p[compare-models · summarize-paper]
-```
+Part of the [estate](https://github.com/toxicwind/estate) MCP fleet.
 
-## Features
+## What the fork changes
 
-- **Resources** — custom `hf://` URI scheme: `hf://model/{id}`,
-  `hf://dataset/{id}`, `hf://space/{id}`, with descriptive names and JSON
-  content type.
-- **Prompts** — `compare-models` (model_ids, comma-separated) and
-  `summarize-paper` (arxiv_id + optional brief/detailed level, with
-  implementation details).
-- **Tools** — model tools (`search-models`, `get-model-info`), dataset
-  tools, space tools (incl. SDK filter), paper tools (`get-paper-info`,
-  `get-daily-papers`), collection tools.
+- **Reproducible env**: pins Python via `.python-version` and full `uv.lock`
+- **ranch packaging**: Dockerfile tuned for the estate registry; smithery.yaml kept
+- upstream features otherwise unchanged
 
-## Quick start
-
-### Via Smithery (Claude Desktop)
+## Run
 
 ```bash
-npx -y @smithery/cli install @shreyaskarnik/huggingface-mcp-server --client claude
+uv run src/server.py        # stdio MCP
+# or
+docker build -t hf-mcp . && docker run -i --rm -e HF_TOKEN hf-mcp
 ```
 
-### Claude Desktop (manual)
-
-On macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-— on Windows: `%APPDATA%/Claude/claude_desktop_config.json`:
-
-```json
-"mcpServers": {
-  "huggingface": {
-    "command": "uv",
-    "args": ["--directory", "/absolute/path/to/huggingface-mcp-server",
-             "run", "huggingface_mcp_server.py"],
-    "env": { "HF_TOKEN": "your_token_here" }
-  }
-}
-```
-
-### Optional auth
-
-Set `HF_TOKEN` (a Hugging Face API token) for higher rate limits, access
-to private repos (if authorized), and better high-volume reliability.
-The server works without it.
-
-## Architecture
-
-Python MCP server over stdio (`uv`-managed), thin over the public HF Hub
-APIs. Read-only by design — it queries Hub data, it never mutates repos.
-
-## Config
+## Configuration
 
 | Env | Required | Purpose |
 | --- | --- | --- |
-| `HF_TOKEN` | no | HF API token: rate limits + private repos |
+| `HF_TOKEN` | yes | Hugging Face API token |
+| `ALLOWED_DIRS` | no | Filesystem allowlist for Hub file downloads |
 
-## Example prompts for Claude
+Secrets belong in the keyring (`ranch/secretsmith`), never in the repo.
 
-- "Search for BERT models on Hugging Face with less than 100 million parameters"
-- "Find the most popular datasets for text classification on Hugging Face"
-- "What are today's featured AI research papers on Hugging Face?"
-- "Summarize the paper with arXiv ID 2307.09288 using the Hugging Face MCP server"
-- "Compare the Llama-3-8B and Mistral-7B models from Hugging Face"
-- "Show me the most popular Gradio spaces for image generation"
-- "Find collections created by TheBloke that include Mixtral models"
+## Upstream provenance
 
-## Dev / contributing
+- Upstream: `shreyaskarnik/huggingface-mcp-server` (MIT)
+- Fork home: `ranch/mcp/huggingface-mcp-server` in estate/ranch
+- Sync: track upstream, rebase fork-only files on top; never renumber rule ids
 
-```bash
-uv sync        # deps + lockfile
-uv build       # dist/ artifacts
-uv publish     # PyPI (needs UV_PUBLISH_TOKEN or username/password flags)
-```
+## License
 
-Debugging: MCP servers run over stdio — use the
-[MCP Inspector](https://github.com/modelcontextprotocol/inspector):
-
-```bash
-npx @modelcontextprotocol/inspector uv --directory /path/to/huggingface-mcp-server run huggingface_mcp_server.py
-```
-
-### Troubleshooting
-
-1. Check server logs in Claude Desktop — macOS:
-   `~/Library/Logs/Claude/mcp-server-huggingface.log`; Windows:
-   `%APPDATA%\Claude\logs\mcp-server-huggingface.log`.
-2. Rate limiting? Add an `HF_TOKEN`.
-3. Verify the machine reaches the Hugging Face API.
-4. If one tool fails, check the same data on huggingface.co first.
-
-## License & security
-
-MIT © 2025 Shreyas Karnik — see [LICENSE](./LICENSE).
-
-- Read-only over the Hub; your `HF_TOKEN` (if set) is used for API calls
-  only and never logged.
-- Keep `HF_TOKEN` in env or the MCP config — never in chat or repos.
+MIT — upstream © Shreyas Karnik; fork changes MIT. See [LICENSE](LICENSE).

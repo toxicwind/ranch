@@ -1,81 +1,53 @@
-# tmux-mcp v2.0
-
 <div align="right">
 
-[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate#license)
-[![estate](https://img.shields.io/badge/estate-monorepo-blue?style=for-the-badge)](https://github.com/toxicwind/estate)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
+[![ranch/mcp](https://img.shields.io/badge/ranch%2Fmcp-fork-blue?style=for-the-badge)](https://github.com/toxicwind/tmux-mcp)
+[![Runtime: Bun](https://img.shields.io/badge/runtime-Bun-f9f1e1?style=for-the-badge&logo=bun)](https://bun.sh)
 
 </div>
 
-MCP server for tmux session inspection and control — hardened for
-multi-socket estates. Agents can see what's running in every tmux session
-(`tmux_list`, `tmux_capture`); sending keystrokes (`tmux_send`) is gated
-behind explicit confirmation so it can never happen by accident.
+# tmux-mcp
+
+Drive tmux sessions from any MCP client — list, capture, and send keys
+with proper stdio framing. Single-file Bun server, zero dependencies.
+
+**Why this fork exists**: the original emitted Content-Length-framed
+JSON-RPC only. Gatehouse's (mcpproxy-go) stdio path silently ignores
+Content-Length-only peers — zero tools discovered. This fork emits
+newline-delimited JSON-RPC (one object per line) and accepts **both**
+framings on input for backward compatibility. See the framing note in
+`server.ts`.
 
 ```mermaid
 flowchart LR
-    agent[agent] -->|MCP| srv[tmux-mcp server.ts]
-    srv -->|scan| socks[sockets · /tmp/tmux-<uid>/]
-    socks --> s1[default socket]
-    socks --> s2[named · tauhyperfix]
-    srv -->|read-only| ro[tmux_list · tmux_capture]
-    srv -->|confirm:true required| send[tmux_send · logged]
+    agent[agent] -->|"MCP stdio (newline JSON)"| srv[server.ts]
+    srv --> tmux[tmux server]
 ```
 
 ## Tools
 
-| Tool | Access | Description |
-| --- | --- | --- |
-| `tmux_list` | Read-only | Lists sessions across **all** discovered tmux sockets (default + named like `tauhyperfix`) |
-| `tmux_capture` | Read-only | Captures pane scrollback (last 100 lines). `target` like `session:window.pane`, optional `socket` |
-| `tmux_send` | **Destructive-gated** | Sends keys to a pane. Requires explicit `confirm:true` — refused otherwise |
+| Tool | Description |
+| --- | --- |
+| `tmux_list` | List tmux sessions/windows/panes |
+| `tmux_capture` | Capture a pane's visible text |
+| `tmux_send` | Send keys/text to a pane |
 
-## Features
-
-- **Multi-socket discovery** — scans `/tmp/tmux-<uid>/` (or `$TMUX_TMPDIR`)
-  for socket files; enumerates the default socket plus named ones (e.g.
-  `tauhyperfix`). v1 only saw the default socket.
-- **Destructive-send gating** — `tmux_send` is never accidental: the schema
-  requires `confirm:true`, and the server logs every confirmed send to
-  stderr.
-
-## Quick start
+## Run
 
 ```bash
-/home/toxic/.bun/bin/bun /home/toxic/estate/tools/tmux-mcp/server.ts
+bun run server.ts
 ```
 
-Registered in the shep gateway (`projects/range/ranch/barn/shep/mcp_config.json`) as `tmux`
-(currently disabled pending deployment review).
+Stdio MCP transport, newline-delimited JSON-RPC out; accepts both
+Content-Length and newline framing in. Framing is auto-detected per
+message: a leading `Content-Length:` header selects header framing,
+anything else parses line-by-line.
 
-## Architecture
+## Testing
 
-Single Bun script (`server.ts`). Socket scan → session enumeration →
-per-tool handlers. Reads are free; sends are schema-gated and stderr-logged.
+Handshake proven: initialize + tools/list + a real `tmux_list` against
+the gatehouse proxy (which drops Content-Length-only peers).
 
-## Config
+## License
 
-| Env / arg | Purpose |
-| --- | --- |
-| `$TMUX_TMPDIR` | override socket scan dir (default `/tmp/tmux-<uid>/`) |
-| `target` | `session:window.pane` for capture/send |
-| `confirm:true` | required for `tmux_send` |
-
-## See also
-
-- [Fleet Knowledgebase](../../docs/fleet-knowledgebase.md) — crew `tau-tmux-mcp`
-- [Mesh gateway](../../projects/mesh/gateway/) — canonical MCP config
-
-## Dev / contributing
-
-Keep the gating: any new write-capable tool gets the same `confirm:true`
-schema requirement and stderr audit line as `tmux_send`.
-
-## License & security
-
-MIT — see [LICENSE](https://github.com/toxicwind/estate#license).
-
-- Never send to interactive shells without the user's informed intent —
-  `tmux_send` is destructive-gated for exactly this reason.
-- Pane scrollback may contain secrets; treat `tmux_capture` output like a
-  terminal screenshot.
+MIT — see [LICENSE](LICENSE).
