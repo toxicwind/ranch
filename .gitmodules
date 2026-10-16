@@ -285,3 +285,84 @@
 [submodule "dedicated-server-ops"]
 	path = dedicated/dedicated-server-ops
 	url = https://github.com/toxicwind/dedi-ops.git
+[submodule "OmniRoute"]
+	path = OmniRoute
+	url = https://github.com/toxicwind/OmniRoute.git
+[submodule "VansRouter"]
+	path = VansRouter
+	url = https://github.com/toxicwind/VansRouter.git
+[submodule "agent-dashboard"]
+	path = agent-dashboard
+	url = https://github.com/toxicwind/agent-dashboard.git
+[submodule "ai-merge-resolve"]
+	path = ai-merge-resolve
+	url = https://github.com/toxicwind/ai-merge-resolve.git
+[submodule "awesome-free-ai-coding"]
+	path = awesome-free-ai-coding
+	url = https://github.com/toxicwind/awesome-free-ai-coding.git
+[submodule "computer-use-linux"]
+	path = computer-use-linux
+	url = https://github.com/toxicwind/computer-use-linux.git
+[submodule "dualspace-ast-bm25-hybrid"]
+	path = dualspace-ast-bm25-hybrid
+	url = https://github.com/toxicwind/dualspace-ast-bm25-hybrid.git
+[submodule "estate-hatch-toolkit"]
+	path = estate-hatch-toolkit
+	url = https://github.com/toxicwind/estate-hatch-toolkit.git
+[submodule "estate-recon"]
+	path = estate-recon
+	url = https://github.com/toxicwind/estate-recon.git
+[submodule "estate-skills-hub"]
+	path = estate-skills-hub
+	url = https://github.com/toxicwind/estate-skills-hub.git
+[submodule "fleetd"]
+	path = fleetd
+	url = https://github.com/toxicwind/fleetd.git
+[submodule "freebuffet"]
+	path = freebuffet
+	url = https://github.com/toxicwind/freebuffet.git
+[submodule "ghq"]
+	path = ghq
+	url = https://github.com/toxicwind/ghq.git
+[submodule "gito"]
+	path = gito
+	url = https://github.com/toxicwind/gito.git
+[submodule "godzilla-llama.cpp"]
+	path = godzilla-llama.cpp
+	url = https://github.com/toxicwind/godzilla-llama.cpp.git
+[submodule "identity-router"]
+	path = identity-router
+	url = https://github.com/toxicwind/identity-router.git
+[submodule "loom"]
+	path = loom
+	url = https://github.com/toxicwind/loom.git
+[submodule "maw"]
+	path = maw
+	url = https://github.com/toxicwind/maw.git
+[submodule "metaclaw-runtime"]
+	path = metaclaw-runtime
+	url = https://github.com/toxicwind/metaclaw-runtime.git
+[submodule "oh-my-pi"]
+	path = oh-my-pi
+	url = https://github.com/toxicwind/oh-my-pi.git
+[submodule "outsource"]
+	path = outsource
+	url = https://github.com/toxicwind/outsource.git
+[submodule "stealthprint"]
+	path = stealthprint
+	url = https://github.com/toxicwind/stealthprint.git
+[submodule "super-board"]
+	path = super-board
+	url = https://github.com/toxicwind/super-board.git
+[submodule "universal-keypool-bun"]
+	path = universal-keypool-bun
+	url = https://github.com/toxicwind/universal-keypool-bun.git
+[submodule "universal-keypool-gateway"]
+	path = universal-keypool-gateway
+	url = https://github.com/toxicwind/universal-keypool-gateway.git
+[submodule "workmux"]
+	path = workmux
+	url = https://github.com/toxicwind/workmux.git
+[submodule "zed-android-port"]
+	path = zed-android-port
+	url = https://github.com/toxicwind/zed-android-port.git
