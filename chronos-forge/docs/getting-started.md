@@ -65,6 +65,20 @@ minimally, re-run proof.
 
 ## Execution budget
 
-The default ceiling is **2000ms** per side-effecting call (`DEFAULT_BUDGET_MS`).
-This exists so a hung subprocess cannot freeze the endless loop. Requests
-above the ceiling are clamped down to it; see `clampBudget`.
+The proof gate runs under a hard deadline so a hung subprocess cannot freeze
+the endless loop. The budget is **model-aware**: `MODEL_BUDGET_MS` in
+`src/chronos/timeout.ts` maps each model to a ceiling derived from live
+latency measurements (2026-10-15, NIM `chat/completions`).
+
+- `stepfun-ai/step-5-preview` → 2000ms (measured 0.63s)
+- `z-ai/glm-5.3-flash` → 45000ms (measured 30.3s)
+- `nvidia/nemotron-3-ultra-550b-a55b` → 0 — known-broken (HTTP 400 DEGRADED);
+  proof fails fast instead of stalling
+
+Pass `model` in `ChronosConfig` to derive the budget, or set
+`executionBudgetMs` to override it explicitly. The default for unknown
+models is `DEFAULT_BUDGET_MS` (2000ms).
+
+Note: every NIM model here is a reasoning model — low `max_tokens` budgets
+are consumed by `reasoning_content` before any user-visible content is
+emitted, so budget your tokens accordingly.

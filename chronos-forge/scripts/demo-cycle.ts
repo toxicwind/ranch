@@ -2,20 +2,30 @@
  * Dry-run demo: bootstraps the control plane, runs one cycle, prints the
  * framed event stream, and checkpoints. Mutates nothing real.
  *
- *   npm run chronos:cycle
+ * Pass a model id to see the budget derive from measured latency:
+ *
+ *   node scripts/demo-cycle.ts                          # default budget
+ *   node scripts/demo-cycle.ts z-ai/glm-5.3-flash       # 45s budget
+ *   node scripts/demo-cycle.ts nvidia/nemotron-3-ultra-550b-a55b   # fail fast
  */
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ChronosForge } from '../dist/chronos/cycle.js';
+import { modelBudget, modelIsKnownBroken, DEFAULT_BUDGET_MS } from '../dist/chronos/timeout.js';
 
 const repoRoot = mkdtempSync(join(tmpdir(), 'chronos-demo-'));
+const model = process.argv[2];
+
+const budget = modelBudget(model, DEFAULT_BUDGET_MS);
+console.error(`[demo] model=${model ?? '(default)'} budget=${budget}ms${modelIsKnownBroken(model) ? ' (known-broken: proof will fail fast)' : ''}`);
 
 const forge = new ChronosForge({
   repoRoot,
-  dryRun: true,
+  dryRun: !modelIsKnownBroken(model),
   maxCycles: 1,
-  executionBudgetMs: 2000,
+  model,
+  ...(modelIsKnownBroken(model) ? {} : { executionBudgetMs: 2000 }),
 });
 
 const results = forge.run([
