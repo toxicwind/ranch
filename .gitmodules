@@ -273,3 +273,18 @@
 [submodule "tailnet-doctor"]
 	path = tailnet-doctor
 	url = https://github.com/toxicwind/tailnet-doctor.git
+[submodule "websites/effusion-labs-tickets"]
+	path = websites/effusionlabs/tickets
+	url = https://github.com/toxicwind/effusion-labs-tickets.git
+[submodule "websites/effusion-labs"]
+	path = websites/effusionlabs/main
+	url = https://github.com/toxicwind/effusion-labs.git
+[submodule "websites/arlockworks-core"]
+	path = websites/arlockworks/main
+	url = https://github.com/toxicwind/arlockworks-core.git
+[submodule "websites/arlockworks-next"]
+	path = websites/arlockworks/app
+	url = https://github.com/toxicwind/arlockworks-next.git
+[submodule "dedicated-server-ops"]
+	path = dedicated-server-ops
+	url = https://github.com/toxicwind/dedi-ops.git
