@@ -47,7 +47,7 @@ export function parseFlockDeadline(
 // ---------------------------------------------------------------------------
 
 export function maxInflight(): number {
-  const raw = parseInt(process.env.SOVEREIGN_MAX_INFLIGHT || "512", 10);
+  const raw = parseInt(process.env.ESTATE_MAX_INFLIGHT || "512", 10);
   return Number.isFinite(raw) && raw > 0 ? raw : 512;
 }
 

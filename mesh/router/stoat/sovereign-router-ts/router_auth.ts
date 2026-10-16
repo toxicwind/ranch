@@ -30,7 +30,7 @@
  * router exposes POST /auth/login + POST /auth/logout (JSON or form) instead.
  *
  * Deliberate deviations from auth.rs (documented, all fail-closed):
- *  - Cookie name is `sovereign_session` (flock used `flock_session`).
+ *  - Cookie name is `estate_session` (flock used `flock_session`).
  *  - A scraper-memo hit re-validates that the user still exists in the store
  *    before returning an identity; flock trusts the memo until the caller
  *    invokes clearScraperMemo(). Deletion therefore kills header-credential
@@ -40,10 +40,10 @@
  *    record (default "user"); no endpoint gates on role yet.
  *
  * Activation: the operator gate is OFF unless users are configured, via
- * SOVEREIGN_AUTH_USERS_FILE (JSON: {"users":[{"username","password_hash",
- * "role"}]}) or SOVEREIGN_AUTH_USERS (same JSON inline). With no users
+ * ESTATE_AUTH_USERS_FILE (JSON: {"users":[{"username","password_hash",
+ * "role"}]}) or ESTATE_AUTH_USERS (same JSON inline). With no users
  * configured the router behaves exactly as before. /v1/* keeps the
- * SOVEREIGN_CLIENT_KEYS gate in router.ts untouched; /health stays open.
+ * ESTATE_CLIENT_KEYS gate in router.ts untouched; /health stays open.
  *
  * Mint a hash for the users file:
  *   bun router_auth.ts --hash 'your-password'
@@ -61,7 +61,7 @@ import { existsSync, readFileSync } from "node:fs";
 
 const pbkdf2Async = promisify(pbkdf2Cb);
 
-export const COOKIE_NAME = "sovereign_session";
+export const COOKIE_NAME = "estate_session";
 export const SESSION_TTL_SECS = 12 * 3600;
 export const THROTTLE_WINDOW_SECS = 60;
 export const THROTTLE_MAX_FAILURES = 10;
@@ -269,8 +269,8 @@ export interface AuthSetup {
  *  (operator gate stays off — today's behavior is preserved). */
 export function loadAuthFromEnv(): AuthSetup | null {
   let users: AuthUser[] = [];
-  const file = process.env.SOVEREIGN_AUTH_USERS_FILE || "";
-  const inline = process.env.SOVEREIGN_AUTH_USERS || "";
+  const file = process.env.ESTATE_AUTH_USERS_FILE || "";
+  const inline = process.env.ESTATE_AUTH_USERS || "";
   if (file && existsSync(file)) {
     try {
       users = coerceUsers(JSON.parse(readFileSync(file, "utf8")));
@@ -281,11 +281,11 @@ export function loadAuthFromEnv(): AuthSetup | null {
     try {
       users = coerceUsers(JSON.parse(inline));
     } catch (e) {
-      console.error("[auth] failed to parse SOVEREIGN_AUTH_USERS:", e);
+      console.error("[auth] failed to parse ESTATE_AUTH_USERS:", e);
     }
   }
   if (!users.length) return null;
-  const tp = (process.env.SOVEREIGN_AUTH_TRUST_PROXY || "").toLowerCase();
+  const tp = (process.env.ESTATE_AUTH_TRUST_PROXY || "").toLowerCase();
   const trustProxy = tp === "1" || tp === "true" || tp === "yes";
   return { admin: new Admin(trustProxy), store: new MemoryUserStore(users) };
 }

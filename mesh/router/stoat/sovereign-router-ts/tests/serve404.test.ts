@@ -5,20 +5,20 @@ import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { spawn, type Subprocess } from "bun";
 
 const PORT = 25299; // unique test port (25xxx range, not production 25104)
-const CATALOG_PATH = `/tmp/sovereign_router_serve404_test.catalog.${process.pid}.json`;
+const CATALOG_PATH = `/tmp/estate_router_serve404_test.catalog.${process.pid}.json`;
 
 let router: Subprocess | null = null;
 
 beforeAll(async () => {
   // Start the router with a unique catalog path so the test is isolated.
   router = spawn({
-    cmd: [process.execPath, "router.ts"], // real bun, not the mise shim (shim overrides SOVEREIGN_ROUTER_PORT from ports.env)
+    cmd: [process.execPath, "router.ts"], // real bun, not the mise shim (shim overrides ESTATE_ROUTER_PORT from ports.env)
     cwd: new URL("..", import.meta.url).pathname,
     env: {
       ...process.env,
-      SOVEREIGN_ROUTER_PORT: String(PORT),
-      SOVEREIGN_CATALOG_STATE: CATALOG_PATH,
-      // No SOVEREIGN_ADMIN_TOKEN: AUTH is unset, endpoint is open in test.
+      ESTATE_ROUTER_PORT: String(PORT),
+      ESTATE_CATALOG_STATE: CATALOG_PATH,
+      // No ESTATE_ADMIN_TOKEN: AUTH is unset, endpoint is open in test.
     },
     stdout: "ignore",
     stderr: "ignore",

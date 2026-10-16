@@ -261,7 +261,7 @@ bun build ./router.ts --target bun --outfile ./dist/router.js
 Create `.env`:
 
 ```env
-SOVEREIGN_ROUTER_PORT=25104
+ESTATE_ROUTER_PORT=25104
 PROXY_API_KEYS=your-client-key-1,your-client-key-2
 NVIDIA_API_KEYS=nvapi-key-1,nvapi-key-2
 OPENROUTER_API_KEY=sk-or-...

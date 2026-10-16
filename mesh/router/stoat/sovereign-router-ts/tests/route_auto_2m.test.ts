@@ -5,9 +5,9 @@ import { describe, test, expect } from "bun:test";
 
 // Must be set before the router modules are imported (DB_PATH and the
 // catalog state path are read once at import).
-process.env.SOVEREIGN_DB = "/tmp/sovereign_router_auto2m_test.db";
-process.env.SOVEREIGN_CATALOG_STATE =
-  `/tmp/sovereign_router_auto2m_test.catalog.${process.pid}.json`;
+process.env.ESTATE_DB = "/tmp/estate_router_auto2m_test.db";
+process.env.ESTATE_CATALOG_STATE =
+  `/tmp/estate_router_auto2m_test.catalog.${process.pid}.json`;
 
 const {
   LONGCTX_2M_PROVIDER,
@@ -62,15 +62,15 @@ describe("longctx2MPinEligible", () => {
     expect(v.estTokens).toBeGreaterThan(1_000_000);
   });
 
-  test("kill switch SOVEREIGN_LONGCTX_2M=0 disables the tier", () => {
-    process.env.SOVEREIGN_LONGCTX_2M = "0";
+  test("kill switch ESTATE_LONGCTX_2M=0 disables the tier", () => {
+    process.env.ESTATE_LONGCTX_2M = "0";
     try {
       expect(longctx2MEnabled()).toBe(false);
       const v = longctx2MPinEligible(bigBody());
       expect(v.ok).toBe(false);
       expect(v.reason).toBe("disabled");
     } finally {
-      delete process.env.SOVEREIGN_LONGCTX_2M;
+      delete process.env.ESTATE_LONGCTX_2M;
     }
     expect(longctx2MEnabled()).toBe(true);
   });

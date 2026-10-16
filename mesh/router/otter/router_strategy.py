@@ -32,11 +32,11 @@ def call_one(provider: str, model: str, body: ChatBody) -> RouteResult:
     headers: dict[str, str] = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {get_key(provider)}",
-        "User-Agent": "Mozilla/5.0 (compatible; SovereignASTMatrix/3.1)",
+        "User-Agent": "Mozilla/5.0 (compatible; EstateASTMatrix/3.1)",
     }
     if provider == "openrouter":
         headers["HTTP-Referer"] = "https://zed.dev"
-        headers["X-Title"] = "Sovereign-AST-Matrix"
+        headers["X-Title"] = "Estate-AST-Matrix"
     start = time.time()
     try:
         req = Request(url, data=data, headers=headers, method="POST")
@@ -103,11 +103,11 @@ def call_one_stream(provider: str, model: str, body: ChatBody) -> RouteResult:
     headers: dict[str, str] = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {get_key(provider)}",
-        "User-Agent": "Mozilla/5.0 (compatible; SovereignASTMatrix/3.1)",
+        "User-Agent": "Mozilla/5.0 (compatible; EstateASTMatrix/3.1)",
     }
     if provider == "openrouter":
         headers["HTTP-Referer"] = "https://zed.dev"
-        headers["X-Title"] = "Sovereign-AST-Matrix"
+        headers["X-Title"] = "Estate-AST-Matrix"
     stream_body: ChatBody = {**body, "model": model, "stream": True}
     data = json.dumps(stream_body).encode()
     start = time.time()

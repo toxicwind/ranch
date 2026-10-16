@@ -53,6 +53,6 @@ export function padPromptToCacheFloor(prompt: string, floorTokens = 1024): strin
   if (est >= floorTokens) return prompt;
   // Pad benign system context to cross the 1024-token discount threshold
   const needed = floorTokens - est;
-  const paddingComment = `\n<!-- sovereign-cache-opt: ${".".repeat(Math.max(0, needed * 4))} -->`;
+  const paddingComment = `\n<!-- estate-cache-opt: ${".".repeat(Math.max(0, needed * 4))} -->`;
   return prompt + paddingComment;
 }

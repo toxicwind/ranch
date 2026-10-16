@@ -940,9 +940,9 @@ def main(argv=None):
     a = build_parser().parse_args(argv)
     # Reconcile flags given BEFORE the subcommand with those given AFTER it:
     # subparser defaults would otherwise clobber the root-parsed values.
-    a.bus = a.bus or getattr(a, "root_bus", None)
-    a.json = a.json or getattr(a, "root_json", False)
-    a.show = a.show or getattr(a, "root_show", False)
+    a.bus = getattr(a, "bus", None) or getattr(a, "root_bus", None)
+    a.json = getattr(a, "json", None) or getattr(a, "root_json", False)
+    a.show = getattr(a, "show", None) or getattr(a, "root_show", False)
     if a.bus:
         os.environ["DBUS_SESSION_BUS_ADDRESS"] = a.bus
     try:

@@ -603,7 +603,9 @@ if (portOccupied(PORT)) await refuseDuplicate(PORT);
 let app: ReturnType<typeof serve>;
 try {
   app = serve({
-
+  // 2026-10-15: bind loopback — the yote harness is internal-only (health on
+  // 127.0.0.1, depends gatehouse); Bun's default host is 0.0.0.0.
+  hostname: "127.0.0.1",
   port: PORT,
   async fetch(req) {
     const u = new URL(req.url);

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Model Health Checker for Sovereign AST Matrix
+Model Health Checker for Estate AST Matrix
 Tests all configured models, handles rate limits, persists results to DB.
 """
 import hashlib
@@ -35,7 +35,7 @@ def _load_secrets() -> None:
 _load_secrets()
 
 # ─── Imports after secrets loaded ──────────────────────────────────────────
-sys.path.insert(0, "/home/toxic/estate/tools/ast-matrix/sovereign-ast-matrix")
+sys.path.insert(0, "/home/toxic/estate/tools/ast-matrix/estate-ast-matrix")
 from router import (
     PROVIDER_MODELS,
     PROVIDERS,
@@ -143,7 +143,7 @@ def test_model(provider: str, model: str) -> dict[str, Any]:
     }
     if provider == "openrouter":
         headers["HTTP-Referer"] = "https://zed.dev"
-        headers["X-Title"] = "Sovereign-AST-Matrix"
+        headers["X-Title"] = "Estate-AST-Matrix"
     if "key_env_alt" in conf:
         alt = os.getenv(conf["key_env_alt"], "")
         if alt and not headers["Authorization"].endswith("Bearer "):

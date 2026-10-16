@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * probe-roundup-weights.ts — live receipt that roundup sweep weights
- * steer the sovereign router's candidate order.
+ * steer the estate router's candidate order.
  * Run from the sovereign-router-ts dir on yote.
  */
 import { getBenchPriors, benchModelBonus, benchProviderElo } from "./bench-priors.ts";

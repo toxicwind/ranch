@@ -28,9 +28,9 @@ import * as path from "node:path";
 // per run so no persisted quarantine leaks between runs.
 // The module-level `state` singleton uses this; the tests below construct
 // their own Matrix instances on per-test temp DBs.
-process.env.SOVEREIGN_DB = "/tmp/sovereign_router_elo_persist_module.db";
-process.env.SOVEREIGN_CATALOG_STATE =
-  `/tmp/sovereign_router_elo_persist_test.catalog.${process.pid}.json`;
+process.env.ESTATE_DB = "/tmp/estate_router_elo_persist_module.db";
+process.env.ESTATE_CATALOG_STATE =
+  `/tmp/estate_router_elo_persist_test.catalog.${process.pid}.json`;
 
 const { Matrix } = await import("../router_matrix");
 const { PROVIDERS } = await import("../router_config");
@@ -194,7 +194,7 @@ describe("Elo persistence", () => {
     const db = tmpDb();
     const modPath = new URL("../router_matrix.ts", import.meta.url).pathname;
     const writer = `
-      process.env.SOVEREIGN_DB = ${JSON.stringify(db)};
+      process.env.ESTATE_DB = ${JSON.stringify(db)};
       const { Matrix } = await import(${JSON.stringify(modPath)});
       const m = new Matrix();
       for (let i = 0; i < 4; i++) m.record("subproc-model", "nvidia", 200, 0.5);
@@ -214,7 +214,7 @@ describe("Elo persistence", () => {
     const wroteVal = wrote[1];
     // First process is fully gone; a new process must restore from the DB.
     const reader = `
-      process.env.SOVEREIGN_DB = ${JSON.stringify(db)};
+      process.env.ESTATE_DB = ${JSON.stringify(db)};
       const { Matrix } = await import(${JSON.stringify(modPath)});
       const m = new Matrix();
       console.log("read:" + m.elo.get("nvidia"));

@@ -202,7 +202,7 @@ estate (`pitchfork start mcpproxy` / `mise run restart-mcpproxy` -> `mcpproxy se
 ├── audit/               # Session deltas, fix history, AGENTS.md inventory
 ├── docs/                # Architecture docs
 ├── profiles/            # User/subagent profiles
-├── src/                 # Sovereign source code
+├── src/                 # Estate source code
 ├── config/              # All configs (ports.env, etc.)
 ├── mise.toml            # Mise tool config + tasks
 ├── pitchfork.toml       # Pitchfork daemon definitions
@@ -226,11 +226,11 @@ estate (`pitchfork start mcpproxy` / `mise run restart-mcpproxy` -> `mcpproxy se
 **Maintainer**: toxic (`toxicwind@gmail.com`) · **Last Updated**: 2026-08-13 (C2 takeover — mcpproxy correct-use, NVIDIA first-class [98/102], timeout/failfast/${ENV} first-class)
 
 # Emergent findings (2026-09-02 session)
-- Sovereign deployment: kafka listener 25144 still 0 (Java/permission limitation accepted); G502 sensitivity 0.1 verified (lua 190); subagent tracking (PreviousPelican/UglyCod/VoluntaryCat) completed; plan mode preserved; read-only enforced.
+- Estate deployment: kafka listener 25144 still 0 (Java/permission limitation accepted); G502 sensitivity 0.1 verified (lua 190); subagent tracking (PreviousPelican/UglyCod/VoluntaryCat) completed; plan mode preserved; read-only enforced.
 - Pi-metaharness: native build bg_51 completed (189MB .node); benchmark reports 0% rate (2 reports at tau/runs/); models.yml configured (discovery + overrides + dead disable); CI spec at .github/workflows/benchmark.yml.
 - Emergent-finder: installed (emergent-finder-v1.0.0.tar.gz → /home/toxic/projects/emergent-finder-package); binary /mnt block documented (symlink workaround at ~/.local/share/agents-output/); install.sh executed (exit 0).
 
 # Emergent findings (2026-09-03 session — Firefox Nightly & Web UI Launcher)
 - Firefox Nightly SSOT: `firefox-nightly` standardized as primary Wayland browser (`BROWSER=firefox-nightly`, `MOZ_ENABLE_WAYLAND=1`, `SUPER + W` in `~/.config/hypr/custom/variables.lua`, default MIME `firefox-nightly.desktop`).
 - Port 9222 SSOT: Dedicated strictly to Chromium CDP sandbox (`/tmp/chrome-headed`, Kataware-Doki WebGPU `cdp-node.ts`, Playwright CDP `helpers.mjs`). `firefox-bidi.service` remains disabled to avoid profile lock collisions (`g304xzha.default-release`) and WebDriver BiDi vs CDP protocol mismatches.
-- Sovereign Web UI Launcher: `scripts/open-web-uis.ts` / `scripts/open-web-uis.sh` (`mise run open-uis`, `mise run list-uis`) probes active listening services with failfast timeouts, reads SSOT ports from `config/ports.env`, and cleanly opens tabs into running Firefox Nightly via native IPC. Anonymous admin auto-login added to `stack/services/grafana-mesh.sh`.
+- Estate Web UI Launcher: `scripts/open-web-uis.ts` / `scripts/open-web-uis.sh` (`mise run open-uis`, `mise run list-uis`) probes active listening services with failfast timeouts, reads SSOT ports from `config/ports.env`, and cleanly opens tabs into running Firefox Nightly via native IPC. Anonymous admin auto-login added to `stack/services/grafana-mesh.sh`.

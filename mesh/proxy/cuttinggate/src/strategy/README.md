@@ -20,7 +20,7 @@ Elo, circuits, health analytics) and below the serving layer.
 ## Behavioral details preserved
 
 - **callOne**: entitlement-404 fail-fast guard → circuit guard → headers
-  (`Sovereign-Flock/3.1` UA, openrouter referer/title, nvidia pool rotation
+  (`Estate-Flock/3.1` UA, openrouter referer/title, nvidia pool rotation
   with 429 when buckets are dry) → governor admission → AbortSignal
   fail-fast stack (CONNECT_MS headers budget, TTFT_MS first-chunk budget
   for streams, ATTEMPT_MS total cap) → hedged_loser → 499 with **no**
@@ -34,7 +34,7 @@ Elo, circuits, health analytics) and below the serving layer.
 - **LONGCTX pin**: est-token gate (>200k) → direct call to the KEYED
   `nvidia/nemotron-3-super-120b-a12b` lane, outside the race; 10/day cap
   (every attempt burns credits, logged under `strategy='longctx-pinned'`);
-  circuit checked first; `SOVEREIGN_LONGCTX_PIN=0` kills it.
+  circuit checked first; `ESTATE_LONGCTX_PIN=0` kills it.
 - **routeFree**: live-metadata free pool (never a static list), ling-first,
   local roles always join at zero cost.
 
@@ -59,7 +59,7 @@ import { createDeps, bindStrategies } from "@flock/strategy";
 
 const deps = createDeps(); // db path, governor path from defaults
 const routers = bindStrategies(deps);
-const r = await routers[process.env.SOVEREIGN_STRATEGY ?? "hybrid"]!(
+const r = await routers[process.env.ESTATE_STRATEGY ?? "hybrid"]!(
   { model: "free", messages: [{ role: "user", content: "hi" }] },
   "session-id",
 );

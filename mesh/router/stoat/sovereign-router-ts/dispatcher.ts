@@ -33,7 +33,7 @@ interface Waiter {
 const GRANT_GAP_MS = 25;
 
 function heartbeatMs(): number {
-  const raw = parseInt(process.env.SOVEREIGN_SSE_HEARTBEAT_MS || "10000", 10);
+  const raw = parseInt(process.env.ESTATE_SSE_HEARTBEAT_MS || "10000", 10);
   return Number.isFinite(raw) && raw > 0 ? raw : 10000;
 }
 

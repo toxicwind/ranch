@@ -1,4 +1,4 @@
-// @sovereign/keypool — event-driven health poller.
+// @estate/keypool — event-driven health poller.
 // Port of keypool/__main__.py _health_poller + wake_poller
 // (commit ea5ee2bf35: TTL revalidation for healthy keys + event-driven poller).
 //

@@ -59,7 +59,7 @@ Bun.serve({
       }
       if (path === "/health") {
         return new Response(
-          '{"status":"ok","router":"sovereign-ast","parallel":4}',
+          '{"status":"ok","router":"estate-ast","parallel":4}',
           { headers: { "Content-Type": "application/json" } },
         );
       }

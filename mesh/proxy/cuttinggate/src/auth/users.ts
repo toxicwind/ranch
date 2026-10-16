@@ -3,7 +3,7 @@ import { ct_eq, PBKDF2_ITERS, now, pw_fragment, base64_decode, form_field, url_d
 // Session/throttle constants. Canonical definitions live in
 // src/strategy/router_auth.ts; mirrored here because src/auth/ is a leaf
 // module and must not depend on the strategy tree.
-const COOKIE = "sovereign_session";
+const COOKIE = "estate_session";
 const SESSION_TTL_SECS = 12 * 3600;
 const THROTTLE_WINDOW_SECS = 60;
 const THROTTLE_MAX_FAILURES = 10;

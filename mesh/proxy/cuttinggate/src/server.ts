@@ -6,7 +6,7 @@
  * POST /admin/reload or SIGHUP), so a regen lands without a restart.
  *
  * Client auth: when CUTTINGGATE_CLIENT_KEYS (or the legacy
- * SOVEREIGN_CLIENT_KEYS) is set, every route except /health requires a
+ * ESTATE_CLIENT_KEYS) is set, every route except /health requires a
  * matching Bearer / x-api-key. Unset = open (localhost is the trust boundary).
  *
  * SSE: chat streams are plain OpenAI frames (`data: {...}` / `data: [DONE]`,
@@ -48,7 +48,7 @@ const CODING = buildCoding(LOCAL_ROLES, {});
 const digest = (s: string): Buffer => createHash("sha256").update(s).digest();
 
 function parseClientKeys(): Buffer[] {
-  const raw = process.env.CUTTINGGATE_CLIENT_KEYS ?? process.env.SOVEREIGN_CLIENT_KEYS ?? "";
+  const raw = process.env.CUTTINGGATE_CLIENT_KEYS ?? process.env.ESTATE_CLIENT_KEYS ?? "";
   return raw.split(",").map((s) => s.trim()).filter(Boolean).map(digest);
 }
 

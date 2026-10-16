@@ -5,7 +5,7 @@
  * Two contracts are recognized on read:
  *
  *   ranch-roost/live-catalog/v1          canonical, roost >= 2.4
- *   sovereign-providers/live-catalog/v1  predecessor, roost < 2.4
+ *   estate-providers/live-catalog/v1  predecessor, roost < 2.4
  *
  * There is no `contractMatched` boolean. The descriptor carries provenance;
  * `stale` is first-class; every failure mode has a name. The compiler forces
@@ -19,11 +19,11 @@ import { readFileSync, writeFileSync, mkdirSync, statSync, watchFile, unwatchFil
 import { dirname } from "node:path";
 
 export const LIVE_CATALOG_CONTRACT = "ranch-roost/live-catalog/v1";
-export const LEGACY_CATALOG_CONTRACT = "sovereign-providers/live-catalog/v1";
+export const LEGACY_CATALOG_CONTRACT = "estate-providers/live-catalog/v1";
 
 export const CONTRACTS = {
   "ranch-roost/live-catalog/v1": { generation: 2, canonical: true, introduced: "2026-06-01", emittedBy: "@ranch/roost >= 2.4" },
-  "sovereign-providers/live-catalog/v1": { generation: 1, canonical: false, introduced: "2026-01-01", emittedBy: "@ranch/roost < 2.4" },
+  "estate-providers/live-catalog/v1": { generation: 1, canonical: false, introduced: "2026-01-01", emittedBy: "@ranch/roost < 2.4" },
 } as const;
 
 export type ContractName = keyof typeof CONTRACTS;

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Sovereign AST Router v1 — Merged maximal free coding gateway for Zed
+Estate AST Router v1 — Merged maximal free coding gateway for Zed
 ===============================================================
 Sources synthesized:
 - 9Router (RTK token saver concept, 3-tier sub/cheap/free, multi-provider, format translation, dashboard ideas)
@@ -28,8 +28,8 @@ from urllib.error import HTTPError, URLError
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import sqlite3
 
-PORT = int(os.getenv("SOVEREIGN_PORT", "19280"))
-DB = os.getenv("SOVEREIGN_DB", "/tmp/sovereign_ast.db")
+PORT = int(os.getenv("ESTATE_PORT", "19280"))
+DB = os.getenv("ESTATE_DB", "/tmp/estate_ast.db")
 MAX_PARALLEL = 4
 STICKY_TTL = 1800
 FIFO = queue.Queue(maxsize=64)
@@ -132,7 +132,7 @@ def call_one(provider, model, body):
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {conf['key']}"}
     if provider == "openrouter":
         headers["HTTP-Referer"] = "https://zed.dev"
-        headers["X-Title"] = "Sovereign-AST-Router"
+        headers["X-Title"] = "Estate-AST-Router"
     data = json.dumps({**body, "model": model}).encode()
     start = time.time()
     try:
@@ -213,7 +213,7 @@ class H(BaseHTTPRequestHandler):
         elif self.path == "/health":
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(b'{"status":"ok","router":"sovereign-ast","parallel":4}')
+            self.wfile.write(b'{"status":"ok","router":"estate-ast","parallel":4}')
         else:
             self.send_response(404)
             self.end_headers()
@@ -255,7 +255,7 @@ class H(BaseHTTPRequestHandler):
                 pass
 
 def main():
-    print(f"Sovereign AST Router on http://127.0.0.1:{PORT}/v1")
+    print(f"Estate AST Router on http://127.0.0.1:{PORT}/v1")
     print("Parallel race: 4 providers, first AST/code response wins. FIFO queue.")
     print("Set OPENROUTER_API_KEY (+ others). Point Zed language_models here.")
     print("Models: auto, fcm, hy3, laguna-m1, qwen3-coder, gemma4-*, nemotron-*")

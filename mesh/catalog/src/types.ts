@@ -53,7 +53,7 @@ export interface ProviderDef {
   /** Default true. Disabled providers are never fetched and never served. */
   enabled?: boolean;
   /**
-   * True for providers that are concepts of the sovereign TS router only
+   * True for providers that are concepts of the estate TS router only
    * (local proxies / shims like nim-local and kimi-auto). Other consumers
    * (herd, TAU, Python) skip these definitions.
    */

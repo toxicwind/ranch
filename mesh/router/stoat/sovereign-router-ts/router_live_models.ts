@@ -174,8 +174,8 @@ export function startLiveDiscovery(): void {
   // Interval refresh (router-max): free-model discovery must track live
   // provider state, not just startup. Jittered 30-min interval; the task
   // body mandates it and the old file header always promised it.
-  // SOVEREIGN_LIVE_REFRESH=0 disables (event triggers stay).
-  if (process.env.SOVEREIGN_LIVE_REFRESH !== "0") {
+  // ESTATE_LIVE_REFRESH=0 disables (event triggers stay).
+  if (process.env.ESTATE_LIVE_REFRESH !== "0") {
     const timer = setInterval(
       () => {
         log("live-models interval refresh");

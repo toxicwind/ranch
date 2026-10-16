@@ -18,7 +18,7 @@ Every model an agent can think with should be one request away. cuttinggate is t
 ```bash
 curl -sf http://127.0.0.1:25200/health      # router health
 curl -sf http://127.0.0.1:25200/v1/models   # model list
-curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25200/v1/chat/completions
+curl -H "X-Estate-Strategy: free" http://127.0.0.1:25200/v1/chat/completions
 ```
 
 Run it: `bun run src/server.ts` — port via `CUTTINGGATE_PORT`; the code default is `:25194` (`src/config.ts`, which collides with ralph-dashboard) and `:25200` comes from the pitchfork stanza in `pitchfork.d/`. Bun ≥ 1.4.0.

@@ -82,7 +82,7 @@ export function recordFailure(name: string, status: number, retryAfterMs: number
 export function circuitOf(name: string): CircuitSnapshot;
 ```
 Honors `Retry-After`. Metric names are load-bearing: `flock_model_empty_strikes`
-mirrors `sovereign_router_model_empty_strikes` for cross-stack correlation.
+mirrors `estate_router_model_empty_strikes` for cross-stack correlation.
 
 ### `providers/roost.ts`
 Wraps the existing `roost/` package. Auto-quarantine is the fix for serve-time

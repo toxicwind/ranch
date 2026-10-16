@@ -2,7 +2,7 @@
 
 *The reproducible numbers behind the marketing claims: token reduction, discovery accuracy, and latency for MCP tool federation — measured, not asserted.*
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge) ![go](https://img.shields.io/badge/go-00ADD8?style=for-the-badge) ![benchmark](https://img.shields.io/badge/reproducible-deterministic-green?style=for-the-badge)
+![estate](https://img.shields.io/badge/estate--projects-blue?style=for-the-badge) ![go](https://img.shields.io/badge/go-00ADD8?style=for-the-badge) ![benchmark](https://img.shields.io/badge/reproducible-deterministic-green?style=for-the-badge)
 
 ## Why this exists
 

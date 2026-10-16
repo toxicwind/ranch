@@ -90,7 +90,7 @@ export class PolicyBackedDeps implements StrategyDeps {
     this.governor = new Governor(opts.governorPath ?? null);
     this.roles = { ...LOCAL_ROLES };
     this.coding = buildCoding(this.roles, MODEL_ALIASES);
-    this.strategyName = opts.strategyName ?? process.env.SOVEREIGN_STRATEGY ?? "hybrid";
+    this.strategyName = opts.strategyName ?? process.env.ESTATE_STRATEGY ?? "hybrid";
     this.fifoMax = opts.fifoMax ?? FIFO_MAX;
     for (const p of PROVIDER_ORDER) this.circuit.register(p);
   }
@@ -286,7 +286,7 @@ export class PolicyBackedDeps implements StrategyDeps {
   }
 }
 
-/** Create a production deps instance (strategy name from SOVEREIGN_STRATEGY). */
+/** Create a production deps instance (strategy name from ESTATE_STRATEGY). */
 export function createDeps(opts: DepsOptions = {}): PolicyBackedDeps {
   return new PolicyBackedDeps(opts);
 }

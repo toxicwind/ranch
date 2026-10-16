@@ -1,4 +1,4 @@
-// @sovereign/keypool — main entrypoint.
+// @estate/keypool — main entrypoint.
 // Port of herd-keypool.py main(). Bun.serve replaces ThreadingHTTPServer.
 
 import { Pool } from "./pool.js";

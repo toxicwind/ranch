@@ -11,9 +11,9 @@
 
 ---
 
-## 🔱 Sovereign Fleet Orchestration (75 Models via AST Matrix)
+## 🔱 Estate Fleet Orchestration (75 Models via AST Matrix)
 
-Herd is the high-performance inference gateway and model router for the Sovereign Stack. It transforms single-model hot-swapping into multi-tier fleet orchestration across local hardware (NVIDIA RTX 3090 24GB CUDA 8.6 + AMD Ryzen 7 8700F Zen 4 AVX-512) and remote endpoints.
+Herd is the high-performance inference gateway and model router for the Estate Stack. It transforms single-model hot-swapping into multi-tier fleet orchestration across local hardware (NVIDIA RTX 3090 24GB CUDA 8.6 + AMD Ryzen 7 8700F Zen 4 AVX-512) and remote endpoints.
 
 - ✅ Easy to deploy and configure: one binary, one configuration file. no external dependencies
 - ✅ On-demand model switching for many local AI servers (llama.cpp + forks, vllm, stable-diffusion.cpp, audio.cpp, ComfyUI, etc.)
@@ -74,13 +74,13 @@ Herd is the high-performance inference gateway and model router for the Sovereig
 
 ### Core Capabilities Matrix
 
-| Capability | Standard Hot-Swap | Herd Sovereign Orchestrator |
+| Capability | Standard Hot-Swap | Herd Estate Orchestrator |
 |---|---|---|
 | **Model Fleet** | 1 model active | **75 models routed via AST Matrix** |
 | **Connection Handling** | Drop connection on swap | **Zero-downtime SSE keep-alive** |
 | **Hardware Offload** | Unmanaged CPU/GPU | **CUDA 8.6 Flash-Attn + Zen 4 AVX-512** |
 | **API Endpoints** | OpenAI basic | **OpenAI, Anthropic, Ollama, SDAPI, Rerank, Voice** |
-| **Supervisor Integration** | Standalone process | **Pitchfork-LLM & Sovereign Control Plane (:25100)** |
+| **Supervisor Integration** | Standalone process | **Pitchfork-LLM & Estate Control Plane (:25100)** |
 | **Observability** | CLI logs | **Prometheus Metrics (:25105) + SSE Event Stream** |
 
 ---

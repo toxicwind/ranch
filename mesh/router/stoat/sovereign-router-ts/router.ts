@@ -1,13 +1,13 @@
 #!/usr/bin/env bun
 /**
- * Sovereign Router v3.2 (Bun/TypeScript)
+ * Estate Router v3.2 (Bun/TypeScript)
  * Port of sovereign-router/router.py — same strategies, HealthDB WAL, circuit breakers.
  *
  * Strategies: fifo_matrix (alias fifo_flock) | ast_race (alias flock_race) | sticky_affinity | weighted_elo | circuit_chain | hybrid
  * Default hybrid: sticky → ast_race → circuit_chain; explicit CODING aliases go direct.
  *
  * Env SSOT: estate/config/ports.env (mise _.file) + ~/.secrets
- *   SOVEREIGN_ROUTER_PORT / SOVEREIGN_PORT — never invent non-25xxx ports
+ *   ESTATE_ROUTER_PORT / ESTATE_PORT — never invent non-25xxx ports
  */
 
 import { createHash } from "node:crypto";
@@ -48,7 +48,7 @@ import { rebuildRateLimiter } from "./router_strategy.ts";
 
 // ---------------------------------------------------------------------------
 // Optional client auth (absorbed from the retired :8000 key-proxy).
-// Set SOVEREIGN_CLIENT_KEYS=comman,separated,keys to require a client key.
+// Set ESTATE_CLIENT_KEYS=comman,separated,keys to require a client key.
 // Unset = open (daemon binds 127.0.0.1; localhost is the trust boundary).
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -58,16 +58,16 @@ import { rebuildRateLimiter } from "./router_strategy.ts";
 // usable token (flock proxy.rs client auth).
 // ---------------------------------------------------------------------------
 const CLIENT_KEY_DIGESTS = digestClientKeys(
-  (process.env.SOVEREIGN_CLIENT_KEYS || "")
+  (process.env.ESTATE_CLIENT_KEYS || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean),
 );
 const inflightGate = new InflightGate();
 const coalescer = new Coalescer(
-  parseInt(process.env.SOVEREIGN_COALESCE_TTL_MS || "5000", 10) || 5000,
+  parseInt(process.env.ESTATE_COALESCE_TTL_MS || "5000", 10) || 5000,
 );
-const COALESCE_ENABLED = process.env.SOVEREIGN_COALESCE !== "0";
+const COALESCE_ENABLED = process.env.ESTATE_COALESCE !== "0";
 
 function clientAuthorized(req: Request): boolean {
   return clientKeyAuthorized(CLIENT_KEY_DIGESTS, presentedClientKey(req));
@@ -75,8 +75,8 @@ function clientAuthorized(req: Request): boolean {
 
 // ---------------------------------------------------------------------------
 // Optional operator auth (flock auth.rs role/session semantics port).
-// Active only when users are configured via SOVEREIGN_AUTH_USERS_FILE or
-// SOVEREIGN_AUTH_USERS. /v1/* keeps the client-key gate above untouched;
+// Active only when users are configured via ESTATE_AUTH_USERS_FILE or
+// ESTATE_AUTH_USERS. /v1/* keeps the client-key gate above untouched;
 // /health stays open. Operator surface (/ui, /metrics, /debug/*) then
 // requires a signed session cookie, Bearer user:pass, or HTTP Basic auth.
 // ---------------------------------------------------------------------------
@@ -86,7 +86,7 @@ if (AUTH) {
     `operator auth on: ${AUTH.store.userCount()} user(s), trustProxy=${AUTH.admin.trustProxy}`,
   );
 } else {
-  log("operator auth off: no users configured (SOVEREIGN_AUTH_USERS_FILE)");
+  log("operator auth off: no users configured (ESTATE_AUTH_USERS_FILE)");
 }
 
 function isOperatorPath(path: string): boolean {
@@ -118,15 +118,15 @@ async function handleStream(
 ): Promise<Response> {
   // G3: commit 200 immediately and heartbeat while waiting/retrying (flock
   // proxy.rs streaming()). Clients see `: connected`, then `: heartbeat`
-  // every SOVEREIGN_SSE_HEARTBEAT_MS while routing, `: retrying` between
+  // every ESTATE_SSE_HEARTBEAT_MS while routing, `: retrying` between
   // attempts, and routed-via/strategy/timings comments on the first chunk.
-  // SOVEREIGN_STREAM_IDLE_MS kills a stalled upstream; client hangup closes
+  // ESTATE_STREAM_IDLE_MS kills a stalled upstream; client hangup closes
   // everything promptly and frees the in-flight slot.
   const enc = new TextEncoder();
   const hbMs =
-    parseInt(process.env.SOVEREIGN_SSE_HEARTBEAT_MS || "10000", 10) || 10000;
+    parseInt(process.env.ESTATE_SSE_HEARTBEAT_MS || "10000", 10) || 10000;
   const idleMs =
-    parseInt(process.env.SOVEREIGN_STREAM_IDLE_MS || "300000", 10) || 300000;
+    parseInt(process.env.ESTATE_STREAM_IDLE_MS || "300000", 10) || 300000;
   let controller: ReadableStreamDefaultController<Uint8Array> | null = null;
   let done = false;
   let hb: ReturnType<typeof setInterval> | undefined;
@@ -382,10 +382,10 @@ const server = Bun.serve({
     let streamOwnsSlot = false;
     try {
 
-    // Client-key gate (only when SOVEREIGN_CLIENT_KEYS is set). /health stays
+    // Client-key gate (only when ESTATE_CLIENT_KEYS is set). /health stays
     // open for liveness probes; everything else requires a key.
     // G18: constant-time digest auth (flock proxy.rs) with a 250ms failure
-    // delay. Unset SOVEREIGN_CLIENT_KEYS = open (localhost trust boundary);
+    // delay. Unset ESTATE_CLIENT_KEYS = open (localhost trust boundary);
     // /health stays open for liveness probes.
     if (path !== "/health" && !clientAuthorized(req)) {
       flockMetrics.unauthorized++;
@@ -430,7 +430,7 @@ const server = Bun.serve({
     // debug log.
     const emitDecision = (rctx: RequestCtx): string => {
       const d = rctx.decision!;
-      if (process.env.SOVEREIGN_DECISION_LOG === "1") {
+      if (process.env.ESTATE_DECISION_LOG === "1") {
         log("routing decision", rctx.model, JSON.stringify(d.toJSON()));
       }
       return d.compact();
@@ -460,9 +460,9 @@ const server = Bun.serve({
       // seeds pre-discovery, live discovery after), plus the CODING aliases.
       // Each entry carries the provider's live metadata (pricing,
       // context_length, architecture...) plus the router's own routing
-      // metadata under "x-sovereign". The free flag is the same live-derived
+      // metadata under "x-estate". The free flag is the same live-derived
       // eligibility routing consumes (modelFree), not a static suffix guess.
-      // x-sovereign.source is the catalog's model source:
+      // x-estate.source is the catalog's model source:
       // seed | live | static | overlay.
       const seen = new Set<string>();
       const data: Record<string, unknown>[] = [];
@@ -483,7 +483,7 @@ const server = Bun.serve({
           object: "model",
           owned_by: p,
           ...(meta as Record<string, unknown>),
-          "x-sovereign": sovMeta(p, id, source),
+          "x-estate": sovMeta(p, id, source),
         });
       };
       for (const p of Object.keys(PROVIDERS)) {
@@ -499,7 +499,7 @@ const server = Bun.serve({
           id,
           object: "model",
           owned_by: "alias",
-          "x-sovereign": {
+          "x-estate": {
             provider: "alias",
             source: "alias",
             free: id === "free",
@@ -583,19 +583,19 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
         const s = dbSummary[p] || {};
         const req_total = (s.successes || 0) + (s.failures || 0);
         L.push(
-          `sovereign_router_requests_total{provider="${p}"} ${req_total}`,
-          `sovereign_router_success_rate{provider="${p}"} ${s.success_rate ?? 0}`,
-          `sovereign_router_avg_latency_ms{provider="${p}"} ${s.avg_latency_ms ?? 0}`,
-          `sovereign_router_rate_limited_total{provider="${p}"} ${s.rate_limited ?? 0}`,
-          `sovereign_router_circuit_open{provider="${p}"} ${circuitNum(p)}`,
-          `sovereign_router_elo{provider="${p}"} ${Math.round((state.elo.get(p) || 1000) * 10) / 10}`,
-          `sovereign_router_live_models{provider="${p}"} ${catalog.liveIds(p).length}`,
+          `estate_router_requests_total{provider="${p}"} ${req_total}`,
+          `estate_router_success_rate{provider="${p}"} ${s.success_rate ?? 0}`,
+          `estate_router_avg_latency_ms{provider="${p}"} ${s.avg_latency_ms ?? 0}`,
+          `estate_router_rate_limited_total{provider="${p}"} ${s.rate_limited ?? 0}`,
+          `estate_router_circuit_open{provider="${p}"} ${circuitNum(p)}`,
+          `estate_router_elo{provider="${p}"} ${Math.round((state.elo.get(p) || 1000) * 10) / 10}`,
+          `estate_router_live_models{provider="${p}"} ${catalog.liveIds(p).length}`,
         );
       }
       for (const [k, v] of state.emptyStrikes) {
         const [p, ...rest] = k.split("/");
         L.push(
-          `sovereign_router_model_empty_strikes{provider="${p}",model="${rest.join("/").replace(/"/g, "")}"} ${v.n}`,
+          `estate_router_model_empty_strikes{provider="${p}",model="${rest.join("/").replace(/"/g, "")}"} ${v.n}`,
         );
       }
       // Model-pressure governor (flock governor.rs AIMD port). Only models
@@ -605,23 +605,23 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
         const [p, ...rest] = k.split("/");
         const m = rest.join("/").replace(/"/g, "");
         L.push(
-          `sovereign_governor_model_limit{provider="${p}",model="${m}"} ${s.limit}`,
-          `sovereign_governor_model_inflight{provider="${p}",model="${m}"} ${s.inflight}`,
-          `sovereign_governor_worker_exhausted_total{provider="${p}",model="${m}"} ${s.exhaustedTotal}`,
+          `estate_governor_model_limit{provider="${p}",model="${m}"} ${s.limit}`,
+          `estate_governor_model_inflight{provider="${p}",model="${m}"} ${s.inflight}`,
+          `estate_governor_worker_exhausted_total{provider="${p}",model="${m}"} ${s.exhaustedTotal}`,
         );
       }
       L.push(
-        `sovereign_router_inflight_requests ${inflightGate.count}`,
-        `sovereign_router_max_inflight ${inflightGate.limit}`,
+        `estate_router_inflight_requests ${inflightGate.count}`,
+        `estate_router_max_inflight ${inflightGate.limit}`,
         ...flockMetrics.render(),
       );
       return new Response(
-        "# HELP sovereign_router_requests_total Total chat completion requests per provider\n" +
-          "# TYPE sovereign_router_requests_total counter\n" +
-          "# HELP sovereign_router_inflight_requests Current in-flight requests (flock max_inflight)\n" +
-          "# TYPE sovereign_router_inflight_requests gauge\n" +
-          "# HELP sovereign_router_max_inflight Configured in-flight cap\n" +
-          "# TYPE sovereign_router_max_inflight gauge\n" +
+        "# HELP estate_router_requests_total Total chat completion requests per provider\n" +
+          "# TYPE estate_router_requests_total counter\n" +
+          "# HELP estate_router_inflight_requests Current in-flight requests (flock max_inflight)\n" +
+          "# TYPE estate_router_inflight_requests gauge\n" +
+          "# HELP estate_router_max_inflight Configured in-flight cap\n" +
+          "# TYPE estate_router_max_inflight gauge\n" +
           L.join("\n") +
           "\n",
         { headers: { "Content-Type": "text/plain; version=0.0.4" } },
@@ -785,11 +785,11 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
         return json({ error: "invalid_json" }, 400);
       }
       const sid = sessionId(req, body);
-      const strat = req.headers.get("X-Sovereign-Strategy") || STRATEGY;
+      const strat = req.headers.get("X-Estate-Strategy") || STRATEGY;
       // Router-max: session stickiness is client-controlled.
-      // X-Sovereign-Sticky: 1 -> pin this session; 0 -> never pin.
+      // X-Estate-Sticky: 1 -> pin this session; 0 -> never pin.
       // Absent -> legacy behavior (races pin the winner).
-      state.setStickyOpt(sid, parseStickyOpt(req.headers.get("X-Sovereign-Sticky")));
+      state.setStickyOpt(sid, parseStickyOpt(req.headers.get("X-Estate-Sticky")));
       // openfang shim: canonicalize "provider:model" / "provider/model"
       // mangled specs before routing.
       const rawModel = String(body.model || "auto");
@@ -890,7 +890,7 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
               : {}),
             ...(t2
               ? {
-                  "X-Sovereign-Timings": `connect_ms=${t2.connect_ms};ttft_ms=${t2.ttft_ms ?? "-"};total_ms=${t2.total_ms}`,
+                  "X-Estate-Timings": `connect_ms=${t2.connect_ms};ttft_ms=${t2.ttft_ms ?? "-"};total_ms=${t2.total_ms}`,
                 }
               : {}),
           },
@@ -924,7 +924,7 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
               : {}),
             ...(t
               ? {
-                  "X-Sovereign-Timings": `connect_ms=${t.connect_ms};ttft_ms=${t.ttft_ms ?? "-"};total_ms=${t.total_ms}`,
+                  "X-Estate-Timings": `connect_ms=${t.connect_ms};ttft_ms=${t.ttft_ms ?? "-"};total_ms=${t.total_ms}`,
                 }
               : {}),
           },
@@ -974,13 +974,13 @@ strategy_detail: STRATEGY === "auto" ? "auto: ast_race (code-shaped) -> free rac
             "X-Routing-Decision": emitDecision(rctx),
             ...(r.interactionId ? { "x-interaction-id": r.interactionId } : {}),
             ...(r.switches
-              ? { "X-Sovereign-Switches": String(r.switches) }
+              ? { "X-Estate-Switches": String(r.switches) }
               : {}),
             ...(r.cost_tier ? { "X-Cost-Tier": r.cost_tier } : {}),
             ...(r.task_type ? { "X-Task-Type": r.task_type } : {}),
             ...(t
               ? {
-                  "X-Sovereign-Timings": `connect_ms=${t.connect_ms};ttft_ms=${t.ttft_ms ?? "-"};total_ms=${t.total_ms}`,
+                  "X-Estate-Timings": `connect_ms=${t.connect_ms};ttft_ms=${t.ttft_ms ?? "-"};total_ms=${t.total_ms}`,
                 }
               : {}),
           },
@@ -1050,7 +1050,7 @@ async function probeProvider(p: string): Promise<boolean> {
   if (!conf) return false;
   const headers: Record<string, string> = {
     Accept: "application/json",
-    "User-Agent": "SovereignRouter/3.2 quarantine-probe",
+    "User-Agent": "EstateRouter/3.2 quarantine-probe",
   };
   if (!conf.no_auth) {
     const k = getKey(p);
@@ -1119,7 +1119,7 @@ function startWarmStandby(): void {
         const k = getKey(p);
         const headers: Record<string, string> = {
           Accept: "application/json",
-          "User-Agent": "SovereignRouter/3.2 warm-standby",
+          "User-Agent": "EstateRouter/3.2 warm-standby",
         };
         if (k) headers["Authorization"] = `Bearer ${k}`;
         const r = await fetch(`${conf.base.replace(/\/+$/, "")}/models`, {
@@ -1149,7 +1149,7 @@ startLiveDiscovery();
 
 const keyed = Object.keys(PROVIDERS).filter(keyOk);
 
-console.log(`Sovereign Router TS v3.2 on http://127.0.0.1:${PORT}/v1`);
+console.log(`Estate Router TS v3.2 on http://127.0.0.1:${PORT}/v1`);
 
 console.log(
   `Strategy=${STRATEGY} | routes: ${Object.keys(ROUTERS).join(", ")}`,

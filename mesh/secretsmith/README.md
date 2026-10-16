@@ -1,6 +1,6 @@
 # secretsmith 🔐
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge)
+![estate](https://img.shields.io/badge/estate--projects-blue?style=for-the-badge)
 ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![secret-service](https://img.shields.io/badge/freedesktop--Secret--Service-181717?style=for-the-badge)
 

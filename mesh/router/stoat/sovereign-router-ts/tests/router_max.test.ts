@@ -5,9 +5,9 @@ import { describe, test, expect } from "bun:test";
 
 // Must be set before the router modules are imported (DB_PATH and the
 // catalog state path are read once at import).
-process.env.SOVEREIGN_DB = "/tmp/sovereign_router_max_test.db";
-process.env.SOVEREIGN_CATALOG_STATE =
-  `/tmp/sovereign_router_max_test.catalog.${process.pid}.json`;
+process.env.ESTATE_DB = "/tmp/estate_router_max_test.db";
+process.env.ESTATE_CATALOG_STATE =
+  `/tmp/estate_router_max_test.catalog.${process.pid}.json`;
 
 const {
   shouldFailover,
@@ -295,9 +295,9 @@ describe("ROUTERS registry", () => {
 });
 
 describe("benchModelBonus kill switch", () => {
-  test("SOVEREIGN_BENCH_PRIORS=0 disables", () => {
-    process.env.SOVEREIGN_BENCH_PRIORS = "0";
+  test("ESTATE_BENCH_PRIORS=0 disables", () => {
+    process.env.ESTATE_BENCH_PRIORS = "0";
     expect(benchModelBonus("openrouter", "m:free")).toBe(0);
-    delete process.env.SOVEREIGN_BENCH_PRIORS;
+    delete process.env.ESTATE_BENCH_PRIORS;
   });
 });

@@ -318,10 +318,10 @@ describe("metrics label hygiene (G11)", () => {
     flockMetrics.unauthorized++;
     flockMetrics.deadlineExceeded++;
     const lines = flockMetrics.render().join("\n");
-    expect(lines).toContain("sovereign_flock_shed_total");
-    expect(lines).toContain("sovereign_flock_unauthorized_total");
-    expect(lines).toContain("sovereign_flock_deadline_exceeded_total");
-    expect(lines).toContain("sovereign_flock_coalesced_total");
+    expect(lines).toContain("estate_flock_shed_total");
+    expect(lines).toContain("estate_flock_unauthorized_total");
+    expect(lines).toContain("estate_flock_deadline_exceeded_total");
+    expect(lines).toContain("estate_flock_coalesced_total");
     flockMetrics.shed--;
     flockMetrics.unauthorized--;
     flockMetrics.deadlineExceeded--;

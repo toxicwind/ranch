@@ -1,4 +1,4 @@
-// @sovereign/keypool — OpenAI chat-completions <-> Gemini EAP Interactions.
+// @estate/keypool — OpenAI chat-completions <-> Gemini EAP Interactions.
 //
 // Port of keypool/translate.py. Implements the official Gemini Tool Retrieval
 // (EAP) protocol:

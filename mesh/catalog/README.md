@@ -6,7 +6,7 @@
 > master provider catalog every router, agent, and daemon perches on.*
 
 **Single source of truth** for LLM providers across the ranch and the
-sovereign estate:
+estate estate:
 
 - **Provider definitions** — base URL, key env var, and the endpoint-shape
   adapter that reads each provider's `/models` listing.

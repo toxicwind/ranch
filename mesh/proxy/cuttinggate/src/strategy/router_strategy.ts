@@ -137,7 +137,7 @@ export async function callOne(
   }
   if (provider === "openrouter") {
     headers["HTTP-Referer"] = "https://zed.dev";
-    headers["X-Title"] = "Sovereign-Router";
+    headers["X-Title"] = "Estate-Router";
   }
    if (provider === "zen") {
      // OpenCode Zen free-tier gate (borrowed: denysvitali/llm-proxy, 12errh/zen-proxy).
@@ -402,7 +402,7 @@ export function firstUsableModelFor(p: string): string | undefined {
 // the race score: +5 is tie-break scale against elo (hundreds-thousands),
 // the latency penalty (elo − latencyEMA/50), and the existing rand*10
 // jitter — it nudges ties, never overrides the breaker or elo.
-// Reversible: SOVEREIGN_MODEL_BONUS=0. Cites: health DB rows
+// Reversible: ESTATE_MODEL_BONUS=0. Cites: health DB rows
 // strategy='longctx-probe' (session 1m-probe-20260921-1745), commit
 // 7f4f79a48c, ranch/mesh/router/sovereign-router/probes/RESULTS-2026-09-21.md.
 const PROBE_VERIFIED_MODELS: Record<string, Set<string>> = {
@@ -415,7 +415,7 @@ const PROBE_VERIFIED_MODELS: Record<string, Set<string>> = {
 };
 const PROBE_VERIFIED_BONUS = 5;
 export function modelProbeBonus(p: string, mid: string): number {
-  if (process.env.SOVEREIGN_MODEL_BONUS === "0") return 0;
+  if (process.env.ESTATE_MODEL_BONUS === "0") return 0;
   return PROBE_VERIFIED_MODELS[p]?.has(mid) ? PROBE_VERIFIED_BONUS : 0;
 }
 
@@ -819,7 +819,7 @@ export async function routeCascade(
 // On pinned failure: the attempt is logged and the caller does a single
 // fallback to the normal race. The pin never sets session stickiness — it
 // is size-deterministic, not session-affine; the next request re-races.
-// Operational kill switch: SOVEREIGN_LONGCTX_PIN=0 disables the pin.
+// Operational kill switch: ESTATE_LONGCTX_PIN=0 disables the pin.
 // ---------------------------------------------------------------------------
 export const LONGCTX_PIN_PROVIDER = "nvidia";
 // KEYED lane ONLY — never the :free id (provider cap 262144 tokens).
@@ -829,7 +829,7 @@ export const LONGCTX_PIN_DAILY_CAP = 10;
 const LONGCTX_PIN_STRATEGY = "longctx-pinned";
 
 export function longctxPinEnabled(): boolean {
-  return process.env.SOVEREIGN_LONGCTX_PIN !== "0";
+  return process.env.ESTATE_LONGCTX_PIN !== "0";
 }
 
 /**
@@ -936,7 +936,7 @@ export async function tryLongctxPin(
 // openrouter/auto-beta at 2_000_000 tokens. The pin uses the keyed openrouter
 // lane with x-ai/grok-4.20; ineligible or pinned failure falls through to the
 // 1M pin, then the normal strategy dispatch.
-// Operational kill switch: SOVEREIGN_LONGCTX_2M=0 disables the tier.
+// Operational kill switch: ESTATE_LONGCTX_2M=0 disables the tier.
 // ---------------------------------------------------------------------------
 export const LONGCTX_2M_PROVIDER = "openrouter";
 export const LONGCTX_2M_MODEL = "x-ai/grok-4.20";
@@ -945,7 +945,7 @@ export const LONGCTX_2M_DAILY_CAP = 5;
 const LONGCTX_2M_STRATEGY = "longctx-2m";
 
 export function longctx2MEnabled(): boolean {
-  return process.env.SOVEREIGN_LONGCTX_2M !== "0";
+  return process.env.ESTATE_LONGCTX_2M !== "0";
 }
 
 /**
@@ -1005,7 +1005,7 @@ export async function tryLongctx2MPin(
  * code-shaped traffic, free race for the default path, hybrid fallback when
  * the free pool is empty. (The 2M/1M context pins run BEFORE strategy
  * dispatch in router.ts, so routeAuto never double-fires them.) Set
- * SOVEREIGN_STRATEGY=auto to make it the main router; it auto-switches the
+ * ESTATE_STRATEGY=auto to make it the main router; it auto-switches the
  * lane every request with no per-request env change.
  */
 // Last user-visible text in the prompt, newest message first. Used by

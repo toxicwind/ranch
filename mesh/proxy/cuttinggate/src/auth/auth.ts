@@ -11,7 +11,7 @@ import { Admin, createAdmin, parseStoredConfig } from "./users";
 
 // Session constants. Canonical definitions live in src/strategy/router_auth.ts;
 // mirrored here because src/auth/ is a leaf module.
-const COOKIE = "sovereign_session";
+const COOKIE = "estate_session";
 const SESSION_TTL_SECS = 12 * 3600;
 
 /** Discriminated result envelope returned by attemptAuth. */

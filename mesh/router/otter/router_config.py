@@ -45,15 +45,15 @@ _load_secrets()
 
 
 # Port SSOT: estate/.env.local AST_MATRIX_PORT=25104
-# process-compose sets SOVEREIGN_PORT=${AST_MATRIX_PORT}; Zed hits :25104/v1
+# process-compose sets ESTATE_PORT=${AST_MATRIX_PORT}; Zed hits :25104/v1
 PORT = int(
-    os.getenv("SOVEREIGN_PORT")
+    os.getenv("ESTATE_PORT")
     or os.getenv("AST_MATRIX_PORT")
     or "25104"
 )
 
 
-DB = os.getenv("SOVEREIGN_DB", "/home/toxic/estate/var/data/ast_matrix.db")
+DB = os.getenv("ESTATE_DB", "/home/toxic/estate/var/data/ast_matrix.db")
 
 
 MAX_PARALLEL = 4
@@ -65,7 +65,7 @@ STICKY_TTL = 1800
 FIFO_MAX = 64
 
 
-STRATEGY = os.getenv("SOVEREIGN_STRATEGY", "hybrid")
+STRATEGY = os.getenv("ESTATE_STRATEGY", "hybrid")
 
 
 

@@ -8,7 +8,7 @@
 > (verified 2026-10-02). cuttinggate on :25200 is canonical.
 > This doc describes the router as it last ran. Code retained here for
 > reference at ranch/mesh/router/stoat/stoat-ts.
-> router_config.ts requires SOVEREIGN_ROUTER_PORT (fallback SOVEREIGN_PORT)
+> router_config.ts requires ESTATE_ROUTER_PORT (fallback ESTATE_PORT)
 > if this code is ever revived.
 
 OpenAI-compatible chat router on `http://127.0.0.1:25104`, supervised by
@@ -34,12 +34,12 @@ client -> :25104/v1/chat/completions
 proxy :8000), `openrouter`, `nvidia` (multi-key rotation + per-key token
 bucket), `groq`, `cerebras`, `google`, `mistral`.
 
-**Strategies** (`SOVEREIGN_STRATEGY`): `hybrid` (default), `ast_race`,
+**Strategies** (`ESTATE_STRATEGY`): `hybrid` (default), `ast_race`,
 `circuit_chain`, `cascade`, `weighted`, `fifo`, `sticky`, `free`.
 
 ## v3.2 resilience features
 
-- **Fail-fast ceilings**: `SOVEREIGN_CONNECT_MS` (8s), `SOVEREIGN_TTFT_MS`
+- **Fail-fast ceilings**: `ESTATE_CONNECT_MS` (8s), `ESTATE_TTFT_MS`
   (45s), per-attempt totals. A hanging backend never holds a client hostage.
 - **Exponential quarantine**: 3 consecutive failures → circuit opens with
   backoff `30s * 2^(level-1)` capped at 10 min. Successful requests reset.
@@ -52,7 +52,7 @@ bucket), `groq`, `cerebras`, `google`, `mistral`.
   without restart.
 - **`/status`**: per-provider circuit detail, last error, Elo, live models,
   p50/p95 latency (SQLite, 30 min window), kimi-auto resolved model.
-- **`X-Sovereign-Timings`**: every chat response ships
+- **`X-Estate-Timings`**: every chat response ships
   `connect_ms / ttft_ms / total_ms` per-hop timings.
 
 ## HFT synthesis (the novel part)
@@ -62,7 +62,7 @@ ceilings, push-not-poll, hot persistent connections, measure every hop,
 fallback planned before primary) applied to LLM routing:
 
 1. **Speculative hedging** (`hedgedChain`): the preferred lane gets a head
-   start; if no winner within `SOVEREIGN_HEDGE_MS` (1500ms), the whole
+   start; if no winner within `ESTATE_HEDGE_MS` (1500ms), the whole
    remaining field races in parallel. First substantive wins; losers are
    aborted and their aborts are **not** circuit strikes. A lane that fails
    fast immediately triggers the next lane. Providers with recent strikes
@@ -77,7 +77,7 @@ fallback planned before primary) applied to LLM routing:
 4. **Push-not-poll kimi-auto**: `fs.watch` on the resolver's `state.json`
    keeps `/status`'s resolved-model marker instant; the shim reads state
    live per request.
-5. **Per-hop telemetry**: `X-Sovereign-Timings` on every response; p50/p95
+5. **Per-hop telemetry**: `X-Estate-Timings` on every response; p50/p95
    per provider in `/status`.
 
 Measured: hedge fires at ~1500ms (test); blackholed-backend failover serves
@@ -89,16 +89,16 @@ closed, traffic returns).
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `SOVEREIGN_STRATEGY` | `hybrid` | routing strategy |
-| `SOVEREIGN_CONNECT_MS` | `8000` | per-attempt connect ceiling |
-| `SOVEREIGN_TTFT_MS` | `45000` | streaming first-token ceiling |
-| `SOVEREIGN_ATTEMPT_MS` | `120000` | non-stream attempt ceiling |
-| `SOVEREIGN_ATTEMPT_STREAM_MS` | `180000` | streaming attempt ceiling |
-| `SOVEREIGN_HEDGE_MS` | `1500` | speculative hedge delay (0=sequential) |
-| `SOVEREIGN_QUARANTINE_BASE_S` | `30` | quarantine backoff base |
-| `SOVEREIGN_QUARANTINE_MAX_S` | `600` | quarantine backoff cap |
-| `SOVEREIGN_QUARANTINE_PROBE_MS` | `15000` | re-probe cadence |
-| `SOVEREIGN_DB` | `…/sovereign_router.db` | SQLite path (tests override) |
+| `ESTATE_STRATEGY` | `hybrid` | routing strategy |
+| `ESTATE_CONNECT_MS` | `8000` | per-attempt connect ceiling |
+| `ESTATE_TTFT_MS` | `45000` | streaming first-token ceiling |
+| `ESTATE_ATTEMPT_MS` | `120000` | non-stream attempt ceiling |
+| `ESTATE_ATTEMPT_STREAM_MS` | `180000` | streaming attempt ceiling |
+| `ESTATE_HEDGE_MS` | `1500` | speculative hedge delay (0=sequential) |
+| `ESTATE_QUARANTINE_BASE_S` | `30` | quarantine backoff base |
+| `ESTATE_QUARANTINE_MAX_S` | `600` | quarantine backoff cap |
+| `ESTATE_QUARANTINE_PROBE_MS` | `15000` | re-probe cadence |
+| `ESTATE_DB` | `…/estate_router.db` | SQLite path (tests override) |
 | `KIMI_AUTO_SHIM_PORT` | `25105` | kimi-auto shim port (in `config/ports.env`) |
 | `KIMI_AUTO_STATE` | `~/.local/share/kimi-auto/state.json` | resolver state (fs.watch) |
 
@@ -187,7 +187,7 @@ spec still works — verify with `/openfang/resolve?spec=<spec>`.
 `bun test tests/hedge.test.ts` (8 tests): hedged second-lane wins at
 ~1500ms, loser aborts take no circuit strike, strike-demotion of lane 0,
 spec normalization (colon/slash/bare), exponential quarantine via synthetic
-probes, latency-EMA scoring. Uses a temp SQLite DB (`SOVEREIGN_DB`).
+probes, latency-EMA scoring. Uses a temp SQLite DB (`ESTATE_DB`).
 
 ## Failover demo (2026-09-20, live)
 

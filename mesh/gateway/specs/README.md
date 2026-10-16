@@ -2,7 +2,7 @@
 
 *The feature specifications behind mcpproxy — every numbered spec directory under `specs/`, produced with [GitHub spec-kit](https://github.com/github/spec-kit), in one navigable table.*
 
-![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge) ![spec-kit](https://img.shields.io/badge/spec--kit-driven-purple?style=for-the-badge)
+![estate](https://img.shields.io/badge/estate--projects-blue?style=for-the-badge) ![spec-kit](https://img.shields.io/badge/spec--kit-driven-purple?style=for-the-badge)
 
 ## Why this index exists
 

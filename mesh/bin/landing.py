@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mesh landing page: public homepage for the sovereign funnel.
+"""Mesh landing page: public homepage for the estate funnel.
 
 Serves on 127.0.0.1:$MESH_LANDING_PORT (25207; funnel `/` -> here). Shows live status of every
 funnel route by probing the localhost backends. stdlib only.
@@ -62,7 +62,7 @@ def get_status():
 
 PAGE = """<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>sovereign mesh</title><meta http-equiv="refresh" content="30">
+<title>estate mesh</title><meta http-equiv="refresh" content="30">
 <style>
 body{{background:#0d1117;color:#c9d1d9;font-family:system-ui,sans-serif;max-width:760px;margin:2em auto;padding:0 1em}}
 h1{{font-size:1.4em}}table{{width:100%;border-collapse:collapse;margin-top:1em}}
@@ -71,7 +71,7 @@ td,th{{padding:.45em .6em;border-bottom:1px solid #21262d;text-align:left;font-s
 .up{{background:#3fb950}}.down{{background:#f85149}}
 a{{color:#58a6ff}}.muted{{color:#8b949e;font-size:.8em}}
 </style></head><body>
-<h1>&#x1f432; sovereign mesh</h1>
+<h1>&#x1f432; estate mesh</h1>
 <p class="muted">funnel gateway status &mdash; auto-refreshes every 30s</p>
 <table><tr><th></th><th>service</th><th>backend</th><th>code</th><th>latency</th><th>public</th></tr>
 {rows}

@@ -1,4 +1,4 @@
-# Sovereign Router & Mesh Routing (Maximal Architecture v3.2+)
+# Estate Router & Mesh Routing (Maximal Architecture v3.2+)
 
 *Multi-provider LLM routing gateway on port `:25104` with Speculative Learning, Obelisk Thompson-sampling Bayesian engine, 7-family rate limit deconvolution, 6-layer adversarial verifiers, and Gatehouse MCP tool integration.*
 
@@ -39,7 +39,7 @@ flowchart TB
 
 ## 📊 Strategies & Routing Modes
 
-Set per request with the `X-Sovereign-Strategy` header or model spec.
+Set per request with the `X-Estate-Strategy` header or model spec.
 
 | Strategy | Behavior |
 |---|---|

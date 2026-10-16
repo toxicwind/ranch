@@ -28,7 +28,7 @@ export function uiData(): Record<string, unknown> {
 export const ROUTER_UI_HTML = `<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Sovereign Router — Provider Matrix</title>
+<title>Estate Router — Provider Matrix</title>
 <style>
 :root{--bg:#0b0e14;--panel:#121826;--panel2:#0f1420;--ink:#e6edf3;--muted:#8b98a9;--acc:#5ad1c4;--free:#7ee787;--warn:#f0883e;--bad:#ff6b6b;--line:#1f2937}
 *{box-sizing:border-box}body{margin:0;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);color:var(--ink)}
@@ -59,7 +59,7 @@ pre{background:#06090f;border:1px solid var(--line);border-radius:8px;padding:10
 .meta{color:var(--muted);font-size:12px;margin-top:6px}
 .err{color:var(--bad)}
 </style></head>
-<body><header><h1>Sovereign Router</h1><span class="sub" id="sub">loading</span></header>
+<body><header><h1>Estate Router</h1><span class="sub" id="sub">loading</span></header>
 <div class="wrap"><div class="panel"><h2>Provider Matrix <button id="refresh" class="ghost" style="padding:4px 10px;font-size:11px">Refresh</button></h2><div id="providers"><span class="meta">loading</span></div></div>
 <div class="panel"><h2>Chat (OpenAI-compatible)</h2>
 <div class="row"><div><label class="vh" for="model">Model</label><select id="model"></select></div>
@@ -116,7 +116,7 @@ $('send').onclick=async()=>{
   const out=$('out'),model=$('model').value;
   if(!model||model==='(no models)'){out.innerHTML='<span class="err">no model available</span>';return;}
   busy(true);out.textContent='…';
-  const r=await api('/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','X-Sovereign-Strategy':$('strategy').value},body:JSON.stringify({model,messages:[{role:'user',content:$('prompt').value}]})});
+  const r=await api('/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','X-Estate-Strategy':$('strategy').value},body:JSON.stringify({model,messages:[{role:'user',content:$('prompt').value}]})});
   busy(false);
   if(r.error){out.innerHTML='<span class="err">'+esc(r.error)+'</span>';return;}
   out.textContent=JSON.stringify(r,null,2).slice(0,6000);
@@ -127,7 +127,7 @@ $('stream').onclick=async()=>{
   if(!model||model==='(no models)'){out.innerHTML='<span class="err">no model available</span>';return;}
   busy(true);out.textContent='';
   try{
-    const r=await fetch('/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','X-Sovereign-Strategy':$('strategy').value},body:JSON.stringify({model,stream:true,messages:[{role:'user',content:$('prompt').value}]})});
+    const r=await fetch('/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','X-Estate-Strategy':$('strategy').value},body:JSON.stringify({model,stream:true,messages:[{role:'user',content:$('prompt').value}]})});
     if(!r.ok||!r.body){out.innerHTML='<span class="err">HTTP '+r.status+': '+esc(await r.text().catch(()=>''))+'</span>';}
     else{
       const rd=r.body.getReader();const dec=new TextDecoder();let buf='';

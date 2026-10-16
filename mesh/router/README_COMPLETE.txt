@@ -1,8 +1,8 @@
-SOVEREIGN AST MATRIX + FULL ARTIFACTS — July 16 2026 (NVIDIA NIM complete)
+ESTATE AST MATRIX + FULL ARTIFACTS — July 16 2026 (NVIDIA NIM complete)
 ==========================================================================
 
 Primary:
-  sovereign-ast-matrix/
+  estate-ast-matrix/
     router.py              — 5-strategy OpenAI-compatible gateway + full NVIDIA NIM
     zed_settings.json      — Zed settings (includes all nim-* models)
     README.md
@@ -14,5 +14,5 @@ NVIDIA NIM:
   - Models: nim-nemotron-*, nim-llama-*, nim-qwen*-coder, nim-deepseek-*, etc.
 
 Usage:
-  python3 sovereign-ast-matrix/router.py
+  python3 estate-ast-matrix/router.py
   Merge zed_settings.json into Zed settings → select openai / auto or any nim-* model

@@ -1,4 +1,4 @@
-# Sovereign AST Router (flock-router)
+# Estate AST Router (flock-router)
 
 *The Bun/TypeScript port of the Python AST router — a 4-way parallel race where the first AST/code-shaped response wins, with sticky sessions and FIFO back-pressure.*
 

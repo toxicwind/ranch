@@ -6,7 +6,7 @@
 
 ## Why this exists
 
-Cloud providers rate-limit per key. keypool holds the estate's API keys, probes their health, and hands the routers a working key — failing over and racing requests so one dead key never stalls the mesh. It's a Bun/TypeScript port of the original `herd-keypool.py` (`@sovereign/keypool`).
+Cloud providers rate-limit per key. keypool holds the estate's API keys, probes their health, and hands the routers a working key — failing over and racing requests so one dead key never stalls the mesh. It's a Bun/TypeScript port of the original `herd-keypool.py` (`@estate/keypool`).
 
 - **Health probing** — a poller keeps per-key health fresh; dead keys are skipped, not retried into.
 - **Failover + racing** — no healthy key → explicit error, never a silent stall.

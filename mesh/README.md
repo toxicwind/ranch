@@ -84,7 +84,7 @@ Strategies:
 
 Override per request:
 ```bash
-curl -H "X-Sovereign-Strategy: free" http://127.0.0.1:25200/v1/chat/completions
+curl -H "X-Estate-Strategy: free" http://127.0.0.1:25200/v1/chat/completions
 ```
 
 ## estate-router (:25104) — still live, superseded by cuttinggate
@@ -100,7 +100,7 @@ Renaming a local pitchfork stanza to `*.retired-*` is a *supervision* change, no
 **Rule:** retiring a daemon means stopping the process and verifying the port is closed. Verify with `ss -ltnp | grep :<port>`, not with `pitchfork status`.
 
 
-## Sovereign MCP gateway (not live)
+## Estate MCP gateway (not live)
 
 `router/estate-mcp-gateway/` is a trust boundary in front of upstream MCP servers: per-upstream circuit breakers quarantine poisoned servers, `notifications/initialized` pins sticky sessions, and `tools/list` is served as a provenance-namespaced union (`<upstream>__<tool>`) with 502 failover. The code defaults to :25120, but that port is canonically estate-chat's per `estate/pitchfork.toml` — do not start the gateway on :25120 without resolving the collision. No pitchfork stanza, nothing listening.
 

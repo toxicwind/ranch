@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-15T06:10:20.195Z",
+  "generated": "2026-10-15T06:16:29.578Z",
   "total": 194,
   "withUpstream": 48,
   "infos": [
@@ -1864,7 +1864,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4013507759,
+      "sizeBytes": 4013783164,
       "fileCount": 14599,
       "signals": [],
       "signalTotal": 0
@@ -2008,8 +2008,8 @@
       "remoteOrigin": "https://github.com/toxicwind/squawk.git",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 20729018,
-      "fileCount": 1793,
+      "sizeBytes": 20771929,
+      "fileCount": 1796,
       "signals": [],
       "signalTotal": 0
     },
@@ -2350,7 +2350,7 @@
       "remoteOrigin": "https://github.com/toxicwind/ranch",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 30185020,
+      "sizeBytes": 30192642,
       "fileCount": 2122,
       "signals": [],
       "signalTotal": 0

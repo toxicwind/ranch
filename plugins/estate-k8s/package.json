@@ -1,0 +1,13 @@
+{
+  "name": "@estate/k8s",
+  "version": "1.0.0",
+  "description": "Kubernetes plugin for kilo-code — query cluster state, pods, services, deployments",
+  "main": "src/index.ts",
+  "files": ["src"],
+  "keywords": ["kilo", "plugin", "kubernetes", "k8s", "estate"],
+  "author": "estate",
+  "license": "MIT",
+  "peerDependencies": {
+    "@kilocode/sdk": "^1.0.0"
+  }
+}

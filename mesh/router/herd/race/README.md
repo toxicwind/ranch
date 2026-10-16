@@ -1,6 +1,6 @@
 # herd/race — universal code racer as a first-class Herd model
 
-> **STATUS (2026-09-20):** this service is planned, not yet built — `main.go`, the `herd-race` binary, the pitchfork entry (`sovereign/herd-race`), the `herd.yaml` peer block, and `config/herd-race.json` do not exist yet. Treat this README as a design doc until the service lands.
+> **STATUS (2026-09-20):** this service is planned, not yet built — `main.go`, the `herd-race` binary, the pitchfork entry (`estate/herd-race`), the `herd.yaml` peer block, and `config/herd-race.json` do not exist yet. Treat this README as a design doc until the service lands.
 
 `herd/race` is the universal code racer ported into Herd natively. It is a
 selectable model like any other: send `{"model": "herd-race/herd/race"}` to
@@ -20,7 +20,7 @@ client -> :25100 (herd) -> peer herd-race -> :25161 (this service)
 ```
 
 - **Service:** Go, `main.go` → binary `herd-race`, supervised by pitchfork
-  (`sovereign/herd-race`), config `/home/toxic/estate/config/herd-race.json`,
+  (`estate/herd-race`), config `/home/toxic/estate/config/herd-race.json`,
   port `25161` (`HERD_RACE_PORT` in `ports.env`).
 - **Herd wiring:** peer `herd-race` in `/home/toxic/estate/config/herd.yaml`
   (`proxy: http://127.0.0.1:25161`, `models: [herd/race]`). Herd's
@@ -65,7 +65,7 @@ client -> :25100 (herd) -> peer herd-race -> :25161 (this service)
 curl -s http://127.0.0.1:25161/health | python3 -m json.tool
 
 # supervised lifecycle
-/home/toxic/estate/stack/pf.sh start|stop sovereign/herd-race
+/home/toxic/estate/stack/pf.sh start|stop estate/herd-race
 
 # model visible through the router?
 curl -s http://127.0.0.1:25100/v1/models | python3 -c \

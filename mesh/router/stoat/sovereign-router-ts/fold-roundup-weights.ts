@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * fold-roundup-weights.ts — fold a roundup sweep's router-weights output
- * (schema_version 2) into bench-priors.json, the file the sovereign router
+ * (schema_version 2) into bench-priors.json, the file the estate router
  * actually loads via bench-priors.ts.
  *
  * Background: the roundup lane's emit-router-weights.ts produces a schema-v2

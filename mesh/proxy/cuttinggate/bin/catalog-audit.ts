@@ -4,7 +4,7 @@
  *
  * Reads the live catalog, probes both gateways, and names every id the estate
  * believes it can serve that no live gateway will accept. This is the check
- * that would have caught `sovereign/free`, `local-fast`, and the nemotron
+ * that would have caught `estate/free`, `local-fast`, and the nemotron
  * cloud model on the day they were declared.
  *
  *   cuttinggate/bin/catalog-audit.ts              # audit, exit 1 on findings

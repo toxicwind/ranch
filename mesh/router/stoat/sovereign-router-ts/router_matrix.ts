@@ -596,7 +596,7 @@ export class Matrix {
 
   private stickyOverride = new Map<string, { opt: boolean; at: number }>();
 
-  /** X-Sovereign-Sticky per-session override (router-max). null clears. */
+  /** X-Estate-Sticky per-session override (router-max). null clears. */
   setStickyOpt(sid: string, opt: boolean | null): void {
     if (opt === null) this.stickyOverride.delete(sid);
     else this.stickyOverride.set(sid, { opt, at: Date.now() });

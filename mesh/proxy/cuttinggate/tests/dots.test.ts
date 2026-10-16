@@ -52,7 +52,7 @@ describe("custom/dots coercion layer", () => {
     expect(out?.[0]?.function?.parameters?.additionalProperties).toBe(false);
   });
 
-  test("constructs full sovereign payload with reasoning cap, stop tokens, and provider flags", () => {
+  test("constructs full estate payload with reasoning cap, stop tokens, and provider flags", () => {
     const payload = dotsBody(
       [{ role: "assistant", content: null }, { role: "user", content: "run tool" }],
       {

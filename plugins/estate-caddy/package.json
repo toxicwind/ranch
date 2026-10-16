@@ -1,0 +1,13 @@
+{
+  "name": "@estate/caddy",
+  "version": "1.0.0",
+  "description": "Caddy plugin for kilo-code — manage Caddyfile, certificates, routes, and proxy configs",
+  "main": "src/index.ts",
+  "files": ["src"],
+  "keywords": ["kilo", "plugin", "caddy", "reverse-proxy", "estate"],
+  "author": "estate",
+  "license": "MIT",
+  "peerDependencies": {
+    "@kilocode/sdk": "^1.0.0"
+  }
+}

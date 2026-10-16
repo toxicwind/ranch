@@ -32,7 +32,7 @@ async function discoverArms(): Promise<Arm[]> {
 
   const arms: Arm[] = [];
   for (const m of json.data ?? []) {
-    const provider = m.flock?.provider ?? m.x_sovereign?.provider ?? m.owned_by;
+    const provider = m.flock?.provider ?? m.x_estate?.provider ?? m.owned_by;
     if (!provider) continue;
     if (provider === "llama-swap" || provider === "alias") continue;
     if (!isChatCapable(m.id)) continue;

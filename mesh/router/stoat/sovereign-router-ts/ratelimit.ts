@@ -6,7 +6,7 @@
  * `allow` consumes one token when available. Per-provider defaults follow
  * AstMatrix's rule — 10 RPM for free-tier providers, 60 RPM for everything
  * else — unless the operator sets an explicit per-provider RPM via
- * SOVEREIGN_RPM_<PROVIDER> (e.g. SOVEREIGN_RPM_GROQ=120).
+ * ESTATE_RPM_<PROVIDER> (e.g. ESTATE_RPM_GROQ=120).
  *
  * Note: nvidia's per-key 40 RPM buckets already live in router_matrix.ts
  * (state.nextNvidiaKey); the provider-level bucket for nvidia defaults high
@@ -56,7 +56,7 @@ export interface ProviderRateSpec {
 }
 
 function envRpm(name: string): number | null {
-  const raw = process.env[`SOVEREIGN_RPM_${name.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`];
+  const raw = process.env[`ESTATE_RPM_${name.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`];
   if (!raw) return null;
   const n = parseFloat(raw);
   return Number.isFinite(n) && n > 0 ? n : null;

@@ -46,20 +46,20 @@ loadEnvFile("/home/toxic/estate/config/ports.env");
 
 loadEnvFile("/home/toxic/estate/.env.local");
 
-// Port SSOT: service-specific SOVEREIGN_ROUTER_PORT wins; SOVEREIGN_PORT is legacy fallback.
+// Port SSOT: service-specific ESTATE_ROUTER_PORT wins; ESTATE_PORT is legacy fallback.
 export const _portRaw =
-  process.env.SOVEREIGN_ROUTER_PORT || process.env.SOVEREIGN_PORT || "";
+  process.env.ESTATE_ROUTER_PORT || process.env.ESTATE_PORT || "";
 
 if (!_portRaw) {
   throw new Error(
-    "SOVEREIGN_ROUTER_PORT or SOVEREIGN_PORT required (config/ports.env)",
+    "ESTATE_ROUTER_PORT or ESTATE_PORT required (config/ports.env)",
   );
 }
 
 export const PORT = parseInt(_portRaw, 10);
 
 export const DB_PATH =
-  process.env.SOVEREIGN_DB || "/home/toxic/estate/data/sovereign_router.db";
+  process.env.ESTATE_DB || "/home/toxic/estate/data/estate_router.db";
 
 export const MAX_PARALLEL = 4;
 
@@ -67,31 +67,31 @@ export const MAX_PARALLEL = 4;
 // CONNECT_MS: headers must arrive (dead backend detected fast).
 // TTFT_MS: first body byte must arrive for streaming (time-to-first-token).
 // ATTEMPT_MS / ATTEMPT_STREAM_MS: total per-attempt caps.
-export const CONNECT_MS = parseInt(process.env.SOVEREIGN_CONNECT_MS || "8000", 10);
-export const TTFT_MS = parseInt(process.env.SOVEREIGN_TTFT_MS || "45000", 10);
-export const ATTEMPT_MS = parseInt(process.env.SOVEREIGN_ATTEMPT_MS || "120000", 10);
+export const CONNECT_MS = parseInt(process.env.ESTATE_CONNECT_MS || "8000", 10);
+export const TTFT_MS = parseInt(process.env.ESTATE_TTFT_MS || "45000", 10);
+export const ATTEMPT_MS = parseInt(process.env.ESTATE_ATTEMPT_MS || "120000", 10);
 export const ATTEMPT_STREAM_MS = parseInt(
-  process.env.SOVEREIGN_ATTEMPT_STREAM_MS || "180000",
+  process.env.ESTATE_ATTEMPT_STREAM_MS || "180000",
   10,
 );
 // QUARANTINE: dead providers are quarantined with exponential backoff
 // re-probing: BASE * 2^(level-1) capped at MAX.
 export const QUARANTINE_BASE_S = parseInt(
-  process.env.SOVEREIGN_QUARANTINE_BASE_S || "60",
+  process.env.ESTATE_QUARANTINE_BASE_S || "60",
   10,
 );
 export const QUARANTINE_MAX_S = parseInt(
-  process.env.SOVEREIGN_QUARANTINE_MAX_S || "1800",
+  process.env.ESTATE_QUARANTINE_MAX_S || "1800",
   10,
 );
 // HEDGE_MS: speculative hedging (HFT redundant-feeds pattern). When a chain
 // lane hasn't produced a winner within HEDGE_MS, the next lane fires in
 // parallel; first substantive wins, losers are aborted. 0 disables.
-export const HEDGE_MS = parseInt(process.env.SOVEREIGN_HEDGE_MS || "1500", 10);
+export const HEDGE_MS = parseInt(process.env.ESTATE_HEDGE_MS || "1500", 10);
 
 // Active quarantine re-probe cadence.
 export const QUARANTINE_PROBE_MS = parseInt(
-  process.env.SOVEREIGN_QUARANTINE_PROBE_MS || "15000",
+  process.env.ESTATE_QUARANTINE_PROBE_MS || "15000",
   10,
 );
 
@@ -99,9 +99,9 @@ export const STICKY_TTL = 1800;
 
 export const FIFO_MAX = 64;
 
-export const STRATEGY = process.env.SOVEREIGN_STRATEGY || "auto";
+export const STRATEGY = process.env.ESTATE_STRATEGY || "auto";
 
-export const UA = "Mozilla/5.0 (compatible; Sovereign-Flock/3.1)";
+export const UA = "Mozilla/5.0 (compatible; Estate-Flock/3.1)";
 
 // ---------------------------------------------------------------------------
 // LLAMA_SWAP_V1 (must come before PROVIDERS that uses it)
@@ -150,7 +150,7 @@ export const LOCAL_ROLES = loadLocalRoleModels();
 // ---------------------------------------------------------------------------
 function effectiveDefs(): ProviderDef[] {
   return PKG_PROVIDER_DEFS.map((d) => {
-    // Local SSOT — always first-class for sovereign GPU path
+    // Local SSOT — always first-class for estate GPU path
     if (d.name === "llama-swap") return { ...d, baseUrl: LLAMA_SWAP_V1 };
     // Local NIM proxy (:8000, nim-consolidation track). Shows dead in
     // /status until the proxy key lands — the router then picks it up via
@@ -270,7 +270,7 @@ export const PROVIDERS: Record<
 // - The dead list is permanent. Quarantine re-admits on re-listing.
 // ---------------------------------------------------------------------------
 export const CATALOG_STATE_PATH =
-  process.env.SOVEREIGN_CATALOG_STATE ||
+  process.env.ESTATE_CATALOG_STATE ||
   "/home/toxic/estate/.state/provider-catalog.json";
 
 export const catalog = new ModelCatalog(EFFECTIVE_DEFS, {
@@ -450,7 +450,7 @@ export function isLocalSwapModelId(model: string): boolean {
   ) {
     return true;
   }
-  // sovereign naming prefixes / known local ids
+  // estate naming prefixes / known local ids
   return /^(beellama|mradermacher|jackrong|turboquant|ik_llama|ik_turboquant|holo|qwen\/|gemma-4|exaone)/i.test(
     model,
   );
@@ -596,7 +596,7 @@ export function costTier(p: string, mid: string): CostTier {
 }
 
 /**
- * parseStickyOpt — X-Sovereign-Sticky header parsing (router-max).
+ * parseStickyOpt — X-Estate-Sticky header parsing (router-max).
  * "1"/"true"/"yes"/"on" -> explicit opt-in; "0"/"false"/"no"/"off" ->
  * explicit opt-out; absent/unparseable -> null (legacy behavior).
  */

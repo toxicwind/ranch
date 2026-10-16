@@ -131,8 +131,8 @@ def post_chat(base: str, key: str, model: str, prompt: str, timeout_s: int):
         headers={
             "Authorization": "Bearer " + key,
             "Content-Type": "application/json",
-            "HTTP-Referer": "https://sovereign.local/probe",
-            "X-Title": "sovereign-longctx-probe",
+            "HTTP-Referer": "https://estate.local/probe",
+            "X-Title": "estate-longctx-probe",
         },
         method="POST",
     )

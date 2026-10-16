@@ -17,11 +17,11 @@ import type { ProviderView } from "./types.ts";
 export const TIMING = Object.freeze({
   MAX_PARALLEL: 4,
   FIFO_MAX: 64,
-  CONNECT_MS: parseInt(process.env.SOVEREIGN_CONNECT_MS || "8000", 10),
-  TTFT_MS: parseInt(process.env.SOVEREIGN_TTFT_MS || "45000", 10),
-  ATTEMPT_MS: parseInt(process.env.SOVEREIGN_ATTEMPT_MS || "120000", 10),
-  ATTEMPT_STREAM_MS: parseInt(process.env.SOVEREIGN_ATTEMPT_STREAM_MS || "300000", 10),
-  HEDGE_MS: parseInt(process.env.SOVEREIGN_HEDGE_MS || "1500", 10),
+  CONNECT_MS: parseInt(process.env.ESTATE_CONNECT_MS || "8000", 10),
+  TTFT_MS: parseInt(process.env.ESTATE_TTFT_MS || "45000", 10),
+  ATTEMPT_MS: parseInt(process.env.ESTATE_ATTEMPT_MS || "120000", 10),
+  ATTEMPT_STREAM_MS: parseInt(process.env.ESTATE_ATTEMPT_STREAM_MS || "300000", 10),
+  HEDGE_MS: parseInt(process.env.ESTATE_HEDGE_MS || "1500", 10),
 });
 
 export const MAX_PARALLEL = TIMING.MAX_PARALLEL;
@@ -32,8 +32,8 @@ export const ATTEMPT_MS = TIMING.ATTEMPT_MS;
 export const ATTEMPT_STREAM_MS = TIMING.ATTEMPT_STREAM_MS;
 export const HEDGE_MS = TIMING.HEDGE_MS;
 
-export const DEFAULT_STRATEGY = process.env.SOVEREIGN_STRATEGY || "hybrid";
-export const UA = "Mozilla/5.0 (compatible; Sovereign-Flock/3.1)";
+export const DEFAULT_STRATEGY = process.env.ESTATE_STRATEGY || "hybrid";
+export const UA = "Mozilla/5.0 (compatible; Estate-Flock/3.1)";
 
 /** Code-shaped output detector (AST race preference). */
 export const AST_RE =

@@ -1,4 +1,4 @@
-# Browserless — Sovereign Mesh
+# Browserless — Estate Mesh
 
 *Headed browser automation for the fleet: one MCP server, one persistent Chromium, zero dead sessions.*
 

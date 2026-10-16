@@ -124,36 +124,36 @@ class FlockMetrics {
 
   render(): string[] {
     const L: string[] = [
-      "# HELP sovereign_flock_requests_total Per-request counter (flock parity)",
-      "# TYPE sovereign_flock_requests_total counter",
+      "# HELP estate_flock_requests_total Per-request counter (flock parity)",
+      "# TYPE estate_flock_requests_total counter",
     ];
     for (const [k, v] of this.requests) {
       const [provider, model, path, status] = k.split("\0");
       L.push(
-        `sovereign_flock_requests_total{provider="${provider}",model="${model}",path="${path}",status="${status}"} ${v}`,
+        `estate_flock_requests_total{provider="${provider}",model="${model}",path="${path}",status="${status}"} ${v}`,
       );
     }
     L.push(
-      "# HELP sovereign_flock_shed_total Requests rejected 429 past the in-flight cap",
-      "# TYPE sovereign_flock_shed_total counter",
-      `sovereign_flock_shed_total ${this.shed}`,
-      "# HELP sovereign_flock_unauthorized_total Client-key auth failures",
-      "# TYPE sovereign_flock_unauthorized_total counter",
-      `sovereign_flock_unauthorized_total ${this.unauthorized}`,
-      "# HELP sovereign_flock_deadline_exceeded_total Requests killed by x-flock-deadline-ms",
-      "# TYPE sovereign_flock_deadline_exceeded_total counter",
-      `sovereign_flock_deadline_exceeded_total ${this.deadlineExceeded}`,
-      "# HELP sovereign_flock_coalesced_total Coalesced requests by role",
-      "# TYPE sovereign_flock_coalesced_total counter",
-      `sovereign_flock_coalesced_total{role="leader"} ${this.coalescedLeader}`,
-      `sovereign_flock_coalesced_total{role="follower"} ${this.coalescedFollower}`,
-      "# HELP sovereign_flock_dispatch_timeout_total Dispatch slot waits that hit the deadline",
-      "# TYPE sovereign_flock_dispatch_timeout_total counter",
-      `sovereign_flock_dispatch_timeout_total ${this.dispatchTimeout}`,
+      "# HELP estate_flock_shed_total Requests rejected 429 past the in-flight cap",
+      "# TYPE estate_flock_shed_total counter",
+      `estate_flock_shed_total ${this.shed}`,
+      "# HELP estate_flock_unauthorized_total Client-key auth failures",
+      "# TYPE estate_flock_unauthorized_total counter",
+      `estate_flock_unauthorized_total ${this.unauthorized}`,
+      "# HELP estate_flock_deadline_exceeded_total Requests killed by x-flock-deadline-ms",
+      "# TYPE estate_flock_deadline_exceeded_total counter",
+      `estate_flock_deadline_exceeded_total ${this.deadlineExceeded}`,
+      "# HELP estate_flock_coalesced_total Coalesced requests by role",
+      "# TYPE estate_flock_coalesced_total counter",
+      `estate_flock_coalesced_total{role="leader"} ${this.coalescedLeader}`,
+      `estate_flock_coalesced_total{role="follower"} ${this.coalescedFollower}`,
+      "# HELP estate_flock_dispatch_timeout_total Dispatch slot waits that hit the deadline",
+      "# TYPE estate_flock_dispatch_timeout_total counter",
+      `estate_flock_dispatch_timeout_total ${this.dispatchTimeout}`,
     );
-    L.push(...renderHistogram("sovereign_flock_ttft_seconds", "Time to first token (streaming)", this.ttft));
-    L.push(...renderHistogram("sovereign_flock_upstream_seconds", "Upstream attempt latency", this.upstream));
-    L.push(...renderHistogram("sovereign_flock_queue_wait_seconds", "FIFO dispatch queue wait", this.queueWait));
+    L.push(...renderHistogram("estate_flock_ttft_seconds", "Time to first token (streaming)", this.ttft));
+    L.push(...renderHistogram("estate_flock_upstream_seconds", "Upstream attempt latency", this.upstream));
+    L.push(...renderHistogram("estate_flock_queue_wait_seconds", "FIFO dispatch queue wait", this.queueWait));
     return L;
   }
 }
