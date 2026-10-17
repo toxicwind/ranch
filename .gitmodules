@@ -423,9 +423,6 @@
 [submodule "antilogos"]
 	path = antilogos
 	url = https://github.com/toxicwind/antilogos.git
-[submodule "kite.kite-cli"]
-	path = kite/kite-cli
-	url = https://github.com/toxicwind/kite-cli.git
 [submodule "rig-ciwatch"]
 	path = rig-ciwatch
 	url = https://github.com/toxicwind/rig.git
@@ -462,3 +459,9 @@
 [submodule "submodules.phone-sentinel"]
 	path = submodules/phone-sentinel
 	url = /home/toxic/phone-sentinel
+[submodule "hatch.hatch-cli"]
+	path = hatch/kite-cli
+	url = https://github.com/toxicwind/kite-cli.git
+[submodule "hatch"]
+	path = hatch
+	url = https://github.com/toxicwind/hatch.git
