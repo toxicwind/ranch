@@ -397,7 +397,7 @@
 	path = mcp/pd-mcp-standalone
 	url = https://github.com/toxicwind/pd-mcp.git
 [submodule "flocksync"]
-	path = mesh/flocksync
+	path = mesh/pylae
 	url = https://github.com/toxicwind/flocksync.git
 [submodule "weasel"]
 	path = forge/router/weasel
