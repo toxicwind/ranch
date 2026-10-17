@@ -1,41 +1,61 @@
-# ranch/* fork audit (generated 2026-10-16T06:09:04.535Z)
+# ranch/* fork audit (generated 2026-10-17T03:51:02.871Z)
 
-201 immediate subdirs; **44** have an obvious upstream reference.
+223 immediate subdirs; **71** have an obvious upstream reference.
 
 By source:
-  - **33** .gitmodules
-  - **2** git remote origin (non-toxicwind)
-  - **3** package.json repository
-  - **1** go.mod module
-  - **2** git remote upstream
+  - **63** .gitmodules
+  - **5** package.json repository
   - **1** README 'Forked from'
-  - **1** GitHub parent fork
+  - **1** git remote upstream
   - **1** Cargo.toml repository
 
 | dir | upstream | source | origin remote |
 |---|---|---|---|
+| `agent-customization-style-guide` | [github.com/toxicwind/agent-customization-style-guide](https://github.com/toxicwind/agent-customization-style-guide) | .gitmodules | github.com/toxicwind/agent-customization-style-guide.git |
+| `agent-dashboard` | [github.com/toxicwind/agent-dashboard](https://github.com/toxicwind/agent-dashboard) | .gitmodules | github.com/toxicwind/agent-dashboard |
 | `AgentForensics` | [github.com/aparnaa19/AgentForensics](https://github.com/aparnaa19/AgentForensics) | .gitmodules | github.com/aparnaa19/AgentForensics.git |
-| `corral` | [github.com/roninjin10/super-ralph](https://github.com/roninjin10/super-ralph.git) | package.json repository | — |
+| `ai-merge-resolve` | [github.com/toxicwind/ai-merge-resolve](https://github.com/toxicwind/ai-merge-resolve) | .gitmodules | github.com/lxgicstudios/ai-merge-resolve.git |
+| `awesome-free-ai-coding` | [github.com/toxicwind/awesome-free-ai-coding](https://github.com/toxicwind/awesome-free-ai-coding) | .gitmodules | github.com/mvalentsev/awesome-free-ai-coding.git |
+| `computer-use-linux` | [github.com/toxicwind/computer-use-linux](https://github.com/toxicwind/computer-use-linux) | .gitmodules | github.com/toxicwind/computer-use-linux.git |
+| `corral` | [github.com/toxicwind/corral](https://github.com/toxicwind/corral.git) | package.json repository | — |
 | `doorbell` | [github.com/toxicwind/doorbell](https://github.com/toxicwind/doorbell) | .gitmodules | github.com/toxicwind/doorbell.git |
 | `drover` | [github.com/A-man-Sharma-04/modelpilot](https://github.com/A-man-Sharma-04/modelpilot) | package.json repository | — |
-| `estate-scripts` | [./estate-scripts](./estate-scripts) | .gitmodules | — |
-| `flicker` | [go.woodpecker-ci.org/woodpecker/v3](https://go.woodpecker-ci.org/woodpecker/v3) | go.mod module | — |
-| `hyprgrid` | [github.com/Aetherall/hyprgrid](https://github.com/Aetherall/hyprgrid) | git remote origin (non-toxicwind) | github.com/Aetherall/hyprgrid.git |
-| `Hyprgrid-gestures` | [github.com/jairnarvaez/Hyprgrid](https://github.com/jairnarvaez/Hyprgrid) | git remote origin (non-toxicwind) | github.com/jairnarvaez/Hyprgrid.git |
-| `kilo-cli` | [github.com/toxicwind/kilo-cli](https://github.com/toxicwind/kilo-cli) | .gitmodules | github.com/toxicwind/kilo-cli.git |
-| `kilo-code` | [github.com/toxicwind/kilo-code](https://github.com/toxicwind/kilo-code) | .gitmodules | github.com/toxicwind/kilo-code.git |
-| `kitty-mcp-server` | [github.com/secemp9/kitty-mcp-server](https://github.com/secemp9/kitty-mcp-server) | git remote upstream | github.com/toxicwind/kitty-mcp-server.git |
+| `dualspace-ast-bm25-hybrid` | [github.com/toxicwind/dualspace-ast-bm25-hybrid](https://github.com/toxicwind/dualspace-ast-bm25-hybrid) | .gitmodules | github.com/toxicwind/dualspace-ast-bm25-hybrid.git |
+| `estate-dispersal` | [github.com/toxicwind/sovereign-dispersal](https://github.com/toxicwind/sovereign-dispersal) | .gitmodules | github.com/toxicwind/sovereign-dispersal.git |
+| `estate-end4` | [github.com/toxicwind/sovereign-end4](https://github.com/toxicwind/sovereign-end4) | .gitmodules | github.com/toxicwind/sovereign-end4.git |
+| `estate-hatch-toolkit` | [github.com/toxicwind/estate-hatch-toolkit](https://github.com/toxicwind/estate-hatch-toolkit) | .gitmodules | github.com/toxicwind/sovereign-hatch-toolkit.git |
+| `estate-recon` | [github.com/toxicwind/estate-recon](https://github.com/toxicwind/estate-recon) | .gitmodules | github.com/toxicwind/estate-recon.git |
+| `estate-scripts` | [github.com/toxicwind/estate-scripts](https://github.com/toxicwind/estate-scripts) | .gitmodules | — |
+| `estate-shell` | [github.com/toxicwind/estate-shell](https://github.com/toxicwind/estate-shell) | .gitmodules | github.com/toxicwind/estate-shell.git |
+| `estate-skills` | [github.com/toxicwind/sovereign-skills](https://github.com/toxicwind/sovereign-skills) | .gitmodules | github.com/toxicwind/sovereign-skills.git |
+| `estate-skills-hub` | [github.com/toxicwind/estate-skills-hub](https://github.com/toxicwind/estate-skills-hub) | .gitmodules | github.com/toxicwind/sovereign-skills-hub.git |
+| `ferret-den` | [github.com/toxicwind/ferret-den](https://github.com/toxicwind/ferret-den) | .gitmodules | github.com/toxicwind/ferret-den.git |
+| `fleetd` | [github.com/toxicwind/fleetd](https://github.com/toxicwind/fleetd) | .gitmodules | github.com/toxicwind/fleetd.git |
+| `freebuffet` | [github.com/toxicwind/freebuffet](https://github.com/toxicwind/freebuffet) | .gitmodules | github.com/6yte96/freebuffet.git |
+| `ghq` | [github.com/toxicwind/ghq](https://github.com/toxicwind/ghq) | .gitmodules | github.com/x-motemen/ghq.git |
+| `gito` | [github.com/toxicwind/gito](https://github.com/toxicwind/gito) | .gitmodules | github.com/Nayjest/Gito.git |
+| `godzilla-llama.cpp` | [github.com/toxicwind/godzilla-llama.cpp](https://github.com/toxicwind/godzilla-llama.cpp) | .gitmodules | github.com/atomicmilkshake/godzilla-llama.cpp.git |
+| `identity-router` | [github.com/toxicwind/identity-router](https://github.com/toxicwind/identity-router) | .gitmodules | github.com/toxicwind/identity-router.git |
+| `kairos` | [github.com/toxicwind/kairos](https://github.com/toxicwind/kairos) | .gitmodules | github.com/toxicwind/kairos.git |
+| `kilo-cli` | [github.com/Kilo-Org/kilo](https://github.com/Kilo-Org/kilo) | package.json repository | github.com/toxicwind/kilo-cli.git |
+| `kilo-code` | [github.com/Kilo-Org/kilocode](https://github.com/Kilo-Org/kilocode) | package.json repository | github.com/toxicwind/kilo-code.git |
 | `lasso` | [github.com/IlyasKhallouki/hypruse](https://github.com/IlyasKhallouki/hypruse) | README 'Forked from' | — |
-| `mcp-prompt-injection-detector` | [github.com/thilinawishvekeerthi/mcp-prompt-injection-detector](https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector) | .gitmodules | github.com/thilinawishvekeerthi/mcp-prompt-injection-detector |
+| `loom` | [github.com/toxicwind/loom](https://github.com/toxicwind/loom) | .gitmodules | github.com/subotic/loom.git |
+| `maw` | [github.com/toxicwind/maw](https://github.com/toxicwind/maw) | .gitmodules | github.com/bobisme/maw.git |
+| `mcp-dropin-guide` | [github.com/toxicwind/mcp-dropin-guide](https://github.com/toxicwind/mcp-dropin-guide) | .gitmodules | github.com/toxicwind/mcp-dropin-guide.git |
 | `mcpproxy-go` | [github.com/toxicwind/mcpproxy-go](https://github.com/toxicwind/mcpproxy-go) | .gitmodules | github.com/toxicwind/mcpproxy-go.git |
+| `metaclaw-runtime` | [github.com/toxicwind/metaclaw-runtime](https://github.com/toxicwind/metaclaw-runtime) | .gitmodules | github.com/toxicwind/metaclaw-runtime.git |
 | `muse-cli` | [github.com/toxicwind/muse-cli](https://github.com/toxicwind/muse-cli) | .gitmodules | github.com/toxicwind/muse-cli.git |
 | `nim-inkling-api-research` | [github.com/toxicwind/nim-inkling-api-research](https://github.com/toxicwind/nim-inkling-api-research) | .gitmodules | github.com/toxicwind/nim-inkling-api-research.git |
+| `nim-omnibus` | [github.com/toxicwind/nim-omnibus](https://github.com/toxicwind/nim-omnibus) | .gitmodules | github.com/toxicwind/nim-omnibus.git |
 | `nvidia-alive` | [github.com/toxicwind/nvidia-alive](https://github.com/toxicwind/nvidia-alive) | .gitmodules | github.com/toxicwind/nvidia-alive.git |
 | `nvidia-kernel-guard` | [github.com/toxicwind/nvidia-kernel-guard](https://github.com/toxicwind/nvidia-kernel-guard) | .gitmodules | github.com/toxicwind/nvidia-kernel-guard.git |
 | `nvidia-nim-model-probe` | [github.com/toxicwind/nvidia-nim-model-probe](https://github.com/toxicwind/nvidia-nim-model-probe) | .gitmodules | github.com/toxicwind/nvidia-nim-model-probe.git |
+| `oh-my-pi` | [github.com/toxicwind/oh-my-pi](https://github.com/toxicwind/oh-my-pi) | .gitmodules | github.com/can1357/oh-my-pi.git |
+| `OmniRoute` | [github.com/toxicwind/OmniRoute](https://github.com/toxicwind/OmniRoute) | .gitmodules | github.com/diegosouzapw/OmniRoute.git |
 | `outlier-toolkit` | [github.com/toxicwind/outlier-toolkit](https://github.com/toxicwind/outlier-toolkit) | .gitmodules | github.com/toxicwind/outlier-toolkit.git |
+| `outsource` | [github.com/toxicwind/outsource](https://github.com/toxicwind/outsource) | .gitmodules | github.com/midagedev/outsource.git |
 | `paper-poller` | [github.com/toxicwind/paper-poller](https://github.com/toxicwind/paper-poller) | .gitmodules | github.com/toxicwind/paper-poller.git |
-| `pd-mcp-standalone` | [github.com/intelligent-ears/pd-tools-mcp](https://github.com/intelligent-ears/pd-tools-mcp) | GitHub parent fork | github.com/toxicwind/pd-mcp.git |
 | `pearlctl` | [github.com/toxicwind/pearlctl](https://github.com/toxicwind/pearlctl) | .gitmodules | github.com/toxicwind/pearlctl.git |
 | `pj-fast` | [github.com/toxicwind/pj-fast](https://github.com/toxicwind/pj-fast) | .gitmodules | github.com/toxicwind/pj-fast.git |
 | `ralph-dashboard` | [github.com/toxicwind/ralph-dashboard](https://github.com/toxicwind/ralph-dashboard) | .gitmodules | github.com/toxicwind/ralph-dashboard.git |
@@ -43,21 +63,25 @@ By source:
 | `repo-first-class` | [github.com/toxicwind/repo-first-class](https://github.com/toxicwind/repo-first-class) | .gitmodules | github.com/toxicwind/repo-first-class.git |
 | `rig` | [github.com/toxicwind/rig](https://github.com/toxicwind/rig) | .gitmodules | github.com/toxicwind/rig.git |
 | `roundup-site` | [github.com/owieth/turborepo-example](https://github.com/owieth/turborepo-example) | .gitmodules | github.com/owieth/turborepo-example |
-| `rsync-mcp` | [github.com/toxicwind/rsync-mcp](https://github.com/toxicwind/rsync-mcp) | .gitmodules | github.com/toxicwind/rsync-mcp.git |
 | `safety-review-gate` | [github.com/toxicwind/safety-review-gate](https://github.com/toxicwind/safety-review-gate) | .gitmodules | github.com/toxicwind/safety-review-gate.git |
 | `secretsmith` | [github.com/toxicwind/secretsmith](https://github.com/toxicwind/secretsmith) | .gitmodules | github.com/toxicwind/secretsmith.git |
 | `session-bus-refresh` | [github.com/toxicwind/session-bus-refresh](https://github.com/toxicwind/session-bus-refresh) | .gitmodules | github.com/toxicwind/session-bus-refresh.git |
 | `skillforge` | [github.com/toxicwind/skillforge](https://github.com/toxicwind/skillforge) | .gitmodules | github.com/toxicwind/skillforge.git |
+| `stealthprint` | [github.com/toxicwind/stealthprint](https://github.com/toxicwind/stealthprint) | .gitmodules | github.com/majiayu000/stealthprint.git |
 | `strudel-dev-vite` | [github.com/toxicwind/strudel-dev-vite](https://github.com/toxicwind/strudel-dev-vite) | .gitmodules | github.com/toxicwind/strudel-dev-vite.git |
 | `strudel-sampler-server-vite` | [github.com/toxicwind/strudel-sampler-server-vite](https://github.com/toxicwind/strudel-sampler-server-vite) | .gitmodules | github.com/toxicwind/strudel-sampler-server-vite.git |
-| `tailnet-doctor` | [github.com/toxicwind/tailnet-doctor](https://github.com/toxicwind/tailnet-doctor) | .gitmodules | github.com/toxicwind/tailnet-doctor.git |
+| `super-board` | [github.com/toxicwind/super-board](https://github.com/toxicwind/super-board) | .gitmodules | github.com/EricTechPro/super-board.git |
 | `tau` | [github.com/can1357/oh-my-pi](https://github.com/can1357/oh-my-pi) | git remote upstream | github.com/toxicwind/tau.git |
-| `tau-extensions` | [github.com/toxicwind/tau-extensions](https://github.com/toxicwind/tau-extensions) | .gitmodules | github.com/toxicwind/tau-extensions.git |
+| `tok` | [github.com/toxicwind/tok](https://github.com/toxicwind/tok) | .gitmodules | github.com/toxicwind/tok.git |
 | `toxicwind-repos` | [github.com/toxicwind/toxicwind-repos](https://github.com/toxicwind/toxicwind-repos) | .gitmodules | github.com/toxicwind/toxicwind-repos |
 | `trading-post` | [github.com/toxicwind/trading-post](https://github.com/toxicwind/trading-post) | .gitmodules | github.com/toxicwind/trading-post.git |
-| `wezterm` | [github.com/toxicwind/wezterm](https://github.com/toxicwind/wezterm) | .gitmodules | github.com/toxicwind/wezterm.git |
+| `universal-keypool-bun` | [github.com/toxicwind/universal-keypool-bun](https://github.com/toxicwind/universal-keypool-bun) | .gitmodules | github.com/toxicwind/universal-keypool-bun.git |
+| `universal-keypool-gateway` | [github.com/toxicwind/universal-keypool-gateway](https://github.com/toxicwind/universal-keypool-gateway) | .gitmodules | github.com/toxicwind/universal-keypool-gateway.git |
+| `VansRouter` | [github.com/toxicwind/VansRouter](https://github.com/toxicwind/VansRouter) | .gitmodules | github.com/toxicwind/VansRouter.git |
 | `wezterm-agent-mcp` | [github.com/multiagentcognition/wezterm-agent-mcp](https://github.com/multiagentcognition/wezterm-agent-mcp.git) | package.json repository | github.com/toxicwind/wezterm-agent-mcp.git |
+| `workmux` | [github.com/toxicwind/workmux](https://github.com/toxicwind/workmux) | .gitmodules | github.com/raine/workmux.git |
 | `yote` | [github.com/toxicwind/yote](https://github.com/toxicwind/yote) | Cargo.toml repository | github.com/toxicwind/ranch |
+| `zed-android-port` | [github.com/toxicwind/zed-android-port](https://github.com/toxicwind/zed-android-port) | .gitmodules | github.com/Dylanmurzello/zed-android-port.git |
 | `additional-lens-profiles` | — | — | — |
 | `agentic-moment-2026` | — | — | — |
 | `agentos` | — | — | — |
@@ -93,25 +117,19 @@ By source:
 | `codeflux-python-patch` | — | — | — |
 | `codeflux-watchfiles` | — | — | — |
 | `ComfyUI-TTools` | — | — | — |
-| `computer-use-linux` | — | — | — |
 | `cron-trust` | — | — | — |
 | `dashboard` | — | — | — |
 | `data` | — | — | — |
 | `dayz-toolkit` | — | — | — |
-| `dedi-ops` | — | — | — |
+| `dedicated` | — | — | — |
 | `disparate-latent-experiment` | — | — | — |
 | `docs` | — | — | — |
 | `dots-client` | — | — | — |
-| `effusion-labs` | — | — | — |
-| `effusion-labs-tickets` | — | — | — |
 | `emergent` | — | — | — |
-| `estate` | — | — | github.com/toxicwind/estate-scripts.git |
+| `estate` | — | — | — |
 | `estate-chat` | — | — | — |
-| `estate-dispersal` | — | — | github.com/toxicwind/sovereign-dispersal.git |
 | `estate-dispersal-monolith` | — | — | — |
-| `estate-end4` | — | — | github.com/toxicwind/sovereign-end4.git |
 | `estate-monitor` | — | — | — |
-| `estate-skills` | — | — | github.com/toxicwind/sovereign-skills.git |
 | `estate-whoa-breakthrough` | — | — | — |
 | `evidence-locker` | — | — | — |
 | `examples` | — | — | — |
@@ -119,28 +137,26 @@ By source:
 | `extensions` | — | — | — |
 | `fanout` | — | — | — |
 | `fast-race` | — | — | — |
-| `ferret-den` | — | — | github.com/toxicwind/ferret-den.git |
 | `fleet` | — | — | — |
-| `fleet-bus-mcp` | — | — | — |
 | `fleet-chat` | — | — | — |
 | `fleet-ops` | — | — | — |
 | `flock` | — | — | — |
 | `forge` | — | — | — |
 | `gatehouse-staging` | — | — | — |
-| `gayxxx-estate` | — | — | github.com/toxicwind/ranch |
+| `gayxxx-estate` | — | — | — |
 | `gear` | — | — | — |
 | `gguf-read` | — | — | — |
 | `github-search` | — | — | — |
 | `goldfinger` | — | — | — |
 | `hatch-decode` | — | — | — |
-| `hatch-mcp` | — | — | — |
+| `herd` | — | — | — |
 | `herdproof-bun` | — | — | — |
 | `hf-model-sync` | — | — | — |
 | `host-proof` | — | — | — |
-| `huggingface-mcp-server` | — | — | — |
 | `hypr-agent-portal` | — | — | — |
 | `keep` | — | — | — |
 | `killer-features` | — | — | — |
+| `kilo` | — | — | — |
 | `kimi-claw` | — | — | — |
 | `kodi-fleet` | — | — | — |
 | `leakfix-src` | — | — | — |
@@ -150,7 +166,7 @@ By source:
 | `llm-mapreduce` | — | — | — |
 | `lookout` | — | — | — |
 | `matter-server` | — | — | — |
-| `mcp-gateway` | — | — | — |
+| `mcp` | — | — | — |
 | `mesh` | — | — | — |
 | `meta-research-toolkit` | — | — | — |
 | `metaaivm` | — | — | — |
@@ -162,13 +178,14 @@ By source:
 | `monad-forge` | — | — | — |
 | `namespace-concealment-explorer` | — | — | — |
 | `naming-audit` | — | — | — |
-| `nim-omnibus` | — | — | github.com/toxicwind/nim-omnibus.git |
 | `nim-repos` | — | — | — |
 | `null-g-proxy` | — | — | — |
 | `omp-test-runner-watchdog-OzX7V0` | — | — | — |
+| `openfang` | — | — | — |
 | `openfang-join` | — | — | — |
 | `openrouter-probe` | — | — | — |
 | `ops` | — | — | — |
+| `organized-lattice-v3` | — | — | — |
 | `pack-fix` | — | — | — |
 | `phone-ocr-sweep` | — | — | — |
 | `plugin-ecosystem` | — | — | — |
@@ -180,6 +197,7 @@ By source:
 | `ranch-analyze` | — | — | — |
 | `range` | — | — | — |
 | `rankings` | — | — | — |
+| `rawhide` | — | — | — |
 | `rename-roundup` | — | — | — |
 | `research` | — | — | — |
 | `roundup` | — | — | — |
@@ -203,12 +221,13 @@ By source:
 | `submodules` | — | — | — |
 | `switchboard` | — | — | — |
 | `task-launch` | — | — | — |
-| `tau-marketplace` | — | — | — |
-| `tmux-mcp` | — | — | — |
+| `tau-extensions` | — | — | — |
 | `toolcall-agent` | — | — | — |
 | `toolkit` | — | — | — |
 | `tools` | — | — | — |
-| `websearch-mcp` | — | — | — |
+| `vendor` | — | — | — |
+| `vendored` | — | — | — |
+| `websites` | — | — | — |
 | `windmill` | — | — | — |
 | `wtf-filetrace` | — | — | — |
 | `wtf-orch` | — | — | — |
@@ -223,11 +242,10 @@ For every dir with a GitHub origin remote, the audit queried `gh api repos/<owne
 
 | dir | origin | upstream (GitHub parent) |
 |---|---|---|
-| `kitty-mcp-server` | github.com/toxicwind/kitty-mcp-server.git | [secemp9/kitty-mcp-server](https://github.com/secemp9/kitty-mcp-server) |
+| `computer-use-linux` | github.com/toxicwind/computer-use-linux.git | [agent-sh/computer-use-linux](https://github.com/agent-sh/computer-use-linux) |
 | `muse-cli` | github.com/toxicwind/muse-cli.git | [nikships/muse-cli](https://github.com/nikships/muse-cli) |
-| `pd-mcp-standalone` | github.com/toxicwind/pd-mcp.git | [intelligent-ears/pd-tools-mcp](https://github.com/intelligent-ears/pd-tools-mcp) |
 | `trading-post` | github.com/toxicwind/trading-post.git | [framerslab/agentos](https://github.com/framerslab/agentos) |
-| `wezterm` | github.com/toxicwind/wezterm.git | [wezterm/wezterm](https://github.com/wezterm/wezterm) |
+| `VansRouter` | github.com/toxicwind/VansRouter.git | [Vanszs/VansRouter](https://github.com/Vanszs/VansRouter) |
 | `wezterm-agent-mcp` | github.com/toxicwind/wezterm-agent-mcp.git | [multiagentcognition/wezterm-agent-mcp](https://github.com/multiagentcognition/wezterm-agent-mcp) |
 
 

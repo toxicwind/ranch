@@ -14,6 +14,7 @@ projects:
   - 'mesh/*/moon.yml'
   - 'mesh/*/*/moon.yml'
   - 'forge/*/moon.yml'
+  - 'forge/*/*/moon.yml'
   - 'squawk/*/moon.yml'
   - 'tau/*/moon.yml'
   - 'campfire/*/moon.yml'
