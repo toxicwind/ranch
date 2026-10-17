@@ -370,6 +370,6 @@
 [submodule "mcp-dropin-guide"]
 	path = mcp-dropin-guide
 	url = https://github.com/toxicwind/mcp-dropin-guide.git
-[submodule "two-sec"]
-	path = two-sec
-	url = https://github.com/toxicwind/two-sec.git
+[submodule "kairos"]
+	path = kairos
+	url = https://github.com/toxicwind/kairos.git
