@@ -7,7 +7,7 @@ Broad GitHub search (5 queries: "contract net protocol multi agent", "auction ta
 ### 1. auction-agent11 -- wushuchris/11-distributed-auction-task-allocation-agent (MIT)
 **What:** Complete distributed typed-auction task allocator. Peers decide BID or ABSTAIN; deterministic scoring: 45% capability + 25% confidence + 20% availability + 10% cost efficiency; deterministic tie-breaks (score, capability, cost, lexical agent_id). Bounded reauction lifecycle: ANNOUNCED -> BIDDING -> AWARDED -> IN_PROGRESS -> COMPLETED / FAILED -> REAUCTIONING -> BIDDING -> COMPLETED/ESCALATED. Append-only protocol events; 150 tests; py3.11.
 **Layout:** `src/auction_coordination/`: auction.py (auctioneer/scoring), bidding.py (BidAction, PeerBidSettings), models.py (Bid/BidAbstention/TaskAnnouncement), registry.py (PeerRegistry -- capability authority), settlement.py, reauction.py, runtime.py, evaluation.py; `tests/`: 18 test files.
-**Reusable:** the whole core -- auctioneer, bidder-side policy, settlement, reauction, audit events. Closest shape to our bid-market (auctioneer + bidders + deterministic winner + audit).
+**Reusable:** the whole core -- auctioneer, bidder-side policy, settlement, reauction, audit events. Closest shape to our gavel (auctioneer + bidders + deterministic winner + audit).
 **Invoke:** `python3 -c "import sys; sys.path.insert(0, 'vendor/auction-agent11/src'); import auction_coordination"`; `pytest` in repo root.
 **Caveat:** assumes shared deterministic utility policy; no Byzantine/malicious-bid handling by design.
 

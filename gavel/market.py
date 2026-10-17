@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""market.py -- shared market/v1 wire client for the squawk bid-market.
+"""market.py -- shared market/v1 wire client for the squawk gavel.
 
 Implements the frozen wire (WIRE.md, t2-architect fleet seq 10091):
 public channel 'market'; standard squawk frontmatter; body = human header +
@@ -17,7 +17,7 @@ from pathlib import Path
 
 WIRE_MARKER = "market/v1"
 CHANNEL = "market"
-BASE = Path("/home/toxic/estate/killer-features/bid-market")
+BASE = Path("/home/toxic/estate/killer-features/gavel")
 
 CHAT_CODE = Path(os.environ.get(
     "SQUAWK_CODE_DIR", "/home/toxic/estate/hatch/agents/ember/chat"))

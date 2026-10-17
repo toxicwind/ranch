@@ -414,3 +414,12 @@
 [submodule "corral"]
 	url = https://github.com/toxicwind/corral.git
 	path = barn/corral
+[submodule "furlong"]
+	path = furlong
+	url = https://github.com/toxicwind/furlong.git
+[submodule "gavel"]
+	path = gavel
+	url = https://github.com/toxicwind/gavel.git
+[submodule "duel"]
+	path = duel
+	url = https://github.com/toxicwind/duel.git

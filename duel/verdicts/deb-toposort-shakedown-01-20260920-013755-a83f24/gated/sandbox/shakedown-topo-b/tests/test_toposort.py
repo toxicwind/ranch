@@ -1,4 +1,4 @@
-"""Hidden acceptance tests for toposort-shakedown-01 (debate-oracle e2e gate).
+"""Hidden acceptance tests for toposort-shakedown-01 (duel e2e gate).
 Debaters never saw these. Derived from tasks/shakedown-toposort/task.json spec.
 """
 import itertools

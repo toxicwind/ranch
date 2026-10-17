@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Oracle judge runner — debate-oracle code selector (t3-impl-oracle).
+"""Oracle judge runner — duel code selector (t3-impl-oracle).
 
 Reads a debate brief (INTERFACE.md), renders the versioned judge prompt,
 judges via a staggered model race with fail-fast ceilings, runs a

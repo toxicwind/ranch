@@ -22,15 +22,15 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-BIDMARKET = HERE.parent  # killer-features/bid-market
-sys.path.insert(0, str(BIDMARKET))
+GAVEL = HERE.parent  # killer-features/gavel
+sys.path.insert(0, str(GAVEL))
 sys.path.insert(0, str(HERE))
 
 import signpost  # noqa: E402
 import tasks as task_defs  # noqa: E402
 from executor import SOLUTIONS  # noqa: E402
 
-CHANNEL = "bid-market"
+CHANNEL = "gavel"
 AUCTIONEER_ID = "auctioneer-e2e"
 BID_WINDOW_S = 8.0
 RESULT_TIMEOUT_S = 150.0
@@ -129,7 +129,7 @@ def post_task(task, workdir, task_id):
     signpost.ensure_key(AUCTIONEER_ID)
     seq, _ = signpost.post(CHANNEL, AUCTIONEER_ID, "task_post", spec,
                            task_id=task_id,
-                           title="task-%s" % task_id, status="bid-market")
+                           title="task-%s" % task_id, status="gavel")
     return spec, seq
 
 
@@ -150,7 +150,7 @@ def post_assign(task_id, winner):
             "winning_confidence": winner["confidence"],
             "posted_ts": time.time()}
     signpost.post(CHANNEL, AUCTIONEER_ID, "assign", spec, task_id=task_id,
-                  title="assign-%s" % task_id, status="bid-market")
+                  title="assign-%s" % task_id, status="gavel")
     return spec
 
 

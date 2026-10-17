@@ -5,7 +5,7 @@
   "stdlib only: no third-party imports in the solution",
   "additive-only: debaters must not modify tests or harness",
   "no network or filesystem access in the solution",
-  "cell-disposable: debate artifacts stay under debate-oracle/runs/"
+  "cell-disposable: debate artifacts stay under duel/runs/"
  ],
  "measured_failure": "Candidate implementations must report REAL directed cycles (first node repeated at the end, every consecutive pair an actual edge) and return the lexicographically smallest valid order. Naive DFS finish orderings and stub cycle reports fail the hidden acceptance tests.",
  "candidates": [

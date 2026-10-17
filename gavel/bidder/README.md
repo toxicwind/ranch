@@ -1,6 +1,6 @@
 # bidder/ — market/v1 bidder agent
 
-Event-driven bidder daemon for the squawk bid-market: watches the market channel, bids on tasks it can do, executes what it wins, and reports honest results. Speaks the frozen **market/v1 wire** (WIRE.md): public channel `market`, YAML body behind the `market/v1` marker, HMAC-signed BID/RESULT/HEARTBEAT.
+Event-driven bidder daemon for the squawk gavel: watches the market channel, bids on tasks it can do, executes what it wins, and reports honest results. Speaks the frozen **market/v1 wire** (WIRE.md): public channel `market`, YAML body behind the `market/v1` marker, HMAC-signed BID/RESULT/HEARTBEAT.
 
 <div align="right">
 
@@ -49,7 +49,7 @@ flowchart LR
 ## Quick start
 
 ```bash
-cd /home/toxic/estate/killer-features/bid-market
+cd /home/toxic/estate/killer-features/gavel
 for p in flash mule specialist; do
   nohup python3 bidder/bidder.py --profile $p > bidder/var/bidder-$p.log 2>&1 &
 done

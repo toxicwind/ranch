@@ -1,4 +1,4 @@
-# debate-oracle — oracle judge (t3-impl-oracle)
+# duel — oracle judge (t3-impl-oracle)
 
 The oracle judge picks the winning code candidate from a debate, then a
 MANDATORY e2e gate crowns only what passes the real acceptance tests.

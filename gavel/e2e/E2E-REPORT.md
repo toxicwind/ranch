@@ -2,7 +2,7 @@
 
 **Batch:** e2e1 | **16 tasks** (4 shell-text, 4 shell-file, 4 python-compute, 4 python-data)
 **Market pool:** 5 real `bidder.py` processes — bidder-flash, bidder-flash-2, bidder-mule, bidder-specialist, bidder-specialist-2
-**Protocol:** PROTOCOL.md v0 (HMAC-signed squawk messages, channel `bid-market`)
+**Protocol:** PROTOCOL.md v0 (HMAC-signed squawk messages, channel `gavel`)
 **Auctioneer:** e2e test-harness driver implementing the protocol's bid window (8s) + deterministic tie-break (highest confidence → lowest eta → lexicographic bidder_id). Retires when t2-impl-auctioneer lands.
 **Date:** 2026-09-20 | **Tester:** t2-e2e (ember)
 

@@ -12,7 +12,7 @@ rule 10, and an eloquent-but-empty defense of C2 to test verbosity bias.
 Ground truth is MEASURED: each candidate is run against the real hidden
 tests (tasks/token-bucket/tests/) in a sandbox before judging.
 
-Usage: python3 audit/audit_v1.py   (runs on yote, from debate-oracle root)
+Usage: python3 audit/audit_v1.py   (runs on yote, from duel root)
 Writes: audit/work/brief-token-bucket.json, audit/FINDINGS-v1.md
 """
 import json, os, re, shutil, subprocess, sys

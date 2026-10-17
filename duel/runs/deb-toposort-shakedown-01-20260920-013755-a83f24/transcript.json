@@ -1,6 +1,6 @@
 {
  "debate_id": "deb-toposort-shakedown-01-20260920-013755-a83f24",
- "protocol": "debate-oracle/v1",
+ "protocol": "duel/v1",
  "task_id": "toposort-shakedown-01",
  "task": {
   "spec": "# Task: toposort\n\nImplement **topological ordering with cycle detection** in a single file named `toposort.py`.\n\n## API\n\n```python\nclass CycleError(Exception):\n    def __init__(self, cycle): ...   # cycle: list of nodes forming the cycle\n\ndef topological_order(nodes, edges) -> list: ...\n```\n\n- `nodes`: iterable of hashable nodes.\n- `edges`: iterable of `(u, v)` tuples meaning **u comes before v**.\n- Returns a list containing every node exactly once, in an order where every edge\n  `(u, v)` has `u` positioned before `v`.\n- **Determinism:** when several valid orders exist, return the lexicographically\n  smallest one, comparing nodes by their `repr()`.\n- If the graph has a cycle, raise `CycleError` whose `.cycle` attribute is a list of\n  nodes forming a directed cycle, with the first node repeated at the end\n  (e.g. `[a, b, c, a]`). A self-loop `(u, u)` is a cycle `[u, u]`.\n- An edge referencing a node not present in `nodes` raises `ValueError`.\n- Duplicate edges are ignored. Empty input returns `[]`.\n\nOnly the Python standard library may be used.\n\n(The hidden acceptance tests check: basic ordering, determinism tiebreaks,\ndisconnected/empty input, duplicate edges, ValueError on unknown nodes,\nself-loop cycle shape, REAL cycle reporting where every consecutive pair is an\nactual edge, and brute-force lexicographic minimality on random small graphs.)\n",
@@ -8,7 +8,7 @@
    "stdlib only: no third-party imports in the solution",
    "additive-only: debaters must not modify tests or harness",
    "no network or filesystem access in the solution",
-   "cell-disposable: debate artifacts stay under debate-oracle/runs/"
+   "cell-disposable: debate artifacts stay under duel/runs/"
   ],
   "measured_failure": "Candidate implementations must report REAL directed cycles (first node repeated at the end, every consecutive pair an actual edge) and return the lexicographically smallest valid order. Naive DFS finish orderings and stub cycle reports fail the hidden acceptance tests.",
   "e2e_failure_notes": null,

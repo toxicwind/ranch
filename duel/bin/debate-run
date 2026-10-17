@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""bin/debate-run -- HFT debate orchestrator for debate-oracle-code-selector.
+"""bin/debate-run -- HFT debate orchestrator for duel-code-selector.
 
 t3-impl-orchestrator. Spawns N debater lanes (one champion-advocate per
 candidate), runs R timed rounds through the estate-scripts router (:25104,
@@ -391,7 +391,7 @@ def main():
     transcript_path = os.path.join(out_dir, "transcript.json")
 
     transcript = {
-        "debate_id": debate_id, "protocol": "debate-oracle/v1",
+        "debate_id": debate_id, "protocol": "duel/v1",
         "task_id": task["task_id"],
         "task": {"spec": task["spec"],
                  "hard_constraints": task["hard_constraints"],
@@ -467,7 +467,7 @@ def main():
     log(f"transcript: {transcript_path}")
     log(f"timings:    {timings_path}")
     # fleet-ready one-liner (post from hatch via squawk CLI)
-    print(f"debate-oracle debate done: task={task['task_id']} id={debate_id} "
+    print(f"duel debate done: task={task['task_id']} id={debate_id} "
           f"rounds={len(transcript['rounds'])} ok={n_ok} cut={n_cut} "
           f"undefended={transcript['undefended'] or 'none'} total_s={total_s}")
     return 0 if transcript["rounds"] else 2

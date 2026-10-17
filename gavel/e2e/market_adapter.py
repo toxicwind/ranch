@@ -1,7 +1,7 @@
-"""Seam between the e2e harness and the REAL squawk bid-marketplace.
+"""Seam between the e2e harness and the REAL squawk gavelplace.
 
 Wired to PROTOCOL.md v0 (msg_type frontmatter + JSON body, HMAC-signed
-via signpost.py, channel `bid-market`). The auction mechanics live in
+via signpost.py, channel `gavel`). The auction mechanics live in
 auctioneer_driver.py (test-harness auctioneer implementing the protocol's
 bid window + deterministic tie-break); when t2-impl-auctioneer lands the
 real auctioneer this module grows a --auctioneer real path.

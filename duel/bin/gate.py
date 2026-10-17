@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""E2E gate finalizer — debate-oracle oracle side (t3-impl-oracle).
+"""E2E gate finalizer — duel oracle side (t3-impl-oracle).
 
 MANDATORY: the oracle's winner MUST pass the task's real acceptance tests
 before being crowned. A judge pick that fails tests is NEVER the answer.

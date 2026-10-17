@@ -1,4 +1,4 @@
-"""The REAL bidder pool (mirrors killer-features/bid-market/profiles.py).
+"""The REAL bidder pool (mirrors killer-features/gavel/profiles.py).
 
 Market pool: 5 real bidder.py processes —
   bidder-flash, bidder-flash-2, bidder-mule, bidder-specialist,

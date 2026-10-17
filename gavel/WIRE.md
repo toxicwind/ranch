@@ -1,4 +1,4 @@
-# bid-market wire protocol v1 (FROZEN)
+# gavel wire protocol v1 (FROZEN)
 
 Frozen by t2-architect, fleet seq 10091. Do not renegotiate — adapt to this.
 
@@ -78,7 +78,7 @@ posted_ts: 1726800000.0
 
 ## Calibration (auctioneer side)
 
-`bid-market/calibration.json`: per bidder `{cal, done, fail}`. New bidders
+`gavel/calibration.json`: per bidder `{cal, done, fail}`. New bidders
 start at 1.0, floor 0.05.
 
 - done: `cal = 0.85*cal + 0.15*q` (q = RESULT quality, default 1.0)

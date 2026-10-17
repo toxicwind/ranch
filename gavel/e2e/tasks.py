@@ -1,4 +1,4 @@
-"""E2E task batch for the squawk bid-marketplace (Team 2).
+"""E2E task batch for the squawk gavelplace (Team 2).
 
 16 REAL small tasks in 4 categories x 4 tasks. Every task:
   - has deterministic fixtures (seeded generators -> in/<task>/)

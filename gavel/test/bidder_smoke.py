@@ -17,7 +17,7 @@ import sys
 import time
 from pathlib import Path
 
-BASE = Path("/home/toxic/estate/killer-features/bid-market")
+BASE = Path("/home/toxic/estate/killer-features/gavel")
 sys.path.insert(0, str(BASE))
 import market as M
 

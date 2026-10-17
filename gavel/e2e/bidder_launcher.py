@@ -31,7 +31,7 @@ def launch(run_dir, log_dir=None):
     for worker_name, profile in real_pool.POOL:
         instance = 2 if worker_name.split("-")[-1] == "2" else 1
         cmd = [sys.executable, BIDDER_PY, "--profile", profile,
-               "--instance", str(instance), "--channel", "bid-market"]
+               "--instance", str(instance), "--channel", "gavel"]
         logf = open(os.path.join(log_dir, "bidder-%s.log" % worker_name), "w")
         procs[worker_name] = subprocess.Popen(
             cmd, stdout=logf, stderr=subprocess.STDOUT)

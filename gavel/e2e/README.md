@@ -1,6 +1,6 @@
-# bid-market e2e harness (T2-E2E)
+# gavel e2e harness (T2-E2E)
 
-End-to-end testing for the squawk bid-marketplace. **E2E-REAL: no mocks.** Real bidder.py OS processes, real HMAC-signed squawk messages per PROTOCOL.md v0, real task execution, and independent ground-truth verification of every result.
+End-to-end testing for the squawk gavelplace. **E2E-REAL: no mocks.** Real bidder.py OS processes, real HMAC-signed squawk messages per PROTOCOL.md v0, real task execution, and independent ground-truth verification of every result.
 
 <div align="right">
 
@@ -53,7 +53,7 @@ flowchart LR
 ## Quick start (on yote)
 
 ```bash
-cd /home/toxic/estate/killer-features/bid-market/e2e
+cd /home/toxic/estate/killer-features/gavel/e2e
 python3 run_e2e.py selftest --run-dir /tmp/e2e-selftest
 python3 run_e2e.py market --run-dir /tmp/e2e-market --batch e2e1
 python3 run_e2e.py report --market /tmp/e2e-market/ledger.json \

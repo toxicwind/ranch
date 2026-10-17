@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bidder daemon for the squawk bid-market (market/v1 wire).
+"""Bidder daemon for the squawk gavel (market/v1 wire).
 
 Watches the `market` channel with inotify (event-driven, no polling),
 bids fast on TASK_POST, executes on ASSIGN, posts signed RESULTs.
@@ -10,7 +10,7 @@ Usage:
 
 Each instance gets its own identity: bidder-<profile>[-N], with its own
 HMAC key. Run N concurrently:
-    cd /home/toxic/estate/killer-features/bid-market
+    cd /home/toxic/estate/killer-features/gavel
     for p in flash mule specialist; do
       nohup python3 bidder/bidder.py --profile $p > bidder/var/bidder-$p.log 2>&1 &
     done
