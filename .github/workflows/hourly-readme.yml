@@ -1,0 +1,49 @@
+name: hourly-readme
+
+# Regenerate the ranch README (stats + registered-submodules table) every hour,
+# commit, and push — so the published map never goes stale. Runs audit-forks.ts
+# (the manifest scan) then generate-readme.ts --update (renders README from it).
+# Docs lie; the table IS the current state.
+
+on:
+  schedule:
+    - cron: "0 * * * *" # every hour, on the hour
+  workflow_dispatch: # manual trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hourly-readme
+  cancel-in-progress: true
+
+jobs:
+  regen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # audit walks git remotes/history per component
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Audit (regenerate FORKS-report)
+        run: bun toolkit/audit-forks.ts
+
+      - name: Render README
+        run: bun toolkit/generate-readme.ts --update
+
+      - name: Commit + push if changed
+        run: |
+          git config user.name "ranch-readme-bot"
+          git config user.email "fleet@toxicwind.dev"
+          if [[ -n "$(git status --porcelain README.md FORKS-report.json FORKS-report.md)" ]]; then
+            git add README.md FORKS-report.json FORKS-report.md
+            git commit -m "readme-bot: hourly regen — stats + registered-submodules table"
+            git push
+          else
+            echo "no changes; skip"
+          fi

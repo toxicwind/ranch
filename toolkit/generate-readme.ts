@@ -208,7 +208,8 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
   md += `| Total size | ${stats.totalSizeGB} GB |\n`;
   md += `| Total tracked files | ${stats.totalFiles.toLocaleString()} |\n\n`;
 
-  // ── Registered submodules: the full map from .gitmodules ──
+  // ── Registered submodules: the full map from .gitmodules, enriched with
+  // descriptions from FORKS-report.json (readmeHead first line). ──
   let subRows = "";
   try {
     const gmRaw = readFileSync(join(RANCH_ROOT, ".gitmodules"), "utf8");
@@ -223,14 +224,25 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
       if (u && cur) cur.url = u[1].trim();
     }
     if (cur) entries.push(cur);
+
+    // Description lookup: from the report's readmeHead (first meaningful line).
+    const descOf = (p: string): string => {
+      const info = (data.infos as any[]).find((i) => i.name === p);
+      if (!info?.readmeHead) return "";
+      const lines = info.readmeHead.split("\n").map((l: string) => l.trim());
+      const first = lines.find((l: string) => l.length > 20 && !l.startsWith("#") && !l.startsWith("!") && !l.startsWith("[") && !l.startsWith("<") && !l.startsWith("|"));
+      return (first ?? "").slice(0, 110).replace(/\|/g, "\\|");
+    };
+
     const sorted = entries.filter((e) => e.path).sort((a, b) => a.path.localeCompare(b.path));
     for (const e of sorted) {
       const disp = e.url.replace(/^https?:\/\/(www\.)?github\.com\//, "").replace(/\.git$/, "");
-      subRows += `| \`${e.path}\` | [${disp}](${e.url}) |\n`;
+      const desc = descOf(e.path);
+      subRows += `| \`${e.path}\` | [${disp}](${e.url}) |${desc ? " " + desc + " |" : " — |"}\n`;
     }
     md += `## 🗂️ Registered Submodules (${sorted.length})\n\n`;
-    md += `The full map — every animal's pen. From \`.gitmodules\`; regenerate with the README.\n\n`;
-    md += `| Path | Repo |\n|---|---|\n`;
+    md += `The full map — every animal's pen, with its repo and description (from README heads). From \`.gitmodules\` + \`FORKS-report.json\`; regenerate with the README.\n\n`;
+    md += `| Path | Repo | Description |\n|---|---|---|\n`;
     md += subRows + "\n";
   } catch {
     md += `## 🗂️ Registered Submodules\n\n*(.gitmodules not readable)*\n\n`;
