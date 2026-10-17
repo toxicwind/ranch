@@ -260,13 +260,6 @@
 [submodule "extensions/drover"]
 	path = extensions/drover
 	url = https://github.com/toxicwind/drover.git
-[submodule "kilo-code"]
-	path = vendor/kilo-code
-	url = https://github.com/toxicwind/kilo-code.git
-[submodule "kilo-cli"]
-	path = vendor/kilo-cli
-	url = https://github.com/toxicwind/kilo-cli.git
-
 [submodule "tailnet-doctor"]
 	path = vendor/tailnet-doctor
 	url = https://github.com/toxicwind/tailnet-doctor.git
