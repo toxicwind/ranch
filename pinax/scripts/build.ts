@@ -98,6 +98,15 @@ const installed = buildInstalledTauYaml(
   },
   installedEnv,
 );
-await Bun.write("/home/toxic/.tau/models.yml", installed);
-await Bun.write("/home/toxic/estate/config/tau/models.yml", installed);
+// Estate live-sync: best-effort only. On CI (or any box without the
+// estate paths) the parent dirs don't exist and Bun.write would throw
+// ENOENT — the build must not fail for that. The generated/ artifacts
+// (checked in) are the CI contract; these two writes are the live-box sync.
+for (const p of ["/home/toxic/.tau/models.yml", "/home/toxic/estate/config/tau/models.yml"]) {
+  try {
+    await Bun.write(p, installed);
+  } catch (e) {
+    console.warn("skip estate sync to " + p + ": " + (e as Error).message);
+  }
+}
 console.log("synced installed slice to ~/.tau/models.yml and estate/config/tau/models.yml");
