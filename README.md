@@ -10,7 +10,7 @@
 
 # 🤠 ranch
 
-**The whole self-hosted AI estate in one monorepo.** Local model serving (**herd**), cloud provider routing (**flock**), the canonical router (**cuttinggate**), the coding agent (**tau**), the MCP gateway (**gatehouse**), the build-job system (**flicker**), fleet chat (**squawk**), and the provider catalog (**roost**) they all share — one directory per component, the full mesh on one box, everything OpenAI-compatible.
+**The whole self-hosted AI estate in one monorepo.** Local model serving (**herd**), cloud provider routing (**hodos**), the canonical router (**cuttinggate**), the coding agent (**tau**), the MCP gateway (**gatehouse**), the build-job system (**forge**), fleet chat (**squawk**), and the provider catalog (**roost**) they all share — one directory per component, the full mesh on one box, everything OpenAI-compatible.
 
 [Explore the docs »](docs/) · [Report Bug](https://github.com/toxicwind/ranch/issues/new?labels=bug&template=bug_report.md) · [Request Feature](https://github.com/toxicwind/ranch/issues/new?labels=enhancement&template=feature_request.md)
 
@@ -48,33 +48,32 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 
 ### The agent this estate serves
 
-**tau** is the coding agent — a terminal coding agent (fork of [oh-my-pi](https://github.com/can1357/oh-my-pi)) with an interactive CLI + SDK, 30+ tools, subagents, LSP-aware editing, and a native Rust hot path. It speaks to dozens of providers through a compiled model catalog sourced from **roost**, the ranch's single provider-data authority. Tau lives in its own repo ([toxicwind/tau](https://github.com/toxicwind/tau)) and nests into the ranch at `tau/` (gitignored — an independent repo with its own remote, absent in a fresh clone); on a live estate, **chute** exposes its stdio ACP engine as a TCP daemon on `:25111`, and its model traffic flows through herd and flock. If you only learn one animal, learn tau — the rest of the ranch exists so the agent can work.
+**tau** is the coding agent — a terminal coding agent (fork of [oh-my-pi](https://github.com/can1357/oh-my-pi)) with an interactive CLI + SDK, 30+ tools, subagents, LSP-aware editing, and a native Rust hot path. It speaks to dozens of providers through a compiled model catalog sourced from **roost**, the ranch's single provider-data authority. Tau lives in its own repo ([toxicwind/tau](https://github.com/toxicwind/tau)) and nests into the ranch at `tau/` (gitignored — an independent repo with its own remote, absent in a fresh clone); on a live estate, **chute** exposes its stdio ACP engine as a TCP daemon on `:25111`, and its model traffic flows through herd and hodos. If you only learn one animal, learn tau — the rest of the ranch exists so the agent can work.
 
 ## 🛠️ Built with
-
-- [Go](https://go.dev) — herd (local front door), flicker (build jobs), gatehouse (MCP gateway)
-- [Rust](https://www.rust-lang.org) — flock proxy (provider router), rig (OpenFang kernel), tau's native hot path
+- [Go](https://go.dev) — herd (local front door), forge (build jobs), gatehouse (MCP gateway)
+- [Rust](https://www.rust-lang.org) — hodos (provider router), rig (OpenFang kernel), tau's native hot path
 - [Bun](https://bun.sh) + [TypeScript](https://www.typescriptlang.org) — workspaces, cuttinggate, fleet-ui, windmill, stream-broker, roost, tau's agent brain
 - [Python](https://www.python.org) — squawk (fleet chat), squawk-ws, lasso (desktop control)
 - [mise](https://mise.jdx.dev) — toolchains and build tasks; estate owns the shared build cache
 - **pitchfork** — the daemon supervisor: supervised services on the live estate
 
-## 📊 Monorepo Statistics (generated 10/16/2026, 9:51:10 PM)
+## 📊 Monorepo Statistics (generated 10/16/2026, 11:01:21 PM)
 
 | Metric | Value |
 |---|---|
-| Total directories | 223 |
-| Directories with obvious upstream | 71 / 223 (31.8%) |
-| Git-tracked directories | 71 |
-| Submodules | 63 |
-| Total size | 71.03 GB |
-| Total tracked files | 585,080 |
+| Total directories | 243 |
+| Directories with obvious upstream | 84 / 243 (34.6%) |
+| Git-tracked directories | 83 |
+| Submodules | 76 |
+| Total size | 322.56 GB |
+| Total tracked files | 645,130 |
 
 ## 🔭 Upstream Sources
 
 | Source | Count |
 |---|---|
-| .gitmodules | 63 |
+| .gitmodules | 76 |
 | package.json repository | 5 |
 | README 'Forked from' | 1 |
 | git remote upstream | 1 |
@@ -84,56 +83,56 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 
 | Language | Files |
 |---|---|
-| TypeScript | 22,631 |
-| Markdown | 4,932 |
-| Rust | 4,149 |
-| SVG | 3,960 |
-| JavaScript | 3,526 |
-| JSON | 3,108 |
-| Python | 2,849 |
+| TypeScript | 27,953 |
+| Markdown | 5,672 |
+| Rust | 4,943 |
+| SVG | 3,967 |
+| JavaScript | 3,578 |
+| JSON | 3,460 |
+| Python | 3,120 |
 | Go | 1,947 |
-| TSX | 1,798 |
+| TSX | 1,916 |
 | MAP | 1,586 |
-| PNG | 1,300 |
-| PYC | 1,203 |
+| PNG | 1,333 |
+| PYC | 1,272 |
 | QML | 1,158 |
 | Kotlin | 1,081 |
-| Shell | 762 |
-| TOML | 723 |
+| TOML | 911 |
+| Shell | 790 |
+| Text | 782 |
 | C++ | 685 |
-| Text | 644 |
+| KDL | 673 |
 | CU | 564 |
-| KDL | 451 |
 
 ## 📦 Top 10 Largest Directories
 
 | Directory | Size | Files | Upstream |
 |---|---|---|---|
-| `mesh` | 17590.0 MB | 168,116 | — |
+| `models` | 139697.9 MB | 101 | — |
+| `vendored` | 97064.4 MB | 2,460,398 | — |
+| `hatch` | 18287.6 MB | 187,002 | github.com/toxicwind/hatch |
+| `mesh` | 11526.0 MB | 132,127 | — |
 | `tau` | 9895.6 MB | 126,228 | github.com/can1357/oh-my-pi |
 | `qed` | 8179.6 MB | 56,807 | — |
-| `kilo` | 7557.7 MB | 163,648 | — |
-| `shell` | 4585.5 MB | 14,953 | — |
+| `kilo` | 7557.7 MB | 163,651 | — |
+| `forge` | 6131.7 MB | 38,467 | — |
+| `shell` | 4589.4 MB | 14,953 | — |
 | `rust-algo-web` | 3626.3 MB | 11,657 | — |
-| `nim-repos` | 2726.9 MB | 63,529 | — |
-| `barn` | 2514.3 MB | 12,963 | — |
-| `github-search` | 2159.6 MB | 45,093 | — |
-| `trading-post` | 1664.1 MB | 94,745 | github.com/toxicwind/trading-post |
 
 ## 🔮 Top Upstreams by Fork Count
 
 | Upstream | Forks |
 |---|---|
+| [github.com/toxicwind/rig](https://github.com/toxicwind/rig) | 2 |
 | [github.com/toxicwind/agent-customization-style-guide](https://github.com/toxicwind/agent-customization-style-guide) | 1 |
 | [github.com/toxicwind/agent-dashboard](https://github.com/toxicwind/agent-dashboard) | 1 |
 | [github.com/aparnaa19/AgentForensics](https://github.com/aparnaa19/AgentForensics) | 1 |
+| [github.com/toxicwind/agon](https://github.com/toxicwind/agon) | 1 |
 | [github.com/toxicwind/ai-merge-resolve](https://github.com/toxicwind/ai-merge-resolve) | 1 |
+| [github.com/toxicwind/antilogos](https://github.com/toxicwind/antilogos) | 1 |
 | [github.com/toxicwind/awesome-free-ai-coding](https://github.com/toxicwind/awesome-free-ai-coding) | 1 |
 | [github.com/toxicwind/computer-use-linux](https://github.com/toxicwind/computer-use-linux) | 1 |
 | [github.com/toxicwind/corral](https://github.com/toxicwind/corral.git) | 1 |
-| [github.com/toxicwind/doorbell](https://github.com/toxicwind/doorbell) | 1 |
-| [github.com/A-man-Sharma-04/modelpilot](https://github.com/A-man-Sharma-04/modelpilot) | 1 |
-| [github.com/toxicwind/dualspace-ast-bm25-hybrid](https://github.com/toxicwind/dualspace-ast-bm25-hybrid) | 1 |
 
 ## 🔲 Similarity Clusters (README-based)
 
@@ -141,33 +140,33 @@ Directories with similar README content (Jaccard on first 500 chars):
 
 | Dir A | Dir B | Similarity |
 |---|---|---|
+| `rig` | `rig-ciwatch` | 100.0% |
+| `tau` | `tau-verify` | 100.0% |
+| `agon` | `antilogos` | 66.7% |
 | `estate-hatch-toolkit` | `pearlctl` | 60.6% |
 | `agent-customization-style-guide` | `mcp-dropin-guide` | 57.1% |
+| `agon` | `gavel` | 54.5% |
+| `antilogos` | `gavel` | 54.5% |
 | `estate-shell` | `kairos` | 45.1% |
 | `kairos` | `tok` | 41.1% |
-| `estate-shell` | `tok` | 40.0% |
-| `OmniRoute` | `VansRouter` | 37.7% |
-| `repo-first-class` | `squawk` | 35.4% |
-| `outlier-toolkit` | `refusal-hunt` | 35.1% |
-| `strudel-dev-vite` | `strudel-sampler-server-vite` | 34.9% |
-| `ferret-den` | `squawk` | 34.6% |
+| `agon` | `estate-shell` | 40.4% |
 
 ## 📁 Directory Type Breakdown
 
 | Type | Count |
 |---|---|
-| Submodule | 63 |
-| Fork (ours) | 51 |
-| Upstream mirror | 18 |
+| Submodule | 76 |
+| Fork (ours) | 61 |
+| Upstream mirror | 20 |
 | Fork (ours, no upstream) | 1 |
 | Upstream mirror (no upstream) | 2 |
-| Vendored (snapshot) | 64 |
-| Experimental | 57 |
-| Stub/Empty | 31 |
+| Vendored (snapshot) | 69 |
+| Experimental | 61 |
+| Stub/Empty | 30 |
 
 ---
 
-*Generated by `bun toolkit/generate-readme.ts` at 2026-10-17T03:51:10.064Z*
+*Generated by `bun toolkit/generate-readme.ts` at 2026-10-17T05:01:21.606Z*
 
 ---
 
