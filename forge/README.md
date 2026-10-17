@@ -7,7 +7,7 @@ Public emergent builder for the estate.
 | Piece | Where | Port |
 |-------|-------|------|
 | NativeLink (REAPI) | barn/nativelink | :25155 / :25157 |
-| forge build daemon (flicker-server binary) | pitchfork estate/forge + estate/forge-agent | :25148 HTTP / :25240 gRPC |
+| forge build daemon (forge-server binary) | pitchfork estate/forge + estate/forge-agent | :25148 HTTP / :25240 gRPC |
 | pattern-borrow | scripts/pattern-borrow.ts | - |
 | emergent (research) | emergent/ | - |
 
