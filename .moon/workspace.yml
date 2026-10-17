@@ -24,20 +24,6 @@ vcs:
   provider: 'github'
   defaultBranch: 'main'
 
-workspace:
-  # Tag all component roots as 'ranch' for cross-cutting queries.
-  tags:
-    - 'ranch'
-    - 'component'
-  # Enable extension / toolchain sync so moon provisions correctly.
-  syncToolchainConfig: true
-
 pipeline:
   cacheLifetime: '7 days'
   installDependencies: true
-  # Rerun affected tasks + dependents across the whole component graph.
-  retryCount: 2
-
-constraints:
-  enforceProjectTypeRelationships: false
-  enforceProjectDependencyRelationships: false
