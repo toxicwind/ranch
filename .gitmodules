@@ -423,3 +423,21 @@
 [submodule "antilogos"]
 	path = antilogos
 	url = https://github.com/toxicwind/antilogos.git
+[submodule "kite.kite-cli"]
+	path = kite/kite-cli
+	url = https://github.com/toxicwind/kite-cli.git
+[submodule "rig-ciwatch"]
+	path = rig-ciwatch
+	url = https://github.com/toxicwind/rig.git
+[submodule "tau-verify"]
+	path = tau-verify
+	url = https://github.com/toxicwind/tau.git
+[submodule "mcp.mcpproxy-go"]
+	path = mcp/mcpproxy-go
+	url = https://github.com/toxicwind/mcpproxy-go.git
+[submodule "nuvio"]
+	path = nuvio
+	url = https://github.com/toxicwind/nuvio.git
+[submodule "phone-sentinel"]
+	path = phone-sentinel
+	url = https://github.com/toxicwind/phone-sentinel.git
