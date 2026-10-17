@@ -540,6 +540,21 @@ var ProviderCatalogDefs = []CatalogProviderDef{
 		Enabled:        true,
 	},
 	{
+		Name:           "google",
+		BaseURL:        "http://127.0.0.1:25109/gemini-eap-interactions",
+		KeyEnv:         "",
+		KeyEnvAlt:      "",
+		Adapter:        "static",
+		Auth:           "none",
+		HeaderName:     "",
+		QueryParam:     "",
+		ModelsPath:     "",
+		NoModelsReason: "",
+		NoAuth:         true,
+		RouterLocal:    false,
+		Enabled:        true,
+	},
+	{
 		Name:           "github",
 		BaseURL:        "https://models.github.ai/inference",
 		KeyEnv:         "GITHUB_TOKEN",
@@ -1204,6 +1219,7 @@ var ProviderCatalogSeeds = map[string][]string{
 		"poolside/laguna-xs-2.1",
 		"z-ai/glm-5.3-flash",
 	},
+	"google": []string{},
 	"github": []string{
 		"google/diffusiongemma-26b-a4b-it",
 		"meta/llama-3.2-11b-vision-instruct",
@@ -1377,10 +1393,28 @@ var ProviderCatalogStaticModels = map[string][]string{
 	"kimi-auto": []string{
 		"kimi-auto",
 	},
+	"google": []string{
+		"models/gemini-flash-tool-retrieval",
+		"models/gemini-3.8-flash",
+		"models/gemini-3.7-flash",
+		"models/gemini-3.6-flash",
+		"models/gemini-3.5-flash",
+		"models/gemini-3.1-pro-preview",
+		"models/gemini-3-flash-preview",
+		"models/gemini-2.5-flash",
+	},
 }
 
 // ProviderCatalogAliases: friendly alias -> [provider, model] (UX layer).
 var ProviderCatalogAliases = map[string][2]string{
+	"gemini-2.5-flash":      {"google", "models/gemini-2.5-flash"},
+	"gemini-3-flash":        {"google", "models/gemini-3-flash-preview"},
+	"gemini-3.1-pro":        {"google", "models/gemini-3.1-pro-preview"},
+	"gemini-3.5-flash":      {"google", "models/gemini-3.5-flash"},
+	"gemini-3.6-flash":      {"google", "models/gemini-3.6-flash"},
+	"gemini-3.7-flash":      {"google", "models/gemini-3.7-flash"},
+	"gemini-3.8-flash":      {"google", "models/gemini-3.8-flash"},
+	"gemini-eap":            {"google", "models/gemini-flash-tool-retrieval"},
 	"groq-gpt-oss-120b":     {"groq", "openai/gpt-oss-120b"},
 	"groq-gpt-oss-20b":      {"groq", "openai/gpt-oss-20b"},
 	"groq-llama-3.3-70b":    {"groq", "llama-3.3-70b-versatile"},

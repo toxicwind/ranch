@@ -938,6 +938,42 @@ export const PROVIDER_DEFS: ProviderDef[] = [
     },
   },
   {
+    name: "google",
+    displayName: "Google (EAP interactions)",
+    // keypool injects one of the six gen-lang-client-0111199472 EAP keys per
+    // request and rewrites OpenAI bodies onto the Interactions API, so there is
+    // no client credential and no /models endpoint to read. auth "none" +
+    // staticModels is the honest shape; the previous keyEnv: GOOGLE_API_KEY
+    // named a secret that no longer exists and 401'd every request.
+    // Restored 2026-10-16: cut by accident in 63689c5; the flock overlay's
+    // EAP entry (and :25109 keypool sidecar) still depend on it.
+    baseUrl: "http://127.0.0.1:25109/gemini-eap-interactions",
+    keyEnv: "",
+    auth: "none",
+    adapter: "static",
+    staticModels: [
+      "models/gemini-flash-tool-retrieval",
+      "models/gemini-3.8-flash",
+      "models/gemini-3.7-flash",
+      "models/gemini-3.6-flash",
+      "models/gemini-3.5-flash",
+      "models/gemini-3.1-pro-preview",
+      "models/gemini-3-flash-preview",
+      "models/gemini-2.5-flash",
+    ],
+    seeds: [],
+    contextLengths: {
+      "models/gemini-flash-tool-retrieval": 1000000,
+      "models/gemini-3.8-flash": 1000000,
+      "models/gemini-3.7-flash": 1000000,
+      "models/gemini-3.6-flash": 1000000,
+      "models/gemini-3.5-flash": 1000000,
+      "models/gemini-3.1-pro-preview": 1000000,
+      "models/gemini-3-flash-preview": 1000000,
+      "models/gemini-2.5-flash": 1000000,
+    },
+  },
+  {
     name: "github",
     displayName: "GitHub Models",
     // 2026-10-02: models.inference.ai.azure.com is DNS-dead; GitHub Models moved to models.github.ai.
@@ -1242,6 +1278,17 @@ export const MODEL_ALIASES: Record<string, ModelAlias> = {
   "nim-gemma4-31b": ["nvidia", "google/gemma-4-31b-it"],
   "nim-glm5.2": ["nvidia", "z-ai/glm-5.2"],
   "nim-inkling": ["nvidia", "thinkingmachines/inkling"],
+  // google routes to the EAP interactions pool; gemini-2.0-flash,
+  // gemini-2.5-flash-lite and gemma-4-31b-it are NOT in that project's model
+  // list (verified 2026-10-02 against GET /v1beta/models) and were dropped.
+  "gemini-eap": ["google", "models/gemini-flash-tool-retrieval"],
+  "gemini-3.8-flash": ["google", "models/gemini-3.8-flash"],
+  "gemini-3.7-flash": ["google", "models/gemini-3.7-flash"],
+  "gemini-3.6-flash": ["google", "models/gemini-3.6-flash"],
+  "gemini-3.5-flash": ["google", "models/gemini-3.5-flash"],
+  "gemini-3.1-pro": ["google", "models/gemini-3.1-pro-preview"],
+  "gemini-3-flash": ["google", "models/gemini-3-flash-preview"],
+  "gemini-2.5-flash": ["google", "models/gemini-2.5-flash"],
   "groq-llama-3.3-70b": ["groq", "llama-3.3-70b-versatile"],
   "groq-qwen3-32b": ["groq", "qwen/qwen3-32b"],
   "groq-qwen3.6-27b": ["groq", "qwen/qwen3.6-27b"],

@@ -624,6 +624,23 @@ pub const ROOST_PROVIDERS: &[RoostProvider] = &[
         context_lengths: &[("hyperbolic/llama-3.1-70b", 128000u64)],
     },
     RoostProvider {
+        name: "google",
+        display_name: "Google (EAP interactions)",
+        base_url: "http://127.0.0.1:25109/gemini-eap-interactions",
+        key_env: "",
+        key_env_alt: "",
+        adapter: "static",
+        auth: "none",
+        header_name: "",
+        query_param: "",
+        models_path: "",
+        router_local: false,
+        enabled: true,
+        seeds: &[],
+        static_models: &["models/gemini-flash-tool-retrieval", "models/gemini-3.8-flash", "models/gemini-3.7-flash", "models/gemini-3.6-flash", "models/gemini-3.5-flash", "models/gemini-3.1-pro-preview", "models/gemini-3-flash-preview", "models/gemini-2.5-flash"],
+        context_lengths: &[("models/gemini-2.5-flash", 1000000u64), ("models/gemini-3-flash-preview", 1000000u64), ("models/gemini-3.1-pro-preview", 1000000u64), ("models/gemini-3.5-flash", 1000000u64), ("models/gemini-3.6-flash", 1000000u64), ("models/gemini-3.7-flash", 1000000u64), ("models/gemini-3.8-flash", 1000000u64), ("models/gemini-flash-tool-retrieval", 1000000u64)],
+    },
+    RoostProvider {
         name: "github",
         display_name: "GitHub Models",
         base_url: "https://models.github.ai/inference",
@@ -818,6 +835,14 @@ pub const ROOST_DEAD_IDS: &[&str] = &["llama-3.3-70b-versatile", "meta-llama/lla
 
 /// Friendly alias -> (provider, canonical model id) (UX layer).
 pub const ROOST_ALIASES: &[(&str, &str, &str)] = &[
+    ("gemini-2.5-flash", "google", "models/gemini-2.5-flash"),
+    ("gemini-3-flash", "google", "models/gemini-3-flash-preview"),
+    ("gemini-3.1-pro", "google", "models/gemini-3.1-pro-preview"),
+    ("gemini-3.5-flash", "google", "models/gemini-3.5-flash"),
+    ("gemini-3.6-flash", "google", "models/gemini-3.6-flash"),
+    ("gemini-3.7-flash", "google", "models/gemini-3.7-flash"),
+    ("gemini-3.8-flash", "google", "models/gemini-3.8-flash"),
+    ("gemini-eap", "google", "models/gemini-flash-tool-retrieval"),
     ("groq-gpt-oss-120b", "groq", "openai/gpt-oss-120b"),
     ("groq-gpt-oss-20b", "groq", "openai/gpt-oss-20b"),
     ("groq-llama-3.3-70b", "groq", "llama-3.3-70b-versatile"),

@@ -518,18 +518,9 @@ struct ProviderOverlay {
     model_map: &'static [(&'static str, &'static str)],
 }
 
-/// The 14 providers flock serves, in registry order. `display_name` is the
+/// The 9 providers flock serves, in registry order. `display_name` is the
 /// bare provider name (verbatim from the old hardcoded defaults).
 const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
-    ProviderOverlay {
-        name: "openrouter",
-        elo: 1500,
-        weight: 1.0,
-        free_tier: false,
-        default_rpm: 0,
-        display_name: "openrouter",
-        model_map: &[],
-    },
     ProviderOverlay {
         name: "nvidia",
         elo: 1550,
@@ -567,24 +558,6 @@ const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
         model_map: &[],
     },
     ProviderOverlay {
-        name: "fireworks",
-        elo: 1510,
-        weight: 1.0,
-        free_tier: false,
-        default_rpm: 0,
-        display_name: "fireworks",
-        model_map: &[],
-    },
-    ProviderOverlay {
-        name: "hyperbolic",
-        elo: 1490,
-        weight: 1.0,
-        free_tier: true,
-        default_rpm: 0,
-        display_name: "hyperbolic",
-        model_map: &[],
-    },
-    ProviderOverlay {
         name: "github",
         elo: 1500,
         weight: 1.0,
@@ -594,30 +567,12 @@ const FLOCK_PROVIDER_OVERLAY: &[ProviderOverlay] = &[
         model_map: &[],
     },
     ProviderOverlay {
-        name: "mistral",
-        elo: 1530,
-        weight: 1.0,
-        free_tier: false,
-        default_rpm: 0,
-        display_name: "mistral",
-        model_map: &[],
-    },
-    ProviderOverlay {
         name: "openai",
         elo: 1650,
         weight: 1.0,
         free_tier: false,
         default_rpm: 0,
         display_name: "openai",
-        model_map: &[],
-    },
-    ProviderOverlay {
-        name: "perplexity",
-        elo: 1480,
-        weight: 1.0,
-        free_tier: false,
-        default_rpm: 0,
-        display_name: "perplexity",
         model_map: &[],
     },
     ProviderOverlay {
@@ -847,25 +802,20 @@ mod tests {
     }
 
     #[test]
-    fn fourteen_builtin_providers() {
+    fn nine_builtin_providers() {
         let defs = default_providers();
-        assert_eq!(defs.len(), 14);
+        assert_eq!(defs.len(), 9);
         let names: Vec<&str> = defs.iter().map(|p| p.name.as_str()).collect();
         for expected in [
-            "openrouter",
             "nvidia",
             "groq",
             "together",
             "cerebras",
-            "fireworks",
-            "hyperbolic",
             "github",
-            "mistral",
             "openai",
-            "perplexity",
             "siliconflow",
-            "google",
             "freeinference",
+            "google",
         ] {
             assert!(names.contains(&expected), "missing {expected}");
         }
@@ -945,11 +895,11 @@ mod tests {
         let defs = default_providers();
         let set = ProviderSet::new(defs);
         let c: Vec<&str> = set
-            .candidates("poolside/laguna-xs-2.1:free")
+            .candidates("poolside/laguna-xs-2.1")
             .iter()
             .map(|p| p.name.as_str())
             .collect();
-        assert_eq!(c, vec!["openrouter"]);
+        assert!(c.contains(&"groq"), "groq serves laguna-xs-2.1: {c:?}");
         // No builtin declares "*", so an unlisted model resolves to nobody.
         let c2: Vec<&str> = set
             .candidates("some/unknown-model")
@@ -1023,13 +973,6 @@ mod tests {
         }
 
         // Spot checks on values that changed with the Roost migration.
-        let ls = by_name("herd");
-        assert!(ls.no_auth);
-        assert_eq!(ls.elo, 1600);
-        assert_eq!(
-            ls.models,
-            vec!["local-fast", "local-quality", "local-longctx"]
-        );
         let nv = by_name("nvidia");
         assert_eq!(nv.base_url, "https://integrate.api.nvidia.com/v1");
         assert!(nv.free_tier);
@@ -1043,12 +986,9 @@ mod tests {
             nv.model_map.get("free").map(|s| s.as_str()),
             Some("nvidia/nemotron-3-ultra-550b-a55b")
         );
-        // Roost's nvidia seeds (7, the entitlement-verified working set)
-        // replace the 2 stale hardcoded ones.
-        assert_eq!(nv.models.len(), 7);
-        let mi = by_name("mistral");
-        // Roost authority: no /v1 suffix (the old hardcode was wrong).
-        assert_eq!(mi.base_url, "https://api.mistral.ai");
+        // Roost's nvidia seeds (13 as of 2026-10-16) replace the 2 stale
+        // hardcoded ones.
+        assert_eq!(nv.models.len(), 13);
         let sf = by_name("siliconflow");
         // Roost authority: .com not .cn.
         assert_eq!(sf.base_url, "https://api.siliconflow.com/v1");
@@ -1068,9 +1008,9 @@ mod tests {
     #[test]
     fn roost_providers_copy_in_sync() {
         // mesh/proxy/flock-proxy/src/roost_providers.rs must be byte-identical to
-        // mesh/catalog/generated/providers.rs modulo the Generated-at stamp.
+        // pinax/generated/providers.rs modulo the Generated-at stamp.
         // Regenerate with: bun ../../../flock/scripts/sync-roost-providers.ts --write
-        let generated = include_str!("../../../catalog/generated/providers.rs");
+        let generated = include_str!("../../../../pinax/generated/providers.rs");
         let copy = include_str!("roost_providers.rs");
         fn normalize(s: &str) -> String {
             s.lines()
@@ -1087,7 +1027,7 @@ mod tests {
         assert_eq!(
             normalize(copy),
             normalize(generated),
-            "roost_providers.rs drifted from mesh/catalog/generated/providers.rs"
+            "roost_providers.rs drifted from pinax/generated/providers.rs"
         );
     }
 

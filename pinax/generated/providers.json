@@ -381,6 +381,25 @@
       "auth": "bearer"
     },
     {
+      "name": "google",
+      "displayName": "Google (EAP interactions)",
+      "baseUrl": "http://127.0.0.1:25109/gemini-eap-interactions",
+      "keyEnv": "",
+      "keyEnvs": [],
+      "adapter": "static",
+      "auth": "none",
+      "staticModels": [
+        "models/gemini-flash-tool-retrieval",
+        "models/gemini-3.8-flash",
+        "models/gemini-3.7-flash",
+        "models/gemini-3.6-flash",
+        "models/gemini-3.5-flash",
+        "models/gemini-3.1-pro-preview",
+        "models/gemini-3-flash-preview",
+        "models/gemini-2.5-flash"
+      ]
+    },
+    {
       "name": "github",
       "displayName": "GitHub Models",
       "baseUrl": "https://models.github.ai/inference",
@@ -996,6 +1015,7 @@
       "poolside/laguna-xs-2.1",
       "z-ai/glm-5.3-flash"
     ],
+    "google": [],
     "github": [
       "google/diffusiongemma-26b-a4b-it",
       "meta/llama-3.2-11b-vision-instruct",
@@ -1215,6 +1235,38 @@
     "nim-inkling": [
       "nvidia",
       "thinkingmachines/inkling"
+    ],
+    "gemini-eap": [
+      "google",
+      "models/gemini-flash-tool-retrieval"
+    ],
+    "gemini-3.8-flash": [
+      "google",
+      "models/gemini-3.8-flash"
+    ],
+    "gemini-3.7-flash": [
+      "google",
+      "models/gemini-3.7-flash"
+    ],
+    "gemini-3.6-flash": [
+      "google",
+      "models/gemini-3.6-flash"
+    ],
+    "gemini-3.5-flash": [
+      "google",
+      "models/gemini-3.5-flash"
+    ],
+    "gemini-3.1-pro": [
+      "google",
+      "models/gemini-3.1-pro-preview"
+    ],
+    "gemini-3-flash": [
+      "google",
+      "models/gemini-3-flash-preview"
+    ],
+    "gemini-2.5-flash": [
+      "google",
+      "models/gemini-2.5-flash"
     ],
     "groq-llama-3.3-70b": [
       "groq",

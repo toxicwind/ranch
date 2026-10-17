@@ -215,6 +215,27 @@ providers:
     apiKey: HETZNER_API_KEY
     discovery:
       type: openai-models-list
+  google:
+    baseUrl: http://127.0.0.1:25109/gemini-eap-interactions
+    api: openai-completions
+    auth: none
+    models:
+      - id: models/gemini-flash-tool-retrieval
+        contextWindow: 1000000
+      - id: models/gemini-3.8-flash
+        contextWindow: 1000000
+      - id: models/gemini-3.7-flash
+        contextWindow: 1000000
+      - id: models/gemini-3.6-flash
+        contextWindow: 1000000
+      - id: models/gemini-3.5-flash
+        contextWindow: 1000000
+      - id: models/gemini-3.1-pro-preview
+        contextWindow: 1000000
+      - id: models/gemini-3-flash-preview
+        contextWindow: 1000000
+      - id: models/gemini-2.5-flash
+        contextWindow: 1000000
   github:
     baseUrl: https://models.github.ai/inference
     api: openai-completions
