@@ -15,10 +15,6 @@ task caching, and remote builds all route through forge — one builder that
 wraps [NativeLink (REAPI)](#-what-it-wraps), the woodpecker-CI fork, the
 pattern-borrow engine, and the emergent research layer.
 
-*forge is the public master name.* The internal build daemon was `flicker`;
-**flicker no longer exists** — every binary, daemon, env var, and config line
-now says `forge`. (Renamed 2026-10-13, sweep complete.)
-
 ## 🧩 What it wraps
 
 | Piece | Where | Port | Role |
@@ -51,18 +47,6 @@ estate/forge-agent   running   :25240 gRPC  (forge-agent binary)
 ```
 
 Health: `curl http://127.0.0.1:25148/api/health` → `{"ok":true, ...}`. *(The
-running daemon's internal `service` string still reads `flicker` — the binary
-pre-dates the rename. It will report `forge` after the next build from the
-swept `forge/woodpecker/` source.)*
-
-## 🗡️ The flicker → forge rename
-
-- Daemons: `forge` + `forge-agent` (supervised by pitchfork, live)
-- Fragment: `pitchfork.d/forge.toml` (`FORGE_ROOT`, `forge-server`, `forge-agent`)
-- Source: `forge/woodpecker/` (the woodpecker fork, content swept)
-- Repos: `forge` is the public master name
-
-## Name
-
-forge is the public master name. This directory is the entrypoint people clone
-or follow.
+internal `service` string still reads `flicker` in the running binary; it will
+report `forge` after the next build from the swept `forge/woodpecker/`
+source.)*
