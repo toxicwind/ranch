@@ -59,16 +59,16 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 - [mise](https://mise.jdx.dev) — toolchains and build tasks; estate owns the shared build cache
 - **pitchfork** — the daemon supervisor: supervised services on the live estate
 
-## 📊 Monorepo Statistics (generated 10/17/2026, 12:05:54 AM)
+## 📊 Monorepo Statistics (generated 10/17/2026, 9:05:53 AM)
 
 | Metric | Value |
 |---|---|
-| Total directories | 244 |
-| Directories with obvious upstream | 151 / 244 (61.9%) |
-| Git-tracked directories | 157 |
-| Submodules | 146 |
-| Total size | 322.77 GB |
-| Total tracked files | 987,247 |
+| Total directories | 191 |
+| Directories with obvious upstream | 141 / 191 (73.8%) |
+| Git-tracked directories | 0 |
+| Submodules | 140 |
+| Total size | 0.93 GB |
+| Total tracked files | 0 |
 
 ## 🗂️ Registered Submodules (221)
 
@@ -76,138 +76,138 @@ The full map — every animal's pen, with its repo and description (from README 
 
 | Path | Repo | Description |
 |---|---|---|
-| `agent-customization-style-guide` | [toxicwind/agent-customization-style-guide](https://github.com/toxicwind/agent-customization-style-guide.git) | **A style guide for writing correct AGENTS.md, .prompt.md, .agent.md and .instructions.md files.** |
+| `agent-customization-style-guide` | [toxicwind/agent-customization-style-guide](https://github.com/toxicwind/agent-customization-style-guide.git) | — |
 | `agent-dashboard` | [toxicwind/agent-dashboard](https://github.com/toxicwind/agent-dashboard.git) | — |
-| `AgentForensics` | [aparnaa19/AgentForensics](https://github.com/aparnaa19/AgentForensics.git) | **Real-time prompt injection detection and forensics for LLM agents.** |
+| `AgentForensics` | [aparnaa19/AgentForensics](https://github.com/aparnaa19/AgentForensics.git) | — |
 | `agon` | [toxicwind/agon](https://github.com/toxicwind/agon.git) | — |
 | `ai-merge-resolve` | [toxicwind/ai-merge-resolve](https://github.com/toxicwind/ai-merge-resolve.git) | — |
-| `android-fleet` | [toxicwind/android-fleet](https://github.com/toxicwind/android-fleet.git) | ADB-managed Android devices on the LAN — the Architect's Pixel 9 Pro XL and the bedroom Google TV. (LG webOS T |
+| `android-fleet` | [toxicwind/android-fleet](https://github.com/toxicwind/android-fleet.git) | — |
 | `antilogos` | [toxicwind/antilogos](https://github.com/toxicwind/antilogos.git) | — |
-| `arroyo` | [toxicwind/arroyo](https://github.com/toxicwind/arroyo.git) | Umbrella for overlord · coyote · discord · mcp under ranch. |
+| `arroyo` | [toxicwind/arroyo](https://github.com/toxicwind/arroyo.git) | — |
 | `ast-grep-rules` | [toxicwind/ast-grep-rules](https://github.com/toxicwind/ast-grep-rules.git) | — |
-| `auto1m` | [toxicwind/auto1m](https://github.com/toxicwind/auto1m.git) | No ceiling: an automatic composite that operates over ~1M tokens using the whole model fleet, instead of treat |
+| `auto1m` | [toxicwind/auto1m](https://github.com/toxicwind/auto1m.git) | — |
 | `awesome-free-ai-coding` | [toxicwind/awesome-free-ai-coding](https://github.com/toxicwind/awesome-free-ai-coding.git) | — |
-| `barn` | [toxicwind/barn](https://github.com/toxicwind/barn.git) | Small single-purpose utilities that keep the ranch running. Each sub-component |
+| `barn` | [toxicwind/barn](https://github.com/toxicwind/barn.git) | — |
 | `barn/corral` | [./barn/corral](./barn/corral) | — |
 | `barn/flatbread` | [toxicwind/flatbread](https://github.com/toxicwind/flatbread.git) | — |
 | `barn/nativelink` | [toxicwind/nativelink](https://github.com/toxicwind/nativelink.git) | — |
 | `barn/rosec` | [toxicwind/rosec](https://github.com/toxicwind/rosec.git) | — |
 | `barn/weave` | [toxicwind/weave](https://github.com/toxicwind/weave.git) | — |
 | `barn/weave-sub` | [toxicwind/weave](https://github.com/toxicwind/weave.git) | — |
-| `bench-radar` | [toxicwind/bench-radar](https://github.com/toxicwind/bench-radar.git) | Nobody reads the nightly benchmark log — so this service does, and **pages |
+| `bench-radar` | [toxicwind/bench-radar](https://github.com/toxicwind/bench-radar.git) | — |
 | `borrowed/herdr` | [ogulcancelik/herdr](https://github.com/ogulcancelik/herdr.git) | — |
 | `borrowed/loom` | [rjwalters/loom](https://github.com/rjwalters/loom.git) | — |
-| `bridge` | [toxicwind/bridge](https://github.com/toxicwind/bridge.git) | The bridge is the control plane between **hatch** (this cell) and **yote** (the heavy box). This project holds |
-| `bugbounty` | [toxicwind/bugbounty](https://github.com/toxicwind/bugbounty.git) | Headed Playwright helpers that open the **real paid bounty programs** for |
-| `campfire` | [toxicwind/campfire](https://github.com/toxicwind/campfire.git) | > 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map. |
-| `chronos-forge` | [toxicwind/chronos-forge](https://github.com/toxicwind/chronos-forge.git) | A repo-scoped **Mixture-of-Experts agent backplane** with an endless, |
+| `bridge` | [toxicwind/bridge](https://github.com/toxicwind/bridge.git) | — |
+| `bugbounty` | [toxicwind/bugbounty](https://github.com/toxicwind/bugbounty.git) | — |
+| `campfire` | [toxicwind/campfire](https://github.com/toxicwind/campfire.git) | — |
+| `chronos-forge` | [toxicwind/chronos-forge](https://github.com/toxicwind/chronos-forge.git) | — |
 | `classifier` | [toxicwind/classifier](https://github.com/toxicwind/classifier.git) | — |
-| `classifier-preflight` | [toxicwind/classifier-preflight](https://github.com/toxicwind/classifier-preflight.git) | Internal meta tool: preflight any text that goes into a scheduled task body, |
+| `classifier-preflight` | [toxicwind/classifier-preflight](https://github.com/toxicwind/classifier-preflight.git) | — |
 | `codebase-memory` | [toxicwind/codebase-memory](https://github.com/toxicwind/codebase-memory.git) | — |
 | `computer-use-linux` | [toxicwind/computer-use-linux](https://github.com/toxicwind/computer-use-linux.git) | — |
-| `corral` | [toxicwind/corral](https://github.com/toxicwind/corral.git) | > **Ticket-driven development & speculative merge queue — evolved from super-ralph lineage** |
+| `corral` | [toxicwind/corral](https://github.com/toxicwind/corral.git) | — |
 | `cron-trust` | [toxicwind/cron-trust](https://github.com/toxicwind/cron-trust.git) | — |
 | `dashboard` | [toxicwind/dashboard](https://github.com/toxicwind/dashboard.git) | — |
 | `dedicated/dedicated-server-ops` | [toxicwind/dedi-ops](https://github.com/toxicwind/dedi-ops.git) | — |
-| `didymos` | [toxicwind/didymos](https://github.com/toxicwind/didymos.git) | *First-class Gemini API MCP server for the mesh: a self-healing multi-key pool with round-robin + automatic fa |
+| `didymos` | [toxicwind/didymos](https://github.com/toxicwind/didymos.git) | — |
 | `disparate-latent-experiment` | [toxicwind/disparate-latent-experiment](https://github.com/toxicwind/disparate-latent-experiment.git) | — |
-| `doorbell` | [toxicwind/doorbell](https://github.com/toxicwind/doorbell.git) | HTTP MCP door on port 25202. v7. One initialize returns the router catalog. |
-| `dots-client` | [toxicwind/dots-client](https://github.com/toxicwind/dots-client.git) | Alternate model-call shim for Dots-3-Note (`dots-studio/dots-3-note-preview:free`) |
-| `drover` | [toxicwind/drover](https://github.com/toxicwind/drover.git) | > 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map. |
-| `dualspace-ast-bm25-hybrid` | [toxicwind/dualspace-ast-bm25-hybrid](https://github.com/toxicwind/dualspace-ast-bm25-hybrid.git) | Dual-space code retrieval engine for autonomous coding agents: a regex-based |
+| `doorbell` | [toxicwind/doorbell](https://github.com/toxicwind/doorbell.git) | — |
+| `dots-client` | [toxicwind/dots-client](https://github.com/toxicwind/dots-client.git) | — |
+| `drover` | [toxicwind/drover](https://github.com/toxicwind/drover.git) | — |
+| `dualspace-ast-bm25-hybrid` | [toxicwind/dualspace-ast-bm25-hybrid](https://github.com/toxicwind/dualspace-ast-bm25-hybrid.git) | — |
 | `duel/vendor/argus-ai-debate` | [Argus-Framework/argus-ai-debate](https://github.com/Argus-Framework/argus-ai-debate.git) | — |
 | `duel/vendor/ChatEval` | [thunlp/ChatEval](https://github.com/thunlp/ChatEval.git) | — |
 | `duel/vendor/debate-or-vote` | [deeplearning-wisc/debate-or-vote](https://github.com/deeplearning-wisc/debate-or-vote.git) | — |
 | `duel/vendor/llm_debate` | [ucl-dark/llm_debate](https://github.com/ucl-dark/llm_debate.git) | — |
 | `duet` | [toxicwind/duet](https://github.com/toxicwind/duet.git) | — |
-| `emergent` | [toxicwind/emergent](https://github.com/toxicwind/emergent.git) | One research question in → ranked code patterns out. Built 2026-10-03 (tansy lane). |
-| `estate-chat` | [toxicwind/estate-chat](https://github.com/toxicwind/estate-chat.git) | The fleet's first-class coordination plane on awrawr-pc. Presence, live |
-| `estate-dispersal` | [toxicwind/sovereign-dispersal](https://github.com/toxicwind/sovereign-dispersal.git) | Bun monolith fusing seven overlooked substrates into one deploy-ready proof-of-concept: estate-scripts fs-map, |
+| `emergent` | [toxicwind/emergent](https://github.com/toxicwind/emergent.git) | — |
+| `estate-chat` | [toxicwind/estate-chat](https://github.com/toxicwind/estate-chat.git) | — |
+| `estate-dispersal` | [toxicwind/sovereign-dispersal](https://github.com/toxicwind/sovereign-dispersal.git) | — |
 | `estate-dispersal-monolith` | [toxicwind/estate-dispersal-monolith](https://github.com/toxicwind/estate-dispersal-monolith.git) | — |
-| `estate-end4` | [toxicwind/sovereign-end4](https://github.com/toxicwind/sovereign-end4.git) | > **The Desktop Shell & Wayland UI layer for the estate-scripts ecosystem.** |
+| `estate-end4` | [toxicwind/sovereign-end4](https://github.com/toxicwind/sovereign-end4.git) | — |
 | `estate-hatch-toolkit` | [toxicwind/estate-hatch-toolkit](https://github.com/toxicwind/estate-hatch-toolkit.git) | — |
 | `estate-monitor` | [toxicwind/estate-monitor](https://github.com/toxicwind/estate-monitor.git) | — |
-| `estate-recon` | [toxicwind/estate-recon](https://github.com/toxicwind/estate-recon.git) | **Unified Sovereign Reconnaissance Repository.** |
-| `estate-scripts` | [toxicwind/estate-scripts](https://github.com/toxicwind/estate-scripts.git) | Consolidated repository of operational, CI/CD, release, benchmark, and auditing scripts for the estate-scripts |
+| `estate-recon` | [toxicwind/estate-recon](https://github.com/toxicwind/estate-recon.git) | — |
+| `estate-scripts` | [toxicwind/estate-scripts](https://github.com/toxicwind/estate-scripts.git) | — |
 | `estate-scripts-dispersal` | [toxicwind/estate-scripts-dispersal](https://github.com/toxicwind/estate-scripts-dispersal.git) | — |
 | `estate-scripts-end4` | [toxicwind/estate-scripts-end4](https://github.com/toxicwind/estate-scripts-end4.git) | — |
 | `estate-scripts-scripts` | [toxicwind/estate-scripts-scripts](https://github.com/toxicwind/estate-scripts-scripts.git) | — |
 | `estate-scripts-skills` | [toxicwind/estate-scripts-skills](https://github.com/toxicwind/estate-scripts-skills.git) | — |
-| `estate-shell` | [toxicwind/estate-shell](https://github.com/toxicwind/estate-shell.git) | The shell SSOT for the estate: **dots** (hypr, quickshell ii, fish, foot, kitty, |
-| `estate-skills` | [toxicwind/sovereign-skills](https://github.com/toxicwind/sovereign-skills.git) | Kimi-style skill definitions and agent orchestration patterns. |
+| `estate-shell` | [toxicwind/estate-shell](https://github.com/toxicwind/estate-shell.git) | — |
+| `estate-skills` | [toxicwind/sovereign-skills](https://github.com/toxicwind/sovereign-skills.git) | — |
 | `estate-skills-hub` | [toxicwind/estate-skills-hub](https://github.com/toxicwind/estate-skills-hub.git) | — |
 | `estate-whoa-breakthrough` | [toxicwind/estate-whoa-breakthrough](https://github.com/toxicwind/estate-whoa-breakthrough.git) | — |
-| `examples` | [toxicwind/examples](https://github.com/toxicwind/examples.git) | Runnable proof that the ranch works. Everything here runs against the live |
+| `examples` | [toxicwind/examples](https://github.com/toxicwind/examples.git) | — |
 | `extensions` | [toxicwind/extensions](https://github.com/toxicwind/extensions.git) | — |
 | `extensions/drover` | [toxicwind/drover](https://github.com/toxicwind/drover.git) | — |
-| `fanout` | [toxicwind/fanout](https://github.com/toxicwind/fanout.git) | Runs shell commands **concurrently** and prints a per-leg receipt. Built for |
-| `fast-race` | [toxicwind/fast-race](https://github.com/toxicwind/fast-race.git) | `fast_race.py` applies the squawk HFT latency doctrine |
-| `ferret-den` | [toxicwind/ferret-den](https://github.com/toxicwind/ferret-den.git) | An MCP server that exposes the Warren's reconnaissance kit under decoupled tool names to prevent false-positiv |
+| `fanout` | [toxicwind/fanout](https://github.com/toxicwind/fanout.git) | — |
+| `fast-race` | [toxicwind/fast-race](https://github.com/toxicwind/fast-race.git) | — |
+| `ferret-den` | [toxicwind/ferret-den](https://github.com/toxicwind/ferret-den.git) | — |
 | `fleet` | [toxicwind/fleet](https://github.com/toxicwind/fleet.git) | — |
-| `fleet-chat` | [toxicwind/fleet-chat](https://github.com/toxicwind/fleet-chat.git) | The fleet's first-class coordination server on awrawr-pc. Rooms, real |
-| `fleet-ops` | [toxicwind/fleet-ops](https://github.com/toxicwind/fleet-ops.git) | Built 2026-09-19 after the iowait-freeze incident (50–80% iowait, load |
-| `fleetd` | [toxicwind/fleetd](https://github.com/toxicwind/fleetd.git) | First-class fleet coordination daemon for awrawr-pc. The literal way for |
+| `fleet-chat` | [toxicwind/fleet-chat](https://github.com/toxicwind/fleet-chat.git) | — |
+| `fleet-ops` | [toxicwind/fleet-ops](https://github.com/toxicwind/fleet-ops.git) | — |
+| `fleetd` | [toxicwind/fleetd](https://github.com/toxicwind/fleetd.git) | — |
 | `flicker` | [toxicwind/flicker](https://github.com/toxicwind/flicker.git) | — |
 | `forge` | [toxicwind/forge](https://github.com/toxicwind/forge.git) | — |
 | `forge/router/weasel` | [diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute) | — |
 | `forge/web` | [toxicwind/CMSaasStarter](https://github.com/toxicwind/CMSaasStarter.git) | — |
-| `freebuffet` | [toxicwind/freebuffet](https://github.com/toxicwind/freebuffet.git) | **One CLI to configure every AI coding agent with 165 LLM providers.** |
+| `freebuffet` | [toxicwind/freebuffet](https://github.com/toxicwind/freebuffet.git) | — |
 | `furlong/vendor/coder_reviewer_reranking` | [facebookresearch/coder_reviewer_reranking](https://github.com/facebookresearch/coder_reviewer_reranking.git) | — |
 | `furlong/vendor/RACE` | [jszheng21/RACE](https://github.com/jszheng21/RACE.git) | — |
 | `furlong/vendor/speed-run` | [2389-research/speed-run](https://github.com/2389-research/speed-run.git) | — |
 | `furlong/vendor/SRank-CodeRanker` | [FSoft-AI4Code/SRank-CodeRanker](https://github.com/FSoft-AI4Code/SRank-CodeRanker.git) | — |
-| `gavel` | [toxicwind/gavel](https://github.com/toxicwind/gavel.git) | **The auction market for dispatches.** Gavel runs an auctioneer and a field of |
+| `gavel` | [toxicwind/gavel](https://github.com/toxicwind/gavel.git) | — |
 | `gavel/vendor/agora` | [KAIJUJO/Agora](https://github.com/KAIJUJO/Agora.git) | — |
 | `gavel/vendor/auction-agent11` | [wushuchris/11-distributed-auction-task-allocation-agent](https://github.com/wushuchris/11-distributed-auction-task-allocation-agent.git) | — |
 | `gavel/vendor/contract-net-router` | [M00C1FER/contract-net-router](https://github.com/M00C1FER/contract-net-router.git) | — |
-| `gayxxx-estate` | [toxicwind/gayxxx-estate](https://github.com/toxicwind/gayxxx-estate.git) | A CloudStream extension repository: **19 CS3 plugins repacked from validated DEX** (ZIP archives with `classes |
+| `gayxxx-estate` | [toxicwind/gayxxx-estate](https://github.com/toxicwind/gayxxx-estate.git) | — |
 | `ghq` | [toxicwind/ghq](https://github.com/toxicwind/ghq.git) | — |
-| `github-search` | [toxicwind/github-search](https://github.com/toxicwind/github-search.git) | > **TOXICWIND FORK** — Autonomous high-recall GitHub search client, API server, Next.js frontend, and Model Co |
+| `github-search` | [toxicwind/github-search](https://github.com/toxicwind/github-search.git) | — |
 | `gito` | [toxicwind/gito](https://github.com/toxicwind/gito.git) | — |
-| `godzilla-llama.cpp` | [toxicwind/godzilla-llama.cpp](https://github.com/toxicwind/godzilla-llama.cpp.git) | Windows-first **MSVC + CUDA** |
+| `godzilla-llama.cpp` | [toxicwind/godzilla-llama.cpp](https://github.com/toxicwind/godzilla-llama.cpp.git) | — |
 | `hatch` | [toxicwind/hatch](https://github.com/toxicwind/hatch.git) | — |
-| `hatch-decode` | [toxicwind/hatch-decode](https://github.com/toxicwind/hatch-decode.git) | > **Why should you care?** The runtime daemon that owns your cell has 158 |
+| `hatch-decode` | [toxicwind/hatch-decode](https://github.com/toxicwind/hatch-decode.git) | — |
 | `hatch/kite-cli` | [toxicwind/kite-cli](https://github.com/toxicwind/kite-cli.git) | — |
 | `herd` | [toxicwind/herd](https://github.com/toxicwind/herd.git) | — |
 | `herdproof-bun` | [toxicwind/herdproof-bun](https://github.com/toxicwind/herdproof-bun.git) | — |
 | `hf-model-sync` | [toxicwind/hf-model-sync](https://github.com/toxicwind/hf-model-sync.git) | — |
 | `hodos` | [toxicwind/hodos](https://github.com/toxicwind/hodos.git) | — |
-| `host-proof` | [toxicwind/host-proof](https://github.com/toxicwind/host-proof.git) | A universal **read-only** host proof bundle. Point it at any box and it |
-| `identity-router` | [toxicwind/identity-router](https://github.com/toxicwind/identity-router.git) | > The universal knowledge router for durable agent memory — lessons, preferences, rules, corrections, and exte |
-| `kairos` | [toxicwind/kairos](https://github.com/toxicwind/kairos.git) | *The opportune moment* — the 2-second rule, first-class: every command an agent |
-| `keep` | [toxicwind/keep](https://github.com/toxicwind/keep.git) | **keep is the single home for secrets.** Nothing secret ever lives in chat, |
-| `keryx` | [toxicwind/keryx](https://github.com/toxicwind/keryx.git) | > **File-based multi-agent chat. No daemon, no sockets, no HTTP — just a |
-| `kilo` | [toxicwind/kilo](https://github.com/toxicwind/kilo.git) | Master project holding the kappa forks on this box (awrawr-pc estate). This |
+| `host-proof` | [toxicwind/host-proof](https://github.com/toxicwind/host-proof.git) | — |
+| `identity-router` | [toxicwind/identity-router](https://github.com/toxicwind/identity-router.git) | — |
+| `kairos` | [toxicwind/kairos](https://github.com/toxicwind/kairos.git) | — |
+| `keep` | [toxicwind/keep](https://github.com/toxicwind/keep.git) | — |
+| `keryx` | [toxicwind/keryx](https://github.com/toxicwind/keryx.git) | — |
+| `kilo` | [toxicwind/kilo](https://github.com/toxicwind/kilo.git) | — |
 | `kimi-auto` | [toxicwind/kimi-auto](https://github.com/toxicwind/kimi-auto.git) | — |
 | `kimi-claw` | [toxicwind/kimi-claw](https://github.com/toxicwind/kimi-claw.git) | — |
-| `kodi-fleet` | [toxicwind/kodi-fleet](https://github.com/toxicwind/kodi-fleet.git) | A[awrawr-pc] --> H[kodi-handoff] |
-| `kryptos` | [toxicwind/kryptos](https://github.com/toxicwind/kryptos.git) | > **The maximal freedesktop Secret Service CLI.** A from-scratch Python |
-| `lasso` | [toxicwind/lasso](https://github.com/toxicwind/lasso.git) | > 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map. |
+| `kodi-fleet` | [toxicwind/kodi-fleet](https://github.com/toxicwind/kodi-fleet.git) | — |
+| `kryptos` | [toxicwind/kryptos](https://github.com/toxicwind/kryptos.git) | — |
+| `lasso` | [toxicwind/lasso](https://github.com/toxicwind/lasso.git) | — |
 | `leakfix-src` | [toxicwind/leakfix-src](https://github.com/toxicwind/leakfix-src.git) | — |
-| `ledger` | [toxicwind/ledger](https://github.com/toxicwind/ledger.git) | > 🗺️ Part of [**the ranch**](https://github.com/toxicwind/ranch) — the whole inference estate, one map. |
+| `ledger` | [toxicwind/ledger](https://github.com/toxicwind/ledger.git) | — |
 | `lib` | [toxicwind/lib](https://github.com/toxicwind/lib.git) | — |
-| `loom` | [toxicwind/loom](https://github.com/toxicwind/loom.git) | **Linked Orchestration Of Multirepos** — a Rust CLI/TUI that makes a distributed monorepo feel like a monorepo |
-| `matter-server` | [toxicwind/matter-server](https://github.com/toxicwind/matter-server.git) | The live Matter app runs from `/home/toxic/.matter-server/app` — outside |
-| `maw` | [toxicwind/maw](https://github.com/toxicwind/maw.git) | `maw` is a coordination layer for teams running many coding agents in parallel on one repo. |
+| `loom` | [toxicwind/loom](https://github.com/toxicwind/loom.git) | — |
+| `matter-server` | [toxicwind/matter-server](https://github.com/toxicwind/matter-server.git) | — |
+| `maw` | [toxicwind/maw](https://github.com/toxicwind/maw.git) | — |
 | `mcp` | [toxicwind/mcp](https://github.com/toxicwind/mcp.git) | — |
-| `mcp-dropin-guide` | [toxicwind/mcp-dropin-guide](https://github.com/toxicwind/mcp-dropin-guide.git) | **A style guide for writing MCP drop-in servers: stdio JSON-RPC, Content-Length framing, tool schemas, and doo |
+| `mcp-dropin-guide` | [toxicwind/mcp-dropin-guide](https://github.com/toxicwind/mcp-dropin-guide.git) | — |
 | `mcp/mcp-prompt-injection-detector` | [thilinawishvekeerthi/mcp-prompt-injection-detector](https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector.git) | — |
 | `mcp/mcpproxy-go` | [toxicwind/mcpproxy-go](https://github.com/toxicwind/mcpproxy-go.git) | — |
 | `mcp/pd-mcp-standalone` | [toxicwind/pd-mcp](https://github.com/toxicwind/pd-mcp.git) | — |
 | `mcp/rsync-mcp` | [toxicwind/rsync-mcp](https://github.com/toxicwind/rsync-mcp.git) | — |
-| `mcpproxy-go` | [toxicwind/mcpproxy-go](https://github.com/toxicwind/mcpproxy-go.git) | > **The sovereign MCP tool federation, security firewall, and agent gateway. Connects 231+ tools across 18 ser |
-| `mesh` | [toxicwind/mesh](https://github.com/toxicwind/mesh.git) | *One endpoint in front of everything: multi-provider LLM routing, MCP federation, and browser automation for t |
+| `mcpproxy-go` | [toxicwind/mcpproxy-go](https://github.com/toxicwind/mcpproxy-go.git) | — |
+| `mesh` | [toxicwind/mesh](https://github.com/toxicwind/mesh.git) | — |
 | `mesh/pylae` | [toxicwind/flocksync](https://github.com/toxicwind/flocksync.git) | — |
 | `meta-research-toolkit` | [toxicwind/meta-research-toolkit](https://github.com/toxicwind/meta-research-toolkit.git) | — |
-| `metaaivm` | [toxicwind/metaaivm](https://github.com/toxicwind/metaaivm.git) | Incremental GitHub harvester for `metaaivm`-related keywords. Runs on yote |
-| `metaaivm-profile` | [toxicwind/metaaivm-profile](https://github.com/toxicwind/metaaivm-profile.git) | First-class agent profile for the Meta AI VM (metaaivm.com) estate. |
+| `metaaivm` | [toxicwind/metaaivm](https://github.com/toxicwind/metaaivm.git) | — |
+| `metaaivm-profile` | [toxicwind/metaaivm-profile](https://github.com/toxicwind/metaaivm-profile.git) | — |
 | `metaclaw-runtime` | [toxicwind/metaclaw-runtime](https://github.com/toxicwind/metaclaw-runtime.git) | — |
-| `mission-control` | [toxicwind/mission-control](https://github.com/toxicwind/mission-control.git) | Event-driven continuation controller. A parent mission stays open until |
-| `ml-serve` | [toxicwind/ml-serve](https://github.com/toxicwind/ml-serve.git) | Hot-loaded ONNX segmentation + e621 native tag resolution over HTTP for the |
-| `muse-cli` | [toxicwind/muse-cli](https://github.com/toxicwind/muse-cli.git) | Talk to your personal muse.ai AI agent from the terminal. |
+| `mission-control` | [toxicwind/mission-control](https://github.com/toxicwind/mission-control.git) | — |
+| `ml-serve` | [toxicwind/ml-serve](https://github.com/toxicwind/ml-serve.git) | — |
+| `muse-cli` | [toxicwind/muse-cli](https://github.com/toxicwind/muse-cli.git) | — |
 | `naming-audit` | [toxicwind/naming-audit](https://github.com/toxicwind/naming-audit.git) | — |
 | `nim-inkling-api-research` | [toxicwind/nim-inkling-api-research](https://github.com/toxicwind/nim-inkling-api-research.git) | — |
-| `nim-omnibus` | [toxicwind/nim-omnibus](https://github.com/toxicwind/nim-omnibus.git) | > Part of [**the ranch**](https://github.com/toxicwind/ranch) — NVIDIA NIM fleet, Brev cloud, NVCF functions,  |
+| `nim-omnibus` | [toxicwind/nim-omnibus](https://github.com/toxicwind/nim-omnibus.git) | — |
 | `nim-repos/api-evangelist-nvidia-nim` | [api-evangelist/nvidia-nim](https://github.com/api-evangelist/nvidia-nim) | — |
 | `nim-repos/bauka0-nvidia-nim-provider` | [bauka0/nvidia-nim-provider](https://github.com/bauka0/nvidia-nim-provider) | — |
 | `nim-repos/david-eve-za-nvidia-nim-mcp` | [david-eve-za/nvidia-nim-mcp](https://github.com/david-eve-za/nvidia-nim-mcp) | — |
@@ -234,57 +234,57 @@ The full map — every animal's pen, with its repo and description (from README 
 | `nim-repos/tibbee-pi-nvidia-nim-provider` | [tibbee/pi-nvidia-nim-provider](https://github.com/tibbee/pi-nvidia-nim-provider) | — |
 | `nim-repos/xRyul-pi-nvidia-nim` | [xRyul/pi-nvidia-nim](https://github.com/xRyul/pi-nvidia-nim) | — |
 | `null-g-proxy` | [toxicwind/null-g-proxy](https://github.com/toxicwind/null-g-proxy.git) | — |
-| `nuvio` | [toxicwind/nuvio](https://github.com/toxicwind/nuvio.git) | Nuvio is a custom Stremio-based media theater for **LG webOS TVs**. It exists because the |
-| `nvidia-alive` | [toxicwind/nvidia-alive](https://github.com/toxicwind/nvidia-alive.git) | > Live endpoint auditing for NVIDIA NIM — and every provider in the |
+| `nuvio` | [toxicwind/nuvio](https://github.com/toxicwind/nuvio.git) | — |
+| `nvidia-alive` | [toxicwind/nvidia-alive](https://github.com/toxicwind/nvidia-alive.git) | — |
 | `nvidia-kernel-guard` | [toxicwind/nvidia-kernel-guard](https://github.com/toxicwind/nvidia-kernel-guard.git) | — |
 | `nvidia-nim-model-probe` | [toxicwind/nvidia-nim-model-probe](https://github.com/toxicwind/nvidia-nim-model-probe.git) | — |
 | `oh-my-pi` | [toxicwind/oh-my-pi](https://github.com/toxicwind/oh-my-pi.git) | — |
 | `OmniRoute` | [toxicwind/OmniRoute](https://github.com/toxicwind/OmniRoute.git) | — |
-| `openfang` | [toxicwind/openfang](https://github.com/toxicwind/openfang.git) | **An open-source Agent OS in Rust.** Not a chatbot framework, not a Python wrapper around an LLM — a full oper |
-| `openfang-join` | [toxicwind/openfang-join](https://github.com/toxicwind/openfang-join.git) | Admit a fleet (squawk) agent into OpenFang as a first-class agent. One command: |
-| `openrouter-probe` | [toxicwind/openrouter-probe](https://github.com/toxicwind/openrouter-probe.git) | **Stop trusting provider labels. Measure which free models actually follow instructio |
-| `ops` | [toxicwind/ops](https://github.com/toxicwind/ops.git) | **Every fix lives in a real file.** The durable, committed home for operations scripts that used |
-| `opsis` | [toxicwind/opsis](https://github.com/toxicwind/opsis.git) | *Headed browser automation for the fleet: one MCP server, one persistent Chromium, zero dead sessions.* |
-| `outlier-toolkit` | [toxicwind/outlier-toolkit](https://github.com/toxicwind/outlier-toolkit.git) | Outlier (Scale AI's contributor platform) publishes no publi |
-| `outsource` | [toxicwind/outsource](https://github.com/toxicwind/outsource.git) | **Your Claude session does the thinking. Cheaper model subscriptions do the typing.** |
-| `pack-fix` | [toxicwind/pack-fix](https://github.com/toxicwind/pack-fix.git) | **Find orphaned stuff on yote and the cell — adopt it or clean it. Never leave a reorg half-done.* |
-| `paper-poller` | [toxicwind/paper-poller](https://github.com/toxicwind/paper-poller.git) | **PAPER-TASK → PAPER-RESULT as a first-class fleet capability.** |
+| `openfang` | [toxicwind/openfang](https://github.com/toxicwind/openfang.git) | — |
+| `openfang-join` | [toxicwind/openfang-join](https://github.com/toxicwind/openfang-join.git) | — |
+| `openrouter-probe` | [toxicwind/openrouter-probe](https://github.com/toxicwind/openrouter-probe.git) | — |
+| `ops` | [toxicwind/ops](https://github.com/toxicwind/ops.git) | — |
+| `opsis` | [toxicwind/opsis](https://github.com/toxicwind/opsis.git) | — |
+| `outlier-toolkit` | [toxicwind/outlier-toolkit](https://github.com/toxicwind/outlier-toolkit.git) | — |
+| `outsource` | [toxicwind/outsource](https://github.com/toxicwind/outsource.git) | — |
+| `pack-fix` | [toxicwind/pack-fix](https://github.com/toxicwind/pack-fix.git) | — |
+| `paper-poller` | [toxicwind/paper-poller](https://github.com/toxicwind/paper-poller.git) | — |
 | `pearlctl` | [toxicwind/pearlctl](https://github.com/toxicwind/pearlctl.git) | — |
 | `phone-lane` | [toxicwind/phone-lane](https://github.com/toxicwind/phone-lane.git) | — |
-| `phone-ocr-sweep` | [toxicwind/phone-ocr-sweep](https://github.com/toxicwind/phone-ocr-sweep.git) | OCR sweep over adb-pulled phone screenshots (corpus at `/home/toxic/ocr-sweep/shots/`, |
-| `phone-sentinel` | [toxicwind/phone-sentinel](https://github.com/toxicwind/phone-sentinel.git) | Zero-touch, network-reactive ADB sentinel for Chris's Pixel 9 Pro XL on LAN and Tailscale. |
-| `pinax` | [toxicwind/pinax](https://github.com/toxicwind/pinax.git) | > *Every flock comes home to **roost** — where the birds settle, perch, and |
+| `phone-ocr-sweep` | [toxicwind/phone-ocr-sweep](https://github.com/toxicwind/phone-ocr-sweep.git) | — |
+| `phone-sentinel` | [toxicwind/phone-sentinel](https://github.com/toxicwind/phone-sentinel.git) | — |
+| `pinax` | [toxicwind/pinax](https://github.com/toxicwind/pinax.git) | — |
 | `pj-fast` | [toxicwind/pj-fast](https://github.com/toxicwind/pj-fast.git) | — |
 | `plugin-ecosystem` | [toxicwind/plugin-ecosystem](https://github.com/toxicwind/plugin-ecosystem.git) | — |
 | `plugin-ecosystem/agentpluginzoo` | [tezansahu/agentpluginzoo](https://github.com/tezansahu/agentpluginzoo.git) | — |
-| `ralph-dashboard` | [toxicwind/ralph-dashboard](https://github.com/toxicwind/ralph-dashboard.git) | > **toxicwind fork** of [Endogen/ralph-dashboard](https://github.com/Endogen/ralph-dashboard). |
-| `refusal-hunt` | [toxicwind/refusal-hunt](https://github.com/toxicwind/refusal-hunt.git) | Agent serving layers sometimes **refuse benign work** — and the refusal hides |
-| `repo-first-class` | [toxicwind/repo-first-class](https://github.com/toxicwind/repo-first-class.git) | > **Make any GitHub repo first-class: a canonical, current checkout — maximally polished, committed, pushed, r |
+| `ralph-dashboard` | [toxicwind/ralph-dashboard](https://github.com/toxicwind/ralph-dashboard.git) | — |
+| `refusal-hunt` | [toxicwind/refusal-hunt](https://github.com/toxicwind/refusal-hunt.git) | — |
+| `repo-first-class` | [toxicwind/repo-first-class](https://github.com/toxicwind/repo-first-class.git) | — |
 | `rig` | [toxicwind/rig](https://github.com/toxicwind/rig.git) | — |
 | `rig-ciwatch` | [toxicwind/rig](https://github.com/toxicwind/rig.git) | — |
-| `roundup-site` | [owieth/turborepo-example](https://github.com/owieth/turborepo-example) | A modern monorepo template built with Next.js 16, React 19, Tailwind CSS v4, TypeScript 5.9, Turborepo, and pn |
+| `roundup-site` | [owieth/turborepo-example](https://github.com/owieth/turborepo-example) | — |
 | `rust-wrappers` | [toxicwind/rust-wrappers](https://github.com/toxicwind/rust-wrappers.git) | — |
-| `safety-review-gate` | [toxicwind/safety-review-gate](https://github.com/toxicwind/safety-review-gate.git) | > **The evidence locker for the safety-review gate investigation — run-ID backfill artifacts, checksummed and  |
-| `secretsmith` | [toxicwind/secretsmith](https://github.com/toxicwind/secretsmith.git) | Maximal freedesktop Secret Service CLI for the estate. Fork lineage: |
-| `session-bus-refresh` | [toxicwind/session-bus-refresh](https://github.com/toxicwind/session-bus-refresh.git) | Refresh is the **same one-shot join-packet read at a newer cursor**. A worker |
-| `skillforge` | [toxicwind/skillforge](https://github.com/toxicwind/skillforge.git) | **Universal skill packaging for AI agents.** |
-| `stealthprint` | [toxicwind/stealthprint](https://github.com/toxicwind/stealthprint.git) | A reusable library for fingerprinting stealth / anonymous models served behind |
-| `strudel-dev-vite` | [toxicwind/strudel-dev-vite](https://github.com/toxicwind/strudel-dev-vite.git) | **Your Strudel live-coding workbench — a hot-reloading Vite dev UI, a reusable plugin kit with Serum-bridge wi |
-| `strudel-sampler-server-vite` | [toxicwind/strudel-sampler-server-vite](https://github.com/toxicwind/strudel-sampler-server-vite.git) | **The sample-library backend for Strudel live-coding — point it at a folder of audio, get a Strudel-compatible |
+| `safety-review-gate` | [toxicwind/safety-review-gate](https://github.com/toxicwind/safety-review-gate.git) | — |
+| `secretsmith` | [toxicwind/secretsmith](https://github.com/toxicwind/secretsmith.git) | — |
+| `session-bus-refresh` | [toxicwind/session-bus-refresh](https://github.com/toxicwind/session-bus-refresh.git) | — |
+| `skillforge` | [toxicwind/skillforge](https://github.com/toxicwind/skillforge.git) | — |
+| `stealthprint` | [toxicwind/stealthprint](https://github.com/toxicwind/stealthprint.git) | — |
+| `strudel-dev-vite` | [toxicwind/strudel-dev-vite](https://github.com/toxicwind/strudel-dev-vite.git) | — |
+| `strudel-sampler-server-vite` | [toxicwind/strudel-sampler-server-vite](https://github.com/toxicwind/strudel-sampler-server-vite.git) | — |
 | `submodules/phone-sentinel` | [/home/toxic/phone-sentinel](/home/toxic/phone-sentinel) | — |
 | `submodules/phone-sentinel` | [/home/toxic/phone-sentinel](/home/toxic/phone-sentinel) | — |
 | `super-board` | [toxicwind/super-board](https://github.com/toxicwind/super-board.git) | — |
-| `tau-verify` | [toxicwind/tau](https://github.com/toxicwind/tau.git) | **A coding agent that runs on your machine, in your processes, on your filesystem.** |
+| `tau-verify` | [toxicwind/tau](https://github.com/toxicwind/tau.git) | — |
 | `tau/tau-extensions` | [toxicwind/tau-extensions](https://github.com/toxicwind/tau-extensions.git) | — |
 | `tau/tau-extensions` | [toxicwind/tau-extensions](https://github.com/toxicwind/tau-extensions.git) | — |
-| `tok` | [toxicwind/tok](https://github.com/toxicwind/tok.git) | **Standalone fast token counter.** Pure-JS BPE via `gpt-tokenizer` — zero native |
+| `tok` | [toxicwind/tok](https://github.com/toxicwind/tok.git) | — |
 | `tools/c8` | [bcoe/c8](https://github.com/bcoe/c8.git) | — |
 | `tools/c8` | [bcoe/c8](https://github.com/bcoe/c8.git) | — |
 | `toxicwind-repos` | [toxicwind/toxicwind-repos](https://github.com/toxicwind/toxicwind-repos) | — |
-| `trading-post` | [toxicwind/trading-post](https://github.com/toxicwind/trading-post.git) | **The frontier market where agents trade work.** Vague directives ride in; biddable |
-| `universal-keypool-bun` | [toxicwind/universal-keypool-bun](https://github.com/toxicwind/universal-keypool-bun.git) | > **Status (2026-09-30 audit):** 17/17 tests pass (`node --test` / `bun test`); `node --check` lint clean. Pac |
-| `universal-keypool-gateway` | [toxicwind/universal-keypool-gateway](https://github.com/toxicwind/universal-keypool-gateway.git) | > **High-throughput key rotation, speculative latency racing, status-aware cooldown state machines, model virt |
-| `VansRouter` | [toxicwind/VansRouter](https://github.com/toxicwind/VansRouter.git) | **Never stop coding. Save 20-40% tokens with RTK + auto-fallback to FREE & cheap AI models.** |
+| `trading-post` | [toxicwind/trading-post](https://github.com/toxicwind/trading-post.git) | — |
+| `universal-keypool-bun` | [toxicwind/universal-keypool-bun](https://github.com/toxicwind/universal-keypool-bun.git) | — |
+| `universal-keypool-gateway` | [toxicwind/universal-keypool-gateway](https://github.com/toxicwind/universal-keypool-gateway.git) | — |
+| `VansRouter` | [toxicwind/VansRouter](https://github.com/toxicwind/VansRouter.git) | — |
 | `vendor/tailnet-doctor` | [toxicwind/tailnet-doctor](https://github.com/toxicwind/tailnet-doctor.git) | — |
 | `websites/arlockworks/app` | [toxicwind/arlockworks-next](https://github.com/toxicwind/arlockworks-next.git) | — |
 | `websites/arlockworks/app` | [toxicwind/arlockworks-next](https://github.com/toxicwind/arlockworks-next.git) | — |
@@ -296,71 +296,49 @@ The full map — every animal's pen, with its repo and description (from README 
 | `websites/effusionlabs/tickets` | [toxicwind/effusion-labs-tickets](https://github.com/toxicwind/effusion-labs-tickets.git) | — |
 | `wezterm` | [toxicwind/wezterm](https://github.com/toxicwind/wezterm.git) | — |
 | `workmux` | [toxicwind/workmux](https://github.com/toxicwind/workmux.git) | — |
-| `zed-android-port` | [toxicwind/zed-android-port](https://github.com/toxicwind/zed-android-port.git) | Started as a joke. Rust on aarch64, sounded portable. Laughed about it. Kept going. Couldn't stop. There's an  |
+| `zed-android-port` | [toxicwind/zed-android-port](https://github.com/toxicwind/zed-android-port.git) | — |
 
 ## 🔭 Upstream Sources
 
 | Source | Count |
 |---|---|
-| .gitmodules | 146 |
-| package.json repository | 3 |
-| git remote upstream | 1 |
+| .gitmodules | 140 |
 | Cargo.toml repository | 1 |
 
 ## 🌐 Languages (by tracked files)
 
 | Language | Files |
 |---|---|
-| TypeScript | 32,871 |
-| Markdown | 7,687 |
-| JavaScript | 6,872 |
-| Rust | 5,160 |
-| Go | 5,028 |
-| JSON | 4,566 |
-| SVG | 4,051 |
-| Python | 3,346 |
-| MAP | 2,935 |
-| MDX | 2,032 |
-| TSX | 1,960 |
-| PNG | 1,636 |
-| PYC | 1,301 |
-| QML | 1,158 |
-| Kotlin | 1,081 |
-| YAML | 987 |
-| TOML | 972 |
-| Shell | 925 |
-| Text | 908 |
-| O | 898 |
 
 ## 📦 Top 10 Largest Directories
 
 | Directory | Size | Files | Upstream |
 |---|---|---|---|
-| `models` | 139697.9 MB | 101 | — |
-| `vendored` | 97064.4 MB | 2,460,398 | — |
-| `hatch` | 18287.6 MB | 187,002 | github.com/toxicwind/hatch |
-| `mesh` | 11526.1 MB | 132,171 | github.com/toxicwind/mesh |
-| `tau` | 9895.6 MB | 126,228 | github.com/can1357/oh-my-pi |
-| `qed` | 8179.6 MB | 56,807 | — |
-| `kilo` | 7557.7 MB | 163,656 | github.com/toxicwind/kilo |
-| `forge` | 6008.4 MB | 44,820 | github.com/toxicwind/forge |
-| `shell` | 4591.1 MB | 14,935 | — |
-| `rust-algo-web` | 3626.3 MB | 11,657 | — |
+| `forge` | 375.3 MB | 2,689 | github.com/toxicwind/forge |
+| `range` | 177.0 MB | 333 | — |
+| `qed` | 122.4 MB | 4,522 | — |
+| `propylon` | 113.7 MB | 7 | — |
+| `barn` | 55.7 MB | 2,315 | github.com/toxicwind/barn |
+| `herd` | 22.7 MB | 1 | github.com/toxicwind/herd |
+| `rustdesk-server` | 18.8 MB | 8 | — |
+| `github-search` | 10.5 MB | 605 | github.com/toxicwind/github-search |
+| `vendor` | 8.2 MB | 484 | — |
+| `roundup` | 8.2 MB | 589 | — |
 
 ## 🔮 Top Upstreams by Fork Count
 
 | Upstream | Forks |
 |---|---|
 | [github.com/toxicwind/rig](https://github.com/toxicwind/rig) | 2 |
+| [github.com/aparnaa19/AgentForensics](https://github.com/aparnaa19/AgentForensics) | 1 |
+| [github.com/toxicwind/OmniRoute](https://github.com/toxicwind/OmniRoute) | 1 |
+| [github.com/toxicwind/VansRouter](https://github.com/toxicwind/VansRouter) | 1 |
 | [github.com/toxicwind/agent-customization-style-guide](https://github.com/toxicwind/agent-customization-style-guide) | 1 |
 | [github.com/toxicwind/agent-dashboard](https://github.com/toxicwind/agent-dashboard) | 1 |
-| [github.com/aparnaa19/AgentForensics](https://github.com/aparnaa19/AgentForensics) | 1 |
 | [github.com/toxicwind/agon](https://github.com/toxicwind/agon) | 1 |
 | [github.com/toxicwind/ai-merge-resolve](https://github.com/toxicwind/ai-merge-resolve) | 1 |
 | [github.com/toxicwind/android-fleet](https://github.com/toxicwind/android-fleet) | 1 |
 | [github.com/toxicwind/antilogos](https://github.com/toxicwind/antilogos) | 1 |
-| [github.com/toxicwind/arroyo](https://github.com/toxicwind/arroyo) | 1 |
-| [github.com/toxicwind/ast-grep-rules](https://github.com/toxicwind/ast-grep-rules) | 1 |
 
 ## 🔲 Similarity Clusters (README-based)
 
@@ -368,33 +346,20 @@ Directories with similar README content (Jaccard on first 500 chars):
 
 | Dir A | Dir B | Similarity |
 |---|---|---|
-| `rig` | `rig-ciwatch` | 100.0% |
-| `tau` | `tau-verify` | 100.0% |
-| `agon` | `forge` | 71.4% |
-| `agon` | `antilogos` | 66.7% |
-| `estate-hatch-toolkit` | `pearlctl` | 60.6% |
-| `hodos` | `null-g-proxy` | 57.9% |
-| `agent-customization-style-guide` | `mcp-dropin-guide` | 57.1% |
-| `agon` | `hodos` | 56.8% |
-| `estate-chat` | `fleet-chat` | 55.4% |
-| `meta-research-toolkit` | `model-max` | 55.3% |
+
 
 ## 📁 Directory Type Breakdown
 
 | Type | Count |
 |---|---|
-| Submodule | 146 |
-| Fork (ours) | 135 |
-| Upstream mirror | 20 |
-| Fork (ours, no upstream) | 5 |
-| Upstream mirror (no upstream) | 2 |
-| Vendored (snapshot) | 28 |
-| Experimental | 29 |
-| Stub/Empty | 30 |
+| Submodule | 140 |
+| Vendored (snapshot) | 51 |
+| Experimental | 63 |
+| Stub/Empty | 77 |
 
 ---
 
-*Generated by `bun toolkit/generate-readme.ts` at 2026-10-17T06:05:55.124Z*
+*Generated by `bun toolkit/generate-readme.ts` at 2026-10-17T09:05:53.555Z*
 
 ---
 
