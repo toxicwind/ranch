@@ -21,37 +21,37 @@
 # --- generated 2026-10-04T00:12:09Z: one entry per tracked gitlink,
 #     url = each checkout's own origin ---
 [submodule "killer-features/bid-market/vendor/agora"]
-	path = bid-market/vendor/agora
+	path = gavel/vendor/agora
 	url = https://github.com/KAIJUJO/Agora.git
 [submodule "killer-features/bid-market/vendor/auction-agent11"]
-	path = bid-market/vendor/auction-agent11
+	path = gavel/vendor/auction-agent11
 	url = https://github.com/wushuchris/11-distributed-auction-task-allocation-agent.git
 [submodule "killer-features/bid-market/vendor/contract-net-router"]
-	path = bid-market/vendor/contract-net-router
+	path = gavel/vendor/contract-net-router
 	url = https://github.com/M00C1FER/contract-net-router.git
 [submodule "killer-features/code-racer/vendor/RACE"]
-	path = code-racer/vendor/RACE
+	path = furlong/vendor/RACE
 	url = https://github.com/jszheng21/RACE.git
 [submodule "killer-features/code-racer/vendor/SRank-CodeRanker"]
-	path = code-racer/vendor/SRank-CodeRanker
+	path = furlong/vendor/SRank-CodeRanker
 	url = https://github.com/FSoft-AI4Code/SRank-CodeRanker.git
 [submodule "killer-features/code-racer/vendor/coder_reviewer_reranking"]
-	path = code-racer/vendor/coder_reviewer_reranking
+	path = furlong/vendor/coder_reviewer_reranking
 	url = https://github.com/facebookresearch/coder_reviewer_reranking.git
 [submodule "killer-features/code-racer/vendor/speed-run"]
-	path = code-racer/vendor/speed-run
+	path = furlong/vendor/speed-run
 	url = https://github.com/2389-research/speed-run.git
 [submodule "killer-features/debate-oracle/vendor/ChatEval"]
-	path = debate-oracle/vendor/ChatEval
+	path = duel/vendor/ChatEval
 	url = https://github.com/thunlp/ChatEval.git
 [submodule "killer-features/debate-oracle/vendor/argus-ai-debate"]
-	path = debate-oracle/vendor/argus-ai-debate
+	path = duel/vendor/argus-ai-debate
 	url = https://github.com/Argus-Framework/argus-ai-debate.git
 [submodule "killer-features/debate-oracle/vendor/debate-or-vote"]
-	path = debate-oracle/vendor/debate-or-vote
+	path = duel/vendor/debate-or-vote
 	url = https://github.com/deeplearning-wisc/debate-or-vote.git
 [submodule "killer-features/debate-oracle/vendor/llm_debate"]
-	path = debate-oracle/vendor/llm_debate
+	path = duel/vendor/llm_debate
 	url = https://github.com/ucl-dark/llm_debate.git
 [submodule "mcpproxy-go"]
 	path = mcpproxy-go
