@@ -54,7 +54,7 @@
 	path = killer-features/debate-oracle/vendor/llm_debate
 	url = https://github.com/ucl-dark/llm_debate.git
 [submodule "mcpproxy-go"]
-	path = mcp/mcpproxy-go
+	path = mcpproxy-go
 	url = https://github.com/toxicwind/mcpproxy-go.git
 [submodule "muse-cli"]
 	path = muse-cli
@@ -366,3 +366,45 @@
 [submodule "kairos"]
 	path = kairos
 	url = https://github.com/toxicwind/kairos.git
+[submodule "agent-customization-style-guide"]
+	path = agent-customization-style-guide
+	url = https://github.com/toxicwind/agent-customization-style-guide.git
+[submodule "nativelink"]
+	path = barn/nativelink
+	url = https://github.com/toxicwind/nativelink.git
+[submodule "rosec"]
+	path = barn/rosec
+	url = https://github.com/toxicwind/rosec.git
+[submodule "weave"]
+	path = barn/weave
+	url = https://github.com/toxicwind/weave.git
+[submodule "estate-dispersal"]
+	path = estate-dispersal
+	url = https://github.com/toxicwind/sovereign-dispersal.git
+[submodule "estate-end4"]
+	path = estate-end4
+	url = https://github.com/toxicwind/sovereign-end4.git
+[submodule "estate-shell"]
+	path = estate-shell
+	url = https://github.com/toxicwind/estate-shell.git
+[submodule "estate-skills"]
+	path = estate-skills
+	url = https://github.com/toxicwind/sovereign-skills.git
+[submodule "ferret-den"]
+	path = ferret-den
+	url = https://github.com/toxicwind/ferret-den.git
+[submodule "pd-mcp-standalone"]
+	path = mcp/pd-mcp-standalone
+	url = https://github.com/toxicwind/pd-mcp.git
+[submodule "flocksync"]
+	path = mesh/flocksync
+	url = https://github.com/toxicwind/flocksync.git
+[submodule "weasel"]
+	path = mesh/router/weasel
+	url = https://github.com/diegosouzapw/OmniRoute
+[submodule "nim-omnibus"]
+	path = nim-omnibus
+	url = https://github.com/toxicwind/nim-omnibus.git
+[submodule "agentpluginzoo"]
+	path = plugin-ecosystem/agentpluginzoo
+	url = https://github.com/tezansahu/agentpluginzoo.git
