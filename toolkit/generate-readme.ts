@@ -6,9 +6,14 @@
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const RANCH_ROOT = "/home/toxic/estate/ranch";
+// Portable paths: derive the repo root from the script's own location so the
+// toolkit runs on yote (/home/toxic/estate/ranch), on GitHub Actions runners
+// (checked out anywhere), and anywhere else — no machine-specific paths.
+const TOOLKIT_DIR = dirname(fileURLToPath(import.meta.url));
+const RANCH_ROOT = dirname(TOOLKIT_DIR);
 const REPORT_PATH = join(RANCH_ROOT, "FORKS-report.json");
 const README_PATH = join(RANCH_ROOT, "README.md");
 const AUDIT_SCRIPT = join(RANCH_ROOT, "toolkit/audit-forks.ts");

@@ -1,4 +1,4 @@
-// ranch/scripts/audit-forks.ts
+// ranch/toolkit/audit-forks.ts
 //
 // For each `ranch/*` dir, find the *obvious* upstream reference and report it.
 // Sources we look at, in order — first match wins:
@@ -18,15 +18,25 @@
 // suggest a fork we haven't pinned to an upstream yet.
 //
 // Usage:
-//   bun scripts/audit-forks.ts                  # write FORKS-report.md + .json
-//   bun scripts/audit-forks.ts --resolve-origins   # + GitHub parent lookup
+//   bun toolkit/audit-forks.ts                  # write FORKS-report.md + .json
+//   bun toolkit/audit-forks.ts --resolve-origins   # + GitHub parent lookup
 
 import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const RANCH_ROOT = "/home/toxic/estate/ranch";
-const CACHE_DIR = "/home/toxic/.cache/ranch-fork-audit";
+// Portable paths: derive the repo root from the script's own location so the
+// toolkit runs on yote (/home/toxic/estate/ranch), on GitHub Actions runners
+// (checked out anywhere), and anywhere else — no machine-specific paths.
+const TOOLKIT_DIR = dirname(fileURLToPath(import.meta.url));
+const RANCH_ROOT = dirname(TOOLKIT_DIR);
+
+const CACHE_DIR = process.env.XDG_CACHE_HOME
+  ? join(process.env.XDG_CACHE_HOME, "ranch-fork-audit")
+  : process.env.HOME
+    ? join(process.env.HOME, ".cache", "ranch-fork-audit")
+    : join(RANCH_ROOT, ".cache", "ranch-fork-audit");
 mkdirSync(CACHE_DIR, { recursive: true });
 
 const args = new Set(process.argv.slice(2));
@@ -367,9 +377,9 @@ ${renderGithubSection(infos)}
 ## Regenerate
 
 \`\`\`bash
-cd /home/toxic/estate/ranch
-bun scripts/audit-forks.ts                    # local + cached GitHub lookups
-bun scripts/audit-forks.ts --resolve-origins  # bust the GitHub cache
+cd <ranch-repo-root>
+bun toolkit/audit-forks.ts                    # local + cached GitHub lookups
+bun toolkit/audit-forks.ts --resolve-origins  # bust the GitHub cache
 \`\`\`
 `;
   writeFileSync(join(RANCH_ROOT, "FORKS-report.md"), md);

@@ -3,9 +3,13 @@
 // manifest (meta 0.2.22 schema) so the estate can drive its 221 repos as
 // peers with `meta git update` etc., instead of submodule churn.
 import { readFileSync, writeFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const GM = "/home/toxic/estate/ranch/.gitmodules";
-const OUT = "/home/toxic/estate/ranch/.meta.yaml";
+// Portable paths: derive the repo root from the script's own location.
+const RANCH_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
+const GM = join(RANCH_ROOT, ".gitmodules");
+const OUT = join(RANCH_ROOT, ".meta.yaml");
 
 const raw = readFileSync(GM, "utf8");
 const entries: { path: string; url: string }[] = [];
