@@ -381,17 +381,11 @@ impl ProviderDef {
         self.map_model(model).to_owned()
     }
 
-    /// Whether `model` is explicitly listed in this provider's `models`,
-    /// i.e. matched by name alone, not by the `"*"` wildcard.
-    pub fn serves_model_explicit(&self, model: &str) -> bool {
-        self.models.iter().any(|m| m == model)
-    }
-
     /// Whether this provider serves `model`: listed in `models`, or the
     /// models list carries the `"*"` wildcard (the old NVIDIA proxy passed
     /// any requested model through, and migrated providers keep that).
     pub fn serves_model(&self, model: &str) -> bool {
-        self.serves_model_explicit(model) || self.models.iter().any(|m| m == "*")
+        self.models.iter().any(|m| m == "*" || m == model)
     }
 
     /// The upstream id for `model` differs from the requested one.

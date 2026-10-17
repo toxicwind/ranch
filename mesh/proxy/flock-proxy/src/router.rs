@@ -559,7 +559,7 @@ impl RouterHandle {
         if rts.is_empty() {
             return vec![];
         }
-        let mut ordered: Vec<Arc<ProviderRuntime>> = match strategy {
+        let ordered: Vec<Arc<ProviderRuntime>> = match strategy {
             Strategy::Hybrid => self.order_hybrid(&rts, model),
             Strategy::AstRace => rts, // race wants the full candidate set
             Strategy::StickyAffinity => self.order_hybrid(&rts, model),
@@ -572,19 +572,6 @@ impl RouterHandle {
                 .collect(),
             Strategy::CircuitChain => self.order_hybrid(&rts, model),
         };
-        // Wildcard-only providers are a last-resort fallback, never a
-        // preferred route. A provider that matched via the `"*"` pass-through
-        // must rank below any provider that explicitly lists `model`. Stable
-        // partition preserves the strategy's ordering within each group, so a
-        // wildcard-only provider is tried only after every explicit candidate.
-        // Strategy::Free is excluded: it filters to free-tier lanes whose
-        // upstream model resolves to the provider default, never the wildcard.
-        if !free_directive && !auto_directive {
-            let (explicit, wildcard): (Vec<_>, Vec<_>) = ordered
-                .into_iter()
-                .partition(|rt| rt.def.read().unwrap().serves_model_explicit(model));
-            ordered = [explicit, wildcard].concat();
-        }
         let collected: Vec<RouteCandidate> = ordered
             .into_iter()
             .map(|rt| {
@@ -2046,45 +2033,6 @@ mod tests {
         let names: Vec<_> = cands.iter().map(|c| c.provider.as_str()).collect();
         assert_eq!(names, vec!["b", "a", "c"]);
         let _ = now;
-    }
-
-    #[tokio::test]
-    async fn explicit_model_outranks_wildcard_only_provider() {
-        // Wildcard-only providers are a last-resort fallback: a provider that
-        // matches only via `"*"` must rank below any provider that explicitly
-        // lists the model, even when the wildcard provider would otherwise win
-        // on hybrid latency. Regression: the nvidia provider carries
-        // models:["*"] and was ranking first for every model, so requests
-        // preferred a failing upstream over explicitly-listed healthy ones.
-        let mut wildcard = test_def("wildcard");
-        wildcard.models = vec!["*".into()]; // pass-through only
-        let mut slow_explicit = test_def("slow-explicit");
-        slow_explicit.models = vec!["explicit/model".into()];
-        let r = test_router(vec![slow_explicit.clone(), wildcard.clone()]);
-        // The wildcard provider is far faster, so Hybrid alone would pick it
-        // first; explicit listing must override latency.
-        r.inner
-            .health
-            .record_latency("wildcard", Duration::from_millis(1));
-        r.inner
-            .health
-            .record_latency("slow-explicit", Duration::from_millis(500));
-        let cands = r.select("explicit/model", "s", Some(Strategy::Hybrid));
-        let names: Vec<_> = cands.iter().map(|c| c.provider.as_str()).collect();
-        assert_eq!(
-            names,
-            vec!["slow-explicit", "wildcard"],
-            "explicitly-listed provider must win over wildcard-only despite latency"
-        );
-        // When no provider explicitly lists the model, the wildcard fallback
-        // still serves (fail-closed: candidates never empty).
-        let r2 = test_router(vec![slow_explicit, wildcard]);
-        r2.inner
-            .health
-            .record_latency("wildcard", Duration::from_millis(1));
-        let cands2 = r2.select("unknown/model", "s", Some(Strategy::Hybrid));
-        let names2: Vec<_> = cands2.iter().map(|c| c.provider.as_str()).collect();
-        assert_eq!(names2, vec!["wildcard"], "wildcard fallback must still serve");
     }
 
     #[tokio::test]
