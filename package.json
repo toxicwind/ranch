@@ -18,17 +18,17 @@
       "corral",
       "drover",
       "drover/sidecar",
-      "flock/client",
-      "flock/dashboard",
+      "hodos/client",
+      "hodos/dashboard",
       "stream-broker",
       "switchboard",
       "windmill",
       "task-launch",
       "metaaivm-profile",
-      "mesh/catalog",
-      "mesh/keypool",
-      "mesh/proxy/cuttinggate",
-      "mesh/router/herd"
+      "pinax",
+      "kryptos/keypool",
+      "forge/router/cuttinggate",
+      "forge/router/herd"
     ],
     "catalog": {
       "@babel/generator": "^7.29.8",

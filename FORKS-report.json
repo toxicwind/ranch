@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-17T03:51:02.871Z",
-  "total": 223,
-  "withUpstream": 71,
+  "generated": "2026-10-17T04:59:46.424Z",
+  "total": 243,
+  "withUpstream": 84,
   "infos": [
     {
       "name": "additional-lens-profiles",
@@ -76,6 +76,18 @@
       "signalTotal": 0
     },
     {
+      "name": "agon",
+      "upstream": "https://github.com/toxicwind/agon",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/agon.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 14460317,
+      "fileCount": 1278,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "ai-merge-resolve",
       "upstream": "https://github.com/toxicwind/ai-merge-resolve",
       "upstreamSource": ".gitmodules",
@@ -96,6 +108,18 @@
       "isSubmodule": false,
       "sizeBytes": 32660374,
       "fileCount": 6427,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "antilogos",
+      "upstream": "https://github.com/toxicwind/antilogos",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/antilogos.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 86402128,
+      "fileCount": 3397,
       "signals": [],
       "signalTotal": 0
     },
@@ -238,8 +262,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 2636427805,
-      "fileCount": 12963,
+      "sizeBytes": 2636427839,
+      "fileCount": 12964,
       "signals": [],
       "signalTotal": 0
     },
@@ -574,6 +598,18 @@
       "signalTotal": 0
     },
     {
+      "name": "didymos",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 8933,
+      "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "disparate-latent-experiment",
       "upstream": null,
       "upstreamSource": null,
@@ -644,6 +680,24 @@
       "fileCount": 57,
       "signals": [],
       "signalTotal": 0
+    },
+    {
+      "name": "duet",
+      "upstream": "https://github.com/toxicwind/duet",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/duet.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 39,
+      "fileCount": 0,
+      "signals": [
+        {
+          "kind": "github-parent",
+          "weight": 3,
+          "detail": "toxicwind/duet is a fork of Muvon/synx (https://github.com/Muvon/synx)"
+        }
+      ],
+      "signalTotal": 3
     },
     {
       "name": "emergent",
@@ -946,16 +1000,22 @@
       "signalTotal": 0
     },
     {
-      "name": "flock",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 10092837,
-      "fileCount": 723,
-      "signals": [],
-      "signalTotal": 0
+      "name": "flicker",
+      "upstream": "https://github.com/toxicwind/flicker",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/flicker.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 39419,
+      "fileCount": 28,
+      "signals": [
+        {
+          "kind": "github-parent",
+          "weight": 3,
+          "detail": "toxicwind/flicker is a fork of woodpecker-ci/woodpecker (https://github.com/woodpecker-ci/woodpecker)"
+        }
+      ],
+      "signalTotal": 3
     },
     {
       "name": "forge",
@@ -964,8 +1024,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 151344355,
-      "fileCount": 1722,
+      "sizeBytes": 6429598514,
+      "fileCount": 38467,
       "signals": [],
       "signalTotal": 0
     },
@@ -990,6 +1050,18 @@
       "isSubmodule": false,
       "sizeBytes": 6679858,
       "fileCount": 35,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "gavel",
+      "upstream": "https://github.com/toxicwind/gavel",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/gavel.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 1595257,
+      "fileCount": 455,
       "signals": [],
       "signalTotal": 0
     },
@@ -1090,6 +1162,18 @@
       "signalTotal": 0
     },
     {
+      "name": "hatch",
+      "upstream": "https://github.com/toxicwind/hatch",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": true,
+      "sizeBytes": 19175963281,
+      "fileCount": 187002,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "hatch-decode",
       "upstream": null,
       "upstreamSource": null,
@@ -1138,6 +1222,18 @@
       "signalTotal": 0
     },
     {
+      "name": "hodos",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 10092837,
+      "fileCount": 723,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "host-proof",
       "upstream": null,
       "upstreamSource": null,
@@ -1180,8 +1276,8 @@
       "remoteOrigin": "https://github.com/toxicwind/kairos.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 231022,
-      "fileCount": 131,
+      "sizeBytes": 236666,
+      "fileCount": 134,
       "signals": [],
       "signalTotal": 0
     },
@@ -1198,14 +1294,14 @@
       "signalTotal": 0
     },
     {
-      "name": "killer-features",
+      "name": "keryx",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 101368746,
-      "fileCount": 4457,
+      "sizeBytes": 33146,
+      "fileCount": 4,
       "signals": [],
       "signalTotal": 0
     },
@@ -1216,8 +1312,8 @@
       "remoteOrigin": null,
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 7924804081,
-      "fileCount": 163648,
+      "sizeBytes": 7924805061,
+      "fileCount": 163651,
       "signals": [],
       "signalTotal": 0
     },
@@ -1246,6 +1342,18 @@
       "signalTotal": 0
     },
     {
+      "name": "kimi-auto",
+      "upstream": "https://github.com/toxicwind/kimi-auto",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/kimi-auto.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 27422,
+      "fileCount": 21,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "kimi-claw",
       "upstream": null,
       "upstreamSource": null,
@@ -1266,6 +1374,18 @@
       "isSubmodule": false,
       "sizeBytes": 82001,
       "fileCount": 7,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "kryptos",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 111552898,
+      "fileCount": 800,
       "signals": [],
       "signalTotal": 0
     },
@@ -1432,8 +1552,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 18444468144,
-      "fileCount": 168116,
+      "sizeBytes": 12085892024,
+      "fileCount": 132127,
       "signals": [],
       "signalTotal": 0
     },
@@ -1530,6 +1650,18 @@
       "isSubmodule": false,
       "sizeBytes": 1478076,
       "fileCount": 17,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "models",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 146483872312,
+      "fileCount": 101,
       "signals": [],
       "signalTotal": 0
     },
@@ -1632,6 +1764,18 @@
       "isSubmodule": false,
       "sizeBytes": 30382250,
       "fileCount": 1203,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "nuvio",
+      "upstream": "https://github.com/toxicwind/nuvio",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": null,
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 917392376,
+      "fileCount": 10784,
       "signals": [],
       "signalTotal": 0
     },
@@ -1756,6 +1900,18 @@
       "signalTotal": 0
     },
     {
+      "name": "opsis",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 36269,
+      "fileCount": 5,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "organized-lattice-v3",
       "upstream": null,
       "upstreamSource": null,
@@ -1828,6 +1984,18 @@
       "signalTotal": 0
     },
     {
+      "name": "phone-lane",
+      "upstream": "https://github.com/toxicwind/phone-lane",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/phone-lane.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 11095550,
+      "fileCount": 42,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "phone-ocr-sweep",
       "upstream": null,
       "upstreamSource": null,
@@ -1836,6 +2004,30 @@
       "isSubmodule": false,
       "sizeBytes": 3173,
       "fileCount": 4,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "phone-sentinel",
+      "upstream": "https://github.com/toxicwind/phone-sentinel",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": null,
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 46409,
+      "fileCount": 41,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "pinax",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 400903,
+      "fileCount": 37,
       "signals": [],
       "signalTotal": 0
     },
@@ -1900,6 +2092,18 @@
       "signalTotal": 0
     },
     {
+      "name": "propylon",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 119187625,
+      "fileCount": 8,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "provider-fuzz",
       "upstream": null,
       "upstreamSource": null,
@@ -1908,6 +2112,18 @@
       "isSubmodule": false,
       "sizeBytes": 153912,
       "fileCount": 17,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "pylae",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 1361,
+      "fileCount": 1,
       "signals": [],
       "signalTotal": 0
     },
@@ -2044,6 +2260,18 @@
       "signalTotal": 0
     },
     {
+      "name": "rig-ciwatch",
+      "upstream": "https://github.com/toxicwind/rig",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/rig.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 23449666,
+      "fileCount": 602,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "roundup",
       "upstream": null,
       "upstreamSource": null,
@@ -2128,6 +2356,18 @@
       "signalTotal": 0
     },
     {
+      "name": "rust-wrappers",
+      "upstream": "https://github.com/toxicwind/rust-wrappers",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/rust-wrappers.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 10806434,
+      "fileCount": 213,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "ryzen3090-whoa",
       "upstream": null,
       "upstreamSource": null,
@@ -2194,7 +2434,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4808275904,
+      "sizeBytes": 4812355210,
       "fileCount": 14953,
       "signals": [],
       "signalTotal": 0
@@ -2242,7 +2482,7 @@
       "remoteOrigin": "https://github.com/toxicwind/squawk.git",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 21669163,
+      "sizeBytes": 21678026,
       "fileCount": 1831,
       "signals": [],
       "signalTotal": 0
@@ -2428,6 +2668,18 @@
       "signalTotal": 0
     },
     {
+      "name": "tau-verify",
+      "upstream": "https://github.com/toxicwind/tau",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": "https://github.com/toxicwind/tau.git",
+      "hasGit": true,
+      "isSubmodule": true,
+      "sizeBytes": 1518671637,
+      "fileCount": 43183,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "tok",
       "upstream": "https://github.com/toxicwind/tok",
       "upstreamSource": ".gitmodules",
@@ -2566,7 +2818,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 0,
+      "sizeBytes": 101779442180,
       "fileCount": 2460398,
       "signals": [],
       "signalTotal": 0
@@ -2668,7 +2920,7 @@
       "remoteOrigin": "https://github.com/toxicwind/ranch",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 33615931,
+      "sizeBytes": 33699921,
       "fileCount": 2132,
       "signals": [],
       "signalTotal": 0

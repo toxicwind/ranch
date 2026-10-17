@@ -1,6 +1,6 @@
 {
   "$schema": "ranch-roost/v1",
-  "generatedAt": "2026-10-13T07:27:35.000Z",
+  "generatedAt": "2026-10-17T05:17:24.000Z",
   "generator": "@ranch/roost codegen — DO NOT EDIT BY HAND",
   "provenance": "@ranch/roost src/data.ts",
   "adapters": [
@@ -1164,49 +1164,9 @@
   },
   "seedsContract": "Cold-start only: served while a provider has never had a successful discovery; inert afterwards. Never hand-edit model membership here — discovery owns it.",
   "aliases": {
-    "ling": [
-      "openrouter",
-      "inclusionai/ling-3.0-flash-fin:free"
-    ],
-    "ling-flash": [
-      "openrouter",
-      "inclusionai/ling-3.0-flash:free"
-    ],
-    "laguna-xs": [
-      "openrouter",
-      "poolside/laguna-xs-2.1:free"
-    ],
-    "laguna-s": [
-      "openrouter",
-      "poolside/laguna-s-2.1:free"
-    ],
-    "gemma4-31b": [
-      "openrouter",
-      "google/gemma-4-31b-it:free"
-    ],
-    "gemma4-26b": [
-      "openrouter",
-      "google/gemma-4-26b-a4b-it:free"
-    ],
-    "nemotron-super": [
-      "openrouter",
-      "nvidia/nemotron-3-super-120b-a12b:free"
-    ],
     "nemotron-nano": [
       "nvidia",
       "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
-    ],
-    "nemotron-ultra": [
-      "openrouter",
-      "nvidia/nemotron-3-ultra-550b-a55b:free"
-    ],
-    "nemotron-omni": [
-      "openrouter",
-      "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"
-    ],
-    "north-mini": [
-      "openrouter",
-      "cohere/north-mini-code:free"
     ],
     "nim-nemotron-super": [
       "nvidia",
@@ -1255,54 +1215,6 @@
     "nim-inkling": [
       "nvidia",
       "thinkingmachines/inkling"
-    ],
-    "gemini-eap": [
-      "google",
-      "models/gemini-flash-tool-retrieval"
-    ],
-    "gemini-3.8-flash": [
-      "google",
-      "models/gemini-3.8-flash"
-    ],
-    "gemini-3.7-flash": [
-      "google",
-      "models/gemini-3.7-flash"
-    ],
-    "gemini-3.6-flash": [
-      "google",
-      "models/gemini-3.6-flash"
-    ],
-    "gemini-3.5-flash": [
-      "google",
-      "models/gemini-3.5-flash"
-    ],
-    "gemini-3.1-pro": [
-      "google",
-      "models/gemini-3.1-pro-preview"
-    ],
-    "gemini-3-flash": [
-      "google",
-      "models/gemini-3-flash-preview"
-    ],
-    "gemini-2.5-flash": [
-      "google",
-      "models/gemini-2.5-flash"
-    ],
-    "mistral-small": [
-      "mistral",
-      "mistral-small-latest"
-    ],
-    "codestral": [
-      "mistral",
-      "codestral-latest"
-    ],
-    "mistral-large": [
-      "mistral",
-      "mistral-large-latest"
-    ],
-    "mistral-medium": [
-      "mistral",
-      "mistral-medium-latest"
     ],
     "groq-llama-3.3-70b": [
       "groq",

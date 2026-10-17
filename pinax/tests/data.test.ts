@@ -37,17 +37,18 @@ describe("reconciled provider data", () => {
       deadIds: DEAD_MODEL_IDS,
     });
     const ids = cat.servingModels("groq");
-    expect(ids).toContain("openai/gpt-oss-120b");
+    // gpt-oss-120b is dead on groq (filtered); gpt-oss-20b is live (served).
+    expect(ids).not.toContain("openai/gpt-oss-120b");
     expect(ids).toContain("openai/gpt-oss-20b");
     expect(ids).not.toContain("llama-3.3-70b-versatile");
     expect(ids).not.toContain("qwen/qwen3-32b");
   });
 
-  test("mistral models url composes without a doubled /v1", () => {
+  test("models url composes without a doubled /v1", () => {
     const cat = new ModelCatalog(PROVIDER_DEFS, {
       aliases: MODEL_ALIASES,
       deadIds: DEAD_MODEL_IDS,
     });
-    expect(cat.modelsUrl("mistral")).toBe("https://api.mistral.ai/v1/models");
+    expect(cat.modelsUrl("openai")).toBe("https://api.openai.com/v1/models");
   });
 });

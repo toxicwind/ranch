@@ -1220,20 +1220,7 @@ export const PROVIDER_DEFS: ProviderDef[] = [
  * aliases stay router-local overlays.
  */
 export const MODEL_ALIASES: Record<string, ModelAlias> = {
-  ling: ["openrouter", "inclusionai/ling-3.0-flash-fin:free"],
-  "ling-flash": ["openrouter", "inclusionai/ling-3.0-flash:free"],
-  "laguna-xs": ["openrouter", "poolside/laguna-xs-2.1:free"],
-  "laguna-s": ["openrouter", "poolside/laguna-s-2.1:free"],
-  "gemma4-31b": ["openrouter", "google/gemma-4-31b-it:free"],
-  "gemma4-26b": ["openrouter", "google/gemma-4-26b-a4b-it:free"],
-  "nemotron-super": ["openrouter", "nvidia/nemotron-3-super-120b-a12b:free"],
   "nemotron-nano": ["nvidia", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"],
-  "nemotron-ultra": ["openrouter", "nvidia/nemotron-3-ultra-550b-a55b:free"],
-  "nemotron-omni": [
-    "openrouter",
-    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-  ],
-  "north-mini": ["openrouter", "cohere/north-mini-code:free"],
   "nim-nemotron-super": ["nvidia", "nvidia/nemotron-3-super-120b-a12b"],
   "nim-nemotron-omni": [
     "nvidia",
@@ -1255,21 +1242,6 @@ export const MODEL_ALIASES: Record<string, ModelAlias> = {
   "nim-gemma4-31b": ["nvidia", "google/gemma-4-31b-it"],
   "nim-glm5.2": ["nvidia", "z-ai/glm-5.2"],
   "nim-inkling": ["nvidia", "thinkingmachines/inkling"],
-  // google routes to the EAP interactions pool; gemini-2.0-flash,
-  // gemini-2.5-flash-lite and gemma-4-31b-it are NOT in that project's model
-  // list (verified 2026-10-02 against GET /v1beta/models) and were dropped.
-  "gemini-eap": ["google", "models/gemini-flash-tool-retrieval"],
-  "gemini-3.8-flash": ["google", "models/gemini-3.8-flash"],
-  "gemini-3.7-flash": ["google", "models/gemini-3.7-flash"],
-  "gemini-3.6-flash": ["google", "models/gemini-3.6-flash"],
-  "gemini-3.5-flash": ["google", "models/gemini-3.5-flash"],
-  "gemini-3.1-pro": ["google", "models/gemini-3.1-pro-preview"],
-  "gemini-3-flash": ["google", "models/gemini-3-flash-preview"],
-  "gemini-2.5-flash": ["google", "models/gemini-2.5-flash"],
-  "mistral-small": ["mistral", "mistral-small-latest"],
-  codestral: ["mistral", "codestral-latest"],
-  "mistral-large": ["mistral", "mistral-large-latest"],
-  "mistral-medium": ["mistral", "mistral-medium-latest"],
   "groq-llama-3.3-70b": ["groq", "llama-3.3-70b-versatile"],
   "groq-qwen3-32b": ["groq", "qwen/qwen3-32b"],
   "groq-qwen3.6-27b": ["groq", "qwen/qwen3.6-27b"],
