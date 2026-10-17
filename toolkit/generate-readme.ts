@@ -161,7 +161,7 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
   md += `[![go](https://img.shields.io/badge/Go-1.23-00ADD8?logo=go&logoColor=white)](https://go.dev)\n`;
   md += `[![rust](https://img.shields.io/badge/Rust-orange?logo=rust)](https://www.rust-lang.org)\n\n`;
   md += `# 🤠 ranch\n\n`;
-  md += `**The whole self-hosted AI estate in one monorepo.** Local model serving (**herd**), cloud provider routing (**flock**), the canonical router (**cuttinggate**), the coding agent (**tau**), the MCP gateway (**gatehouse**), the build-job system (**flicker**), fleet chat (**squawk**), and the provider catalog (**roost**) they all share — one directory per component, the full mesh on one box, everything OpenAI-compatible.\n\n`;
+  md += `**The whole self-hosted AI estate in one monorepo.** Local model serving (**herd**), cloud provider routing (**hodos**), the canonical router (**cuttinggate**), the coding agent (**tau**), the MCP gateway (**gatehouse**), the build-job system (**forge**), fleet chat (**keryx**), and the provider catalog (**roost**) they all share — one directory per component, the full mesh on one box, everything OpenAI-compatible.\n\n`;
   md += `[Explore the docs »](docs/) · [Report Bug](https://github.com/toxicwind/ranch/issues/new?labels=bug&template=bug_report.md) · [Request Feature](https://github.com/toxicwind/ranch/issues/new?labels=enhancement&template=feature_request.md)\n\n`;
   md += `<img src="docs/images/ranch-demo.svg" alt="ranch 30-second proof: 52 local models behind one OpenAI-compatible door, every core service answering 200" width="720">\n\n`;
   md += `</div>\n\n`;
@@ -189,13 +189,13 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
   md += `If you run models on a box **and** call cloud APIs, this is the shape of the answer: local traffic stays local, cloud traffic goes through one rate-limit-aware router, and **strategy names — not model names — decide the route**. Any client that speaks the OpenAI API just works — \`curl\`, the OpenAI SDK, your agent framework of choice.\n\n`;
   md += `The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](https://bun.sh) link the TypeScript animals, [moon](https://moonrepo.dev) orchestrates polyglot tasks (Bun/TS, Go, Python, Rust) with pinned toolchains, and CI runs only what your change touches (\`moon ci\`). One directory per animal, no pens inside pens — this README is the map.\n\n`;
   md += `### The agent this estate serves\n\n`;
-  md += `**tau** is the coding agent — a terminal coding agent (fork of [oh-my-pi](https://github.com/can1357/oh-my-pi)) with an interactive CLI + SDK, 30+ tools, subagents, LSP-aware editing, and a native Rust hot path. It speaks to dozens of providers through a compiled model catalog sourced from **roost**, the ranch's single provider-data authority. Tau lives in its own repo ([toxicwind/tau](https://github.com/toxicwind/tau)) and nests into the ranch at \`tau/\` (gitignored — an independent repo with its own remote, absent in a fresh clone); on a live estate, **chute** exposes its stdio ACP engine as a TCP daemon on \`:25111\`, and its model traffic flows through herd and flock. If you only learn one animal, learn tau — the rest of the ranch exists so the agent can work.\n\n`;
+  md += `**tau** is the coding agent — a terminal coding agent (fork of [oh-my-pi](https://github.com/can1357/oh-my-pi)) with an interactive CLI + SDK, 30+ tools, subagents, LSP-aware editing, and a native Rust hot path. It speaks to dozens of providers through a compiled model catalog sourced from **roost**, the ranch's single provider-data authority. Tau lives in its own repo ([toxicwind/tau](https://github.com/toxicwind/tau)) and nests into the ranch at \`tau/\` (gitignored — an independent repo with its own remote, absent in a fresh clone); on a live estate, **chute** exposes its stdio ACP engine as a TCP daemon on \`:25111\`, and its model traffic flows through herd and hodos. If you only learn one animal, learn tau — the rest of the ranch exists so the agent can work.\n\n`;
 
   md += `## 🛠️ Built with\n\n`;
-  md += `- [Go](https://go.dev) — herd (local front door), flicker (build jobs), gatehouse (MCP gateway)\n`;
-  md += `- [Rust](https://www.rust-lang.org) — flock proxy (provider router), rig (OpenFang kernel), tau's native hot path\n`;
+  md += `- [Go](https://go.dev) — herd (local front door), forge (build jobs), gatehouse (MCP gateway)\n`;
+  md += `- [Rust](https://www.rust-lang.org) — hodos (provider router), rig (OpenFang kernel), tau's native hot path\n`;
   md += `- [Bun](https://bun.sh) + [TypeScript](https://www.typescriptlang.org) — workspaces, cuttinggate, fleet-ui, windmill, stream-broker, roost, tau's agent brain\n`;
-  md += `- [Python](https://www.python.org) — squawk (fleet chat), squawk-ws, lasso (desktop control)\n`;
+  md += `- [Python](https://www.python.org) — keryx (fleet chat), squawk-ws, lasso (desktop control)\n`;
   md += `- [mise](https://mise.jdx.dev) — toolchains and build tasks; estate owns the shared build cache\n`;
   md += `- **pitchfork** — the daemon supervisor: supervised services on the live estate\n\n`;
 
@@ -207,6 +207,35 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
   md += `| Submodules | ${stats.submodules} |\n`;
   md += `| Total size | ${stats.totalSizeGB} GB |\n`;
   md += `| Total tracked files | ${stats.totalFiles.toLocaleString()} |\n\n`;
+
+  // ── Registered submodules: the full map from .gitmodules ──
+  let subRows = "";
+  try {
+    const gmRaw = readFileSync(join(RANCH_ROOT, ".gitmodules"), "utf8");
+    const entries: { path: string; url: string }[] = [];
+    let cur: { path: string; url: string } | null = null;
+    for (const line of gmRaw.split("\n")) {
+      const sec = line.match(/^\[submodule "([^"]+)"\]/);
+      if (sec) { if (cur) entries.push(cur); cur = { path: "", url: "" }; continue; }
+      const p = line.match(/^\s*path\s*=\s*(.+)$/);
+      if (p && cur) cur.path = p[1].trim();
+      const u = line.match(/^\s*url\s*=\s*(.+)$/);
+      if (u && cur) cur.url = u[1].trim();
+    }
+    if (cur) entries.push(cur);
+    const sorted = entries.filter((e) => e.path).sort((a, b) => a.path.localeCompare(b.path));
+    for (const e of sorted) {
+      const disp = e.url.replace(/^https?:\/\/(www\.)?github\.com\//, "").replace(/\.git$/, "");
+      subRows += `| \`${e.path}\` | [${disp}](${e.url}) |\n`;
+    }
+    md += `## 🗂️ Registered Submodules (${sorted.length})\n\n`;
+    md += `The full map — every animal's pen. From \`.gitmodules\`; regenerate with the README.\n\n`;
+    md += `| Path | Repo |\n|---|---|\n`;
+    md += subRows + "\n";
+  } catch {
+    md += `## 🗂️ Registered Submodules\n\n*(.gitmodules not readable)*\n\n`;
+  }
+
 
   md += `## 🔭 Upstream Sources\n\n`;
   md += `| Source | Count |\n|---|---|\n`;
