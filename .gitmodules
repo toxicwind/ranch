@@ -465,3 +465,18 @@
 [submodule "hatch"]
 	path = hatch
 	url = https://github.com/toxicwind/hatch.git
+[submodule "duet"]
+	path = duet
+	url = https://github.com/toxicwind/duet.git
+[submodule "flicker"]
+	path = flicker
+	url = https://github.com/toxicwind/flicker.git
+[submodule "phone-lane"]
+	path = phone-lane
+	url = https://github.com/toxicwind/phone-lane.git
+[submodule "rust-wrappers"]
+	path = rust-wrappers
+	url = https://github.com/toxicwind/rust-wrappers.git
+[submodule "kimi-auto"]
+	path = kimi-auto
+	url = https://github.com/toxicwind/kimi-auto.git
