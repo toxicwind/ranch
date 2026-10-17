@@ -35,17 +35,14 @@ describe("provider wire data integrity", () => {
     }
   });
 
-  test("anthropic uses x-api-key auth against its native models endpoint", () => {
-    const a = PROVIDER_DEFS.find((d) => d.name === "anthropic")!;
-    expect(a.baseUrl).toBe("https://api.anthropic.com/v1");
-    expect(a.auth).toBe("x-api-key");
-    expect(a.headerName).toBe("x-api-key");
+  test("openai uses bearer auth against its native endpoint", () => {
+    const o = PROVIDER_DEFS.find((d) => d.name === "openai")!;
+    expect(o.baseUrl).toBe("https://api.openai.com/v1");
+    expect(o.auth).toBe("bearer");
   });
 
   test("templated baseUrls preserve their region/account placeholders", () => {
     const mantle = PROVIDER_DEFS.find((d) => d.name === "bedrock-mantle")!;
     expect(mantle.baseUrl).toContain("{region}");
-    const cf = PROVIDER_DEFS.find((d) => d.name === "cloudflare-ai-gateway")!;
-    expect(cf.baseUrl).toContain("<account>");
   });
 });

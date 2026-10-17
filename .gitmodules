@@ -609,12 +609,6 @@
 [submodule "kilo"]
 	path = kilo
 	url = https://github.com/toxicwind/kilo.git
-[submodule "kilo-cli"]
-	path = kilo-cli
-	url = https://github.com/toxicwind/kilo-cli.git
-[submodule "kilo-code"]
-	path = kilo-code
-	url = https://github.com/toxicwind/kilo-code.git
 [submodule "kimi-claw"]
 	path = kimi-claw
 	url = https://github.com/toxicwind/kimi-claw.git
@@ -660,24 +654,12 @@
 [submodule "ml-serve"]
 	path = ml-serve
 	url = https://github.com/toxicwind/ml-serve.git
-[submodule "model-max"]
-	path = model-max
-	url = https://github.com/toxicwind/model-max.git
-[submodule "monad-forge"]
-	path = monad-forge
-	url = https://github.com/toxicwind/monad-forge.git
 [submodule "naming-audit"]
 	path = naming-audit
 	url = https://github.com/toxicwind/naming-audit.git
-[submodule "nim-repos"]
-	path = nim-repos
-	url = https://github.com/toxicwind/nim-repos.git
 [submodule "null-g-proxy"]
 	path = null-g-proxy
 	url = https://github.com/toxicwind/null-g-proxy.git
-[submodule "omp-test-runner-watchdog-OzX7V0"]
-	path = omp-test-runner-watchdog-OzX7V0
-	url = https://github.com/toxicwind/omp-test-runner-watchdog-OzX7V0.git
 [submodule "openfang"]
 	path = openfang
 	url = https://github.com/toxicwind/openfang.git
@@ -693,3 +675,15 @@
 [submodule "opsis"]
 	path = opsis
 	url = https://github.com/toxicwind/opsis.git
+[submodule "pack-fix"]
+	path = pack-fix
+	url = https://github.com/toxicwind/pack-fix.git
+[submodule "phone-ocr-sweep"]
+	path = phone-ocr-sweep
+	url = https://github.com/toxicwind/phone-ocr-sweep.git
+[submodule "pinax"]
+	path = pinax
+	url = https://github.com/toxicwind/pinax.git
+[submodule "plugin-ecosystem"]
+	path = plugin-ecosystem
+	url = https://github.com/toxicwind/plugin-ecosystem.git
