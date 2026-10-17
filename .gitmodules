@@ -408,3 +408,6 @@
 [submodule "agentpluginzoo"]
 	path = plugin-ecosystem/agentpluginzoo
 	url = https://github.com/tezansahu/agentpluginzoo.git
+[submodule "tok"]
+	path = tok
+	url = https://github.com/toxicwind/tok.git
