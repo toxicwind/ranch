@@ -59,84 +59,81 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 - [mise](https://mise.jdx.dev) — toolchains and build tasks; estate owns the shared build cache
 - **pitchfork** — the daemon supervisor: supervised services on the live estate
 
-## 📊 Monorepo Statistics (generated 10/16/2026, 12:09:04 AM)
+## 📊 Monorepo Statistics (generated 10/16/2026, 9:51:10 PM)
 
 | Metric | Value |
 |---|---|
-| Total directories | 201 |
-| Directories with obvious upstream | 44 / 201 (21.9%) |
-| Git-tracked directories | 49 |
-| Submodules | 33 |
-| Total size | 66.41 GB |
-| Total tracked files | 325,371 |
+| Total directories | 223 |
+| Directories with obvious upstream | 71 / 223 (31.8%) |
+| Git-tracked directories | 71 |
+| Submodules | 63 |
+| Total size | 71.03 GB |
+| Total tracked files | 585,080 |
 
 ## 🔭 Upstream Sources
 
 | Source | Count |
 |---|---|
-| .gitmodules | 33 |
-| package.json repository | 3 |
-| git remote origin (non-toxicwind) | 2 |
-| git remote upstream | 2 |
-| go.mod module | 1 |
+| .gitmodules | 63 |
+| package.json repository | 5 |
 | README 'Forked from' | 1 |
-| GitHub parent fork | 1 |
+| git remote upstream | 1 |
 | Cargo.toml repository | 1 |
 
 ## 🌐 Languages (by tracked files)
 
 | Language | Files |
 |---|---|
-| TypeScript | 13,874 |
-| Markdown | 3,510 |
-| SVG | 3,261 |
-| Python | 2,054 |
-| Go | 1,790 |
-| TSX | 1,670 |
-| Rust | 1,274 |
-| PNG | 1,240 |
+| TypeScript | 22,631 |
+| Markdown | 4,932 |
+| Rust | 4,149 |
+| SVG | 3,960 |
+| JavaScript | 3,526 |
+| JSON | 3,108 |
+| Python | 2,849 |
+| Go | 1,947 |
+| TSX | 1,798 |
+| MAP | 1,586 |
+| PNG | 1,300 |
 | PYC | 1,203 |
-| JSON | 1,127 |
-| Kotlin | 1,054 |
-| QML | 579 |
-| Shell | 520 |
-| Text | 405 |
-| CSS | 366 |
-| TOML | 318 |
-| YAML | 306 |
-| KDL | 222 |
-| C | 185 |
-| JavaScript | 182 |
+| QML | 1,158 |
+| Kotlin | 1,081 |
+| Shell | 762 |
+| TOML | 723 |
+| C++ | 685 |
+| Text | 644 |
+| CU | 564 |
+| KDL | 451 |
 
 ## 📦 Top 10 Largest Directories
 
 | Directory | Size | Files | Upstream |
 |---|---|---|---|
-| `mesh` | 15990.3 MB | 166,806 | — |
-| `wezterm` | 8873.1 MB | 31,543 | github.com/toxicwind/wezterm |
-| `qed` | 8179.6 MB | 56,803 | — |
-| `tau` | 5102.7 MB | 48,439 | github.com/can1357/oh-my-pi |
-| `tau-extensions` | 4786.4 MB | 77,624 | github.com/toxicwind/tau-extensions |
-| `shell` | 4375.0 MB | 14,952 | — |
+| `mesh` | 17590.0 MB | 168,116 | — |
+| `tau` | 9895.6 MB | 126,228 | github.com/can1357/oh-my-pi |
+| `qed` | 8179.6 MB | 56,807 | — |
+| `kilo` | 7557.7 MB | 163,648 | — |
+| `shell` | 4585.5 MB | 14,953 | — |
 | `rust-algo-web` | 3626.3 MB | 11,657 | — |
-| `nim-repos` | 2709.8 MB | 63,117 | — |
-| `barn` | 2513.5 MB | 12,945 | — |
+| `nim-repos` | 2726.9 MB | 63,529 | — |
+| `barn` | 2514.3 MB | 12,963 | — |
 | `github-search` | 2159.6 MB | 45,093 | — |
+| `trading-post` | 1664.1 MB | 94,745 | github.com/toxicwind/trading-post |
 
 ## 🔮 Top Upstreams by Fork Count
 
 | Upstream | Forks |
 |---|---|
+| [github.com/toxicwind/agent-customization-style-guide](https://github.com/toxicwind/agent-customization-style-guide) | 1 |
+| [github.com/toxicwind/agent-dashboard](https://github.com/toxicwind/agent-dashboard) | 1 |
 | [github.com/aparnaa19/AgentForensics](https://github.com/aparnaa19/AgentForensics) | 1 |
-| [github.com/jairnarvaez/Hyprgrid](https://github.com/jairnarvaez/Hyprgrid) | 1 |
-| [github.com/roninjin10/super-ralph](https://github.com/roninjin10/super-ralph.git) | 1 |
+| [github.com/toxicwind/ai-merge-resolve](https://github.com/toxicwind/ai-merge-resolve) | 1 |
+| [github.com/toxicwind/awesome-free-ai-coding](https://github.com/toxicwind/awesome-free-ai-coding) | 1 |
+| [github.com/toxicwind/computer-use-linux](https://github.com/toxicwind/computer-use-linux) | 1 |
+| [github.com/toxicwind/corral](https://github.com/toxicwind/corral.git) | 1 |
 | [github.com/toxicwind/doorbell](https://github.com/toxicwind/doorbell) | 1 |
 | [github.com/A-man-Sharma-04/modelpilot](https://github.com/A-man-Sharma-04/modelpilot) | 1 |
-| [./estate-scripts](./estate-scripts) | 1 |
-| [go.woodpecker-ci.org/woodpecker/v3](https://go.woodpecker-ci.org/woodpecker/v3) | 1 |
-| [github.com/Aetherall/hyprgrid](https://github.com/Aetherall/hyprgrid) | 1 |
-| [github.com/toxicwind/kilo-cli](https://github.com/toxicwind/kilo-cli) | 1 |
-| [github.com/toxicwind/kilo-code](https://github.com/toxicwind/kilo-code) | 1 |
+| [github.com/toxicwind/dualspace-ast-bm25-hybrid](https://github.com/toxicwind/dualspace-ast-bm25-hybrid) | 1 |
 
 ## 🔲 Similarity Clusters (README-based)
 
@@ -144,33 +141,33 @@ Directories with similar README content (Jaccard on first 500 chars):
 
 | Dir A | Dir B | Similarity |
 |---|---|---|
-| `pd-mcp-standalone` | `pearlctl` | 45.9% |
-| `mcpproxy-go` | `squawk` | 41.3% |
-| `estate` | `squawk` | 38.9% |
-| `estate` | `mcpproxy-go` | 35.6% |
+| `estate-hatch-toolkit` | `pearlctl` | 60.6% |
+| `agent-customization-style-guide` | `mcp-dropin-guide` | 57.1% |
+| `estate-shell` | `kairos` | 45.1% |
+| `kairos` | `tok` | 41.1% |
+| `estate-shell` | `tok` | 40.0% |
+| `OmniRoute` | `VansRouter` | 37.7% |
 | `repo-first-class` | `squawk` | 35.4% |
 | `outlier-toolkit` | `refusal-hunt` | 35.1% |
 | `strudel-dev-vite` | `strudel-sampler-server-vite` | 34.9% |
 | `ferret-den` | `squawk` | 34.6% |
-| `outlier-toolkit` | `session-bus-refresh` | 33.9% |
-| `mcpproxy-go` | `pearlctl` | 33.3% |
 
 ## 📁 Directory Type Breakdown
 
 | Type | Count |
 |---|---|
-| Submodule | 33 |
-| Fork (ours) | 42 |
-| Upstream mirror | 6 |
-| Fork (ours, no upstream) | 8 |
-| Upstream mirror (no upstream) | 1 |
-| Vendored (snapshot) | 60 |
-| Experimental | 60 |
-| Stub/Empty | 32 |
+| Submodule | 63 |
+| Fork (ours) | 51 |
+| Upstream mirror | 18 |
+| Fork (ours, no upstream) | 1 |
+| Upstream mirror (no upstream) | 2 |
+| Vendored (snapshot) | 64 |
+| Experimental | 57 |
+| Stub/Empty | 31 |
 
 ---
 
-*Generated by `bun toolkit/generate-readme.ts` at 2026-10-16T06:09:04.668Z*
+*Generated by `bun toolkit/generate-readme.ts` at 2026-10-17T03:51:10.064Z*
 
 ---
 
