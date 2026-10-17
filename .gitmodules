@@ -441,3 +441,24 @@
 [submodule "phone-sentinel"]
 	path = phone-sentinel
 	url = https://github.com/toxicwind/phone-sentinel.git
+[submodule "tau.tau-extensions"]
+	path = tau/tau-extensions
+	url = https://github.com/toxicwind/tau-extensions.git
+[submodule "tools.c8"]
+	path = tools/c8
+	url = https://github.com/bcoe/c8.git
+[submodule "websites.arlockworks.app"]
+	path = websites/arlockworks/app
+	url = https://github.com/toxicwind/arlockworks-next.git
+[submodule "websites.arlockworks.main"]
+	path = websites/arlockworks/main
+	url = https://github.com/toxicwind/arlockworks-core.git
+[submodule "websites.effusionlabs.main"]
+	path = websites/effusionlabs/main
+	url = https://github.com/toxicwind/effusion-labs.git
+[submodule "websites.effusionlabs.tickets"]
+	path = websites/effusionlabs/tickets
+	url = https://github.com/toxicwind/effusion-labs-tickets.git
+[submodule "submodules.phone-sentinel"]
+	path = submodules/phone-sentinel
+	url = /home/toxic/phone-sentinel
