@@ -400,7 +400,7 @@
 	path = mesh/flocksync
 	url = https://github.com/toxicwind/flocksync.git
 [submodule "weasel"]
-	path = mesh/router/weasel
+	path = forge/router/weasel
 	url = https://github.com/diegosouzapw/OmniRoute
 [submodule "nim-omnibus"]
 	path = nim-omnibus
