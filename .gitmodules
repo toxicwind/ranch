@@ -411,3 +411,6 @@
 [submodule "tok"]
 	path = tok
 	url = https://github.com/toxicwind/tok.git
+[submodule "corral"]
+	url = https://github.com/toxicwind/corral.git
+	path = barn/corral
