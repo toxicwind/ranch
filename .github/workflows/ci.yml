@@ -41,8 +41,12 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
       - name: Install tau-marketplace deps
         run: |
-          (cd tau/tau-marketplace && bun install)
-          for d in tau/tau-marketplace/plugins/*/; do
+          TM_FILE="$(find . -maxdepth 4 -name package.json -path '*tau-marketplace*' -not -path './node_modules/*' | head -1)"
+          [ -n "$TM_FILE" ] || { echo "tau-marketplace not found after reorg"; exit 1; }
+          TM_DIR="$(dirname "$TM_FILE")"
+          echo "tau-marketplace at $TM_DIR"
+          (cd "$TM_DIR" && bun install)
+          for d in "$TM_DIR"/plugins/*/; do
             if [ -f "$d/package.json" ]; then (cd "$d" && bun install); fi
           done
 
