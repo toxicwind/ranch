@@ -256,7 +256,7 @@ def _resolve_ralph_model(base_url, timeout=15):
             content = ""
             if choices:
                 msg = choices[0].get("message") or {}
-                content = (msg.get("content") or msg.get("reasoning_content") or "").strip()
+                content = (msg.get("content") or msg.get("reasoning_content") or msg.get("reasoning") or "").strip()
             if content:
                 _ralph_model_cache.update(model=cand, ts=now)
                 return cand
@@ -872,7 +872,7 @@ class Bidder:
                 content = ""
                 if choices:
                     msg = choices[0].get("message") or {}
-                    content = (msg.get("content") or msg.get("reasoning_content") or "").strip()
+                    content = (msg.get("content") or msg.get("reasoning_content") or msg.get("reasoning") or "").strip()
                 if content:
                     return content
             except Exception:

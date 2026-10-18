@@ -286,10 +286,10 @@ export async function proxyChatCompletions(
       const data = (await resp.json()) as any;
       const msg = data?.choices?.[0]?.message;
       // NIM-wide behavior (verified 2026-10-15, 65-model sweep): several
-      // models return reasoning_content ONLY with empty content. Fall back
+      // models return reasoning_content ONLY (or bare reasoning) with empty content. Fall back
       // so a reasoning-only response is not misclassified as an empty
       // completion (the ghost-empty disease).
-      const text: string = msg?.content || msg?.reasoning_content || "";
+      const text: string = msg?.content || msg?.reasoning_content || msg?.reasoning || "";
       if (!text.trim()) throw new Error("nim-proxy returned an empty completion");
       pool.recordSuccess(key);
       return text;
