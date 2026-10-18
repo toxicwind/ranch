@@ -1,4 +1,4 @@
-# ranch/* fork audit (generated 2026-10-18T16:05:44.204Z)
+# ranch/* fork audit (generated 2026-10-18T17:04:25.870Z)
 
 190 immediate subdirs; **140** have an obvious upstream reference.
 
