@@ -7,7 +7,7 @@
 
 import { execSync, type ExecSyncOptions } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, join, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 import { homedir } from "node:os";
 
@@ -26,6 +26,16 @@ function initColocated(dir: string): void {
   } catch (e: any) {
     throw new Error(`jj git init --colocate failed in ${dir}: ${e?.message ?? e}`);
   }
+}
+
+/**
+ * Directories where in-place `jj git init` must never run — an isolated
+ * workspace is provisioned instead. Turning $HOME (or /) into a repo is
+ * never what a task launch wants.
+ */
+function isProtectedCwd(dir: string): boolean {
+  const normalized = resolve(dir);
+  return normalized === "/" || (homedir() !== "" && normalized === homedir());
 }
 
 function seedInitialCommit(workspace: string): void {
@@ -70,6 +80,18 @@ export async function ensureWorkspace(
     // Adopt existing git repo non-destructively
     initColocated(requestedCwd);
     console.error(`corral: adopted ${requestedCwd} as a colocated jj repo (jj git init --colocate).`);
+    return requestedCwd;
+  }
+
+  // 2026-10-18 (cwd launch): when launched with a task cwd that is a plain
+  // directory (not a protected location), initialize the colocated jj repo
+  // IN PLACE instead of abandoning the launch cwd for an isolated workspace
+  // elsewhere. The bidder launches corral with the task workdir as cwd and
+  // expects the agent to work there.
+  if (!isProtectedCwd(requestedCwd)) {
+    initColocated(requestedCwd);
+    seedInitialCommit(requestedCwd);
+    console.error(`corral: initialized ${requestedCwd} as a colocated jj repo in place (jj git init --colocate).`);
     return requestedCwd;
   }
 

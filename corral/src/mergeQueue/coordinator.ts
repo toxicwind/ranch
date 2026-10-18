@@ -9,6 +9,7 @@ import type {
   CommandResult,
   MergeQueueOps,
   MergeQueueRequest,
+  EvictReason,
 } from "./types";
 import { createDefaultOps } from "./ops";
 import { REQUEST_MARKER, buildSpeculativeMergeQueuePrompt, extractRequestFromPrompt } from "./prompt";
@@ -479,32 +480,3 @@ export function resetSpeculativeMergeQueueRegistry() {
   coordinatorRegistry.clear();
 }
 
-export function createSpeculativeMergeQueueAgent(
-  id = "super-ralph-speculative-merge-queue",
-): AgentLike {
-  return {
-    id,
-    async generate(args: any) {
-      try {
-        const request = extractRequestFromPrompt(String(args?.prompt ?? ""));
-        const output = await runTicketThroughSpeculativeMergeQueue(request);
-        return { output };
-      } catch (err) {
-        return {
-          output: {
-            merged: false,
-            mergeCommit: null,
-            ciPassed: false,
-            summary: `Merge queue coordinator error: ${err instanceof Error ? err.message : String(err)}`,
-            evicted: false,
-            evictionReason: null,
-            evictionDetails: null,
-            attemptedLog: null,
-            attemptedDiffSummary: null,
-            landedOnMainSinceBranch: null,
-          },
-        };
-      }
-    },
-  };
-}
