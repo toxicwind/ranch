@@ -1,9 +1,9 @@
-# ranch/* fork audit (generated 2026-10-18T03:07:10.065Z)
+# ranch/* fork audit (generated 2026-10-18T04:06:25.313Z)
 
-191 immediate subdirs; **141** have an obvious upstream reference.
+190 immediate subdirs; **140** have an obvious upstream reference.
 
 By source:
-  - **140** .gitmodules
+  - **139** .gitmodules
   - **1** Cargo.toml repository
 
 | dir | upstream | source | origin remote |
@@ -73,7 +73,6 @@ By source:
 | `herd` | [github.com/toxicwind/herd](https://github.com/toxicwind/herd) | .gitmodules | — |
 | `herdproof-bun` | [github.com/toxicwind/herdproof-bun](https://github.com/toxicwind/herdproof-bun) | .gitmodules | — |
 | `hf-model-sync` | [github.com/toxicwind/hf-model-sync](https://github.com/toxicwind/hf-model-sync) | .gitmodules | — |
-| `hodos` | [github.com/toxicwind/hodos](https://github.com/toxicwind/hodos) | .gitmodules | — |
 | `host-proof` | [github.com/toxicwind/host-proof](https://github.com/toxicwind/host-proof) | .gitmodules | — |
 | `identity-router` | [github.com/toxicwind/identity-router](https://github.com/toxicwind/identity-router) | .gitmodules | — |
 | `kairos` | [github.com/toxicwind/kairos](https://github.com/toxicwind/kairos) | .gitmodules | — |

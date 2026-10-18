@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-18T03:07:10.065Z",
-  "total": 191,
-  "withUpstream": 141,
+  "generated": "2026-10-18T04:06:25.313Z",
+  "total": 190,
+  "withUpstream": 140,
   "infos": [
     {
       "name": "AgentForensics",
@@ -754,8 +754,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 393512973,
-      "fileCount": 2689,
+      "sizeBytes": 393520724,
+      "fileCount": 2691,
       "signals": [],
       "signalTotal": 0
     },
@@ -888,18 +888,6 @@
       "isSubmodule": true,
       "sizeBytes": 18755,
       "fileCount": 2,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "hodos",
-      "upstream": "https://github.com/toxicwind/hodos",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": true,
-      "sizeBytes": 4117339,
-      "fileCount": 204,
       "signals": [],
       "signalTotal": 0
     },
