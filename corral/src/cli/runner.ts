@@ -1,43 +1,61 @@
 /**
- * Workflow runner for Smithers.
- * Spawns the Smithers CLI with the generated workflow.
- * Uses `up` subcommand (smthrs 0.35.0+) or `run` (legacy) and `--preload` (bun 1.4.2+).
+ * Workflow runner — executes Smithers workflow
+ * 
+ * Extracted from the bottom 400 lines of original cli/index.ts
+ * Handles preload generation, bunfig, spawning smithers, reporting.
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { mkdir, symlink, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { existsSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createRequire } from "node:module";
 import { banner, ok, err, warn, info, kv, summaryBox } from "../ui/cli-style";
 import { CorralTimer } from "../timing";
+import { renderWorkflowFile } from "./generator";
 import { writeRunReport } from "../report/renderReport";
 import { detectExactReply, normalizeReply } from "../exactReply";
-import { renderWorkflowFile } from "./generator";
-import { detectAgents } from "./detect-agents";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const GENERATED_PRELOAD_SOURCE = `import { mdxPlugin } from "smthrs/mdx-plugin";
 mdxPlugin();
+
+// Effect compat shims — see preload.ts for details
 import { plugin } from "bun";
 import { createRequire } from "node:module";
+
 const UNSTABLE_PREFIX = "effect/unstable/";
-const UNSTABLE_SHIMS = ["cluster","cluster/Entity","cluster/MessageStorage","cluster/RunnerHealth","cluster/Runners","cluster/RunnerStorage","cluster/Sharding","cluster/ShardingConfig","cluster/SingleRunner","http/FetchHttpClient","observability/Otlp","process/ChildProcess","process/ChildProcessSpawner","reactivity/Reactivity","rpc/Rpc","rpc/RpcGroup","sql/SqlClient","sql/SqlError","sql/Statement","workflow","workflow/Activity","workflow/DurableDeferred","workflow/Workflow","workflow/WorkflowEngine"];
-function unstableResolvesNatively(): boolean { try { createRequire(import.meta.url).resolve(UNSTABLE_PREFIX + "workflow"); return true; } catch { return false; } }
+const UNSTABLE_SHIMS = [
+  "cluster", "cluster/Entity", "cluster/MessageStorage", "cluster/RunnerHealth",
+  "cluster/Runners", "cluster/RunnerStorage", "cluster/Sharding", "cluster/ShardingConfig",
+  "cluster/SingleRunner", "http/FetchHttpClient", "observability/Otlp",
+  "process/ChildProcess", "process/ChildProcessSpawner", "reactivity/Reactivity",
+  "rpc/Rpc", "rpc/RpcGroup", "sql/SqlClient", "sql/SqlError", "sql/Statement",
+  "workflow", "workflow/Activity", "workflow/DurableDeferred", "workflow/Workflow", "workflow/WorkflowEngine",
+];
+
+function unstableResolvesNatively(): boolean {
+  try {
+    createRequire(import.meta.url).resolve(UNSTABLE_PREFIX + "workflow");
+    return true;
+  } catch { return false; }
+}
+
 if (!unstableResolvesNatively()) {
-  plugin({ name: "effect-unstable-compat", setup(build) {
-    for (const rest of UNSTABLE_SHIMS) {
-      build.module(UNSTABLE_PREFIX + rest, async () => {
-        const mod = await import("effect/" + rest);
-        return { loader: "object", exports: {...mod} };
-      });
-    }
-  }});
+  plugin({
+    name: "effect-unstable-compat",
+    setup(build) {
+      for (const rest of UNSTABLE_SHIMS) {
+        build.module(UNSTABLE_PREFIX + rest, async () => {
+          const mod = await import("effect/" + rest);
+          return { loader: "object", exports: { ...mod } };
+        });
+      }
+    },
+  });
 }
 `;
 
-/** Options for running a Smithers workflow */
 export type RunWorkflowOpts = {
   repoRoot: string;
   promptText: string;
@@ -49,169 +67,109 @@ export type RunWorkflowOpts = {
   headless: boolean;
 };
 
-export interface SmithersCliResolution {
-  cliPath: string;
-  packageRoot: string;
-  subcommand: string;
-}
-
-export function findSmithersCli(repoRoot: string, sourceRoot: string): SmithersCliResolution {
-  const packageRoots: string[] = [];
-
-  try {
-    const req = createRequire(import.meta.url);
-    const resolvedPkg = req.resolve("smthrs/package.json");
-    packageRoots.push(dirname(resolvedPkg));
-  } catch {}
-
-  try {
-    const req = createRequire(import.meta.url);
-    const resolvedPkg = req.resolve("smithers-orchestrator/package.json");
-    packageRoots.push(dirname(resolvedPkg));
-  } catch {}
-
-  packageRoots.push(
-    join(sourceRoot, "node_modules", "smthrs"),
-    join(sourceRoot, "node_modules", "smithers-orchestrator"),
-    join(repoRoot, "node_modules", "smthrs"),
-    join(repoRoot, "node_modules", "smithers-orchestrator"),
-    join(repoRoot, ".smithers", "node_modules", "smthrs"),
-    join(repoRoot, ".smithers", "node_modules", "smithers-orchestrator"),
-    join(process.env.HOME || "", "smithers"),
-  );
-
-  const seen = new Set<string>();
-  const probed: string[] = [];
-
-  for (const root of packageRoots) {
-    if (!root || seen.has(root)) continue;
-    seen.add(root);
-
-    // 1. Inspect package.json "bin" field
-    const pkgJsonPath = join(root, "package.json");
-    if (existsSync(pkgJsonPath)) {
-      try {
-        const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
-        const bin = pkg.bin;
-        const binRel = typeof bin === "string"
-          ? bin
-          : bin && typeof bin === "object"
-            ? (bin.smithers || bin.smthrs || Object.values(bin)[0] as string)
-            : null;
-        if (binRel) {
-          const cliPath = resolve(root, binRel);
-          probed.push(cliPath);
-          if (existsSync(cliPath)) {
-            return { cliPath, packageRoot: root, subcommand: "up" };
-          }
-        }
-      } catch {}
-    }
-
-    // 2. Inspect relative layout candidates
-    const relCandidates = [
-      join("src", "bin", "smithers.js"),
-      join("dist", "cli.js"),
-      "cli.js",
-      join("src", "cli", "index.ts"),
-    ];
-    for (const rel of relCandidates) {
-      const cliPath = join(root, rel);
-      probed.push(cliPath);
-      if (existsSync(cliPath)) {
-        const subcommand = rel.includes("src/cli/index.ts") ? "run" : "up";
-        return { cliPath, packageRoot: root, subcommand };
-      }
-    }
-  }
-
-  // 3. Check .bin symlinks
-  const binCandidates = [
-    join(sourceRoot, "node_modules", ".bin", "smithers"),
-    join(repoRoot, "node_modules", ".bin", "smithers"),
-  ];
-  for (const b of binCandidates) {
-    probed.push(b);
-    if (existsSync(b)) {
-      return { cliPath: b, packageRoot: dirname(dirname(b)), subcommand: "up" };
-    }
-  }
-
-  throw new Error(`smithers not found in ${probed.join(", ")}`);
-}
-
-/** Execute the workflow via `bun --preload <preload> <smithers-cli> up <workflow>` */
 export async function runWorkflow(opts: RunWorkflowOpts): Promise<void> {
   const { repoRoot, promptText, promptSourcePath, runId, maxConcurrency, maxIterations, skipQuestions, headless } = opts;
-  const timer = new CorralTimer(runId);
+
+  const timer = new CorralTimer();
   const superRalphSourceRoot = resolve(__dirname, "..", "..");
   const superRalphPreload = join(superRalphSourceRoot, "preload.ts");
+  const workflowPath = join(superRalphSourceRoot, "src", "components", "SuperRalph.tsx"); // Actually smithers workflow file is different
+  // For now, use the conventional smithers workflow path resolution
+  const smithersDirCandidates = [
+    join(superRalphSourceRoot, "node_modules", "smthrs"),
+    join(superRalphSourceRoot, "node_modules", "smthrs"),
+  ];
 
-  const resolution = findSmithersCli(repoRoot, superRalphSourceRoot);
-  const smithersCliPath = resolution.cliPath;
-  const smithersSubcommand = resolution.subcommand;
+  let smithersPackageRoot: string | null = null;
+  let smithersCliPath: string | null = null;
+  let smithersSubcommand = "up"; // 2026-10-18: smthrs 0.35.0 uses up, not run
 
+  // 2026-10-18: restored src/bin/smithers.js candidate (regression of
+  // be6748c; original fix 0917990). smthrs@0.35.0 ships its CLI at
+  // src/bin/smithers.js (its declared bin entry) with no dist/ at all.
+  const smithersCliRelCandidates = ["dist/cli.js", "cli.js", "src/bin/smithers.js"];
+  for (const dir of smithersDirCandidates) {
+    const found = smithersCliRelCandidates
+      .map((rel) => join(dir, rel))
+      .find((abs) => existsSync(abs));
+    if (found) {
+      smithersPackageRoot = dir;
+      smithersCliPath = found;
+      break;
+    }
+  }
+
+  if (!smithersPackageRoot || !smithersCliPath) {
+    throw new Error(
+      `smithers package not found. Looked in ${smithersDirCandidates.join(", ")}. Run bun install.`
+    );
+  }
+
+  // Prepare preload and bunfig in a temp work dir or repo root
   const workDir = join(repoRoot, ".corral");
   await mkdir(workDir, { recursive: true });
-  const generatedDir = join(workDir, "generated");
-  await mkdir(generatedDir, { recursive: true });
-  const smithersDir = join(repoRoot, ".smithers");
-  await mkdir(smithersDir, { recursive: true });
-
-  const effectiveWorkflowPath = join(workDir, "workflow.tsx");
-  const generatedWorkflowPath = join(generatedDir, "workflow.tsx");
-  const dbPath = join(smithersDir, "workflow.db");
-
-  // Always generate a fresh, fully configured workflow for this run
-  const workflowSource = renderWorkflowFile({
-    promptText,
-    promptSpecPath: promptSourcePath,
-    repoRoot,
-    dbPath,
-    packageScripts: {},
-    detectedAgents: detectAgents(),
-    fallbackConfig: { maxConcurrency, maxIterations },
-    maxIterations,
-    superRalphSourceRoot,
-    runningFromSource: true,
-  });
-
-  await writeFile(effectiveWorkflowPath, workflowSource, "utf8");
-  await writeFile(generatedWorkflowPath, workflowSource, "utf8");
-
-  // Also maintain .super-ralph/generated/workflow.tsx for backward compatibility
-  const superRalphGenDir = join(repoRoot, ".super-ralph", "generated");
-  await mkdir(superRalphGenDir, { recursive: true });
-  await writeFile(join(superRalphGenDir, "workflow.tsx"), workflowSource, "utf8");
+  await mkdir(join(repoRoot, ".smithers"), { recursive: true }); // 2026-10-18: smithers needs this for workflow.db
 
   const preloadPath = join(workDir, "preload.ts");
-  const useShared = existsSync(superRalphPreload);
-  if (!useShared) await writeFile(preloadPath, GENERATED_PRELOAD_SOURCE, "utf8");
-  await writeFile(join(workDir, "bunfig.toml"), `preload = ["${useShared ? superRalphPreload : "./preload.ts"}"]\n`, "utf8");
+  const bunfigPath = join(workDir, "bunfig.toml");
+  const useSharedPreload = existsSync(superRalphPreload);
 
-  // Ensure node_modules can be resolved from .corral
-  const corralNodeModules = join(workDir, "node_modules");
-  const sourceNodeModules = join(superRalphSourceRoot, "node_modules");
-  if (!existsSync(corralNodeModules) && existsSync(sourceNodeModules)) {
-    try {
-      await symlink(sourceNodeModules, corralNodeModules, "dir");
-    } catch {}
+  if (!useSharedPreload) {
+    await writeFile(preloadPath, GENERATED_PRELOAD_SOURCE, "utf8");
   }
+  await writeFile(bunfigPath, `preload = ["./preload.ts"]\n`, "utf8");
+
+  const detectedAgents = { claude: true, codex: false, gh: true };
 
   if (!headless) {
-    console.log(`🚀 Corral — Multi-Agent Ticket Orchestration`);
+    console.log(`🚀 Estate Corral — Multi-Agent Ticket Orchestration`);
     console.log(`📁 Repo: ${repoRoot}`);
+    console.log(`📝 Prompt: ${promptSourcePath || "inline"}`);
+    console.log(`💾 Database: ${join(repoRoot, ".smithers", "db.sqlite")}`);
     console.log(`🆔 Run ID: ${runId}`);
-    kv([["concurrency", String(maxConcurrency)], ["max iterations", String(maxIterations)], ["smithers", smithersSubcommand]]);
+    kv([
+      ["agents", `claude=${detectedAgents.claude} codex=${detectedAgents.codex} gh=${detectedAgents.gh}`],
+      ["concurrency", String(maxConcurrency)],
+      ["max iterations", String(maxIterations)],
+    ]);
     console.log("");
   }
+
   info("Starting workflow execution...");
 
-  const execCwd = existsSync(join(superRalphSourceRoot, "node_modules")) ? superRalphSourceRoot : repoRoot;
-  const effectivePreload = useShared ? superRalphPreload : preloadPath;
+  // Resolve actual smithers workflow file — for this refactor we delegate to original behavior
+  // The original cli generated workflow files dynamically; here we assume SuperRalph.tsx is the entry
+  // but smithers needs a workflow file. We'll look for .corral/workflow.tsx or fallback to src/components/SuperRalph
+  let effectiveWorkflowPath = join(workDir, "workflow.tsx");
+  if (!existsSync(effectiveWorkflowPath)) {
+    // 2026-10-18: generate the real workflow via generator.ts. The old
+    // inline placeholder exported a raw component, which smthrs 0.35.0
+    // rejects (RUN_FAILED: must be created with smithers(...)).
+    const runningFromSourceWf = existsSync(join(superRalphSourceRoot, "node_modules"));
+    const wfContent = renderWorkflowFile({
+      promptText,
+      promptSpecPath: promptSourcePath,
+      repoRoot,
+      dbPath: join(repoRoot, ".smithers", "workflow.db"),
+      packageScripts: {},
+      detectedAgents: { claude: detectedAgents.claude, codex: detectedAgents.codex },
+      fallbackConfig: { maxConcurrency, maxIterations },
+      clarificationSession: null,
+      maxIterations,
+      superRalphSourceRoot,
+      runningFromSource: runningFromSourceWf,
+    });
+    await writeFile(effectiveWorkflowPath, wfContent, "utf8");
+  }
+
+  let execCwd: string;
+  const runningFromSource = existsSync(join(superRalphSourceRoot, "node_modules"));
+  execCwd = runningFromSource ? superRalphSourceRoot : repoRoot;
+
+  const effectivePreload = useSharedPreload ? superRalphPreload : preloadPath;
 
   const args = [
-    "--preload",
+    "-r",
     effectivePreload,
     smithersCliPath,
     smithersSubcommand,
@@ -224,12 +182,17 @@ export async function runWorkflow(opts: RunWorkflowOpts): Promise<void> {
     String(maxConcurrency),
   ];
 
-  const env = { ...process.env, USE_CLI_AGENTS: "1", SMITHERS_DEBUG: "1", NODE_ENV: "production" } as any;
-  delete env.CLAUDECODE;
+  const env = {
+    ...process.env,
+    USE_CLI_AGENTS: "1",
+    SMITHERS_DEBUG: "1",
+    NODE_ENV: "production",
+  };
+  delete (env as any).CLAUDECODE;
 
   const proc = Bun.spawn(["bun", "--no-install", ...args], {
     cwd: execCwd,
-    env,
+    env: env as any,
     stdout: headless ? "ignore" : "inherit",
     stderr: "inherit",
     stdin: headless ? "ignore" : "inherit",
@@ -250,8 +213,7 @@ export async function runWorkflow(opts: RunWorkflowOpts): Promise<void> {
     } else if (reportPath) {
       console.error(`report: ${reportPath}`);
     }
-    const resolvedDbPath = existsSync(dbPath) ? dbPath : join(repoRoot, ".smithers", "db.sqlite");
-    await printFinalReply(resolvedDbPath, runId, headless, promptText);
+    await printFinalReply(join(repoRoot, ".smithers", "db.sqlite"), runId, headless, promptText);
   } else {
     err(`Workflow exited with code ${exitCode}`);
     console.error(timingSummary);
