@@ -49,6 +49,9 @@ struct Lane {
     sent: Mutex<VecDeque<Instant>>,
     /// Lane is in cooldown until this instant (set after an upstream 429/5xx).
     cooldown_until: Mutex<Instant>,
+    /// Consecutive 429 count for exponential backoff (Tier 1). Reset on
+    /// any successful response via `clear_429`.
+    consecutive_429: Mutex<u32>,
 }
 
 pub struct Pool {
@@ -110,6 +113,7 @@ impl Pool {
                     Some(prev) => Lane {
                         sent: Mutex::new(prev.sent.lock().unwrap().clone()),
                         cooldown_until: Mutex::new(*prev.cooldown_until.lock().unwrap()),
+                        consecutive_429: Mutex::new(*prev.consecutive_429.lock().unwrap()),
                         key: s.key,
                         rpm: s.rpm,
                     },
@@ -118,6 +122,7 @@ impl Pool {
                         rpm: s.rpm,
                         sent: Mutex::new(VecDeque::new()),
                         cooldown_until: Mutex::new(now),
+                        consecutive_429: Mutex::new(0),
                     },
                 },
             )
@@ -244,6 +249,19 @@ impl Pool {
         if let Some(pos) = sent.iter().rposition(|t| *t == stamp) {
             sent.remove(pos);
         }
+    }
+
+    /// Record a 429 on a lane; returns the new consecutive count for
+    /// exponential backoff calculation (Tier 1).
+    pub fn note_429(&self, lane: usize) -> u32 {
+        let mut c = self.lanes[lane].consecutive_429.lock().unwrap();
+        *c = c.saturating_add(1);
+        *c
+    }
+
+    /// Clear a lane's consecutive-429 count after a successful response.
+    pub fn clear_429(&self, lane: usize) {
+        *self.lanes[lane].consecutive_429.lock().unwrap() = 0;
     }
 
     /// Put a lane in cooldown after the upstream told us to back off.

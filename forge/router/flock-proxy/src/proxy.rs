@@ -168,7 +168,9 @@ const QUARANTINE_STRIKES: u32 = 3;
 /// - 401/403: the KEY is bad -- another key/provider may work, fall over.
 /// - 429/5xx/timeouts: the PROVIDER is struggling -- fall over.
 fn retryable(status: reqwest::StatusCode) -> bool {
-    matches!(status.as_u16(), 401 | 403 | 429 | 500 | 502 | 503 | 504)
+    // 401/403 are auth failures, not transient: fail fast, never retry.
+    // Retrying them wastes slots and can trigger upstream abuse detection.
+    matches!(status.as_u16(), 429 | 500 | 502 | 503 | 504)
 }
 
 /// Backoff for a lane in cooldown: honor Retry-After when present.
@@ -179,6 +181,29 @@ fn backoff_for(resp: &reqwest::Response) -> Duration {
         .and_then(|s| s.parse::<u64>().ok())
         .map(Duration::from_secs)
         .unwrap_or(Duration::from_secs(10))
+}
+
+/// Exponential backoff for 429 (Too Many Requests) with jitter.
+///
+/// NVIDIA's free tier enforces ~40 RPM per key on a rolling 60s window and
+/// does NOT send Retry-After headers. A fixed retry delay is actively
+/// harmful here: each request sent into a 429 resets the upstream's rate
+/// limit timer, extending the lockout indefinitely (NVIDIA dev forum).
+/// Exponential backoff (10s -> 20s -> 40s -> 80s, capped at 120s) gives the
+/// window time to drain. +/-25% jitter desynchronizes lanes so they don't
+/// retry in lockstep and re-trigger the limit together.
+fn backoff_for_429(consecutive: u32) -> Duration {
+    // 10 * 2^n for n=0..3, capped at 120s
+    let exp = 10u64.saturating_mul(1u64 << consecutive.min(3));
+    let capped = exp.min(120);
+    // +/-25% jitter from a cheap time-based PRNG (no new deps)
+    let now_nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.subsec_nanos() as u64)
+        .unwrap_or(0);
+    let quarter = capped / 4;
+    let jitter = (now_nanos % (quarter * 2 + 1)).saturating_sub(quarter);
+    Duration::from_secs(capped.saturating_sub(quarter).saturating_add(jitter).max(5))
 }
 
 /// Join the global FIFO queue for a rate-limit slot, invoking `on_wait` every
@@ -985,7 +1010,17 @@ fn streaming(
                         return;
                     }
                     let status = resp.status();
-                    let backoff = backoff_for(&resp);
+                    // Tier 1+2: 429s get exponential backoff with jitter and
+                    // per-lane consecutive tracking. Other retryable statuses
+                    // keep the Retry-After-honoring fixed backoff.
+                    let backoff = if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
+                        let n = slot.pool.note_429(slot.lane);
+                        let b = backoff_for_429(n);
+                        tracing::info!(lane = slot.lane, consecutive_429 = n, ?b, "429 exponential backoff");
+                        b
+                    } else {
+                        backoff_for(&resp)
+                    };
                     // Worker exhaustion is model-scoped: back off the model via
                     // the governor, never the lane (see `buffered`).
                     let detail = resp.text().await.unwrap_or_default();
@@ -1010,6 +1045,12 @@ fn streaming(
                         return;
                     }
                     continue;
+                }
+
+                // Tier 2: success clears the lane's consecutive-429 count,
+                // so a recovered lane starts back at the base 10s backoff.
+                if resp.status().is_success() {
+                    slot.pool.clear_429(slot.lane);
                 }
 
                 if !resp.status().is_success() {
