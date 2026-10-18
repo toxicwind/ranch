@@ -355,8 +355,10 @@ def kb_attestation():
 class SeqPoster:
     """Atomic multi-poster-safe message writer for one channel dir.
 
-    Refreshes seq from the directory before every post and bumps past
-    collisions, so several bidders + the oracle can share a channel.
+    Seq is allocated via oracle_loop.alloc_channel_seq() (chat_core's
+    durable .seqhigh mark under the channel lock), shared with squawk-send
+    and the oracle -- the 2026-10-17 fix for duplicate seqs when the
+    dir-scan allocator raced the mark allocator.
     """
 
     def __init__(self, channel_dir, channel_name, frm):
@@ -386,26 +388,28 @@ class SeqPoster:
              raw_body=False, extra_fm=None):
         with self._lock:
             self._refresh()
-            self.seq += 1
+            # Unified allocation (2026-10-17): see
+            # oracle_loop.alloc_channel_seq.
+            self.seq = ol.alloc_channel_seq(self.dir)
             self.lamport += 1
             parents = [self.last_hash] if self.last_hash else []
             ts = time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime())
-            fm = (
-                f"---\nseq: {self.seq}\nfrom: {self.frm}\nto: {to}\n"
-                f"msg_type: {msg_type}\ntask_id: {task_id}\n"
-                f"channel: {self.channel}\nts: {ts}\nstatus: {self.channel}\n"
-                f"title: {title}\nlamport: {self.lamport}\n"
-                f"parents: {json.dumps(parents)}\n"
-            )
-            if extra_fm:
-                for k, v in extra_fm.items():
-                    fm += f"{k}: {v}\n"
-            if note:
-                fm += f"note: {note}\n"
-            fm += "---\n"
-            text = fm + (body if raw_body else json.dumps(body))
             slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:60]
             while True:
+                fm = (
+                    f"---\nseq: {self.seq}\nfrom: {self.frm}\nto: {to}\n"
+                    f"msg_type: {msg_type}\ntask_id: {task_id}\n"
+                    f"channel: {self.channel}\nts: {ts}\nstatus: {self.channel}\n"
+                    f"title: {title}\nlamport: {self.lamport}\n"
+                    f"parents: {json.dumps(parents)}\n"
+                )
+                if extra_fm:
+                    for k, v in extra_fm.items():
+                        fm += f"{k}: {v}\n"
+                if note:
+                    fm += f"note: {note}\n"
+                fm += "---\n"
+                text = fm + (body if raw_body else json.dumps(body))
                 name = f"{self.seq:04d}-{self.frm}-{slug}.md"
                 final = self.dir / name
                 try:
@@ -417,7 +421,7 @@ class SeqPoster:
                     # oracle's inotify watch already listens for.
                     fd = os.open(final, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
                 except FileExistsError:
-                    self.seq += 1  # lost the race; bump and retry
+                    self.seq = ol.alloc_channel_seq(self.dir)
                     continue
                 with os.fdopen(fd, "w", encoding="utf-8") as f:
                     f.write(text)

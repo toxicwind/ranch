@@ -178,6 +178,35 @@ def inotify_names(fd):
 # ---------------- message IO ----------------
 SEQ_RE = re.compile(r"^(\d+)-")
 
+# Unified seq allocation (2026-10-17): chat_core owns the durable .seqhigh
+# mark for every channel dir. Poster/SeqPoster used to scan the dir for the
+# max seq and never touched .seqhigh, while squawk-send trusted the mark
+# without scanning -- the two schemes raced and wrote duplicate seqs in
+# fleet (1791911247907 x2, 1791911247931 x2 on 2026-10-17). Every channel
+# writer now allocates through alloc_channel_seq() below.
+sys.path.insert(0, str(BIN.parent.parent))  # ranch/squawk -> chat_core
+from chat_core import _acquire_lock, _next_seq, _release_lock
+
+
+def alloc_channel_seq(channel_dir):
+    """Allocate the next seq for a channel dir via chat_core's durable mark.
+
+    The channel lock serializes against squawk-send, so the oracle, the
+    bidders, and agents can never be handed the same seq. On lock failure
+    falls back to the legacy dir-scan -- a stuck lock must never crash the
+    market loop (same failure profile as the pre-unification code).
+    """
+    d = Path(channel_dir)
+    try:
+        lock = _acquire_lock(d)
+    except Exception:
+        files = [f for f in os.listdir(d) if SEQ_RE.match(f)]
+        return max([int(SEQ_RE.match(f).group(1)) for f in files] or [0]) + 1
+    try:
+        return _next_seq(d)
+    finally:
+        _release_lock(lock)
+
 
 def parse_msg(path):
     """Returns (frontmatter dict, body) or None."""
@@ -207,10 +236,10 @@ def parse_msg(path):
 class Poster:
     """Atomic message writer for one channel dir.
 
-    Refreshes seq from the directory on every post and bumps past
-    collisions, so the oracle and bidders can share a channel safely.
-    (Seq races were previously caused by duplicate loop instances; the
-    single-instance flock is the root-cause fix, this is belt-and-braces.)
+    Seq is allocated via alloc_channel_seq() (chat_core's durable .seqhigh
+    mark under the channel lock), shared with squawk-send -- the 2026-10-17
+    fix for duplicate seqs when the dir-scan allocator raced the mark
+    allocator. The O_EXCL create stays as belt-and-braces.
     """
 
     def __init__(self, channel_dir, channel_name):
@@ -242,25 +271,28 @@ class Poster:
         # shim's rewrites must never touch it.
         title = _shim_screen(title)
         note = _shim_screen(note)
-        self.seq += 1
+        # Unified allocation (2026-10-17): chat_core's durable .seqhigh mark
+        # under the channel lock, shared with squawk-send. The old dir-scan
+        # here raced the mark allocator and wrote duplicate seqs.
+        self.seq = alloc_channel_seq(self.dir)
         self.lamport += 1
         parents = [self.last_hash] if self.last_hash else []
         ts = time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime())
-        fm = (
-            f"---\nseq: {self.seq}\nfrom: {frm}\nto: {to}\n"
-            f"msg_type: {msg_type}\ntask_id: {task_id}\n"
-            f"channel: {self.channel}\nts: {ts}\nstatus: {self.channel}\n"
-            f"title: {title}\nlamport: {self.lamport}\nparents: {json.dumps(parents)}\n"
-        )
-        if extra_fm:
-            for k, v in extra_fm.items():
-                fm += f"{k}: {v}\n"
-        if note:
-            fm += f"note: {note}\n"
-        fm += "---\n"
-        text = fm + (body if raw_body else json.dumps(body))
         slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:60]
         while True:
+            fm = (
+                f"---\nseq: {self.seq}\nfrom: {frm}\nto: {to}\n"
+                f"msg_type: {msg_type}\ntask_id: {task_id}\n"
+                f"channel: {self.channel}\nts: {ts}\nstatus: {self.channel}\n"
+                f"title: {title}\nlamport: {self.lamport}\nparents: {json.dumps(parents)}\n"
+            )
+            if extra_fm:
+                for k, v in extra_fm.items():
+                    fm += f"{k}: {v}\n"
+            if note:
+                fm += f"note: {note}\n"
+            fm += "---\n"
+            text = fm + (body if raw_body else json.dumps(body))
             name = f"{self.seq:04d}-{frm}-{slug}.md"
             final = self.dir / name
             try:
@@ -269,7 +301,10 @@ class Poster:
                 # raises IN_CLOSE_WRITE, which our inotify watch listens for.
                 fd = os.open(final, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             except FileExistsError:
-                self.seq += 1  # lost the race; bump and retry
+                # Lost a filename race with an out-of-band writer: reallocate
+                # and retry (frontmatter is rebuilt above, so the file's seq
+                # always matches its name).
+                self.seq = alloc_channel_seq(self.dir)
                 continue
             with os.fdopen(fd, "w", encoding="utf-8") as f:
                 f.write(text)
