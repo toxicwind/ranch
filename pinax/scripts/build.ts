@@ -19,16 +19,15 @@ const outDir = join(here, "..", "generated");
  * hand-copied snapshot that silently drifted — it was 6 days stale and
  * predated the vansrouter/omniroute definitions entirely. The build now
  * writes it, so "DO NOT EDIT BY HAND" is enforced by the generator
- * instead of by convention. Both trees live in the same repo, so a
- * relative path from mesh/catalog reaches it.
+ * instead of by convention. Both trees live on the same estate
+ * filesystem (hodos is its own repo), so a relative path reaches it.
  */
 const FLOCK_RUST_PATH = resolve(
   here,
   "..",
   "..",
-  "forge",
-  "router",
-  "flock-proxy",
+  "hodos",
+  "proxy",
   "src",
   "roost_providers.rs",
 );
