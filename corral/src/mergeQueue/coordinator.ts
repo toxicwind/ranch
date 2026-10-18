@@ -9,7 +9,6 @@ import type {
   CommandResult,
   MergeQueueOps,
   MergeQueueRequest,
-  EvictReason,
 } from "./types";
 import { createDefaultOps } from "./ops";
 import { REQUEST_MARKER, buildSpeculativeMergeQueuePrompt, extractRequestFromPrompt } from "./prompt";
