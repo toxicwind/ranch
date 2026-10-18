@@ -135,3 +135,6 @@ service-account*.json
 models/   # 137GB model weights (runtime data, not source)
 kite/worktrees/   # worktree state, not kite source
 hatch/worktrees/   # worktree state (leak source)
+
+# hodos is its own repo (toxicwind/hodos) — canonical tree lives there
+/hodos/
