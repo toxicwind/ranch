@@ -57,6 +57,50 @@ const LF = join(CD, "last_update.json");
 const LG = join(LD, "yote.log");
 const PORT = Number(process.env.YOTE_PORT ?? "25102");
 const TOK = process.env.YOTE_TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || "";
+
+// kappacode_change - Coyote persona avatar (ported 2026-10-18): static PNG
+// pushed to the Telegram bot profile once per asset change, plus the idle
+// MP4 served at /avatar/idle. Assets live in config/ next to yote_chats.json.
+const AVATAR_PATH = join(CD, "yote-avatar.png");
+const AVATAR_IDLE_PATH = join(CD, "yote-avatar-idle.mp4");
+const AVATAR_MARK = join(CD, ".avatar_synced");
+
+async function syncAvatar() {
+  // Push the Coyote avatar to the Telegram bot profile once per avatar.
+  // Bot API setMyProfilePhoto takes an InputProfilePhoto:
+  //   photo = JSON {type:"static", photo:"attach://<name>"} with the PNG
+  // bytes attached under that name. Guarded by a marker file; re-runs only
+  // when the marker is removed (i.e. the asset changed).
+  try {
+    if (!TOK || existsSync(AVATAR_MARK)) return;
+    if (!existsSync(AVATAR_PATH)) return;
+    const buf = readFileSync(AVATAR_PATH);
+    const fd = new FormData();
+    fd.append(
+      "photo",
+      JSON.stringify({ type: "static", photo: "attach://yote-avatar.png" }),
+    );
+    fd.append(
+      "yote-avatar.png",
+      new Blob([buf], { type: "image/png" }),
+      "yote-avatar.png",
+    );
+    const r = await fetch(`https://api.telegram.org/bot${TOK}/setMyProfilePhoto`, {
+      method: "POST",
+      body: fd,
+      signal: AbortSignal.timeout(60000),
+    });
+    const j: any = await r.json().catch(() => ({}));
+    if (j?.ok) {
+      writeFileSync(AVATAR_MARK, new Date().toISOString());
+      log("avatar synced to telegram bot profile");
+    } else {
+      log(`avatar sync failed: ${JSON.stringify(j).slice(0, 160)}`);
+    }
+  } catch (e: any) {
+    log(`avatar sync err ${(e && e.message) || e}`);
+  }
+}
 const ALW = new Set(
   (process.env.YOTE_TELEGRAM_ALLOWED_USERS || process.env.TELEGRAM_ALLOWED_USERS || "")
     .split(",")
@@ -617,6 +661,36 @@ try {
       });
       if (m) return cors(m);
     }
+    // kappacode_change - Coyote persona avatar endpoints (ported from the
+    // retired estate/src/services/yote.ts service, 2026-10-18).
+    if (p === "/avatar") {
+      const f = Bun.file(AVATAR_PATH);
+      if (!(await f.exists()))
+        return cors(new Response("no avatar", { status: 404 }));
+      return cors(
+        new Response(f, {
+          headers: {
+            "content-type": "image/png",
+            "content-length": String(f.size),
+            "cache-control": "public, max-age=86400",
+          },
+        }),
+      );
+    }
+    if (p === "/avatar/idle") {
+      const f = Bun.file(AVATAR_IDLE_PATH);
+      if (!(await f.exists()))
+        return cors(new Response("no idle video", { status: 404 }));
+      return cors(
+        new Response(f, {
+          headers: {
+            "content-type": "video/mp4",
+            "content-length": String(f.size),
+            "cache-control": "public, max-age=86400",
+          },
+        }),
+      );
+    }
     if (p === "/health") {
       let s: any = null;
       try {
@@ -863,6 +937,7 @@ log(
 );
 if (TOK) poll().catch((e) => log(`poll fatal ${e}`));
 else log("WARNING: YOTE_TELEGRAM_BOT_TOKEN missing — poll disabled");
+syncAvatar(); // kappacode_change - push Coyote persona avatar on boot
 
 export default app;
 export { ofClient, openfang };
