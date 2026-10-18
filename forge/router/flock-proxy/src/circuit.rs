@@ -78,6 +78,22 @@ impl CircuitBreaker {
         self.state
     }
 
+    /// Non-mutating check: true only if the circuit is open AND the cooldown
+    /// timeout has NOT yet elapsed. When the timeout has elapsed, returns
+    /// false so the caller lets the request through to `allow()`, which
+    /// performs the open->half-open transition and grants the probe lease.
+    /// This fixes the candidate-selection path that checked `state() == Open`
+    /// directly and thereby wedged circuits open forever.
+    pub fn is_open_and_cooling(&self) -> bool {
+        if self.state != CircuitState::Open {
+            return false;
+        }
+        match self.last_failure {
+            Some(t) => t.elapsed() < self.timeout,
+            None => true,
+        }
+    }
+
     pub fn failures(&self) -> u32 {
         self.failures
     }

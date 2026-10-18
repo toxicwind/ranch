@@ -663,7 +663,7 @@ impl RouterHandle {
                 drop(def);
                 if !self.inner.health.is_healthy(name) {
                     Some(SkipReason::NotConnected)
-                } else if matches!(rt.circuit.lock().unwrap().state(), CircuitState::Open) {
+                } else if rt.circuit.lock().unwrap().is_open_and_cooling() {
                     Some(SkipReason::CircuitOpen)
                 } else {
                     None
