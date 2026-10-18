@@ -24,10 +24,10 @@
  * Stats and errors use opaque "key#N" labels only.
  */
 
-const DEFAULT_ROUTER_PORT = process.env.CUTTINGGATE_PORT || process.env.ESTATE_SCRIPTS_ROUTER_PORT || "25200";
+const DEFAULT_ROUTER_PORT = process.env.FLOCK_PORT || "25193";
 export const DEFAULT_PROXY_BASE_URL =
-  process.env.ESTATE_SCRIPTS_ROUTER_URL ||
   process.env.FLOCK_BASE_URL ||
+  process.env.ESTATE_ROUTER_URL ||
   `http://127.0.0.1:${DEFAULT_ROUTER_PORT}`;
 export const DEFAULT_PROXY_MODEL = "gemini-eap-openai/gemini-3.8-flash";
 const DEFAULT_RETRY_AFTER_MS = 60_000;
@@ -284,7 +284,12 @@ export async function proxyChatCompletions(
         throw new Error("nim-proxy HTTP " + resp.status + ": " + body.slice(0, 300));
       }
       const data = (await resp.json()) as any;
-      const text: string = data?.choices?.[0]?.message?.content ?? "";
+      const msg = data?.choices?.[0]?.message;
+      // NIM-wide behavior (verified 2026-10-15, 65-model sweep): several
+      // models return reasoning_content ONLY with empty content. Fall back
+      // so a reasoning-only response is not misclassified as an empty
+      // completion (the ghost-empty disease).
+      const text: string = msg?.content || msg?.reasoning_content || "";
       if (!text.trim()) throw new Error("nim-proxy returned an empty completion");
       pool.recordSuccess(key);
       return text;
