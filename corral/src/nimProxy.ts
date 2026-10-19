@@ -260,7 +260,8 @@ export async function proxyChatCompletions(
   // Direct reasoning caps (2026-10-19): gpt-oss effort verified live via
   // :25193 (reasoning tokens 295 -> 6 at "low"; "medium" here because this
   // path does real coding work). Nemotron-3 per NVIDIA docs:
-  // reasoning_budget + chat_template_kwargs. A 400 flips stripReasoning so
+  // reasoning_budget + chat_template_kwargs; GLM reasoning_effort "low"
+  // only (medium verified to burn fully, 2026-10-19). A 400 flips stripReasoning so
   // later key attempts omit the params (a rejecting upstream degrades to
   // the old uncapped behavior instead of failing).
   let stripReasoning = false;
@@ -272,6 +273,7 @@ export async function proxyChatCompletions(
         reasoning_budget: 4096,
         chat_template_kwargs: { enable_thinking: true, low_effort: true },
       };
+    if (model.includes("glm")) return { reasoning_effort: "low" };
     return {};
   };
   for (let i = 0; i < attempts; i++) {
