@@ -134,14 +134,23 @@ def _envelope(rec: dict) -> dict:
 
 
 async def _ensure_stream(js) -> None:
-    try:
-        await js.stream_info(STREAM)
-        return
-    except Exception:
-        pass
     # NOTE: nats-server 2.14.5 rejects a leading-wildcard subject here
     # (overlap check vs the JetStream API); explicit per-channel subjects.
     subjects = [f"{c}.messages" for c in CHANNELS]
+    try:
+        info = await js.stream_info(STREAM)
+    except Exception:
+        info = None
+    if info is not None:
+        # Reconcile subjects with the configured channel set (Pry, 2026-10-19):
+        # channels added to SQUAWK_NATS_CHANNELS after the stream was created
+        # must join it, or their publishes have nowhere to land.
+        current = list(info.config.subjects or [])
+        if set(current) != set(subjects):
+            info.config.subjects = subjects
+            await js.update_stream(config=info.config)
+            print(f"squawk-nats-tail: updated stream {STREAM} subjects -> {subjects}", flush=True)
+        return
     await js.add_stream(
         name=STREAM,
         subjects=subjects,
