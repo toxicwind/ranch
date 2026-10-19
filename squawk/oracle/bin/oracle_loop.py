@@ -124,7 +124,12 @@ KB_SHA_RE = re.compile(r"^[0-9a-f]{40}$")  # knowledgebase commit SHA
 # failure. The oracle never executes payloads; it only verifies.
 AGENTIC_TIMEOUT_MS = 30 * 60 * 1000   # Super Ralph runs are slow (~11 min
                                       # observed for a trivial run)
-AGENTIC_BID_WINDOW_MS = 15000
+# 2026-10-19 (osprey, rig migration): bidder lanes are rig agents on
+# a ~60s cron cadence now, not inotify daemons. The auction window
+# must exceed the poll cadence, so 15s -> 300s. Side benefit: this
+# also ends the chronic bid-drought (bids landing after the window
+# closed, documented since 2026-10-15).
+AGENTIC_BID_WINDOW_MS = 300000
 ACCEPT_REPORT_MARKER = "ACCEPTANCE-REPORT:"
 
 # ---------------- inotify (ctypes, stdlib only) ----------------
@@ -580,6 +585,14 @@ class OracleLoop:
             "non-interactive: do not ask questions. Your final reply must "
             "summarize the outcome against each acceptance criterion and "
             "MUST end with exactly this section:\n"
+            "## Change contract (code tasks)\n"
+            "If this task changes any files, ALSO write your proposed changes "
+            "to edits.json in the working directory as JSON: "
+            "{\"edits\": [{\"path\": \"<absolute repo path>\", \"old\": "
+            "\"<exact existing text>\", \"new\": \"<replacement text>\"}]}. "
+            "One entry per change; 'old' must match the file exactly. The "
+            "market applies edits.json DIRECTLY via MCP tools -- it is the "
+            "deliverable, not just your chat reply.\n\n"
             "ACCEPTANCE-REPORT:\n"
             "- criterion 1: MET - <evidence>\n"
             "- criterion 2: MET - <evidence>\n"
@@ -718,11 +731,14 @@ class OracleLoop:
             # of the execution stack can never be routed through the
             # component it repairs (intake 2638 lesson).
             no_corral = bool(d.get("no_corral"))
+            mcp_apply = bool(d.get("mcp_apply"))
             tid = "direct-%d" % int(time.time() * 1000)
             body = self._agentic_task_body(tid, req["text"], req["from"],
                                            ["direct", "urgent"], "direct",
                                            bid_window_ms=5000,
-                                           exec_mode=("direct-only"
+                                           exec_mode=("mcp-apply"
+                                                    if mcp_apply
+                                                    else "direct-only"
                                                     if no_corral
                                                     else "corral"))
             self._post_signed_task(

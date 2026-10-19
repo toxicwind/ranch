@@ -46,6 +46,7 @@ _spec.loader.exec_module(ol)
 import keypool as keypool_mod
 import mechanism as mech
 import sealed as sealed_mod
+import mcp_apply as mcp_mod
 
 CHANNEL = ol.CHANNEL
 FLEET = ol.FLEET
@@ -1037,6 +1038,88 @@ def _reasoning_params(model, budget=1024, effort="low"):
         err = "" if success else "one-shot: empty output after 2 calls"
         return success, out2[-OUT_CAP:], err, dur
 
+
+    # ----- first-class MCP apply (2026-10-19, osprey) -----
+    # On oracle approval, code changes are applied DIRECTLY to the repo
+    # through the Gatehouse MCP proxy -- anchored read -> edit -> verify,
+    # every tool call recorded as task evidence. This is the market's
+    # native apply mechanism, not an opt-in lane.
+    def _wants_mcp_apply(self, task):
+        """Default True for code-fix tasks (first-class); an explicit
+        task['mcp_apply'] overrides either way."""
+        if "mcp_apply" in task:
+            return bool(task["mcp_apply"])
+        tags = [str(t).lower() for t in (task.get("tags") or [])]
+        return "code-fix" in tags
+
+    def _mcp_apply_workdir(self, task, workdir):
+        """Apply workdir/edits.json (anchored-edits contract) via MCP."""
+        evidence = []
+        edits_path = workdir / "edits.json"
+        if not edits_path.exists():
+            evidence.append({"mcp_apply": "no edits.json from runner; "
+                                          "output-text settle as before"})
+            return evidence
+        try:
+            obj = json.loads(edits_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as e:
+            evidence.append({"mcp_apply": "edits.json unreadable",
+                             "error": str(e)[:160]})
+            return evidence
+        edits = obj.get("edits") if isinstance(obj, dict) else obj
+        if not isinstance(edits, list) or not edits:
+            evidence.append({"mcp_apply": "edits.json has no edits list"})
+            return evidence
+        applied, failures = mcp_mod.apply_change_set(edits, evidence)
+        (workdir / "mcp-apply-evidence.json").write_text(
+            json.dumps(evidence, indent=1)[:PARTIAL_CAP], encoding="utf-8")
+        evidence.append({"mcp_apply_summary":
+                         "%d/%d applied" % (applied, len(edits))})
+        return evidence
+
+    def _run_mcp_apply(self, task, workdir, env, timeout_ms, t0):
+        """exec_mode mcp-apply: the model emits anchored edits; they are
+        applied DIRECTLY via Gatehouse MCP tools. Chosen deliberately by
+        a routing marker -- no corral/super-ralph fallback."""
+        tid = task["task_id"]
+        prompt = task.get("payload", "") or ""
+        (workdir / "prompt.md").write_text(prompt, encoding="utf-8")
+        model = _resolve_ralph_model(RALPH_BASE_URL)
+        self.say("%s mcp-apply on %s (model %s)."
+                 % (self.name, tid, model))
+        gen_prompt = (
+            "You are a coding agent. Do this task:\n\n%s\n\n"
+            "Output ONLY a JSON object: {\"edits\": [{\"path\": "
+            "\"<absolute repo path>\", \"old\": \"<exact existing text>\", "
+            "\"new\": \"<replacement text>\"}], \"summary\": \"<one line>\"}. "
+            "One entry per file change; 'old' must match the file's current "
+            "content EXACTLY. If no file changes are needed, output "
+            "{\"edits\": [], \"summary\": \"<why>\"}." % prompt)
+        out1 = self._one_shot_call(model, gen_prompt, timeout=60)
+        evidence = []
+        edits, perr = mcp_mod.parse_edits_json(out1)
+        if perr:
+            dur = (time.time() - t0) * 1000
+            evidence.append({"mcp_apply": "model emitted no parseable edits",
+                             "error": perr[:160]})
+            return False, out1[-OUT_CAP:], "mcp-apply: %s" % perr, dur, evidence
+        applied, failures = mcp_mod.apply_change_set(edits, evidence)
+        (workdir / "mcp-apply-evidence.json").write_text(
+            json.dumps(evidence, indent=1)[:PARTIAL_CAP], encoding="utf-8")
+        dur = (time.time() - t0) * 1000
+        via = "mcp" if any(e.get("via") == "mcp" for e in evidence) \
+            else "local-fallback"
+        ok = not failures and applied == len(edits)
+        out = ("mcp-apply: %d/%d edits applied via %s.\n%s\n\n"
+               "ACCEPTANCE-REPORT:\n- apply: %s"
+               % (applied, len(edits), via, out1[:2000],
+                  "MET - %d edits applied, evidence attached" % applied if ok
+                  else "UNMET - %d failures, see mcp-apply-evidence.json"
+                  % len(failures)))
+        err = "" if ok else "mcp-apply: %d/%d edits failed" % (len(failures),
+                                                               len(edits))
+        return ok, out[-OUT_CAP:], err, dur, evidence
+
     def _run_corral(self, task, workdir, env, timeout_ms, t0):
         """Execute an agentic task via the corral CLI (market primary path).
 
@@ -1140,8 +1223,15 @@ def _reasoning_params(model, budget=1024, effort="low"):
         before = set(os.listdir(workdir))
         t0 = time.time()
         success, out, err = False, "", ""
+        mcp_evidence = []
         try:
-            if task.get("exec_mode") == "direct-only":
+            if task.get("exec_mode") == "mcp-apply":
+                # 2026-10-19 (osprey): first-class MCP apply -- anchored
+                # edits land DIRECTLY via Gatehouse MCP tools. No
+                # agentic-lane fallback by design.
+                success, out, err, dur, mcp_evidence = self._run_mcp_apply(
+                    task, workdir, env, timeout_ms, t0)
+            elif task.get("exec_mode") == "direct-only":
                 # 2026-10-19 (osprey): explicit no-corral route for
                 # execution-stack repairs. One-shot runs ONCE; there
                 # is deliberately NO fallback to corral or
@@ -1179,6 +1269,10 @@ def _reasoning_params(model, budget=1024, effort="low"):
                              "to super-ralph." % (self.name, tid, err[:120]))
                     success, out, err, dur = self._run_super_ralph(
                         task, workdir, env, timeout_ms, t0)
+                if success and self._wants_mcp_apply(task):
+                    # First-class: code-fix runs apply their edits.json
+                    # change set DIRECTLY via Gatehouse MCP tools.
+                    mcp_evidence = self._mcp_apply_workdir(task, workdir)
             elif task.get("exec_mode") == "super-ralph":
                 # Agentic execution via the real Super Ralph CLI.
                 # Returns the same (success, out, err, dur) tuple
@@ -1236,7 +1330,8 @@ def _reasoning_params(model, budget=1024, effort="low"):
                 "result_hash": result_hash,
                 "artifacts": artifacts,
                 "duration_ms": dur_r,
-                "error": err, "posted_ts": now}
+                "error": err, "posted_ts": now,
+                "mcp_evidence": mcp_evidence}
         # Sign the result envelope: the oracle verifies this under our
         # registry HMAC key. Unsigned results are ignored, so a forged
         # result posted by anyone else can neither frame us for a slash

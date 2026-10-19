@@ -89,8 +89,26 @@ dq3 = triage({"from": "x", "text": "check the focuses logic in the dashboard"},
              led)
 assert not (dq3["route"] == "REJECT"
             and "known-broken" in dq3["reason"]), dq3
+# route:mcp override (2026-10-19): explicit MCP-apply marker -> DIRECT
+# with mcp_apply=True and no_corral=True (first-class apply, override)
+from oracle_intake import MCP_APPLY_MARKERS, _has_mcp_apply_marker
+assert len(MCP_APPLY_MARKERS) == 3
+assert _has_mcp_apply_marker("fix the login bug route:mcp")
+assert _has_mcp_apply_marker("patch it [mcp-apply]")
+assert _has_mcp_apply_marker("!mcp repair the scheduler")
+assert not _has_mcp_apply_marker("fix the broken health probe")
+dm = triage({"from": "x", "text": "fix the login bug route:mcp"}, led)
+assert dm["route"] == "DIRECT", dm
+assert dm["mcp_apply"] is True, dm
+assert dm["no_corral"] is True, dm
+# marker cannot hurry a known-broken repair either: quarantine first
+dq5 = triage({"from": "osprey",
+              "text": "route:mcp repair selectReviewTickets: "
+                      "focuses undefined"}, led)
+assert dq5["route"] == "REJECT", dq5
+assert dq5["known_broken"] == "corral-render-selectReviewTickets", dq5
 rows = [json.loads(line) for line in open(led)]
 assert all(r["event"] == "intake-decision" for r in rows)
-assert len(rows) == 19
+assert len(rows) == 21
 os.unlink(led)
 print("INTAKE_UNIT_OK routes=%s hints=%s" % (ROUTES, sorted(TAG_HINTS)))
