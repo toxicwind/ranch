@@ -190,7 +190,7 @@ outbox = {}             # channel -> [broadcast msgs], oldest-first
 subscribers = set()     # (asyncio.Queue, frozenset(channels), writer)
 _dynamic_channels = set()  # channels discovered on disk beyond CHANNELS
 # directories under the chat root that are NOT message channels
-RESERVED_DIRS = {"keys"}
+RESERVED_DIRS = {"keys", "presence"}  # not message channels (Pry, 2026-10-19)
 _watched_dirs = set()   # str paths with an inotify watch installed
 _loop = None            # event loop, set in main() for cross-thread close
 _state_dirty = False
@@ -300,7 +300,7 @@ def _discover_channels():
     except OSError:
         return
     for name in names:
-        if (name.startswith(".") or name in CHANNELS
+        if (name.startswith(".") or name.startswith("-") or name in CHANNELS
                 or name in _dynamic_channels or name in RESERVED_DIRS):
             continue
         _dynamic_channels.add(name)

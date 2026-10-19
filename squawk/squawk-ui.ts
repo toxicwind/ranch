@@ -274,7 +274,10 @@ function handleChannels(): Response {
   let dirs: string[];
   try { dirs = readdirSync(SQUAWK_ROOT, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name); }
   catch { dirs = []; }
-  return Response.json({ ok: true, channels: dirs.filter(d => VALID_CHANNEL.test(d)).sort() });
+  // Canonical channel list (Pry, 2026-10-19): same rule as squawk-ws --
+  // exclude the key store, the presence dir, and dash-prefixed junk dirs.
+  const RESERVED = new Set(["keys", "presence"]);
+  return Response.json({ ok: true, channels: dirs.filter(d => VALID_CHANNEL.test(d) && !RESERVED.has(d) && !d.startsWith("-")).sort() });
 }
 
 // POST /send {channel, text} -> {ok, seq}
