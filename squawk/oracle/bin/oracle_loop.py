@@ -25,8 +25,11 @@ Auction lifecycle per task:
   assign    -> ASSIGNED (wait for winner's result until timeout_ms)
   result    -> verify (success, duration, artifact hash) -> settle -> CLOSED
                verified: bond released + reward + rep bump
-               failed/timeout: bond slashed (objective triggers only)
-  exec timeout with no result -> settle FAILED, slash full bond.
+               failed verification of real output: bond slashed
+               (objective triggers only)
+  exec timeout / no result -> settle FAILED on the infra path: bond
+               RELEASED, never slashed (no result was produced; the
+               failure is infrastructure, not the bidder, 2026-10-12).
                There is NO oracle fallback execution: running arbitrary
                task-post payloads as the oracle was removed 2026-09-20.
 
@@ -56,9 +59,20 @@ BIN = Path(__file__).resolve().parent
 sys.path.insert(0, str(BIN))
 import mechanism as mech
 import calibration as cal_mod
+import engine as engine_mod
 import sealed as sealed_mod
 
 AGENT_DIR = BIN.parent
+
+# Claim guard (2026-10-19, Chris -- market audit correction B1): a
+# fleet message may only ASSERT a bond slash the ledger already
+# records. fleet_note consults the ledger before writing; unbacked
+# slash claims are rejected at generation time and rerouted to the
+# claim-rejected kind. Negated mentions ("released, not slashed")
+# are not claims.
+_SLASH_CLAIM_RE = re.compile(r"\bslash(?:ed|ing|es)?\b", re.IGNORECASE)
+_SLASH_NEGATED_RE = re.compile(r"(not|no|never|without)\s+(?:been\s+)?$",
+                               re.IGNORECASE)
 
 # Shared sidechat_shim screening (2026-10-05): every fleet post goes through
 # the shim's pipeline (estate allowlist -> preflight gate -> format_safe),
@@ -123,8 +137,18 @@ KB_SHA_RE = re.compile(r"^[0-9a-f]{40}$")  # knowledgebase commit SHA
 # requests become corral ticket prompts (exec_mode="corral") executed by
 # the winning bidder, with automatic fallback to Super Ralph on corral
 # failure. The oracle never executes payloads; it only verifies.
-AGENTIC_TIMEOUT_MS = 30 * 60 * 1000   # Super Ralph runs are slow (~11 min
-                                      # observed for a trivial run)
+AGENTIC_TIMEOUT_MS = 60 * 60 * 1000   # Super Ralph runs are slow (~11 min
+                                      # observed for a trivial run).
+                                      # 2026-10-19 (finch, audit correction
+                                      # Stage B): 30 min made the designed
+                                      # two-lane sequence impossible --
+                                      # corral's own cap is 1740s, leaving
+                                      # the super-ralph fallback ~60s. All
+                                      # 14 exec-timeout settles fired at
+                                      # exactly 1800s with lane 1 still
+                                      # mid-flight. 60 min fits corral +
+                                      # ralph + post buffer in one
+                                      # deadline.
 # 2026-10-19 (osprey, rig migration): bidder lanes are rig agents on
 # a ~60s cron cadence now, not inotify daemons. The auction window
 # must exceed the poll cadence, so 15s -> 300s. Side benefit: this
@@ -430,6 +454,44 @@ def _parse_acceptance_report(output):
     return found, all_met, items
 
 
+def _label_for_settle(verified, success, notes):
+    """Corrected settlement label gate (2026-10-19, Chris): label
+    the OUTCOME, not the settle reason. Returns (label, gate_reason):
+    label True/False for a decidable outcome, None when the settle
+    must be excluded -- the caller logs EVERY exclusion with its
+    gate_reason, because inauditable exclusions would hide the
+    selection bias this correction exists to remove.
+
+      verified                                -> (True,  verified-correct)
+      no answer (not success: infra settles)  -> (None,  no-answer-infra)
+      answer + empty output                   -> (None,  no-answer-empty-output)
+      answer + verifier found it wanting
+        (acceptance-unmet / missing-artifact /
+         bad-artifact / proof-hash-mismatch)  -> (False, flagged-incorrect)
+      answer + acceptance report missing      -> (None,  verdict-undecidable-report-missing)
+      answer + anything else                  -> (None,  verdict-ambiguous)
+
+    The flagged-incorrect row is the point of the correction: a
+    FLAGGED settle with a present-but-wrong answer is the most
+    valuable label the gate can learn from, and the old settle-reason
+    gate threw it away.
+    """
+    if verified:
+        return True, "verified-correct"
+    if not success:
+        return None, "no-answer-infra"
+    joined = " ".join(notes or [])
+    if "empty-output" in joined:
+        return None, "no-answer-empty-output"
+    if ("acceptance-unmet" in joined or "missing-artifact" in joined
+            or "bad-artifact" in joined
+            or "proof-hash-mismatch" in joined):
+        return False, "flagged-incorrect"
+    if "acceptance-report-missing" in joined:
+        return None, "verdict-undecidable-report-missing"
+    return None, "verdict-ambiguous"
+
+
 class OracleLoop:
     def __init__(self):
         WORK.mkdir(parents=True, exist_ok=True)
@@ -472,8 +534,66 @@ class OracleLoop:
         with open(LEDGER, "a", encoding="utf-8") as f:
             f.write(json.dumps(kw) + "\n")
 
-    def fleet_note(self, text):
-        """Fleet narration as oracle-market, markdown body, single write."""
+    def _ledger_has_slash(self, task_id):
+        """True only when the ledger itself records a slash for the
+        task. The ledger is the truth-source for money claims; the
+        writer consults it BEFORE writing, not after."""
+        if not task_id:
+            return False
+        try:
+            with open(LEDGER) as f:
+                for line in f:
+                    if '"slashed"' not in line or task_id not in line:
+                        continue
+                    try:
+                        row = json.loads(line)
+                    except Exception:
+                        continue
+                    if row.get("event") == "slashed" and \
+                            row.get("task_id") == task_id:
+                        return True
+        except OSError:
+            return False
+        return False
+
+    def _slash_claim_backed(self, text, task_id):
+        """Whether a message may be posted as-is: it makes no slash
+        claim, or the claim it makes is backed by a slashed ledger
+        event for the task. A claim with no task reference can never
+        be backed."""
+        for m in _SLASH_CLAIM_RE.finditer(text):
+            prefix = text[max(0, m.start() - 14):m.start()]
+            if _SLASH_NEGATED_RE.search(prefix):
+                continue
+            return self._ledger_has_slash(task_id)
+        return True
+
+    def fleet_note(self, text, task_id=None):
+        """Fleet narration as oracle-market, markdown body, single write.
+
+        Claim guard (2026-10-19, audit correction B1): a note that
+        asserts a bond slash must be backed by a slashed event in
+        the ledger for that task. Unbacked claims are rejected at
+        generation time and rerouted to the claim-rejected kind with
+        the reason recorded in the ledger -- they never reach the
+        fleet as claims.
+        """
+        if not self._slash_claim_backed(text, task_id):
+            self.log("claim_rejected", task_id=task_id,
+                     gate_reason="no-ledger-slash-event",
+                     text=text[:200])
+            try:
+                self.fleet.post(
+                    "claim-rejected", f"oracle-{int(time.time())}",
+                    "oracle-market: CLAIM REJECTED (no ledger event): "
+                    "a generated note asserted a bond slash for "
+                    f"{task_id or 'an unreferenced task'} with no "
+                    "slashed event in the ledger. Rejected text: "
+                    + text[:300],
+                    frm=FROM, raw_body=True)
+            except OSError:
+                pass
+            return
         try:
             self.fleet.post("note", f"oracle-{int(time.time())}", text,
                             frm=FROM, raw_body=True)
@@ -1372,21 +1492,29 @@ class OracleLoop:
                  success=success, duration_ms=duration_ms,
                  price_paid=self.auctions[tid].price_paid, notes=notes,
                  reason=reason, replay=replay)
-        # Feed the abstention gate's evidence store (calibration). A
-        # settle is a genuinely labeled accepted outcome only when a
-        # real result was produced and then verified or failed
-        # verification. Infra settles (no result ever produced) label
-        # nothing -- there was no accepted outcome to grade. Replays
-        # recorded their row at the original settle; never
-        # double-count them.
-        if not replay:
-            infra = reason in ("no-result", "exec-timeout") and not success
-            if not infra:
+        # Settlement feeder for the abstention gate -- CORRECTED
+        # gate (2026-10-19, Chris; supersedes the ec6c9f5 settle-
+        # reason gate above the line): label the outcome, not the
+        # settle reason. _label_for_settle applies the gate table;
+        # labeled rows go through engine.record_accepted_outcome
+        # (same history store the gate reads), and EVERY exclusion
+        # is written to the ledger with its gate reason.
+        if replay:
+            self.log("label_excluded", task_id=tid, winner=bidder,
+                     gate_reason="replay", settle_reason=reason,
+                     verified=verified, success=success)
+        else:
+            label, gate_reason = _label_for_settle(verified, success,
+                                                   notes)
+            if label is None:
+                self.log("label_excluded", task_id=tid, winner=bidder,
+                         gate_reason=gate_reason, settle_reason=reason,
+                         verified=verified, success=success)
+            else:
                 try:
-                    cal_mod.record_labeled_outcome(
-                        bool(verified), source="market_settlement",
-                        task_id=tid, winner=bidder, success=success,
-                        reason=reason)
+                    engine_mod.record_accepted_outcome(
+                        tid, label, source="market_settlement",
+                        note=gate_reason)
                 except Exception as e:
                     self.log("label_record_failed", task_id=tid,
                              error=str(e)[:120])
@@ -1483,9 +1611,18 @@ class OracleLoop:
                 "duration_ms": duration_ms, "notes": notes}
 
     def exec_timeout(self, tid):
-        """Winner missed the result deadline: settle FAILED + slash full
-        bond. There is deliberately NO fallback execution — the oracle
-        never runs task-post payloads (removed 2026-09-20)."""
+        """Winner missed the result deadline: settle FAILED. No result
+        was produced, so _apply_settle takes the infra path and
+        RELEASES the bond -- timeouts never slash (2026-10-12/13).
+        There is deliberately NO fallback execution — the oracle
+        never runs task-post payloads (removed 2026-09-20).
+
+        The fleet note below used to claim "bond slashed" BEFORE the
+        stake transition ran -- false by construction, and the
+        recurring false-slash of the Oct 13-15 corrections. The note
+        now states only what this path knows, and the fleet_note
+        claim guard rejects any unbacked slash assertion at
+        generation time regardless."""
         a = self.auctions.get(tid)
         if not a or a.state != "ASSIGNED" or tid in self.done:
             return
@@ -1493,7 +1630,8 @@ class OracleLoop:
         self.log("exec_timeout", task_id=tid, winner=a.winner)
         self.fleet_note(
             f"oracle-market: {a.winner} missed the result deadline on {tid}; "
-            f"settling FAILED, bond slashed.")
+            f"settling FAILED (infra: no result produced, bond released).",
+            task_id=tid)
         # Stake first, publish second. Any crash between the two is
         # reconciled exactly once by reconstruct(): the locked bond is the
         # pending marker for _apply_settle, and a ledger "settled" event

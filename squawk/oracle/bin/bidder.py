@@ -139,8 +139,26 @@ CORRAL_CAP_S = 1740  # same class as super-ralph: agentic runs are slow
 WORKTREE_ORPHAN_AGE_S = 120
 
 
-def sweep_orphaned_worktrees():
-    """Remove orphaned /tmp/workflow-wt-* dirs; return count removed."""
+def _task_root(p):
+    """The oracle task dir (…/oracle/work/<bidder>/<task>) containing
+    path p, or None when p is not inside one."""
+    parts = Path(p).parts
+    for i in range(len(parts) - 1):
+        if parts[i] == "oracle" and parts[i + 1] == "work":
+            if len(parts) > i + 3:
+                return str(Path(*parts[:i + 4]))
+            return None
+    return None
+
+
+def sweep_orphaned_worktrees(own_workdir=None):
+    """Remove orphaned /tmp/workflow-wt-* dirs; return count removed.
+
+    own_workdir: the task workdir of the run about to start. When
+    given, a worktree whose repo pointers resolve into a DIFFERENT
+    task's workdir (a satellite of that task's repo) is also
+    removed: adopting it gets jj's root-resolution refusal and the
+    run stalls (research-1792445323109)."""
     import glob as _glob
     removed = 0
     now = time.time()
@@ -153,10 +171,66 @@ def sweep_orphaned_worktrees():
             if not lines or not lines[0].startswith("gitdir: "):
                 continue
             target = lines[0][len("gitdir: "):].strip()
-            if os.path.exists(target):
-                continue  # live or valid worktree -- never touch
+            if not os.path.exists(target):
+                if now - os.path.getmtime(path) < WORKTREE_ORPHAN_AGE_S:
+                    continue  # creation-race guard
+                shutil.rmtree(path, ignore_errors=True)
+                if not os.path.exists(path):
+                    removed += 1
+                continue
+            # Satellite check (finch, 2026-10-19): the dir's repo
+            # pointers may resolve into a DIFFERENT task's workdir
+            # (observed live: /tmp/workflow-wt-update-progress is a
+            # satellite of forge/task-1790943731163's repo). Only the
+            # owning task's own runs may keep such a dir.
+            if own_workdir is not None:
+                _pointers = [target]
+                _jjrepo = Path(path) / ".jj" / "repo"
+                try:
+                    if _jjrepo.is_file():
+                        _p = _jjrepo.read_text(encoding="utf-8").strip()
+                        if _p:
+                            _pointers.append(
+                                _p if os.path.isabs(_p)
+                                else str(Path(path) / ".jj" / _p))
+                except Exception:
+                    pass
+                _own = _task_root(str(own_workdir))
+                _foreign = False
+                for _ptr in _pointers:
+                    _root = _task_root(os.path.realpath(_ptr))
+                    if _root and _own and _root != _own:
+                        _foreign = True
+                if _foreign:
+                    if now - os.path.getmtime(path) < WORKTREE_ORPHAN_AGE_S:
+                        continue  # creation-race guard
+                    shutil.rmtree(path, ignore_errors=True)
+                    if not os.path.exists(path):
+                        removed += 1
+                    continue
+            # Gitdir target exists. One poison shape remains (finch,
+            # 2026-10-19, audit Stage A): leftover metadata from
+            # another repo/context that git does NOT resolve as this
+            # dir's repository root. Smithers refuses to overwrite
+            # such metadata, its stall detector kills the run, and
+            # BOTH executor lanes adopt the same deterministic path
+            # -- one poisoned dir fails every lane permanently
+            # (research-1792445323109, TASK_STALLED x2). A dir git
+            # itself disowns as a workspace root cannot be a live
+            # run's worktree; remove it under the same age guard,
+            # and only when git's answer is unambiguous.
             if now - os.path.getmtime(path) < WORKTREE_ORPHAN_AGE_S:
                 continue  # creation-race guard
+            try:
+                _top = subprocess.run(
+                    ["git", "-C", path, "rev-parse", "--show-toplevel"],
+                    capture_output=True, text=True, timeout=10)
+                _root = _top.stdout.strip()
+            except Exception:
+                continue  # cannot prove poison -- leave it alone
+            if _top.returncode == 0 and _root and \
+                    os.path.realpath(_root) == os.path.realpath(path):
+                continue  # git owns this workspace root -- live/valid
             shutil.rmtree(path, ignore_errors=True)
             if not os.path.exists(path):
                 removed += 1
@@ -813,7 +887,7 @@ class Bidder:
         (workdir / "prompt.md").write_text(prompt, encoding="utf-8")
         rc = None
         timed_out = False
-        _swept = sweep_orphaned_worktrees()
+        _swept = sweep_orphaned_worktrees(own_workdir=workdir)
         if _swept:
             self.say("%s swept %d orphaned workflow worktree(s) before super-ralph on %s."
                      % (self.name, _swept, tid))
@@ -1195,7 +1269,7 @@ class Bidder:
         tid = task["task_id"]
         prompt = task.get("payload", "") or ""
         (workdir / "prompt.md").write_text(prompt, encoding="utf-8")
-        _swept = sweep_orphaned_worktrees()
+        _swept = sweep_orphaned_worktrees(own_workdir=workdir)
         if _swept:
             self.say("%s swept %d orphaned workflow worktree(s) before corral on %s."
                      % (self.name, _swept, tid))
