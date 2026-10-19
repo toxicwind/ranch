@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-19T23:27:33.430Z",
+  "generated": "2026-10-19T23:35:39.147Z",
   "total": 246,
-  "withUpstream": 151,
+  "withUpstream": 152,
   "infos": [
     {
       "name": "additional-lens-profiles",
@@ -46,8 +46,8 @@
       "remoteOrigin": "https://github.com/aparnaa19/AgentForensics.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 1818681,
-      "fileCount": 90,
+      "sizeBytes": 1818945,
+      "fileCount": 92,
       "signals": [],
       "signalTotal": 0
     },
@@ -785,11 +785,11 @@
     },
     {
       "name": "estate-kappa-plugin",
-      "upstream": null,
-      "upstreamSource": null,
+      "upstream": "https://github.com/toxicwind/estate-kappa-plugin",
+      "upstreamSource": ".gitmodules",
       "remoteOrigin": "https://github.com/toxicwind/estate-kappa-plugin.git",
       "hasGit": true,
-      "isSubmodule": false,
+      "isSubmodule": true,
       "sizeBytes": 50500,
       "fileCount": 52,
       "signals": [],
@@ -1192,8 +1192,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 19178699254,
-      "fileCount": 187329,
+      "sizeBytes": 19178833837,
+      "fileCount": 187335,
       "signals": [],
       "signalTotal": 0
     },
@@ -1312,8 +1312,8 @@
       "remoteOrigin": "https://github.com/toxicwind/kilo.git",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 8274642687,
-      "fileCount": 180749,
+      "sizeBytes": 8274655747,
+      "fileCount": 180761,
       "signals": [],
       "signalTotal": 0
     },
@@ -1858,8 +1858,8 @@
       "remoteOrigin": "https://github.com/diegosouzapw/OmniRoute.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 1138083717,
-      "fileCount": 24349,
+      "sizeBytes": 2017910339,
+      "fileCount": 24581,
       "signals": [],
       "signalTotal": 0
     },
@@ -2014,7 +2014,7 @@
       "remoteOrigin": "https://github.com/toxicwind/phone-lane.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 11664664,
+      "sizeBytes": 11670645,
       "fileCount": 42,
       "signals": [],
       "signalTotal": 0
@@ -2290,7 +2290,7 @@
       "remoteOrigin": "https://github.com/toxicwind/rig.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 203340252,
+      "sizeBytes": 203340285,
       "fileCount": 591,
       "signals": [],
       "signalTotal": 0
@@ -2470,7 +2470,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4840073423,
+      "sizeBytes": 4840915704,
       "fileCount": 14969,
       "signals": [],
       "signalTotal": 0
@@ -2518,7 +2518,7 @@
       "remoteOrigin": "https://github.com/toxicwind/squawk.git",
       "hasGit": true,
       "isSubmodule": false,
-      "sizeBytes": 97269876,
+      "sizeBytes": 97270794,
       "fileCount": 6115,
       "signals": [],
       "signalTotal": 0
@@ -2626,7 +2626,7 @@
       "remoteOrigin": "https://github.com/toxicwind/strudel-sampler-server-vite.git",
       "hasGit": true,
       "isSubmodule": true,
-      "sizeBytes": 313422,
+      "sizeBytes": 313455,
       "fileCount": 65,
       "signals": [],
       "signalTotal": 0

@@ -1,9 +1,9 @@
-# ranch/* fork audit (generated 2026-10-19T23:27:33.430Z)
+# ranch/* fork audit (generated 2026-10-19T23:35:39.147Z)
 
-246 immediate subdirs; **151** have an obvious upstream reference.
+246 immediate subdirs; **152** have an obvious upstream reference.
 
 By source:
-  - **145** .gitmodules
+  - **146** .gitmodules
   - **1** go.mod module
   - **3** package.json repository
   - **1** git remote upstream
@@ -48,6 +48,7 @@ By source:
 | `estate-dispersal-monolith` | [github.com/toxicwind/estate-dispersal-monolith](https://github.com/toxicwind/estate-dispersal-monolith) | .gitmodules | github.com/toxicwind/estate-dispersal-monolith.git |
 | `estate-end4` | [github.com/toxicwind/sovereign-end4](https://github.com/toxicwind/sovereign-end4) | .gitmodules | github.com/toxicwind/sovereign-end4.git |
 | `estate-hatch-toolkit` | [github.com/toxicwind/estate-hatch-toolkit](https://github.com/toxicwind/estate-hatch-toolkit) | .gitmodules | github.com/toxicwind/sovereign-hatch-toolkit.git |
+| `estate-kappa-plugin` | [github.com/toxicwind/estate-kappa-plugin](https://github.com/toxicwind/estate-kappa-plugin) | .gitmodules | github.com/toxicwind/estate-kappa-plugin.git |
 | `estate-monitor` | [github.com/toxicwind/estate-monitor](https://github.com/toxicwind/estate-monitor) | .gitmodules | github.com/toxicwind/estate-monitor.git |
 | `estate-recon` | [github.com/toxicwind/estate-recon](https://github.com/toxicwind/estate-recon) | .gitmodules | github.com/toxicwind/estate-recon.git |
 | `estate-scripts` | [github.com/toxicwind/estate-scripts](https://github.com/toxicwind/estate-scripts) | .gitmodules | — |
@@ -189,7 +190,6 @@ By source:
 | `dedicated` | — | — | — |
 | `docs` | — | — | — |
 | `estate` | — | — | — |
-| `estate-kappa-plugin` | — | — | github.com/toxicwind/estate-kappa-plugin.git |
 | `evidence-locker` | — | — | — |
 | `extagents` | — | — | — |
 | `gatehouse-staging` | — | — | — |
