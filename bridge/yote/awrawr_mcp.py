@@ -245,6 +245,51 @@ def _canonical_spawn_env():
     return env
 
 
+
+# --- output persistence (Tansy 2026-10-19, mirrors TS capOut estate 6e62d2c939) ---
+# Truncated tool output used to be silently dropped at the cap. Now the
+# COMPLETE output is persisted to a durable dir under HOME (not /tmp:
+# tmpfs + janitor sweeps made /tmp-saved outputs vanish before retrieval).
+# Override with AWR_MCP_OUTPUT_DIR. Files older than 7 days are pruned.
+OUT_CAP = 20000
+_cap_out_counter = [0]
+
+
+def _cap_out(prefix, out, cap=OUT_CAP):
+    if not out:
+        return prefix + "(no output)"
+    if len(out) <= cap:
+        return prefix + out
+    out_dir = os.environ.get("AWR_MCP_OUTPUT_DIR") or os.path.expanduser(
+        "~/.awrawr-mcp/outputs")
+    saved = None
+    try:
+        os.makedirs(out_dir, exist_ok=True)
+        _cap_out_counter[0] += 1
+        saved = os.path.join(
+            out_dir,
+            "out-%d-%d-%d.txt" % (int(time.time() * 1000), os.getpid(),
+                                  _cap_out_counter[0]))
+        with open(saved, "w") as f:
+            f.write(out)
+        cutoff = time.time() - 7 * 24 * 3600
+        for name in os.listdir(out_dir):
+            p = os.path.join(out_dir, name)
+            try:
+                if os.path.getmtime(p) < cutoff:
+                    os.unlink(p)
+            except Exception:
+                pass
+    except Exception:
+        saved = None
+    if saved:
+        note = ("\n...[TRUNCATED %d chars total, full output saved to %s]"
+                % (len(out), saved))
+    else:
+        note = "\n...[TRUNCATED %d chars total]" % len(out)
+    return prefix + out[:cap] + note
+
+
 @mcp.tool()
 def exec(cmd: str, workdir: str = "/home/toxic") -> str:
     """Run a shell command on awrawr-pc (subject to command policy).
@@ -280,7 +325,7 @@ def exec(cmd: str, workdir: str = "/home/toxic") -> str:
                truncated=truncated,
                elapsed_ms=int((time.monotonic() - t0) * 1000))
         rc = f"[exit={p.returncode}] "
-        return rc + out[:20000] if out else rc + "(no output)"
+        return _cap_out(rc, out)
     except subprocess.TimeoutExpired:
         _audit(**base, status="timeout",
                elapsed_ms=int((time.monotonic() - t0) * 1000))
@@ -334,7 +379,7 @@ def _mcp_run_one(cmd, workdir, timeout=90):
                truncated=truncated,
                elapsed_ms=int((time.monotonic() - t0) * 1000))
         rc = "[exit=%d] " % p.returncode
-        return rc + out[:20000] if out else rc + "(no output)"
+        return _cap_out(rc, out)
     except subprocess.TimeoutExpired:
         _audit(**base, status="timeout",
                elapsed_ms=int((time.monotonic() - t0) * 1000))
@@ -1106,7 +1151,7 @@ def _ffs_run(sub: str, args: list, root: str, timeout: int = 60) -> str:
                truncated=truncated,
                elapsed_ms=int((time.monotonic() - t0) * 1000))
         rc = "[exit=%d] " % p.returncode
-        return rc + out[:FFS_OUT_CAP] if out else rc + "(no output)"
+        return _cap_out(rc, out, FFS_OUT_CAP)
     except subprocess.TimeoutExpired:
         _audit(**base, status="timeout",
                elapsed_ms=int((time.monotonic() - t0) * 1000))
@@ -1343,7 +1388,7 @@ def _mesh_call(tool_name: str, arguments: dict, timeout: int = 90) -> str:
         truncated = len(out) > MESH_OUT_CAP
         _audit(**base, status="ok", out_chars=len(out), truncated=truncated,
                elapsed_ms=int((time.monotonic() - t0) * 1000))
-        return out[:MESH_OUT_CAP] + ("…[truncated]" if truncated else "")
+        return _cap_out("", out, MESH_OUT_CAP)
     except Exception as e:
         _audit(**base, status="error", reason=str(e)[:200],
                elapsed_ms=int((time.monotonic() - t0) * 1000))
@@ -1373,7 +1418,7 @@ def mesh_upstream_servers() -> str:
         _audit(**base, status="ok", exit=p.returncode,
                out_chars=len(out),
                elapsed_ms=int((time.monotonic() - t0) * 1000))
-        return ("[exit=%d] " % p.returncode + out[:MESH_OUT_CAP]) if out \
+        return _cap_out("[exit=%d] " % p.returncode, out, MESH_OUT_CAP) if out \
             else "[exit=%d] (no output)" % p.returncode
     except Exception as e:
         _audit(**base, status="error", reason=str(e)[:200],
