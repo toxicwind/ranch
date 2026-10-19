@@ -967,9 +967,19 @@ class Bidder:
                     content = (msg.get("content") or msg.get("reasoning_content") or msg.get("reasoning") or "").strip()
                 if content:
                     return content
-            except Exception:
-                # A 400 here may be an upstream rejecting a reasoning
-                # field: retry the remaining routes with the plain body.
+            except Exception as e:
+                # 2026-10-19 (osprey/bruteforce, Chris): name the failure
+                # instead of swallowing it. A 400 here may be an upstream
+                # rejecting a reasoning field: retry the remaining routes
+                # with the plain body. Routes, keys, and fallback order
+                # unchanged; the failure now lands in stderr evidence.
+                if isinstance(e, urllib.error.HTTPError):
+                    print(f"_one_shot_call: route {base} HTTP {e.code} "
+                          f"{e.reason}; retrying next route", flush=True)
+                else:
+                    print(f"_one_shot_call: route {base} "
+                          f"{type(e).__name__}: {str(e)[:200]}; "
+                          f"retrying next route", flush=True)
                 body = plain_body
                 continue
         return ""
