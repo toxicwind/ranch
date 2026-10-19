@@ -73,11 +73,14 @@ WORK = os.environ.get("ORACLE_WORK", "/home/toxic/estate/ranch/squawk/oracle/wor
 # herd.yaml, and oracle-judge-local was a local beellama model -- banned
 # by the 2026-10-13 corrective from Chris (local herd models not ready).
 DEFAULT_JUDGES = [
-    "nvidia/nemotron-3-super-120b-a12b",  # 2026-10-19 bench: perfect probes; ultra demoted (length burns)
-    "nvidia/nemotron-3-ultra-550b-a55b",
-    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+    "openai/gpt-oss-120b",  # 2026-10-19: bench winner, ~1s on this route
+    "z-ai/glm-5.3-flash",  # verified answering judge-shaped probes ~1s (2026-10-19)
+    "nvidia/nemotron-3-super-120b-a12b",  # diversity seat: benched perfect, but all three
+    # nemotron judges timed out at 90s on trivial prompts after the bench (2026-10-19 pm);
+    # the engine liveness gate re-admits it when it answers again.
+  # 2026-10-19 bench: perfect probes; ultra demoted (length burns)
 ]
-FALLBACK_JUDGE = "nvidia/nemotron-3-super-120b-a12b"
+FALLBACK_JUDGE = "openai/gpt-oss-120b"
 
 JUDGE_PROMPT = """You are judge {idx} (anonymous) on the OpenFang Oracle panel.
 Question: {question}
