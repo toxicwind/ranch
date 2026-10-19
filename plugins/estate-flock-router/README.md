@@ -1,11 +1,11 @@
 # @estate/flock-router
 
-Flock provider routing plugin for kilo-code — queries strategy weights, health, and routing decisions.
+Flock provider routing plugin for kappa-code — queries strategy weights, health, and routing decisions.
 
 ## Install
 
 ```bash
-# Kilo auto-discovers from .kilo/plugin/ directory
+# Kappa auto-discovers from .kappa/plugin/ directory
 ```
 
 ## Usage

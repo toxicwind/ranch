@@ -1,11 +1,11 @@
 # @estate/herd-models
 
-Herd model catalog plugin for kilo-code — exposes local LLM models as Kilo model providers.
+Herd model catalog plugin for kappa-code — exposes local LLM models as Kappa model providers.
 
 ## Install
 
 ```bash
-# Kilo auto-discovers from .kilo/plugin/ directory
+# Kappa auto-discovers from .kappa/plugin/ directory
 ```
 
 ## Usage

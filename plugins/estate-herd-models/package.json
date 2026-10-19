@@ -1,13 +1,13 @@
 {
   "name": "@estate/herd-models",
   "version": "1.0.0",
-  "description": "herd model catalog plugin for kilo-code",
+  "description": "herd model catalog plugin for kappa-code",
   "main": "src/index.ts",
   "files": ["src"],
-  "keywords": ["kilo", "plugin", "herd", "models", "llm", "estate"],
+  "keywords": ["kappa", "plugin", "herd", "models", "llm", "estate"],
   "author": "estate",
   "license": "MIT",
   "peerDependencies": {
-    "@kilocode/sdk": "^1.0.0"
+    "@kappacode/sdk": "^1.0.0"
   }
 }

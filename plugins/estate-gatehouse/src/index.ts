@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
-// @estate/gatehouse — MCP gateway plugin for kilo-cli
-// Maximalized: integrates gatehouse with Kilo's tool system
+// @estate/gatehouse — MCP gateway plugin for kappa-cli
+// Maximalized: integrates gatehouse with Kappa's tool system
 // Namespace-qualified to avoid 81% name collision problem (arXiv 2609.23809)
 
 type ToolResult = string | {
