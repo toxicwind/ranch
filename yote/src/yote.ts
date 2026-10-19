@@ -865,7 +865,7 @@ try {
         u.searchParams.get("msg") ||
         `yote→openfang external test ${new Date().toISOString()}`;
       if (mode === "overlord") {
-        const target = u.searchParams.get("to") || "crawlspace_coyote_bot";
+        const target = u.searchParams.get("to") || "estate_coyote_bot";
         const r = await testOverlordSend(target, txt);
         return jres(r);
       }

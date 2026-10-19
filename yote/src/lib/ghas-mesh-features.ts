@@ -5,9 +5,9 @@
  *
  * Mount via handleMeshRequest() on /mesh/* of any service, or run mesh-hub.
  */
-import { loadestate-scriptsPorts, requirePort } from "./ports.ts";
+import { loadEstateScriptsPorts, requirePort } from "./ports.ts";
 
-loadestate-scriptsPorts();
+loadEstateScriptsPorts();
 
 export type MeshServiceId =
   | "herd"
