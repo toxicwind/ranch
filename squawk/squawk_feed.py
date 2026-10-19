@@ -60,7 +60,6 @@ TOKEN_ENV = "SQUAWK_FEED_TOKEN"
 HOLD_SECONDS = 55.0
 MAX_MESSAGES = 50
 TAIL_CAP = 500  # server-side cap on ?tail= boot snapshots
-TEXT_CAP = 500
 # inotify event bits (linux/inotify.h). NOTE: 0x100 is IN_CREATE, not
 # IN_MOVED_TO (0x80) -- IN_CREATE fires at open(), before any content
 # is written, so it must NOT be in the mask: the watcher would bump
@@ -203,14 +202,6 @@ def _watch_loop(state: FeedState):
 # fat response builder
 # ---------------------------------------------------------------------------
 
-def _truncate(text, cap: int = TEXT_CAP) -> str:
-    if text is None:
-        return None
-    if len(text) > cap:
-        return text[: cap - 1] + "…"
-    return text
-
-
 def build_fat(since: int, state: FeedState,
               max_messages: int = MAX_MESSAGES, tail: int = 0) -> dict:
     """{"seq": M, "messages": [...]} for messages with seq > since.
@@ -233,7 +224,9 @@ def build_fat(since: int, state: FeedState,
         rec = fleet_relay.build_relay_record(
             p, channel=state.channel,
             identity=state.identity, key_dir=state.key_dir)
-        rec["body"] = _truncate(rec.get("body"))
+        # Full bodies by design (Chris, 2026-09-21): the serve path
+        # does NOT truncate. The 500-char TEXT_CAP removal was lost
+        # in the estate migration and is restored here (Pry, 2026-10-19).
         messages.append(rec)
         seq = rec.get("seq") or 0
         if seq <= 0:
