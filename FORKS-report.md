@@ -1,9 +1,9 @@
-# ranch/* fork audit (generated 2026-10-19T22:05:53.952Z)
+# ranch/* fork audit (generated 2026-10-19T23:05:26.051Z)
 
-190 immediate subdirs; **140** have an obvious upstream reference.
+189 immediate subdirs; **139** have an obvious upstream reference.
 
 By source:
-  - **139** .gitmodules
+  - **138** .gitmodules
   - **1** Cargo.toml repository
 
 | dir | upstream | source | origin remote |
@@ -78,7 +78,6 @@ By source:
 | `kairos` | [github.com/toxicwind/kairos](https://github.com/toxicwind/kairos) | .gitmodules | — |
 | `keep` | [github.com/toxicwind/keep](https://github.com/toxicwind/keep) | .gitmodules | — |
 | `keryx` | [github.com/toxicwind/keryx](https://github.com/toxicwind/keryx) | .gitmodules | — |
-| `kilo` | [github.com/toxicwind/kilo](https://github.com/toxicwind/kilo) | .gitmodules | — |
 | `kimi-claw` | [github.com/toxicwind/kimi-claw](https://github.com/toxicwind/kimi-claw) | .gitmodules | — |
 | `kodi-fleet` | [github.com/toxicwind/kodi-fleet](https://github.com/toxicwind/kodi-fleet) | .gitmodules | — |
 | `kryptos` | [github.com/toxicwind/kryptos](https://github.com/toxicwind/kryptos) | .gitmodules | — |

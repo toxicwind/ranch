@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-19T22:05:53.952Z",
-  "total": 190,
-  "withUpstream": 140,
+  "generated": "2026-10-19T23:05:26.051Z",
+  "total": 189,
+  "withUpstream": 139,
   "infos": [
     {
       "name": "AgentForensics",
@@ -94,7 +94,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 45302,
+      "sizeBytes": 44823,
       "fileCount": 11,
       "signals": [],
       "signalTotal": 0
@@ -178,8 +178,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 58451395,
-      "fileCount": 2315,
+      "sizeBytes": 58468030,
+      "fileCount": 2316,
       "signals": [],
       "signalTotal": 0
     },
@@ -226,8 +226,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 316645,
-      "fileCount": 34,
+      "sizeBytes": 320042,
+      "fileCount": 35,
       "signals": [],
       "signalTotal": 0
     },
@@ -334,8 +334,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 592816,
-      "fileCount": 74,
+      "sizeBytes": 587306,
+      "fileCount": 73,
       "signals": [],
       "signalTotal": 0
     },
@@ -952,18 +952,6 @@
       "signalTotal": 0
     },
     {
-      "name": "kilo",
-      "upstream": "https://github.com/toxicwind/kilo",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": true,
-      "sizeBytes": 0,
-      "fileCount": 0,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
       "name": "kimi-claw",
       "upstream": "https://github.com/toxicwind/kimi-claw",
       "upstreamSource": ".gitmodules",
@@ -1342,8 +1330,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 413452,
-      "fileCount": 57,
+      "sizeBytes": 415930,
+      "fileCount": 60,
       "signals": [],
       "signalTotal": 0
     },
@@ -1486,7 +1474,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 19245,
+      "sizeBytes": 19287,
       "fileCount": 16,
       "signals": [],
       "signalTotal": 0
@@ -1702,7 +1690,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 8559366,
+      "sizeBytes": 8559437,
       "fileCount": 589,
       "signals": [],
       "signalTotal": 0
@@ -1894,8 +1882,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 1996385,
-      "fileCount": 224,
+      "sizeBytes": 2093912,
+      "fileCount": 237,
       "signals": [],
       "signalTotal": 0
     },
@@ -1930,8 +1918,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 442608,
-      "fileCount": 51,
+      "sizeBytes": 447065,
+      "fileCount": 52,
       "signals": [],
       "signalTotal": 0
     },
@@ -1942,8 +1930,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 7001,
-      "fileCount": 12,
+      "sizeBytes": 5757,
+      "fileCount": 10,
       "signals": [],
       "signalTotal": 0
     },
@@ -2242,7 +2230,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 1769060,
+      "sizeBytes": 1775126,
       "fileCount": 87,
       "signals": [],
       "signalTotal": 0
