@@ -243,7 +243,13 @@ function parseMsgFile(path: string, fallbackSeq: number): Msg | null {
   };
 }
 
-// GET /wait?since=<seq>&channel=<name>&tail=<n> -> {ok, messages, cursor}
+// GET /wait?since=<seq>&channel=<name>&tail=<n> -> {ok, messages, cursor, oldest, has_more}
+// GET /wait?before=<seq>&channel=<name>&tail=<n> -> the page of history
+// immediately older than <seq> (history paging for the UI: the boot snapshot
+// is tail-capped, so without `before` older messages are unreachable).
+// `before` is exclusive, matching the UI's seq-keyed dedupe identity.
+// Response `oldest` is the first returned seq; `has_more` says whether any
+// message older than `oldest` exists in the channel.
 function handleWait(url: URL): Response {
   const channel = (url.searchParams.get("channel") || "fleet").toLowerCase();
   if (!VALID_CHANNEL.test(channel)) {
@@ -251,22 +257,51 @@ function handleWait(url: URL): Response {
   }
   const since = Number(url.searchParams.get("since") || 0);
   const tail = Math.min(Math.max(Number(url.searchParams.get("tail") || 200), 1), 1000);
+  const beforeRaw = url.searchParams.get("before");
+  const before = beforeRaw ? Number(beforeRaw) : null;
   const dir = join(SQUAWK_ROOT, channel);
   let files: string[];
   try { files = readdirSync(dir); } catch { files = []; }
   // filenames start with <seq>-... so filter by name before reading
+  if (before !== null && Number.isFinite(before)) {
+    // Name-first paging: sort candidate filenames by seq and parse only the
+    // page — never parse the whole channel store for one history page.
+    const cand: { f: string; seq: number }[] = [];
+    for (const f of files) {
+      if (!f.endsWith(".md")) continue;
+      const seq = Number(f.split("-")[0]);
+      if (!Number.isFinite(seq) || seq >= before) continue;
+      cand.push({ f, seq });
+    }
+    cand.sort((a, b) => a.seq - b.seq);
+    const page = cand.slice(-tail);
+    const msgs: Msg[] = [];
+    for (const { f, seq } of page) {
+      const msg = parseMsgFile(join(dir, f), seq);
+      if (msg) msgs.push(msg);
+    }
+    msgs.sort((a, b) => a.seq - b.seq);
+    const cursor = msgs.length ? msgs[msgs.length - 1].seq : before;
+    const oldest = msgs.length ? msgs[0].seq : null;
+    return Response.json({ ok: true, messages: msgs, cursor, oldest, has_more: cand.length > page.length });
+  }
   const msgs: Msg[] = [];
+  let minSeq = Infinity;
   for (const f of files) {
     if (!f.endsWith(".md")) continue;
     const seq = Number(f.split("-")[0]);
-    if (!Number.isFinite(seq) || seq <= since) continue;
+    if (!Number.isFinite(seq)) continue;
+    if (seq < minSeq) minSeq = seq;
+    if (seq <= since) continue;
     const msg = parseMsgFile(join(dir, f), seq);
     if (msg) msgs.push(msg);
   }
   msgs.sort((a, b) => a.seq - b.seq);
   const sliced = msgs.slice(-tail);
   const cursor = sliced.length ? sliced[sliced.length - 1].seq : since;
-  return Response.json({ ok: true, messages: sliced, cursor });
+  const oldest = sliced.length ? sliced[0].seq : null;
+  const has_more = oldest !== null && minSeq < oldest;
+  return Response.json({ ok: true, messages: sliced, cursor, oldest, has_more });
 }
 
 // GET /channels -> {ok, channels: [...]}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import MessageCard from "./MessageCard.svelte";
   import AddChannelDialog from "./AddChannelDialog.svelte";
-  import { untrack } from "svelte";
+  import { untrack, tick } from "svelte";
   import { live as feedLive, keyOf as feedKeyOf } from "./live.svelte.js";
   import { natsLive, keyOf as natsKeyOf } from "./nats-live.svelte.js";
   // ?src=nats swaps the live source to NATS+JetStream (file-feed snapshot
@@ -29,6 +29,15 @@
   let stuck = $state(false);
   let newWhileStuck = $state(0);
   let prevCount = 0;
+  // --- history paging: the boot snapshot is tail-capped (200); older
+  // --- messages load on demand via /wait?before=<oldest loaded seq>.
+  // --- Per-channel state; hasMore starts optimistic-true and the server's
+  // --- has_more field corrects it on the first page fetch.
+  let paging = $state({} as Record<string, { hasMore: boolean; loading: boolean }>);
+  let page = $derived(paging[activeName] ?? { hasMore: true, loading: false });
+  // while a history page is being prepended, the pin-to-bottom and
+  // new-arrival effects must not fire — scroll anchoring owns the position.
+  let prepending = $state(false);
   let msgEl: HTMLTextAreaElement | null = $state(null);
 
   // auto-growing composer: the textarea expands with content up to a cap,
@@ -80,6 +89,7 @@
   // --- count arrivals while stuck (drives the jump pill) ---
   $effect(() => {
     const n = active.messages.length;
+    if (prepending) { prevCount = n; return; }
     if (stuck && n > prevCount) newWhileStuck += n - prevCount;
     prevCount = n;
   });
@@ -92,7 +102,7 @@
     const el = logEl;
     const n = active.messages.length;
     void activeName;
-    if (!el || !n || stuck) return;
+    if (!el || !n || stuck || prepending) return;
     // run after DOM updates
     queueMicrotask(() => {
       el.scrollTop = el.scrollHeight;
@@ -103,6 +113,43 @@
     if (!logEl) return;
     stuck = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight > 120;
     if (!stuck) newWhileStuck = 0;
+    // near the top of loaded history: page in the next older chunk
+    if (logEl.scrollTop < 90) void loadOlder();
+  }
+
+  // Fetch one history page older than the oldest loaded message and
+  // prepend it, preserving the exact scroll position (scroll anchoring:
+  // record height/top, ingest, then shift top by the height delta).
+  async function loadOlder() {
+    const name = activeName;
+    const t = live.tabs[name] as { messages: Msg[]; cursor: number } | undefined;
+    if (!t || !t.messages.length || prepending) return;
+    const p = paging[name] ?? { hasMore: true, loading: false };
+    if (p.loading || !p.hasMore) return;
+    paging = { ...paging, [name]: { hasMore: p.hasMore, loading: true } };
+    const el = logEl;
+    const prevH = el ? el.scrollHeight : 0;
+    const prevTop = el ? el.scrollTop : 0;
+    prepending = true;
+    try {
+      const oldestKey = keyOf(t.messages[0]);
+      const r = await fetch(`wait?channel=${encodeURIComponent(name)}&before=${oldestKey}&tail=100`);
+      const d = await r.json();
+      if (!r.ok || !d.ok) throw new Error(d.error || "http " + r.status);
+      const fresh: Msg[] = Array.isArray(d.messages) ? d.messages : [];
+      if (fresh.length) {
+        if (SRC_NATS) (live as typeof natsLive).ingestSnapshot(name, fresh);
+        else live.ingest(name, fresh as any);
+      }
+      paging = { ...paging, [name]: { hasMore: !!d.has_more && fresh.length > 0, loading: false } };
+      await tick();
+      if (el) el.scrollTop = prevTop + (el.scrollHeight - prevH);
+    } catch (e: any) {
+      paging = { ...paging, [name]: { hasMore: p.hasMore, loading: false } };
+      live.sysLine("load older failed: " + (e.message || e));
+    } finally {
+      prepending = false;
+    }
   }
 
   function jumpToLatest() {
@@ -246,6 +293,17 @@
           <p class="empty-sub">messages land here live — say something below</p>
         </div>
       {/if}
+    {/if}
+    {#if active.messages.length > 0}
+      <div style="display:flex;justify-content:center;align-items:center;height:32px;">
+        {#if page.loading}
+          <span style="opacity:.55;font-size:12px;">loading older…</span>
+        {:else if page.hasMore}
+          <button onclick={loadOlder} style="background:none;border:1px solid rgba(255,255,255,.14);border-radius:999px;color:inherit;padding:3px 12px;font-size:12px;cursor:pointer;" aria-label="load older messages">↑ load older messages</button>
+        {:else}
+          <span style="opacity:.45;font-size:12px;">— beginning of #{activeName} —</span>
+        {/if}
+      </div>
     {/if}
     {#each active.messages as m, i (keyOf(m))}
       <MessageCard {m} compact={i > 0 && active.messages[i - 1].from === m.from} />
