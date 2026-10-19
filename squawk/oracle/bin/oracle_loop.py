@@ -591,7 +591,8 @@ class OracleLoop:
     def _agentic_task_body(self, tid, request_text, requester, tags,
                            task_class,
                            bid_window_ms=AGENTIC_BID_WINDOW_MS,
-                           timeout_ms=AGENTIC_TIMEOUT_MS):
+                           timeout_ms=AGENTIC_TIMEOUT_MS,
+                           exec_mode="corral"):
         acceptance = self._acceptance_for(request_text)
         return {
             "task_id": tid,
@@ -601,7 +602,7 @@ class OracleLoop:
             "tags": sorted(set(tags or ["probe"])),
             "acceptance": acceptance,
             "task_class": task_class,
-            "exec_mode": "corral",
+            "exec_mode": exec_mode,
             "posted_ts": time.time(),
             "bid_window_ms": bid_window_ms,
             "timeout_ms": timeout_ms,
@@ -710,10 +711,20 @@ class OracleLoop:
         elif route == "DIRECT":
             # Urgent: skip the auction delay, but NOT authentication,
             # stake escrow, result verification, or settlement.
+            # 2026-10-19 (osprey): no_corral (explicit [no-corral] /
+            # !direct / route:direct marker) also skips the agentic
+            # lanes -- exec_mode="direct-only" runs one-shot once
+            # with NO fallback to corral or super-ralph, so a repair
+            # of the execution stack can never be routed through the
+            # component it repairs (intake 2638 lesson).
+            no_corral = bool(d.get("no_corral"))
             tid = "direct-%d" % int(time.time() * 1000)
             body = self._agentic_task_body(tid, req["text"], req["from"],
                                            ["direct", "urgent"], "direct",
-                                           bid_window_ms=5000)
+                                           bid_window_ms=5000,
+                                           exec_mode=("direct-only"
+                                                    if no_corral
+                                                    else "corral"))
             self._post_signed_task(
                 body, tid, safe_frm,
                 note=("intake: DIRECT from %s (control-signed); "

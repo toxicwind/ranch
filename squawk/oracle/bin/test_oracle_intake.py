@@ -6,7 +6,9 @@ import sys
 import tempfile
 
 sys.path.insert(0, "/home/toxic/estate/ranch/squawk/oracle/bin")
-from oracle_intake import ROUTES, TAG_HINTS, _tags_for, triage
+from oracle_intake import (ROUTES, TAG_HINTS, KNOWN_BROKEN,
+                           NO_CORRAL_MARKERS, _has_no_corral_marker,
+                           _tags_for, triage)
 
 led = tempfile.mktemp()
 cases = [
@@ -42,8 +44,53 @@ assert d4["from"] == "?"
 # hostile input never raises
 triage({"from": "x", "text": None}, led)
 triage({}, led)
+# known-broken quarantine (2026-10-18): repair of a broken lane is never
+# auctioned through that lane -- not even with !urgent
+assert len(KNOWN_BROKEN) >= 1
+dq = triage({"from": "osprey",
+             "text": "repair the corral selectReviewTickets crash: "
+                     "focuses is undefined (smthrs 0.35.0)"}, led)
+assert dq["route"] == "REJECT", dq
+assert "known-broken" in dq["reason"], dq["reason"]
+assert dq["known_broken"] == "corral-render-selectReviewTickets", dq
+dq2 = triage({"from": "osprey",
+              "text": "!urgent fix selectReviewTickets focuses mismatch"},
+             led)
+assert dq2["route"] == "REJECT", dq2
+assert dq2["known_broken"] == "corral-render-selectReviewTickets", dq2
+# explicit no-corral marker (2026-10-19): execution-stack repairs run
+# one-shot only -- DIRECT with no_corral=True, never the agentic lanes.
+# The known-broken quarantine still wins when both match.
+assert len(NO_CORRAL_MARKERS) == 3
+assert _has_no_corral_marker("fix the bidder flap [no-corral]")
+assert _has_no_corral_marker("!direct repair the retry loop")
+assert _has_no_corral_marker("ROUTE:DIRECT patch the scheduler")
+assert not _has_no_corral_marker("fix the broken health probe")
+dn = triage({"from": "osprey",
+             "text": "repair the bidder death-flap [no-corral]: "
+                     "root-cause the restart loop"}, led)
+assert dn["route"] == "DIRECT", dn
+assert dn["no_corral"] is True, dn
+assert "no-corral" in dn["reason"], dn["reason"]
+dn2 = triage({"from": "x", "text": "!direct probe the queue depth"}, led)
+assert dn2["route"] == "DIRECT" and dn2["no_corral"] is True, dn2
+# plain !urgent stays DIRECT but without no_corral (corral lane kept)
+du = triage({"from": "x", "text": "!urgent restart the tailer"}, led)
+assert du["route"] == "DIRECT", du
+assert "no_corral" not in du, du
+# marker cannot hurry a known-broken repair: quarantine runs first
+dq4 = triage({"from": "osprey",
+              "text": "[no-corral] repair selectReviewTickets: "
+                      "focuses undefined"}, led)
+assert dq4["route"] == "REJECT", dq4
+assert dq4["known_broken"] == "corral-render-selectReviewTickets", dq4
+# one keyword alone does not quarantine
+dq3 = triage({"from": "x", "text": "check the focuses logic in the dashboard"},
+             led)
+assert not (dq3["route"] == "REJECT"
+            and "known-broken" in dq3["reason"]), dq3
 rows = [json.loads(line) for line in open(led)]
 assert all(r["event"] == "intake-decision" for r in rows)
-assert len(rows) == 12
+assert len(rows) == 19
 os.unlink(led)
 print("INTAKE_UNIT_OK routes=%s hints=%s" % (ROUTES, sorted(TAG_HINTS)))

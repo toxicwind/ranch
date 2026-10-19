@@ -1043,7 +1043,16 @@ class Bidder:
         t0 = time.time()
         success, out, err = False, "", ""
         try:
-            if (task.get("exec_mode") == "one-shot"
+            if task.get("exec_mode") == "direct-only":
+                # 2026-10-19 (osprey): explicit no-corral route for
+                # execution-stack repairs. One-shot runs ONCE; there
+                # is deliberately NO fallback to corral or
+                # super-ralph -- routing a repair through the
+                # component it repairs only burns bidder runs
+                # (intake 2638). A failure here is a real failure.
+                success, out, err, dur = self._run_one_shot(
+                    task, workdir, env, timeout_ms, t0)
+            elif (task.get("exec_mode") == "one-shot"
                     or self._is_trivial_probe(task)):
                 # One-shot fast path (2026-10-13): trivial probe tasks skip
                 # the corral ticket pipeline (~110 model calls, 15-28 min)
