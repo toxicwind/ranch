@@ -230,19 +230,24 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
     }
     if (cur) entries.push(cur);
 
-    // Description lookup: GitHub description first (if gh is available),
-    // fallback to readmeHead from FORKS-report.json.
-    const ghDescCache: Record<string, string> = {};
+    // Description lookup: disk-backed cache for GitHub API descriptions (borrow pattern: sync-disk-cache).
+    const CACHE_FILE = join(RANCH_ROOT, ".cache", "ranch-fork-audit", "gh-descriptions.json");
+    let ghDescCache: Record<string, string> = {};
+    try {
+      if (existsSync(CACHE_FILE)) ghDescCache = JSON.parse(readFileSync(CACHE_FILE, "utf8"));
+    } catch {}
+
     const descOf = (p: string, repoUrl: string): string => {
       const slugMatch = repoUrl.match(/github\.com[\/:]([^\/]+\/[^\/\.]+)/);
       if (slugMatch) {
         const slug = slugMatch[1];
         if (slug in ghDescCache) return ghDescCache[slug];
         try {
-          const ghDesc = sh(`gh api repos/${slug} --jq .description 2>/dev/null`, undefined, 4000).trim();
+          const ghDesc = sh(`gh api repos/${slug} --jq .description 2>/dev/null`, undefined, 2000).trim();
           if (ghDesc && ghDesc !== "null") {
             const clean = ghDesc.slice(0, 110).replace(/\|/g, "\\|");
             ghDescCache[slug] = clean;
+            try { writeFileSync(CACHE_FILE, JSON.stringify(ghDescCache, null, 2)); } catch {}
             return clean;
           }
         } catch {}

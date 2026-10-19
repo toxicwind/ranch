@@ -690,3 +690,9 @@
 [submodule "estate-kappa-plugin"]
 	path = estate-kappa-plugin
 	url = https://github.com/toxicwind/estate-kappa-plugin.git
+[submodule "bash-style-guide"]
+	path = bash-style-guide
+	url = https://github.com/toxicwind/bash-style-guide.git
+[submodule "pdfshield"]
+	path = pdfshield
+	url = https://github.com/purvalsingh/pdfshield.git

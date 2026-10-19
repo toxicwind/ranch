@@ -394,13 +394,19 @@ bun toolkit/audit-forks.ts --resolve-origins  # bust the GitHub cache
 function enrichWithGithubParents(infos: DirInfo[]): void {
   // Parallel pool (AGENTS.md: read-only work parallelizes maximally).
   const targets = infos.filter((i) => i.remoteOrigin && i.remoteOrigin.includes("github.com/"));
+  console.log(`[audit-forks] Scanning ${targets.length} components with GitHub remotes...`);
   const CONCURRENCY = 8;
   let cursor = 0;
+  let completed = 0;
   const runWorker = async (): Promise<void> => {
     while (true) {
       const i = cursor++;
       if (i >= targets.length) return;
       const t = targets[i];
+      completed++;
+      if (completed % 25 === 0 || completed === targets.length) {
+        console.log(`[audit-forks] Progress: ${completed}/${targets.length} audited...`);
+      }
       const m = t.remoteOrigin!.match(/github\.com[/:]([^/]+)\/([^/]+?)(?:\.git)?$/);
       if (!m) continue;
       const parent = queryGithubParent(m[1], m[2]);
