@@ -38,6 +38,15 @@
   // while a history page is being prepended, the pin-to-bottom and
   // new-arrival effects must not fire — scroll anchoring owns the position.
   let prepending = $state(false);
+  // --- history pack: C1+C3 digest of a channel's deep history from the
+  // --- squawk-history service, proxied by the UI server at /pack (the
+  // --- server holds the feed token; /pack takes seconds on big channels).
+  type PackDigest = { episode: number; count: number; seq_first: number; seq_last: number; senders: Record<string, number>; terms: string[] };
+  let pack = $state(null as null | {
+    loading?: boolean; error?: string; used?: number; budget?: number;
+    nMsgs?: number; digestsTotal?: number; digests?: PackDigest[];
+  });
+  let packQuery = $state("");
   let msgEl: HTMLTextAreaElement | null = $state(null);
 
   // auto-growing composer: the textarea expands with content up to a cap,
@@ -158,7 +167,26 @@
     newWhileStuck = 0;
   }
 
+  async function fetchPack() {
+    const name = activeName;
+    if (pack?.loading) return;
+    pack = { loading: true };
+    try {
+      const r = await fetch(`pack?channel=${encodeURIComponent(name)}&q=${encodeURIComponent(packQuery)}&budget=4000`);
+      const d = await r.json();
+      if (!r.ok || !d.ok) throw new Error(d.error || "http " + r.status);
+      pack = {
+        used: d.used_tokens_est, budget: d.budget_tokens,
+        nMsgs: Array.isArray(d.messages) ? d.messages.length : 0,
+        digestsTotal: d.digests_total, digests: Array.isArray(d.digests) ? d.digests : [],
+      };
+    } catch (e: any) {
+      pack = { error: e.message || String(e) };
+    }
+  }
+
   function showTab(name: string) {
+    pack = null;
     if (logEl) {
       const t = live.tabs[activeName];
       if (t) (t as any).scrollTop = logEl.scrollTop;
@@ -302,6 +330,37 @@
           <button onclick={loadOlder} style="background:none;border:1px solid rgba(255,255,255,.14);border-radius:999px;color:inherit;padding:3px 12px;font-size:12px;cursor:pointer;" aria-label="load older messages">↑ load older messages</button>
         {:else}
           <span style="opacity:.45;font-size:12px;">— beginning of #{activeName} —</span>
+        {/if}
+      </div>
+    {/if}
+    {#if active.messages.length > 0}
+      <div style="margin:2px 8px 6px;border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:6px 10px;font-size:12px;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button onclick={fetchPack} disabled={pack?.loading} style="background:none;border:1px solid rgba(255,255,255,.14);border-radius:999px;color:inherit;padding:3px 12px;font-size:12px;cursor:pointer;" aria-label="summarize channel history as a pack">
+            {pack?.loading ? "packing…" : "📦 history pack"}
+          </button>
+          <input bind:value={packQuery} placeholder="focus terms (optional)" aria-label="pack focus terms"
+            style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:999px;color:inherit;padding:3px 10px;font-size:12px;min-width:150px;"
+            onkeydown={(e) => { if (e.key === "Enter") { e.preventDefault(); void fetchPack(); } }} />
+          {#if pack && !pack.loading && !pack.error}
+            <span style="opacity:.65;">~{pack.used} of {pack.budget} tokens · {pack.nMsgs} messages kept · {pack.digestsTotal} pruned episodes</span>
+            <button onclick={() => (pack = null)} style="background:none;border:none;color:inherit;opacity:.6;cursor:pointer;font-size:12px;" aria-label="close pack">✕</button>
+          {/if}
+          {#if pack?.error}
+            <span style="opacity:.8;">pack failed: {pack.error}</span>
+          {/if}
+        </div>
+        {#if pack?.digests?.length}
+          <div style="margin-top:6px;display:flex;flex-direction:column;gap:2px;">
+            {#each pack.digests.slice(0, 12) as d (d.episode)}
+              <div style="opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title={`episode ${d.episode} · seq ${d.seq_first}–${d.seq_last}`}>
+                <span style="opacity:.7;">#{d.episode}</span> · {d.count} msgs · {Object.entries(d.senders).map(([s, n]) => n > 1 ? `${s}×${n}` : s).join(", ")} · {d.terms.slice(0, 5).join(" · ")}
+              </div>
+            {/each}
+            {#if pack.digests.length > 12}
+              <div style="opacity:.5;">…and {pack.digests.length - 12} more digest spans (of {pack.digestsTotal} pruned episodes)</div>
+            {/if}
+          </div>
         {/if}
       </div>
     {/if}

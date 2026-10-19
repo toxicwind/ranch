@@ -304,6 +304,33 @@ function handleWait(url: URL): Response {
   return Response.json({ ok: true, messages: sliced, cursor, oldest, has_more });
 }
 
+const HISTORY = "http://127.0.0.1:25152";
+
+// GET /pack?channel=<name>&q=<query>&budget=<tokens> -> squawk-history /pack
+// proxy. The history service (JetStream index, C1+C3 packer) requires the
+// feed token; this server already holds it (getFeedToken) and the browser
+// never sees it — same pattern as the feed proxy's authHeaders.
+async function handlePack(url: URL): Promise<Response> {
+  const channel = (url.searchParams.get("channel") || "fleet").toLowerCase();
+  if (!VALID_CHANNEL.test(channel)) {
+    return Response.json({ ok: false, error: "invalid channel" }, { status: 400 });
+  }
+  const q = url.searchParams.get("q") || "";
+  const budget = Math.min(Math.max(Number(url.searchParams.get("budget") || 4000), 1000), 16000);
+  const target = `${HISTORY}/pack?channel=${encodeURIComponent(channel)}`
+    + `&q=${encodeURIComponent(q)}&budget=${budget}`;
+  try {
+    const resp = await fetch(target, {
+      headers: { authorization: "Bearer " + getFeedToken() },
+      signal: AbortSignal.timeout(45000),
+    });
+    const body = await resp.text();
+    return new Response(body, { status: resp.status, headers: { "Content-Type": "application/json" } });
+  } catch {
+    return Response.json({ ok: false, error: "history service unreachable" }, { status: 502 });
+  }
+}
+
 // GET /channels -> {ok, channels: [...]}
 function handleChannels(): Response {
   let dirs: string[];
@@ -434,6 +461,7 @@ Bun.serve<SockData>({
     }
     // --- channel-aware endpoints served from the local store ---
     if (url.pathname === "/wait" && req.method === "GET") return handleWait(url);
+    if (url.pathname === "/pack" && req.method === "GET") return handlePack(url);
     if (url.pathname === "/channels" && req.method === "GET") return handleChannels();
     if (url.pathname === "/send" && req.method === "POST") return handleSend(req);
     // --- cell-primary tunnel: proxy squawk traffic to the cell when connected ---
