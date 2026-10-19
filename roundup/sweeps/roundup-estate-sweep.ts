@@ -34,6 +34,7 @@ const GATEWAYS: Record<string, { url: string; keyEnv?: string }> = {
   herd: { url: "http://127.0.0.1:25100/v1" },
   flock: { url: "http://127.0.0.1:25193/v1", keyEnv: "FLOCK_KEY" },
   sov: { url: "http://127.0.0.1:25104/v1" },
+  kappa: { url: "http://127.0.0.1:8000/v1", keyEnv: "NIM_PROXY_KEY" },
 };
 
 const GUIDELLM = process.env.GUIDELLM_BIN ?? "/home/toxic/.local/bin/guidellm";

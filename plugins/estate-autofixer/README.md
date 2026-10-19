@@ -5,7 +5,7 @@ Sardonic estate autofixer plugin — discovers and fixes broken symlinks, config
 ## Install
 
 ```bash
-# Kilo auto-discovers from .kilo/plugin/ directory
+# Kappa auto-discovers from .kappa/plugin/ directory
 ```
 
 ## Usage

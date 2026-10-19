@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
-// @estate/flock-router — Provider routing plugin for kilo-code
-// Integrates flock's strategy routing into Kilo's model selection
+// @estate/flock-router — Provider routing plugin for kappa-code
+// Integrates flock's strategy routing into Kappa's model selection
 
 export default function flockRouterPlugin() {
   const FLOCK_URL = process.env.FLOCK_URL || "http://127.0.0.1:25193";

@@ -1,11 +1,11 @@
 # @estate/k8s
 
-Kubernetes plugin for kilo-code — query cluster state using kubectl.
+Kubernetes plugin for kappa-code — query cluster state using kubectl.
 
 ## Install
 
 ```bash
-# Kilo auto-discovers from .kilo/plugin/ directory
+# Kappa auto-discovers from .kappa/plugin/ directory
 # Requires kubectl to be available in PATH
 ```
 

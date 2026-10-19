@@ -4,7 +4,7 @@
 #   meta git update       # clone missing + pull all
 #   meta git status       # per-repo state
 #   meta exec '<cmd>'     # run any command across every component
-# Regenerate: bun tmp/gen-meta-manifest.ts
+# Regenerate: bun toolkit/gen-meta-manifest.ts
 projects:
   "agent-customization-style-guide":
     repo: https://github.com/toxicwind/agent-customization-style-guide.git

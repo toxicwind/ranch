@@ -1,13 +1,13 @@
 #!/usr/bin/env bun
-// @estate/herd-models — Model catalog plugin for kilo-code
-// Exposes herd's model catalog as Kilo model providers for chat completion
+// @estate/herd-models — Model catalog plugin for kappa-code
+// Exposes herd's model catalog as Kappa model providers for chat completion
 
 export default function herdModelsPlugin() {
   const HERD_URL = process.env.HERD_URL || "http://127.0.0.1:25100";
 
   return {
     name: "estate/herd-models",
-    description: "herd model catalog — expose local LLM models as kilo model providers",
+    description: "herd model catalog — expose local LLM models as kappa model providers",
     tools: {
       herd_list: {
         description: "List all models served by herd with their parameters",

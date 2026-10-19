@@ -1,13 +1,13 @@
 {
   "name": "@estate/flock-router",
   "version": "1.0.0",
-  "description": "flock provider routing plugin for kilo-code",
+  "description": "flock provider routing plugin for kappa-code",
   "main": "src/index.ts",
   "files": ["src"],
-  "keywords": ["kilo", "plugin", "flock", "router", "provider", "estate"],
+  "keywords": ["kappa", "plugin", "flock", "router", "provider", "estate"],
   "author": "estate",
   "license": "MIT",
   "peerDependencies": {
-    "@kilocode/sdk": "^1.0.0"
+    "@kappacode/sdk": "^1.0.0"
   }
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// @estate/k8s — Kubernetes plugin for kilo-code
+// @estate/k8s — Kubernetes plugin for kappa-code
 // Query cluster state using kubectl or direct API if available
 
 export default function k8sPlugin() {

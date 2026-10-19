@@ -1,12 +1,12 @@
 # @estate/gatehouse
 
-MCP gateway plugin for kilo-cli — integrates gatehouse MCP tools as Kilo tools.
+MCP gateway plugin for kappa-cli — integrates gatehouse MCP tools as Kappa tools.
 
 ## Install
 
 ```bash
-# Kilo auto-discovers from .kilo/plugin/ directory
-# Or manually: `kilo plugin install ./estate-gatehouse`
+# Kappa auto-discovers from .kappa/plugin/ directory
+# Or manually: `kappa plugin install ./estate-gatehouse`
 ```
 
 ## Usage

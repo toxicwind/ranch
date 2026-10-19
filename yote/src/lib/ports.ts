@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 
-const SOV = process.env.estate-scripts_ROOT || resolve(homedir(), "estate-scripts");
+const SOV = process.env.ESTATE_SCRIPTS_ROOT || resolve(homedir(), "estate");
 
 function loadEnvFile(path: string): void {
   if (!existsSync(path)) return;
@@ -29,14 +29,14 @@ function loadEnvFile(path: string): void {
 }
 
 /** Idempotent: load ports.env then .env.local into process.env */
-export function loadestate-scriptsPorts(): void {
+export function loadEstateScriptsPorts(): void {
   loadEnvFile(resolve(SOV, "config/ports.env"));
   loadEnvFile(resolve(SOV, ".env.local"));
   loadEnvFile(resolve(homedir(), ".secrets"));
 }
 
 export function requireEnv(name: string): string {
-  loadestate-scriptsPorts();
+  loadEstateScriptsPorts();
   const v = process.env[name];
   if (v === undefined || v === "") {
     throw new Error(
