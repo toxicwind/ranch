@@ -155,16 +155,27 @@ def direct_model_call(prompt):
     """Direct OpenAI-compatible chat call; merges content and reasoning."""
     import urllib.request
 
+    # 2026-10-18: hodos flock :25193 is the master router (:25104 was the
+    # retired nim-proxy port). Key resolution: FLOCK_API_KEY ->
+    # NIM_PROXY_API_KEY -> flock client-key files -> NVIDIA_API_KEY last.
+    # The flock CLIENT key is the right credential on any flock base URL;
+    # NVIDIA_API_KEY is an upstream nvapi key and only a last resort.
     base = os.environ.get("NIM_BASE_URL", "http://127.0.0.1:25193/v1").rstrip("/")
-    key = os.environ.get("NVIDIA_API_KEY", "")
-    # flock (:25193) needs its client key, not the NVIDIA upstream key
-    if ":25193" in base:
-        try:
-            ck = os.path.expanduser("~/.flock-data/client-key.corral")
-            if os.path.exists(ck):
-                key = open(ck).read().strip()
-        except Exception:
-            pass
+    key = os.environ.get("FLOCK_API_KEY", "")
+    if not key:
+        key = os.environ.get("NIM_PROXY_API_KEY", "")
+    if not key:
+        for ck in ("~/.hodos-data/client-key.corral", "~/.flock/client-key.corral", "~/.flock-data/client-key.corral"):
+            try:
+                p = os.path.expanduser(ck)
+                if os.path.exists(p):
+                    key = open(p).read().strip()
+                    if key:
+                        break
+            except Exception:
+                pass
+    if not key:
+        key = os.environ.get("NVIDIA_API_KEY", "")
     model = os.environ.get("NIM_MODEL", "")
     body = json.dumps({
         "model": model,
