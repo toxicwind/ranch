@@ -59,17 +59,30 @@ RALPH_MODEL = os.environ.get("RALPH_MODEL",
                             "openai/gpt-oss-120b")  # 2026-10-19 live bench winner
 RALPH_BASE_URL = os.environ.get("RALPH_BASE_URL",
                                 "http://127.0.0.1:25193/v1")  # flock (NIM-backed); 2026-10-13 Chris corrective: do NOT use local herd :25100
+def _flock_client_key():
+    """Read the flock/hodos client key. The flock->hodos rename
+    (2026-10-18) moved the data dir: ~/.flock-data is gone, the live key
+    sits under ~/.hodos-data (identical copy at ~/.hodos/.flock).
+    Try the live homes first, legacy path last; None if unreadable."""
+    for p in ('/home/toxic/.hodos-data/client-key.corral',
+              '/home/toxic/.hodos/.flock/client-key.corral',
+              '/home/toxic/.flock-data/client-key.corral'):
+        try:
+            with open(p) as f:
+                return f.read().strip()
+        except OSError:
+            continue
+    return None
+
 # cuttinggate's auth gate requires a "Bearer " prefix (any non-empty value;
 # the upstream key comes from cuttinggate's own credential plane).
 RALPH_API_KEY = os.environ.get("RALPH_API_KEY", "oracle-market-bidder")
 # 2026-10-13 (vesper): when routing via flock, use the flock client key.
 # Read at startup from the 0600 key file; never hardcoded.
 if '127.0.0.1:25193' in RALPH_BASE_URL:
-    try:
-        with open('/home/toxic/.flock-data/client-key.corral') as _fk:
-            RALPH_API_KEY = 'Bearer ' + _fk.read().strip()
-    except OSError:
-        pass
+    _k = _flock_client_key()
+    if _k:
+        RALPH_API_KEY = _k
 OUT_CAP = 8000
 ERR_CAP = 2000
 PARTIAL_CAP = 65536  # bound for the on-disk partial-output evidence file
@@ -728,11 +741,9 @@ class Bidder:
         # gpt-oss-20b here stomped the working model and re-armed the
         # ghost on every super-ralph fallback.
         renv["FLOCK_MODEL"] = ralph_model
-        try:
-            with open("/home/toxic/.flock-data/client-key.corral") as _kf:
-                renv["FLOCK_API_KEY"] = _kf.read().strip()
-        except OSError:
-            pass
+        _k = _flock_client_key()
+        if _k:
+            renv["FLOCK_API_KEY"] = _k
         # 2026-09-21 (tern): the oracle's exec deadline is
         # assign_ts + timeout_ms/1000, but the bidder starts the
         # subprocess after assignment. Without a buffer the oracle
