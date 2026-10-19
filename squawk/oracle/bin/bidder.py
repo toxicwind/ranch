@@ -868,13 +868,32 @@ class Bidder:
             return False
         return True
 
+def _reasoning_params(model, budget=1024, effort="low"):
+    """Direct reasoning caps per model family (2026-10-19). See
+    patch_reasoning history: gpt-oss effort verified live via :25193;
+    nemotron-3 budget/kwargs per NVIDIA docs. Unknown families: none."""
+    if model.startswith("openai/gpt-oss"):
+        return {"reasoning_effort": effort}
+    if "nemotron-3" in model:
+        return {"reasoning_budget": budget,
+                "chat_template_kwargs": {"enable_thinking": True,
+                                         "low_effort": True}}
+    return {}
+
+
     def _one_shot_call(self, model, prompt, timeout=60):
         """Single OpenAI-compatible chat call. Tries :25200 (cuttinggate)
         first, falls back to :25193 (flock direct). Returns content or ""."""
-        body = json.dumps({"model": model,
-                           "messages": [{"role": "user", "content": prompt}],
-                           "max_tokens": 4096,
-                           "temperature": 0.2}).encode()
+        payload = {"model": model,
+                   "messages": [{"role": "user", "content": prompt}],
+                   "max_tokens": 4096,
+                   "temperature": 0.2}
+        payload.update(_reasoning_params(model))
+        body = json.dumps(payload).encode()
+        plain_body = json.dumps({"model": model,
+                                 "messages": [{"role": "user", "content": prompt}],
+                                 "max_tokens": 4096,
+                                 "temperature": 0.2}).encode()
         routes = [(ONE_SHOT_BASE_URL, "Bearer " + ONE_SHOT_API_KEY),
                   ("http://127.0.0.1:25193/v1", RALPH_API_KEY)]
         for base, auth in routes:
@@ -894,6 +913,9 @@ class Bidder:
                 if content:
                     return content
             except Exception:
+                # A 400 here may be an upstream rejecting a reasoning
+                # field: retry the remaining routes with the plain body.
+                body = plain_body
                 continue
         return ""
 

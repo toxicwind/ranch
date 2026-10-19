@@ -257,6 +257,23 @@ export async function proxyChatCompletions(
 
   let lastError: Error | null = null;
   const attempts = pool.size;
+  // Direct reasoning caps (2026-10-19): gpt-oss effort verified live via
+  // :25193 (reasoning tokens 295 -> 6 at "low"; "medium" here because this
+  // path does real coding work). Nemotron-3 per NVIDIA docs:
+  // reasoning_budget + chat_template_kwargs. A 400 flips stripReasoning so
+  // later key attempts omit the params (a rejecting upstream degrades to
+  // the old uncapped behavior instead of failing).
+  let stripReasoning = false;
+  const reasoningParams = (): Record<string, unknown> => {
+    if (stripReasoning) return {};
+    if (model.startsWith("openai/gpt-oss")) return { reasoning_effort: "medium" };
+    if (model.includes("nemotron-3"))
+      return {
+        reasoning_budget: 4096,
+        chat_template_kwargs: { enable_thinking: true, low_effort: true },
+      };
+    return {};
+  };
   for (let i = 0; i < attempts; i++) {
     const key = pool.nextAvailable();
     if (!key) break;
@@ -272,6 +289,7 @@ export async function proxyChatCompletions(
           max_tokens: opts.maxTokens ?? 4096,
           temperature: opts.temperature ?? 1.0,
           messages,
+          ...reasoningParams(),
         }),
       });
       if (resp.status === 429) {
@@ -281,6 +299,7 @@ export async function proxyChatCompletions(
       }
       if (!resp.ok) {
         const body = await resp.text().catch(() => "");
+        if (resp.status === 400 && !stripReasoning) stripReasoning = true;
         throw new Error("nim-proxy HTTP " + resp.status + ": " + body.slice(0, 300));
       }
       const data = (await resp.json()) as any;

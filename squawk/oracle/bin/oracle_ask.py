@@ -184,7 +184,20 @@ def family_of_model(model_id):
 # herd transport: structured results, evidence preserved
 # ---------------------------------------------------------------------------
 
-def herd_chat(model, prompt, timeout_s=90, max_tokens=1500):
+def _reasoning_params(model, budget=1024, effort="low"):
+    """Direct reasoning caps per model family (2026-10-19). See
+    patch_reasoning history: gpt-oss effort verified live via :25193;
+    nemotron-3 budget/kwargs per NVIDIA docs. Unknown families: none."""
+    if model.startswith("openai/gpt-oss"):
+        return {"reasoning_effort": effort}
+    if "nemotron-3" in model:
+        return {"reasoning_budget": budget,
+                "chat_template_kwargs": {"enable_thinking": True,
+                                         "low_effort": True}}
+    return {}
+
+
+def herd_chat(model, prompt, timeout_s=90, max_tokens=1500, _no_reasoning=False):
     """POST /v1/chat/completions. Returns a structured dict — never raises.
 
     On success: ok, text, latency_s, usage, http_status, model_served
@@ -194,12 +207,15 @@ def herd_chat(model, prompt, timeout_s=90, max_tokens=1500):
     unknown), http_status (when the upstream answered), error_body
     (bounded upstream body excerpt — the evidence old code dropped).
     """
-    body = json.dumps({
+    payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.2,
         "max_tokens": max_tokens,
-    }).encode()
+    }
+    if not _no_reasoning:
+        payload.update(_reasoning_params(model))
+    body = json.dumps(payload).encode()
     headers = {"Content-Type": "application/json"}
     if FLOCK_API_KEY:
         headers["Authorization"] = "Bearer " + FLOCK_API_KEY
@@ -223,6 +239,11 @@ def herd_chat(model, prompt, timeout_s=90, max_tokens=1500):
                 "server": server,
                 "error": None, "error_kind": None, "error_body": None}
     except urllib.error.HTTPError as e:
+        if e.code == 400 and not _no_reasoning and _reasoning_params(model):
+            # Upstream rejected a reasoning field: retry once uncapped
+            # rather than failing the call (old behavior preserved).
+            return herd_chat(model, prompt, timeout_s, max_tokens,
+                             _no_reasoning=True)
         try:
             ebody = e.read().decode("utf-8", "replace")[:500]
         except Exception:
