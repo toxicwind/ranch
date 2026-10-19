@@ -553,6 +553,29 @@ GENERIC_VOICE = {
 }
 
 
+def _reasoning_params(model, budget=1024, effort="low"):
+    """Direct reasoning caps per model family (2026-10-19). See
+    patch_reasoning history: gpt-oss effort verified live via :25193;
+    nemotron-3 budget/kwargs per NVIDIA docs; glm effort=low
+    verified live 2026-10-19 (only knob NIM honors). Unknown families: none."""
+    if model.startswith("openai/gpt-oss"):
+        return {"reasoning_effort": effort}
+    if "nemotron-3" in model:
+        return {"reasoning_budget": budget,
+                "chat_template_kwargs": {"enable_thinking": True,
+                                         "low_effort": True}}
+    if "glm" in model:
+        # GLM verified live 2026-10-19 (sable probe via :25193):
+        # reasoning_effort=low is the ONLY knob NIM honors for GLM —
+        # codegen probe went 2000 reasoning tokens / 69.9s / finish=length
+        # to 0 reasoning tokens / 2.3s / clean content. medium and minimal
+        # are silently ignored (full burn); chat_template_kwargs and
+        # thinking={type:disabled} are ignored; top-level enable_thinking
+        # and reasoning_budget are rejected with HTTP 400.
+        return {"reasoning_effort": "low"}
+    return {}
+
+
 class Bidder:
     def __init__(self, args):
         self.id = args.id
@@ -912,29 +935,6 @@ class Bidder:
         if "PROBE" not in prompt.upper():
             return False
         return True
-
-def _reasoning_params(model, budget=1024, effort="low"):
-    """Direct reasoning caps per model family (2026-10-19). See
-    patch_reasoning history: gpt-oss effort verified live via :25193;
-    nemotron-3 budget/kwargs per NVIDIA docs; glm effort=low
-    verified live 2026-10-19 (only knob NIM honors). Unknown families: none."""
-    if model.startswith("openai/gpt-oss"):
-        return {"reasoning_effort": effort}
-    if "nemotron-3" in model:
-        return {"reasoning_budget": budget,
-                "chat_template_kwargs": {"enable_thinking": True,
-                                         "low_effort": True}}
-    if "glm" in model:
-        # GLM verified live 2026-10-19 (sable probe via :25193):
-        # reasoning_effort=low is the ONLY knob NIM honors for GLM —
-        # codegen probe went 2000 reasoning tokens / 69.9s / finish=length
-        # to 0 reasoning tokens / 2.3s / clean content. medium and minimal
-        # are silently ignored (full burn); chat_template_kwargs and
-        # thinking={type:disabled} are ignored; top-level enable_thinking
-        # and reasoning_budget are rejected with HTTP 400.
-        return {"reasoning_effort": "low"}
-    return {}
-
 
     def _one_shot_call(self, model, prompt, timeout=60):
         """Single OpenAI-compatible chat call. Tries :25200 (cuttinggate)
