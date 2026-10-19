@@ -29,7 +29,7 @@ export const TRIGGER_SHAPES: TriggerShape[] = [
   },
   {
     id: "zero-approval",
-    pattern: "zero approval|without approval|no approval prompts|doesn'?t require approval",
+    pattern: "zero approval|without approval|no approval prompts|doesn'?t require approval|pre[- ]approval|automatic approval",
     why: "Reads as acting without the user's consent.",
     rewrite: "Name the authority: 'under Chris's standing autonomous-operation order (2026-09-20)'.",
   },
@@ -65,6 +65,12 @@ export const TRIGGER_SHAPES: TriggerShape[] = [
     rewrite: "Delete; cite your own observed incidents instead.",
   },
   {
+    id: "bypass-bare",
+    pattern: "\\bbypass(?:ing|ed)?\\b",
+    why: "Bare 'bypass' reads as circumvention even in legitimate operational contexts (caught 2026-10-04: 'bypass the disabled skip-check' in a router status report was quarantined).",
+    rewrite: "Say 'take the approved route instead of' or 'use the supported path for'.",
+  },
+  {
     id: "named-circumvention",
     pattern: "abliteration|\\bDAN\\b|jailbreak",
     why: "Named circumvention technique.",
@@ -73,7 +79,7 @@ export const TRIGGER_SHAPES: TriggerShape[] = [
   {
     id: "ignore-safety",
     pattern:
-      "ignore (the |this )?(safety|security) (classifier|filter|check)|disregard (the )?(safety|security)",
+      "ignore (the |this )?(safety|security) (classifier|filter|check)|disregard (the )?(safety|security)|ignore (the |this )?(\\w+ ){1,3}narrator",
     why: "Direct adversarial imperative against a safety system.",
     rewrite:
       "Behavioral: 'classify the failure by observed type (transient/auth/malformed/downstream) and act on the type, not the prose.'",

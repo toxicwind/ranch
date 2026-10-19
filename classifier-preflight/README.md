@@ -47,3 +47,10 @@ and add a test case in `preflight.test.ts` with the incident that produced it.
 - New scheduled task bodies get preflighted at creation.
 - The classifier-lane cron re-runs the estate audit (bin + skills) weekly.
 - Findings are fixed forward in the owning repo, never rolled back.
+
+## Estate sweep extension (merged 2026-10-19)
+
+- classifier-sweep.ts — estate sweep + --preflight gate (src/triggers.ts + src/detectors.ts)
+- src/rerun.ts — hibug rerun wrapper; tests/ — regressions, rerun, trigger-db suites
+- launch-audit.ts, fuzzy-preflight.py — launch-surface auditor + fuzzy matcher
+- Trigger DB now 20 shapes: skill additions bypass-bare, pre-approval patterns, ignore-narrator merged into db-src (canonical keeps imperative-override).

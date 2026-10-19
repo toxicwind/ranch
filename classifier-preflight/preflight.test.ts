@@ -93,8 +93,8 @@ test("kill-language: standing prohibitions do not match", () => {
   );
 });
 
-test("db sanity: 19 shapes, all with id/patterns/why/rewrite, all JS-compilable", () => {
-  expect(DB.shapes.length).toBe(19);
+test("db sanity: 20 shapes, all with id/patterns/why/rewrite, all JS-compilable", () => {
+  expect(DB.shapes.length).toBe(20);
   const ids = new Set<string>();
   for (const t of DB.shapes) {
     expect(t.id).toBeString();

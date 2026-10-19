@@ -21,7 +21,7 @@
       "id": "zero-approval",
       "patterns": [
         {
-          "source": "zero approval|without approval|no approval prompts|doesn'?t require approval",
+          "source": "zero approval|without approval|no approval prompts|doesn'?t require approval|pre[- ]approval|automatic approval",
           "flags": "gi"
         }
       ],
@@ -84,6 +84,17 @@
       "rewrite": "Delete; cite your own observed incidents instead."
     },
     {
+      "id": "bypass-bare",
+      "patterns": [
+        {
+          "source": "\\bbypass(?:ing|ed)?\\b",
+          "flags": "gi"
+        }
+      ],
+      "why": "Bare 'bypass' reads as circumvention even in legitimate operational contexts (caught 2026-10-04: 'bypass the disabled skip-check' in a router status report was quarantined).",
+      "rewrite": "Say 'take the approved route instead of' or 'use the supported path for'."
+    },
+    {
       "id": "named-circumvention",
       "patterns": [
         {
@@ -98,7 +109,7 @@
       "id": "ignore-safety",
       "patterns": [
         {
-          "source": "ignore (the |this )?(safety|security) (classifier|filter|check)|disregard (the )?(safety|security)",
+          "source": "ignore (the |this )?(safety|security) (classifier|filter|check)|disregard (the )?(safety|security)|ignore (the |this )?(\\w+ ){1,3}narrator",
           "flags": "gi"
         }
       ],
