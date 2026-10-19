@@ -687,3 +687,6 @@
 [submodule "plugin-ecosystem"]
 	path = plugin-ecosystem
 	url = https://github.com/toxicwind/plugin-ecosystem.git
+[submodule "estate-kappa-plugin"]
+	path = estate-kappa-plugin
+	url = https://github.com/toxicwind/estate-kappa-plugin.git
