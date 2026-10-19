@@ -55,6 +55,7 @@ from pathlib import Path
 BIN = Path(__file__).resolve().parent
 sys.path.insert(0, str(BIN))
 import mechanism as mech
+import calibration as cal_mod
 import sealed as sealed_mod
 
 AGENT_DIR = BIN.parent
@@ -1371,6 +1372,24 @@ class OracleLoop:
                  success=success, duration_ms=duration_ms,
                  price_paid=self.auctions[tid].price_paid, notes=notes,
                  reason=reason, replay=replay)
+        # Feed the abstention gate's evidence store (calibration). A
+        # settle is a genuinely labeled accepted outcome only when a
+        # real result was produced and then verified or failed
+        # verification. Infra settles (no result ever produced) label
+        # nothing -- there was no accepted outcome to grade. Replays
+        # recorded their row at the original settle; never
+        # double-count them.
+        if not replay:
+            infra = reason in ("no-result", "exec-timeout") and not success
+            if not infra:
+                try:
+                    cal_mod.record_labeled_outcome(
+                        bool(verified), source="market_settlement",
+                        task_id=tid, winner=bidder, success=success,
+                        reason=reason)
+                except Exception as e:
+                    self.log("label_record_failed", task_id=tid,
+                             error=str(e)[:120])
         return True
 
     def handle_result(self, meta, data, replay=False, verify_sig=True):
