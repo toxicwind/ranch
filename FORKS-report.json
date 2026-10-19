@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-19T21:05:34.518Z",
+  "generated": "2026-10-19T22:05:53.952Z",
   "total": 190,
   "withUpstream": 140,
   "infos": [
@@ -298,8 +298,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 60570,
-      "fileCount": 12,
+      "sizeBytes": 119082,
+      "fileCount": 21,
       "signals": [],
       "signalTotal": 0
     },
@@ -334,7 +334,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 591051,
+      "sizeBytes": 592816,
       "fileCount": 74,
       "signals": [],
       "signalTotal": 0
@@ -1894,8 +1894,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 1950945,
-      "fileCount": 219,
+      "sizeBytes": 1996385,
+      "fileCount": 224,
       "signals": [],
       "signalTotal": 0
     },
@@ -1918,7 +1918,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 66125,
+      "sizeBytes": 66203,
       "fileCount": 10,
       "signals": [],
       "signalTotal": 0
