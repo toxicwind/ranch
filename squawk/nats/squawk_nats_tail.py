@@ -203,8 +203,12 @@ class Tailer:
         env = _envelope(rec)
         env["seq"] = seq  # filename seq is canonical, always
         data = json.dumps(env, ensure_ascii=False).encode("utf-8")
-        # nats-py 2.x dedups via the Nats-Msg-Id header (no msg_id kwarg)
-        headers = {"Nats-Msg-Id": f"squawk:{channel}:{seq}"}
+        # nats-py 2.x dedups via the Nats-Msg-Id header (no msg_id kwarg).
+        # The id is per-FILE, not per-seq (Pry, 2026-10-19): distinct messages
+        # can share a filename seq (804 such groups in fleet), and a seq-only
+        # id made JetStream dedup silently eat the second one. Per-file ids
+        # still dedup replays of the same file after a cursor loss.
+        headers = {"Nats-Msg-Id": f"squawk:{channel}:{seq}:{path.name}"}
         try:
             await self.js.publish(f"{channel}.messages", data, headers=headers)
         except Exception as e:
