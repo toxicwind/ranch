@@ -41,6 +41,19 @@ def _has_no_corral_marker(text):
     return any(m in tl for m in NO_CORRAL_MARKERS)
 
 
+# Explicit MCP-apply override (2026-10-19): any of these substrings forces
+# the DIRECT route with mcp_apply=True -- the winner applies anchored
+# edits DIRECTLY via Gatehouse MCP tools. This is an override; code-fix
+# tasks get MCP apply by default in bidder.py (_wants_mcp_apply).
+MCP_APPLY_MARKERS = ("route:mcp", "[mcp-apply]", "!mcp")
+
+
+def _has_mcp_apply_marker(text):
+    """True when the poster explicitly requested the MCP apply lane."""
+    tl = (text or "").lower()
+    return any(m in tl for m in MCP_APPLY_MARKERS)
+
+
 # Known-broken components (2026-10-18): intake signatures that must never be
 # auctioned into the market's agentic lanes, because the lane itself is the
 # broken component. Repair of these components happens in a direct lane with
@@ -98,6 +111,12 @@ def triage(request, ledger_path):
             "explicit no-corral marker: execution-stack repair runs "
             "one-shot only, never through corral/super-ralph",
         )
+    elif _has_mcp_apply_marker(text):
+        route, reason = (
+            "DIRECT",
+            "explicit mcp-apply marker: winner applies anchored edits "
+            "DIRECTLY via Gatehouse MCP tools",
+        )
     elif text.startswith("!urgent"):
         route, reason = "DIRECT", "urgent flag"
     elif "petition" in text.lower() and "upgrade" in text.lower():
@@ -121,6 +140,9 @@ def triage(request, ledger_path):
     if sig:
         decision["known_broken"] = sig
     if route == "DIRECT" and _has_no_corral_marker(text):
+        decision["no_corral"] = True
+    if route == "DIRECT" and _has_mcp_apply_marker(text):
+        decision["mcp_apply"] = True
         decision["no_corral"] = True
     if route == "TASK":
         decision["tags"] = _tags_for(text)
