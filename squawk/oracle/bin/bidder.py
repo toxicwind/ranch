@@ -56,20 +56,33 @@ RALPH_CAP_S = 1740  # 29 min ceiling: Super Ralph runs are slow (~11 min
 # 2026-10-13 (osprey root-cause, verified live): kimi-k3-nim 404s on
 # :25193. Default to the verified-working executor model.
 RALPH_MODEL = os.environ.get("RALPH_MODEL",
-                            "z-ai/glm-5.3-flash")
+                            "openai/gpt-oss-120b")  # 2026-10-19 live bench winner
 RALPH_BASE_URL = os.environ.get("RALPH_BASE_URL",
                                 "http://127.0.0.1:25193/v1")  # flock (NIM-backed); 2026-10-13 Chris corrective: do NOT use local herd :25100
+def _flock_client_key():
+    """Read the flock/hodos client key. The flock->hodos rename
+    (2026-10-18) moved the data dir: ~/.flock-data is gone, the live key
+    sits under ~/.hodos-data (identical copy at ~/.hodos/.flock).
+    Try the live homes first, legacy path last; None if unreadable."""
+    for p in ('/home/toxic/.hodos-data/client-key.corral',
+              '/home/toxic/.hodos/.flock/client-key.corral',
+              '/home/toxic/.flock-data/client-key.corral'):
+        try:
+            with open(p) as f:
+                return f.read().strip()
+        except OSError:
+            continue
+    return None
+
 # cuttinggate's auth gate requires a "Bearer " prefix (any non-empty value;
 # the upstream key comes from cuttinggate's own credential plane).
 RALPH_API_KEY = os.environ.get("RALPH_API_KEY", "oracle-market-bidder")
 # 2026-10-13 (vesper): when routing via flock, use the flock client key.
 # Read at startup from the 0600 key file; never hardcoded.
 if '127.0.0.1:25193' in RALPH_BASE_URL:
-    try:
-        with open('/home/toxic/.flock-data/client-key.corral') as _fk:
-            RALPH_API_KEY = 'Bearer ' + _fk.read().strip()
-    except OSError:
-        pass
+    _k = _flock_client_key()
+    if _k:
+        RALPH_API_KEY = _k
 OUT_CAP = 8000
 ERR_CAP = 2000
 PARTIAL_CAP = 65536  # bound for the on-disk partial-output evidence file
@@ -187,9 +200,16 @@ RALPH_MODEL_CANDIDATES = [
     # content" on :25200. nvidia/nemotron-3-ultra-550b-a55b verified 200 +
     # non-empty on both routes. Verified-first ordering; the resolver's
     # non-empty probe promotes whatever actually answers.
-    "z-ai/glm-5.3-flash",  # 2026-10-15 Chris verified working on NVIDIA
-    "nvidia/nemotron-3-ultra-550b-a55b",
-    "openai/gpt-oss-20b",
+    # 2026-10-19 live bench (10 models x trivial + hard probes via :25193):
+    # gpt-oss-120b perfect score at ~1s; nemotron-3-super-120b perfect but
+    # slower; glm-5.3-flash failed the codegen probe (finish=length, text
+    # burned in reasoning). gpt-oss-20b REMOVED (Chris: useless; dominated
+    # by 120b on every axis) and nemotron-3-ultra REMOVED (failed codegen,
+    # 67s length burn). kimi-k2/deepseek-v4/qwen3-coder/llama-3.3 are all
+    # 410-EOL on NVIDIA now.
+    "openai/gpt-oss-120b",
+    "nvidia/nemotron-3-super-120b-a12b",
+    "z-ai/glm-5.3-flash",
 ]
 _ralph_model_cache = {"model": None, "ts": 0.0}
 RALPH_MODEL_CACHE_S = 300
@@ -721,11 +741,9 @@ class Bidder:
         # gpt-oss-20b here stomped the working model and re-armed the
         # ghost on every super-ralph fallback.
         renv["FLOCK_MODEL"] = ralph_model
-        try:
-            with open("/home/toxic/.flock-data/client-key.corral") as _kf:
-                renv["FLOCK_API_KEY"] = _kf.read().strip()
-        except OSError:
-            pass
+        _k = _flock_client_key()
+        if _k:
+            renv["FLOCK_API_KEY"] = _k
         # 2026-09-21 (tern): the oracle's exec deadline is
         # assign_ts + timeout_ms/1000, but the bidder starts the
         # subprocess after assignment. Without a buffer the oracle

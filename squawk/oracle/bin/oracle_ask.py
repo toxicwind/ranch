@@ -54,11 +54,17 @@ HERD_URL = os.environ.get("HERD_URL", "http://127.0.0.1:25193")
 # Flock requires the client key as a Bearer token. Read at startup from
 # the 0600 key file (same pattern as bin/bidder.py); never hardcoded.
 FLOCK_API_KEY = ""
-try:
-    with open("/home/toxic/.flock-data/client-key.corral") as _fk:
-        FLOCK_API_KEY = _fk.read().strip()
-except OSError:
-    pass
+# flock->hodos rename (2026-10-18): key moved to ~/.hodos-data (legacy
+# ~/.flock-data is gone -- the anonymous fallback 401s against :25193).
+for _kp in ("/home/toxic/.hodos-data/client-key.corral",
+            "/home/toxic/.hodos/.flock/client-key.corral",
+            "/home/toxic/.flock-data/client-key.corral"):
+    try:
+        with open(_kp) as _fk:
+            FLOCK_API_KEY = _fk.read().strip()
+        break
+    except OSError:
+        continue
 WORK = os.environ.get("ORACLE_WORK", "/home/toxic/estate/ranch/squawk/oracle/work")
 
 # Judge panel: NIM-backed models served by flock :25193, verified live
@@ -67,11 +73,11 @@ WORK = os.environ.get("ORACLE_WORK", "/home/toxic/estate/ranch/squawk/oracle/wor
 # herd.yaml, and oracle-judge-local was a local beellama model -- banned
 # by the 2026-10-13 corrective from Chris (local herd models not ready).
 DEFAULT_JUDGES = [
+    "nvidia/nemotron-3-super-120b-a12b",  # 2026-10-19 bench: perfect probes; ultra demoted (length burns)
     "nvidia/nemotron-3-ultra-550b-a55b",
     "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
-    "nvidia/nemotron-3-super-120b-a12b:free",
 ]
-FALLBACK_JUDGE = "nvidia/nemotron-3-ultra-550b-a55b"
+FALLBACK_JUDGE = "nvidia/nemotron-3-super-120b-a12b"
 
 JUDGE_PROMPT = """You are judge {idx} (anonymous) on the OpenFang Oracle panel.
 Question: {question}
