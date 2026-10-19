@@ -230,8 +230,23 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
     }
     if (cur) entries.push(cur);
 
-    // Description lookup: from the report's readmeHead (first meaningful line).
-    const descOf = (p: string): string => {
+    // Description lookup: GitHub description first (if gh is available),
+    // fallback to readmeHead from FORKS-report.json.
+    const ghDescCache: Record<string, string> = {};
+    const descOf = (p: string, repoUrl: string): string => {
+      const slugMatch = repoUrl.match(/github\.com[\/:]([^\/]+\/[^\/\.]+)/);
+      if (slugMatch) {
+        const slug = slugMatch[1];
+        if (slug in ghDescCache) return ghDescCache[slug];
+        try {
+          const ghDesc = sh(`gh api repos/${slug} --jq .description 2>/dev/null`, undefined, 4000).trim();
+          if (ghDesc && ghDesc !== "null") {
+            const clean = ghDesc.slice(0, 110).replace(/\|/g, "\\|");
+            ghDescCache[slug] = clean;
+            return clean;
+          }
+        } catch {}
+      }
       const info = (data.infos as any[]).find((i) => i.name === p);
       if (!info?.readmeHead) return "";
       const lines = info.readmeHead.split("\n").map((l: string) => l.trim());
@@ -242,7 +257,7 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
     const sorted = entries.filter((e) => e.path).sort((a, b) => a.path.localeCompare(b.path));
     for (const e of sorted) {
       const disp = e.url.replace(/^https?:\/\/(www\.)?github\.com\//, "").replace(/\.git$/, "");
-      const desc = descOf(e.path);
+      const desc = descOf(e.path, e.url);
       subRows += `| \`${e.path}\` | [${disp}](${e.url}) |${desc ? " " + desc + " |" : " — |"}\n`;
     }
     md += `## 🗂️ Registered Submodules (${sorted.length})\n\n`;
