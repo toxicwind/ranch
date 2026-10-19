@@ -15,7 +15,7 @@ This wrapper implements a ReAct loop:
 5. Loop until model answers without tool tags
 
 Durability:
-- NO timeouts — subprocesses run to completion
+- Bounded deadlines - subprocesses and HTTP calls fail fast on a deadline
 - Catalog fetched live at startup
 - Iteration ceiling 25 (Corral default maxIterations)
 """
@@ -39,6 +39,7 @@ NIM_SHIM_REAL = os.environ.get(
     str(Path.home() / ".local" / "bin" / "claude.nim-shim-real")
 )
 MAX_ITERATIONS = int(os.environ.get("CORRAL_REACT_MAX_ITER", "25"))
+HTTP_DEADLINE_S = int(os.environ.get("CORRAL_REACT_HTTP_DEADLINE_S", "60"))
 MAX_RESULT_CHARS = 6000
 
 _WRITE_TOKENS = (
@@ -194,7 +195,7 @@ def direct_model_call(prompt):
         },
     )
     try:
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=HTTP_DEADLINE_S) as resp:
             data = json.loads(resp.read().decode())
     except Exception as e:
         print("direct_model_call failed: %s" % e, file=sys.stderr)
