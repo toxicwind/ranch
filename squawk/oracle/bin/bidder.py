@@ -76,6 +76,39 @@ def _flock_client_key():
             continue
     return None
 
+def _cuttinggate_client_key():
+    """Read the cuttinggate client key. cuttinggate-serve.sh exports
+    CUTTINGGATE_CLIENT_KEY from the vault file /home/toxic/.secrets;
+    bidder daemons inherit it in their environment. Fall back to
+    parsing that one line out of the vault file (no shell eval) for
+    contexts running without the estate env (rig/cron shells).
+    None if unreadable."""
+    v = os.environ.get("CUTTINGGATE_CLIENT_KEY")
+    if v:
+        return v.strip()
+    try:
+        with open("/home/toxic/.secrets") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("export "):
+                    line = line[len("export "):].lstrip()
+                if line.startswith("CUTTINGGATE_CLIENT_KEY="):
+                    return line.split("=", 1)[1].strip().strip("\"'")
+    except OSError:
+        pass
+    return None
+
+
+def _bearer(key):
+    """Authorization header value for a raw client key. hodos and
+    cuttinggate both require the 'Bearer ' scheme prefix; a bare key
+    gets 401 'missing or invalid proxy API key' (route 2 of
+    _one_shot_call sent RALPH_API_KEY bare until 2026-10-19)."""
+    if not key:
+        return ""
+    return key if key.startswith("Bearer ") else "Bearer " + key
+
+
 # cuttinggate's auth gate requires a "Bearer " prefix (any non-empty value;
 # the upstream key comes from cuttinggate's own credential plane).
 RALPH_API_KEY = os.environ.get("RALPH_API_KEY", "oracle-market-bidder")
@@ -141,6 +174,15 @@ CORRAL_BASE_URL = os.environ.get("CORRAL_BASE_URL",
 ONE_SHOT_BASE_URL = os.environ.get("ONE_SHOT_BASE_URL",
                                    "http://127.0.0.1:25200/v1")
 ONE_SHOT_API_KEY = os.environ.get("ONE_SHOT_API_KEY", "oracle-market-bidder")
+# 2026-10-19 (finch, Chris approved): the placeholder default above
+# authenticates NOTHING -- cuttinggate rejects it 401 auth_invalid
+# (reproduced live). Load the real client key from the vault, the
+# same source cuttinggate-serve.sh uses. An explicit ONE_SHOT_API_KEY
+# env setting still wins; only the default gets replaced.
+if "ONE_SHOT_API_KEY" not in os.environ:
+    _ck = _cuttinggate_client_key()
+    if _ck:
+        ONE_SHOT_API_KEY = _ck
 ONE_SHOT_CAP_S = 150.0  # hard ceiling: must stay well under 3 min
 ONE_SHOT_PROBE_MAX_CHARS = 2500  # gate: longer prompts always take the pipeline
 
@@ -949,8 +991,9 @@ class Bidder:
                                  "messages": [{"role": "user", "content": prompt}],
                                  "max_tokens": 4096,
                                  "temperature": 0.2}).encode()
-        routes = [(ONE_SHOT_BASE_URL, "Bearer " + ONE_SHOT_API_KEY),
-                  ("http://127.0.0.1:25193/v1", RALPH_API_KEY)]
+        routes = [(ONE_SHOT_BASE_URL, _bearer(ONE_SHOT_API_KEY)),
+                  ("http://127.0.0.1:25193/v1", _bearer(RALPH_API_KEY))]
+        errors = []
         for base, auth in routes:
             try:
                 req = urllib.request.Request(
@@ -968,6 +1011,10 @@ class Bidder:
                 if content:
                     return content
             except Exception as e:
+                if isinstance(e, urllib.error.HTTPError):
+                    errors.append("%s -> HTTP %s %s" % (base, e.code, e.reason))
+                else:
+                    errors.append("%s -> %s: %s" % (base, type(e).__name__, str(e)[:200]))
                 # 2026-10-19 (osprey/bruteforce, Chris): name the failure
                 # instead of swallowing it. A 400 here may be an upstream
                 # rejecting a reasoning field: retry the remaining routes
@@ -982,6 +1029,7 @@ class Bidder:
                           f"retrying next route", flush=True)
                 body = plain_body
                 continue
+        self._last_one_shot_errors = errors
         return ""
 
     def _run_one_shot(self, task, workdir, env, timeout_ms, t0):
@@ -1005,6 +1053,9 @@ class Bidder:
         out1 = self._one_shot_call(model, script_prompt, timeout=60)
         if not out1.strip():
             dur = (time.time() - t0) * 1000
+            errs = getattr(self, "_last_one_shot_errors", None)
+            if errs:
+                return False, "", ("one-shot infra error (call 1): %s" % "; ".join(errs)), dur
             return False, "", "one-shot: model returned empty (call 1)", dur
         exec_note = ""
         m = re.search(r"```python\s*(.*?)```", out1, re.DOTALL)
