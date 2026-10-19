@@ -6,7 +6,7 @@
  */
 
 import { execSync, type ExecSyncOptions } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 import { homedir } from "node:os";
@@ -63,10 +63,49 @@ function seedInitialCommit(workspace: string): void {
  * A fresh `jj git init --colocate` has no commits and no refs, which fails at discover
  * step with WORKTREE_CREATE_FAILED — so we seed an initial commit + main bookmark.
  */
+
+/**
+ * Orphaned smithers worktree sweep (2026-10-19, scout T1).
+ * Smithers <Worktree> adopts deterministic /tmp/workflow-wt-<ticket-id> dirs.
+ * When the parent run dir is cleaned first, the worktree's .git file points
+ * at a gitdir that no longer exists and every later run reusing that ticket
+ * id fails permanently (oracle research-1792445323109, both lanes). A
+ * worktree whose gitdir target is gone is orphaned by definition; remove
+ * only those, and only when untouched for >120s (creation-race guard).
+ */
+function sweepOrphanedWorkflowWorktrees(): void {
+  let names: string[] = [];
+  try {
+    names = readdirSync("/tmp").filter((n) => n.startsWith("workflow-wt-"));
+  } catch {
+    return;
+  }
+  let removed = 0;
+  for (const name of names) {
+    const dir = join("/tmp", name);
+    try {
+      const gitPath = join(dir, ".git");
+      if (!statSync(gitPath).isFile()) continue;
+      const first = readFileSync(gitPath, "utf8").split("\n")[0] ?? "";
+      if (!first.startsWith("gitdir: ")) continue;
+      const target = first.slice("gitdir: ".length).trim();
+      if (existsSync(target)) continue;
+      if (Date.now() - statSync(dir).mtimeMs < 120_000) continue;
+      rmSync(dir, { recursive: true, force: true });
+      removed++;
+    } catch {
+      continue;
+    }
+  }
+  if (removed > 0) {
+    console.error(`corral: swept ${removed} orphaned workflow worktree(s) from /tmp.`);
+  }
+}
 export async function ensureWorkspace(
   requestedCwd: string,
   promptSourcePath: string | null
 ): Promise<string> {
+  sweepOrphanedWorkflowWorktrees();
   if (!hasCommand("jj")) {
     throw new Error("jj binary not found — install https://github.com/martinvonz/jj");
   }

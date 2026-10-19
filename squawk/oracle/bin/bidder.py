@@ -26,6 +26,7 @@ import os
 import re
 import secrets
 import select
+import shutil
 import signal
 import subprocess
 import sys
@@ -89,6 +90,45 @@ PARTIAL_CAP = 65536  # bound for the on-disk partial-output evidence file
 RALPH_POST_BUFFER_S = 30.0  # time to preserve evidence + post result
 CORRAL_CLI = Path("/home/toxic/estate/ranch/corral/src/cli/index.ts")
 CORRAL_CAP_S = 1740  # same class as super-ralph: agentic runs are slow
+
+# ---- orphaned smithers worktree sweep (2026-10-19, scout T1) ----
+# Smithers <Worktree> uses deterministic paths /tmp/workflow-wt-<ticket-id>
+# and ADOPTS an existing dir there. Ticket ids are generic step names reused
+# across tasks and days, so when a parent run dir (e.g. ~/.corral/runs/*) is
+# cleaned but its /tmp worktree survives, the worktree's .git file dangles:
+# it points at a gitdir that no longer exists, git/jj can never resolve it,
+# and every later run hitting that ticket id fails all attempts permanently
+# (research-1792445323109: settled no-result on BOTH corral and ralph lanes).
+# A worktree whose gitdir target is GONE is orphaned by definition -- no
+# live run can own it (a live run's gitdir exists). Remove only those, and
+# only when untouched for >120s (creation-race guard).
+WORKTREE_ORPHAN_AGE_S = 120
+
+
+def sweep_orphaned_worktrees():
+    """Remove orphaned /tmp/workflow-wt-* dirs; return count removed."""
+    import glob as _glob
+    removed = 0
+    now = time.time()
+    for path in _glob.glob("/tmp/workflow-wt-*"):
+        try:
+            gitfile = Path(path) / ".git"
+            if not gitfile.is_file():
+                continue
+            lines = gitfile.read_text(encoding="utf-8").splitlines()
+            if not lines or not lines[0].startswith("gitdir: "):
+                continue
+            target = lines[0][len("gitdir: "):].strip()
+            if os.path.exists(target):
+                continue  # live or valid worktree -- never touch
+            if now - os.path.getmtime(path) < WORKTREE_ORPHAN_AGE_S:
+                continue  # creation-race guard
+            shutil.rmtree(path, ignore_errors=True)
+            if not os.path.exists(path):
+                removed += 1
+        except Exception:
+            continue
+    return removed
 CORRAL_BASE_URL = os.environ.get("CORRAL_BASE_URL",
                                 "http://127.0.0.1:25193/v1")
                              # before the oracle's exec deadline
@@ -707,6 +747,10 @@ class Bidder:
         (workdir / "prompt.md").write_text(prompt, encoding="utf-8")
         rc = None
         timed_out = False
+        _swept = sweep_orphaned_worktrees()
+        if _swept:
+            self.say("%s swept %d orphaned workflow worktree(s) before super-ralph on %s."
+                     % (self.name, _swept, tid))
         if not RALPH_BIN.exists():
             dur = (time.time() - t0) * 1000
             return (False, "",
@@ -1007,6 +1051,10 @@ def _reasoning_params(model, budget=1024, effort="low"):
         tid = task["task_id"]
         prompt = task.get("payload", "") or ""
         (workdir / "prompt.md").write_text(prompt, encoding="utf-8")
+        _swept = sweep_orphaned_worktrees()
+        if _swept:
+            self.say("%s swept %d orphaned workflow worktree(s) before corral on %s."
+                     % (self.name, _swept, tid))
         if not CORRAL_CLI.exists():
             dur = (time.time() - t0) * 1000
             return (False, "",
