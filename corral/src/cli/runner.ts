@@ -153,7 +153,9 @@ export async function runWorkflow(opts: RunWorkflowOpts): Promise<void> {
       dbPath: join(repoRoot, ".smithers", "workflow.db"),
       packageScripts: {},
       detectedAgents: { claude: detectedAgents.claude, codex: detectedAgents.codex },
-      fallbackConfig: { maxConcurrency, maxIterations },
+      // 2026-10-19 (osprey): focuses: [] keeps the generated
+      // workflow's SuperRalph spread total on the first render.
+      fallbackConfig: { maxConcurrency, maxIterations, focuses: [] },
       clarificationSession: null,
       maxIterations,
       superRalphSourceRoot,
