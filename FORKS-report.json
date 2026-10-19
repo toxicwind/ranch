@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-19T17:05:12.203Z",
+  "generated": "2026-10-19T18:07:41.805Z",
   "total": 190,
   "withUpstream": 140,
   "infos": [
@@ -334,7 +334,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 587292,
+      "sizeBytes": 589554,
       "fileCount": 74,
       "signals": [],
       "signalTotal": 0
@@ -1894,7 +1894,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 1939836,
+      "sizeBytes": 1946553,
       "fileCount": 219,
       "signals": [],
       "signalTotal": 0
