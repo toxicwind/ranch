@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-20T11:13:27.770Z",
-  "total": 194,
-  "withUpstream": 143,
+  "generated": "2026-10-20T13:15:32.981Z",
+  "total": 192,
+  "withUpstream": 141,
   "infos": [
     {
       "name": "AgentForensics",
@@ -509,13 +509,13 @@
     },
     {
       "name": "estate-dispersal",
-      "upstream": "https://github.com/toxicwind/sovereign-dispersal",
+      "upstream": "https://github.com/toxicwind/estate-dispersal",
       "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/sovereign-dispersal.git",
-      "hasGit": true,
+      "remoteOrigin": null,
+      "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 41,
-      "fileCount": 1,
+      "sizeBytes": 0,
+      "fileCount": 0,
       "signals": [],
       "signalTotal": 0
     },
@@ -533,7 +533,7 @@
     },
     {
       "name": "estate-end4",
-      "upstream": "https://github.com/toxicwind/sovereign-end4",
+      "upstream": "https://github.com/toxicwind/estate-end4",
       "upstreamSource": ".gitmodules",
       "remoteOrigin": null,
       "hasGit": false,
@@ -592,18 +592,6 @@
       "signalTotal": 0
     },
     {
-      "name": "estate-scripts",
-      "upstream": "https://github.com/toxicwind/estate-scripts",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": true,
-      "sizeBytes": 0,
-      "fileCount": 0,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
       "name": "estate-shell",
       "upstream": "https://github.com/toxicwind/estate-shell",
       "upstreamSource": ".gitmodules",
@@ -617,13 +605,13 @@
     },
     {
       "name": "estate-skills",
-      "upstream": "https://github.com/toxicwind/sovereign-skills",
+      "upstream": "https://github.com/toxicwind/estate-skills",
       "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/sovereign-skills.git",
-      "hasGit": true,
+      "remoteOrigin": null,
+      "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 38,
-      "fileCount": 1,
+      "sizeBytes": 0,
+      "fileCount": 0,
       "signals": [],
       "signalTotal": 0
     },
@@ -1720,18 +1708,6 @@
       "signalTotal": 0
     },
     {
-      "name": "rig-ciwatch",
-      "upstream": "https://github.com/toxicwind/rig",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": "https://github.com/toxicwind/rig.git",
-      "hasGit": true,
-      "isSubmodule": true,
-      "sizeBytes": 36,
-      "fileCount": 1,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
       "name": "rodeo",
       "upstream": null,
       "upstreamSource": null,
@@ -1750,8 +1726,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 8559437,
-      "fileCount": 589,
+      "sizeBytes": 8612360,
+      "fileCount": 604,
       "signals": [],
       "signalTotal": 0
     },
@@ -2110,7 +2086,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 693193,
+      "sizeBytes": 693189,
       "fileCount": 127,
       "signals": [],
       "signalTotal": 0
@@ -2170,7 +2146,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 43083,
+      "sizeBytes": 45431,
       "fileCount": 5,
       "signals": [],
       "signalTotal": 0
@@ -2254,7 +2230,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 57,
+      "sizeBytes": 53,
       "fileCount": 1,
       "signals": [],
       "signalTotal": 0

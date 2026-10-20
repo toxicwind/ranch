@@ -1,9 +1,9 @@
-# ranch/* fork audit (generated 2026-10-20T11:13:27.770Z)
+# ranch/* fork audit (generated 2026-10-20T13:15:32.981Z)
 
-194 immediate subdirs; **143** have an obvious upstream reference.
+192 immediate subdirs; **141** have an obvious upstream reference.
 
 By source:
-  - **142** .gitmodules
+  - **140** .gitmodules
   - **1** Cargo.toml repository
 
 | dir | upstream | source | origin remote |
@@ -41,16 +41,15 @@ By source:
 | `dualspace-ast-bm25-hybrid` | [github.com/toxicwind/dualspace-ast-bm25-hybrid](https://github.com/toxicwind/dualspace-ast-bm25-hybrid) | .gitmodules | — |
 | `emergent` | [github.com/toxicwind/emergent](https://github.com/toxicwind/emergent) | .gitmodules | — |
 | `estate-chat` | [github.com/toxicwind/estate-chat](https://github.com/toxicwind/estate-chat) | .gitmodules | — |
-| `estate-dispersal` | [github.com/toxicwind/sovereign-dispersal](https://github.com/toxicwind/sovereign-dispersal) | .gitmodules | github.com/toxicwind/sovereign-dispersal.git |
+| `estate-dispersal` | [github.com/toxicwind/estate-dispersal](https://github.com/toxicwind/estate-dispersal) | .gitmodules | — |
 | `estate-dispersal-monolith` | [github.com/toxicwind/estate-dispersal-monolith](https://github.com/toxicwind/estate-dispersal-monolith) | .gitmodules | — |
-| `estate-end4` | [github.com/toxicwind/sovereign-end4](https://github.com/toxicwind/sovereign-end4) | .gitmodules | — |
+| `estate-end4` | [github.com/toxicwind/estate-end4](https://github.com/toxicwind/estate-end4) | .gitmodules | — |
 | `estate-hatch-toolkit` | [github.com/toxicwind/estate-hatch-toolkit](https://github.com/toxicwind/estate-hatch-toolkit) | .gitmodules | — |
 | `estate-kappa-plugin` | [github.com/toxicwind/estate-kappa-plugin](https://github.com/toxicwind/estate-kappa-plugin) | .gitmodules | github.com/toxicwind/estate-kappa-plugin.git |
 | `estate-monitor` | [github.com/toxicwind/estate-monitor](https://github.com/toxicwind/estate-monitor) | .gitmodules | — |
 | `estate-recon` | [github.com/toxicwind/estate-recon](https://github.com/toxicwind/estate-recon) | .gitmodules | — |
-| `estate-scripts` | [github.com/toxicwind/estate-scripts](https://github.com/toxicwind/estate-scripts) | .gitmodules | — |
 | `estate-shell` | [github.com/toxicwind/estate-shell](https://github.com/toxicwind/estate-shell) | .gitmodules | — |
-| `estate-skills` | [github.com/toxicwind/sovereign-skills](https://github.com/toxicwind/sovereign-skills) | .gitmodules | github.com/toxicwind/sovereign-skills.git |
+| `estate-skills` | [github.com/toxicwind/estate-skills](https://github.com/toxicwind/estate-skills) | .gitmodules | — |
 | `estate-skills-hub` | [github.com/toxicwind/estate-skills-hub](https://github.com/toxicwind/estate-skills-hub) | .gitmodules | — |
 | `estate-whoa-breakthrough` | [github.com/toxicwind/estate-whoa-breakthrough](https://github.com/toxicwind/estate-whoa-breakthrough) | .gitmodules | — |
 | `examples` | [github.com/toxicwind/examples](https://github.com/toxicwind/examples) | .gitmodules | — |
@@ -130,7 +129,6 @@ By source:
 | `refusal-hunt` | [github.com/toxicwind/refusal-hunt](https://github.com/toxicwind/refusal-hunt) | .gitmodules | github.com/toxicwind/refusal-hunt.git |
 | `repo-first-class` | [github.com/toxicwind/repo-first-class](https://github.com/toxicwind/repo-first-class) | .gitmodules | github.com/toxicwind/repo-first-class.git |
 | `rig` | [github.com/toxicwind/rig](https://github.com/toxicwind/rig) | .gitmodules | github.com/toxicwind/rig.git |
-| `rig-ciwatch` | [github.com/toxicwind/rig](https://github.com/toxicwind/rig) | .gitmodules | github.com/toxicwind/rig.git |
 | `roundup-site` | [github.com/owieth/turborepo-example](https://github.com/owieth/turborepo-example) | .gitmodules | github.com/owieth/turborepo-example |
 | `rust-wrappers` | [github.com/toxicwind/rust-wrappers](https://github.com/toxicwind/rust-wrappers) | .gitmodules | github.com/toxicwind/rust-wrappers.git |
 | `safety-review-gate` | [github.com/toxicwind/safety-review-gate](https://github.com/toxicwind/safety-review-gate) | .gitmodules | github.com/toxicwind/safety-review-gate.git |
