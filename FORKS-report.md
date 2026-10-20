@@ -1,9 +1,9 @@
-# ranch/* fork audit (generated 2026-10-20T00:55:55.811Z)
+# ranch/* fork audit (generated 2026-10-20T01:26:04.885Z)
 
-192 immediate subdirs; **142** have an obvious upstream reference.
+193 immediate subdirs; **143** have an obvious upstream reference.
 
 By source:
-  - **141** .gitmodules
+  - **142** .gitmodules
   - **1** Cargo.toml repository
 
 | dir | upstream | source | origin remote |
@@ -71,6 +71,7 @@ By source:
 | `github-search` | [github.com/toxicwind/github-search](https://github.com/toxicwind/github-search) | .gitmodules | — |
 | `gito` | [github.com/toxicwind/gito](https://github.com/toxicwind/gito) | .gitmodules | — |
 | `godzilla-llama.cpp` | [github.com/toxicwind/godzilla-llama.cpp](https://github.com/toxicwind/godzilla-llama.cpp) | .gitmodules | — |
+| `hatch` | [github.com/toxicwind/hatch](https://github.com/toxicwind/hatch) | .gitmodules | — |
 | `hatch-decode` | [github.com/toxicwind/hatch-decode](https://github.com/toxicwind/hatch-decode) | .gitmodules | — |
 | `herd` | [github.com/toxicwind/herd](https://github.com/toxicwind/herd) | .gitmodules | — |
 | `herdproof-bun` | [github.com/toxicwind/herdproof-bun](https://github.com/toxicwind/herdproof-bun) | .gitmodules | — |
