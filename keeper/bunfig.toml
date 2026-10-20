@@ -1,0 +1,21 @@
+# keeper — first-class estate browser daemon (CDP :9223 + browserless MCP).
+# Bun config kept lean; node engines apply (see package.json engines).
+
+telemetry = false
+
+[install]
+exact = true
+linker = "hoisted"
+saveTextLockfile = true
+
+[test]
+# keeper's tests are currently jest-based (package.json: jest/bin:test); when run
+# under bun test, prune heavy dirs so a root-level scan never walks the browser
+# profile or build output.
+pathIgnorePatterns = [
+  "**/node_modules/**",
+  "**/.git/**",
+  "**/dist/**",
+  "**/smoke/**",
+  ".browserless/**",
+]
