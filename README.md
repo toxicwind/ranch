@@ -59,16 +59,16 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 - [mise](https://mise.jdx.dev) — toolchains and build tasks; estate owns the shared build cache
 - **pitchfork** — the daemon supervisor: supervised services on the live estate
 
-## 📊 Monorepo Statistics (generated 10/20/2026, 5:18:10 PM)
+## 📊 Monorepo Statistics (generated 10/20/2026, 6:11:31 PM)
 
 | Metric | Value |
 |---|---|
-| Total directories | 192 |
-| Directories with obvious upstream | 141 / 192 (73.4%) |
-| Git-tracked directories | 45 |
-| Components (peer repos) | 140 |
-| Total size | 0.92 GB |
-| Total tracked files | 45 |
+| Total directories | 203 |
+| Directories with obvious upstream | 143 / 203 (70.4%) |
+| Git-tracked directories | 0 |
+| Components (peer repos) | 142 |
+| Total size | 0.00 GB |
+| Total tracked files | 0 |
 
 ## 🗂️ Components (213)
 
@@ -143,7 +143,7 @@ The full map — every animal's pen, with its repo and description (from README 
 | `fanout` | 📖 `Docs/Data` | [toxicwind/fanout](https://github.com/toxicwind/fanout.git) | — |
 | `fast-race` | 🐍 `Python` | [toxicwind/fast-race](https://github.com/toxicwind/fast-race.git) | — |
 | `ferret-den` | 📁 `Workspace` | [toxicwind/ferret-den](https://github.com/toxicwind/ferret-den.git) | — |
-| `ffs-diff` | `—` | [toxicwind/ffs-diff](https://github.com/toxicwind/ffs-diff.git) | — |
+| `ffs-diff` | 📁 `Workspace` | [toxicwind/ffs-diff](https://github.com/toxicwind/ffs-diff.git) | — |
 | `fleet` | 🔷 `TypeScript` | [toxicwind/fleet](https://github.com/toxicwind/fleet.git) | — |
 | `fleet-chat` | 🔷 `TypeScript` | [toxicwind/fleet-chat](https://github.com/toxicwind/fleet-chat.git) | — |
 | `fleet-ops` | 🐍 `Python` | [toxicwind/fleet-ops](https://github.com/toxicwind/fleet-ops.git) | — |
@@ -168,7 +168,7 @@ The full map — every animal's pen, with its repo and description (from README 
 | `godzilla-llama.cpp` | 📁 `Workspace` | [toxicwind/godzilla-llama.cpp](https://github.com/toxicwind/godzilla-llama.cpp.git) | — |
 | `hatch` | 📖 `Docs/Data` | [toxicwind/hatch](https://github.com/toxicwind/hatch.git) | — |
 | `hatch-decode` | 📖 `Docs/Data` | [toxicwind/hatch-decode](https://github.com/toxicwind/hatch-decode.git) | — |
-| `hatch/kite-cli` | `—` | [toxicwind/kite-cli](https://github.com/toxicwind/kite-cli.git) | — |
+| `hatch/kite-cli` | 📁 `Workspace` | [toxicwind/kite-cli](https://github.com/toxicwind/kite-cli.git) | — |
 | `herd` | 📁 `Workspace` | [toxicwind/herd](https://github.com/toxicwind/herd.git) | — |
 | `herdproof-bun` | 📁 `Workspace` | [toxicwind/herdproof-bun](https://github.com/toxicwind/herdproof-bun.git) | — |
 | `hf-model-sync` | 🔷 `TypeScript` | [toxicwind/hf-model-sync](https://github.com/toxicwind/hf-model-sync.git) | — |
@@ -234,7 +234,7 @@ The full map — every animal's pen, with its repo and description (from README 
 | `nim-repos/tibbee-pi-nvidia-nim-provider` | `—` | [tibbee/pi-nvidia-nim-provider](https://github.com/tibbee/pi-nvidia-nim-provider) | — |
 | `nim-repos/xRyul-pi-nvidia-nim` | `—` | [xRyul/pi-nvidia-nim](https://github.com/xRyul/pi-nvidia-nim) | — |
 | `null-g-proxy` | ⚡ `Bun` | [toxicwind/null-g-proxy](https://github.com/toxicwind/null-g-proxy.git) | — |
-| `nuvio` | `—` | [toxicwind/nuvio](https://github.com/toxicwind/nuvio.git) | — |
+| `nuvio` | 📁 `Workspace` | [toxicwind/nuvio](https://github.com/toxicwind/nuvio.git) | — |
 | `nvidia-alive` | 📁 `Workspace` | [toxicwind/nvidia-alive](https://github.com/toxicwind/nvidia-alive.git) | — |
 | `nvidia-kernel-guard` | 📁 `Workspace` | [toxicwind/nvidia-kernel-guard](https://github.com/toxicwind/nvidia-kernel-guard.git) | — |
 | `nvidia-nim-model-probe` | 📁 `Workspace` | [toxicwind/nvidia-nim-model-probe](https://github.com/toxicwind/nvidia-nim-model-probe.git) | — |
@@ -294,7 +294,7 @@ The full map — every animal's pen, with its repo and description (from README 
 
 | Source | Count |
 |---|---|
-| .gitmodules | 140 |
+| .gitmodules | 142 |
 | Cargo.toml repository | 1 |
 
 ## 🌐 Languages (by tracked files)
@@ -306,16 +306,16 @@ The full map — every animal's pen, with its repo and description (from README 
 
 | Directory | Size | Files | Upstream |
 |---|---|---|---|
-| `forge` | 369.5 MB | 2,479 | github.com/toxicwind/forge |
-| `range` | 177.0 MB | 333 | — |
-| `qed` | 122.4 MB | 4,522 | — |
-| `propylon` | 113.7 MB | 7 | — |
-| `barn` | 55.8 MB | 2,321 | github.com/toxicwind/barn |
-| `herd` | 22.7 MB | 1 | github.com/toxicwind/herd |
-| `rustdesk-server` | 18.8 MB | 8 | — |
-| `github-search` | 10.5 MB | 605 | github.com/toxicwind/github-search |
-| `roundup` | 8.2 MB | 604 | — |
-| `vendor` | 8.2 MB | 484 | — |
+| `AgentForensics` | 0.0 MB | 1 | github.com/aparnaa19/AgentForensics |
+| `OmniRoute` | 0.0 MB | 1 | github.com/toxicwind/OmniRoute |
+| `VansRouter` | 0.0 MB | 1 | github.com/toxicwind/VansRouter |
+| `agent-customization-style-guide` | 0.0 MB | 1 | github.com/toxicwind/agent-customization-style-guide |
+| `agent-dashboard` | 0.0 MB | 1 | github.com/toxicwind/agent-dashboard |
+| `agon` | 0.0 MB | 1 | github.com/toxicwind/agon |
+| `ai-merge-resolve` | 0.0 MB | 1 | github.com/toxicwind/ai-merge-resolve |
+| `android-fleet` | 0.0 MB | 12 | github.com/toxicwind/android-fleet |
+| `antilogos` | 0.0 MB | 1 | github.com/toxicwind/antilogos |
+| `arroyo` | 0.0 MB | 7 | github.com/toxicwind/arroyo |
 
 ## 🔮 Top Upstreams by Fork Count
 
@@ -344,16 +344,12 @@ Directories with similar README content (Jaccard on first 500 chars):
 
 | Type | Count |
 |---|---|
-| Submodule | 140 |
-| Fork (ours) | 42 |
-| Upstream mirror | 3 |
-| Vendored (snapshot) | 50 |
-| Experimental | 69 |
-| Stub/Empty | 28 |
+| Submodule | 142 |
+| Experimental | 203 |
 
 ---
 
-*Generated by `bun toolkit/generate-readme.ts` at 2026-10-20T17:18:10.711Z*
+*Generated by `bun toolkit/generate-readme.ts` at 2026-10-20T18:11:31.884Z*
 
 ---
 
