@@ -1,5 +1,5 @@
 # ranch/.meta.yaml — the multi-repo manifest (meta 0.2.22+).
-# Generated from .gitmodules (215 repos) — repos are PEERS, not
+# Generated from .gitmodules (213 repos) — repos are PEERS, not
 # hierarchy: each stays an independent clone with its own history. Sync with
 #   meta git update       # clone missing + pull all
 #   meta git status       # per-repo state
@@ -94,8 +94,6 @@ projects:
     repo: https://github.com/deeplearning-wisc/debate-or-vote.git
   "duel/vendor/llm_debate":
     repo: https://github.com/ucl-dark/llm_debate.git
-  "duet":
-    repo: https://github.com/toxicwind/duet.git
   "emergent":
     repo: https://github.com/toxicwind/emergent.git
   "estate-chat":
@@ -238,8 +236,6 @@ projects:
     repo: https://github.com/toxicwind/maw.git
   "mcp":
     repo: https://github.com/toxicwind/mcp.git
-  "mcp-dropin-guide":
-    repo: https://github.com/toxicwind/mcp-dropin-guide.git
   "mcp/mcp-prompt-injection-detector":
     repo: https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector.git
   "mcp/mcpproxy-go":

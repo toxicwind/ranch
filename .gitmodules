@@ -357,9 +357,6 @@
 	path = zed-android-port
 	url = https://github.com/toxicwind/zed-android-port.git
 
-[submodule "mcp-dropin-guide"]
-	path = mcp-dropin-guide
-	url = https://github.com/toxicwind/mcp-dropin-guide.git
 [submodule "kairos"]
 	path = kairos
 	url = https://github.com/toxicwind/kairos.git
@@ -435,9 +432,6 @@
 [submodule "hatch"]
 	path = hatch
 	url = https://github.com/toxicwind/hatch.git
-[submodule "duet"]
-	path = duet
-	url = https://github.com/toxicwind/duet.git
 [submodule "flicker"]
 	path = flicker
 	url = https://github.com/toxicwind/flicker.git
