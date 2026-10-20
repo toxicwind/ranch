@@ -26,8 +26,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: recursive
+          # Submodules are NOT cloned at checkout (ci-watch 2026-10-19):
+          # several registered submodule upstreams are unreachable from the
+          # workflow token (deleted/renamed: workmux, zed-android-port,
+          # ai-merge-resolve; private outside token access: arlockworks-next,
+          # arlockworks-core, effusion-labs-tickets). A recursive checkout
+          # hard-fails the whole sync (run 39347242493). Submodules init
+          # best-effort in the next step instead.
+          submodules: false
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Init submodules (best-effort)
+        run: git submodule update --init --recursive || true
 
       - uses: oven-sh/setup-bun@v2
         with:
