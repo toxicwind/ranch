@@ -185,9 +185,6 @@
 [submodule "skillforge"]
 	path = skillforge
 	url = https://github.com/toxicwind/skillforge.git
-[submodule "estate-scripts"]
-	path = estate-scripts
-	url = https://github.com/toxicwind/estate-scripts.git
 [submodule "estate-scripts-dispersal"]
 	path = estate-scripts-dispersal
 	url = https://github.com/toxicwind/estate-scripts-dispersal.git
@@ -380,16 +377,16 @@
 	url = https://github.com/toxicwind/weave.git
 [submodule "estate-dispersal"]
 	path = estate-dispersal
-	url = https://github.com/toxicwind/sovereign-dispersal.git
+	url = https://github.com/toxicwind/estate-dispersal.git
 [submodule "estate-end4"]
 	path = estate-end4
-	url = https://github.com/toxicwind/sovereign-end4.git
+	url = https://github.com/toxicwind/estate-end4.git
 [submodule "estate-shell"]
 	path = estate-shell
 	url = https://github.com/toxicwind/estate-shell.git
 [submodule "estate-skills"]
 	path = estate-skills
-	url = https://github.com/toxicwind/sovereign-skills.git
+	url = https://github.com/toxicwind/estate-skills.git
 [submodule "ferret-den"]
 	path = ferret-den
 	url = https://github.com/toxicwind/ferret-den.git
@@ -435,30 +432,6 @@
 [submodule "nuvio"]
 	path = nuvio
 	url = https://github.com/toxicwind/nuvio.git
-[submodule "phone-sentinel"]
-	path = phone-sentinel
-	url = https://github.com/toxicwind/phone-sentinel.git
-[submodule "tau.tau-extensions"]
-	path = tau/tau-extensions
-	url = https://github.com/toxicwind/tau-extensions.git
-[submodule "tools.c8"]
-	path = tools/c8
-	url = https://github.com/bcoe/c8.git
-[submodule "websites.arlockworks.app"]
-	path = websites/arlockworks/app
-	url = https://github.com/toxicwind/arlockworks-next.git
-[submodule "websites.arlockworks.main"]
-	path = websites/arlockworks/main
-	url = https://github.com/toxicwind/arlockworks-core.git
-[submodule "websites.effusionlabs.main"]
-	path = websites/effusionlabs/main
-	url = https://github.com/toxicwind/effusion-labs.git
-[submodule "websites.effusionlabs.tickets"]
-	path = websites/effusionlabs/tickets
-	url = https://github.com/toxicwind/effusion-labs-tickets.git
-[submodule "submodules.phone-sentinel"]
-	path = submodules/phone-sentinel
-	url = /home/toxic/phone-sentinel
 [submodule "hatch.hatch-cli"]
 	path = hatch/kite-cli
 	url = https://github.com/toxicwind/kite-cli.git
@@ -696,3 +669,7 @@
 [submodule "pdfshield"]
 	path = pdfshield
 	url = https://github.com/purvalsingh/pdfshield.git
+
+[submodule "ffs-diff"]
+	url = https://github.com/toxicwind/ffs-diff.git
+	path = ffs-diff

@@ -1,5 +1,5 @@
 # ranch/.meta.yaml — the multi-repo manifest (meta 0.2.22+).
-# Generated from .gitmodules (214 repos) — repos are PEERS, not
+# Generated from .gitmodules (216 repos) — repos are PEERS, not
 # hierarchy: each stays an independent clone with its own history. Sync with
 #   meta git update       # clone missing + pull all
 #   meta git status       # per-repo state
@@ -42,6 +42,8 @@ projects:
     repo: https://github.com/toxicwind/weave.git
   "barn/weave-sub":
     repo: https://github.com/toxicwind/weave.git
+  "bash-style-guide":
+    repo: https://github.com/toxicwind/bash-style-guide.git
   "bench-radar":
     repo: https://github.com/toxicwind/bench-radar.git
   "borrowed/herdr":
@@ -99,19 +101,19 @@ projects:
   "estate-chat":
     repo: https://github.com/toxicwind/estate-chat.git
   "estate-dispersal":
-    repo: https://github.com/toxicwind/sovereign-dispersal.git
+    repo: https://github.com/toxicwind/estate-dispersal.git
   "estate-dispersal-monolith":
     repo: https://github.com/toxicwind/estate-dispersal-monolith.git
   "estate-end4":
-    repo: https://github.com/toxicwind/sovereign-end4.git
+    repo: https://github.com/toxicwind/estate-end4.git
   "estate-hatch-toolkit":
     repo: https://github.com/toxicwind/estate-hatch-toolkit.git
+  "estate-kappa-plugin":
+    repo: https://github.com/toxicwind/estate-kappa-plugin.git
   "estate-monitor":
     repo: https://github.com/toxicwind/estate-monitor.git
   "estate-recon":
     repo: https://github.com/toxicwind/estate-recon.git
-  "estate-scripts":
-    repo: https://github.com/toxicwind/estate-scripts.git
   "estate-scripts-dispersal":
     repo: https://github.com/toxicwind/estate-scripts-dispersal.git
   "estate-scripts-end4":
@@ -123,7 +125,7 @@ projects:
   "estate-shell":
     repo: https://github.com/toxicwind/estate-shell.git
   "estate-skills":
-    repo: https://github.com/toxicwind/sovereign-skills.git
+    repo: https://github.com/toxicwind/estate-skills.git
   "estate-skills-hub":
     repo: https://github.com/toxicwind/estate-skills-hub.git
   "estate-whoa-breakthrough":
@@ -140,6 +142,8 @@ projects:
     repo: https://github.com/toxicwind/fast-race.git
   "ferret-den":
     repo: https://github.com/toxicwind/ferret-den.git
+  "ffs-diff":
+    repo: https://github.com/toxicwind/ffs-diff.git
   "fleet":
     repo: https://github.com/toxicwind/fleet.git
   "fleet-chat":
@@ -352,14 +356,14 @@ projects:
     repo: https://github.com/toxicwind/pack-fix.git
   "paper-poller":
     repo: https://github.com/toxicwind/paper-poller.git
+  "pdfshield":
+    repo: https://github.com/purvalsingh/pdfshield.git
   "pearlctl":
     repo: https://github.com/toxicwind/pearlctl.git
   "phone-lane":
     repo: https://github.com/toxicwind/phone-lane.git
   "phone-ocr-sweep":
     repo: https://github.com/toxicwind/phone-ocr-sweep.git
-  "phone-sentinel":
-    repo: https://github.com/toxicwind/phone-sentinel.git
   "pinax":
     repo: https://github.com/toxicwind/pinax.git
   "pj-fast":
