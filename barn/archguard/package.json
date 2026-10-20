@@ -13,6 +13,7 @@
     "build:client": "npm --prefix client run build",
     "seed": "tsx src/db/seed.ts",
     "seed:estate": "tsx src/scripts/seedEstate.ts",
+    "precheck": "tsx src/scripts/prPrecheck.ts",
     "verify": "tsx src/scripts/verifyBackbone.ts",
     "verify:phase2": "tsx src/scripts/verifyPhase2.ts",
     "test": "npm run verify:phase2"
