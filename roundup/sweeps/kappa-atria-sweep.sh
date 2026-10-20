@@ -38,14 +38,17 @@ MODELS=(Atria-Dawn)
 echo "[atria-sweep] guidellm: $GUIDELLM"
 echo "[atria-sweep] target: $TARGET  (rpm:60 shared -> synchronous, serial)"
 echo "[atria-sweep] models: ${MODELS[*]}"
+echo "[atria-sweep] note: Atria-Dawn is a REASONING model — it emits nothing visible until"
+echo "                    max_tokens clears the reasoning phase (~128+). output_tokens=256 here"
+echo "                    so the benchmark measures real answer throughput, not the reasoning tail."
 
 FAIL=0
 for m in "${MODELS[@]}"; do
   safe=$(echo "$m" | tr '/:' '__')
   echo "=== $m ==="
   if timeout 120 "$GUIDELLM" run \
-    --backend "kind=openai_http,target=$TARGET,model=$m,validate_backend=False,api_key=$K" \
-    --data "kind=synthetic_text,prompt_tokens=128,output_tokens=64" \
+    --backend "kind=openai_http,target=$TARGET,model=$m,validate_backend=False,api_key=$K,max_tokens=256" \
+    --data "kind=synthetic_text,prompt_tokens=128,output_tokens=256" \
     --profile kind=synchronous \
     --constraint "kind=max_requests,count=5" \
     --tokenizer kind=huggingface_auto,model=gpt2 \
