@@ -88,6 +88,10 @@ estate/forge          running   :25148 HTTP  (forge-server)
 estate/forge-agent    running   :25240 gRPC  (forge-agent)
 ```
 
-> Note: the running binary's internal `service` string still reads `flicker`;
-> it will report `forge` after the next build from the swept `forge/woodpecker/`
-> source.
+> Naming canon (2026-10-19): the binary is `forge-server`, the pillar is
+> `estate/forge` + `estate/forge-agent`, the build-daemon engine inside this
+> repo remains Woodpecker's fork whose internal `service` string still reads
+> `flicker` (cosmetic, not user-facing). "mbx" is the mise task-cache client
+> that submits through this same daemon (`MBX_CACHE_PORT=25148` is its port
+> SSOT). Fresh binaries built 2026-10-19 live in `flicker/bin/forge-server` +
+> `forge-agent` (see docs/ops/forge-naming-canon.md).

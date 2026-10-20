@@ -1,6 +1,7 @@
-$schema: 'https://moonrepo.dev/schemas/project.json'
-language: 'go'
-layer: 'application'
+$schema: "https://moonrepo.dev/schemas/project.json"
+id: "forge-router-herd"
+language: "go"
+layer: "application"
 # Known pre-existing failures (herd lane owns):
 # - internal/router: 4 integration tests for the peer-health ejection flow
 #   (TestPeerIntegration_*) — the health recording wiring was never completed.
@@ -15,11 +16,11 @@ layer: 'application'
 # runs CORSConfig.Validate(); config_posix_test golden updated for it.)
 tasks:
   build:
-    command: 'go build ./...'
-    inputs: ['**/*.go', 'go.mod', 'go.sum']
+    command: "go build ./..."
+    inputs: ["**/*.go", "go.mod", "go.sum"]
   test:
-    command: 'go test ./...'
-    inputs: ['**/*.go', 'go.mod', 'go.sum']
+    command: "go test ./..."
+    inputs: ["**/*.go", "go.mod", "go.sum"]
   lint:
-    command: 'gofmt -l ./internal ./cmd'
-    inputs: ['**/*.go']
+    command: "gofmt -l ./internal ./cmd"
+    inputs: ["**/*.go"]

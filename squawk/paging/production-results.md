@@ -25,7 +25,7 @@ keeps unpacked spans addressable by seq range. Raw store never mutated.
 
 Archive probes added to de-bias the race's today-skew (probes_archive.json):
 A1 Oct 5 terminal-MCP forks (wezterm 41 / kitty 40 tools), A2 Oct 4
-roundup sweep weights → sovereign router, A3 Oct 3 marquee README audit.
+roundup sweep weights → estate router, A3 Oct 3 marquee README audit.
 
 | packer | @4k | @16k |
 |---|---|---|

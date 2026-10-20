@@ -1,6 +1,6 @@
-# AGENTS.md — gayxxx-sovereign (`/home/toxic/projects/gayxxx-sovereign`)
+# AGENTS.md — gayxxx-estate (`/home/toxic/projects/gayxxx-estate`)
 
-**Role**: CloudStream CS3 repository and plugin repackager / media streaming manifest for Sovereign.
+**Role**: CloudStream CS3 repository and plugin repackager / media streaming manifest for Estate.
 **Stack**: Android DEX, Gradle/Kotlin, JSON metadata, CloudStream plugin API.
 
 ---
@@ -123,16 +123,16 @@ ast-grep scan -p 'NVIDIA_MODELS' -l ts --json=stream /home/toxic/projects/pi-age
 - **Coverage floor 82%**: `npx vitest run --coverage --bail` after code. Lint (`biome`) + typecheck.
 - See TODO Wave 5 for the worker-limit `/32` redo + timeout/failfast threading.
 
-## 🔌 MCP / mcpproxy (sovereign-owned)
+## 🔌 MCP / mcpproxy (estate-owned)
 
 - **mcpproxy** is the single MCP federation gateway: `http://127.0.0.1:25109/mcp`, owned by
-sovereign (`pitchfork start mcpproxy` / `mise run restart-mcpproxy` -> `mcpproxy serve
+estate (`pitchfork start mcpproxy` / `mise run restart-mcpproxy` -> `mcpproxy serve
 --config=/home/toxic/.mcpproxy/mcp_config.json`). 43 real upstreams (ghas + 42 others).
 - **pi MUST list ONLY `mcpproxy`** in `~/.pi/agent/mcp.json` (no duplicate direct `ghas`/
   `nvidia-nim` entries). All MCP tools reach pi through the proxy via `retrieve_tools`.
-- **nvidia-nim is NOT an MCP server.** It is a llama-swap/sovereign-router **completions API**
+- **nvidia-nim is NOT an MCP server.** It is a llama-swap/estate-router **completions API**
   (OpenAI-compatible, on `:25100`). NVIDIA models are first-class via pi-agent's `nvidia`
-  provider (`packages/ai/src/providers/`) -> sovereign-router/llama-swap, not an MCP upstream.
+  provider (`packages/ai/src/providers/`) -> estate-router/llama-swap, not an MCP upstream.
 - **Subagents**: `config.yaml` `can_spawn_subagents:true` + whitelist + `subagents.defaultModel:
   opencode/hy3-free`. The `subagent` spawn tool is a LIVE-PI builtin (not callable from a
   plain assistant context) — fanout only works inside an interactive pi session.

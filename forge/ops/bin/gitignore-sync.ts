@@ -43,7 +43,7 @@ export function loadManifest(path: string = MANIFEST): Manifest {
 }
 
 export function render(
-  manifest: Manifest,
+  manifest: Manifest = loadManifest(),
   templatesDir = join(ESTATE_ROOT, "ops", "gitignore", "templates"),
   layersDir = join(ESTATE_ROOT, "ops", "gitignore", "layers"),
 ): { content: string; sections: Section[] } {

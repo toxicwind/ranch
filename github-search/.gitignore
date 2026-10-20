@@ -49,3 +49,8 @@ Thumbs.db
 scripts/cycle_*
 .fastembed_cache/
 _production_archive/cache/
+
+# per-user IDE configs (contain local credentials)
+.codeium/
+.windsurf/
+.cursor/

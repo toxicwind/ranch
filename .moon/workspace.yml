@@ -1,4 +1,4 @@
-$schema: 'https://moonrepo.dev/schemas/workspace.json'
+$schema: "https://moonrepo.dev/schemas/workspace.json"
 
 # Ranch monorepo — moon task orchestration (maximal).
 # Every animal/component is a first-class moon project. Tasks are polyglot
@@ -7,24 +7,20 @@ $schema: 'https://moonrepo.dev/schemas/workspace.json'
 
 projects:
   # Top-level component projects.
-  - '*/moon.yml'
-  # Nested sub-project graphs (mesh, flock, barn, forge, squawk, tau, campfire).
-  - 'barn/*/moon.yml'
-  - 'flock/*/moon.yml'
-  - 'mesh/*/moon.yml'
-  - 'mesh/*/*/moon.yml'
-  - 'forge/*/moon.yml'
-  - 'forge/*/*/moon.yml'
-  - 'squawk/*/moon.yml'
-  - 'tau/*/moon.yml'
-  - 'campfire/*/moon.yml'
-  # Explicit re-scans if a project is added mid-tree.
-  - '*/projects/*/moon.yml'
+  - "*/moon.yml"
+  # Nested sub-project graphs (barn, mesh, forge, squawk, tau, kappa).
+  - "barn/*/moon.yml"
+  - "mesh/*/moon.yml"
+  - "forge/*/moon.yml"
+  - "forge/*/*/moon.yml"
+  - "squawk/*/moon.yml"
+  - "tau/*/moon.yml"
+  - "kappa/*/moon.yml"
 
 vcs:
-  provider: 'github'
-  defaultBranch: 'main'
+  provider: "github"
+  defaultBranch: "main"
 
 pipeline:
-  cacheLifetime: '7 days'
+  cacheLifetime: "7 days"
   installDependencies: true

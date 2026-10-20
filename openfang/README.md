@@ -1,7 +1,7 @@
 <div align="right">
 
-[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
-[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
+[![license](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-projects#license)
+[![estate-projects](https://img.shields.io/badge/estate--projects-part%20of-blueviolet?style=for-the-badge)](https://github.com/toxicwind/estate-projects)
 
 </div>
 
@@ -16,7 +16,7 @@
 
 - **Agents that work while you sleep** — scheduled, always-on, with a real dashboard
 - **Rust-grade reliability** — the agent runtime is infrastructure, not a demo
-- **On this estate** — fronted by the sovereign services stack (`axiom` service on `:25103`, `coyote` inference engine on `:25143` routing through herd across 14 providers)
+- **On this estate** — fronted by the estate services stack (`axiom` service on `:25103`, `coyote` inference engine on `:25143` routing through herd across 14 providers)
 
 ## Features
 
@@ -36,7 +36,7 @@ flowchart LR
         W --> M[Monitors / targets]
         W --> R[Reports]
     end
-    subgraph sovereign["Sovereign estate"]
+    subgraph estate["Estate estate"]
         S[axiom service :25103]
         C[coyote inference :25143]
         H[herd :25100 — 14 providers]
@@ -59,7 +59,7 @@ openfang start
 ## License & security
 
 - OpenFang upstream is open source — see [upstream repo](https://github.com/RightNow-AI/openfang) for its license.
-- This monorepo's own files are [MIT](https://github.com/toxicwind/sovereign-projects#license).
+- This monorepo's own files are [MIT](https://github.com/toxicwind/estate-projects#license).
 
 ## This directory
 

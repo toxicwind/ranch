@@ -1,0 +1,5 @@
+# hatch-decode .envrc — machine-local direnv pointer (gitignored).
+# Copy to .envrc and adjust the estate root path. Secrets come from the
+# secretsmith keyring via the root env, never from files.
+source_env_if_exists "$HOME/estate/.envrc"
+dotenv_if_exists .env.local

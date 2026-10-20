@@ -10,13 +10,14 @@ $schema: 'https://moonrepo.dev/schemas/toolchain.json'
 # the python projects move to uv-managed environments.
 
 bun:
-  version: '1.4.2'
+  version: '1.4.4'
 
 node:
   version: '22.12.0'
 
-go:
-  version: '1.23.1'
+# go is deliberately NOT pinned here: moon 2.x toolchain schema rejects a bare
+# `go` block, and the estate already pins go via mise (config/mise.toml).
+# Revisit if moon adds native go toolchain support.
 
 rust:
   version: '1.89.0'
