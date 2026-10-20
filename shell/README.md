@@ -1,15 +1,15 @@
 <div align="right">
 
-[![License: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-projects#license)
-[![estate-projects](https://img.shields.io/badge/part_of-estate--projects-blue?style=for-the-badge)](https://github.com/toxicwind/estate-projects)
+[![License: MIT](https://img.shields.io/github/license/toxicwind/estate?style=for-the-badge)](https://github.com/toxicwind/estate/blob/main/LICENSE)
+[![estate](https://img.shields.io/badge/part_of-estate-blue?style=for-the-badge)](https://github.com/toxicwind/estate)
 
 </div>
 
 # Quickshell home — `ii`
 
-> **The canonical home of the Architect's `ii` quickshell setup: the illogical-impulse fork plus the operations layer that keeps it alive on Hyprland.**
+> **The canonical home of the Architect's `ii` quickshell setup: the estate-end4 fork plus the operations layer that keeps it alive on Hyprland.**
 
-Two halves: `ii/` — the `ii` fork of end-4's illogical-impulse (submodule, remote `toxicwind/estate-end4`; QML/config work lives here, untouched by the redo) — and the first-class operations layer around it (`bin/`, `lib/`, `deploy/`) that launches, supervises, and doctors it.
+Two halves: `ii/` — the estate fork of end-4's dots-hyprland/illogical-impulse (repo `toxicwind/estate-end4`; QML/config work lives here, committed directly) — and the first-class operations layer around it (`bin/`, `lib/`, `deploy/`) that launches, supervises, and doctors it.
 
 ## Entrypoints
 
@@ -44,15 +44,15 @@ MIT — see the [canonical LICENSE](https://github.com/toxicwind/estate-projects
 
 ## Layout
 
-| Path | What |
-|---|---|
-| [`bin/`](./bin) | User entrypoints (above) |
-| [`lib/qs-common.sh`](./lib/qs-common.sh) | Shared env/pid/unit helpers (sourced by `bin/*`) |
-| [`deploy/quickshell-ii.service`](./deploy/quickshell-ii.service) | systemd `--user` unit (`Restart=always`, `RestartSec=2`); installed by `qs-install` |
-| [`quarantine/`](./quarantine) | Legacy material — parked, never deleted (see [`quarantine/MANIFEST.md`](./quarantine/MANIFEST.md)) |
-| [`evidence/`](./evidence) | grim DP-1/DP-2 captures per verification run |
-| [`AUDIT.md`](./AUDIT.md) | Structural inventory + IPC anomaly root cause (2026-09-19) |
-| [`ii/`](./ii) | The fork — QML/config work lives here; this redo does not touch its content |
+| Path                                                             | What                                                                                               |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| [`bin/`](./bin)                                                  | User entrypoints (above)                                                                           |
+| [`lib/qs-common.sh`](./lib/qs-common.sh)                         | Shared env/pid/unit helpers (sourced by `bin/*`)                                                   |
+| [`deploy/quickshell-ii.service`](./deploy/quickshell-ii.service) | systemd `--user` unit (`Restart=always`, `RestartSec=2`); installed by `qs-install`                |
+| [`quarantine/`](./quarantine)                                    | Legacy material — parked, never deleted (see [`quarantine/MANIFEST.md`](./quarantine/MANIFEST.md)) |
+| [`evidence/`](./evidence)                                        | grim DP-1/DP-2 captures per verification run                                                       |
+| [`AUDIT.md`](./AUDIT.md)                                         | Structural inventory + IPC anomaly root cause (2026-09-19)                                         |
+| [`ii/`](./ii)                                                    | The fork — QML/config work lives here; this redo does not touch its content                        |
 
 `/usr/local/bin/qs` delegates to `bin/qs-launch` (the old hand-rolled version lives in quarantine).
 
@@ -86,15 +86,15 @@ Terminal emulator: `wezterm` (GPU-accelerated, listed in `ii/packages.arch.txt`)
 
 ### Repo layout
 
-| Path | Content |
-|---|---|
-| `ii/dots/.config/wezterm/shell-integration.sh` | Original bash OSC 133 script |
-| `ii/dots/.config/wezterm/plugins/wezterm-cmdpicker/` | Forked cmdpicker plugin repo |
-| `ii/dots/.config/wezterm/wezterm.lua` | Active Lua-first config (tab bar + keybindings) |
-| `ii/dots/.config/wezterm/shell-integration.sh` | Symlink to shell repo script |
-| `ii/dots/.config/wezterm/plugins/wezterm-cmdpicker` | Symlink to shell repo plugin |
-| `~/.config/wezterm` | **Symlink** → `ii/dots/.config/wezterm` (managed by Dotbot via `ii/install.conf.yaml`) |
+| Path                                                 | Content                                                                                |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `ii/dots/.config/wezterm/shell-integration.sh`       | Original bash OSC 133 script                                                           |
+| `ii/dots/.config/wezterm/plugins/wezterm-cmdpicker/` | Forked cmdpicker plugin repo                                                           |
+| `ii/dots/.config/wezterm/wezterm.lua`                | Active Lua-first config (tab bar + keybindings)                                        |
+| `ii/dots/.config/wezterm/shell-integration.sh`       | Symlink to shell repo script                                                           |
+| `ii/dots/.config/wezterm/plugins/wezterm-cmdpicker`  | Symlink to shell repo plugin                                                           |
+| `~/.config/wezterm`                                  | **Symlink** → `ii/dots/.config/wezterm` (managed by Dotbot via `ii/install.conf.yaml`) |
 
 ## Contributing
 
-New operations go in `bin/` and source `lib/qs-common.sh` — never duplicate env/pid/unit logic. The `ii/` submodule is upstream territory: never commit QML fixes here that belong in the fork.
+New operations go in `bin/` and source `lib/qs-common.sh` — never duplicate env/pid/unit logic. The `ii/` repo is upstream territory from the estate side: never commit QML fixes here that belong in the fork (`toxicwind/estate-end4`).
