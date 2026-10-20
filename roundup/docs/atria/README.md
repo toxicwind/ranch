@@ -1,99 +1,85 @@
-# Atria-Dawn — recon findings (2026-10-20)
+# Atria-Dawn — max recon (2026-10-20)
 
-Full behavioral fingerprint of the Atria API's single model, from a token-frugal
-probe harness (`roundup/sweeps/kappa-atria-recon.py`) and a request-oracle HAR
-capture of the Atria web console. Frugal because the trial key carries a hard
-~10k token bucket (not daily).
+Authoritative account + model fingerprint, assembled from:
+- authenticated `/console/usage` + `/console/keys` RSC payloads (browserless
+  replay of the live Firefox `logto_*` session — the HAR-stripped cookies
+  redirect to /sign-in, the live 1505-char value authenticates),
+- a token-frugal model probe harness (`roundup/sweeps/kappa-atria-recon.py`),
+- a request-oracle HAR of the web console,
+- `ferret` (projectdiscovery) surface recon in `ferret/`.
 
-## Model operating constraints (the decisive findings)
+## Account / quota — AUTHORITATIVE (server-side)
 
-1. **Atria-Dawn is a pure reasoning model.**
-   - With `max_tokens <= 64` the response has `content=null`, `finish_reason=length`,
-     and the ENTIRE completion budget goes to `reasoning_tokens`.
-   - At `max_tokens=512` it emits real content (e.g. `'VISIBLE_OK'`, only 11
-     reasoning tokens) with `finish_reason=stop`.
-   - **Callers MUST set `max_tokens >= ~128` (512+ recommended) or they get an
-     empty visible answer.** This is the #1 integration gotcha.
-   - Streaming (SSE) carries BOTH `reasoning_content` then `content` deltas. The
-     first streaming chunks are `reasoning_content` ("Let's…"); `content` starts
-     empty. `@ai-sdk/openai-compatible` handles this (reads `delta.content`).
+Account `18cj82f8ebua` · `toxicwind@gmail.com` · `Chris` · `isAdmin: false`
 
-2. **Reasoning cannot be disabled.**
-   - `reasoning_effort: "none"` -> HTTP 400 (rejected).
-   - `enable_thinking: false` and `thinking:{...}` are silently ignored (still
-     produces reasoning tokens).
+| field | value |
+|-------|-------|
+| `token_quota` | 10000 |
+| `token_used`  | 849   |
+| remaining     | ~9,151 |
+| `suspended_at`| null |
+| `suspension_version` | 0 |
 
-3. **Guided/structured decoding is not honored at small budgets.**
-   - `guided_regex`, `guided_choice`, `guided_json`, and `response_format:
-     json_object` all return 200 but the tokens all go to `reasoning_tokens`
-     (finish=length, content=null). No evidence the grammar is applied before the
-     budget runs out. Verify with a large `max_tokens` before relying on it.
+**It is a FIXED BUCKET, not daily.** No reset. The dashboard earlier showed 284
+settled; by this authed read it was 849 (drained by probing live).
 
-4. **Parallel branches ignored.**
-   - `n: 2` and `n: 4` both return exactly 1 choice (like Anthropic Messages default).
+### Billing is output-only (input is cached free)
 
-5. **Prompt caching is active.**
-   - Every request shows `cached_tokens == prompt_tokens` (full input cache hit).
-   - Reused prefixes are effectively free input-wise; `created_cache_tokens: 0`.
+Per badging key `new` (`atr_wg37kbis…`, active, id `905975b8-…`):
 
-6. **TTFT is slow and grows super-linearly with tiny budgets.**
-   - ~7.0s @ 1 tok, ~6.4s @ 4 tok, ~17.8s @ 8 tok. The reasoning phase dominates.
+| metric | value |
+|--------|-------|
+| request_count | 34 |
+| prompt_tokens | 1077 |
+| completion_tokens | 849 |
+| cached_input_tokens | 1077 |
+| uncached_input_tokens | **0** |
+| billed_tokens | 849 (= completion only) |
+| cache_observed_input | 1077 |
 
-7. **`accept*`/`stop`/`metadata`/`seed`/`logprobs` all accepted (200) but moot at
-   tiny budget** — reasoning eats everything; effect only visible with budget.
+The model cache makes **all input free** (`cached_input_tokens == prompt_tokens`,
+`uncached == 0`), so billing == output tokens. Prompt hits cost nothing; reuse
+long prefixes freely.
 
-## Quota / accounting — CONFIRMED server-side (authed RSC read)
+## Model operating constraints (from the probe harness)
 
-Pulled the live quota straight out of the authenticated `/console/usage` RSC
-(using the real browser session cookies from Firefox — the pasted HAR cookies
-were truncated/HAR-stripped and redirect to `/sign-in`; the live 1505-char
-`logto_*` value authenticates):
+1. **Reasoning model.** `max_tokens <= 64` → `content=null`, `finish=length`,
+   ALL budget to `reasoning_tokens`. At `max_tokens=512` → real content
+   (`'VISIBLE_OK'`, 11 reasoning tok, finish=stop). **Call with `max_tokens >=
+   ~128` (512 recommended) or you get an empty reply.**
+   - SSE carries `reasoning_content` then `content` deltas; `@ai-sdk/openai-compatible`
+     reads `delta.content`. Compatible.
+2. **Reasoning can't be disabled**: `reasoning_effort:none` → 400; `enable_thinking`
+   /`thinking` ignored.
+3. **Guided/FSM decode unproven at small budget**: `guided_regex/choice/json`,
+   `response_format:json_object` all 200 but tokens → reasoning. Verify with
+   generous `max_tokens`.
+4. **`n` ignored**: `n:2`/`n:4` → always 1 choice.
+5. **TTFT slow + reasoning-tax**: ~7s@1, 6.4s@4, 17.8s@8.
+6. Rate limit **50 rpm** (`x-rpm-limit: 50`) shared across all 3 APIs + all keys.
 
-```json
-"token_quota": 10000,
-"token_used": 849,
-"suspended_at": null
-```
+## API surface / infra (HAR + ferret)
 
-- **It is a FIXED BUCKET — confirmed, not daily.** `token_quota=10000`,
-  `token_used=849`, so ~**9,151 remaining**. No daily reset. (The dashboard's
-  earlier "284 lifetime settled" had already grown to 849 by the time this was
-  read — the trial bucket drains, it does not refill daily.)
-- Per-API breakdown also returned: `prompt_tokens:1077,
-  completion_tokens:849, cached_input…` (across all three APIs).
-- The quota data lives in the RSC flight on `GET /console/usage?_rsc=…` AFTER a
-  real Login session authenticates. The HAR-stripped/pasted cookies do NOT
-  authenticate (`NEXT_REDIRECT;/sign-in;307`); the browser's full `logto_*`
-  (1505 chars) does.
-- Rate limit is per-minute: `x-rpm-limit: 50`, `x-rpm-remaining` in every response.
+- Console = **Next.js on Vercel**, RSC `?_rsc=` flights, Logto auth.
+- Hosts (ferret webprobe):
+  - `auth.atria-asi.ai` → 302 (Logto)
+  - `www.atria-asi.ai` → 200 "Atria Dawn" (CloudFront + Alibaba OSS + AWS, HTTP/3)
+  - `api.atria-asi.ai` → 200 "Atria Dawn — 模型 API" (console)
+  - `www.api.atria-asi.ai` → subfinder discovery, no live HTTP
+- Quota/key data: `GET /console/usage?_rsc=…` and `GET /console/keys?_rsc=…`
+  (auth'd), `cache-control: private,no-cache,no-store`.
 
-## HAR structure (request-ord position in the console)
-
-- Atria runs **Next.js on Vercel** with RSC flights (`?_rsc=`).
-- Data routes behind the console (session-cookie gated, `cache-control:
-  private,no-cache,no-store`, 0-byte bodies in the capture):
-  - `/console/usage?_rsc=…` — quota/usage
-  - `/console/keys?_rsc=…`     — API keys
-  - `/console`                 — shell
-- Infra: logo on **AliyunOSS -> CloudFront**; console flights P50 ~230-310ms, one
-  cold `/console` at 913ms. No inference `/v1/*` calls in the capture
-  (dashboard navigation only).
-- The RSC `GET /console/usage` without the Logto cookie returns only the page
-  shell (metadata/title), NOT the quota numbers — no public leak path.
-
-## Ferret-den (projectdiscovery) surface recon — pending
-
-`ferret` wraps projectdiscovery binaries (`dnsprobe`=dnsx, `webprobe`=httpx,
-`subprobe`=subfinder, `altprobe`=alterx, `tlsprobe`, `cdnprobe`, …). Targets for
-Atria: `api.atria-asi.ai`, `www.atria-asi.ai`, `auth.atria-asi.ai`. Results to be
-saved under `docs/atria/ferret/`.
-
-## Files in this folder
+## Files
 
 ```text
 docs/atria/
-  README.md        <- this file
-  weird-findings.md<- full probe transcript (kappa-atria-recon.py output)
-  ferret/          <- ferrret/den network surface results (dns/web/tls/alt)
-../sweeps/kappa-atria-recon.py <- the reusable token-frugal probe harness
+  README.md             <- this summary
+  weird-findings.md     <- full probe transcript
+  ferret/
+    README.md           <- surface recon summary
+    webprobe.txt / dnsprobe.txt / tlsprobe.txt / subprobe.txt
+    console-usage.rsc   <- authed usage payload (raw)
+    console-keys.rsc    <- authed keys payload (raw)
+../sweeps/kappa-atria-recon.py  <- reusable token-frugal harness
+../sweeps/kappa-atria-sweep.sh  <- guidellm throughput benchmark
 ```
