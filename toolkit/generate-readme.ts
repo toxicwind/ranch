@@ -4,7 +4,7 @@
 // computes stats, and renders a beautiful ranch README.md
 // Usage: bun toolkit/generate-readme.ts [--update] [--dry-run]
 
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -33,9 +33,11 @@ function sh(cmd: string, cwd?: string, timeoutMs = 30_000): string {
 function jaccardSimilarity(a: string, b: string): number {
   const tokensA = new Set(a.toLowerCase().split(/\W+/).filter(t => t.length > 2));
   const tokensB = new Set(b.toLowerCase().split(/\W+/).filter(t => t.length > 2));
-  const intersection = new Set([...tokensA].filter(x => tokensB.has(x)));
-  const union = new Set([...tokensA, ...tokensB]);
-  return union.size === 0 ? 0 : intersection.size / union.size;
+  // ES2025 Set methods with a portable fallback (older runtimes lack them).
+  let intersection = 0;
+  for (const t of tokensA) if (tokensB.has(t)) intersection++;
+  const union = (tokensA as any).union ? (tokensA as any).union(tokensB) : new Set([...tokensA, ...tokensB]);
+  return union.size === 0 ? 0 : intersection / union.size;
 }
 
 function similarityScore(a: { readmeHead?: string; sizeBytes?: number; fileCount?: number; upstream?: string }, b: { readmeHead?: string; sizeBytes?: number; fileCount?: number; upstream?: string }): number {
@@ -46,6 +48,57 @@ function similarityScore(a: { readmeHead?: string; sizeBytes?: number; fileCount
   const sizeScore = a.sizeBytes && b.sizeBytes ? 1 - Math.min(1, Math.abs(a.sizeBytes - b.sizeBytes) / Math.max(a.sizeBytes, b.sizeBytes, 1)) : 0;
   const upstreamScore = a.upstream && b.upstream && a.upstream === b.upstream ? 1 : 0;
   return textScore * 0.4 + fileScore * 0.3 + sizeScore * 0.2 + upstreamScore * 0.1;
+}
+
+function detectLanguage(relPath: string): string {
+  const p = join(RANCH_ROOT, relPath);
+  if (!existsSync(p)) return "`—`";
+
+  let entries: string[] = [];
+  try {
+    entries = readdirSync(p);
+  } catch {
+    return "`—`";
+  }
+
+  // Fast O(1) top-level manifest detection
+  if (entries.includes("bun.lock") || entries.includes("bunfig.toml")) return "⚡ `Bun`";
+  if (entries.includes("Cargo.toml")) return "🦀 `Rust`";
+  if (entries.includes("go.mod")) return "🐹 `Go`";
+  if (entries.includes("pyproject.toml") || entries.includes("requirements.txt") || entries.includes("setup.py")) return "🐍 `Python`";
+  if (entries.includes("package.json")) return "🔷 `TypeScript`";
+
+  // Shallow file extension counters (kept ultra high frequency)
+  const counts: Record<string, number> = { ts: 0, py: 0, rs: 0, go: 0, sh: 0, doc: 0 };
+  for (const f of entries) {
+    if (f.endsWith(".ts") || f.endsWith(".tsx")) counts.ts++;
+    else if (f.endsWith(".py")) counts.py++;
+    else if (f.endsWith(".rs")) counts.rs++;
+    else if (f.endsWith(".go")) counts.go++;
+    else if (f.endsWith(".sh") || f.endsWith(".bash")) counts.sh++;
+    else if (f.endsWith(".md") || f.endsWith(".json") || f.endsWith(".yaml")) counts.doc++;
+  }
+
+  if (counts.ts > 0) return "🔷 `TypeScript`";
+  if (counts.py > 0) return "🐍 `Python`";
+  if (counts.rs > 0) return "🦀 `Rust`";
+  if (counts.go > 0) return "🐹 `Go`";
+  if (counts.sh > 0) return "🐚 `Shell`";
+  if (counts.doc > 0) return "📖 `Docs/Data`";
+
+  // Check src/ directory if present
+  const srcPath = join(p, "src");
+  if (existsSync(srcPath)) {
+    try {
+      const srcFiles = readdirSync(srcPath);
+      if (srcFiles.some(f => f.endsWith(".ts") || f.endsWith(".tsx"))) return "🔷 `TypeScript`";
+      if (srcFiles.some(f => f.endsWith(".py"))) return "🐍 `Python`";
+      if (srcFiles.some(f => f.endsWith(".rs"))) return "🦀 `Rust`";
+      if (srcFiles.some(f => f.endsWith(".go"))) return "🐹 `Go`";
+    } catch {}
+  }
+
+  return "📁 `Workspace`";
 }
 
 function computeStats(infos: {name: string; upstream: string | null; upstreamSource: string | null; remoteOrigin: string | null; hasGit: boolean; isSubmodule: boolean; sizeBytes: number; fileCount: number; readmeHead?: string}[]): { total: number; withUpstream: number; withGit: number; submodules: number; totalSizeGB: string; totalFiles: number; bySource: Record<string, number>; langs: Record<string, number> } {
@@ -161,7 +214,7 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
   md += `[![ci](https://github.com/toxicwind/ranch/actions/workflows/ci.yml/badge.svg)](https://github.com/toxicwind/ranch/actions/workflows/ci.yml)\n`;
   md += `[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)\n`;
   md += `[![stars](https://img.shields.io/github/stars/toxicwind/ranch)](https://github.com/toxicwind/ranch/stargazers)\n`;
-  md += `[![bun](https://img.shields.io/badge/bun-1.4.2-f9f1e1?logo=bun)](https://bun.sh)\n`;
+  md += `[![bun](https://img.shields.io/badge/bun-1.4.4-f9f1e1?logo=bun)](https://bun.sh)\n`;
   md += `[![mise](https://img.shields.io/badge/toolchains-mise-ffd55a)](https://mise.jdx.dev)\n`;
   md += `[![go](https://img.shields.io/badge/Go-1.23-00ADD8?logo=go&logoColor=white)](https://go.dev)\n`;
   md += `[![rust](https://img.shields.io/badge/Rust-orange?logo=rust)](https://www.rust-lang.org)\n\n`;
@@ -237,38 +290,47 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
       if (existsSync(CACHE_FILE)) ghDescCache = JSON.parse(readFileSync(CACHE_FILE, "utf8"));
     } catch {}
 
-    const descOf = (p: string, repoUrl: string): string => {
+
+const descOf = (p: string, repoUrl: string): string => {
       const slugMatch = repoUrl.match(/github\.com[\/:]([^\/]+\/[^\/\.]+)/);
       if (slugMatch) {
         const slug = slugMatch[1];
-        if (slug in ghDescCache) return ghDescCache[slug];
-        try {
-          const ghDesc = sh(`gh api repos/${slug} --jq .description 2>/dev/null`, undefined, 2000).trim();
-          if (ghDesc && ghDesc !== "null") {
-            const clean = ghDesc.slice(0, 110).replace(/\|/g, "\\|");
-            ghDescCache[slug] = clean;
-            try { writeFileSync(CACHE_FILE, JSON.stringify(ghDescCache, null, 2)); } catch {}
-            return clean;
-          }
-        } catch {}
+        if (slug in ghDescCache && ghDescCache[slug]) return ghDescCache[slug];
       }
       const info = (data.infos as any[]).find((i) => i.name === p);
       if (!info?.readmeHead) return "";
       const lines = info.readmeHead.split("\n").map((l: string) => l.trim());
-      const first = lines.find((l: string) => l.length > 20 && !l.startsWith("#") && !l.startsWith("!") && !l.startsWith("[") && !l.startsWith("<") && !l.startsWith("|"));
-      return (first ?? "").slice(0, 110).replace(/\|/g, "\\|");
+      const first = lines.find((l: string) => {
+        if (l.length < 15) return false;
+        if (/^([#!<|\[*-]|```)/.test(l)) return false;
+        if (l.startsWith("http://") || l.startsWith("https://")) return false;
+        return true;
+      });
+      if (!first) return "";
+      const cleaned = first
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // strip markdown links
+        .replace(/`([^`]+)`/g, "$1")                 // strip inline code
+        .replace(/<[^>]+>/g, "")                     // strip html tags
+        .trim();
+      return cleaned.slice(0, 110).replace(/\|/g, "\\|");
     };
 
-    const sorted = entries.filter((e) => e.path).sort((a, b) => a.path.localeCompare(b.path));
+    // Sort submodules naturally by path (numeric + case-insensitive)
+    const sorted = entries
+      .filter((e) => e.path)
+      .sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true, sensitivity: "base" }));
     for (const e of sorted) {
       const disp = e.url.replace(/^https?:\/\/(www\.)?github\.com\//, "").replace(/\.git$/, "");
+      const lang = detectLanguage(e.path);
       const desc = descOf(e.path, e.url);
-      subRows += `| \`${e.path}\` | [${disp}](${e.url}) |${desc ? " " + desc + " |" : " — |"}\n`;
+      subRows += `| \`${e.path}\` | ${lang} | [${disp}](${e.url}) |${desc ? " " + desc + " |" : " — |"}\n`;
     }
     md += `## 🗂️ Registered Submodules (${sorted.length})\n\n`;
     md += `The full map — every animal's pen, with its repo and description (from README heads). From \`.gitmodules\` + \`FORKS-report.json\`; regenerate with the README.\n\n`;
-    md += `| Path | Repo | Description |\n|---|---|---|\n`;
+    md += `| Path | Stack / Lang | Repo | Description |\n|---|---|---|---|\n`;
     md += subRows + "\n";
+
+
   } catch {
     md += `## 🗂️ Registered Submodules\n\n*(.gitmodules not readable)*\n\n`;
   }
