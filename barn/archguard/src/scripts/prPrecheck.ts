@@ -138,11 +138,17 @@ function extractProposals(files: FileDiff[]): ExtractedProposal[] {
       }
     }
 
-    // Rule B — EST-002: Kilo Gateway naming invariant. Any introduced
-    // "Kappa Gateway" / api.kappa.ai string, or a removed "Kilo Gateway".
+    // Rule B — EST-002: Kilo Gateway naming invariant. Fires on an ACTUAL
+    // rename, not on mere mentions: (a) a "Kilo Gateway" string is removed and
+    // not restored in the same file (rename-away), or (b) kappa.ai naming is
+    // introduced inside kappa-gateway source (the Oct-17 incident's blast
+    // zone: packages/kappa-gateway/src/api/constants.ts). Documentation and
+    // test fixtures that merely mention the forbidden strings do NOT trip it
+    // (proven: this script's own comments contain "Kappa Gateway" and stay clean).
+    const inKappaGatewaySrc = /kappa-gateway/i.test(f.file);
     const kappaIntroduced = /kappa[ -]?gateway/i.test(addedText) || /api\.kappa\.ai/i.test(addedText);
     const kiloRemoved = /kilo[ -]?gateway/i.test(removedText) && !/kilo[ -]?gateway/i.test(addedText);
-    if (kappaIntroduced || kiloRemoved) {
+    if ((inKappaGatewaySrc && kappaIntroduced) || (kiloRemoved && kappaIntroduced)) {
       const nameMatch = addedText.match(/kappa[ -]?gateway/i) || addedText.match(/api\.kappa\.ai/i);
       out.push({
         rule: 'B (EST-002)',
