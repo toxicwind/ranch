@@ -1454,3 +1454,14 @@ estate/ranch/rustdesk-server/id_ed25519
 estate/ranch/rustdesk-server/id_ed25519.pub
 ranch/rustdesk-server/id_ed25519
 ranch/rustdesk-server/id_ed25519.pub
+
+# --- vendored woodpecker (forge/woodpecker): re-include source dirs ---
+# The broad [Dd]ebug/ and [Ll]og/ build-output rules above silently swallowed
+# woodpecker source packages (agent/log, cli/pipeline/log, server/api/debug,
+# server/services/log) when the tree was swept into git, breaking the Go
+# build in monorepo CI. These negations keep the vendored module complete.
+# (ci-watch repair 2026-10-20; do not remove without moving the packages.)
+!woodpecker/agent/log/
+!woodpecker/cli/pipeline/log/
+!woodpecker/server/api/debug/
+!woodpecker/server/services/log/
