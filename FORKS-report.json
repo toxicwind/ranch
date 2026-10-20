@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-20T10:16:54.832Z",
-  "total": 193,
+  "generated": "2026-10-20T11:13:27.770Z",
+  "total": 194,
   "withUpstream": 143,
   "infos": [
     {
@@ -1728,6 +1728,18 @@
       "isSubmodule": true,
       "sizeBytes": 36,
       "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "rodeo",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 34917,
+      "fileCount": 4,
       "signals": [],
       "signalTotal": 0
     },

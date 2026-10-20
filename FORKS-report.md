@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-20T10:16:54.832Z)
+# ranch/* fork audit (generated 2026-10-20T11:13:27.770Z)
 
-193 immediate subdirs; **143** have an obvious upstream reference.
+194 immediate subdirs; **143** have an obvious upstream reference.
 
 By source:
   - **142** .gitmodules
@@ -171,6 +171,7 @@ By source:
 | `rawhide` | — | — | — |
 | `rename-roundup` | — | — | — |
 | `research` | — | — | — |
+| `rodeo` | — | — | — |
 | `roundup` | — | — | — |
 | `routing` | — | — | — |
 | `routing-score` | — | — | — |
