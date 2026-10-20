@@ -420,9 +420,6 @@
 [submodule "antilogos"]
 	path = antilogos
 	url = https://github.com/toxicwind/antilogos.git
-[submodule "rig-ciwatch"]
-	path = rig-ciwatch
-	url = https://github.com/toxicwind/rig.git
 [submodule "tau-verify"]
 	path = tau-verify
 	url = https://github.com/toxicwind/tau.git

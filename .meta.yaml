@@ -1,5 +1,5 @@
 # ranch/.meta.yaml — the multi-repo manifest (meta 0.2.22+).
-# Generated from .gitmodules (216 repos) — repos are PEERS, not
+# Generated from .gitmodules (215 repos) — repos are PEERS, not
 # hierarchy: each stays an independent clone with its own history. Sync with
 #   meta git update       # clone missing + pull all
 #   meta git status       # per-repo state
@@ -379,8 +379,6 @@ projects:
   "repo-first-class":
     repo: https://github.com/toxicwind/repo-first-class.git
   "rig":
-    repo: https://github.com/toxicwind/rig.git
-  "rig-ciwatch":
     repo: https://github.com/toxicwind/rig.git
   "roundup-site":
     repo: https://github.com/owieth/turborepo-example
