@@ -42,13 +42,30 @@ capture of the Atria web console. Frugal because the trial key carries a hard
 7. **`accept*`/`stop`/`metadata`/`seed`/`logprobs` all accepted (200) but moot at
    tiny budget** — reasoning eats everything; effect only visible with budget.
 
-## Quota / accounting (from dashboard + HAR)
+## Quota / accounting — CONFIRMED server-side (authed RSC read)
 
-- **It is a BUCKET, not daily.** Dashboard: "Total quota 10,000 · 2.84% used ·
-  284 lifetime settled". No evidence of a per-day reset for this trial key.
+Pulled the live quota straight out of the authenticated `/console/usage` RSC
+(using the real browser session cookies from Firefox — the pasted HAR cookies
+were truncated/HAR-stripped and redirect to `/sign-in`; the live 1505-char
+`logto_*` value authenticates):
+
+```json
+"token_quota": 10000,
+"token_used": 849,
+"suspended_at": null
+```
+
+- **It is a FIXED BUCKET — confirmed, not daily.** `token_quota=10000`,
+  `token_used=849`, so ~**9,151 remaining**. No daily reset. (The dashboard's
+  earlier "284 lifetime settled" had already grown to 849 by the time this was
+  read — the trial bucket drains, it does not refill daily.)
+- Per-API breakdown also returned: `prompt_tokens:1077,
+  completion_tokens:849, cached_input…` (across all three APIs).
+- The quota data lives in the RSC flight on `GET /console/usage?_rsc=…` AFTER a
+  real Login session authenticates. The HAR-stripped/pasted cookies do NOT
+  authenticate (`NEXT_REDIRECT;/sign-in;307`); the browser's full `logto_*`
+  (1505 chars) does.
 - Rate limit is per-minute: `x-rpm-limit: 50`, `x-rpm-remaining` in every response.
-- Quota is NOT exposed via the API. The console reads it from an authenticated
-  Logto-session RSC endpoint `/console/usage`.
 
 ## HAR structure (request-ord position in the console)
 
