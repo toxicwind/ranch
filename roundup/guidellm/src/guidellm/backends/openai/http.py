@@ -687,18 +687,14 @@ class OpenAIHTTPBackend(Backend):
                     # Read body before raising so the error carries the
                     # gateway's actual diagnostic.
                     await stream.aread()
-                    self._raise_for_status(
-                        stream, request_kwargs.get("url", "")
-                    )
+                    self._raise_for_status(stream, request_kwargs.get("url", ""))
 
                 end_reached = False
 
                 async for chunk in self._aiter_lines(stream):
                     if stream.status_code >= 400:
                         await stream.aread()
-                        self._raise_for_status(
-                            stream, request_kwargs.get("url", "")
-                        )
+                        self._raise_for_status(stream, request_kwargs.get("url", ""))
                     iter_time = time.time()
 
                     if request_info.timings.first_request_iteration is None:
@@ -758,9 +754,7 @@ class OpenAIHTTPBackend(Backend):
 
     # ── HTTP helpers ─────────────────────────────────────────────────────
 
-    async def _probe_validate_endpoint(
-        self, validate_kwargs: dict[str, Any]
-    ) -> None:
+    async def _probe_validate_endpoint(self, validate_kwargs: dict[str, Any]) -> None:
         """Probe the configured validate endpoint.
 
         A 2xx here is a strong positive signal but not required for
@@ -824,7 +818,11 @@ class OpenAIHTTPBackend(Backend):
         for attempt in range(1, attempts + 1):
             try:
                 response = await client.request(
-                    method, url, json=json, params=params
+                    method,
+                    url,
+                    json=json,
+                    params=params,
+                    headers=self._build_headers(),
                 )
             except httpx.ConnectError as exc:
                 last_exc = TransportError(

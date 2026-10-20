@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# kilo-freeinference-sweep.sh — roundup bench of the freeinference catalog
+# kappa-freeinference-sweep.sh — roundup bench of the freeinference catalog
 # exactly as Kilo serves it (6 models; 4 chat-usable). Synchronous profile,
 # strictly serial — the provider enforces concurrency limit:1 per key
 # (findings.md §14), so parallel lanes are pointless here.
 # File lock prevents concurrent runs with same API key (collision → quota exhausted).
-LOCKFILE="/tmp/kilo-freeinference-sweep.lock"
+LOCKFILE="/tmp/kappa-freeinference-sweep.lock"
 exec 9>"$LOCKFILE"
 if ! flock -n 9; then
-  echo "FATAL: another kilo-freeinference-sweep is already running (same API key)" >&2
+  echo "FATAL: another kappa-freeinference-sweep is already running (same API key)" >&2
   exit 1
 fi
 trap 'rm -f "$LOCKFILE"' EXIT
@@ -26,16 +26,16 @@ K=$(grep -E '^FREEINFERENCE_API_KEY=' /home/toxic/.secrets | head -1 | cut -d= -
 [ -z "$K" ] && { echo "FATAL: FREEINFERENCE_API_KEY missing from vault" >&2; exit 3; }
 TARGET=https://freeinference.org/v1
 DATE=$(date +%Y%m%d)
-OUTDIR="$ROUNDUP/results/kilo-freeinf-$DATE"
+OUTDIR="$ROUNDUP/results/kappa-freeinf-$DATE"
 mkdir -p "$OUTDIR"
 
 # The Kilo freeinference catalog: chat models only (bge-m3 = embedding-only,
 # diffusiongemma = not an agent model — discovered but skipped).
 MODELS=(glm-5.3-flash deepseek-v4-flash qwen3.6-35b minimax-m3)
 
-echo "[kilo-sweep] guidellm: $GUIDELLM"
-echo "[kilo-sweep] target: $TARGET  (concurrency limit:1 -> synchronous, serial)"
-echo "[kilo-sweep] models: ${MODELS[*]}"
+echo "[kappa-sweep] guidellm: $GUIDELLM"
+echo "[kappa-sweep] target: $TARGET  (concurrency limit:1 -> synchronous, serial)"
+echo "[kappa-sweep] models: ${MODELS[*]}"
 
 FAIL=0
 for m in "${MODELS[@]}"; do
@@ -75,11 +75,11 @@ for f in sorted(glob.glob(os.path.join(outdir, "*.json"))):
     except Exception as e:
         print(f"CORRUPT {name}: {e}")
 rows.sort(key=lambda r: r[1] if r[1] is not None else 9e9)
-print(f"\nKILO FREEINFERENCE RANKING ({len(rows)} benchmarks):")
+print(f"\nKAPPA FREEINFERENCE RANKING ({len(rows)} benchmarks):")
 print(f"{'model':24} {'lat/s':>7} {'TTFT ms':>8} {'out tok/s':>9}")
 for n, lat, ttft, tps in rows:
     f = lambda v: f"{v:.2f}" if isinstance(v, (int, float)) else "-"
     print(f"{n[:24]:24} {f(lat):>7} {f(ttft):>8} {f(tps):>9}")
 PYEOF
-[ "$FAIL" -gt 0 ] && { echo "[kilo-sweep] $FAIL model(s) failed — see $OUTDIR/*.log"; exit 1; }
-echo "[kilo-sweep] done: $OUTDIR"
+[ "$FAIL" -gt 0 ] && { echo "[kappa-sweep] $FAIL model(s) failed — see $OUTDIR/*.log"; exit 1; }
+echo "[kappa-sweep] done: $OUTDIR"
