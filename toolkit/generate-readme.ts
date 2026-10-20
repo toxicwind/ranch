@@ -262,11 +262,11 @@ function generateReadme(data: { generated: string; total: number; infos: Array<a
   md += `| Total directories | ${data.total} |\n`;
   md += `| Directories with obvious upstream | ${stats.withUpstream} / ${data.total} (${((stats.withUpstream / data.total) * 100).toFixed(1)}%) |\n`;
   md += `| Git-tracked directories | ${stats.withGit} |\n`;
-  md += `| Submodules | ${stats.submodules} |\n`;
+  md += `| Components (peer repos) | ${stats.submodules} |\n`;
   md += `| Total size | ${stats.totalSizeGB} GB |\n`;
   md += `| Total tracked files | ${stats.totalFiles.toLocaleString()} |\n\n`;
 
-  // ── Registered submodules: the full map from .gitmodules, enriched with
+  // ── Components: the full map from .gitmodules (peer registry), enriched with
   // descriptions from FORKS-report.json (readmeHead first line). ──
   let subRows = "";
   try {
@@ -315,7 +315,7 @@ const descOf = (p: string, repoUrl: string): string => {
       return cleaned.slice(0, 110).replace(/\|/g, "\\|");
     };
 
-    // Sort submodules naturally by path (numeric + case-insensitive)
+    // Sort components naturally by path (numeric + case-insensitive)
     const sorted = entries
       .filter((e) => e.path)
       .sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true, sensitivity: "base" }));
@@ -325,14 +325,14 @@ const descOf = (p: string, repoUrl: string): string => {
       const desc = descOf(e.path, e.url);
       subRows += `| \`${e.path}\` | ${lang} | [${disp}](${e.url}) |${desc ? " " + desc + " |" : " — |"}\n`;
     }
-    md += `## 🗂️ Registered Submodules (${sorted.length})\n\n`;
+    md += `## 🗂️ Components (${sorted.length})\n\n`;
     md += `The full map — every animal's pen, with its repo and description (from README heads). From \`.gitmodules\` + \`FORKS-report.json\`; regenerate with the README.\n\n`;
     md += `| Path | Stack / Lang | Repo | Description |\n|---|---|---|---|\n`;
     md += subRows + "\n";
 
 
   } catch {
-    md += `## 🗂️ Registered Submodules\n\n*(.gitmodules not readable)*\n\n`;
+    md += `## 🗂️ Components\n\n*(.gitmodules not readable)*\n\n`;
   }
 
 

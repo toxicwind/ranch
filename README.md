@@ -59,18 +59,18 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 - [mise](https://mise.jdx.dev) — toolchains and build tasks; estate owns the shared build cache
 - **pitchfork** — the daemon supervisor: supervised services on the live estate
 
-## 📊 Monorepo Statistics (generated 10/20/2026, 6:52:48 AM)
+## 📊 Monorepo Statistics (generated 10/20/2026, 6:54:18 AM)
 
 | Metric | Value |
 |---|---|
 | Total directories | 194 |
 | Directories with obvious upstream | 143 / 194 (73.7%) |
 | Git-tracked directories | 48 |
-| Submodules | 142 |
+| Components (peer repos) | 142 |
 | Total size | 0.92 GB |
 | Total tracked files | 48 |
 
-## 🗂️ Registered Submodules (217)
+## 🗂️ Components (213)
 
 The full map — every animal's pen, with its repo and description (from README heads). From `.gitmodules` + `FORKS-report.json`; regenerate with the README.
 
@@ -120,7 +120,6 @@ The full map — every animal's pen, with its repo and description (from README 
 | `duel/vendor/ChatEval` | `—` | [thunlp/ChatEval](https://github.com/thunlp/ChatEval.git) | — |
 | `duel/vendor/debate-or-vote` | `—` | [deeplearning-wisc/debate-or-vote](https://github.com/deeplearning-wisc/debate-or-vote.git) | — |
 | `duel/vendor/llm_debate` | `—` | [ucl-dark/llm_debate](https://github.com/ucl-dark/llm_debate.git) | — |
-| `duet` | 🔷 `TypeScript` | [toxicwind/duet](https://github.com/toxicwind/duet.git) | — |
 | `emergent` | 🔷 `TypeScript` | [toxicwind/emergent](https://github.com/toxicwind/emergent.git) | — |
 | `estate-chat` | 🔷 `TypeScript` | [toxicwind/estate-chat](https://github.com/toxicwind/estate-chat.git) | — |
 | `estate-dispersal` | ⚡ `Bun` | [toxicwind/estate-dispersal](https://github.com/toxicwind/estate-dispersal.git) | Bun monolith fusing seven overlooked substrates into one deploy-ready proof-of-concept: estate-scripts fs-map, |
@@ -130,7 +129,6 @@ The full map — every animal's pen, with its repo and description (from README 
 | `estate-kappa-plugin` | 🔷 `TypeScript` | [toxicwind/estate-kappa-plugin](https://github.com/toxicwind/estate-kappa-plugin.git) | Official estate plugin collection for **kappa** (@kappacode/cli). |
 | `estate-monitor` | 🔷 `TypeScript` | [toxicwind/estate-monitor](https://github.com/toxicwind/estate-monitor.git) | — |
 | `estate-recon` | 📖 `Docs/Data` | [toxicwind/estate-recon](https://github.com/toxicwind/estate-recon.git) | — |
-| `estate-scripts` | 🔷 `TypeScript` | [toxicwind/estate-scripts](https://github.com/toxicwind/estate-scripts.git) | — |
 | `estate-scripts-dispersal` | `—` | [toxicwind/estate-scripts-dispersal](https://github.com/toxicwind/estate-scripts-dispersal.git) | — |
 | `estate-scripts-end4` | `—` | [toxicwind/estate-scripts-end4](https://github.com/toxicwind/estate-scripts-end4.git) | — |
 | `estate-scripts-scripts` | `—` | [toxicwind/estate-scripts-scripts](https://github.com/toxicwind/estate-scripts-scripts.git) | — |
@@ -193,7 +191,6 @@ The full map — every animal's pen, with its repo and description (from README 
 | `matter-server` | 🔷 `TypeScript` | [toxicwind/matter-server](https://github.com/toxicwind/matter-server.git) | — |
 | `maw` | 🦀 `Rust` | [toxicwind/maw](https://github.com/toxicwind/maw.git) | — |
 | `mcp` | 📁 `Workspace` | [toxicwind/mcp](https://github.com/toxicwind/mcp.git) | — |
-| `mcp-dropin-guide` | 📖 `Docs/Data` | [toxicwind/mcp-dropin-guide](https://github.com/toxicwind/mcp-dropin-guide.git) | — |
 | `mcp/mcp-prompt-injection-detector` | 📖 `Docs/Data` | [thilinawishvekeerthi/mcp-prompt-injection-detector](https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector.git) | — |
 | `mcp/mcpproxy-go` | 🐹 `Go` | [toxicwind/mcpproxy-go](https://github.com/toxicwind/mcpproxy-go.git) | — |
 | `mcp/pd-mcp-standalone` | ⚡ `Bun` | [toxicwind/pd-mcp](https://github.com/toxicwind/pd-mcp.git) | — |
@@ -264,7 +261,6 @@ The full map — every animal's pen, with its repo and description (from README 
 | `refusal-hunt` | 🐍 `Python` | [toxicwind/refusal-hunt](https://github.com/toxicwind/refusal-hunt.git) | Agent serving layers sometimes **refuse benign work** — and the refusal hides |
 | `repo-first-class` | 🐍 `Python` | [toxicwind/repo-first-class](https://github.com/toxicwind/repo-first-class.git) | > **Make any GitHub repo first-class: a canonical, current checkout — maximally polished, committed, pushed, r |
 | `rig` | 🦀 `Rust` | [toxicwind/rig](https://github.com/toxicwind/rig.git) | — |
-| `rig-ciwatch` | 🦀 `Rust` | [toxicwind/rig](https://github.com/toxicwind/rig.git) | — |
 | `roundup-site` | 🔷 `TypeScript` | [owieth/turborepo-example](https://github.com/owieth/turborepo-example) | A modern monorepo template built with Next.js 16, React 19, Tailwind CSS v4, TypeScript 5.9, Turborepo, and pn |
 | `rust-wrappers` | 📁 `Workspace` | [toxicwind/rust-wrappers](https://github.com/toxicwind/rust-wrappers.git) | — |
 | `safety-review-gate` | 📖 `Docs/Data` | [toxicwind/safety-review-gate](https://github.com/toxicwind/safety-review-gate.git) | > **The evidence locker for the safety-review gate investigation — run-ID backfill artifacts, checksummed and  |
@@ -386,7 +382,7 @@ Directories with similar README content (Jaccard on first 500 chars):
 
 ---
 
-*Generated by `bun toolkit/generate-readme.ts` at 2026-10-20T12:52:49.017Z*
+*Generated by `bun toolkit/generate-readme.ts` at 2026-10-20T12:54:18.481Z*
 
 ---
 
