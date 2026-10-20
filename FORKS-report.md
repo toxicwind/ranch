@@ -1,9 +1,9 @@
-# ranch/* fork audit (generated 2026-10-19T23:35:39.147Z)
+# ranch/* fork audit (generated 2026-10-20T00:00:53.483Z)
 
-246 immediate subdirs; **152** have an obvious upstream reference.
+248 immediate subdirs; **154** have an obvious upstream reference.
 
 By source:
-  - **146** .gitmodules
+  - **148** .gitmodules
   - **1** go.mod module
   - **3** package.json repository
   - **1** git remote upstream
@@ -23,6 +23,7 @@ By source:
 | `auto1m` | [github.com/toxicwind/auto1m](https://github.com/toxicwind/auto1m) | .gitmodules | github.com/toxicwind/auto1m.git |
 | `awesome-free-ai-coding` | [github.com/toxicwind/awesome-free-ai-coding](https://github.com/toxicwind/awesome-free-ai-coding) | .gitmodules | github.com/mvalentsev/awesome-free-ai-coding.git |
 | `barn` | [github.com/toxicwind/barn](https://github.com/toxicwind/barn) | .gitmodules | github.com/toxicwind/barn.git |
+| `bash-style-guide` | [github.com/toxicwind/bash-style-guide](https://github.com/toxicwind/bash-style-guide) | .gitmodules | github.com/toxicwind/bash-style-guide.git |
 | `bench-radar` | [github.com/toxicwind/bench-radar](https://github.com/toxicwind/bench-radar) | .gitmodules | github.com/toxicwind/bench-radar.git |
 | `bridge` | [github.com/toxicwind/bridge](https://github.com/toxicwind/bridge) | .gitmodules | github.com/toxicwind/bridge.git |
 | `bugbounty` | [github.com/toxicwind/bugbounty](https://github.com/toxicwind/bugbounty) | .gitmodules | github.com/toxicwind/bugbounty.git |
@@ -129,6 +130,7 @@ By source:
 | `outsource` | [github.com/toxicwind/outsource](https://github.com/toxicwind/outsource) | .gitmodules | github.com/midagedev/outsource.git |
 | `pack-fix` | [github.com/toxicwind/pack-fix](https://github.com/toxicwind/pack-fix) | .gitmodules | github.com/toxicwind/pack-fix.git |
 | `paper-poller` | [github.com/toxicwind/paper-poller](https://github.com/toxicwind/paper-poller) | .gitmodules | github.com/toxicwind/paper-poller.git |
+| `pdfshield` | [github.com/purvalsingh/pdfshield](https://github.com/purvalsingh/pdfshield) | .gitmodules | github.com/purvalsingh/pdfshield.git |
 | `pearlctl` | [github.com/toxicwind/pearlctl](https://github.com/toxicwind/pearlctl) | .gitmodules | github.com/toxicwind/pearlctl.git |
 | `phone-lane` | [github.com/toxicwind/phone-lane](https://github.com/toxicwind/phone-lane) | .gitmodules | github.com/toxicwind/phone-lane.git |
 | `phone-ocr-sweep` | [github.com/toxicwind/phone-ocr-sweep](https://github.com/toxicwind/phone-ocr-sweep) | .gitmodules | github.com/toxicwind/phone-ocr-sweep.git |
