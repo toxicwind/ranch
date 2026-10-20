@@ -1,0 +1,34 @@
+{
+  "name": "@estate/cookie-vault",
+  "version": "1.0.0",
+  "description": "Full-session (cookies + per-origin localStorage) grab/restore between Firefox and the keeper Chromium, with continuous auto-sync.",
+  "license": "MIT",
+  "engines": {
+    "bun": ">=1.4.4",
+    "node": ">=20"
+  },
+  "type": "commonjs",
+  "main": "src/index.js",
+  "bin": {
+    "cookie-vault": "./bin/cookie-vault.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "scripts": {
+    "test": "bun test tests/",
+    "check": "bun --check src/cli.js"
+  },
+  "keywords": [
+    "cookie",
+    "session",
+    "localStorage",
+    "keeper",
+    "chromium",
+    "firefox",
+    "cdp"
+  ]
+}

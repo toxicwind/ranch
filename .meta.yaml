@@ -50,6 +50,8 @@ projects:
     repo: https://github.com/ogulcancelik/herdr.git
   "borrowed/loom":
     repo: https://github.com/rjwalters/loom.git
+  "borrowed/delendai":
+    repo: https://github.com/toxicwind/DelendAI.git
   "bridge":
     repo: https://github.com/toxicwind/bridge.git
   "bugbounty":
