@@ -1,7 +1,3 @@
-[tasks.herd-sweep]
-run = "./sweeps/roundup_herd_sweep.sh"
-description = "Benchmark every model herd can load"
-
 [tasks.bench]
 run = "./sweeps/roundup-bench.sh"
 description = "Benchmark providers using instruction_following scorer"
@@ -26,6 +22,14 @@ description = "Convert sweep results into router weights"
 run = "./sweeps/dump-roundup.sh"
 description = "Dump roundup directory"
 
+[tasks.kappa-freeinf-sweep]
+run = "./sweeps/kappa-freeinference-sweep.sh"
+description = "Benchmark the Kappa extra freeinference catalog (6 models, serial, concurrency limit 1)"
+
+[tasks.kappa-atria-sweep]
+run = "./sweeps/kappa-atria-sweep.sh"
+description = "Benchmark Kappa Atria-Dawn (512K ctx, serial, ~50 rpm shared)"
+
 [tasks.upstream-status]
 run = "./scripts/upstream-merge.sh --status"
 description = "Check fork status"
@@ -41,6 +45,42 @@ description = "Dev server for rankings site"
 [tasks.docs-build]
 run = "cd docs-site && npm run build"
 description = "Build rankings site"
+
+# Ad-hoc recon probes (read-only). Use to sanity-check a provider/endpoint before
+# writing a full sweep.
+[tasks.probe-keypool]
+run = "python3 ./scripts/probe-keypool.py"
+description = "Probe keypool provider(s)"
+
+[tasks.probe-openrouter]
+run = "python3 ./scripts/probe-openrouter.py"
+description = "Probe OpenRouter models/rates"
+
+[tasks.probe-local-vram]
+run = "python3 ./scripts/probe-local-vram.py"
+description = "Probe local VRAM / model slots"
+
+[tasks.probe-nvidia-nim]
+run = "python3 ./scripts/probe-nvidia-nim.py"
+description = "Probe NVIDIA NIM endpoint capabilities"
+
+[tasks.probe-nvidia-tps]
+run = "python3 ./scripts/probe-nvidia-tps.py"
+description = "Probe NVIDIA throughput (tokens/s)"
+
+[tasks.probe-nvidia-tps-sh]
+run = "bash ./scripts/probe-nvidia-tps.sh"
+description = "Probe NVIDIA throughput (tokens/s, shell variant)"
+
+# Real-world task benchmark (correctness, not just latency). Runs the same complex
+# deterministic coding task across the estate's free models and scores answers.
+[tasks.realworld-bench]
+run = "bun ./sweeps/realworld-bench.ts"
+description = "Real-world task benchmark: correctness scoring across free models"
+
+[tasks.mise-build]
+run = "bash ./scripts/mise-build.sh"
+description = "Roundup registry build helper"
 
 # Preflight: verify toolchain + endpoints before any sweep. Exit non-zero on
 # the 2026-10-14 silent-failure class (missing guidellm, zero results, exit 0).

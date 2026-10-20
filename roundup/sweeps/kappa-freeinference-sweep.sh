@@ -22,8 +22,12 @@ for c in ~/.venv-guidellm/bin/guidellm "$ROUNDUP/guidellm/.venv/bin/guidellm"; d
 done
 [ -z "$GUIDELLM" ] && { echo "FATAL: guidellm not found (python3 -m venv ~/.venv-guidellm && ~/.venv-guidellm/bin/pip install -e roundup/guidellm)" >&2; exit 3; }
 
-K=$(grep -E '^FREEINFERENCE_API_KEY=' /home/toxic/.secrets | head -1 | cut -d= -f2-)
-[ -z "$K" ] && { echo "FATAL: FREEINFERENCE_API_KEY missing from vault" >&2; exit 3; }
+# Read the key from the keyring (kf → secretsmith, SSOT) with vault fallback.
+# Never echo it.
+K=""
+command -v kf >/dev/null 2>&1 && K=$(kf FREEINFERENCE_API_KEY 2>/dev/null)
+[ -z "$K" ] && K=$(grep -E '^FREEINFERENCE_API_KEY=' /home/toxic/.secrets | head -1 | cut -d= -f2-)
+[ -z "$K" ] && { echo "FATAL: FREEINFERENCE_API_KEY missing (keyring/vault)" >&2; exit 3; }
 TARGET=https://freeinference.org/v1
 DATE=$(date +%Y%m%d)
 OUTDIR="$ROUNDUP/results/kappa-freeinf-$DATE"

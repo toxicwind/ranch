@@ -95,6 +95,20 @@ mise run upstream-status
 | `mise run estate-sweep` | [`roundup-estate-sweep.ts`](./sweeps/roundup-estate-sweep.ts) | **One-command estate sweep**: discovers models live from herd, flock, and the estate-scripts router; benchmarks each with the vendored GuideLLM's `instruction_following` scorer; emits `roundup-bench/1` JSONL (`results.jsonl`), `roundup-weights/1` (`weights.json`), and `ranking.md`. | herd `:25100` · flock `:25193` · sov `:25104` |
 | `mise run emit-weights` | [`emit-router-weights.ts`](./sweeps/emit-router-weights.ts) | Converts sweep `results.jsonl` into the estate-scripts router's `schema_version: 2` weight contract (`provider_priors` + `model_priors`), which the router hot-reloads. | — |
 | `mise run dump` | [`dump-roundup.sh`](./sweeps/dump-roundup.sh) | Give me everything in this directory as one readable dump. | — |
+| `mise run kappa-freeinf-sweep` | [`kappa-freeinference-sweep.sh`](./sweeps/kappa-freeinference-sweep.sh) | Benchmark the **Kappa** external freeinference catalog (6 models; 4 chat-usable; serial — the provider enforces concurrency limit 1 per key). | freeinference.org |
+| `mise run kappa-atria-sweep` | [`kappa-atria-sweep.sh`](./sweeps/kappa-atria-sweep.sh) | Benchmark **Kappa Atria-Dawn** (single model, 512K ctx; serial, ~50 rpm shared across the account — concurrent bursts are unstable). | api.atria-asi.ai |
+| `mise run realworld-bench` | [`realworld-bench.ts`](./sweeps/realworld-bench.ts) | **Correctness** benchmark (not just latency): every free model runs the same deterministic coding task and is scored. | herd · flock · sov |
+
+Ad-hoc recon (no ranked output, read-only probes):
+
+| Task | Script | Question it answers |
+|---|---|---|
+| `mise run probe-keypool` | [`probe-keypool.py`](./scripts/probe-keypool.py) | Is the keypool provider reachable? |
+| `mise run probe-openrouter` | [`probe-openrouter.py`](./scripts/probe-openrouter.py) | What does OpenRouter expose / charge? |
+| `mise run probe-local-vram` | [`probe-local-vram.py`](./scripts/probe-local-vram.py) | What models fit in local VRAM? |
+| `mise run probe-nvidia-nim` | [`probe-nvidia-nim.py`](./scripts/probe-nvidia-nim.py) | NVIDIA NIM endpoint capabilities |
+| `mise run probe-nvidia-tps` | [`probe-nvidia-tps.py`](./scripts/probe-nvidia-tps.py) | NVIDIA throughput, tokens/s |
+| `mise run probe-nvidia-tps-sh` | [`probe-nvidia-tps.sh`](./scripts/probe-nvidia-tps.sh) | NVIDIA throughput, tokens/s (shell variant) |
 
 All of them rank the same way — quality desc, p50 latency asc — and the
 `.sh` sweeps write `results/{herd,bench,sweeps}/ranking.md`. The estate sweep
@@ -117,10 +131,16 @@ deliberately excluded; that is a standing decision, not an oversight.
 > **Benchmark traffic goes through the herd router, never direct to providers.**
 
 herd and flock own every provider credential. The herd sweep reads no secrets,
-passes no `api_key` to GuideLLM, and prints none. The provider sweeps pull
-`FLOCK_KEY`, `NIM_KEY`, and `VR_KEY` out of `/home/toxic/.secrets` in-process
-and never echo them. If you find yourself adding `--api-key` to a sweep, you
-have broken the rule.
+passes no `api_key` to GuideLLM, and prints none. The router/provider sweeps
+pull `FLOCK_KEY`, `NIM_KEY`, and `VR_KEY` out of `/home/toxic/.secrets` in-process
+and never echo them.
+
+The single-provider external sweeps (`kappa-freeinf-*`, `kappa-atria-*`) are the
+one deliberate exception: they read their own key from the keyring (`kf`) with a
+`/home/toxic/.secrets` fallback and pass it straight to GuideLLM, because those
+catalogs are not reached through the herd router. Keys are never echoed and never
+committed. If you find yourself adding `--api-key` to a sweep that routes through
+herd, you have broken the rule.
 
 ## Vendored GuideLLM
 
