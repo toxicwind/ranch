@@ -1,5 +1,8 @@
-# ranch/squawk-ws — project-owned daemon manifest. Source of truth for 'squawk-ws'.
-# Owned by the ranch/squawk-ws project; the parent only composes it.
+# ranch/squawk-ws — project-owned daemon manifest.
+# NOTE (Forge, 2026-10-20): the live daemon is served from estate/pitchfork.toml
+# [daemons.squawk-ws] — that block is the source of truth. This fragment is
+# composed but NOT the owning layer today; do not edit the run line here
+# expecting a restart to pick it up.
 
 
 [daemons.squawk-ws]
