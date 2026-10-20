@@ -138,3 +138,4 @@ hatch/worktrees/   # worktree state (leak source)
 
 # hodos is its own repo (toxicwind/hodos) — canonical tree lives there
 /hodos/
+.envrc
