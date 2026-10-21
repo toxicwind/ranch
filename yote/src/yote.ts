@@ -111,8 +111,8 @@ const CHS = (process.env.YOTE_TELEGRAM_CHANNELS ?? "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
-const LLM = process.env.LLM_PROXY_URL ?? "http://127.0.0.1:25104/v1";
-const OF_URL = process.env.OPENFANG_URL ?? "http://127.0.0.1:25103";
+const LLM = process.env.HODOS_URL ?? process.env.LLM_PROXY_URL ?? "http://127.0.0.1:25193/v1";
+const OF_URL = process.env.OPENFANG_URL ?? "http://127.0.0.1:25196";
 const DEFAULT_AGENT = (
   process.env.YOTE_OPENFANG_AGENT ||
   process.env.DEFAULT_MODEL?.replace(/^openfang:/, "") ||
@@ -354,14 +354,14 @@ async function hChat(cid: number, txt: string, o: any = {}) {
   const routed = await resolveReplyText({
     ofChat: (t, a) => ofChat(t, a),
     herdUrl: LLM,
-    herdModel: process.env.YOTE_HERD_FALLBACK_MODEL || "kimi-k3-nim",
+    herdModel: process.env.YOTE_HODOS_FALLBACK_MODEL || process.env.YOTE_HERD_FALLBACK_MODEL || "z-ai/glm-5.3-flash",
     ofUrl: OF_URL,
     txt,
     agent,
     updateId,
     recordLatency: (ms) => ledger.recordOpenFangLatency(ms),
   });
-  log(`route update=${updateId} via=${routed.route} of_ms=${routed.openfangMs}`);
+  log(`route update=${updateId} via=${routed.route} of_ms=${routed.openfangMs} [OF_ERR: ${routed.openfangError ?? "none"}] [FALLBACK_ERR: ${routed.herdError ?? "none"}]`);
   await send(cid, routed.text || "empty", o);
 }
 

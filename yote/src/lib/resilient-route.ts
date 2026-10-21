@@ -44,6 +44,9 @@ export function shouldFallbackToHerd(err: string | undefined): boolean {
   return (
     /http\s*(500|502|503|504)/.test(e) ||
     /http\s*404/.test(e) ||
+    /http\s*\?/.test(e) ||
+    /agent processing failed/.test(e) ||
+    /server_error/.test(e) ||
     /model.{0,24}not.?found/.test(e) ||
     /no router/.test(e) ||
     /timed?\s*out/.test(e) ||
@@ -60,9 +63,15 @@ async function herdChat(
   txt: string,
 ): Promise<{ ok: boolean; content: string; error?: string }> {
   try {
-    const r = await fetch(`${herdUrl}/v1/chat/completions`, {
+    const key = process.env.HODOS_API_KEY || process.env.FLOCK_API_KEY || "";
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (key) {
+      headers["Authorization"] = `Bearer ${key}`;
+    }
+    const endpoint = herdUrl.endsWith("/v1") ? `${herdUrl}/chat/completions` : `${herdUrl}/v1/chat/completions`;
+    const r = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         model,
         messages: [{ role: "user", content: txt }],
@@ -72,9 +81,14 @@ async function herdChat(
       signal: AbortSignal.timeout(90000),
     });
     const raw = (await r.json().catch(() => null)) as any;
-    const content = raw?.choices?.[0]?.message?.content;
-    if (r.ok && typeof content === "string" && content.trim()) {
-      return { ok: true, content: content.trim() };
+    const choice = raw?.choices?.[0]?.message;
+    const content = (typeof choice?.content === "string" && choice.content.trim())
+      ? choice.content.trim()
+      : (typeof choice?.reasoning_content === "string" && choice.reasoning_content.trim())
+        ? choice.reasoning_content.trim()
+        : null;
+    if (r.ok && content) {
+      return { ok: true, content };
     }
     const err =
       raw?.error?.message || raw?.error || `HTTP ${r.status} (empty body)`;
@@ -100,8 +114,8 @@ function actionableError(o: {
   return [
     `⚠️ yote couldn't generate a reply (update ${o.updateId}) — nothing was silently dropped; your message is in the delivery ledger.`,
     `• OpenFang openfang:${o.agent} @ ${o.ofUrl}: ${o.ofErr}`,
-    `• Herd fallback ${o.herdUrl} (model ${o.herdModel}): ${o.herdErr}`,
-    `What to check: pitchfork status for the openfang + herd daemons, then the fleet channel for alerts.`,
+    `• Hodos fallback ${o.herdUrl} (model ${o.herdModel}): ${o.herdErr}`,
+    `What to check: pitchfork status for openfang and hodos daemons (:25193), then the fleet channel.`,
   ].join("\n");
 }
 
