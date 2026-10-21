@@ -95,7 +95,7 @@ async function main() {
     `bun-scaffold apply — root=${ROOT} target=${TARGET ?? "auto"} llm=${USE_LLM} dry=${DRY_RUN}`,
   );
 
-  if (!USE_LLM && !TARGET) {
+  if (!USE_LLM && !TARGET && !BULK) {
     console.log(
       "No --llm and no --target; running detection only. Add --llm to scaffold, or --target <dir>.",
     );
