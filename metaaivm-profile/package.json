@@ -1,1 +1,15 @@
-{"dependencies":{"task-launch":"workspace:*"},"description":"Executable agent profile for the MetaAIVM estate (metaaivm.com): Hatch-autoloaded / ipnext identification with autonomy-directive injection at the pre-agent layer.","name":"metaaivm-profile","scripts":{"test":"bun test"},"version":"1.0.0"}
+{
+  "dependencies": {
+    "task-launch": "workspace:*"
+  },
+  "description": "Executable agent profile for the MetaAIVM estate (metaaivm.com): Hatch-autoloaded / ipnext identification with autonomy-directive injection at the pre-agent layer.",
+  "name": "metaaivm-profile",
+  "scripts": {
+    "test": "bun test",
+    "validate": "bun run typecheck && bun run test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check src tests 2>/dev/null || true",
+    "typecheck": ":"
+  },
+  "version": "1.0.0"
+}

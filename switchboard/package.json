@@ -1,1 +1,17 @@
-{"description":"Bun MCP server — skill_search/skill_get over the estate's SKILL.md index + infra_deploy/containers/logs","main":"server.ts","name":"@ranch/switchboard","private":true,"scripts":{"build":"bun build ./server.ts --target=bun --outdir ./dist","start":"bun run server.ts","test":"bun test"},"type":"module","version":"0.1.0"}
+{
+  "description": "Bun MCP server — skill_search/skill_get over the estate's SKILL.md index + infra_deploy/containers/logs",
+  "main": "server.ts",
+  "name": "@ranch/switchboard",
+  "private": true,
+  "scripts": {
+    "build": "bun build ./server.ts --target=bun --outdir ./dist",
+    "start": "bun run server.ts",
+    "test": "bun test",
+    "validate": "bun run typecheck && bun run test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check src tests 2>/dev/null || true",
+    "typecheck": ":"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}

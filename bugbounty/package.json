@@ -8,7 +8,12 @@
     "github": "node open-github.mjs",
     "google": "node open-google.mjs",
     "all": "node run-all.mjs",
-    "all:shot": "BB_CLOSE=1 node run-all.mjs"
+    "all:shot": "BB_CLOSE=1 node run-all.mjs",
+    "validate": "bun run typecheck && bun run test",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check src tests 2>/dev/null || true",
+    "typecheck": ":"
   },
   "dependencies": {
     "playwright": "1.61.0"

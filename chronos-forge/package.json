@@ -32,7 +32,9 @@
     "verify": "npm run typecheck && npm run lint && npm run test",
     "dev": "node --watch --import ./scripts/dev-loader.ts scripts/dev.ts",
     "chronos:bootstrap": "node --import ./scripts/dev-loader.ts scripts/bootstrap.ts",
-    "chronos:cycle": "node --import ./scripts/dev-loader.ts scripts/cycle.ts"
+    "chronos:cycle": "node --import ./scripts/dev-loader.ts scripts/cycle.ts",
+    "validate": "bun run typecheck && bun run test",
+    "test:coverage": "bun test --coverage"
   },
   "dependencies": {},
   "devDependencies": {

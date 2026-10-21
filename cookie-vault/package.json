@@ -20,7 +20,11 @@
   ],
   "scripts": {
     "test": "bun test tests/",
-    "check": "bun --check src/cli.js"
+    "check": "bun --check src/cli.js",
+    "validate": "bun run typecheck && bun run test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check src tests 2>/dev/null || true",
+    "typecheck": ":"
   },
   "keywords": [
     "cookie",

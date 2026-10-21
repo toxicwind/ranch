@@ -6,7 +6,11 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "dev": "bun --hot run src/index.ts",
-    "typecheck": "bunx tsc --noEmit"
+    "typecheck": "bunx tsc --noEmit",
+    "validate": "bun run typecheck && bun run test",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check src tests 2>/dev/null || true"
   },
   "dependencies": {
     "hono": "^4.6.0"

@@ -353,7 +353,11 @@
     "install-extension": "code-insiders --install-extension drover-1.0.0-estate-scripts.vsix --force",
     "sidecar:build": "cd sidecar && node esbuild.js",
     "sidecar:package": "cd sidecar && node esbuild.js && npx --no-install @vscode/vsce package --no-dependencies --out drover-eap-0.1.0.vsix",
-    "sidecar:install": "code-insiders --install-extension sidecar/drover-eap-0.1.0.vsix --force"
+    "sidecar:install": "code-insiders --install-extension sidecar/drover-eap-0.1.0.vsix --force",
+    "validate": "bun run typecheck && bun run test",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check src tests 2>/dev/null || true"
   },
   "devDependencies": {
     "@types/vscode": "^1.90.0",

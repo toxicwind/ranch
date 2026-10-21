@@ -7,7 +7,10 @@
     "build": "bun build src/typescript/index.ts --outdir dist",
     "test": "bun test --coverage",
     "lint": "bunx tsc --noEmit",
-    "dev": "bun run src/typescript/index.ts"
+    "dev": "bun run src/typescript/index.ts",
+    "validate": "bun run typecheck && bun run test",
+    "test:coverage": "bun test --coverage",
+    "typecheck": "tsgo --noEmit -p tsconfig.json"
   },
   "devDependencies": {
     "@types/bun": "latest",

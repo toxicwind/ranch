@@ -14,6 +14,8 @@
     "build": "tsc -b",
     "lint": "biome check packages/*/src",
     "test": "bun test packages/*",
-    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules .tsbuildinfo packages/*/.tsbuildinfo"
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules .tsbuildinfo packages/*/.tsbuildinfo",
+    "validate": "bun run typecheck && bun run test",
+    "test:coverage": "bun test --coverage"
   }
 }

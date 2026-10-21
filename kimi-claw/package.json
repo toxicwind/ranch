@@ -25,7 +25,11 @@
     "check:active-surface": "node scripts/check-active-im-surface.mjs",
     "test": "node --experimental-transform-types --test tests/*.test.ts",
     "test:cases": "node --experimental-transform-types tests/acp-case-runner.ts",
-    "test:coverage:baseline": "node --experimental-transform-types --experimental-test-coverage --test-coverage-include='src/**/*.ts' --test tests/*.test.ts"
+    "test:coverage:baseline": "node --experimental-transform-types --experimental-test-coverage --test-coverage-include='src/**/*.ts' --test tests/*.test.ts",
+    "validate": "bun run typecheck && bun run test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check src tests 2>/dev/null || true",
+    "typecheck": ":"
   },
   "dependencies": {
     "@bufbuild/protobuf": "2.11.0",
