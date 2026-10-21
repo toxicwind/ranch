@@ -9,4 +9,4 @@ _BLESS=/home/toxic/.browserless
 [ -d "$_BLESS/browsers" ] || _BLESS=/home/toxic/archive/home-dirs-2026/.browserless
 export PLAYWRIGHT_BROWSERS_PATH="$_BLESS/browsers"
 mkdir -p /home/toxic/.browserless/keeper
-exec node /home/toxic/estate/ranch/stable/keeper/keeper.cjs
+exec node /home/toxic/estate/ranch/keeper/keeper.cjs
