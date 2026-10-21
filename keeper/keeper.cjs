@@ -13,7 +13,9 @@ const path = require("path");
 const { execSync } = require("child_process");
 
 const PROFILE_DIR = "/home/toxic/.browserless/profiles/nv-audit";
-const CDP_PORT = 9223;
+// CDP port must come from the estate Port SSOT (config/ports.env -> 25xxx),
+// not a hardcoded 9223. pitchfork injects env_file; dev/fallback = 25154.
+const CDP_PORT = Number(process.env.BROWSER_KEEPER_CDP_PORT) || 25154;
 const KEEPER_DIR = "/home/toxic/.browserless/keeper";
 const STATUS_FILE = path.join(KEEPER_DIR, "status.json");
 
