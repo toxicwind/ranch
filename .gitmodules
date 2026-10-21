@@ -281,9 +281,6 @@
 [submodule "VansRouter"]
 	path = VansRouter
 	url = https://github.com/toxicwind/VansRouter.git
-[submodule "agent-dashboard"]
-	path = range
-	url = https://github.com/toxicwind/agent-dashboard.git
 [submodule "ai-merge-resolve"]
 	path = ai-merge-resolve
 	url = https://github.com/toxicwind/ai-merge-resolve.git

@@ -8,8 +8,8 @@
 projects:
   "agent-customization-style-guide":
     repo: https://github.com/toxicwind/agent-customization-style-guide.git
-  "agent-dashboard":
-    repo: https://github.com/toxicwind/agent-dashboard.git
+  "range":
+    repo: https://github.com/toxicwind/range.git
   "AgentForensics":
     repo: https://github.com/aparnaa19/AgentForensics.git
   "agon":
