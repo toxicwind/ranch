@@ -95,9 +95,7 @@ function seedFromLegacyJsonl(): number {
   const count = (db.query("SELECT COUNT(*) AS c FROM agents").get() as { c: number }).c;
   if (count > 0) return 0;
   const f = Bun.file(SEED_JSONL);
-  // Legacy join-log (~/fleet, removed in the home reorg) is optional now:
-  // a missing file means zero legacy agents to import, not a startup failure.
-  return f.text().catch(() => "").then((text) => {
+  return f.text().then((text) => {
     let n = 0;
     const ins = db.prepare(`INSERT OR IGNORE INTO agents
       (agent_id, name, chat_id, host_machine_id, hostname, hatchling_id, summoner, surface, frame_id, first_seen, last_heartbeat, activity, counters)
