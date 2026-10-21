@@ -75,9 +75,9 @@ const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
 
 /** The engine's authoritative role list, read from source rather than hardcoded. */
 export const MODEL_BROWSER_SRC =
-	"/home/toxic/estate/projects/range/ranch/stockyard/tau/packages/tui/src/overlays/model-browser.ts";
+	"/home/toxic/sovereign/projects/range/ranch/stockyard/tau/packages/tui/src/overlays/model-browser.ts";
 export const PRIORITY_JSON =
-	"/home/toxic/estate/projects/range/ranch/stockyard/tau/packages/coding-agent/src/priority.json";
+	"/home/toxic/sovereign/projects/range/ranch/stockyard/tau/packages/coding-agent/src/priority.json";
 
 function fail(message: string): never {
 	throw new Error(`model-audit: ${message}`);
@@ -364,10 +364,10 @@ export function resolveConfigPath(explicit?: string): string {
 		const candidate = join(agentDir, "config.yml");
 		if (existsSync(candidate)) return candidate;
 	}
-	const estateAgentConfig = join(homedir(), "estate", "config", "tau", "agent", "config.yml");
-	if (existsSync(estateAgentConfig)) return estateAgentConfig;
+	const sovereignAgentConfig = join(homedir(), "sovereign", "config", "tau", "agent", "config.yml");
+	if (existsSync(sovereignAgentConfig)) return sovereignAgentConfig;
 	fail(
-		`no agent config.yml found; tried $PI_CODING_AGENT_DIR and ${estateAgentConfig}. Note: $PI_CONFIG_DIR/config.yml is NOT loaded for settings.`,
+		`no agent config.yml found; tried $PI_CODING_AGENT_DIR and ${sovereignAgentConfig}. Note: $PI_CONFIG_DIR/config.yml is NOT loaded for settings.`,
 	);
 }
 
