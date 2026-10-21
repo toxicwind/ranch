@@ -7,4 +7,4 @@ BUILD_CMD=$(cat <<'BUILD'
 bun run build && bun test
 BUILD
 )
-exec "$ROOT/scripts/mise-build.sh" "roost" "$ROOT/mesh/catalog" "$BUILD_CMD"
+exec "$ROOT/scripts/mise-build.sh" "pinax" "$ROOT/mesh/catalog" "$BUILD_CMD"

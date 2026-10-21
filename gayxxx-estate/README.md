@@ -1,11 +1,11 @@
-# gayxxx-estate — CloudStream CS3 plugin repository
+# gayxxx-sovereign — CloudStream CS3 plugin repository
 
 A CloudStream extension repository: **19 CS3 plugins repacked from validated DEX** (ZIP archives with `classes.dex`). Add it to CloudStream via `repo.json` and the app pulls the plugin list from `plugins.json`.
 
 <div align="right">
 
-[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/estate-projects#license)
-[![estate-projects](https://img.shields.io/badge/estate--projects-main-6e56cf?style=for-the-badge)](https://github.com/toxicwind/estate-projects)
+[![license: MIT](https://img.shields.io/badge/license-MIT%20%2B%20upstream-blue?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects#license)
+[![sovereign-projects](https://img.shields.io/badge/sovereign--projects-main-6e56cf?style=for-the-badge)](https://github.com/toxicwind/sovereign-projects)
 
 </div>
 
@@ -43,7 +43,7 @@ Each `plugins.json` entry carries: `name`, `internalName`, `description`, `iconU
 Add to CloudStream:
 
 ```
-https://raw.githubusercontent.com/toxicwind/gayxxx-estate/main/repo.json
+https://raw.githubusercontent.com/toxicwind/gayxxx-sovereign/main/repo.json
 ```
 
 Inspect a plugin without installing anything:
@@ -54,4 +54,4 @@ python3 cs3_inspector.py final_builds/GayStream.cs3
 
 ## License & security
 
-MIT where marked — [LICENSE](https://github.com/toxicwind/estate-projects#license). `cs3_inspector.py` is read-only by design — it extracts strings and patterns from DEX files, it never executes plugin code. Treat any `.cs3` from outside `final_builds/` as untrusted until it passes the same inspection pipeline.
+MIT where marked — [LICENSE](https://github.com/toxicwind/sovereign-projects#license). `cs3_inspector.py` is read-only by design — it extracts strings and patterns from DEX files, it never executes plugin code. Treat any `.cs3` from outside `final_builds/` as untrusted until it passes the same inspection pipeline.

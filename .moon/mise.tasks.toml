@@ -22,27 +22,3 @@ run = "meta context"
 [tasks.ranch-manifest]
 description = "Regenerate .meta.yaml from .gitmodules"
 run = "bun toolkit/gen-meta-manifest.ts"
-
-# pitchfork (jdx/pitchfork) — the estate's daemon supervisor → moon through mise.
-# Configs: /home/toxic/estate/pitchfork.toml + per-project pitchfork.toml.
-# Daemon list: `pitchfork --help` (list/status/restart/start/stop/logs/supervisor).
-
-[tasks.pitchfork-list]
-description = "List all supervised daemons across merged configs"
-run = "pitchfork list"
-
-[tasks.pitchfork-status]
-description = "Displays the status of a daemon"
-run = "pitchfork status"
-
-[tasks.pitchfork-restart]
-description = "Restarts a daemon (stop then start)"
-run = "pitchfork restart"
-
-[tasks.pitchfork-supervisor]
-description = "Start, stop, or check the pitchfork supervisor daemon"
-run = "pitchfork supervisor status"
-
-[tasks.pitchfork-logs]
-description = "Displays logs for daemon(s)"
-run = "pitchfork logs"

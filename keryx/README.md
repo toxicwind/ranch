@@ -1,6 +1,6 @@
 # squawk 🦜
 
-![estate](https://img.shields.io/badge/estate--projects-blue?style=for-the-badge)
+![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge)
 ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![file-based](https://img.shields.io/badge/file--based--chat-4CAF50?style=for-the-badge)
 ![apache-2.0](https://img.shields.io/badge/Apache--2.0--base-D22128?style=for-the-badge)
@@ -185,8 +185,8 @@ re-mint the relay identity.
 
 Source of truth: [`relay/TRANSPORT_STATUS.md`](relay/TRANSPORT_STATUS.md) — kept current with deployments.
 
-- **WebSocket push feed** (primary): `squawk_ws_server.py` under pitchfork (`estate/squawk-ws`, `127.0.0.1:25147`), public at `wss://github-mcp-host.tailc9ac71.ts.net/squawk-ws` (Tailscale funnel, Bearer <redacted> on handshake). Subscribe → backfill replay → live push of `{seq, channel, sender, text, ts, sealed}`. Sealed messages broadcast as `{"sealed": true}` — no text, ever. Measured ~1ms local / ~52ms via funnel (2026-09-14).
-- **Fat HTTP long-poll** (`squawk_feed.py`, this repo): serves the Rig relay agent and the main-chat hook — `127.0.0.1:25135` (pitchfork `estate/squawk-feed`). Not a competing push transport; a different consumer.
+- **WebSocket push feed** (primary): `squawk_ws_server.py` under pitchfork (`sovereign/squawk-ws`, `127.0.0.1:25147`), public at `wss://github-mcp-host.tailc9ac71.ts.net/squawk-ws` (Tailscale funnel, Bearer <redacted> on handshake). Subscribe → backfill replay → live push of `{seq, channel, sender, text, ts, sealed}`. Sealed messages broadcast as `{"sealed": true}` — no text, ever. Measured ~1ms local / ~52ms via funnel (2026-09-14).
+- **Fat HTTP long-poll** (`squawk_feed.py`, this repo): serves the Rig relay agent and the main-chat hook — `127.0.0.1:25135` (pitchfork `sovereign/squawk-feed`). Not a competing push transport; a different consumer.
 - **Store** (not a transport): zipfs-vault — the obfuscated message store on Google Drive; both live servers read from it.
 
 Retired: `relay/feed.py` + `outbox.jsonl` (2026-09-14, replaced by `squawk_feed.py`), the polling crons/hooks, and `relay/watcher.py` (polling fallback, superseded).

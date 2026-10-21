@@ -25,11 +25,15 @@ function sqliteOpen(path, readonly) {
     return new DatabaseSync(path, { readOnly: !!readonly });
   }
 }
+function queryAll(db, sql) {
+  if (typeof db.query === "function") return db.query(sql).all();
+  if (typeof db.prepare === "function") return db.prepare(sql).all();
+  throw new Error("Unsupported sqlite database interface");
+}
 
 function decodeUtf8(buf) {
   return new TextDecoder().decode(buf);
 }
-
 /**
  * Grab cookies + localStorage from Firefox.
  * @param {{ profile?: string }} [opts]
@@ -57,11 +61,10 @@ function grabFirefox(opts = {}) {
 
     // --- cookies ---
     const db = sqliteOpen(tmpCookies, true);
-    const rows = db
-      .query(
-        "SELECT host, name, value, path, expiry, isSecure, isHttpOnly, sameSite FROM moz_cookies",
-      )
-      .all();
+    const rows = queryAll(
+      db,
+      "SELECT host, name, value, path, expiry, isSecure, isHttpOnly, sameSite FROM moz_cookies",
+    );
     db.close();
     for (const r of rows) {
       let exp = r.expiry;
@@ -99,11 +102,10 @@ function grabFirefox(opts = {}) {
           const sd = sqliteOpen(tmp, true);
           let srows = [];
           try {
-            srows = sd
-              .query(
-                "SELECT key, value, compression_type FROM data WHERE value IS NOT NULL",
-              )
-              .all();
+            srows = queryAll(
+              sd,
+              "SELECT key, value, compression_type FROM data WHERE value IS NOT NULL",
+            );
           } finally {
             sd.close();
           }
@@ -142,11 +144,10 @@ function grabFirefox(opts = {}) {
     if (existsSync(tmpStore)) {
       const sd = sqliteOpen(tmpStore, true);
       try {
-        const srows = sd
-          .query(
-            "SELECT scope, key, value FROM webappsstore2 WHERE value IS NOT NULL",
-          )
-          .all();
+        const srows = queryAll(
+          sd,
+          "SELECT scope, key, value FROM webappsstore2 WHERE value IS NOT NULL",
+        );
         for (const s of srows) {
           const origin = unescapeScope(s.scope);
           if (!origin) continue;

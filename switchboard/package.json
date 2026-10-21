@@ -1,7 +1,7 @@
 {
   "description": "Bun MCP server — skill_search/skill_get over the estate's SKILL.md index + infra_deploy/containers/logs",
   "main": "server.ts",
-  "name": "@ranch/switchboard",
+  "name": "@toxicwind/switchboard",
   "private": true,
   "scripts": {
     "build": "bun build ./server.ts --target=bun --outdir ./dist",

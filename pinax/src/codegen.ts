@@ -5,6 +5,9 @@
  * - generated/providers.json — canonical data artifact (Python scripts, docs).
  * - generated/providers.go  — drop-in data file for herd (Go cannot import TS).
  * - generated/providers.rs  — drop-in data module for flock (Rust cannot import TS).
+ * - generated/providers.kappa.json — canonical catalog for the kappa agent (Go+TS);
+ *   same catalog shape as providers.json, tagged for kappa so a future kappa
+ *   import (or kappa json config) can reference it.
  *
  * All are checked in. `bun run build` regenerates them; the sync test
  * regenerates into a temp dir and diffs byte-for-byte, so a stale artifact
@@ -37,12 +40,15 @@ export function codegenTimestamp(): string {
   return new Date().toISOString();
 }
 
-
 function jsonEscaped(s: string): string {
   return JSON.stringify(s);
 }
 
-function goStringSlice(ids: string[], elementIndent = "\t\t", closeIndent = "\t"): string {
+function goStringSlice(
+  ids: string[],
+  elementIndent = "\t\t",
+  closeIndent = "\t",
+): string {
   if (ids.length === 0) return "[]string{}";
   return `[]string{\n${ids.map((id) => `${elementIndent}${jsonEscaped(id)},`).join("\n")}\n${closeIndent}}`;
 }
@@ -83,9 +89,9 @@ function keyEnvsOf(d: { keyEnv?: string; keyEnvAlt?: string }): string[] {
 /** Canonical JSON artifact for non-TS consumers (Python research scripts). */
 export function buildProvidersJson(input: CodegenInput): string {
   const doc = {
-    $schema: "ranch-roost/v1",
+    $schema: "estate-pinax/v1",
     generatedAt: codegenTimestamp(),
-    generator: "@ranch/roost codegen — DO NOT EDIT BY HAND",
+    generator: "@toxicwind/pinax codegen — DO NOT EDIT BY HAND",
     ...(input.provenance ? { provenance: input.provenance } : {}),
     adapters: ["openai", "google-v1beta", "mistral", "static", "none"],
     providers: input.defs.map((d) => ({
@@ -116,6 +122,132 @@ export function buildProvidersJson(input: CodegenInput): string {
       "Permanent hand-managed tier (EOL notices). Never served, never re-admitted by discovery.",
   };
   return JSON.stringify(doc, null, 2) + "\n";
+}
+
+/**
+ * Canonical JSON artifact for the Kappa agent (both full catalog and config-ready).
+ * Profile 1: Full catalog containing all enabled providers in Pinax.
+ */
+export function buildProvidersKappaJson(input: CodegenInput): string {
+  const generatedAt = codegenTimestamp();
+  const provenance = input.provenance ? input.provenance : "unknown";
+
+  const providerMap: Record<string, Record<string, unknown>> = {};
+
+  for (const d of input.defs) {
+    if (d.enabled === false || d.routerLocal || d.name === "herd") {
+      continue;
+    }
+    const models: Record<
+      string,
+      { name: string; limit: { context: number; output: number } }
+    > = {};
+    const modelIds =
+      d.staticModels && d.staticModels.length > 0
+        ? d.staticModels
+        : d.seeds && d.seeds.length > 0
+          ? d.seeds
+          : [];
+
+    for (const id of modelIds) {
+      models[id] = {
+        name: id,
+        limit: {
+          context: d.contextLengths?.[id] ?? 128000,
+          output: 8192,
+        },
+      };
+    }
+
+    let apiKey = "none";
+    if (d.name === "flock") {
+      apiKey = "!cat /home/toxic/.tau/flock.key";
+    } else if (d.name === "hodos") {
+      apiKey = "herd-local";
+    } else if (d.auth !== "none" && d.keyEnv) {
+      apiKey = `{env:${d.keyEnv}}`;
+    }
+
+    providerMap[d.name] = {
+      npm: "@ai-sdk/openai-compatible",
+      name: d.displayName ?? d.name,
+      options: {
+        baseURL: d.baseUrl,
+        apiKey,
+      },
+      models,
+    };
+  }
+
+  const doc = {
+    $schema: "https://app.kappa.ai/config.json",
+    contract: "estate-pinax/kappa-catalog/v1",
+    generator:
+      "@toxicwind/pinax codegen — kappa target (full profile) — DO NOT EDIT BY HAND",
+    provenance,
+    generatedAt,
+    deadIds: [...input.deadIds].sort(),
+    aliases: input.aliases,
+    seeds: Object.fromEntries(input.defs.map((d) => [d.name, d.seeds])),
+    provider: providerMap,
+    providers: input.defs.map((d) => ({
+      name: d.name,
+      ...(d.displayName ? { displayName: d.displayName } : {}),
+      baseUrl: d.baseUrl,
+      keyEnv: d.keyEnv,
+      ...(d.keyEnvAlt ? { keyEnvAlt: d.keyEnvAlt } : {}),
+      keyEnvs: keyEnvsOf(d),
+      adapter: d.adapter,
+      ...(d.modelsPath ? { modelsPath: d.modelsPath } : {}),
+      ...(d.auth ? { auth: d.auth } : {}),
+      ...(d.headerName ? { headerName: d.headerName } : {}),
+      ...(d.queryParam ? { queryParam: d.queryParam } : {}),
+      ...(d.extraHeaders ? { extraHeaders: d.extraHeaders } : {}),
+      ...(d.staticModels ? { staticModels: d.staticModels } : {}),
+      ...(d.noModelsReason ? { noModelsReason: d.noModelsReason } : {}),
+      ...(d.enabled === false ? { enabled: false } : {}),
+      ...(d.routerLocal ? { routerLocal: true } : {}),
+    })),
+  };
+
+  return JSON.stringify(doc, null, 2) + "\n";
+}
+
+/**
+ * Kappa install slice: local routers and unkeyed static catalogs stay.
+ * A provider with a keyEnv is omitted unless that variable (or keyEnvAlt)
+ * is non-empty in env.
+ * Profile 2: Installed slice for live Kappa consumption (~/.config/kappa/kappa-models.json).
+ */
+export function buildInstalledKappaJson(
+  input: CodegenInput,
+  env: Record<string, string | undefined> = process.env,
+): string {
+  const present = (name?: string) => {
+    if (!name) return false;
+    const v = env[name];
+    return typeof v === "string" && v.trim().length > 0;
+  };
+  const defs = input.defs.filter((d) => {
+    if (d.enabled === false || d.routerLocal) return false;
+    if (
+      d.name === "flock" ||
+      d.name === "herd" ||
+      d.name === "hodos" ||
+      d.auth === "none"
+    ) {
+      return true;
+    }
+    const pool = keyEnvsOf(d);
+    if (pool.length === 0) return true;
+    return pool.some(present);
+  });
+  const full = JSON.parse(
+    buildProvidersKappaJson({ ...input, defs }),
+  ) as Record<string, unknown>;
+  full.generator =
+    "@toxicwind/pinax codegen — kappa target (installed profile) — DO NOT EDIT BY HAND";
+  return JSON.stringify(full, null, 2) + "\n";
 }
 
 /**
@@ -157,12 +289,15 @@ export function buildProvidersGo(input: CodegenInput): string {
 
   const staticGo = input.defs
     .filter((d) => d.adapter === "static")
-    .map((d) => `\t${jsonEscaped(d.name)}: ${goStringSlice(d.staticModels ?? [])},`)
+    .map(
+      (d) =>
+        `\t${jsonEscaped(d.name)}: ${goStringSlice(d.staticModels ?? [])},`,
+    )
     .join("\n");
 
   const provenance = input.provenance ? input.provenance : "unknown";
 
-  return `// Code generated by @ranch/roost — DO NOT EDIT BY HAND.
+  return `// Code generated by @toxicwind/pinax — DO NOT EDIT BY HAND.
 // Regenerate with: bun run build  (in packages/providers)
 // Source of truth: packages/providers/src/data.ts
 // Generated at: ${generatedAt}
@@ -241,14 +376,14 @@ function rustStrSlice(ids: string[]): string {
  * vars, adapters, seeds) are never hand-edited.
  *
  * Seeds are emitted raw — they may name dead IDs. The consumer filters
- * ROOST_DEAD_IDS, per the catalog contract ("the catalog filters deadIds
+ * PINAX_DEAD_IDS, per the catalog contract ("the catalog filters deadIds
  * everywhere (cold start included)").
  */
 /** Render a Record<string, number> as a Rust slice of (&str, u64) tuples. */
 function rustCtxLengths(m: Record<string, number>): string {
-  const entries = Object.keys(m).sort().map(
-    (k) => `(${jsonEscaped(k)}, ${Math.floor(m[k])}u64)`
-  );
+  const entries = Object.keys(m)
+    .sort()
+    .map((k) => `(${jsonEscaped(k)}, ${Math.floor(m[k])}u64)`);
   return `&[${entries.join(", ")}]`;
 }
 
@@ -279,7 +414,7 @@ export function buildProvidersRust(input: CodegenInput): string {
         `static_models: ${rustStrSlice(d.staticModels ?? [])},`,
         `context_lengths: ${rustCtxLengths(d.contextLengths ?? {})},`,
       ];
-      return `    RoostProvider {\n${fields.map((f) => `        ${f}`).join("\n")}\n    },`;
+      return `    PinaxProvider {\n${fields.map((f) => `        ${f}`).join("\n")}\n    },`;
     })
     .join("\n");
 
@@ -292,20 +427,20 @@ export function buildProvidersRust(input: CodegenInput): string {
     )
     .join("\n");
 
-  return `// Code generated by @ranch/roost — DO NOT EDIT BY HAND.
+  return `// Code generated by @toxicwind/pinax — DO NOT EDIT BY HAND.
 // Regenerate with: bun run build  (in mesh/catalog)
 // Source of truth: mesh/catalog/src/data.ts
 // Generated at: ${generatedAt}
 
-/// Provenance of the Roost catalog revision this module was generated from.
-pub const ROOST_PROVENANCE: &str = ${jsonEscaped(provenance)};
+/// Provenance of the Pinax catalog revision this module was generated from.
+pub const PINAX_PROVENANCE: &str = ${jsonEscaped(provenance)};
 
-/// One provider's wire data, generated from the Roost catalog.
+/// One provider's wire data, generated from the Pinax catalog.
 /// Flock builds its operational ProviderDefs from this table merged with
 /// flock's hand-maintained overlay (elo/weight/free-tier/model-map); the
 /// wire fields here (base URLs, key env vars, adapters, seeds) are never
 /// hand-edited.
-pub struct RoostProvider {
+pub struct PinaxProvider {
     /// Canonical provider key, e.g. "groq".
     pub name: &'static str,
     pub display_name: &'static str,
@@ -329,7 +464,7 @@ pub struct RoostProvider {
     pub router_local: bool,
     /// Disabled providers are never fetched and never served.
     pub enabled: bool,
-    /// Cold-start seeds ONLY. May name dead IDs — filter ROOST_DEAD_IDS.
+    /// Cold-start seeds ONLY. May name dead IDs — filter PINAX_DEAD_IDS.
     pub seeds: &'static [&'static str],
     /// Adapter "static": the model list, carried in the definition.
     pub static_models: &'static [&'static str],
@@ -337,22 +472,28 @@ pub struct RoostProvider {
     pub context_lengths: &'static [(&'static str, u64)],
 }
 
-/// The canonical provider table, generated from the Roost catalog.
-pub const ROOST_PROVIDERS: &[RoostProvider] = &[
+/// The canonical provider table, generated from the Pinax catalog.
+pub const PINAX_PROVIDERS: &[PinaxProvider] = &[
 ${defs}
 ];
 
 /// Permanent EOL tier (hand-managed). Never served, never re-admitted:
 /// filter these out of seeds and live listings alike.
-pub const ROOST_DEAD_IDS: &[&str] = ${rustStrSlice(deadIds)};
+pub const PINAX_DEAD_IDS: &[&str] = ${rustStrSlice(deadIds)};
 
 /// Friendly alias -> (provider, canonical model id) (UX layer).
-pub const ROOST_ALIASES: &[(&str, &str, &str)] = &[
+pub const PINAX_ALIASES: &[(&str, &str, &str)] = &[
 ${aliases}
 ];
+
+// Backwards-compatibility aliases for legacy consumers.
+pub type RoostProvider = PinaxProvider;
+pub const ROOST_PROVENANCE: &str = PINAX_PROVENANCE;
+pub const ROOST_PROVIDERS: &[PinaxProvider] = PINAX_PROVIDERS;
+pub const ROOST_DEAD_IDS: &[&str] = PINAX_DEAD_IDS;
+pub const ROOST_ALIASES: &[(&str, &str, &str)] = PINAX_ALIASES;
 `;
 }
-
 
 /** Tau install slice: local routers and unkeyed static catalogs stay.
  *  A provider with a keyEnv is omitted unless that variable (or keyEnvAlt)
@@ -369,7 +510,8 @@ export function buildInstalledTauYaml(
   };
   const defs = input.defs.filter((d) => {
     if (d.enabled === false || d.routerLocal) return false;
-    if (d.name === "flock" || d.name === "herd" || d.auth === "none") return true;
+    if (d.name === "flock" || d.name === "herd" || d.auth === "none")
+      return true;
     const pool = keyEnvsOf(d);
     if (pool.length === 0) return true;
     return pool.some(present);
@@ -383,7 +525,7 @@ export function buildProvidersTauYaml(input: CodegenInput): string {
   const provenance = input.provenance ? input.provenance : "unknown";
 
   const lines: string[] = [
-    "# Code generated by @ranch/roost for Tau — DO NOT EDIT BY HAND.",
+    "# Code generated by @toxicwind/pinax for Tau — DO NOT EDIT BY HAND.",
     "# Regenerate with: bun run build  (in mesh/catalog)",
     "# Source of truth: mesh/catalog/src/data.ts",
     `# Generated at: ${generatedAt}`,
@@ -397,7 +539,7 @@ export function buildProvidersTauYaml(input: CodegenInput): string {
     "",
     "providers:",
     "  flock:",
-    '    baseUrl: http://127.0.0.1:25193/v1',
+    "    baseUrl: http://127.0.0.1:25193/v1",
     "    api: openai-completions",
     '    apiKey: "!cat /home/toxic/.tau/flock.key"',
     "    discovery:",
@@ -405,7 +547,12 @@ export function buildProvidersTauYaml(input: CodegenInput): string {
   ];
 
   for (const d of input.defs) {
-    if (d.enabled === false || d.routerLocal || d.name === "herd" || d.name === "herd") {
+    if (
+      d.enabled === false ||
+      d.routerLocal ||
+      d.name === "herd" ||
+      d.name === "herd"
+    ) {
       continue;
     }
     lines.push(`  ${d.name}:`);
@@ -439,7 +586,13 @@ export function buildProvidersTauYaml(input: CodegenInput): string {
 export async function emitAll(
   outDir: string,
   input: CodegenInput,
-): Promise<{ jsonPath: string; goPath: string; rustPath: string; tauPath: string }> {
+): Promise<{
+  jsonPath: string;
+  goPath: string;
+  rustPath: string;
+  tauPath: string;
+  kappaPath: string;
+}> {
   const { promises: fs } = await import("node:fs");
   const { join } = await import("node:path");
   await fs.mkdir(outDir, { recursive: true });
@@ -447,9 +600,14 @@ export async function emitAll(
   const goPath = join(outDir, "providers.go");
   const rustPath = join(outDir, "providers.rs");
   const tauPath = join(outDir, "tau-models.yml");
+  const kappaPath = join(outDir, "providers.kappa.json");
+  const kappaModelsPath = join(outDir, "kappa-models.json");
   await fs.writeFile(jsonPath, buildProvidersJson(input), "utf8");
   await fs.writeFile(goPath, buildProvidersGo(input), "utf8");
   await fs.writeFile(rustPath, buildProvidersRust(input), "utf8");
   await fs.writeFile(tauPath, buildProvidersTauYaml(input), "utf8");
-  return { jsonPath, goPath, rustPath, tauPath };
+  const kappaContent = buildProvidersKappaJson(input);
+  await fs.writeFile(kappaPath, kappaContent, "utf8");
+  await fs.writeFile(kappaModelsPath, kappaContent, "utf8");
+  return { jsonPath, goPath, rustPath, tauPath, kappaPath };
 }

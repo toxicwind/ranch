@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * audit.ts — live model-ID audit for @ranch/roost (race doctrine).
+ * audit.ts — live model-ID audit for @toxicwind/pinax (race doctrine).
  *
  * Fires every provider probe concurrently with a per-probe fail-fast
  * ceiling (default 2000ms) and ZERO retries — losers are data. Borrows
@@ -15,7 +15,7 @@
  *  - referenced ids from estate config surfaces, classified
  *
  * Usage: bun scripts/audit.ts [--timeout ms] [--refs file ...]
- * Latency ledger: ~/.cache/shingle/roost-audit.jsonl (winner-log shape —
+ * Latency ledger: ~/.cache/shingle/pinax-audit.jsonl (winner-log shape —
  * next runs read it to spot chronic-tail providers).
  */
 import { ModelCatalog } from "../src/catalog.ts";
@@ -26,8 +26,8 @@ import type { DiscoveryResult } from "../src/discovery.ts";
 
 const HOME = Bun.env.HOME ?? "";
 const CACHE_DIR = `${HOME}/.cache/shingle`;
-const LATENCY_LOG = `${CACHE_DIR}/roost-audit.jsonl`;
-const LAST_JSON = `${CACHE_DIR}/roost-audit-last.json`;
+const LATENCY_LOG = `${CACHE_DIR}/pinax-audit.jsonl`;
+const LAST_JSON = `${CACHE_DIR}/pinax-audit-last.json`;
 
 const DEFAULT_REFS = [
   `${HOME}/estate/config/tau/agent/config.yml`,

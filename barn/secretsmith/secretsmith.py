@@ -816,10 +816,15 @@ def cmd_bitwarden_get(svc, a, registry, as_json):
 def cmd_cookie_vault_sync(svc, a, registry, as_json):
     """Synchronize Firefox and Keeper cookies via cookie-vault utility."""
     import subprocess
-    cookie_vault_bin = "/home/toxic/estate/ranch/barn/browserless/bin/cookie-vault.ts"
+    candidates = [
+        "/home/toxic/estate/ranch/cookie-vault/bin/cookie-vault.js",
+        "/home/toxic/estate/ranch/barn/browserless/bin/cookie-vault.ts",
+    ]
+    cookie_vault_bin = next((c for c in candidates if os.path.exists(c)), candidates[0])
     subcmd = a.vault_action or "sync"
+    runner = ["node", cookie_vault_bin, subcmd] if cookie_vault_bin.endswith(".js") else ["bun", cookie_vault_bin, subcmd]
     try:
-        res = subprocess.run(["bun", cookie_vault_bin, subcmd], capture_output=True, text=True, timeout=15)
+        res = subprocess.run(runner, capture_output=True, text=True, timeout=15)
         out = res.stdout.strip()
         if as_json:
             print(json.dumps({"action": subcmd, "exit": res.returncode, "output": out}))
@@ -829,7 +834,6 @@ def cmd_cookie_vault_sync(svc, a, registry, as_json):
     except Exception as e:
         print("secretsmith: cookie-vault error: %s" % e, file=sys.stderr)
         return 1
-
 
 def build_parser():
     p = argparse.ArgumentParser(prog="secretsmith",

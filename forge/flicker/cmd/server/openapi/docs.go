@@ -6321,8 +6321,7 @@ const docTemplate = `{
                 "forgejo",
                 "bitbucket",
                 "bitbucket-dc",
-                "addon",
-                "local"
+                "addon"
             ],
             "x-enum-varnames": [
                 "ForgeTypeGithub",
@@ -6331,8 +6330,7 @@ const docTemplate = `{
                 "ForgeTypeForgejo",
                 "ForgeTypeBitbucket",
                 "ForgeTypeBitbucketDatacenter",
-                "ForgeTypeAddon",
-                "ForgeTypeLocal"
+                "ForgeTypeAddon"
             ]
         },
         "model.QueueTask": {

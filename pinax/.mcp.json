@@ -1,6 +1,6 @@
 {
 	"mcpServers": {
-		"DelendAI:ranch-roost": {
+		"DelendAI:estate-pinax": {
 			"type": "stdio",
 			"command": "bunx",
 			"args": [
@@ -11,7 +11,7 @@
 				"--workspace",
 				".",
 				"--name",
-				"DelendAI:ranch-roost"
+				"DelendAI:estate-pinax"
 			]
 		}
 	}

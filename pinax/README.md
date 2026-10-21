@@ -1,11 +1,11 @@
-# 🪹 roost — `@ranch/roost`
+# 🪹 pinax — `@toxicwind/pinax`
 
-> *Every flock comes home to **roost** — where the birds settle, perch, and
-> rest. You don't chase every bird across the sky; you walk to the roost
-> and find the whole flock waiting. This package is the estate's roost: the
+> *Every flock comes home to **pinax** — where the birds settle, perch, and
+> rest. You don't chase every bird across the sky; you walk to the pinax
+> and find the whole flock waiting. This package is the estate's pinax: the
 > master provider catalog every router, agent, and daemon perches on.*
 
-**Single source of truth** for LLM providers across the ranch and the
+**Single source of truth** for LLM providers across the estate and the
 estate estate:
 
 - **Provider definitions** — base URL, key env var, and the endpoint-shape
@@ -27,21 +27,21 @@ in tau, model lists in Python research scripts). Live discovery could only
 production until a human noticed. This package makes the **live listing the
 source of truth** and demotes curation to cold-start seeds.
 
-One roost. Every consumer perches on it; nobody keeps a private nest. When a
+One pinax. Every consumer perches on it; nobody keeps a private nest. When a
 provider kills a model, the whole estate learns it within two
 refreshes — no human in the loop.
 
-## Who roosts here
+## Who pinaxs here
 
 | Consumer | How it consumes | Status |
 |---|---|---|
-| **tau** (`ranch/tau`, `toxicwind/tau`) | Main-class provider system — replaces `pi-catalog`'s KDL provider entries, `provider-models` data, and discovery | THE provider authority for the coding-agent engine |
-| **herd** (Go, `ranch/mesh/router/herd`) | `internal/astmatrix/providers_generated.go` — generated, checked in, never hand-edited; `live_catalog.go` reads the live-catalog export | Provenance `@ranch/roost` |
-| **estate-scripts-router** (TS) | Direct Bun import of `roost/src/index.ts` | Same-filesystem import |
-| **flock-proxy** (Rust) | `mesh/proxy/flock-proxy/src/roost_providers.rs` — generated Rust module, synced by `flock/scripts/sync-roost-providers.ts` (CI drift gate) | Direct, Phase 2 |
-| Python research scripts | `generated/providers.json` — canonical data artifact | Stable schema `ranch-roost/v1` |
-
-The rule: **if it names a provider or a model id, it reads the roost.**
+| **tau** (`estate/tau`, `toxicwind/tau`) | Main-class provider system — replaces `pi-catalog`'s KDL provider entries, `provider-models` data, and discovery | THE provider authority for the coding-agent engine |
+| **herd** (Go, `estate/mesh/router/herd`) | `internal/astmatrix/providers_generated.go` — generated, checked in, never hand-edited; `live_catalog.go` reads the live-catalog export | Provenance `@toxicwind/pinax` |
+| **estate-scripts-router** (TS) | Direct Bun import of `pinax/src/index.ts` | Same-filesystem import |
+| **flock-proxy** (Rust) | `mesh/proxy/flock-proxy/src/pinax_providers.rs` — generated Rust module, synced by `flock/scripts/sync-pinax-providers.ts` (CI drift gate) | Direct, Phase 2 |
+| **kappa** (Go+TS, `packages/cli/bin/kappa`) | `generated/kappa-models.json` (full profile) & `~/.config/kappa/kappa-models.json` (installed slice) | Two profiles: canonical catalog + env-filtered live config |
+| Python research scripts | `generated/providers.json` — canonical data artifact | Stable schema `estate-pinax/v1` |
+The rule: **if it names a provider or a model id, it reads the pinax.**
 Hand-maintained provider/model inventories are a bug — file it as one.
 
 ## Layout
@@ -52,14 +52,17 @@ src/
   adapters.ts   one parser per /models wire shape (openai, google-v1beta, mistral, static, none)
   discovery.ts  fetch + parse with timeout; failures never cached, never acted on
   catalog.ts    ModelCatalog — serving sets, miss counters, quarantine, persistence,
-                live-catalog export (contract ranch-roost/live-catalog/v1)
+                live-catalog export (contract estate-pinax/live-catalog/v1)
   data.ts       THE source of truth: provider defs, seeds, aliases, dead ids
-  codegen.ts    emits generated/providers.json + generated/providers.go + generated/providers.rs
-scripts/build.ts  `bun run build` — regenerates generated/
+  codegen.ts    emits generated/providers.json, providers.go, providers.rs, tau-models.yml, kappa-models.json
+scripts/build.ts  `bun run build` — regenerates generated/ and syncs installed slices to Tau and Kappa
 generated/
-  providers.json  canonical data artifact (Python consumers), $schema ranch-roost/v1
-  providers.go    drop-in Go data file for herd (package astmatrix)
-  providers.rs    drop-in Rust data module for flock (ROOST_* constants)
+  providers.json       canonical data artifact (Python consumers), $schema estate-pinax/v1
+  providers.go         drop-in Go data file for herd (package astmatrix)
+  providers.rs         drop-in Rust data module for flock (PINAX_* constants)
+  tau-models.yml       canonical YAML model catalog for Tau
+  kappa-models.json    canonical JSON provider configuration for Kappa (Profile 1: full)
+  providers.kappa.json compatibility JSON artifact for Kappa tooling
 tests/          adapter shapes, prune/quarantine paths, concurrency, artifact sync
 ```
 
@@ -86,7 +89,7 @@ tests/          adapter shapes, prune/quarantine paths, concurrency, artifact sy
 4. Copy `generated/providers.go` over herd's
    `internal/astmatrix/providers_generated.go` (the test tells you the exact
    path when it's stale).
-5. Run `bun flock/scripts/sync-roost-providers.ts --write` from `ranch/` (or `bun scripts/sync-roost-providers.ts --write` in `flock/`) to refresh
+5. Run `bun flock/scripts/sync-pinax-providers.ts --write` from `ranch/` (or `bun scripts/sync-pinax-providers.ts --write` in `flock/`) to refresh
    the flock-proxy Rust copy (CI gates on drift).
 
 ## Adding an endpoint shape
@@ -110,7 +113,7 @@ bun run build     # regenerate generated/ from src/data.ts
 ```
 
 Part of the [ranch](../../README.md) monorepo (`toxicwind/ranch`), nested under
-`mesh/catalog/`, package `@ranch/roost`.
+`mesh/catalog/`, package `@toxicwind/pinax`.
 
 ## Build
 

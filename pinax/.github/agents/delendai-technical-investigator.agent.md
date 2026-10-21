@@ -1,7 +1,7 @@
 ---
 name: delendai-technical-investigator
 description: Focused technical investigation
-tools: [read, search, edit, execute, todo, DelendAI:ranch-roost/*]
+tools: [read, search, edit, execute, todo, DelendAI:estate-pinax/*]
 user-invocable: false
 ---
 

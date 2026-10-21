@@ -1,6 +1,6 @@
 {
 	"servers": {
-		"DelendAI:ranch-roost": {
+		"DelendAI:estate-pinax": {
 			"type": "stdio",
 			"command": "bunx",
 			"args": [
@@ -11,7 +11,7 @@
 				"--workspace",
 				"${workspaceFolder}",
 				"--name",
-				"DelendAI:ranch-roost"
+				"DelendAI:estate-pinax"
 			]
 		}
 	}

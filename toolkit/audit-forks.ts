@@ -175,20 +175,8 @@ function dirInfo(name: string, submodules: Record<string, string>): DirInfo {
   const hasGit = existsSync(join(p, ".git"));
   const isSubmodule = name in submodules;
   const remoteOrigin = hasGit ? sh("git remote get-url origin", p) : null;
-  let sizeBytes = 0;
-  try {
-    const s = statSync(p);
-    sizeBytes = s.size;
-  } catch {
-    sizeBytes = 0;
-  }
-  let fileCount = 0;
-  try {
-    const stdout = execSync(`git -C "${p}" ls-files 2>/dev/null | wc -l`, { timeout: 1000 }).toString();
-    fileCount = Number(stdout.trim()) || 0;
-  } catch {
-    fileCount = 0;
-  }
+  const sizeBytes = Number(sh(`du -sb ${p} 2>/dev/null`)?.split("\t")[0]) || 0;
+  const fileCount = Number(sh(`find ${p} -type f 2>/dev/null | wc -l`).split("\n")[0]) || 0;
 
   // First match wins: submodule → manifests → readme → git remotes
   let upstream: string | null = null;
@@ -322,46 +310,28 @@ function renderReviewSection(infos: DirInfo[]): string {
   return lines.join("\n");
 }
 
-async function queryGithubParentAsync(owner: string, repo: string): Promise<{ full_name: string; html_url?: string } | null> {
-  const cacheFile = join(CACHE_DIR, `parent-${owner}-${repo}.json`);
-  if (!RESOLVE && existsSync(cacheFile)) {
-    try {
-      const c = JSON.parse(readFileSync(cacheFile, "utf8"));
-      return c.parent ?? null;
-    } catch { /* fall through */ }
-  }
-  try {
-    const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
-      headers: {
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "ranch-audit-forks",
-        ...(token ? { "Authorization": `Bearer ${token}` } : {})
-      },
-      signal: AbortSignal.timeout(3000)
-    });
-    if (!res.ok) {
-      writeFileSync(cacheFile, JSON.stringify({ parent: null, ts: Date.now() }));
-      return null;
-    }
-    const d = await res.json() as any;
-    const parent = d.parent ? { full_name: d.parent.full_name, html_url: d.parent.html_url } : null;
-    writeFileSync(cacheFile, JSON.stringify({ parent, ts: Date.now() }));
-    return parent;
-  } catch {
-    return null;
-  }
-}
-
 function queryGithubParent(owner: string, repo: string): { full_name: string; html_url?: string } | null {
   const cacheFile = join(CACHE_DIR, `parent-${owner}-${repo}.json`);
   if (!RESOLVE && existsSync(cacheFile)) {
     try {
       const c = JSON.parse(readFileSync(cacheFile, "utf8"));
-      return c.parent ?? null;
+      if (c.parent) return c.parent;
     } catch { /* fall through */ }
   }
-  return null;
+  try {
+    const out = execSync(
+      `gh api repos/${owner}/${repo} --jq '{parent: .parent.full_name, parent_url: .parent.html_url, source: .source.full_name, fork: .fork}'`,
+      { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 10_000 },
+    );
+    const d = JSON.parse(out);
+    const parent = d.parent && d.parent !== "null"
+      ? { full_name: d.parent, html_url: d.parent_url }
+      : (d.source && d.source !== "null" ? { full_name: d.source, html_url: `https://github.com/${d.source}` } : null);
+    writeFileSync(cacheFile, JSON.stringify({ parent, ts: Date.now() }, null, 2));
+    return parent;
+  } catch {
+    return null;
+  }
 }
 
 function summarize(infos: DirInfo[]): string {
@@ -376,7 +346,7 @@ function summarize(infos: DirInfo[]): string {
   ].join("\n");
 }
 
-async function main(): Promise<void> {
+function main(): void {
   const subs = submodulesFromGitmodules();
   const dirs = listImmediateDirs(RANCH_ROOT);
   const infos = dirs.map((d) => dirInfo(d, subs));
@@ -385,7 +355,7 @@ async function main(): Promise<void> {
   // `parent.full_name` in parallel. Runs unconditionally (uses cache) so the
   // report always has GitHub's view. Cached per (owner, repo) at
   // ~/.cache/ranch-fork-audit/parent-<owner>-<repo>.json
-  await enrichWithGithubParents(infos);
+  enrichWithGithubParents(infos);
 
   const generated = new Date().toISOString();
   const md = `# ranch/* fork audit (generated ${generated})
@@ -421,11 +391,11 @@ bun toolkit/audit-forks.ts --resolve-origins  # bust the GitHub cache
   console.log(`[done] wrote FORKS-report.md / FORKS-report.json`);
 }
 
-async function enrichWithGithubParents(infos: DirInfo[]): Promise<void> {
+function enrichWithGithubParents(infos: DirInfo[]): void {
   // Parallel pool (AGENTS.md: read-only work parallelizes maximally).
   const targets = infos.filter((i) => i.remoteOrigin && i.remoteOrigin.includes("github.com/"));
   console.log(`[audit-forks] Scanning ${targets.length} components with GitHub remotes...`);
-  const CONCURRENCY = 32;
+  const CONCURRENCY = 8;
   let cursor = 0;
   let completed = 0;
   const runWorker = async (): Promise<void> => {
@@ -439,7 +409,7 @@ async function enrichWithGithubParents(infos: DirInfo[]): Promise<void> {
       }
       const m = t.remoteOrigin!.match(/github\.com[/:]([^/]+)\/([^/]+?)(?:\.git)?$/);
       if (!m) continue;
-      const parent = await queryGithubParentAsync(m[1], m[2]);
+      const parent = queryGithubParent(m[1], m[2]);
       if (parent) {
         t.signals.push({
           kind: "github-parent", weight: 3,
@@ -454,7 +424,7 @@ async function enrichWithGithubParents(infos: DirInfo[]): Promise<void> {
     }
   };
   const workers = Array.from({ length: Math.min(CONCURRENCY, targets.length) }, () => runWorker());
-  await Promise.all(workers);
+  return Promise.all(workers).then(() => undefined) as unknown as void;
 }
 
 function renderGithubSection(infos: DirInfo[]): string {
@@ -480,4 +450,4 @@ function renderGithubSection(infos: DirInfo[]): string {
   return lines.join("\n");
 }
 
-await main();
+main();

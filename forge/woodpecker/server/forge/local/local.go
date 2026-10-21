@@ -26,22 +26,19 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
+
+var _ forge.Forge = (*client)(nil)
 
 type client struct {
 	url string
 }
 
 // New returns the forge local (no-op) forge.
-//
-// NOTE: the return type is *client, not forge.Forge, on purpose: importing
-// server/forge for the interface would create an import cycle
-// (server/forge/service.go registers this forge). *client satisfies
-// forge.Forge implicitly; conformance is enforced at the wiring site
-// (cmd/server assigns local.New to forge.NewLocalForge func() forge.Forge).
-func New() *client {
+func New() forge.Forge {
 	return &client{url: "local://forge"}
 }
 

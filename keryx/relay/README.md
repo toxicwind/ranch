@@ -1,6 +1,6 @@
 # squawk relay + live transports 📡
 
-![estate](https://img.shields.io/badge/estate--projects-blue?style=for-the-badge)
+![sovereign](https://img.shields.io/badge/sovereign--projects-blue?style=for-the-badge)
 ![python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![live-transports](https://img.shields.io/badge/live--transports-00BCD4?style=for-the-badge)
 
@@ -48,8 +48,8 @@ curl -s 127.0.0.1:25135/squawk-feed/seq
 
 ## Live transports
 
-- **WebSocket push feed** (primary transport): `squawk_ws_server.py` under pitchfork (`estate/squawk-ws`, `127.0.0.1:25147`), public at `wss://github-mcp-host.tailc9ac71.ts.net/squawk-ws` (Tailscale funnel, Bearer <redacted> on handshake). Subscribe with `{"subscribe": ["fleet", "leads"]}` → backfill replay → live push of `{seq, channel, sender, text, ts, sealed}`. Watches `<chat-root>/fleet/*.md` and `<chat-root>/leads/*.md` via inotify, plus the zipfs-vault manifest. Sealed messages broadcast as `{"sealed": true}` — no text, ever. Measured ~1ms local / ~52ms via funnel (2026-09-14).
-- **Fat HTTP long-poll** (`squawk_feed.py`, repo root; pitchfork `estate/squawk-feed`, `127.0.0.1:25135`): serves the Rig relay agent and the main-chat hook. `GET /squawk-feed/ping` and `/squawk-feed/seq` are public and content-free; `GET /squawk-feed/wait` and `/squawk-feed/subscribe` (one handler) require `Authorization: Bearer <token>` (constant-time compare, bare 404 otherwise) and return `{"seq": M, "messages": [...]}` with per-message seq, ≤50 messages, full message bodies served untruncated. Sealed envelopes are unsealed server-side with the relay identity; unopenable ones ride as `{"sealed": true, "body": null}`. Inotify wake on post (~55s hold).
+- **WebSocket push feed** (primary transport): `squawk_ws_server.py` under pitchfork (`sovereign/squawk-ws`, `127.0.0.1:25147`), public at `wss://github-mcp-host.tailc9ac71.ts.net/squawk-ws` (Tailscale funnel, Bearer <redacted> on handshake). Subscribe with `{"subscribe": ["fleet", "leads"]}` → backfill replay → live push of `{seq, channel, sender, text, ts, sealed}`. Watches `<chat-root>/fleet/*.md` and `<chat-root>/leads/*.md` via inotify, plus the zipfs-vault manifest. Sealed messages broadcast as `{"sealed": true}` — no text, ever. Measured ~1ms local / ~52ms via funnel (2026-09-14).
+- **Fat HTTP long-poll** (`squawk_feed.py`, repo root; pitchfork `sovereign/squawk-feed`, `127.0.0.1:25135`): serves the Rig relay agent and the main-chat hook. `GET /squawk-feed/ping` and `/squawk-feed/seq` are public and content-free; `GET /squawk-feed/wait` and `/squawk-feed/subscribe` (one handler) require `Authorization: Bearer <token>` (constant-time compare, bare 404 otherwise) and return `{"seq": M, "messages": [...]}` with per-message seq, ≤50 messages, full message bodies served untruncated. Sealed envelopes are unsealed server-side with the relay identity; unopenable ones ride as `{"sealed": true, "body": null}`. Inotify wake on post (~55s hold).
 
 Hard rule: **no unauthenticated unsealed content, ever.** Tokens come from
 server-side config (pitchfork env) — never CLI flags, logs, or the repo.
@@ -82,7 +82,7 @@ server.
 
 ## License & Security
 
-Part of the estate estate (see repo root). **Security posture:** the relay
+Part of the sovereign estate (see repo root). **Security posture:** the relay
 is a first-class Squawk identity with provisioned keys (0600) — relay-signed
 posts are HMAC'd through the normal post path and `relayed_from`/`human`
 attribution is signature-covered, so forged relay claims fail closed.

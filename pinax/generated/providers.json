@@ -1,8 +1,8 @@
 {
-  "$schema": "ranch-roost/v1",
-  "generatedAt": "2026-10-17T05:17:24.000Z",
-  "generator": "@ranch/roost codegen — DO NOT EDIT BY HAND",
-  "provenance": "@ranch/roost src/data.ts",
+  "$schema": "estate-pinax/v1",
+  "generatedAt": "2026-10-21T04:47:27.000Z",
+  "generator": "@toxicwind/pinax codegen — DO NOT EDIT BY HAND",
+  "provenance": "@toxicwind/pinax src/data.ts",
   "adapters": [
     "openai",
     "google-v1beta",
