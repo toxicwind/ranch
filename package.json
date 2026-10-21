@@ -13,7 +13,7 @@
   "version": "1.0.0",
   "workspaces": {
     "packages": [
-      "stable/keeper",
+      "keeper",
       "campfire",
       "corral",
       "drover",
