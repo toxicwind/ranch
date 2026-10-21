@@ -39,7 +39,7 @@ export class OpenFangClient {
     private defaultRouteChain: RouteOption[] = [
       {
         agent: "coyote",
-        model: "openfang:coyote",
+        model: "rig:coyote",
         max_tokens: 512,
         temperature: 0.3,
         timeoutMs: 8000,
@@ -47,19 +47,11 @@ export class OpenFangClient {
       },
       {
         agent: "coyote",
-        model: "openfang:coyote",
+        model: "coyote",
         max_tokens: 1024,
         temperature: 0.4,
         timeoutMs: 15000,
         label: "balanced",
-      },
-      {
-        agent: "coyote",
-        model: "openfang:coyote",
-        max_tokens: 2048,
-        temperature: 0.5,
-        timeoutMs: 30000,
-        label: "thorough",
       },
     ],
   ) {
