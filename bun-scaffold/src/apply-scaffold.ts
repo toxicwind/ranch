@@ -16,8 +16,14 @@
 
 import { completeOver, type ChatMsg } from "./delendai-bridge";
 import { scanPackageJsons } from "./detect-bizarre-package-json";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  mkdirSync,
+  statSync,
+} from "node:fs";
+import { dirname, join } from "node:path";
 
 const SCAFFOLD_BUNFIG = readFileSync(
   new URL("../bunfig.toml", import.meta.url),
@@ -31,6 +37,7 @@ const TARGET = targetArgIdx !== -1 ? process.argv[targetArgIdx + 1] : null;
 const USE_LLM = process.argv.includes("--llm");
 const DRY_RUN = process.argv.includes("--dry-run");
 const YES = process.argv.includes("--yes");
+const BULK = process.argv.includes("--bulk");
 
 function banner(msg: string) {
   console.log(`\n# ${msg}`);
@@ -71,6 +78,16 @@ function isBunApp(target: string): boolean {
   const main = String(pkg.main ?? "");
   if (/\.(mjs|tsx?)$/.test(main) && (pkg as any).type === "module") return true;
   return false;
+}
+
+/** True if `dir` is a git submodule (has a .git FILE, not a dir). */
+function hasSubmoduleGit(dir: string): boolean {
+  try {
+    const st = statSync(join(dir, ".git"));
+    return st.isFile();
+  } catch {
+    return false;
+  }
 }
 
 async function main() {
@@ -133,6 +150,46 @@ async function main() {
         console.log(`  [llm] skipped: ${r[0].error ?? "no text"}`);
       }
     }
+    return;
+  }
+
+  if (BULK) {
+    // Better bulk: scan ROOT, filter to confidently-Bun projects, write the
+    // max bunfig to each (deterministic file, no LLM). Non-bun / ambiguous are
+    // reported as skips so the 800-finding mess becomes a small actionable set.
+    const findings = scanPackageJsons(ROOT);
+    const projectDirs = [...new Set(findings.map((f) => dirname(f.path)))];
+    let applied = 0;
+    let skipped = 0;
+    const batch = projectDirs.map((d) => {
+      const bun = isBunApp(d);
+      const sub = hasSubmoduleGit(d); // written in a submodule → separate repo
+      return { d, bun, sub } as const;
+    });
+    for (const { d, bun, sub } of batch) {
+      if (!bun) {
+        if (DRY_RUN || YES) console.log(`  [skip] ${d} (not Bun)`);
+        skipped++;
+        continue;
+      }
+      if (sub) {
+        console.log(
+          `  [submodule] ${d} — bunfig goes in that submodule's repo`,
+        );
+        skipped++;
+        continue;
+      }
+      if (DRY_RUN) {
+        console.log(`  [dry-run] would write bunfig to ${d}`);
+      } else {
+        writeFileSync(join(d, "bunfig.toml"), SCAFFOLD_BUNFIG);
+        console.log(`  wrote bunfig -> ${d}`);
+      }
+      applied++;
+    }
+    banner(
+      `bulk done: ${applied} applied, ${skipped} skipped/other of ${batch.length} bun-candidate dirs`,
+    );
     return;
   }
 

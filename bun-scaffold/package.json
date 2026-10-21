@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "validate": "bun run typecheck && bun run test:coverage && bun run lint",
-    "typecheck": "bun x tsc --noEmit",
+    "typecheck": "tsgo --noEmit -p tsconfig.json",
     "test": "bun test",
     "test:coverage": "bun test --coverage",
     "coverage:ratchet": "bun test --coverage --coverage.reporter=json-summary && bun x vyper-spec coverage:ratchet",
@@ -26,6 +26,8 @@
   "devDependencies": {
     "@biomejs/biome": "*",
     "@types/bun": "^1.4.0",
+    "@types/node": "^22.0.0",
+    "@typescript/native-preview": "*",
     "typescript": "^5.7.0"
   },
   "keywords": [

@@ -39,6 +39,7 @@ export async function completeOver<T>(
   items: T[],
   makeMessages: (item: T, i: number) => ChatMsg[],
   _opts: { concurrency?: number } = {},
+  concurrency = 2,
 ): Promise<Array<{ item: T; ok: boolean; text?: string; error?: string }>> {
   const results: Array<{
     item: T;
@@ -47,7 +48,7 @@ export async function completeOver<T>(
     error?: string;
   }> = [];
   let cursor = 0;
-  const lim = Math.min(_opts?.concurrency ?? 2, 2);
+  const lim = Math.min(concurrency ?? _opts?.concurrency ?? 2, 2);
   const worker = async () => {
     for (;;) {
       const i = cursor++;
