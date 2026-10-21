@@ -23,9 +23,9 @@ interface Finding {
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 
+const rootArgIdx = process.argv.indexOf("--root");
 const ROOT =
-  process.argv[process.argv.indexOf("--root") + 1] ||
-  "/home/toxic/estate/ranch";
+  rootArgIdx !== -1 ? process.argv[rootArgIdx + 1] : "/home/toxic/estate/ranch";
 const JSON_OUT = process.argv.includes("--json");
 
 function isDir(p: string) {
@@ -55,6 +55,8 @@ function* walk(dir: string, depth = 0): Generator<string> {
         "build",
         "target",
         ".worktrees",
+        ".next",
+        ".cache",
       ].includes(e)
     )
       continue;

@@ -23,10 +23,11 @@ const SCAFFOLD_BUNFIG = readFileSync(
   new URL("../bunfig.toml", import.meta.url),
   "utf8",
 );
+const rootArgIdx = process.argv.indexOf("--root");
 const ROOT =
-  process.argv[process.argv.indexOf("--root") + 1] ||
-  "/home/toxic/estate/ranch";
-const TARGET = process.argv[process.argv.indexOf("--target") + 1] || null;
+  rootArgIdx !== -1 ? process.argv[rootArgIdx + 1] : "/home/toxic/estate/ranch";
+const targetArgIdx = process.argv.indexOf("--target");
+const TARGET = targetArgIdx !== -1 ? process.argv[targetArgIdx + 1] : null;
 const USE_LLM = process.argv.includes("--llm");
 const DRY_RUN = process.argv.includes("--dry-run");
 const YES = process.argv.includes("--yes");
