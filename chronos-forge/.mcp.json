@@ -1,0 +1,18 @@
+{
+	"mcpServers": {
+		"DelendAI:chronos-forge-omnibus": {
+			"type": "stdio",
+			"command": "bunx",
+			"args": [
+				"--package",
+				"@delendai/cli",
+				"delendai",
+				"__serve",
+				"--workspace",
+				".",
+				"--name",
+				"DelendAI:chronos-forge-omnibus"
+			]
+		}
+	}
+}
