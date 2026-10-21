@@ -282,7 +282,7 @@
 	path = VansRouter
 	url = https://github.com/toxicwind/VansRouter.git
 [submodule "agent-dashboard"]
-	path = agent-dashboard
+	path = range
 	url = https://github.com/toxicwind/agent-dashboard.git
 [submodule "ai-merge-resolve"]
 	path = ai-merge-resolve
