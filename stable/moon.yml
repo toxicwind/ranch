@@ -1,11 +1,14 @@
 $schema: 'https://moonrepo.dev/schemas/project.json'
 language: 'typescript'
 layer: 'application'
+# keeper was promoted from stable/keeper to first-class ranch/keeper
+# (5fef991). These tasks delegate to the sibling keeper project so the
+# stable:build / stable:lint targets keep working from this project root.
 tasks:
   build:
-    command: 'bun --cwd=keeper run build'
-    inputs: ['keeper/src/**/*', 'keeper/tsconfig.json', 'keeper/package.json']
-    outputs: ['keeper/dist']
+    command: 'bun --cwd=../keeper run build'
+    inputs: ['../keeper/src/**/*', '../keeper/tsconfig.json', '../keeper/package.json']
+    outputs: ['../keeper/dist']
   lint:
-    command: 'bun --cwd=keeper run lint'
-    inputs: ['keeper/src/**/*']
+    command: 'bun --cwd=../keeper run lint'
+    inputs: ['../keeper/src/**/*']
