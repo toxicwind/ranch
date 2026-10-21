@@ -1,0 +1,13 @@
+{
+  "name": "@ranch/ffs-monad",
+  "version": "1.0.0",
+  "description": "Functional, monadic, Scala/Haskell-inspired TypeScript library for FFS and code intelligence",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
