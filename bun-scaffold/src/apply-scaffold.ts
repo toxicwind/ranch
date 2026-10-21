@@ -36,6 +36,43 @@ function banner(msg: string) {
   console.log(`\n# ${msg}`);
 }
 
+/**
+ * bun-stack heuristic — only real Bun projects should get a bunfig.
+ * A project is bun-applicable when its package.json shows Bun markers and is
+ * NOT a python/bash/openclaw skill and NOT an upstream node-only lib with zero
+ * bun usage. This prevents a blind sweep from misapplying the scaffold to
+ * non-Bun projects (observed: rig/sdk dev + gear/email-to-calendar).
+ */
+function isBunApp(target: string): boolean {
+  const pkgPath = existsSync(`${target}/package.json`)
+    ? `${target}/package.json`
+    : null;
+  if (!pkgPath) return false;
+  let pkg: Record<string, unknown> = {};
+  try {
+    pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+  } catch {
+    return false;
+  }
+  const raw = JSON.stringify(pkg);
+
+  // Non-bun hard negatives.
+  if (/python3|"bash"|"jq"|openclaw/.test(raw)) return false; // skill / script-bins
+  if (pkg.engines === "node" && !/bun/.test(raw)) {
+    const bins = (pkg.scripts as Record<string, string> | undefined) ?? {};
+    const scriptVals = Object.values(bins).join(" ");
+    if (!/bun/.test(scriptVals)) return false; // node-only, no bun in scripts
+  }
+
+  // Bun positives.
+  if (/bun/.test(raw)) return true; // bun dep/script/bunfig mention
+  const scripts = (pkg.scripts as Record<string, string> | undefined) ?? {};
+  if (Object.values(scripts).some((v) => /bun/.test(v))) return true;
+  const main = String(pkg.main ?? "");
+  if (/\.(mjs|tsx?)$/.test(main) && (pkg as any).type === "module") return true;
+  return false;
+}
+
 async function main() {
   banner(
     `bun-scaffold apply — root=${ROOT} target=${TARGET ?? "auto"} llm=${USE_LLM} dry=${DRY_RUN}`,
@@ -53,13 +90,19 @@ async function main() {
   }
 
   if (TARGET) {
-    // Single-project apply: install the scaffold files.
+    // Single-project apply: install the scaffold files (only if real bun).
     const pkgPath = existsSync(`${TARGET}/package.json`)
       ? `${TARGET}/package.json`
       : null;
     if (!pkgPath) {
       console.error(`No package.json at ${TARGET}`);
       process.exit(1);
+    }
+    if (!isBunApp(TARGET)) {
+      console.log(
+        `  [skip] ${TARGET} is not a Bun project (bun-stack heuristic)`,
+      );
+      return;
     }
     banner(`applying scaffold to ${TARGET}`);
     const write = (dest: string, body: string) => {
