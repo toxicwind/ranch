@@ -20,8 +20,8 @@ interface Finding {
   detail: string;
 }
 
-import { readFileSync, readdirSync, statSync, existsSync, join } from "node:fs";
-import { dirname } from "node:path";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
 
 const ROOT =
   process.argv[process.argv.indexOf("--root") + 1] ||

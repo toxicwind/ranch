@@ -146,11 +146,17 @@ async function launchOnce() {
   // Auto-restore cookies from Secretsmith Cookie-Vault on startup so sessions never vanish
   const backupCookieFile = "/home/toxic/.browserless/cookies-backup.json";
   try {
-    // Sync live Firefox cookies into vault via Secretsmith before restoring
+    // Full-session sync (cookies + per-origin localStorage) from live Firefox
+    // into the keeper Chromium. 2026-10-20: the prior `secretsmith cookie-vault
+    // sync` was a dead stub (no such subcommand; exited 1 in try/catch, so
+    // sessions never restored). Use the real ranch/cookie-vault CLI instead.
     try {
       const { execSync } = require("child_process");
-      execSync("secretsmith cookie-vault sync", { timeout: 10000 });
-      log("secretsmith cookie-vault synced Firefox credentials");
+      execSync(
+        "bun /home/toxic/estate/ranch/cookie-vault/bin/cookie-vault.js sync",
+        { timeout: 20000, env: Object.assign({}, process.env, { DISPLAY: ":99" }) },
+      );
+      log("cookie-vault: synced full Firefox session (cookies + localStorage) into keeper");
     } catch (_) {}
 
     if (fs.existsSync(backupCookieFile)) {
