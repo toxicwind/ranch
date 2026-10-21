@@ -1,0 +1,18 @@
+{
+	"mcpServers": {
+		"DelendAI:estate-scripts-stream-broker": {
+			"type": "stdio",
+			"command": "bunx",
+			"args": [
+				"--package",
+				"@delendai/cli",
+				"delendai",
+				"__serve",
+				"--workspace",
+				".",
+				"--name",
+				"DelendAI:estate-scripts-stream-broker"
+			]
+		}
+	}
+}
