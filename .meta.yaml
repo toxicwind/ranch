@@ -156,6 +156,10 @@ projects:
     repo: https://github.com/toxicwind/flicker.git
   "forge":
     repo: https://github.com/toxicwind/forge.git
+  "code-patterns-guide":
+    repo: https://github.com/toxicwind/code-patterns-guide.git
+  "forge-mcp":
+    repo: https://github.com/toxicwind/forge-mcp.git
   "forge/router/weasel":
     repo: https://github.com/diegosouzapw/OmniRoute
   "forge/web":
@@ -248,6 +252,8 @@ projects:
     repo: https://github.com/toxicwind/rsync-mcp.git
   "mcpproxy-go":
     repo: https://github.com/toxicwind/mcpproxy-go.git
+  "mcp-dropin-guide":
+    repo: https://github.com/toxicwind/mcp-dropin-guide.git
   "mesh":
     repo: https://github.com/toxicwind/mesh.git
   "mesh/pylae":
