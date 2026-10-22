@@ -25,12 +25,13 @@ flock :25193 ── Strategy::Free ──▶ NIM → OpenRouter-free → …
 
 ## Ports
 
-| Port | Service | Home |
-|---|---|---|
-| 25100 | herd (herd fork, Go) | estate-scripts-projects/projects/herd |
-| 25193 | flock router (Rust) | toxicwind/flock → /home/toxic/projects/flock |
-| 25104 | estate-scripts TS router (bench/Elo layer) | estate-scripts-projects |
-| 25109 | keypool sidecar | estate-scripts-projects |
+| Port  | Service                                                               | Home                                         |
+| ----- | --------------------------------------------------------------------- | -------------------------------------------- |
+| 25100 | herd (herd fork, Go)                                                  | estate-scripts-projects/projects/herd        |
+| 25193 | flock router (Rust)                                                   | toxicwind/flock → /home/toxic/projects/flock |
+| 25104 | estate-scripts TS router (bench/Elo layer)                            | estate-scripts-projects                      |
+| 25109 | keypool sidecar                                                       | estate-scripts-projects                      |
+| 25154 | skopos — persistent browser/watcher (headed Chromium CDP; was keeper) | toxicwind/skopos / estate/ranch/keeper       |
 
 ## Rules
 
