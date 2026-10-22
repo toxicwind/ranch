@@ -1,35 +1,46 @@
 # ranch/.meta.yaml — the multi-repo manifest (meta 0.2.22+).
-# Generated from .gitmodules (213 repos) — repos are PEERS, not
+# Generated from .gitmodules (214 repos) — repos are PEERS, not
 # hierarchy: each stays an independent clone with its own history. Sync with
 #   meta git update       # clone missing + pull all
 #   meta git status       # per-repo state
 #   meta exec '<cmd>'     # run any command across every component
 # Regenerate: bun toolkit/gen-meta-manifest.ts
-projects:
-  "agent-customization-style-guide":
-    repo: https://github.com/toxicwind/agent-customization-style-guide.git
-  "range":
-    repo: https://github.com/toxicwind/range.git
-  "AgentForensics":
-    repo: https://github.com/aparnaa19/AgentForensics.git
-  "agon":
-    repo: https://github.com/toxicwind/agon.git
-  "ai-merge-resolve":
-    repo: https://github.com/toxicwind/ai-merge-resolve.git
-  "android-fleet":
-    repo: https://github.com/toxicwind/android-fleet.git
-  "antilogos":
-    repo: https://github.com/toxicwind/antilogos.git
-  "arroyo":
-    repo: https://github.com/toxicwind/arroyo.git
-  "ast-grep-rules":
-    repo: https://github.com/toxicwind/ast-grep-rules.git
-  "auto1m":
-    repo: https://github.com/toxicwind/auto1m.git
-  "awesome-free-ai-coding":
-    repo: https://github.com/toxicwind/awesome-free-ai-coding.git
+# CATEGORIZED by theme (DATA-DRIVEN from .meta-themes.yaml — olympus = Greek-coded
+# products; ranch-structure = the venture's pens/shelters; general = the rest).
+
+olympus:
+  "hodos":
+    repo: https://github.com/toxicwind/hodos.git
+  "kairos":
+    repo: https://github.com/toxicwind/kairos.git
+  "keryx":
+    repo: https://github.com/toxicwind/keryx.git
+  "kilo":
+    repo: https://github.com/toxicwind/kilo.git
+  "kryptos":
+    repo: https://github.com/toxicwind/kryptos.git
+  "muse-cli":
+    repo: https://github.com/toxicwind/muse-cli.git
+  "skopos":
+    repo: https://github.com/toxicwind/skopos.git
+  "tau/tau-extensions":
+    repo: https://github.com/toxicwind/tau-extensions.git
+
+ranch-structure:
   "barn":
     repo: https://github.com/toxicwind/barn.git
+  "corral":
+    repo: https://github.com/toxicwind/corral.git
+  "forge":
+    repo: https://github.com/toxicwind/forge.git
+  "forge/router/weasel":
+    repo: https://github.com/diegosouzapw/OmniRoute
+  "forge/web":
+    repo: https://github.com/toxicwind/CMSaasStarter.git
+  "herd":
+    repo: https://github.com/toxicwind/herd.git
+
+barn:
   "barn/corral":
     repo: ./barn/corral
   "barn/flatbread":
@@ -42,62 +53,8 @@ projects:
     repo: https://github.com/toxicwind/weave.git
   "barn/weave-sub":
     repo: https://github.com/toxicwind/weave.git
-  "bash-style-guide":
-    repo: https://github.com/toxicwind/bash-style-guide.git
-  "bench-radar":
-    repo: https://github.com/toxicwind/bench-radar.git
-  "borrowed/herdr":
-    repo: https://github.com/ogulcancelik/herdr.git
-  "borrowed/loom":
-    repo: https://github.com/rjwalters/loom.git
-  "borrowed/delendai":
-    repo: https://github.com/toxicwind/DelendAI.git
-  "bridge":
-    repo: https://github.com/toxicwind/bridge.git
-  "bugbounty":
-    repo: https://github.com/toxicwind/bugbounty.git
-  "campfire":
-    repo: https://github.com/toxicwind/campfire.git
-  "chronos-forge":
-    repo: https://github.com/toxicwind/chronos-forge.git
-  "classifier":
-    repo: https://github.com/toxicwind/classifier.git
-  "classifier-preflight":
-    repo: https://github.com/toxicwind/classifier-preflight.git
-  "codebase-memory":
-    repo: https://github.com/toxicwind/codebase-memory.git
-  "computer-use-linux":
-    repo: https://github.com/toxicwind/computer-use-linux.git
-  "corral":
-    repo: https://github.com/toxicwind/corral.git
-  "cron-trust":
-    repo: https://github.com/toxicwind/cron-trust.git
-  "dashboard":
-    repo: https://github.com/toxicwind/dashboard.git
-  "dedicated/dedicated-server-ops":
-    repo: https://github.com/toxicwind/dedi-ops.git
-  "didymos":
-    repo: https://github.com/toxicwind/didymos.git
-  "disparate-latent-experiment":
-    repo: https://github.com/toxicwind/disparate-latent-experiment.git
-  "doorbell":
-    repo: https://github.com/toxicwind/doorbell.git
-  "dots-client":
-    repo: https://github.com/toxicwind/dots-client.git
-  "drover":
-    repo: https://github.com/toxicwind/drover.git
-  "dualspace-ast-bm25-hybrid":
-    repo: https://github.com/toxicwind/dualspace-ast-bm25-hybrid.git
-  "duel/vendor/argus-ai-debate":
-    repo: https://github.com/Argus-Framework/argus-ai-debate.git
-  "duel/vendor/ChatEval":
-    repo: https://github.com/thunlp/ChatEval.git
-  "duel/vendor/debate-or-vote":
-    repo: https://github.com/deeplearning-wisc/debate-or-vote.git
-  "duel/vendor/llm_debate":
-    repo: https://github.com/ucl-dark/llm_debate.git
-  "emergent":
-    repo: https://github.com/toxicwind/emergent.git
+
+estate:
   "estate-chat":
     repo: https://github.com/toxicwind/estate-chat.git
   "estate-dispersal":
@@ -130,150 +87,26 @@ projects:
     repo: https://github.com/toxicwind/estate-skills-hub.git
   "estate-whoa-breakthrough":
     repo: https://github.com/toxicwind/estate-whoa-breakthrough.git
-  "examples":
-    repo: https://github.com/toxicwind/examples.git
-  "extensions":
-    repo: https://github.com/toxicwind/extensions.git
-  "extensions/drover":
-    repo: https://github.com/toxicwind/drover.git
-  "fanout":
-    repo: https://github.com/toxicwind/fanout.git
-  "fast-race":
-    repo: https://github.com/toxicwind/fast-race.git
-  "ferret-den":
-    repo: https://github.com/toxicwind/ferret-den.git
-  "ffs-diff":
-    repo: https://github.com/toxicwind/ffs-diff.git
-  "fleet":
-    repo: https://github.com/toxicwind/fleet.git
-  "fleet-chat":
-    repo: https://github.com/toxicwind/fleet-chat.git
-  "fleet-ops":
-    repo: https://github.com/toxicwind/fleet-ops.git
-  "fleetd":
-    repo: https://github.com/toxicwind/fleetd.git
-  "flicker":
-    repo: https://github.com/toxicwind/flicker.git
-  "forge":
-    repo: https://github.com/toxicwind/forge.git
-  "code-patterns-guide":
-    repo: https://github.com/toxicwind/code-patterns-guide.git
-  "forge-mcp":
-    repo: https://github.com/toxicwind/forge-mcp.git
-  "forge/router/weasel":
-    repo: https://github.com/diegosouzapw/OmniRoute
-  "forge/web":
-    repo: https://github.com/toxicwind/CMSaasStarter.git
-  "freebuffet":
-    repo: https://github.com/toxicwind/freebuffet.git
-  "furlong/vendor/coder_reviewer_reranking":
-    repo: https://github.com/facebookresearch/coder_reviewer_reranking.git
-  "furlong/vendor/RACE":
-    repo: https://github.com/jszheng21/RACE.git
-  "furlong/vendor/speed-run":
-    repo: https://github.com/2389-research/speed-run.git
-  "furlong/vendor/SRank-CodeRanker":
-    repo: https://github.com/FSoft-AI4Code/SRank-CodeRanker.git
-  "gavel":
-    repo: https://github.com/toxicwind/gavel.git
-  "gavel/vendor/agora":
-    repo: https://github.com/KAIJUJO/Agora.git
-  "gavel/vendor/auction-agent11":
-    repo: https://github.com/wushuchris/11-distributed-auction-task-allocation-agent.git
-  "gavel/vendor/contract-net-router":
-    repo: https://github.com/M00C1FER/contract-net-router.git
-  "gayxxx-estate":
-    repo: https://github.com/toxicwind/gayxxx-estate.git
-  "ghq":
-    repo: https://github.com/toxicwind/ghq.git
-  "github-search":
-    repo: https://github.com/toxicwind/github-search.git
-  "gito":
-    repo: https://github.com/toxicwind/gito.git
-  "godzilla-llama.cpp":
-    repo: https://github.com/toxicwind/godzilla-llama.cpp.git
-  "hatch":
-    repo: https://github.com/toxicwind/hatch.git
-  "hatch-decode":
-    repo: https://github.com/toxicwind/hatch-decode.git
-  "hatch/kite-cli":
-    repo: https://github.com/toxicwind/kite-cli.git
-  "herd":
-    repo: https://github.com/toxicwind/herd.git
-  "herdproof-bun":
-    repo: https://github.com/toxicwind/herdproof-bun.git
-  "hf-model-sync":
-    repo: https://github.com/toxicwind/hf-model-sync.git
-  "hodos":
-    repo: https://github.com/toxicwind/hodos.git
-  "host-proof":
-    repo: https://github.com/toxicwind/host-proof.git
-  "identity-router":
-    repo: https://github.com/toxicwind/identity-router.git
-  "kairos":
-    repo: https://github.com/toxicwind/kairos.git
-  "keep":
-    repo: https://github.com/toxicwind/keep.git
-  "keryx":
-    repo: https://github.com/toxicwind/keryx.git
-  "kilo":
-    repo: https://github.com/toxicwind/kilo.git
-  "kimi-auto":
-    repo: https://github.com/toxicwind/kimi-auto.git
-  "kimi-claw":
-    repo: https://github.com/toxicwind/kimi-claw.git
-  "kodi-fleet":
-    repo: https://github.com/toxicwind/kodi-fleet.git
-  "kryptos":
-    repo: https://github.com/toxicwind/kryptos.git
-  "lasso":
-    repo: https://github.com/toxicwind/lasso.git
-  "leakfix-src":
-    repo: https://github.com/toxicwind/leakfix-src.git
-  "ledger":
-    repo: https://github.com/toxicwind/ledger.git
-  "lib":
-    repo: https://github.com/toxicwind/lib.git
-  "loom":
-    repo: https://github.com/toxicwind/loom.git
-  "matter-server":
-    repo: https://github.com/toxicwind/matter-server.git
-  "maw":
-    repo: https://github.com/toxicwind/maw.git
-  "mcp":
-    repo: https://github.com/toxicwind/mcp.git
-  "mcp/mcp-prompt-injection-detector":
-    repo: https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector.git
-  "mcp/mcpproxy-go":
-    repo: https://github.com/toxicwind/mcpproxy-go.git
-  "mcp/pd-mcp-standalone":
-    repo: https://github.com/toxicwind/pd-mcp.git
-  "mcp/rsync-mcp":
-    repo: https://github.com/toxicwind/rsync-mcp.git
-  "mcpproxy-go":
-    repo: https://github.com/toxicwind/mcpproxy-go.git
-  "mcp-dropin-guide":
-    repo: https://github.com/toxicwind/mcp-dropin-guide.git
-  "mesh":
-    repo: https://github.com/toxicwind/mesh.git
-  "mesh/pylae":
-    repo: https://github.com/toxicwind/flocksync.git
-  "meta-research-toolkit":
-    repo: https://github.com/toxicwind/meta-research-toolkit.git
-  "metaaivm":
-    repo: https://github.com/toxicwind/metaaivm.git
-  "metaaivm-profile":
-    repo: https://github.com/toxicwind/metaaivm-profile.git
-  "metaclaw-runtime":
-    repo: https://github.com/toxicwind/metaclaw-runtime.git
-  "mission-control":
-    repo: https://github.com/toxicwind/mission-control.git
-  "ml-serve":
-    repo: https://github.com/toxicwind/ml-serve.git
-  "muse-cli":
-    repo: https://github.com/toxicwind/muse-cli.git
-  "naming-audit":
-    repo: https://github.com/toxicwind/naming-audit.git
+
+submodules:
+  "submodules/phone-sentinel":
+    repo: /home/toxic/phone-sentinel
+
+tools:
+  "tools/c8":
+    repo: https://github.com/bcoe/c8.git
+
+websites:
+  "websites/arlockworks/app":
+    repo: https://github.com/toxicwind/arlockworks-next.git
+  "websites/arlockworks/main":
+    repo: https://github.com/toxicwind/arlockworks-core.git
+  "websites/effusionlabs/main":
+    repo: https://github.com/toxicwind/effusion-labs.git
+  "websites/effusionlabs/tickets":
+    repo: https://github.com/toxicwind/effusion-labs-tickets.git
+
+nim:
   "nim-inkling-api-research":
     repo: https://github.com/toxicwind/nim-inkling-api-research.git
   "nim-omnibus":
@@ -328,6 +161,198 @@ projects:
     repo: https://github.com/tibbee/pi-nvidia-nim-provider
   "nim-repos/xRyul-pi-nvidia-nim":
     repo: https://github.com/xRyul/pi-nvidia-nim
+
+general:
+  "agent-customization-style-guide":
+    repo: https://github.com/toxicwind/agent-customization-style-guide.git
+  "AgentForensics":
+    repo: https://github.com/aparnaa19/AgentForensics.git
+  "agon":
+    repo: https://github.com/toxicwind/agon.git
+  "ai-merge-resolve":
+    repo: https://github.com/toxicwind/ai-merge-resolve.git
+  "android-fleet":
+    repo: https://github.com/toxicwind/android-fleet.git
+  "antilogos":
+    repo: https://github.com/toxicwind/antilogos.git
+  "arroyo":
+    repo: https://github.com/toxicwind/arroyo.git
+  "ast-grep-rules":
+    repo: https://github.com/toxicwind/ast-grep-rules.git
+  "auto1m":
+    repo: https://github.com/toxicwind/auto1m.git
+  "awesome-free-ai-coding":
+    repo: https://github.com/toxicwind/awesome-free-ai-coding.git
+  "bash-style-guide":
+    repo: https://github.com/toxicwind/bash-style-guide.git
+  "bench-radar":
+    repo: https://github.com/toxicwind/bench-radar.git
+  "borrowed/herdr":
+    repo: https://github.com/ogulcancelik/herdr.git
+  "borrowed/loom":
+    repo: https://github.com/rjwalters/loom.git
+  "bridge":
+    repo: https://github.com/toxicwind/bridge.git
+  "bugbounty":
+    repo: https://github.com/toxicwind/bugbounty.git
+  "campfire":
+    repo: https://github.com/toxicwind/campfire.git
+  "chronos-forge":
+    repo: https://github.com/toxicwind/chronos-forge.git
+  "classifier":
+    repo: https://github.com/toxicwind/classifier.git
+  "classifier-preflight":
+    repo: https://github.com/toxicwind/classifier-preflight.git
+  "codebase-memory":
+    repo: https://github.com/toxicwind/codebase-memory.git
+  "computer-use-linux":
+    repo: https://github.com/toxicwind/computer-use-linux.git
+  "cron-trust":
+    repo: https://github.com/toxicwind/cron-trust.git
+  "dashboard":
+    repo: https://github.com/toxicwind/dashboard.git
+  "dedicated/dedicated-server-ops":
+    repo: https://github.com/toxicwind/dedi-ops.git
+  "didymos":
+    repo: https://github.com/toxicwind/didymos.git
+  "disparate-latent-experiment":
+    repo: https://github.com/toxicwind/disparate-latent-experiment.git
+  "doorbell":
+    repo: https://github.com/toxicwind/doorbell.git
+  "dots-client":
+    repo: https://github.com/toxicwind/dots-client.git
+  "drover":
+    repo: https://github.com/toxicwind/drover.git
+  "dualspace-ast-bm25-hybrid":
+    repo: https://github.com/toxicwind/dualspace-ast-bm25-hybrid.git
+  "duel/vendor/argus-ai-debate":
+    repo: https://github.com/Argus-Framework/argus-ai-debate.git
+  "duel/vendor/ChatEval":
+    repo: https://github.com/thunlp/ChatEval.git
+  "duel/vendor/debate-or-vote":
+    repo: https://github.com/deeplearning-wisc/debate-or-vote.git
+  "duel/vendor/llm_debate":
+    repo: https://github.com/ucl-dark/llm_debate.git
+  "emergent":
+    repo: https://github.com/toxicwind/emergent.git
+  "examples":
+    repo: https://github.com/toxicwind/examples.git
+  "extensions":
+    repo: https://github.com/toxicwind/extensions.git
+  "extensions/drover":
+    repo: https://github.com/toxicwind/drover.git
+  "fanout":
+    repo: https://github.com/toxicwind/fanout.git
+  "fast-race":
+    repo: https://github.com/toxicwind/fast-race.git
+  "ferret-den":
+    repo: https://github.com/toxicwind/ferret-den.git
+  "ffs-diff":
+    repo: https://github.com/toxicwind/ffs-diff.git
+  "fleet":
+    repo: https://github.com/toxicwind/fleet.git
+  "fleet-chat":
+    repo: https://github.com/toxicwind/fleet-chat.git
+  "fleet-ops":
+    repo: https://github.com/toxicwind/fleet-ops.git
+  "fleetd":
+    repo: https://github.com/toxicwind/fleetd.git
+  "flicker":
+    repo: https://github.com/toxicwind/flicker.git
+  "freebuffet":
+    repo: https://github.com/toxicwind/freebuffet.git
+  "furlong/vendor/coder_reviewer_reranking":
+    repo: https://github.com/facebookresearch/coder_reviewer_reranking.git
+  "furlong/vendor/RACE":
+    repo: https://github.com/jszheng21/RACE.git
+  "furlong/vendor/speed-run":
+    repo: https://github.com/2389-research/speed-run.git
+  "furlong/vendor/SRank-CodeRanker":
+    repo: https://github.com/FSoft-AI4Code/SRank-CodeRanker.git
+  "gavel":
+    repo: https://github.com/toxicwind/gavel.git
+  "gavel/vendor/agora":
+    repo: https://github.com/KAIJUJO/Agora.git
+  "gavel/vendor/auction-agent11":
+    repo: https://github.com/wushuchris/11-distributed-auction-task-allocation-agent.git
+  "gavel/vendor/contract-net-router":
+    repo: https://github.com/M00C1FER/contract-net-router.git
+  "gayxxx-estate":
+    repo: https://github.com/toxicwind/gayxxx-estate.git
+  "ghq":
+    repo: https://github.com/toxicwind/ghq.git
+  "github-search":
+    repo: https://github.com/toxicwind/github-search.git
+  "gito":
+    repo: https://github.com/toxicwind/gito.git
+  "godzilla-llama.cpp":
+    repo: https://github.com/toxicwind/godzilla-llama.cpp.git
+  "hatch":
+    repo: https://github.com/toxicwind/hatch.git
+  "hatch-decode":
+    repo: https://github.com/toxicwind/hatch-decode.git
+  "hatch/kite-cli":
+    repo: https://github.com/toxicwind/kite-cli.git
+  "herdproof-bun":
+    repo: https://github.com/toxicwind/herdproof-bun.git
+  "hf-model-sync":
+    repo: https://github.com/toxicwind/hf-model-sync.git
+  "host-proof":
+    repo: https://github.com/toxicwind/host-proof.git
+  "identity-router":
+    repo: https://github.com/toxicwind/identity-router.git
+  "keep":
+    repo: https://github.com/toxicwind/keep.git
+  "kimi-auto":
+    repo: https://github.com/toxicwind/kimi-auto.git
+  "kimi-claw":
+    repo: https://github.com/toxicwind/kimi-claw.git
+  "kodi-fleet":
+    repo: https://github.com/toxicwind/kodi-fleet.git
+  "lasso":
+    repo: https://github.com/toxicwind/lasso.git
+  "leakfix-src":
+    repo: https://github.com/toxicwind/leakfix-src.git
+  "ledger":
+    repo: https://github.com/toxicwind/ledger.git
+  "lib":
+    repo: https://github.com/toxicwind/lib.git
+  "loom":
+    repo: https://github.com/toxicwind/loom.git
+  "matter-server":
+    repo: https://github.com/toxicwind/matter-server.git
+  "maw":
+    repo: https://github.com/toxicwind/maw.git
+  "mcp":
+    repo: https://github.com/toxicwind/mcp.git
+  "mcp/mcp-prompt-injection-detector":
+    repo: https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector.git
+  "mcp/mcpproxy-go":
+    repo: https://github.com/toxicwind/mcpproxy-go.git
+  "mcp/pd-mcp-standalone":
+    repo: https://github.com/toxicwind/pd-mcp.git
+  "mcp/rsync-mcp":
+    repo: https://github.com/toxicwind/rsync-mcp.git
+  "mcpproxy-go":
+    repo: https://github.com/toxicwind/mcpproxy-go.git
+  "mesh":
+    repo: https://github.com/toxicwind/mesh.git
+  "mesh/pylae":
+    repo: https://github.com/toxicwind/flocksync.git
+  "meta-research-toolkit":
+    repo: https://github.com/toxicwind/meta-research-toolkit.git
+  "metaaivm":
+    repo: https://github.com/toxicwind/metaaivm.git
+  "metaaivm-profile":
+    repo: https://github.com/toxicwind/metaaivm-profile.git
+  "metaclaw-runtime":
+    repo: https://github.com/toxicwind/metaclaw-runtime.git
+  "mission-control":
+    repo: https://github.com/toxicwind/mission-control.git
+  "ml-serve":
+    repo: https://github.com/toxicwind/ml-serve.git
+  "naming-audit":
+    repo: https://github.com/toxicwind/naming-audit.git
   "null-g-proxy":
     repo: https://github.com/toxicwind/null-g-proxy.git
   "nuvio":
@@ -340,6 +365,8 @@ projects:
     repo: https://github.com/toxicwind/nvidia-nim-model-probe.git
   "oh-my-pi":
     repo: https://github.com/toxicwind/oh-my-pi.git
+  "olympus":
+    repo: https://github.com/toxicwind/olympus.git
   "OmniRoute":
     repo: https://github.com/toxicwind/OmniRoute.git
   "openfang":
@@ -402,18 +429,12 @@ projects:
     repo: https://github.com/toxicwind/strudel-dev-vite.git
   "strudel-sampler-server-vite":
     repo: https://github.com/toxicwind/strudel-sampler-server-vite.git
-  "submodules/phone-sentinel":
-    repo: /home/toxic/phone-sentinel
   "super-board":
     repo: https://github.com/toxicwind/super-board.git
   "tau-verify":
     repo: https://github.com/toxicwind/tau.git
-  "tau/tau-extensions":
-    repo: https://github.com/toxicwind/tau-extensions.git
   "tok":
     repo: https://github.com/toxicwind/tok.git
-  "tools/c8":
-    repo: https://github.com/bcoe/c8.git
   "toxicwind-repos":
     repo: https://github.com/toxicwind/toxicwind-repos
   "trading-post":
@@ -426,14 +447,6 @@ projects:
     repo: https://github.com/toxicwind/VansRouter.git
   "vendor/tailnet-doctor":
     repo: https://github.com/toxicwind/tailnet-doctor.git
-  "websites/arlockworks/app":
-    repo: https://github.com/toxicwind/arlockworks-next.git
-  "websites/arlockworks/main":
-    repo: https://github.com/toxicwind/arlockworks-core.git
-  "websites/effusionlabs/main":
-    repo: https://github.com/toxicwind/effusion-labs.git
-  "websites/effusionlabs/tickets":
-    repo: https://github.com/toxicwind/effusion-labs-tickets.git
   "wezterm":
     repo: https://github.com/toxicwind/wezterm.git
   "workmux":
