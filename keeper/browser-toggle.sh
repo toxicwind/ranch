@@ -1,6 +1,16 @@
 #!/bin/bash
 # browser-toggle.sh: show/hide the keeper Chromium viewer window via TigerVNC / Hyprland.
 # Connects to the isolated keeper display (Xvnc :99 at 127.0.0.1:5900).
+#
+# Dispatch note: this Hyprland runs an estate Lua config, so `hyprctl dispatch`
+# arguments are evaluated as Lua by hl.dispatch(). Bare Hyprland dispatch words
+# ("movetoworkspacesilent", "focuswindow", ...) are Lua syntax errors (exit 7).
+# Only hl.dsp.* dispatcher expressions work:
+#   hl.dsp.window.move({workspace=<ws>, window="address:0x..."})  -- move a window
+#   hl.dsp.focus({window="address:0x..."})                        -- focus a window
+#   hl.dsp.workspace.toggle_special("<name>")                     -- toggle special ws
+# Errors are surfaced instead of being swallowed by `> /dev/null 2>&1 || true`,
+# which previously hid both the Lua syntax errors and hl.focus "window not found".
 set -u
 
 VNC_PASSWD="/home/toxic/.browserless/vncpasswd"
@@ -31,10 +41,17 @@ if [ -n "$INFO" ]; then
   WS="${INFO##*|}"
   SEL="address:$ADDR"
   if [[ "$WS" == *"special"* ]]; then
-    hyprctl dispatch "hl.dsp.window.move({workspace=\"e+0\", window=\"$SEL\"})" > /dev/null 2>&1 || true
-    hyprctl dispatch "hl.dsp.focus({window=\"$SEL\"})" > /dev/null 2>&1 || true
+    # Hidden on the special:browser scratchpad: bring it back onto the active
+    # workspace and focus it. "e+0" was not a valid workspace and silently
+    # no-oped, which is why the toggle appeared to do nothing.
+    CUR_WS="$(hyprctl activeworkspace -j | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')"
+    hyprctl dispatch "hl.dsp.window.move({workspace=\"$CUR_WS\", window=\"$SEL\"})"
+    hyprctl dispatch "hl.dsp.focus({window=\"$SEL\"})"
   else
-    hyprctl dispatch "hl.dsp.window.move({workspace=\"special:browser\", follow=false, window=\"$SEL\"})" > /dev/null 2>&1 || true
+    # Visible on a normal workspace: park it on special:browser, then toggle
+    # that workspace so the window is actually shown again.
+    hyprctl dispatch "hl.dsp.window.move({workspace=\"special:browser\", window=\"$SEL\"})"
+    hyprctl dispatch 'hl.dsp.workspace.toggle_special("browser")'
   fi
 else
   # Launch TigerVNC viewer connected to keeper

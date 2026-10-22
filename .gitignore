@@ -17,7 +17,11 @@ github_*_pat.json
 *.pcap
 node_modules/
 target/
-dist/
+dist/*
+!dist/*.js
+!dist/*.js.map
+!dist/*.d.ts
+!dist/*.d.ts.map
 .cache/
 .bun/
 
