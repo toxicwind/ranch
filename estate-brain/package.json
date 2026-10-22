@@ -1,0 +1,50 @@
+{
+  "name": "@estate/estate-brain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Estate-brain: the fleet's single source of truth for crew rosters, personas, signing identities, keys, and tokens. Consolidates the old squawk-persona registry with the corral crews roster/personas/identity-specs. Regenerates $SQUAWK_ROOT/runners.yml and exports runtime env for agents. Zero hard deps, Bun.",
+  "license": "MIT",
+  "engines": {
+    "bun": ">=1.4.4",
+    "node": ">=20"
+  },
+  "packageManager": "bun@1.4.4",
+  "bin": {
+    "estate-brain": "./bin/estate-brain.ts",
+    "squawk-persona": "./bin/estate-brain.ts"
+  },
+  "scripts": {
+    "validate": "bun run typecheck && bun run test:coverage && bun run lint",
+    "typecheck": "tsgo --noEmit -p tsconfig.json",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "coverage:ratchet": "bun test --coverage --coverage.reporter=json-summary && bun x vyper-spec coverage:ratchet",
+    "lint": "bun x biome check src tests bin",
+    "format": "bun x biome format --write src tests bin",
+    "persona": "bun bin/estate-brain.ts"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "picocolors": "^1.1.0",
+    "yaml": "^2.6.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "*",
+    "@types/bun": "^1.4.0",
+    "@types/node": "^22.0.0",
+    "@typescript/native-preview": "*",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "bun",
+    "squawk",
+    "persona",
+    "identity",
+    "fleet",
+    "keys",
+    "tokens",
+    "runners"
+  ]
+}
