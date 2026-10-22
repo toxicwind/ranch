@@ -1,7 +1,8 @@
 {
   "project": "ranch",
   "development": {
-    "profile": "shared-checkout-merge"
+    "profile": "shared-checkout-merge",
+    "guard": { "unknownActor": "person" }
   },
   "validationMatrix": {
     "scopes": {
