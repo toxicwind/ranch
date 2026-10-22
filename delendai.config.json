@@ -1,0 +1,16 @@
+{
+  "project": "ranch",
+  "development": {
+    "profile": "shared-checkout-merge"
+  },
+  "validationMatrix": {
+    "scopes": {
+      "cookie-vault": [
+        { "command": "bun --check src/cli.js", "expect": "exit0" },
+        { "command": "bun --check src/keeper-cdp.js", "expect": "exit0" },
+        { "command": "bun test", "expect": "exit0" }
+      ],
+      "default": [{ "command": "git diff --check", "expect": "exit0" }]
+    }
+  }
+}

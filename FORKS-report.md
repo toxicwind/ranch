@@ -1,14 +1,15 @@
-# ranch/* fork audit (generated 2026-10-22T02:13:38.955Z)
+# ranch/* fork audit (generated 2026-10-21T06:16:51.454Z)
 
-206 immediate subdirs; **142** have an obvious upstream reference.
+206 immediate subdirs; **143** have an obvious upstream reference.
 
 By source:
-  - **141** .gitmodules
+  - **142** .gitmodules
   - **1** Cargo.toml repository
 
 | dir | upstream | source | origin remote |
 |---|---|---|---|
 | `agent-customization-style-guide` | [github.com/toxicwind/agent-customization-style-guide](https://github.com/toxicwind/agent-customization-style-guide) | .gitmodules | — |
+| `agent-dashboard` | [github.com/toxicwind/agent-dashboard](https://github.com/toxicwind/agent-dashboard) | .gitmodules | — |
 | `AgentForensics` | [github.com/aparnaa19/AgentForensics](https://github.com/aparnaa19/AgentForensics) | .gitmodules | — |
 | `agon` | [github.com/toxicwind/agon](https://github.com/toxicwind/agon) | .gitmodules | — |
 | `ai-merge-resolve` | [github.com/toxicwind/ai-merge-resolve](https://github.com/toxicwind/ai-merge-resolve) | .gitmodules | — |
@@ -177,7 +178,6 @@ By source:
 | `qed` | — | — | — |
 | `ranch-analyze` | — | — | — |
 | `range` | — | — | — |
-| `range-ui.tmp` | — | — | — |
 | `rankings` | — | — | — |
 | `rawhide` | — | — | — |
 | `rename-roundup` | — | — | — |
