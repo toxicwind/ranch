@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-22T02:13:38.955Z",
+  "generated": "2026-10-21T06:16:51.454Z",
   "total": 206,
-  "withUpstream": 142,
+  "withUpstream": 143,
   "infos": [
     {
       "name": "AgentForensics",
@@ -42,6 +42,18 @@
     {
       "name": "agent-customization-style-guide",
       "upstream": "https://github.com/toxicwind/agent-customization-style-guide",
+      "upstreamSource": ".gitmodules",
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": true,
+      "sizeBytes": 0,
+      "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "agent-dashboard",
+      "upstream": "https://github.com/toxicwind/agent-dashboard",
       "upstreamSource": ".gitmodules",
       "remoteOrigin": null,
       "hasGit": false,
@@ -298,7 +310,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 100414,
+      "sizeBytes": 99860,
       "fileCount": 46,
       "signals": [],
       "signalTotal": 0
@@ -1018,7 +1030,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 296934,
+      "sizeBytes": 295493,
       "fileCount": 58,
       "signals": [],
       "signalTotal": 0
@@ -1246,7 +1258,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 73791,
+      "sizeBytes": 73237,
       "fileCount": 45,
       "signals": [],
       "signalTotal": 0
@@ -1606,8 +1618,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 703732,
-      "fileCount": 69,
+      "sizeBytes": 383472,
+      "fileCount": 67,
       "signals": [],
       "signalTotal": 0
     },
@@ -1762,18 +1774,6 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 0,
-      "fileCount": 0,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "range-ui.tmp",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
       "sizeBytes": 185579607,
       "fileCount": 333,
       "signals": [],
@@ -1846,8 +1846,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 3722901,
-      "fileCount": 128,
+      "sizeBytes": 3660967,
+      "fileCount": 90,
       "signals": [],
       "signalTotal": 0
     },
@@ -1894,8 +1894,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 8674496,
-      "fileCount": 643,
+      "sizeBytes": 8612460,
+      "fileCount": 605,
       "signals": [],
       "signalTotal": 0
     },
@@ -2074,7 +2074,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 82408,
+      "sizeBytes": 81854,
       "fileCount": 46,
       "signals": [],
       "signalTotal": 0
@@ -2242,7 +2242,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 102041,
+      "sizeBytes": 101487,
       "fileCount": 49,
       "signals": [],
       "signalTotal": 0

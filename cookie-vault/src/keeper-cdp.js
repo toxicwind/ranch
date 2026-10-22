@@ -1,5 +1,7 @@
 "use strict";
-// src/keeper-cdp.js — minimal CDP client for the keeper Chromium (:9223).
+// src/keeper-cdp.js — minimal CDP client for the keeper Chromium.
+// The keeper's CDP port is the estate SSOT value (default :25154), passed in
+// via `cdpUrl` from cli.js — never hardcode 9223 here.
 // Grabs and restores cookies + DOMStorage/localStorage over the browser target.
 
 let callCounter = 10;

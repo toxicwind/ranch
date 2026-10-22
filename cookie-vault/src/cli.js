@@ -20,7 +20,15 @@ const {
 } = require("./vault");
 const { statSync, existsSync, join } = require("node:fs");
 
-const CDP_URL = process.env.BROWSER_KEEPER_CDP || "http://127.0.0.1:9223";
+// Keeper Chromium CDP port. The keeper's chromium was moved off the archaic
+// 9223 fallback onto the 25xxx estate range (config/ports.env:
+// BROWSER_KEEPER_CDP_PORT=25154), so this MUST default to that SSOT port, not
+// 9223 — writing cookies to a stray :9223 test instance silently no-ops.
+// Resolution: explicit BROWSER_KEEPER_CDP wins, then BROWSER_KEEPER_CDP_PORT,
+// then the SSOT default.
+const CDP_PORT = process.env.BROWSER_KEEPER_CDP_PORT || "25154";
+const CDP_URL =
+  process.env.BROWSER_KEEPER_CDP || `http://127.0.0.1:${CDP_PORT}`;
 const FF_PROFILE =
   process.env.FF_PROFILE ||
   "/home/toxic/.mozilla/firefox/7c8v85fg.default-nightly";

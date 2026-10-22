@@ -33,13 +33,9 @@ is the control plane. Both live here, built and versioned together.
 - `pitchfork.fragment.toml` — merge into `[daemons.browser-keeper]` in
   `/home/toxic/estate/pitchfork.toml` (owned sequence from
   `/home/toxic/estate`).
-- `browser-toggle.sh` — shows/hides the **VNC viewer** window (the TigerVNC
-  client the Architect looks at, which renders the isolated keeper display).
-  Not legacy: the keeper's Chromium is on Xvnc :99, but the *viewer* that
-  mirrors it is a real Hyprland window, and this toggles it between the
-  active workspace and the `special:browser` scratchpad. Dispatch goes through
-  `hl.dsp.*` Lua expressions because this Hyprland runs a Lua config (bare
-  Hyprland dispatch words are Lua syntax errors here).
+- `browser-toggle.sh` — LEGACY: showed/hid the keeper window via the Hyprland
+  scratchpad. Dead since the keeper moved to the isolated Xvnc :99 display
+  (no Hyprland window exists any more); kept for reference.
 - `src/` — the MCP server source (`index.ts`, `persistent.ts`, `client.ts`,
   `types.ts`, `simple-server.ts`).
 - `dist/` — `tsc` build output (gitignored; built on the box, never committed).
