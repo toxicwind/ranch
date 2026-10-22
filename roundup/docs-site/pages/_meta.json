@@ -1,9 +1,5 @@
 {
-  "index": "Overview",
-  "benchmarks": {
-    "title": "Rankings",
-    "type": "page"
-  },
+  "index": "Rankings",
   "radar": {
     "title": "Radar",
     "type": "page"
