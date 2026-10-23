@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-22T02:13:38.955Z",
+  "generated": "2026-10-23T04:10:02.478Z",
   "total": 206,
-  "withUpstream": 142,
+  "withUpstream": 141,
   "infos": [
     {
       "name": "AgentForensics",
@@ -42,18 +42,6 @@
     {
       "name": "agent-customization-style-guide",
       "upstream": "https://github.com/toxicwind/agent-customization-style-guide",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": true,
-      "sizeBytes": 0,
-      "fileCount": 0,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "agon",
-      "upstream": "https://github.com/toxicwind/agon",
       "upstreamSource": ".gitmodules",
       "remoteOrigin": null,
       "hasGit": false,
@@ -346,8 +334,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 92327,
-      "fileCount": 49,
+      "sizeBytes": 95622,
+      "fileCount": 50,
       "signals": [],
       "signalTotal": 0
     },
@@ -442,7 +430,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4228,
+      "sizeBytes": 4806,
       "fileCount": 2,
       "signals": [],
       "signalTotal": 0
@@ -504,6 +492,18 @@
       "isSubmodule": true,
       "sizeBytes": 17962,
       "fileCount": 5,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "estate-brain",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 18699,
+      "fileCount": 3,
       "signals": [],
       "signalTotal": 0
     },
@@ -1894,8 +1894,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 8674496,
-      "fileCount": 643,
+      "sizeBytes": 8797106,
+      "fileCount": 644,
       "signals": [],
       "signalTotal": 0
     },
@@ -2110,8 +2110,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 66203,
-      "fileCount": 10,
+      "sizeBytes": 67163,
+      "fileCount": 11,
       "signals": [],
       "signalTotal": 0
     },
@@ -2314,8 +2314,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 49503,
-      "fileCount": 6,
+      "sizeBytes": 72468,
+      "fileCount": 7,
       "signals": [],
       "signalTotal": 0
     },

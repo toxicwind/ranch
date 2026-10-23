@@ -1,16 +1,15 @@
-# ranch/* fork audit (generated 2026-10-22T02:13:38.955Z)
+# ranch/* fork audit (generated 2026-10-23T04:10:02.478Z)
 
-206 immediate subdirs; **142** have an obvious upstream reference.
+206 immediate subdirs; **141** have an obvious upstream reference.
 
 By source:
-  - **141** .gitmodules
+  - **140** .gitmodules
   - **1** Cargo.toml repository
 
 | dir | upstream | source | origin remote |
 |---|---|---|---|
 | `agent-customization-style-guide` | [github.com/toxicwind/agent-customization-style-guide](https://github.com/toxicwind/agent-customization-style-guide) | .gitmodules | — |
 | `AgentForensics` | [github.com/aparnaa19/AgentForensics](https://github.com/aparnaa19/AgentForensics) | .gitmodules | — |
-| `agon` | [github.com/toxicwind/agon](https://github.com/toxicwind/agon) | .gitmodules | — |
 | `ai-merge-resolve` | [github.com/toxicwind/ai-merge-resolve](https://github.com/toxicwind/ai-merge-resolve) | .gitmodules | — |
 | `android-fleet` | [github.com/toxicwind/android-fleet](https://github.com/toxicwind/android-fleet) | .gitmodules | — |
 | `antilogos` | [github.com/toxicwind/antilogos](https://github.com/toxicwind/antilogos) | .gitmodules | — |
@@ -159,6 +158,7 @@ By source:
 | `data` | — | — | — |
 | `dedicated` | — | — | — |
 | `docs` | — | — | — |
+| `estate-brain` | — | — | — |
 | `feedlot-mcp` | — | — | — |
 | `kappa` | — | — | — |
 | `keeper` | — | — | — |
