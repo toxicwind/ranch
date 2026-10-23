@@ -1,0 +1,148 @@
+# estate-scripts standard sensitive & ephemeral patterns added by auditor
+.secrets
+*.key
+*.pat
+github_*_pat.json
+*.env.local
+*.jsonl
+*.db
+# ... except the flicker migration-test seed fixture (CI needs it)
+!flicker/server/store/datastore/migration/test-files/sqlite.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.sock
+*.log
+*.pcap
+node_modules/
+target/
+dist/
+.cache/
+.bun/
+
+# mcpproxy-go (barn/gatehouse) rewrites its EFFECTIVE config on every start,
+# re-materializing the live api_key and per-server env into the file. Only the
+# scrubbed .dist template is meant to be tracked; this was committed once by
+# mistake and is the reason the key leaked to a public repo.
+**/mcp_config.json
+**/mcp_config.json.bak*
+**/mcp_config.example.json
+
+# CAUTION -- the three rules above are INERT for any path already in the index.
+# A tracked file is never ignored, which is precisely how the live key got in.
+# `mcp_config.example.json` is scrubbed and intentionally tracked (its rule only
+# blocks new siblings). The other five tracked paths under barn/ were not, and
+# must be `git rm --cached`'d before barn/ is first pushed -- that stages a
+# tip-level deletion, which is why it is worth doing while barn/ is unpushed.
+#
+# Compiled gateway binaries. These are in-tree `make build` products; the
+# deployed build is projects/range/bin/gatehouse, owned and ignored by the
+# estate-scripts monorepo. mcpproxy-go alone was 49.5 MiB of build output.
+/barn/gatehouse/mcpproxy-go
+/barn/gatehouse/mcpproxy
+/barn/gatehouse/mcpproxy-tray
+/barn/gatehouse/mcpproxy-server
+/barn/gatehouse/mcpproxy-dev
+
+# Generated symbol/search indexes -- same class as the .ffs/ cache below.
+# .project_map.json carries a "generatedAt" stamp; index.bleve/store/root.bolt
+# is a bbolt database. Both are rebuilt from source on demand.
+**/index.bleve/
+**/.project_map.json
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# ffs index cache (30MB+ of generated symbol index)
+.ffs/
+
+# Smithers agent scratch output: per-run `*.html` reports and logs. Generated
+# on every agent sweep, never hand-edited. The sibling rule in
+# estate/.gitignore:1252 does NOT cover these -- ranch is its own git root
+# (/home/toxic/estate/ranch/.git), and an ignore rule only applies within the
+# root that declares it. Without this, agent scratch reports get staged.
+.smithers/
+
+# editor/agent scratch backups
+*.bak.[0-9]*
+
+# Nested checkouts that carry their own .git but are NOT registered in
+# .gitmodules. Committing them would add gitlinks with no URL entry, which
+# breaks `git clone --recursive`. They are managed as independent repos.
+/vansrouter/
+/tau/
+/boundless/
+/sigma/
+/omp-semantic-policy/
+/barn/woodpecker/
+/gear/
+/kitty-mcp-server/
+/wezterm/
+/wezterm-agent-mcp/
+
+# Runtime session state & scratch dumps
+yote/sessions/
+*.b64
+
+# `corral` and `paddock` are ALSO nested checkouts, but unlike the
+# four paths above they are tracked on purpose: each is a gitlink (mode
+# 160000) with a path and url declared in .gitmodules, so `git clone
+# --recursive` can resolve them. Do not add them here -- an ignore rule does
+# not apply to a tracked gitlink, and removing their .gitmodules entries
+# would reintroduce `fatal: no submodule mapping found in .gitmodules`.
+
+# ─── nuvio (android-fleet/nuvio) ──────────────────────────────────────────
+# Nuvio is an LG webOS TV media theater, a fleet target, not an ADB one --
+# it deploys over the webOS `ares` CLI instead. It lives here because the
+# fleet is the collection of Chris's own screens, not because webOS is
+# Android.
+#
+# `nuvio-platform/submodules/` holds 11 vendored third-party checkouts
+# (NuvioWeb, NuvioTVWebOS, NuvioWebTVInstaller, comet, p2p-media-loader,
+# hlsjs-p2p-engine, subtitle-translator, llm-subtrans, xiu, webos-homebrew,
+# docchi-addon) declared in nuvio-platform/.gitmodules. Those URLs belong to
+# third parties, not to this monorepo, so they are managed as independent
+# checkouts rather than committed as gitlinks here.
+/android-fleet/nuvio/nuvio-platform/submodules/
+
+# The same 11 projects also arrive as source archives, unpacked on demand.
+# 49 MB of vendored tarballs duplicating the checkouts above.
+/android-fleet/nuvio/nuvio-platform/*.tar.gz
+
+# shell/ii is a nested standalone checkout (ex-submodule; its gitdir
+# ranch/.git/modules/shell/estate-scripts-end4 is gone and .gitmodules no
+# longer declares it). Not ranch content - keep it out of the tree.
+shell/ii/
+
+# ranch-analyze/config/ holds swept-in tau runtime log dumps (http-400-request
+# JSONs). Runtime state with live credentials - never committed.
+ranch-analyze/config/
+
+# wezterm/ is a local 6.8GB vendored build tree - never committed.
+wezterm/
+
+# ── credentials / sessions (purge_secrets_final) ──
+config/.secrets
+config/.secrets.*
+config/secrets/
+config/tau/sessions/
+**/tau/sessions/
+*.pem
+credentials.json
+service-account*.json
+models/   # 137GB model weights (runtime data, not source)
+kite/worktrees/   # worktree state, not kite source
+hatch/worktrees/   # worktree state (leak source)
+
+# hodos is its own repo (toxicwind/hodos) — canonical tree lives there
+/hodos/
+.envrc
+
+# security + build noise (ranch takeover 2026-10-21)
+rustdesk-server/id_ed25519
+rustdesk-server/id_ed25519.pub
+*.tsbuildinfo
+.next/
+.moon/cache/

@@ -1,0 +1,10 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+language: 'typescript'
+layer: 'application'
+# The main extension src/ was never committed (only the built .vsix);
+# the sidecar is the buildable piece.
+tasks:
+  build:
+    command: 'bun run sidecar:build'
+    inputs: ['sidecar/src/**/*', 'sidecar/esbuild.js', 'package.json']
+    outputs: ['sidecar/dist']

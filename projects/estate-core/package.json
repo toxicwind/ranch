@@ -1,0 +1,16 @@
+{
+  "name": "estate-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Estate Core — private project for the estate runtime",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "bun test",
+    "test:unit": "bun test tests/unit/",
+    "test:integration": "bun test tests/integration/",
+    "test:max": "bun test --coverage"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

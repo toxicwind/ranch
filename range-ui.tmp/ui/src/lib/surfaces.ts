@@ -1,0 +1,647 @@
+// surfaces: the inventory of every browser-reachable service in the estate-scripts
+// stack, so the master dashboard can present the whole stack as one set of
+// tabs instead of N half-wired dashboards that each know about one daemon.
+//
+// Provenance: ports and health paths are transcribed from the `[daemons.*]`
+// blocks in `estate-scripts/pitchfork.toml`, which is the authoritative service
+// list. Daemon names are carried through verbatim so a tab can name the thing
+// that has to be running for it to answer.
+//
+// A surface is `ui` when something serves an actual page, and `api` when the
+// port only speaks HTTP. Embedding an api surface in a frame would just render
+// raw JSON, so those are listed with live health and open in a new tab instead.
+// The distinction is about what a human gets out of the tab, not about whether
+// the service exists.
+
+import { loopback } from "./ports";
+
+export type SurfaceKind = "ui" | "api";
+
+export interface Surface {
+	/** Stable id, also the tab value. */
+	id: string;
+	label: string;
+	/** Grouping section in the tab strip. */
+	group: string;
+	/** Absolute origin. Same-origin for herd, which this app already proxies. */
+	origin: string;
+	kind: SurfaceKind;
+	/** The pitchfork daemon that serves it, when there is one. */
+	daemon?: string;
+	/** Path probed for health. Defaults to "/". */
+	healthPath?: string;
+	/**
+	 * Path embedded in the tab's iframe. Distinct from `healthPath`: a service
+	 * is usually healthy at `/health` but serves its page at `/`, and framing
+	 * the health endpoint shows raw JSON instead of the app. Defaults to "/".
+	 */
+	pagePath?: string;
+	/** Shown in the tab's tooltip and in the service detail. */
+	description: string;
+}
+
+export const SURFACE_GROUPS = [
+	"Models",
+	"Fleet",
+	"Mesh",
+	"Search",
+	"Ops",
+	"Automation",
+] as const;
+
+export type SurfaceGroup = (typeof SURFACE_GROUPS)[number];
+
+export const SURFACES: readonly Surface[] = [
+	// ── Models & inference ────────────────────────────────────────────────
+	{
+		id: "herd",
+		label: "Herd",
+		group: "Models",
+		// herd is the herd-shaped API this dashboard already talks to
+		// through apiBase, so it has no separate page to embed.
+		origin: "",
+		kind: "api",
+		daemon: "herd",
+		healthPath: "/health",
+		description: "herd: the local model gateway this dashboard drives.",
+	},
+	{
+		id: "flock",
+		label: "Flock",
+		group: "Models",
+		origin: loopback("FLOCK_PORT"),
+		kind: "api",
+		daemon: "flock",
+		healthPath: "/health",
+		description: "Cloud provider gateway — the other half of the model plane.",
+	},
+	{
+		id: "beellama",
+		label: "Beellama",
+		group: "Models",
+		origin: loopback("BEELLAMA_PORT"),
+		kind: "ui",
+		daemon: "beellama-fast",
+		healthPath: "/health",
+		description: "llama.cpp server front end — full llama-server chat UI.",
+	},
+	{
+		id: "model-guard",
+		label: "Model Guard",
+		group: "Models",
+		origin: loopback("MODEL_GUARD_PORT"),
+		kind: "api",
+		daemon: "model-guard",
+		healthPath: "/v1/models",
+		description: "Proxies :25100 and rewrites chat bodies per model constraints.",
+	},
+	{
+		id: "fleet-feed",
+		label: "Fleet Feed",
+		group: "Fleet",
+		origin: loopback("RUST_WEB_BACKEND_PORT"),
+		kind: "ui",
+		daemon: "fleet-feed",
+		healthPath: "/health",
+		description:
+			"Fleet roster + per-agent history + live ws feed. Was rust-web's rust_algo_web/src/agents.rs, ported to TS 2026-10-02; the Rust tree had no Cargo.toml left, so the launcher could only fail.",
+	},
+	{
+		id: "fleet-ui",
+		label: "Fleet UI",
+		group: "Fleet",
+		origin: loopback("FLEET_UI_PORT"),
+		kind: "ui",
+		daemon: "fleet-ui",
+		description: "Squawk shell with fleet as one tab among channels.",
+	},
+	{
+		id: "ml-serve",
+		label: "ML Serve",
+		group: "Models",
+		origin: loopback("ML_SERVE_PORT"),
+		kind: "api",
+		daemon: "ml-serve",
+		healthPath: "/health",
+		description: "Model serving for the algo side.",
+	},
+
+	// ── Fleet & agents ────────────────────────────────────────────────────
+	{
+		id: "tau",
+		label: "Tau",
+		group: "Fleet",
+		origin: loopback("TAU_CHUTE_PORT"),
+		kind: "ui",
+		daemon: "tau",
+		description: "The agent engine this session is running inside.",
+	},
+	{
+		id: "agent-viewer",
+		label: "Agent Viewer",
+		group: "Fleet",
+		origin: "http://127.0.0.1:6080",
+		kind: "ui",
+		daemon: "agent-viewer",
+		description: "noVNC view into the agent desktop.",
+	},
+	{
+		id: "hindsight",
+		label: "Hindsight",
+		group: "Fleet",
+		origin: loopback("HINDSIGHT_API_PORT"),
+		kind: "ui",
+		daemon: "hindsight",
+		healthPath: "/health",
+		description: "Memory / recall service for the agent fleet.",
+	},
+	{
+		id: "kimi-code",
+		label: "Kimi Code",
+		group: "Fleet",
+		origin: loopback("KIMI_CODE_PORT"),
+		kind: "api",
+		daemon: "kimi-code",
+		healthPath: "/health",
+		description: "Kimi coding agent service.",
+	},
+	{
+		id: "kimi-audit",
+		label: "Kimi Audit",
+		group: "Fleet",
+		origin: loopback("KIMI_AUDIT_DASH_PORT"),
+		kind: "ui",
+		daemon: "kimi-audit-dash",
+		healthPath: "/health",
+		description: "Audit dashboard for the kimi auto runs.",
+	},
+	{
+		id: "byte-vision",
+		label: "Byte Vision",
+		group: "Fleet",
+		origin: loopback("BYTE_VISION_PORT"),
+		kind: "api",
+		daemon: "byte-vision",
+		healthPath: "/health",
+		description: "Vision/OCR service.",
+	},
+	{
+		id: "oracle-core",
+		label: "Oracle",
+		group: "Fleet",
+		origin: loopback("ORACLE_CORE_PORT"),
+		kind: "api",
+		daemon: "oracle-core",
+		healthPath: "/health",
+		description: "Oracle market core.",
+	},
+	{
+		id: "coyote",
+		label: "Coyote",
+		group: "Fleet",
+		origin: loopback("COYOTE_PORT"),
+		kind: "api",
+		daemon: "coyote",
+		healthPath: "/health",
+		description: "Coyote service.",
+	},
+	{
+		id: "toolcall-llm",
+		label: "Toolcall LLM",
+		group: "Fleet",
+		origin: loopback("TOOLCALL_PORT"),
+		kind: "api",
+		daemon: "toolcall-llm",
+		healthPath: "/health",
+		description: "Tool-calling LLM shim.",
+	},
+
+	// ── Mesh & routing ────────────────────────────────────────────────────
+	{
+		id: "gatehouse",
+		label: "Gatehouse",
+		group: "Mesh",
+		origin: loopback("MCPPROXY_GO_PORT"),
+		kind: "ui",
+		daemon: "gatehouse",
+		healthPath: "/health",
+		description: "MCP gateway and its web control panel.",
+	},
+	{
+		id: "mesh-hub",
+		label: "Mesh Hub",
+		group: "Mesh",
+		origin: loopback("MESH_HUB_PORT"),
+		kind: "api",
+		daemon: "mesh-hub",
+		healthPath: "/health",
+		description: "Agent mesh hub.",
+	},
+	{
+		id: "mesh-landing",
+		label: "Mesh Landing",
+		group: "Mesh",
+		origin: loopback("MESH_LANDING_PORT"),
+		kind: "ui",
+		daemon: "mesh-landing",
+		healthPath: "/health",
+		description: "Landing page for the mesh fleet.",
+	},
+	{
+		id: "vansrouter",
+		label: "VansRouter",
+		group: "Mesh",
+		origin: loopback("VANSROUTER_PORT"),
+		kind: "ui",
+		daemon: "vansrouter",
+		healthPath: "/api/health",
+		description: "Model router control plane.",
+	},
+	{
+		id: "yote",
+		label: "Yote",
+		group: "Mesh",
+		origin: loopback("YOTE_PORT"),
+		kind: "api",
+		daemon: "yote",
+		healthPath: "/health",
+		description: "Yote fleet bus.",
+	},
+	{
+		id: "estate-scripts-chat",
+		label: "estate-scripts Chat",
+		group: "Mesh",
+		origin: loopback("estate-scripts_CHAT_PORT"),
+		kind: "ui",
+		daemon: "estate-scripts-chat",
+		healthPath: "/health",
+		description: "First-class fleet chat plane.",
+	},
+	{
+		id: "matter",
+		label: "Matter",
+		group: "Mesh",
+		origin: loopback("MATTER_SERVER_PORT"),
+		kind: "api",
+		daemon: "matter-server",
+		healthPath: "/health",
+		description: "Matter server.",
+	},
+	{
+		id: "nginx",
+		label: "Nginx",
+		group: "Mesh",
+		origin: loopback("NGINX_PORT"),
+		kind: "api",
+		daemon: "nginx",
+		description: "Front reverse proxy for the stack.",
+	},
+
+	// ── Search & knowledge ────────────────────────────────────────────────
+	{
+		id: "search-ui",
+		label: "Search",
+		group: "Search",
+		origin: loopback("GHAS_FRONTEND_PORT"),
+		kind: "ui",
+		daemon: "search-ui",
+		description: "Code and document search UI.",
+	},
+	{
+		id: "search-api",
+		label: "Search API",
+		group: "Search",
+		origin: loopback("GHAS_API_PORT"),
+		kind: "api",
+		daemon: "search-api",
+		healthPath: "/health",
+		description: "Backend behind the search UI.",
+	},
+	{
+		id: "codebase-memory",
+		label: "Codebase Memory",
+		group: "Search",
+		origin: loopback("CODEBASE_MEMORY_PORT"),
+		kind: "api",
+		daemon: "codebase-memory",
+		description: "Repository memory index.",
+	},
+	{
+		id: "qdrant",
+		label: "Qdrant",
+		group: "Search",
+		origin: loopback("QDRANT_PORT"),
+		kind: "api",
+		daemon: "qdrant",
+		description: "Vector store for recall and memory.",
+	},
+	{
+		id: "hf-downloader",
+		label: "HF Downloader",
+		group: "Search",
+		origin: loopback("HF_DOWNLOADER_PORT"),
+		kind: "api",
+		daemon: "hf-downloader",
+		healthPath: "/api/health",
+		description: "Hugging Face asset fetcher.",
+	},
+
+	// ── Ops & observability ───────────────────────────────────────────────
+	{
+		id: "openfang",
+		label: "OpenFang",
+		group: "Ops",
+		origin: loopback("OPENFANG_KERNEL_PORT"),
+		kind: "api",
+		daemon: "openfang",
+		healthPath: "/api/health",
+		description: "OpenFang runtime.",
+	},
+	{
+		id: "openfang-front",
+		label: "OpenFang UI",
+		group: "Ops",
+		origin: loopback("OPENFANG_PORT"),
+		kind: "ui",
+		daemon: "openfang-front",
+		healthPath: "/api/health",
+		description: "OpenFang front end.",
+	},
+	{
+		id: "grafana",
+		label: "Grafana",
+		group: "Ops",
+		origin: loopback("GRAFANA_PORT"),
+		kind: "ui",
+		daemon: "grafana",
+		healthPath: "/api/health",
+		description: "Dashboards and alerting.",
+	},
+	{
+		id: "prometheus",
+		label: "Prometheus",
+		group: "Ops",
+		origin: loopback("PROMETHEUS_PORT"),
+		kind: "ui",
+		daemon: "prometheus",
+		healthPath: "/-/healthy",
+		description: "Metrics store and query UI.",
+	},
+	{
+		id: "ralph",
+		label: "Ralph",
+		group: "Ops",
+		origin: loopback("RALPH_DASH_PORT"),
+		kind: "ui",
+		daemon: "ralph-dashboard",
+		healthPath: "/api/health",
+		description: "Ralph loop dashboard.",
+	},
+	{
+		id: "bench-radar",
+		label: "Bench Radar",
+		group: "Ops",
+		origin: loopback("BENCH_RADAR_PORT"),
+		kind: "ui",
+		daemon: "bench-radar",
+		healthPath: "/health",
+		description: "Model benchmark results.",
+	},
+	{
+		id: "telemetry",
+		label: "Windmill",
+		group: "Ops",
+		origin: loopback("WINDMILL_PORT"),
+		kind: "api",
+		daemon: "windmill",
+		healthPath: "/api/status",
+		description: "GPU / PCIe telemetry -- which way the wind blows.",
+	},
+	{
+		id: "node-exporter",
+		label: "Node Exporter",
+		group: "Ops",
+		origin: loopback("NODE_EXPORTER_PORT"),
+		kind: "api",
+		daemon: "node-exporter",
+		healthPath: "/metrics",
+		description: "Host metrics.",
+	},
+	{
+		id: "estate-scripts-exporter",
+		label: "estate-scripts Exporter",
+		group: "Ops",
+		origin: loopback("estate-scripts_EXPORTER_PORT"),
+		kind: "api",
+		daemon: "estate-scripts-exporter",
+		healthPath: "/metrics",
+		description: "Stack-level Prometheus exporter.",
+	},
+	{
+		id: "browser-keeper",
+		label: "Browser Keeper",
+		group: "Ops",
+		origin: loopback("BROWSER_KEEPER_CDP_PORT"),
+		kind: "api",
+		daemon: "browser-keeper",
+		healthPath: "/",
+		description: "Headless Chrome DevTools endpoint.",
+	},
+	{
+		id: "files",
+		label: "Files",
+		group: "Ops",
+		origin: loopback("FILES_PORT"),
+		kind: "ui",
+		daemon: "files",
+		healthPath: "/health",
+		description: "File server.",
+	},
+
+	// ── Automation & integration ──────────────────────────────────────────
+	{
+		id: "awrawr-mcp",
+		label: "Awrawr MCP",
+		group: "Automation",
+		origin: loopback("AWR_MCP_PORT"),
+		kind: "api",
+		daemon: "awrawr-mcp",
+		description: "Personal assistant MCP surface.",
+	},
+	{
+		id: "awrawr-ws-exec",
+		label: "Awrawr Exec",
+		group: "Automation",
+		origin: loopback("EXEC_WS_PORT"),
+		kind: "api",
+		daemon: "awrawr-ws-exec",
+		description: "Websocket exec channel.",
+	},
+	{
+		id: "whatsapp-mcp",
+		label: "WhatsApp",
+		group: "Automation",
+		origin: loopback("WHATSAPP_MCP_PORT"),
+		kind: "api",
+		daemon: "whatsapp-mcp",
+		healthPath: "/health",
+		description: "WhatsApp bridge.",
+	},
+	{
+		id: "mbx-cache",
+		label: "Mise Cache",
+		group: "Automation",
+		origin: loopback("MBX_CACHE_PORT"),
+		kind: "api",
+		daemon: "mbx-cache",
+		healthPath: "/v1/status",
+		description: "Immutable remote cache for mise task artifacts and mr-boxington builds.",
+	},
+	{
+		id: "paper-poller",
+		label: "Paper Poller",
+		group: "Automation",
+		origin: loopback("PAPER_POLLER_PORT"),
+		kind: "api",
+		daemon: "paper-poller",
+		healthPath: "/ready",
+		description: "arXiv/alphaXiv search racer.",
+	},
+	{
+		id: "keypool",
+		label: "Keypool",
+		group: "Automation",
+		origin: loopback("KEYPOOL_PORT"),
+		kind: "api",
+		daemon: "keypool",
+		healthPath: "/health",
+		description: "Rotating API key pool.",
+	},
+	{
+		id: "null-g-proxy",
+		label: "Null-G Proxy",
+		group: "Automation",
+		origin: loopback("NULL_G_PROXY_PORT"),
+		kind: "api",
+		daemon: "null-g-proxy",
+		healthPath: "/health",
+		description: "Null-gravity egress proxy.",
+	},
+	{
+		id: "stream-broker",
+		label: "Stream Broker",
+		group: "Automation",
+		origin: loopback("STREAM_BROKER_PORT"),
+		kind: "api",
+		daemon: "estate-scripts-stream-broker",
+		description: "Fleet event stream broker.",
+	},
+	{
+		id: "nim-kimi",
+		label: "NIM Kimi",
+		group: "Automation",
+		origin: loopback("NIM_KIMI_SIDECAR_PORT"),
+		kind: "api",
+		daemon: "nim-kimi-sidecar",
+		healthPath: "/health",
+		description: "NIM sidecar for kimi models.",
+	},
+	{
+		id: "kimi-shim",
+		label: "Kimi Shim",
+		group: "Automation",
+		origin: loopback("KIMI_AUTO_SHIM_PORT"),
+		kind: "api",
+		daemon: "kimi-auto-shim",
+		healthPath: "/health",
+		description: "Compatibility shim for the kimi auto stack.",
+	},
+	{
+		id: "boundless",
+		label: "Boundless",
+		group: "Automation",
+		origin: loopback("BOUNDLESS_PORT"),
+		kind: "ui",
+		daemon: "boundless",
+		description: "Boundless web app.",
+	},
+];
+
+/** Surfaces that render a page, in tab order. These are the embeddable ones. */
+export const EMBEDDABLE_SURFACES: readonly Surface[] = SURFACES.filter(
+	(surface) => surface.kind === "ui" && surface.origin !== "",
+);
+
+export interface SurfaceHealth {
+	status: "up" | "down" | "unknown";
+	/** Round-trip time in ms; undefined when the probe did not complete. */
+	latencyMs?: number;
+	/** HTTP status, or the transport-level failure reason. */
+	detail: string;
+}
+
+export const UNKNOWN_HEALTH: SurfaceHealth = { status: "unknown", detail: "not probed" };
+
+const PROBE_TIMEOUT_MS = 3_000;
+const PROBE_CONCURRENCY = 12;
+
+/**
+ * Probe one surface. `mode: "no-cors"` is deliberate: these are other origins,
+ * so a full fetch is opaque unless every one of them sets CORS headers. A
+ * no-cors request still resolves for a reachable server and still rejects for a
+ * dead one, which is exactly the signal a health badge needs — the response
+ * body is never read.
+ */
+export async function probeSurface(surface: Surface): Promise<SurfaceHealth> {
+	if (surface.origin === "") {
+		// Same-origin surfaces are already covered by the dashboard's own
+		// connection state; probing them here would double-count herd.
+		return { status: "up", detail: "same origin" };
+	}
+	const url = `${surface.origin}${surface.healthPath ?? "/"}`;
+	const started = performance.now();
+	try {
+		const response = await fetch(url, {
+			mode: "no-cors",
+			cache: "no-store",
+			signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+		});
+		return {
+			status: "up",
+			latencyMs: Math.round(performance.now() - started),
+			detail: `HTTP ${response.status}`,
+		};
+	} catch (error) {
+		// A no-cors probe of a live server reports "opaque"; a dead one throws.
+		// Anything reaching here is a transport failure worth naming exactly,
+		// because "down" with no reason is the least actionable badge there is.
+		return {
+			status: "down",
+			latencyMs: Math.round(performance.now() - started),
+			detail: error instanceof Error ? error.message : String(error),
+		};
+	}
+}
+
+/** Probe every surface with bounded concurrency, preserving registry order. */
+export async function probeAllSurfaces(
+	surfaces: readonly Surface[] = SURFACES,
+): Promise<Map<string, SurfaceHealth>> {
+	const results = new Map<string, SurfaceHealth>();
+	let cursor = 0;
+
+	async function worker(): Promise<void> {
+		while (cursor < surfaces.length) {
+			const surface = surfaces[cursor++];
+			if (!surface) continue;
+			results.set(surface.id, await probeSurface(surface));
+		}
+	}
+
+	const workers = Array.from(
+		{ length: Math.min(PROBE_CONCURRENCY, surfaces.length) },
+		() => worker(),
+	);
+	await Promise.all(workers);
+	return results;
+}

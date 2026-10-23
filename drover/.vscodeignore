@@ -1,0 +1,14 @@
+.vscode/**
+.vscode-test/**
+src/**
+test/**
+sidecar/**
+node_modules/**
+esbuild.js
+tsconfig.json
+.gitignore
+.env
+.env.*
+**/*.map
+**/*.ts
+!dist/extension.js

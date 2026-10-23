@@ -1,0 +1,27 @@
+{
+  "name": "drover-eap",
+  "displayName": "Drover EAP (Gemini Tool Retrieval)",
+  "description": "Companion LM Chat Provider using the Gemini EAP tool-retrieval SDK.",
+  "publisher": "toxic",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.129.0"
+  },
+  "categories": ["AI", "Chat"],
+  "main": "./dist/sidecar.js",
+  "activationEvents": [],
+  "contributes": {
+    "languageModelChatProviders": [
+      {
+        "vendor": "drover-eap",
+        "displayName": "Drover EAP (Gemini)"
+      }
+    ]
+  },
+  "dependencies": {
+    "@google/genai": "^2.24.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

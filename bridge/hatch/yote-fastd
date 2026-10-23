@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+"""yote-fastd: persistent fast-path exec proxy (cell side).
+
+Chris 2026-10-04: "find the fast". Measured 2026-10-04 03:07 UTC:
+  raw WS socket roundtrip:  130ms
+  yote-conn exec:           425ms  (python startup 204ms + wrapper overhead)
+  race_exec.py:             1500-2500ms (ThreadPoolExecutor + importlib + probes)
+
+The bridge itself is fast; the wrappers are slow. This daemon holds ONE
+persistent unix-socket connection to ws_daemon and proxies client
+commands over it, so per-exec cost drops to ~socket RTT + remote run.
+
+Protocol (client -> daemon, one JSON line):
+  {"cmd": "<shell>", "workdir": "/home/toxic", "timeout": 120}
+Daemon -> client (JSON lines):
+  {"type":"chunk","stream":"stdout","data":"..."}
+  {"type":"chunk","stream":"stderr","data":"..."}
+  {"type":"done","code":N}
+
+Supervision: runs under the cell's process tree; if ws_daemon's socket
+vanishes it reconnects with backoff and fails client calls fast (no
+120s semaphore hangs). Log: ~/.cache/yote-fastd.log (rotated at 2MB).
+"""
+import json
+import os
+import socket
+import sys
+import threading
+import time
+
+CACHE = os.path.expanduser("~/.cache")
+WS_SOCK = os.path.join(CACHE, "awrawr-ws-bridge.sock")
+FAST_SOCK = os.path.join(CACHE, "yote-fast.sock")
+LOG_PATH = os.path.join(CACHE, "yote-fastd.log")
+LOG_MAX = 2_000_000
+
+
+def log(*a):
+    ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    line = "[fastd %s] %s\n" % (ts, " ".join(str(x) for x in a))
+    try:
+        if os.path.exists(LOG_PATH) and os.path.getsize(LOG_PATH) > LOG_MAX:
+            os.replace(LOG_PATH, LOG_PATH + ".1")
+        with open(LOG_PATH, "a") as f:
+            f.write(line)
+    except OSError:
+        pass
+
+
+class Upstream:
+    """One socket per call: ws_daemon closes the connection after each
+    request (one-shot design), so persistence just earns broken pipes.
+    A fresh unix-socket connect costs ~5ms; reconnect-on-failure covers
+    daemon restarts."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+
+    def _dial(self):
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s.settimeout(60)
+        s.connect(WS_SOCK)
+        return s
+
+    def call(self, cmd, workdir, timeout):
+        with self._lock:  # serialize dials; one socket per call
+            last = None
+            for attempt in (1, 2, 3):
+                try:
+                    s = self._dial()
+                except OSError as e:
+                    last = e
+                    log("upstream dial failed (attempt %d): %s"
+                        % (attempt, e))
+                    time.sleep(min(0.2 * attempt, 1.0))
+                    continue
+                try:
+                    s.sendall((json.dumps(
+                        {"cmd": cmd, "workdir": workdir}) + "\n").encode())
+                    s.settimeout(timeout + 10)
+                    buf = b""
+                    chunks = []
+                    t0 = time.time()
+                    while time.time() - t0 < timeout + 10:
+                        try:
+                            d = s.recv(65536)
+                        except socket.timeout:
+                            break
+                        if not d:
+                            break
+                        buf += d
+                        while b"\n" in buf:
+                            line, buf = buf.split(b"\n", 1)
+                            try:
+                                m = json.loads(line)
+                            except Exception:
+                                continue
+                            t = m.get("type")
+                            if t in ("chunk", "done", "error"):
+                                chunks.append(m)
+                                if t in ("done", "error"):
+                                    buf = b""
+                                    break
+                        else:
+                            continue
+                        break
+                    try:
+                        s.close()
+                    except Exception:
+                        pass
+                    return chunks
+                except OSError as e:
+                    last = e
+                    log("upstream call failed (attempt %d): %s"
+                        % (attempt, e))
+                    try:
+                        s.close()
+                    except Exception:
+                        pass
+                    time.sleep(min(0.2 * attempt, 1.0))
+            return [{"type": "error",
+                     "message": "upstream unavailable: %s" % str(last)[:120]}]
+
+
+def handle_client(conn, upstream):
+    try:
+        f = conn.makefile("r", encoding="utf-8", errors="replace")
+        line = f.readline()
+        if not line:
+            return
+        req = json.loads(line)
+        cmd = req.get("cmd", "")
+        workdir = req.get("workdir", "/home/toxic")
+        timeout = int(req.get("timeout", 120))
+        if not cmd:
+            conn.sendall(b'{"type":"error","message":"empty cmd"}\n')
+            return
+        t0 = time.time()
+        for m in upstream.call(cmd, workdir, timeout):
+            conn.sendall((json.dumps(m) + "\n").encode())
+        dt = (time.time() - t0) * 1000
+        log("exec %.0fms cmd=%.60s" % (dt, cmd))
+    except Exception as e:
+        try:
+            conn.sendall((json.dumps(
+                {"type": "error", "message": str(e)[:200]}) + "\n").encode())
+        except Exception:
+            pass
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
+def main():
+    if os.path.exists(FAST_SOCK):
+        # stale socket from a dead daemon? probe it.
+        try:
+            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            s.settimeout(2)
+            s.connect(FAST_SOCK)
+            s.close()
+            log("another fastd is live; exiting")
+            sys.exit(0)
+        except OSError:
+            os.unlink(FAST_SOCK)
+    upstream = Upstream()
+    srv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    srv.bind(FAST_SOCK)
+    srv.listen(64)
+    os.chmod(FAST_SOCK, 0o600)
+    log("listening on %s" % FAST_SOCK)
+    while True:
+        conn, _ = srv.accept()
+        threading.Thread(target=handle_client, args=(conn, upstream),
+                         daemon=True).start()
+
+
+if __name__ == "__main__":
+    main()

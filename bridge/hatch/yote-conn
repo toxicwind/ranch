@@ -1,0 +1,792 @@
+#!/usr/bin/env python3
+"""yote-conn -- CLI for the yote-connector daemon (127.0.0.1:18301).
+
+Live sessions are first-class: every long-running command gets a session
+ID you can detach from and reattach to. Think tmux, but the terminal
+lives on yote.
+
+Quick commands (block until done):
+  yote-conn exec "<cmd>" [workdir] [timeout_s]
+  yote-conn health
+
+Sessions (detached, reattachable -- the main workflow):
+  yote-conn session "<cmd>" [workdir] [timeout_s]
+                                     # start detached -> prints session ID
+  yote-conn sessions                 # list all sessions + live state
+  yote-conn attach <id>              # stream a session's output live
+  yote-conn status <id>              # one-shot status + output tails
+  yote-conn kill <id>                # SIGTERM the session's process group
+  yote-conn run "<cmd>" [workdir]    # session + immediate attach in one step
+
+Interactive terminal:
+  yote-conn shell                    # live REPL shell on yote (cd persists)
+
+Batch / misc:
+  yote-conn multi <cmds.json | ->
+  yote-conn herd <METHOD> <path> [body.json | -]
+  yote-conn flock <METHOD> <path> [body.json | -]
+
+Legacy aliases (still work): bg, bg-list, bg-status, bg-tail, bg-kill.
+exec --bg also dispatches detached.
+
+The exec subcommand takes the unix-socket fast path (ws_daemon, same
+protocol as yote-conn-fast) when available, falling back to the HTTP
+daemon transparently -- including when the daemon reports its bridge down
+("bridge not connected", pre-dispatch, safe to re-dispatch). Errors that
+may have executed remotely ("bridge response timeout", "bridge
+reconnecting") stay final: no double-exec. All other subcommands use the
+daemon directly.
+
+Canonical source: ranch/bridge/hatch/yote-conn in toxicwind/estate.
+"""
+import json
+import os
+import socket
+import sys
+import urllib.request
+import urllib.error
+
+
+class ConnectorDown(Exception):
+    """The local connector daemon (127.0.0.1:18301) is unreachable."""
+
+
+def _is_retryable_exec_error(msg):
+    """True if an exec failure is safe to retry (pre-dispatch, never ran).
+
+    ONLY fast pre-dispatch failures are retryable. "all lanes down" means
+    the bridge burned the full lane timeouts (150s+) trying and failing --
+    retrying it 3x is what piled 142 stuck processes during the 2026-10-03
+    flap (4 attempts x 150s = 10 min hang per invocation). A bridge outage
+    is not fixed by immediate retry; the circuit breaker handles it.
+    """
+    # "bridge not connected" = daemon never sent the frame (see exec_fast).
+    # ConnectorDown = daemon unreachable, nothing dispatched.
+    # Anything mentioning "timeout" or "reconnecting" may have executed:
+    # NEVER retry those (double-exec risk).
+    if not msg:
+        return False
+    low = msg.lower()
+    if "timeout" in low or "reconnecting" in low:
+        return False
+    # "all lanes down" / "connect failure": the bridge ATTEMPTED the
+    # command through all lanes and failed slowly. Not retryable -- the
+    # circuit breaker (below) fails these fast instead of burning
+    # another full timeout cycle per retry.
+    if "all lanes down" in low or "connect failure" in low:
+        return False
+    return ("bridge not connected" in low
+            or "connector down" in low)
+
+
+def with_exec_retry(fn, max_retries=3):
+    """Retry an exec callable on pre-dispatch failures with backoff.
+
+    fn() must raise on failure. Only retries when the failure proves the
+    command never reached yote. May-have-executed failures propagate
+    immediately.
+    """
+    import random
+    import time as _time
+    last = None
+    for attempt in range(max_retries + 1):
+        try:
+            return fn()
+        except Exception as e:
+            last = e
+            msg = str(e)
+            if not _is_retryable_exec_error(msg) or attempt == max_retries:
+                raise
+            delay = (2 ** attempt) + random.uniform(0, 0.5)
+            print(f"yote-conn: transient failure (attempt "
+                  f"{attempt + 1}/{max_retries + 1}), retrying in "
+                  f"{delay:.1f}s", file=sys.stderr)
+            _time.sleep(delay)
+    raise last
+
+
+# --- bridge circuit breaker: fail fast when the bridge is known down ---
+# The transport layer (awrawr-bridge/exec.py) marks degraded lanes via
+# flag files: ~/.cache/awrawr-ws-down (15s TTL) and
+# ~/.cache/awrawr-https-down (60s TTL). When BOTH lanes are down, any exec
+# attempt will burn the full timeout (150s+) before failing. Check the
+# flags first and fail in milliseconds instead of minutes.
+_WS_DOWN_FLAG = os.path.expanduser("~/.cache/awrawr-ws-down")
+_HTTPS_DOWN_FLAG = os.path.expanduser("~/.cache/awrawr-https-down")
+_WS_DOWN_TTL = 15
+_HTTPS_DOWN_TTL = 60
+
+
+def _bridge_known_down():
+    """(down, reason): True if both lanes are marked degraded.
+
+    Fail-fast gate for the exec path. A single bridge flap used to
+    cascade into 142 stuck yote-conn processes (2026-10-03): each
+    invocation burned 150s+ per attempt x 4 retries = 10 min hang,
+    while crons/watchdogs kept spawning more. The circuit breaker
+    ensures only the first process pays the timeout; the rest fail
+    in <100ms until the lanes recover.
+    """
+    import time as _time
+    ws_down = False
+    https_down = False
+    try:
+        ws_down = (_time.time() - os.path.getmtime(_WS_DOWN_FLAG)
+                   < _WS_DOWN_TTL)
+    except OSError:
+        pass
+    try:
+        with open(_HTTPS_DOWN_FLAG) as _f:
+            _rec = json.load(_f)
+        https_down = (_time.time() - float(_rec.get("ts", 0))
+                      < _HTTPS_DOWN_TTL)
+    except (OSError, ValueError, TypeError):
+        pass
+    if ws_down and https_down:
+        return True, ("both lanes marked down "
+                      "(ws %ds TTL, https %ds TTL)" % (_WS_DOWN_TTL,
+                                                        _HTTPS_DOWN_TTL))
+    return False, ""
+
+
+try:
+    from bridge_sem import bridge_slot
+except ImportError:  # guard unavailable -> proceed unguarded
+    from contextlib import nullcontext as bridge_slot
+
+BASE = "http://127.0.0.1:18301"
+FAST_SOCK = os.path.expanduser("~/.cache/awrawr-ws-bridge.sock")
+
+
+def exec_fast(spec):
+    """Exec via the ws_daemon unix socket (same protocol as yote-conn-fast).
+
+    Skips python urllib startup + the connector HTTP daemon hop.
+    Returns the remote exit code, or None if the fast path is unavailable
+    (socket missing/unreachable) so the caller falls back to the daemon.
+    Output behavior matches the HTTP path exactly: raw stdout/stderr
+    passthrough, no timing chatter.
+    """
+    if not os.path.exists(FAST_SOCK):
+        return None
+    payload = {"cmd": spec["cmd"],
+               "workdir": spec.get("workdir", "/home/toxic"),
+               "timeout": spec.get("timeout", 120)}
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        s.settimeout(payload["timeout"] + 60)
+        s.connect(FAST_SOCK)
+        s.sendall((json.dumps(payload) + "\n").encode())
+        buf = b""
+        while True:
+            data = s.recv(65536)
+            if not data:
+                return 1
+            buf += data
+            while b"\n" in buf:
+                line, buf = buf.split(b"\n", 1)
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    doc = json.loads(line.decode("utf-8", "replace"))
+                except ValueError:
+                    continue
+                t = doc.get("type")
+                if t == "chunk":
+                    if doc.get("stream") == "stderr":
+                        sys.stderr.write(doc.get("data") or "")
+                    else:
+                        sys.stdout.write(doc.get("data") or "")
+                elif t == "done":
+                    if doc.get("error"):
+                        print("error: %s" % doc["error"], file=sys.stderr)
+                    return doc.get("code", 1)
+                elif t == "error":
+                    msg = doc.get("message") or ""
+                    if msg.startswith("bridge not connected"):
+                        # Pre-dispatch bridge-down: the daemon never sent the
+                        # frame, so the command did not execute remotely.
+                        # The daemon fails fast precisely so callers fall
+                        # back to the old HTTP daemon path -- honor that by
+                        # reporting the fast path unavailable (None).
+                        return None
+                    print("bridge error: %s" % msg,
+                          file=sys.stderr)
+                    return 1
+    except OSError:
+        return None
+    finally:
+        try:
+            s.close()
+        except OSError:
+            pass
+
+
+def req(method, path, data=None, ctype="application/json"):
+    r = urllib.request.Request(BASE + path, data=data, method=method)
+    if data:
+        r.add_header("Content-Type", ctype)
+    try:
+        # 180s: the daemon's worst case is ~160s (race 5s + HTTPS 150s).
+        # Was 300s; during a flap every caller blocked the full 5 min.
+        with urllib.request.urlopen(r, timeout=180) as resp:
+            return resp.status, resp.read()
+    except urllib.error.HTTPError as e:
+        return e.code, e.read()
+    except (urllib.error.URLError, OSError, socket.timeout) as e:
+        # Daemon down / refusing: every caller funnels through here, so
+        # raise one typed error instead of a urllib traceback. Caught at
+        # the __main__ boundary -> clean "connector down", exit 1.
+        raise ConnectorDown("%s %s: %s" % (method, path, e))
+
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
+        if len(sys.argv) < 2:
+            # No args: drop straight into the live shell. This is the
+            # human path -- just `yote-conn` and you're on yote.
+            sys.argv.append("shell")
+        else:
+            print(__doc__.strip())
+            return 0
+    cmd = sys.argv[1]
+    if cmd == "health":
+        code, body = req("GET", "/health")
+        print(body.decode())
+        return 0
+    if cmd == "exec":
+        if len(sys.argv) < 3:
+            print("usage: yote-conn exec \"<cmd>\" [workdir] [timeout_s] [--bg]",
+                  file=sys.stderr)
+            return 2
+        # --bg anywhere in the args: dispatch detached, print handle, return.
+        bg_only = "--bg" in sys.argv[2:]
+        args = [a for a in sys.argv[2:] if a != "--bg"]
+        spec = {"cmd": args[0]}
+        if len(args) > 1:
+            spec["workdir"] = args[1]
+        if len(args) > 2:
+            try:
+                spec["timeout"] = int(args[2])
+            except ValueError:
+                print("timeout must be an integer number of seconds",
+                      file=sys.stderr)
+                return 2
+        if bg_only:
+            code, body = req("POST", "/exec-bg", json.dumps(spec).encode())
+            d = json.loads(body.decode())
+            if d.get("handle"):
+                print(d["handle"])
+                return 0
+            print("dispatch failed: %s" % d.get("error"), file=sys.stderr)
+            return 1
+        # Circuit breaker: fail fast if the bridge is known down.
+        # Don't burn 120s waiting for a slot + 150s per attempt when
+        # the lanes are already marked degraded.
+        _down, _why = _bridge_known_down()
+        if _down:
+            print("yote-conn: bridge down (circuit breaker): %s" % _why,
+                  file=sys.stderr)
+            return 1
+        with bridge_slot():
+            def _do_exec():
+                fast_code = exec_fast(spec)
+                if fast_code is not None:
+                    return ("fast", fast_code)
+                code, body = req("POST", "/exec", json.dumps(spec).encode())
+                return ("http", code, body)
+            try:
+                res = with_exec_retry(_do_exec)
+            except ConnectorDown as e:
+                print("connector down: %s" % e, file=sys.stderr)
+                return 1
+            if res[0] == "fast":
+                return res[1]
+            _, code, body = res
+            d = json.loads(body.decode())
+            sys.stdout.write(d.get("stdout", ""))
+            sys.stderr.write(d.get("stderr", ""))
+            if d.get("error"):
+                print("error: %s" % d["error"], file=sys.stderr)
+            return d.get("code", 1)
+    if cmd == "multi":
+        if len(sys.argv) < 3:
+            print("usage: yote-conn multi <cmds.json | ->", file=sys.stderr)
+            return 2
+        if sys.argv[2] == "-":
+            raw = sys.stdin.read()
+        else:
+            try:
+                with open(sys.argv[2]) as f:
+                    raw = f.read()
+            except OSError as e:
+                print("cannot read %s: %s" % (sys.argv[2], e),
+                      file=sys.stderr)
+                return 2
+        try:
+            cmds = json.loads(raw)
+        except ValueError as e:
+            print("invalid JSON: %s" % e, file=sys.stderr)
+            return 2
+        # allow a plain list of strings as shorthand
+        norm = [c if isinstance(c, dict) else {"cmd": c} for c in cmds]
+        with bridge_slot():
+            code, body = req("POST", "/exec-multi",
+                             json.dumps({"cmds": norm}).encode())
+            d = json.loads(body.decode())
+            for r in d.get("results", []):
+                tag = r.get("tag", "?")
+                print("=== [%s] exit=%s (%sms, %s) ==="
+                      % (tag, r.get("code"), r.get("connector_ms"),
+                         r.get("transport")))
+                if r.get("stdout"):
+                    sys.stdout.write(r["stdout"])
+                if r.get("stderr"):
+                    sys.stderr.write("[stderr] " + r["stderr"])
+                if r.get("error"):
+                    print("[error] %s" % r["error"], file=sys.stderr)
+            print("--- %d commands in %sms ---"
+                  % (d.get("count", 0), d.get("total_ms", 0)))
+            return 0 if all(r.get("code") == 0
+                        for r in d.get("results", [])) else 1
+    if cmd == "bg":
+        if len(sys.argv) < 3:
+            print("usage: yote-conn bg \"<cmd>\" [workdir] [timeout_s]",
+                  file=sys.stderr)
+            return 2
+        spec = {"cmd": sys.argv[2]}
+        if len(sys.argv) > 3:
+            spec["workdir"] = sys.argv[3]
+        if len(sys.argv) > 4:
+            try:
+                spec["timeout_s"] = int(sys.argv[4])
+            except ValueError:
+                print("timeout_s must be an integer", file=sys.stderr)
+                return 2
+        code, body = req("POST", "/exec-bg", json.dumps(spec).encode())
+        d = json.loads(body.decode())
+        if d.get("handle"):
+            print(d["handle"])
+            return 0
+        print("dispatch failed: %s" % d.get("error"), file=sys.stderr)
+        return 1
+    if cmd == "bg-status":
+        if len(sys.argv) < 3:
+            print("usage: yote-conn bg-status <handle>", file=sys.stderr)
+            return 2
+        code, body = req("GET", "/bg/%s" % sys.argv[2])
+        d = json.loads(body.decode())
+        print("handle : %s" % d.get("handle"))
+        print("state  : %s" % d.get("state"))
+        if d.get("code") is not None:
+            print("exit   : %s" % d.get("code"))
+        if d.get("cmd"):
+            print("cmd    : %s" % d.get("cmd"))
+        if d.get("stdout_tail"):
+            print("--- stdout (tail) ---")
+            sys.stdout.write(d["stdout_tail"])
+        if d.get("stderr_tail"):
+            print("--- stderr (tail) ---")
+            sys.stdout.write(d["stderr_tail"])
+        if d.get("error"):
+            print("error  : %s" % d.get("error"), file=sys.stderr)
+        return 0
+    if cmd == "bg-tail":
+        # Incremental attach: fetch stdout/stderr deltas from byte offsets.
+        # Negative offset = last N bytes. The daemon returns the new offsets;
+        # pass them back on the next call to resume (reattach loop).
+        if len(sys.argv) < 3:
+            print("usage: yote-conn bg-tail <handle> [soff] [eoff]",
+                  file=sys.stderr)
+            return 2
+        try:
+            soff = int(sys.argv[3]) if len(sys.argv) > 3 else 0
+            eoff = int(sys.argv[4]) if len(sys.argv) > 4 else 0
+        except ValueError:
+            print("offsets must be integers", file=sys.stderr)
+            return 2
+        code, body = req("GET", "/bg/%s?soff=%d&eoff=%d"
+                         % (sys.argv[2], soff, eoff))
+        d = json.loads(body.decode())
+        if d.get("error"):
+            print("error  : %s" % d["error"], file=sys.stderr)
+            return 1
+        print("handle : %s" % d.get("handle"))
+        print("state  : %s" % d.get("state"))
+        if d.get("code") is not None:
+            print("exit   : %s" % d.get("code"))
+        import base64 as _b64
+        has_offsets = "stdout_soff" in d or "stderr_eoff" in d
+        so = d.get("stdout_b64") or ""
+        eo = d.get("stderr_b64") or ""
+        if has_offsets:
+            nso = d.get("stdout_soff")
+            if so:
+                print("--- stdout (bytes %d->%s) ---"
+                      % (soff, "?" if nso is None else nso))
+                sys.stdout.write(
+                    _b64.b64decode(so.encode()).decode("utf-8", "replace"))
+                sys.stdout.write("\n")
+            else:
+                print("--- stdout: no new bytes (offset %d) ---" % soff)
+            neo = d.get("stderr_eoff")
+            if eo:
+                print("--- stderr (bytes %d->%s) ---"
+                      % (eoff, "?" if neo is None else neo))
+                sys.stdout.write(
+                    _b64.b64decode(eo.encode()).decode("utf-8", "replace"))
+                sys.stdout.write("\n")
+            else:
+                print("--- stderr: no new bytes (offset %d) ---" % eoff)
+            rso = d.get("stdout_soff")
+            reo = d.get("stderr_eoff")
+            print("resume : yote-conn bg-tail %s %s %s"
+                  % (d.get("handle"), rso if rso is not None else soff,
+                     reo if reo is not None else eoff))
+        else:
+            # Old daemon without offset support: fall back to the tails.
+            if d.get("stdout_tail"):
+                print("--- stdout (tail; daemon has no offset support) ---")
+                sys.stdout.write(d["stdout_tail"])
+            if d.get("stderr_tail"):
+                print("--- stderr (tail; daemon has no offset support) ---")
+                sys.stdout.write(d["stderr_tail"])
+            print("resume : daemon has no offset support; use bg-status")
+        return 0
+    if cmd == "bg-list":
+        code, body = req("GET", "/bg")
+        d = json.loads(body.decode())
+        for h in d.get("handles", []):
+            print("%s  %-9s %s" % (h.get("handle"), h.get("state") or "?",
+                                   (h.get("cmd") or "")[:70]))
+        return 0
+    if cmd in ("bg-kill", "kill"):
+        if len(sys.argv) < 3:
+            print("usage: yote-conn kill <id>", file=sys.stderr)
+            return 2
+        code, body = req("POST", "/bg/%s/kill" % sys.argv[2])
+        d = json.loads(body.decode())
+        print("session  : %s" % d.get("handle"))
+        print("state    : %s" % (d.get("state") or
+                                 ("signaled pid %s" % d.get("signaled"))))
+        if d.get("note"):
+            print("note     : %s" % d.get("note"))
+        if d.get("error"):
+            print("error    : %s" % d.get("error"), file=sys.stderr)
+        return 0 if d.get("signaled") else 1
+    # --- Session-first aliases (intuitive names for the bg system) ---
+    if cmd == "session":
+        # Start a detached session, print its ID. Same as `bg`.
+        if len(sys.argv) < 3:
+            print("usage: yote-conn session \"<cmd>\" [workdir] [timeout_s]",
+                  file=sys.stderr)
+            return 2
+        spec = {"cmd": sys.argv[2]}
+        if len(sys.argv) > 3:
+            spec["workdir"] = sys.argv[3]
+        if len(sys.argv) > 4:
+            try:
+                spec["timeout_s"] = int(sys.argv[4])
+            except ValueError:
+                print("timeout_s must be an integer", file=sys.stderr)
+                return 2
+        code, body = req("POST", "/exec-bg", json.dumps(spec).encode())
+        d = json.loads(body.decode())
+        if d.get("handle"):
+            print(d["handle"])
+            print("attach with: yote-conn attach %s" % d["handle"],
+                  file=sys.stderr)
+            return 0
+        print("dispatch failed: %s" % d.get("error"), file=sys.stderr)
+        return 1
+    if cmd == "sessions":
+        # List all sessions. Same as `bg-list`, prettier header.
+        code, body = req("GET", "/bg")
+        d = json.loads(body.decode())
+        handles = d.get("handles", [])
+        if not handles:
+            print("(no sessions)")
+            return 0
+        print("%-16s %-9s %s" % ("SESSION", "STATE", "COMMAND"))
+        for h in handles:
+            print("%-16s %-9s %s" % (h.get("handle"), h.get("state") or "?",
+                                    (h.get("cmd") or "")[:60]))
+        return 0
+    if cmd == "status":
+        # One-shot session status. Same as `bg-status`.
+        if len(sys.argv) < 3:
+            print("usage: yote-conn status <id>", file=sys.stderr)
+            return 2
+        code, body = req("GET", "/bg/%s" % sys.argv[2])
+        d = json.loads(body.decode())
+        print("session: %s" % d.get("handle"))
+        print("state  : %s" % d.get("state"))
+        if d.get("code") is not None:
+            print("exit   : %s" % d.get("code"))
+        if d.get("cmd"):
+            print("cmd    : %s" % d.get("cmd"))
+        if d.get("stdout_tail"):
+            print("--- stdout (tail) ---")
+            sys.stdout.write(d["stdout_tail"])
+        if d.get("stderr_tail"):
+            print("--- stderr (tail) ---")
+            sys.stdout.write(d["stderr_tail"])
+        if d.get("error"):
+            print("error  : %s" % d.get("error"), file=sys.stderr)
+        return 0
+    if cmd == "attach":
+        # Stream a session's output live until it finishes.
+        # Like `run`, but attaches to an existing session instead of
+        # starting a new one. Ctrl-C detaches (session keeps running).
+        if len(sys.argv) < 3:
+            print("usage: yote-conn attach <id>", file=sys.stderr)
+            return 2
+        import base64 as _b64
+        import time as _time
+        handle = sys.argv[2]
+        soff, eoff = 0, 0
+        print("attached to %s (Ctrl-C to detach, session keeps running)"
+              % handle, file=sys.stderr)
+        try:
+            while True:
+                code, body = req("GET", "/bg/%s?soff=%d&eoff=%d"
+                                 % (handle, soff, eoff))
+                try:
+                    d = json.loads(body.decode())
+                except ValueError:
+                    print("attach: bad status frame from connector",
+                          file=sys.stderr)
+                    return 1
+                state = d.get("state")
+                if state in ("unknown", "bad-handle"):
+                    print("attach: %s" % d.get("error"), file=sys.stderr)
+                    return 1
+                so = d.get("stdout_b64") or ""
+                eo = d.get("stderr_b64") or ""
+                if so:
+                    nso = d.get("stdout_soff")
+                    sys.stdout.write(_b64.b64decode(so.encode()).decode(
+                        "utf-8", "replace"))
+                    sys.stdout.flush()
+                    soff = nso if nso is not None else soff + len(
+                        _b64.b64decode(so.encode()))
+                if eo:
+                    neo = d.get("stderr_eoff")
+                    sys.stderr.write(_b64.b64decode(eo.encode()).decode(
+                        "utf-8", "replace"))
+                    sys.stderr.flush()
+                    eoff = neo if neo is not None else eoff + len(
+                        _b64.b64decode(eo.encode()))
+                if state in ("done", "timeout", "stale"):
+                    final_code = d.get("code")
+                    try:
+                        final_code = int(final_code)
+                    except (TypeError, ValueError):
+                        final_code = 1
+                    print("attach: %s (exit %d)" % (state, final_code),
+                          file=sys.stderr)
+                    return final_code
+                _time.sleep(2)
+        except KeyboardInterrupt:
+            print("\ndetached from %s (session still running)" % handle,
+                  file=sys.stderr)
+            print("reattach: yote-conn attach %s" % handle, file=sys.stderr)
+            return 0
+    if cmd == "shell":
+        # Interactive live terminal on yote. A REPL: each line is exec'd
+        # remotely, cd persists across commands, Ctrl-C cancels the
+        # current command, `exit` leaves.
+        import readline  # noqa: F401  (history + line editing)
+        workdir = "/home/toxic"
+        print("yote shell -- live terminal on yote (type 'exit' to leave)",
+              file=sys.stderr)
+        while True:
+            try:
+                prompt = "yote:%s$ " % (workdir.replace("/home/toxic", "~"))
+                line = input(prompt).strip()
+            except (EOFError, KeyboardInterrupt):
+                print(file=sys.stderr)
+                break
+            if not line:
+                continue
+            if line in ("exit", "quit", "logout"):
+                break
+            # Track cd locally so the workdir persists.
+            if line == "cd" or line.startswith("cd "):
+                target = line[2:].strip() or "/home/toxic"
+                # Resolve remotely to handle ~, .., symlinks truthfully.
+                spec = {"cmd": "cd %s && pwd" % workdir,
+                        "workdir": workdir, "timeout": 10}
+                # Actually: cd into current, then cd to target, then pwd.
+                spec["cmd"] = "cd %s && cd %s && pwd" % (workdir, target)
+                with bridge_slot():
+                    def _do_cd():
+                        fast_code = exec_fast(spec)
+                        if fast_code is not None:
+                            return ("fast", fast_code)
+                        code, body = req("POST", "/exec",
+                                         json.dumps(spec).encode())
+                        return ("http", code, body)
+                    try:
+                        res = with_exec_retry(_do_cd)
+                    except Exception as e:
+                        print("cd failed: %s" % e, file=sys.stderr)
+                        continue
+                if res[0] == "fast":
+                    # Fast path streams directly; can't capture pwd.
+                    # Fall back to HTTP for cd.
+                    code, body = req("POST", "/exec",
+                                     json.dumps(spec).encode())
+                    d = json.loads(body.decode())
+                else:
+                    _, code, body = res
+                    d = json.loads(body.decode())
+                if d.get("code") == 0:
+                    workdir = d.get("stdout", "").strip() or workdir
+                else:
+                    sys.stderr.write(d.get("stderr", "cd failed\n"))
+                continue
+            spec = {"cmd": line, "workdir": workdir, "timeout": 600}
+            with bridge_slot():
+                def _do_shell():
+                    fast_code = exec_fast(spec)
+                    if fast_code is not None:
+                        return ("fast", fast_code)
+                    code, body = req("POST", "/exec",
+                                     json.dumps(spec).encode())
+                    return ("http", code, body)
+                try:
+                    res = with_exec_retry(_do_shell)
+                except KeyboardInterrupt:
+                    print("^C", file=sys.stderr)
+                    continue
+                except Exception as e:
+                    print("error: %s" % e, file=sys.stderr)
+                    continue
+            if res[0] == "fast":
+                # Fast path already streamed output; exit code is res[1].
+                if res[1] != 0:
+                    print("[exit %d]" % res[1], file=sys.stderr)
+                continue
+            _, code, body = res
+            try:
+                d = json.loads(body.decode())
+            except ValueError:
+                print("bad response from connector", file=sys.stderr)
+                continue
+            sys.stdout.write(d.get("stdout", ""))
+            sys.stderr.write(d.get("stderr", ""))
+            if d.get("code") not in (0, None):
+                print("[exit %d]" % d.get("code"), file=sys.stderr)
+            if d.get("error"):
+                print("error: %s" % d["error"], file=sys.stderr)
+        print("shell closed", file=sys.stderr)
+        return 0
+    if cmd == "run":
+        # Auto-backgrounding entrypoint for long runners.
+        # Dispatches fully detached (survives this process dying), then
+        # streams output incrementally until the remote job reaches a
+        # terminal state. NO timeout ceiling: the loop waits as long as
+        # the job takes. Fail-fast: dispatch errors exit immediately.
+        # The remote exit code propagates (timeout state -> exit 1).
+        if len(sys.argv) < 3:
+            print("usage: yote-conn run \"<cmd>\" [workdir]", file=sys.stderr)
+            return 2
+        import base64 as _b64
+        import time as _time
+        spec = {"cmd": sys.argv[2]}
+        if len(sys.argv) > 3:
+            spec["workdir"] = sys.argv[3]
+        code, body = req("POST", "/exec-bg", json.dumps(spec).encode())
+        d = json.loads(body.decode())
+        handle = d.get("handle")
+        if not handle:
+            print("run: dispatch failed: %s" % d.get("error"),
+                  file=sys.stderr)
+            return 1
+        print("run: backgrounded as %s" % handle, file=sys.stderr)
+        soff, eoff = 0, 0
+        final_code = 1
+        while True:
+            code, body = req("GET", "/bg/%s?soff=%d&eoff=%d"
+                             % (handle, soff, eoff))
+            try:
+                d = json.loads(body.decode())
+            except ValueError:
+                print("run: bad status frame from connector",
+                      file=sys.stderr)
+                return 1
+            state = d.get("state")
+            if state in ("unknown", "bad-handle"):
+                print("run: status error: %s" % d.get("error"),
+                      file=sys.stderr)
+                return 1
+            so = d.get("stdout_b64") or ""
+            eo = d.get("stderr_b64") or ""
+            if so:
+                nso = d.get("stdout_soff")
+                sys.stdout.write(
+                    _b64.b64decode(so.encode()).decode("utf-8", "replace"))
+                sys.stdout.flush()
+                if nso is not None:
+                    soff = nso
+                else:
+                    soff += len(_b64.b64decode(so.encode()))
+            if eo:
+                neo = d.get("stderr_eoff")
+                sys.stderr.write(
+                    _b64.b64decode(eo.encode()).decode("utf-8", "replace"))
+                sys.stderr.flush()
+                if neo is not None:
+                    eoff = neo
+                else:
+                    eoff += len(_b64.b64decode(eo.encode()))
+            if state in ("done", "timeout", "stale"):
+                if state == "timeout":
+                    print("run: remote job timed out (timeout_s set at "
+                          "dispatch)", file=sys.stderr)
+                elif state == "stale":
+                    print("run: remote runner died without final status "
+                          "(stale)", file=sys.stderr)
+                final_code = d.get("code")
+                try:
+                    final_code = int(final_code)
+                except (TypeError, ValueError):
+                    final_code = 1
+                print("run: %s (exit %d)" % (state, final_code),
+                      file=sys.stderr)
+                return final_code
+            _time.sleep(2)
+    if cmd in ("herd", "flock"):
+        if len(sys.argv) < 4:
+            print("usage: yote-conn %s <METHOD> <path> [body]" % cmd,
+                  file=sys.stderr)
+            return 2
+        method, path = sys.argv[2].upper(), sys.argv[3]
+        data = None
+        if len(sys.argv) > 4:
+            data = (sys.stdin.buffer.read() if sys.argv[4] == "-"
+                    else sys.argv[4].encode())
+        code, body = req(method, "/%s%s" % (cmd, path), data)
+        sys.stdout.buffer.write(body)
+        if code >= 400:
+            print("\n[%s %s -> HTTP %d]" % (cmd, path, code),
+                  file=sys.stderr)
+        return 0 if code < 400 else 1
+    print("unknown command: %s" % cmd, file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except ConnectorDown as e:
+        print("yote-conn: connector down (is the daemon up?): %s" % e,
+              file=sys.stderr)
+        sys.exit(1)
+    except ValueError as e:
+        # json.loads on a non-JSON daemon reply, int() slips, etc.
+        print("yote-conn: bad response from connector: %s" % e,
+              file=sys.stderr)
+        sys.exit(1)

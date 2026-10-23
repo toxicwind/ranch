@@ -1,0 +1,15 @@
+{
+  "index": "Overview",
+  "benchmarks": {
+    "title": "Rankings",
+    "type": "page"
+  },
+  "radar": {
+    "title": "Radar",
+    "type": "page"
+  },
+  "docs": {
+    "title": "Docs",
+    "type": "page"
+  }
+}

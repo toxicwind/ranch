@@ -1,0 +1,62 @@
+name: corral CI
+
+# GitHub runs workflows from the repo ROOT only. This is the live CI for the
+# corral package (ranch/corral): bun install + typecheck + test, path-filtered
+# so it only fires when corral or this workflow changes.
+# (corral/.github/workflows/ci.yml mirrors these same gates as the
+# package-local contract.)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "corral/**"
+      - ".github/workflows/corral.yml"
+  pull_request:
+    paths:
+      - "corral/**"
+      - ".github/workflows/corral.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corral-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: install, typecheck, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Corral's gates (typecheck + unit tests) never launch a browser, but the
+    # monorepo pulls playwright/puppeteer via sibling workspaces. Their
+    # postinstall browser downloads (~300MB) stall on GH runners — skip them.
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      PUPPETEER_SKIP_DOWNLOAD: "true"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.2"
+      - name: Install jj (Jujutsu)
+        run: |
+          mkdir -p /tmp/jjdl
+          curl -fsSL "https://github.com/jj-vcs/jj/releases/download/v0.32.0/jj-v0.32.0-x86_64-unknown-linux-musl.tar.gz" | tar xz -C /tmp/jjdl
+          sudo install -m 755 /tmp/jjdl/jj /usr/local/bin/jj
+          jj --version
+      # NOTE: no actions/cache for the bun store -- a restored cache made
+      # `bun install` hang silently for 15min (run 37168529657). The monorepo
+      # CI cold-installs in ~1-2min, so the cache buys nothing here.
+      # Install at the repo ROOT (where bun.lock lives): corral has no own
+      # lockfile, so bun walks up here anyway. Explicit beats implicit.
+      - name: Install
+        timeout-minutes: 15
+        run: bun install  # plain (not --frozen-lockfile): the frozen flag hung silent on GH runners; monorepo CI uses plain install
+      - name: Typecheck
+        working-directory: corral
+        run: bun run typecheck
+      - name: Test
+        working-directory: corral
+        run: bun test tests/

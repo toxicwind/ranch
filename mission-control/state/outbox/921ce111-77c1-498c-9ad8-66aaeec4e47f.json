@@ -1,0 +1,11 @@
+{
+  "directiveId": "921ce111-77c1-498c-9ad8-66aaeec4e47f",
+  "parentMissionId": "m2",
+  "parentRunId": "probe-replay-run",
+  "terminal": "resultless",
+  "reason": "run probe-replay-run recorded unknown with null summary and zero observable output",
+  "activityId": "6a386384-5636-4026-a199-883b3e4568cb",
+  "taskId": "b2aa710d-2932-461c-baf4-363f875aa42b",
+  "chatId": "192a6c89-ffad-4182-8d0c-3f5759ab6b9d",
+  "issuedAt": "2026-09-30T22:29:24.160Z"
+}

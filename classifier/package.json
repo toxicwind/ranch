@@ -1,0 +1,12 @@
+{
+  "description": "First-class safety-classifier false-positive detectors and autonomy failure-mode regressions. Executable detectors for canned refusals, stall phrasing, false-success run records, and misattributed API dispatch (the tasks category error).",
+  "name": "classifier",
+  "scripts": {
+    "test": "bun test",
+    "validate": "bun run typecheck && bun run test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check src tests 2>/dev/null || true",
+    "typecheck": ":"
+  },
+  "version": "1.0.0"
+}

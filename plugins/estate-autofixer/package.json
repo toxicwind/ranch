@@ -1,0 +1,13 @@
+{
+  "name": "@estate/autofixer",
+  "version": "1.0.0",
+  "description": "Sardonic estate autofixer plugin — discovers and fixes broken symlinks, config drift, and manifest gaps",
+  "main": "src/index.ts",
+  "files": ["src"],
+  "keywords": ["kappa", "plugin", "autofix", "estate", "audit"],
+  "author": "estate",
+  "license": "MIT",
+  "peerDependencies": {
+    "@kappacode/sdk": "^1.0.0"
+  }
+}

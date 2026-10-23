@@ -1,0 +1,9 @@
+node_modules/
+dist/
+sidecar/node_modules/
+sidecar/dist/
+*.vsix
+*.log
+.env
+.env.local
+.mp-backup/

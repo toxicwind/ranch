@@ -1,0 +1,99 @@
+[tasks.bench]
+run = "./sweeps/roundup-bench.sh"
+description = "Benchmark providers using instruction_following scorer"
+
+[tasks.bench-v3]
+run = "./sweeps/roundup-bench-v3.sh"
+description = "Benchmark providers with capability probing"
+
+[tasks.sweep]
+run = "./sweeps/roundup_sweep.sh"
+description = "Quick sanity pass over working OpenRouter models"
+
+[tasks.estate-sweep]
+run = "bun ./sweeps/roundup-estate-sweep.ts"
+description = "One-command estate sweep"
+
+[tasks.emit-weights]
+run = "bun ./sweeps/emit-router-weights.ts"
+description = "Convert sweep results into router weights"
+
+[tasks.dump]
+run = "./sweeps/dump-roundup.sh"
+description = "Dump roundup directory"
+
+[tasks.kappa-freeinf-sweep]
+run = "./sweeps/kappa-freeinference-sweep.sh"
+description = "Benchmark the Kappa extra freeinference catalog (6 models, serial, concurrency limit 1)"
+
+[tasks.kappa-atria-sweep]
+run = "./sweeps/kappa-atria-sweep.sh"
+description = "Benchmark Kappa Atria-Dawn (512K ctx, serial, ~50 rpm shared)"
+
+[tasks.upstream-status]
+run = "./scripts/upstream-merge.sh --status"
+description = "Check fork status"
+
+[tasks.gen-benchmarks]
+run = "bun ./scripts/gen-benchmarks-json.ts"
+description = "Generate docs-site/public/benchmarks.json from latest ranking"
+
+[tasks.docs-dev]
+run = "cd docs-site && npm run dev"
+description = "Dev server for rankings site"
+
+[tasks.docs-build]
+run = "cd docs-site && npm run build"
+description = "Build rankings site"
+
+# Ad-hoc recon probes (read-only). Use to sanity-check a provider/endpoint before
+# writing a full sweep.
+[tasks.probe-keypool]
+run = "python3 ./scripts/probe-keypool.py"
+description = "Probe keypool provider(s)"
+
+[tasks.probe-openrouter]
+run = "python3 ./scripts/probe-openrouter.py"
+description = "Probe OpenRouter models/rates"
+
+[tasks.probe-local-vram]
+run = "python3 ./scripts/probe-local-vram.py"
+description = "Probe local VRAM / model slots"
+
+[tasks.probe-nvidia-nim]
+run = "python3 ./scripts/probe-nvidia-nim.py"
+description = "Probe NVIDIA NIM endpoint capabilities"
+
+[tasks.probe-nvidia-tps]
+run = "python3 ./scripts/probe-nvidia-tps.py"
+description = "Probe NVIDIA throughput (tokens/s)"
+
+[tasks.probe-nvidia-tps-sh]
+run = "bash ./scripts/probe-nvidia-tps.sh"
+description = "Probe NVIDIA throughput (tokens/s, shell variant)"
+
+# Real-world task benchmark (correctness, not just latency). Runs the same complex
+# deterministic coding task across the estate's free models and scores answers.
+[tasks.realworld-bench]
+run = "bun ./sweeps/realworld-bench.ts"
+description = "Real-world task benchmark: correctness scoring across free models"
+
+[tasks.mise-build]
+run = "bash ./scripts/mise-build.sh"
+description = "Roundup registry build helper"
+
+# Preflight: verify toolchain + endpoints before any sweep. Exit non-zero on
+# the 2026-10-14 silent-failure class (missing guidellm, zero results, exit 0).
+[tasks.test]
+run = "python3 -m pytest tests/test_sweep_preflight.py -v"
+description = "Roundup preflight: fork present, guidellm resolvable, sweep fails loudly"
+
+# Live smoke: 1 model, 1 request — proves a sweep can actually produce data.
+[tasks.smoke]
+run = "ROUNDUP_LIVE=1 python3 -m pytest tests/test_sweep_preflight.py::test_live_smoke_sweep_produces_results -v"
+description = "Live smoke sweep (1 model, 1 request) — meta-test against silent failure"
+
+# Full herd sweep (all live herd models, guidellm path now explicit).
+[tasks.herd-sweep]
+run = "./sweeps/roundup_herd_sweep.sh"
+description = "Benchmark every model herd can load (loud-fail on zero results)"
