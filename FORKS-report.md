@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-23T00:23:25.770Z)
+# ranch/* fork audit (generated 2026-10-23T01:22:36.233Z)
 
-206 immediate subdirs; **142** have an obvious upstream reference.
+207 immediate subdirs; **142** have an obvious upstream reference.
 
 By source:
   - **141** .gitmodules
@@ -159,6 +159,7 @@ By source:
 | `data` | — | — | — |
 | `dedicated` | — | — | — |
 | `docs` | — | — | — |
+| `estate-brain` | — | — | — |
 | `feedlot-mcp` | — | — | — |
 | `kappa` | — | — | — |
 | `keeper` | — | — | — |

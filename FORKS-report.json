@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-23T00:23:25.770Z",
-  "total": 206,
+  "generated": "2026-10-23T01:22:36.233Z",
+  "total": 207,
   "withUpstream": 142,
   "infos": [
     {
@@ -442,7 +442,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4228,
+      "sizeBytes": 4806,
       "fileCount": 2,
       "signals": [],
       "signalTotal": 0
@@ -504,6 +504,18 @@
       "isSubmodule": true,
       "sizeBytes": 17962,
       "fileCount": 5,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "estate-brain",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 18699,
+      "fileCount": 3,
       "signals": [],
       "signalTotal": 0
     },
@@ -2110,8 +2122,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 66203,
-      "fileCount": 10,
+      "sizeBytes": 67928,
+      "fileCount": 11,
       "signals": [],
       "signalTotal": 0
     },
@@ -2314,7 +2326,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 66521,
+      "sizeBytes": 72468,
       "fileCount": 7,
       "signals": [],
       "signalTotal": 0
