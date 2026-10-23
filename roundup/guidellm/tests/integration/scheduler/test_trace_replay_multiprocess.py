@@ -1,0 +1,381 @@
+"""
+Integration test: trace file through dataset pipeline and TraceReplayStrategy.
+
+Validates multiprocess worker scheduling using real trace replay (not a test-only
+strategy): trace_synthetic deserializer, generative mapper/finalizer, and
+``TraceReplayStrategy.resolve_dequeued_target_start``.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import time
+from functools import wraps
+from pathlib import Path
+from typing import Any
+from unittest.mock import Mock
+
+import pytest
+
+from guidellm.data.deserializers import TraceDatasetDeserializer
+from guidellm.data.finalizers.generative import GenerativeRequestFinalizer
+from guidellm.data.preprocessors.mappers import GenerativeColumnMapper
+from guidellm.scheduler import (
+    BackendInterface,
+    MaxDurationConstraint,
+    MaxNumberConstraint,
+    TraceReplayStrategy,
+    WorkerProcessGroup,
+)
+from guidellm.scheduler.schemas import (
+    ConversationGraph,
+    HistoryContext,
+)
+from guidellm.scheduler.schemas.conversation_graph import (
+    GenerativeConversationGraph,
+    GenerativeConversationNode,
+)
+from guidellm.schemas import GenerationRequest, RequestSettings
+from guidellm.schemas.data import (
+    FileDataArgs,
+    GenerativeColumnMapperArgs,
+    GenerativeRequestFinalizerArgs,
+    MinimalTraceFormatArgs,
+)
+from guidellm.schemas.scheduler import (
+    MaxDurationConstraintArgs,
+    MaxRequestsConstraintArgs,
+)
+
+TIME_SCALE = 2.0
+RESOLVE_DELAY = 0.03
+# Sorted trace: earliest ts=2 -> 0.0, ts=5 -> 3.0, ts=8 -> 6.0 (duplicates below)
+EXPECTED_RELATIVE = [0.0, 0.0, 0.0, 0.1, 0.1, 1.5, 2.0, 2.0, 3.5, 7.0]
+NUM_REQUESTS = len(EXPECTED_RELATIVE)
+
+
+def async_timeout(delay: float):
+    """Decorator to add timeout to async test functions."""
+
+    def decorator(func):
+        @wraps(func)
+        async def new_func(*args, **kwargs):
+            return await asyncio.wait_for(func(*args, **kwargs), timeout=delay)
+
+        return new_func
+
+    return decorator
+
+
+def _trace_file_source(trace_path: Path) -> FileDataArgs:
+    suffix = trace_path.suffix.lower()
+    if suffix in {".json", ".jsonl"}:
+        kind = "json_file"
+    elif suffix == ".csv":
+        kind = "csv_file"
+    elif suffix == ".parquet":
+        kind = "parquet_file"
+    else:
+        kind = "json_file"
+    return FileDataArgs(kind=kind, path=trace_path)
+
+
+def _mock_processor() -> Mock:
+    proc = Mock()
+    proc.encode.side_effect = lambda text: list(range(len(text.split())))
+    proc.decode.side_effect = lambda tokens, skip_special_tokens=False: " ".join(
+        f"tok{i}" for i, _ in enumerate(tokens)
+    )
+    return proc
+
+
+def _write_trace(path: Path, lines: list[str]) -> Path:
+    path.write_text("\n".join(lines))
+    return path
+
+
+def _requests_from_trace(
+    trace_path: Path,
+    *,
+    time_scale: float = 1.0,
+) -> tuple[list[ConversationGraph[GenerationRequest]], list[float]]:
+    deserializer = TraceDatasetDeserializer()
+    dataset = deserializer(
+        config=MinimalTraceFormatArgs(
+            source=_trace_file_source(trace_path),
+            time_scale=time_scale,
+        ),
+        processor_factory=_mock_processor,
+        random_seed=42,
+    )
+
+    mapper = GenerativeColumnMapper(GenerativeColumnMapperArgs())
+    mapper.setup_data([dataset])
+    finalizer = GenerativeRequestFinalizer(GenerativeRequestFinalizerArgs())
+
+    relative_timestamps: list[float] = []
+    graphs: list[ConversationGraph[GenerationRequest]] = []
+    for idx, conversation in enumerate(dataset):
+        mapped = mapper([{"dataset": conversation}])
+        graph = finalizer(mapped)
+        assert isinstance(graph, GenerativeConversationGraph)
+        assert len(graph.nodes) == 1
+        assert not graph.edges
+        node = next(iter(graph.nodes.values()))
+        node.request.request_id = f"req_{idx}"
+        offset = node.settings.relative_timestamp
+        assert offset is not None
+        relative_timestamps.append(offset)
+        graphs.append(graph)
+
+    return graphs, relative_timestamps
+
+
+class FastMockBackend(BackendInterface):
+    """Backend with short resolve delay to exercise multiprocess dequeue."""
+
+    def __init__(
+        self,
+        resolve_delay: float = RESOLVE_DELAY,
+        processes_limit: int | None = None,
+    ):
+        self._resolve_delay = resolve_delay
+        self._processes_limit = processes_limit
+
+    @property
+    def processes_limit(self) -> int | None:
+        return self._processes_limit
+
+    @property
+    def requests_limit(self) -> int | None:
+        return None
+
+    def info(self) -> dict[str, Any]:
+        return {"type": "fast_mock_trace_replay", "delay": self._resolve_delay}
+
+    async def process_startup(self):
+        pass
+
+    async def validate(self):
+        pass
+
+    async def process_shutdown(self):
+        pass
+
+    async def resolve(self, request, request_info, history=None):
+        request_info.timings.request_start = time.time()
+        await asyncio.sleep(self._resolve_delay)
+        request_info.timings.request_end = time.time()
+        rid = (
+            request.request_id
+            if hasattr(request, "request_id")
+            else request["request_id"]
+        )
+        yield f"ok_{rid}", request_info
+
+
+def _request_index(request) -> int:
+    rid = (
+        request.request_id if hasattr(request, "request_id") else request["request_id"]
+    )
+    return int(rid.removeprefix("req_"))
+
+
+@pytest.mark.smoke
+@pytest.mark.regression
+@pytest.mark.asyncio
+@async_timeout(60.0)
+async def test_trace_replay_multiprocess_from_trace_file(tmp_path: Path):
+    """Trace replay timing under multiprocessing with dataset-sourced settings.
+
+    ### WRITTEN BY AI ###
+    """
+    # Unsorted rows; deserializer sorts by timestamp (t0=2.0 -> EXPECTED_RELATIVE).
+    trace = _write_trace(
+        tmp_path / "trace.jsonl",
+        [
+            '{"timestamp": 9.0, "input_length": 10, "output_length": 5}',
+            '{"timestamp": 2.0, "input_length": 10, "output_length": 5}',
+            '{"timestamp": 5.5, "input_length": 10, "output_length": 5}',
+            '{"timestamp": 2.0, "input_length": 10, "output_length": 5}',
+            '{"timestamp": 4.0, "input_length": 10, "output_length": 5}',
+            '{"timestamp": 2.1, "input_length": 10, "output_length": 5}',
+            '{"timestamp": 2.0, "input_length": 10, "output_length": 5}',
+            '{"timestamp": 3.5, "input_length": 10, "output_length": 5}',
+            '{"timestamp": 2.1, "input_length": 10, "output_length": 5}',
+            '{"timestamp": 4.0, "input_length": 10, "output_length": 5}',
+        ],
+    )
+
+    requests, relative_timestamps = _requests_from_trace(trace, time_scale=TIME_SCALE)
+    assert relative_timestamps == pytest.approx(
+        [TIME_SCALE * timestamp for timestamp in EXPECTED_RELATIVE],
+        abs=1e-9,
+    )
+    assert len(requests) == NUM_REQUESTS
+
+    strategy = TraceReplayStrategy()
+    group = WorkerProcessGroup(
+        backend=FastMockBackend(resolve_delay=RESOLVE_DELAY),
+        requests=requests,
+        strategy=strategy,
+        max_number=MaxNumberConstraint(
+            args=MaxRequestsConstraintArgs(count=NUM_REQUESTS)
+        ),
+    )
+
+    settings_by_index: dict[int, RequestSettings] = {}
+    targeted_start_by_index: dict[int, float] = {}
+    worker_nodes: set[int] = set()
+    completed = 0
+
+    try:
+        await group.create_processes()
+        assert group.processes is not None
+        assert len(group.processes) >= 2
+
+        start_time = time.time() + 0.05
+        await group.start(start_time)
+
+        async for (
+            response,
+            request,
+            request_info,
+            _state,
+        ) in group.request_updates():
+            index = _request_index(request)
+
+            if request_info.settings.relative_timestamp is not None:
+                settings_by_index[index] = request_info.settings
+
+            if request_info.timings.targeted_start is not None:
+                targeted_start_by_index[index] = request_info.timings.targeted_start
+
+            if request_info.status == "completed":
+                assert response == f"ok_req_{index}"
+                worker_nodes.add(request_info.scheduler_node_id)
+                completed += 1
+                if completed == NUM_REQUESTS:
+                    break
+    finally:
+        exceptions = await group.shutdown()
+        assert exceptions == []
+
+    assert len(settings_by_index) == NUM_REQUESTS
+    assert len(targeted_start_by_index) == NUM_REQUESTS
+    assert len(worker_nodes) >= 2
+
+    for index, relative_timestamp in enumerate(EXPECTED_RELATIVE):
+        scaled_timestamp = TIME_SCALE * relative_timestamp
+        assert settings_by_index[index].relative_timestamp == pytest.approx(
+            scaled_timestamp,
+            abs=1e-9,
+        )
+        expected_target = start_time + scaled_timestamp
+        assert targeted_start_by_index[index] == pytest.approx(
+            expected_target,
+            abs=0.05,
+        )
+
+
+def _linear_replay_graph(
+    timestamps: list[float],
+    *,
+    graph_id: str = "linear_replay",
+    request_prefix: str = "req",
+) -> GenerativeConversationGraph:
+    nodes: dict[str, GenerativeConversationNode] = {}
+    parents_by_node: dict[str, list[tuple[str, HistoryContext]]] = {}
+    prev: str | None = None
+    for index, relative_timestamp in enumerate(timestamps):
+        node_id = f"n{index}"
+        nodes[node_id] = GenerativeConversationNode(
+            node_id=node_id,
+            agent_id="default",
+            request=GenerationRequest(request_id=f"{request_prefix}_{index}"),
+            settings=RequestSettings(relative_timestamp=relative_timestamp),
+        )
+        parents_by_node[node_id] = [(prev, "full")] if prev is not None else []
+        prev = node_id
+    return GenerativeConversationGraph.from_nodes_with_parents(
+        nodes=nodes,
+        parents_by_node=parents_by_node,
+        graph_id=graph_id,
+    )
+
+
+@pytest.mark.smoke
+@pytest.mark.regression
+@pytest.mark.asyncio
+@async_timeout(60.0)
+async def test_max_duration_cancels_long_replay_sleep():
+    """max_duration stops workers sleeping on a future relative_timestamp.
+
+    Arm duration only after the delayed request is ``pending`` (sleep started)
+    so cancel is sequenced from that event, not by racing two wall-clocks.
+    The timestamp is far enough that the request cannot complete first.
+
+    ## WRITTEN BY AI ##
+    """
+    delayed_id = "del_0"
+    delayed = _linear_replay_graph(
+        [1_000_000.0], graph_id="delayed", request_prefix="del"
+    )
+    strategy = TraceReplayStrategy(time_scale=1.0)
+    group = WorkerProcessGroup(
+        backend=FastMockBackend(resolve_delay=RESOLVE_DELAY, processes_limit=1),
+        requests=[delayed],
+        strategy=strategy,
+    )
+    statuses_by_request: dict[str, list[str]] = {}
+    duration_armed = False
+    cancelled_count = 0
+    try:
+        await group.create_processes()
+        await group.start(time.time())
+        async for _, _, request_info, _state in group.request_updates():
+            statuses_by_request.setdefault(request_info.request_id, []).append(
+                request_info.status
+            )
+            if (
+                not duration_armed
+                and request_info.request_id == delayed_id
+                and request_info.status == "pending"
+            ):
+                # Sleep is in flight. Attach an already-elapsed duration and
+                # signal workers the same way the coordinator poll loop would.
+                duration_armed = True
+                assert group.state is not None
+                state_update = group.state.update_state(
+                    add_constraints={
+                        "max_duration": MaxDurationConstraint(
+                            args=MaxDurationConstraintArgs(seconds=1e-9)
+                        )
+                    }
+                )
+                if (
+                    state_update.stop_processing
+                    and group.constraint_reached_event is not None
+                ):
+                    group.constraint_reached_event.set()
+            if request_info.status == "cancelled":
+                break
+        if group.state is not None:
+            # received_callback may record cancel before this iterator yields it
+            cancelled_count = group.state.update_state().state.cancelled_requests
+    finally:
+        exceptions = await group.shutdown()
+        assert exceptions == []
+
+    delayed_statuses = statuses_by_request.get(delayed_id, [])
+    assert duration_armed, (
+        f"delayed request never reached pending; statuses={statuses_by_request}"
+    )
+    assert "cancelled" in delayed_statuses or cancelled_count >= 1, (
+        f"expected cancelled for {delayed_id}; statuses={statuses_by_request} "
+        f"cancelled_requests={cancelled_count}"
+    )
+    assert "completed" not in delayed_statuses, (
+        f"delayed request completed instead of cancelling; "
+        f"statuses={statuses_by_request}"
+    )

@@ -1,0 +1,7 @@
+language: 'typescript'
+tasks:
+  test:
+    command: 'bun test'
+    inputs:
+      - src/**/*.ts
+      - tests/**/*.ts

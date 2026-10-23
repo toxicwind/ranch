@@ -1,0 +1,663 @@
+# Submodules tracked by this repository.
+#
+# Every path listed here is recorded in the index as a gitlink (mode 160000).
+# Each needs a `url`, because `git submodule update --init` -- which is what
+# `git clone --recursive` runs -- has no way to obtain a gitlink's contents
+# without one. A gitlink with no entry here makes `git submodule status`
+# abort with:
+#
+#     fatal: no submodule mapping found in .gitmodules for path '<path>'
+#
+# and makes `git clone --recursive` fail outright after checkout.
+#
+# URLs are each checkout's own `origin`, verified with
+# `git remote get-url origin` from inside the submodule.
+#
+# NOTE: the six nested checkouts ignored in .gitignore
+# (/vansrouter/, /tau/, /boundless/, /sigma/, /omp-semantic-policy/,
+# /barn/woodpecker/) are deliberately NOT listed here. They are ignored
+# rather than tracked, so they contribute no gitlinks and need no entry.
+
+# --- generated 2026-10-04T00:12:09Z: one entry per tracked gitlink,
+#     url = each checkout's own origin ---
+[submodule "killer-features/bid-market/vendor/agora"]
+	path = gavel/vendor/agora
+	url = https://github.com/KAIJUJO/Agora.git
+[submodule "killer-features/bid-market/vendor/auction-agent11"]
+	path = gavel/vendor/auction-agent11
+	url = https://github.com/wushuchris/11-distributed-auction-task-allocation-agent.git
+[submodule "killer-features/bid-market/vendor/contract-net-router"]
+	path = gavel/vendor/contract-net-router
+	url = https://github.com/M00C1FER/contract-net-router.git
+[submodule "killer-features/code-racer/vendor/RACE"]
+	path = furlong/vendor/RACE
+	url = https://github.com/jszheng21/RACE.git
+[submodule "killer-features/code-racer/vendor/SRank-CodeRanker"]
+	path = furlong/vendor/SRank-CodeRanker
+	url = https://github.com/FSoft-AI4Code/SRank-CodeRanker.git
+[submodule "killer-features/code-racer/vendor/coder_reviewer_reranking"]
+	path = furlong/vendor/coder_reviewer_reranking
+	url = https://github.com/facebookresearch/coder_reviewer_reranking.git
+[submodule "killer-features/code-racer/vendor/speed-run"]
+	path = furlong/vendor/speed-run
+	url = https://github.com/2389-research/speed-run.git
+[submodule "killer-features/debate-oracle/vendor/ChatEval"]
+	path = duel/vendor/ChatEval
+	url = https://github.com/thunlp/ChatEval.git
+[submodule "killer-features/debate-oracle/vendor/argus-ai-debate"]
+	path = duel/vendor/argus-ai-debate
+	url = https://github.com/Argus-Framework/argus-ai-debate.git
+[submodule "killer-features/debate-oracle/vendor/debate-or-vote"]
+	path = duel/vendor/debate-or-vote
+	url = https://github.com/deeplearning-wisc/debate-or-vote.git
+[submodule "killer-features/debate-oracle/vendor/llm_debate"]
+	path = duel/vendor/llm_debate
+	url = https://github.com/ucl-dark/llm_debate.git
+[submodule "mcpproxy-go"]
+	path = mcpproxy-go
+	url = https://github.com/toxicwind/mcpproxy-go.git
+[submodule "muse-cli"]
+	path = muse-cli
+	url = https://github.com/toxicwind/muse-cli.git
+[submodule "nim-inkling-api-research"]
+	path = nim-inkling-api-research
+	url = https://github.com/toxicwind/nim-inkling-api-research.git
+[submodule "nim-repos/Gitlawb-openclaude"]
+	path = nim-repos/Gitlawb-openclaude
+	url = https://github.com/Gitlawb/openclaude
+[submodule "nim-repos/NVIDIA-NemoClaw"]
+	path = nim-repos/NVIDIA-NemoClaw
+	url = https://github.com/NVIDIA/NemoClaw
+[submodule "nim-repos/Sateeshreddymaddi-Custom-Nvidia-Nim-Node"]
+	path = nim-repos/Sateeshreddymaddi-Custom-Nvidia-Nim-Node
+	url = https://github.com/Sateeshreddymaddi/Custom-Nvidia-Nim-Node
+[submodule "nim-repos/api-evangelist-nvidia-nim"]
+	path = nim-repos/api-evangelist-nvidia-nim
+	url = https://github.com/api-evangelist/nvidia-nim
+[submodule "nim-repos/bauka0-nvidia-nim-provider"]
+	path = nim-repos/bauka0-nvidia-nim-provider
+	url = https://github.com/bauka0/nvidia-nim-provider
+[submodule "nim-repos/david-eve-za-nvidia-nim-mcp"]
+	path = nim-repos/david-eve-za-nvidia-nim-mcp
+	url = https://github.com/david-eve-za/nvidia-nim-mcp
+[submodule "nim-repos/diegovisk-pi-nvidia-nim"]
+	path = nim-repos/diegovisk-pi-nvidia-nim
+	url = https://github.com/diegovisk/pi-nvidia-nim
+[submodule "nim-repos/furqanafridi-free-claude-code"]
+	path = nim-repos/furqanafridi-free-claude-code
+	url = https://github.com/furqanafridi/free-claude-code
+[submodule "nim-repos/gabriel-ferraresi-NIMGEN"]
+	path = nim-repos/gabriel-ferraresi-NIMGEN
+	url = https://github.com/gabriel-ferraresi/NIMGEN
+[submodule "nim-repos/h0rcrux-hermes-backup"]
+	path = nim-repos/h0rcrux-hermes-backup
+	url = https://github.com/h0rcrux/hermes-backup
+[submodule "nim-repos/iammalego-keymux"]
+	path = nim-repos/iammalego-keymux
+	url = https://github.com/iammalego/keymux
+[submodule "nim-repos/joeldg-nvidiarouter"]
+	path = nim-repos/joeldg-nvidiarouter
+	url = https://github.com/joeldg/nvidiarouter
+[submodule "nim-repos/lizhebio-nim-qwen-model-router"]
+	path = nim-repos/lizhebio-nim-qwen-model-router
+	url = https://github.com/lizhebio/nim-qwen-model-router
+[submodule "nim-repos/lucky-mandator-gocode-router"]
+	path = nim-repos/lucky-mandator-gocode-router
+	url = https://github.com/lucky-mandator/gocode-router
+[submodule "nim-repos/mschwarzmueller-pi_agent_rust"]
+	path = nim-repos/mschwarzmueller-pi_agent_rust
+	url = https://github.com/mschwarzmueller/pi_agent_rust
+[submodule "nim-repos/musistudio-claude-code-router"]
+	path = nim-repos/musistudio-claude-code-router
+	url = https://github.com/musistudio/claude-code-router
+[submodule "nim-repos/nezerkc-opencode-provider-nvidia-nim"]
+	path = nim-repos/nezerkc-opencode-provider-nvidia-nim
+	url = https://github.com/nezerkc/opencode-provider-nvidia-nim
+[submodule "nim-repos/nirholas-three.ws"]
+	path = nim-repos/nirholas-three.ws
+	url = https://github.com/nirholas/three.ws
+[submodule "nim-repos/olszalsik-a0-nvidia-nim"]
+	path = nim-repos/olszalsik-a0-nvidia-nim
+	url = https://github.com/olszalsik/a0-nvidia-nim
+[submodule "nim-repos/rickeshtn-nim-code"]
+	path = nim-repos/rickeshtn-nim-code
+	url = https://github.com/rickeshtn/nim-code
+[submodule "nim-repos/shaivpidadi-freeridev3"]
+	path = nim-repos/shaivpidadi-freeridev3
+	url = https://github.com/shaivpidadi/freeridev3
+[submodule "nim-repos/stillhue-claudio"]
+	path = nim-repos/stillhue-claudio
+	url = https://github.com/stillhue/claudio
+[submodule "nim-repos/thispointon-kondi"]
+	path = nim-repos/thispointon-kondi
+	url = https://github.com/thispointon/kondi
+[submodule "nim-repos/tibbee-pi-nvidia-nim-provider"]
+	path = nim-repos/tibbee-pi-nvidia-nim-provider
+	url = https://github.com/tibbee/pi-nvidia-nim-provider
+[submodule "nim-repos/xRyul-pi-nvidia-nim"]
+	path = nim-repos/xRyul-pi-nvidia-nim
+	url = https://github.com/xRyul/pi-nvidia-nim
+[submodule "nvidia-alive"]
+	path = nvidia-alive
+	url = https://github.com/toxicwind/nvidia-alive.git
+[submodule "nvidia-kernel-guard"]
+	path = nvidia-kernel-guard
+	url = https://github.com/toxicwind/nvidia-kernel-guard.git
+[submodule "nvidia-nim-model-probe"]
+	path = nvidia-nim-model-probe
+	url = https://github.com/toxicwind/nvidia-nim-model-probe.git
+[submodule "outlier-toolkit"]
+	path = outlier-toolkit
+	url = https://github.com/toxicwind/outlier-toolkit.git
+[submodule "paper-poller"]
+	path = paper-poller
+	url = https://github.com/toxicwind/paper-poller.git
+[submodule "pearlctl"]
+	path = pearlctl
+	url = https://github.com/toxicwind/pearlctl.git
+[submodule "pj-fast"]
+	path = pj-fast
+	url = https://github.com/toxicwind/pj-fast.git
+[submodule "ralph-dashboard"]
+	path = ralph-dashboard
+	url = https://github.com/toxicwind/ralph-dashboard.git
+[submodule "refusal-hunt"]
+	path = refusal-hunt
+	url = https://github.com/toxicwind/refusal-hunt.git
+[submodule "repo-first-class"]
+	path = repo-first-class
+	url = https://github.com/toxicwind/repo-first-class.git
+[submodule "rig"]
+	path = rig
+	url = https://github.com/toxicwind/rig.git
+[submodule "rsync-mcp"]
+	path = mcp/rsync-mcp
+	url = https://github.com/toxicwind/rsync-mcp.git
+[submodule "safety-review-gate"]
+	path = safety-review-gate
+	url = https://github.com/toxicwind/safety-review-gate.git
+[submodule "secretsmith"]
+	path = secretsmith
+	url = https://github.com/toxicwind/secretsmith.git
+[submodule "session-bus-refresh"]
+	path = session-bus-refresh
+	url = https://github.com/toxicwind/session-bus-refresh.git
+[submodule "skillforge"]
+	path = skillforge
+	url = https://github.com/toxicwind/skillforge.git
+[submodule "estate-scripts-dispersal"]
+	path = estate-scripts-dispersal
+	url = https://github.com/toxicwind/estate-scripts-dispersal.git
+[submodule "estate-scripts-end4"]
+	path = estate-scripts-end4
+	url = https://github.com/toxicwind/estate-scripts-end4.git
+[submodule "estate-scripts-scripts"]
+	path = estate-scripts-scripts
+	url = https://github.com/toxicwind/estate-scripts-scripts.git
+[submodule "estate-scripts-skills"]
+	path = estate-scripts-skills
+	url = https://github.com/toxicwind/estate-scripts-skills.git
+[submodule "strudel-dev-vite"]
+	path = strudel-dev-vite
+	url = https://github.com/toxicwind/strudel-dev-vite.git
+[submodule "strudel-sampler-server-vite"]
+	path = strudel-sampler-server-vite
+	url = https://github.com/toxicwind/strudel-sampler-server-vite.git
+[submodule "toxicwind-repos"]
+	path = toxicwind-repos
+	url = https://github.com/toxicwind/toxicwind-repos
+[submodule "trading-post"]
+	path = trading-post
+	url = https://github.com/toxicwind/trading-post.git
+[submodule "wezterm"]
+	path = wezterm
+	url = https://github.com/toxicwind/wezterm.git
+
+# --- repair 2026-10-04: 4 gitlinks missing from the 00:12Z generation,
+#     urls verified via git remote get-url origin inside each checkout ---
+[submodule "AgentForensics"]
+	path = AgentForensics
+	url = https://github.com/aparnaa19/AgentForensics.git
+[submodule "borrowed/herdr"]
+	path = borrowed/herdr
+	url = https://github.com/ogulcancelik/herdr.git
+[submodule "borrowed/loom"]
+	path = borrowed/loom
+	url = https://github.com/rjwalters/loom.git
+[submodule "mcp-prompt-injection-detector"]
+	path = mcp/mcp-prompt-injection-detector
+	url = https://github.com/thilinawishvekeerthi/mcp-prompt-injection-detector.git
+[submodule "roundup-site"]
+	path = roundup-site
+	url = https://github.com/owieth/turborepo-example
+[submodule "barn/weave-sub"]
+	path = barn/weave-sub
+	url = https://github.com/toxicwind/weave.git
+[submodule "barn/flatbread"]
+	path = barn/flatbread
+	url = https://github.com/toxicwind/flatbread.git
+[submodule "forge/web"]
+	path = forge/web
+	url = https://github.com/toxicwind/CMSaasStarter.git
+[submodule "tau-extensions"]
+	path = tau/tau-extensions
+	url = https://github.com/toxicwind/tau-extensions.git
+[submodule "doorbell"]
+	path = doorbell
+	url = https://github.com/toxicwind/doorbell.git
+[submodule "tools/c8"]
+	path = tools/c8
+	url = https://github.com/bcoe/c8.git
+[submodule "barn/corral"]
+	path = barn/corral
+	url = ./barn/corral
+[submodule "submodules/phone-sentinel"]
+	path = submodules/phone-sentinel
+	url = /home/toxic/phone-sentinel
+[submodule "extensions/drover"]
+	path = extensions/drover
+	url = https://github.com/toxicwind/drover.git
+[submodule "tailnet-doctor"]
+	path = vendor/tailnet-doctor
+	url = https://github.com/toxicwind/tailnet-doctor.git
+[submodule "websites/effusion-labs-tickets"]
+	path = websites/effusionlabs/tickets
+	url = https://github.com/toxicwind/effusion-labs-tickets.git
+[submodule "websites/effusion-labs"]
+	path = websites/effusionlabs/main
+	url = https://github.com/toxicwind/effusion-labs.git
+[submodule "websites/arlockworks-core"]
+	path = websites/arlockworks/main
+	url = https://github.com/toxicwind/arlockworks-core.git
+[submodule "websites/arlockworks-next"]
+	path = websites/arlockworks/app
+	url = https://github.com/toxicwind/arlockworks-next.git
+[submodule "dedicated-server-ops"]
+	path = dedicated/dedicated-server-ops
+	url = https://github.com/toxicwind/dedi-ops.git
+[submodule "OmniRoute"]
+	path = OmniRoute
+	url = https://github.com/toxicwind/OmniRoute.git
+[submodule "VansRouter"]
+	path = VansRouter
+	url = https://github.com/toxicwind/VansRouter.git
+[submodule "ai-merge-resolve"]
+	path = ai-merge-resolve
+	url = https://github.com/toxicwind/ai-merge-resolve.git
+[submodule "awesome-free-ai-coding"]
+	path = awesome-free-ai-coding
+	url = https://github.com/toxicwind/awesome-free-ai-coding.git
+[submodule "computer-use-linux"]
+	path = computer-use-linux
+	url = https://github.com/toxicwind/computer-use-linux.git
+[submodule "dualspace-ast-bm25-hybrid"]
+	path = dualspace-ast-bm25-hybrid
+	url = https://github.com/toxicwind/dualspace-ast-bm25-hybrid.git
+[submodule "estate-hatch-toolkit"]
+	path = estate-hatch-toolkit
+	url = https://github.com/toxicwind/estate-hatch-toolkit.git
+[submodule "estate-recon"]
+	path = estate-recon
+	url = https://github.com/toxicwind/estate-recon.git
+[submodule "estate-skills-hub"]
+	path = estate-skills-hub
+	url = https://github.com/toxicwind/estate-skills-hub.git
+[submodule "fleetd"]
+	path = fleetd
+	url = https://github.com/toxicwind/fleetd.git
+[submodule "freebuffet"]
+	path = freebuffet
+	url = https://github.com/toxicwind/freebuffet.git
+[submodule "ghq"]
+	path = ghq
+	url = https://github.com/toxicwind/ghq.git
+[submodule "gito"]
+	path = gito
+	url = https://github.com/toxicwind/gito.git
+[submodule "godzilla-llama.cpp"]
+	path = godzilla-llama.cpp
+	url = https://github.com/toxicwind/godzilla-llama.cpp.git
+[submodule "identity-router"]
+	path = identity-router
+	url = https://github.com/toxicwind/identity-router.git
+[submodule "loom"]
+	path = loom
+	url = https://github.com/toxicwind/loom.git
+[submodule "maw"]
+	path = maw
+	url = https://github.com/toxicwind/maw.git
+[submodule "metaclaw-runtime"]
+	path = metaclaw-runtime
+	url = https://github.com/toxicwind/metaclaw-runtime.git
+[submodule "oh-my-pi"]
+	path = oh-my-pi
+	url = https://github.com/toxicwind/oh-my-pi.git
+[submodule "outsource"]
+	path = outsource
+	url = https://github.com/toxicwind/outsource.git
+[submodule "stealthprint"]
+	path = stealthprint
+	url = https://github.com/toxicwind/stealthprint.git
+[submodule "super-board"]
+	path = super-board
+	url = https://github.com/toxicwind/super-board.git
+[submodule "universal-keypool-bun"]
+	path = universal-keypool-bun
+	url = https://github.com/toxicwind/universal-keypool-bun.git
+[submodule "universal-keypool-gateway"]
+	path = universal-keypool-gateway
+	url = https://github.com/toxicwind/universal-keypool-gateway.git
+[submodule "workmux"]
+	path = workmux
+	url = https://github.com/toxicwind/workmux.git
+[submodule "zed-android-port"]
+	path = zed-android-port
+	url = https://github.com/toxicwind/zed-android-port.git
+
+[submodule "kairos"]
+	path = kairos
+	url = https://github.com/toxicwind/kairos.git
+[submodule "agent-customization-style-guide"]
+	path = agent-customization-style-guide
+	url = https://github.com/toxicwind/agent-customization-style-guide.git
+[submodule "nativelink"]
+	path = barn/nativelink
+	url = https://github.com/toxicwind/nativelink.git
+[submodule "rosec"]
+	path = barn/rosec
+	url = https://github.com/toxicwind/rosec.git
+[submodule "weave"]
+	path = barn/weave
+	url = https://github.com/toxicwind/weave.git
+[submodule "estate-dispersal"]
+	path = estate-dispersal
+	url = https://github.com/toxicwind/estate-dispersal.git
+[submodule "estate-end4"]
+	path = estate-end4
+	url = https://github.com/toxicwind/estate-end4.git
+[submodule "estate-shell"]
+	path = estate-shell
+	url = https://github.com/toxicwind/estate-shell.git
+[submodule "estate-skills"]
+	path = estate-skills
+	url = https://github.com/toxicwind/estate-skills.git
+[submodule "ferret-den"]
+	path = ferret-den
+	url = https://github.com/toxicwind/ferret-den.git
+[submodule "pd-mcp-standalone"]
+	path = mcp/pd-mcp-standalone
+	url = https://github.com/toxicwind/pd-mcp.git
+[submodule "flocksync"]
+	path = mesh/pylae
+	url = https://github.com/toxicwind/flocksync.git
+[submodule "weasel"]
+	path = forge/router/weasel
+	url = https://github.com/diegosouzapw/OmniRoute
+[submodule "nim-omnibus"]
+	path = nim-omnibus
+	url = https://github.com/toxicwind/nim-omnibus.git
+[submodule "agentpluginzoo"]
+	path = plugin-ecosystem/agentpluginzoo
+	url = https://github.com/tezansahu/agentpluginzoo.git
+[submodule "tok"]
+	path = tok
+	url = https://github.com/toxicwind/tok.git
+[submodule "corral"]
+	url = https://github.com/toxicwind/corral.git
+	path = corral
+[submodule "gavel"]
+	path = gavel
+	url = https://github.com/toxicwind/gavel.git
+[submodule "agon"]
+	path = agon
+	url = https://github.com/toxicwind/agon.git
+[submodule "antilogos"]
+	path = antilogos
+	url = https://github.com/toxicwind/antilogos.git
+[submodule "tau-verify"]
+	path = tau-verify
+	url = https://github.com/toxicwind/tau.git
+[submodule "mcp.mcpproxy-go"]
+	path = mcp/mcpproxy-go
+	url = https://github.com/toxicwind/mcpproxy-go.git
+[submodule "nuvio"]
+	path = nuvio
+	url = https://github.com/toxicwind/nuvio.git
+[submodule "hatch.hatch-cli"]
+	path = hatch/kite-cli
+	url = https://github.com/toxicwind/kite-cli.git
+[submodule "hatch"]
+	path = hatch
+	url = https://github.com/toxicwind/hatch.git
+[submodule "flicker"]
+	path = flicker
+	url = https://github.com/toxicwind/flicker.git
+[submodule "phone-lane"]
+	path = phone-lane
+	url = https://github.com/toxicwind/phone-lane.git
+[submodule "rust-wrappers"]
+	path = rust-wrappers
+	url = https://github.com/toxicwind/rust-wrappers.git
+[submodule "kimi-auto"]
+	path = kimi-auto
+	url = https://github.com/toxicwind/kimi-auto.git
+[submodule "android-fleet"]
+	path = android-fleet
+	url = https://github.com/toxicwind/android-fleet.git
+[submodule "arroyo"]
+	path = arroyo
+	url = https://github.com/toxicwind/arroyo.git
+[submodule "ast-grep-rules"]
+	path = ast-grep-rules
+	url = https://github.com/toxicwind/ast-grep-rules.git
+[submodule "auto1m"]
+	path = auto1m
+	url = https://github.com/toxicwind/auto1m.git
+[submodule "barn"]
+	path = barn
+	url = https://github.com/toxicwind/barn.git
+[submodule "bench-radar"]
+	path = bench-radar
+	url = https://github.com/toxicwind/bench-radar.git
+[submodule "bridge"]
+	path = bridge
+	url = https://github.com/toxicwind/bridge.git
+[submodule "bugbounty"]
+	path = bugbounty
+	url = https://github.com/toxicwind/bugbounty.git
+[submodule "campfire"]
+	path = campfire
+	url = https://github.com/toxicwind/campfire.git
+[submodule "chronos-forge"]
+	path = chronos-forge
+	url = https://github.com/toxicwind/chronos-forge.git
+[submodule "classifier"]
+	path = classifier
+	url = https://github.com/toxicwind/classifier.git
+[submodule "classifier-preflight"]
+	path = classifier-preflight
+	url = https://github.com/toxicwind/classifier-preflight.git
+[submodule "codebase-memory"]
+	path = codebase-memory
+	url = https://github.com/toxicwind/codebase-memory.git
+[submodule "cron-trust"]
+	path = cron-trust
+	url = https://github.com/toxicwind/cron-trust.git
+[submodule "dashboard"]
+	path = dashboard
+	url = https://github.com/toxicwind/dashboard.git
+[submodule "didymos"]
+	path = didymos
+	url = https://github.com/toxicwind/didymos.git
+[submodule "disparate-latent-experiment"]
+	path = disparate-latent-experiment
+	url = https://github.com/toxicwind/disparate-latent-experiment.git
+[submodule "dots-client"]
+	path = dots-client
+	url = https://github.com/toxicwind/dots-client.git
+[submodule "drover"]
+	path = drover
+	url = https://github.com/toxicwind/drover.git
+[submodule "emergent"]
+	path = emergent
+	url = https://github.com/toxicwind/emergent.git
+[submodule "estate-chat"]
+	path = estate-chat
+	url = https://github.com/toxicwind/estate-chat.git
+[submodule "estate-dispersal-monolith"]
+	path = estate-dispersal-monolith
+	url = https://github.com/toxicwind/estate-dispersal-monolith.git
+[submodule "estate-monitor"]
+	path = estate-monitor
+	url = https://github.com/toxicwind/estate-monitor.git
+[submodule "estate-whoa-breakthrough"]
+	path = estate-whoa-breakthrough
+	url = https://github.com/toxicwind/estate-whoa-breakthrough.git
+[submodule "examples"]
+	path = examples
+	url = https://github.com/toxicwind/examples.git
+[submodule "extensions"]
+	path = extensions
+	url = https://github.com/toxicwind/extensions.git
+[submodule "fanout"]
+	path = fanout
+	url = https://github.com/toxicwind/fanout.git
+[submodule "fast-race"]
+	path = fast-race
+	url = https://github.com/toxicwind/fast-race.git
+[submodule "fleet"]
+	path = fleet
+	url = https://github.com/toxicwind/fleet.git
+[submodule "fleet-chat"]
+	path = fleet-chat
+	url = https://github.com/toxicwind/fleet-chat.git
+[submodule "fleet-ops"]
+	path = fleet-ops
+	url = https://github.com/toxicwind/fleet-ops.git
+[submodule "forge"]
+	path = forge
+	url = https://github.com/toxicwind/forge.git
+[submodule "gayxxx-estate"]
+	path = gayxxx-estate
+	url = https://github.com/toxicwind/gayxxx-estate.git
+[submodule "github-search"]
+	path = github-search
+	url = https://github.com/toxicwind/github-search.git
+[submodule "hatch-decode"]
+	path = hatch-decode
+	url = https://github.com/toxicwind/hatch-decode.git
+[submodule "herd"]
+	path = herd
+	url = https://github.com/toxicwind/herd.git
+[submodule "herdproof-bun"]
+	path = herdproof-bun
+	url = https://github.com/toxicwind/herdproof-bun.git
+[submodule "hf-model-sync"]
+	path = hf-model-sync
+	url = https://github.com/toxicwind/hf-model-sync.git
+[submodule "hodos"]
+	path = hodos
+	url = https://github.com/toxicwind/hodos.git
+[submodule "host-proof"]
+	path = host-proof
+	url = https://github.com/toxicwind/host-proof.git
+[submodule "keep"]
+	path = keep
+	url = https://github.com/toxicwind/keep.git
+[submodule "keryx"]
+	path = keryx
+	url = https://github.com/toxicwind/keryx.git
+[submodule "kilo"]
+	path = kilo
+	url = https://github.com/toxicwind/kilo.git
+[submodule "kimi-claw"]
+	path = kimi-claw
+	url = https://github.com/toxicwind/kimi-claw.git
+[submodule "kodi-fleet"]
+	path = kodi-fleet
+	url = https://github.com/toxicwind/kodi-fleet.git
+[submodule "kryptos"]
+	path = kryptos
+	url = https://github.com/toxicwind/kryptos.git
+[submodule "lasso"]
+	path = lasso
+	url = https://github.com/toxicwind/lasso.git
+[submodule "leakfix-src"]
+	path = leakfix-src
+	url = https://github.com/toxicwind/leakfix-src.git
+[submodule "ledger"]
+	path = ledger
+	url = https://github.com/toxicwind/ledger.git
+[submodule "lib"]
+	path = lib
+	url = https://github.com/toxicwind/lib.git
+[submodule "matter-server"]
+	path = matter-server
+	url = https://github.com/toxicwind/matter-server.git
+[submodule "mcp"]
+	path = mcp
+	url = https://github.com/toxicwind/mcp.git
+[submodule "mesh"]
+	path = mesh
+	url = https://github.com/toxicwind/mesh.git
+[submodule "meta-research-toolkit"]
+	path = meta-research-toolkit
+	url = https://github.com/toxicwind/meta-research-toolkit.git
+[submodule "metaaivm"]
+	path = metaaivm
+	url = https://github.com/toxicwind/metaaivm.git
+[submodule "metaaivm-profile"]
+	path = metaaivm-profile
+	url = https://github.com/toxicwind/metaaivm-profile.git
+[submodule "mission-control"]
+	path = mission-control
+	url = https://github.com/toxicwind/mission-control.git
+[submodule "ml-serve"]
+	path = ml-serve
+	url = https://github.com/toxicwind/ml-serve.git
+[submodule "naming-audit"]
+	path = naming-audit
+	url = https://github.com/toxicwind/naming-audit.git
+[submodule "null-g-proxy"]
+	path = null-g-proxy
+	url = https://github.com/toxicwind/null-g-proxy.git
+[submodule "openfang"]
+	path = openfang
+	url = https://github.com/toxicwind/openfang.git
+[submodule "openfang-join"]
+	path = openfang-join
+	url = https://github.com/toxicwind/openfang-join.git
+[submodule "openrouter-probe"]
+	path = openrouter-probe
+	url = https://github.com/toxicwind/openrouter-probe.git
+[submodule "ops"]
+	path = ops
+	url = https://github.com/toxicwind/ops.git
+[submodule "opsis"]
+	path = opsis
+	url = https://github.com/toxicwind/opsis.git
+[submodule "pack-fix"]
+	path = pack-fix
+	url = https://github.com/toxicwind/pack-fix.git
+[submodule "phone-ocr-sweep"]
+	path = phone-ocr-sweep
+	url = https://github.com/toxicwind/phone-ocr-sweep.git
+[submodule "pinax"]
+	path = pinax
+	url = https://github.com/toxicwind/pinax.git
+[submodule "plugin-ecosystem"]
+	path = plugin-ecosystem
+	url = https://github.com/toxicwind/plugin-ecosystem.git
+[submodule "estate-kappa-plugin"]
+	path = estate-kappa-plugin
+	url = https://github.com/toxicwind/estate-kappa-plugin.git
+[submodule "bash-style-guide"]
+	path = bash-style-guide
+	url = https://github.com/toxicwind/bash-style-guide.git
+[submodule "pdfshield"]
+	path = pdfshield
+	url = https://github.com/purvalsingh/pdfshield.git
+
+[submodule "ffs-diff"]
+	url = https://github.com/toxicwind/ffs-diff.git
+	path = ffs-diff

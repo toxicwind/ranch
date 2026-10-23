@@ -1,0 +1,18 @@
+{
+	"mcpServers": {
+		"DelendAI:windmill": {
+			"type": "stdio",
+			"command": "bunx",
+			"args": [
+				"--package",
+				"@delendai/cli",
+				"delendai",
+				"__serve",
+				"--workspace",
+				".",
+				"--name",
+				"DelendAI:windmill"
+			]
+		}
+	}
+}

@@ -1,0 +1,13 @@
+{
+  "description": "GPU / PCIe telemetry for the ranch — tells you which way the wind blows",
+  "name": "windmill",
+  "scripts": {
+    "start": "bun run server.ts",
+    "validate": "bun run typecheck && bun run test",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check src tests 2>/dev/null || true",
+    "typecheck": ":"
+  },
+  "version": "1.0.0"
+}

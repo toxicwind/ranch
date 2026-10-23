@@ -1,0 +1,10 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+language: 'python'
+layer: 'application'
+# Uses the project venv (pytest, ruff, and the package are installed there).
+tasks:
+  test:
+    command: '.venv/bin/python -m pytest'
+    inputs: ['src/**/*.py', 'tests/**/*.py', 'pyproject.toml']
+    options:
+      cache: false

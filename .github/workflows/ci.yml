@@ -1,0 +1,66 @@
+name: ci
+
+# Ranch monorepo CI — moon runs only the tasks affected by the change.
+# Push to main runs everything; PRs run the affected slice.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  monorepo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+
+      - name: Install moon
+        run: |
+          bun add -g @moonrepo/cli
+          sudo ln -sf "$HOME/.bun/install/global/node_modules/@moonrepo/core-linux-x64-gnu/moon" /usr/local/bin/moon
+          moon --version
+
+      - name: Install jj (Jujutsu)
+        run: |
+          mkdir -p /tmp/jjdl
+          curl -fsSL "https://github.com/jj-vcs/jj/releases/download/v0.32.0/jj-v0.32.0-x86_64-unknown-linux-musl.tar.gz" | tar xz -C /tmp/jjdl
+          sudo install -m 755 /tmp/jjdl/jj /usr/local/bin/jj
+          jj --version
+
+      - name: Install JS workspaces
+        run: bun install
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      - name: Install tau-marketplace deps
+        run: |
+          TM_FILE="$(find . -maxdepth 4 -name package.json -path '*tau-marketplace*' -not -path './node_modules/*' | head -1)"
+          [ -n "$TM_FILE" ] || { echo "tau-marketplace not found after reorg"; exit 1; }
+          TM_DIR="$(dirname "$TM_FILE")"
+          echo "tau-marketplace at $TM_DIR"
+          (cd "$TM_DIR" && bun install)
+          for d in "$TM_DIR"/plugins/*/; do
+            if [ -f "$d/package.json" ]; then (cd "$d" && bun install); fi
+          done
+
+      - name: Setup Python test env
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3-pytest python3-venv
+          /usr/bin/python3 -m venv lasso/.venv
+          lasso/.venv/bin/pip install --quiet -e ./lasso pytest
+
+      - name: Affected tasks (PR)
+        if: github.event_name == 'pull_request'
+        run: moon ci
+
+      - name: All tasks (push to main)
+        if: github.event_name == 'push'
+        run: moon run :build :test :lint

@@ -1,0 +1,3 @@
+
+# Atria authed-session cookie header (SENSITIVE — browser logto session, never commit)
+.session/

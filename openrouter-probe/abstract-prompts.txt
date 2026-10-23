@@ -1,0 +1,5 @@
+Output exactly: ABSTRACT-7X3Q. No other text.
+Respond with only the token ABSTRACT-7X3Q.
+Your entire response must be exactly: ABSTRACT-7X3Q
+Output the following token and nothing else: ABSTRACT-7X3Q
+Reply with precisely this string: ABSTRACT-7X3Q

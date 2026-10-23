@@ -1,0 +1,35 @@
+[project]
+name = "mcp-background-job"
+version = "0.1.3"
+description = "MCP server for executing long-running shell commands asynchronously"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "Dylan Navajas Gluck", email = "dylan.n.gluck@gmail.com" }]
+license = { text = "MIT" }
+keywords = ["mcp", "background", "jobs", "async", "shell", "commands"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = ["fastmcp>=2.11.1", "pydantic>=2.11.7"]
+
+[project.urls]
+Homepage = "https://github.com/dylan-gluck/mcp-background-job"
+Repository = "https://github.com/dylan-gluck/mcp-background-job"
+Issues = "https://github.com/dylan-gluck/mcp-background-job/issues"
+
+[project.scripts]
+mcp-background-job = "mcp_background_job.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_background_job"]
+
+[dependency-groups]
+dev = ["mypy>=1.17.1", "pytest>=8.4.1", "pytest-asyncio>=1.1.0", "ruff>=0.12.7"]

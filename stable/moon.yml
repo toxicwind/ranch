@@ -1,0 +1,11 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+language: 'typescript'
+layer: 'application'
+# keeper was promoted from stable/keeper to first-class ranch/keeper
+# (5fef991). These targets delegate to the keeper project via task deps
+# (moon forbids ".." traversal in inputs, so no relative-path delegation).
+tasks:
+  build:
+    deps: ['keeper:build']
+  lint:
+    deps: ['keeper:lint']

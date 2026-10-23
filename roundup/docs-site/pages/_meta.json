@@ -1,0 +1,11 @@
+{
+  "index": "Rankings",
+  "radar": {
+    "title": "Radar",
+    "type": "page"
+  },
+  "docs": {
+    "title": "Docs",
+    "type": "page"
+  }
+}

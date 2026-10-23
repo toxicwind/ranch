@@ -1,0 +1,14 @@
+{
+  "description": "Incremental GitHub harvest + first-class agent profile for the Muse Spark model family (Meta Superintelligence Labs).",
+  "name": "spark-harvest",
+  "scripts": {
+    "harvest": "bun harvest.ts",
+    "test": "bun test",
+    "verify": "bun verify.ts",
+    "validate": "bun run typecheck && bun run test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check src tests 2>/dev/null || true",
+    "typecheck": ":"
+  },
+  "version": "1.0.0"
+}
