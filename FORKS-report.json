@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-23T03:10:41.138Z",
-  "total": 207,
+  "generated": "2026-10-22T02:13:38.955Z",
+  "total": 206,
   "withUpstream": 142,
   "infos": [
     {
@@ -346,8 +346,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 95622,
-      "fileCount": 50,
+      "sizeBytes": 92327,
+      "fileCount": 49,
       "signals": [],
       "signalTotal": 0
     },
@@ -442,7 +442,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4806,
+      "sizeBytes": 4228,
       "fileCount": 2,
       "signals": [],
       "signalTotal": 0
@@ -504,18 +504,6 @@
       "isSubmodule": true,
       "sizeBytes": 17962,
       "fileCount": 5,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "estate-brain",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 18699,
-      "fileCount": 3,
       "signals": [],
       "signalTotal": 0
     },
@@ -1906,8 +1894,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 8797106,
-      "fileCount": 644,
+      "sizeBytes": 8674496,
+      "fileCount": 643,
       "signals": [],
       "signalTotal": 0
     },
@@ -2122,8 +2110,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 67163,
-      "fileCount": 11,
+      "sizeBytes": 66203,
+      "fileCount": 10,
       "signals": [],
       "signalTotal": 0
     },
@@ -2326,8 +2314,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 72468,
-      "fileCount": 7,
+      "sizeBytes": 49503,
+      "fileCount": 6,
       "signals": [],
       "signalTotal": 0
     },
