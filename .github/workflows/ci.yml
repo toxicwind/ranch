@@ -24,7 +24,10 @@ jobs:
 
       - name: Install moon
         run: |
-          bun add -g @moonrepo/cli
+          # bun's global install skips the @moonrepo/cli optional platform
+          # package, so install it explicitly -- otherwise `moon --version`
+          # dies with MODULE_NOT_FOUND @moonrepo/core-linux-x64-gnu/package.json.
+          bun add -g @moonrepo/cli @moonrepo/core-linux-x64-gnu
           sudo ln -sf "$HOME/.bun/install/global/node_modules/@moonrepo/core-linux-x64-gnu/moon" /usr/local/bin/moon
           moon --version
 
