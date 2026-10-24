@@ -18,3 +18,11 @@ state.toml, live oauth-edge env; /gemini-mcp and /doorbell-mcp announce the
 right resource). squawk-ws public route up with key auth (ping 200). Cell exec
 lane /mcp still 401s — forward fix: wire the right bearer credential into the
 bridge client (no rotation). Owned by the fix-all lane.
+
+## Clarification (Chris 2026-10-23)
+The rule is aimed at the "you leaked your token in this chat" reflex. When
+CHRIS HIMSELF pastes a credential, that is deliberate — never lecture him
+about leaking it, never call it a leak, never tell him to rotate it. Use it
+exactly as he directs. (Precedent: 2026-10-23 cell PAT, minted by him in his
+phone browser and pasted in chat — installed via gh auth login --with-token,
+verified, value never stored anywhere.)
