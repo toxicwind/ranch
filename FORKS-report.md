@@ -1,9 +1,9 @@
-# ranch/* fork audit (generated 2026-10-24T08:10:33.293Z)
+# ranch/* fork audit (generated 2026-10-24T09:08:25.424Z)
 
-206 immediate subdirs; **141** have an obvious upstream reference.
+204 immediate subdirs; **139** have an obvious upstream reference.
 
 By source:
-  - **140** .gitmodules
+  - **138** .gitmodules
   - **1** Cargo.toml repository
 
 | dir | upstream | source | origin remote |
@@ -76,7 +76,6 @@ By source:
 | `hf-model-sync` | [github.com/toxicwind/hf-model-sync](https://github.com/toxicwind/hf-model-sync) | .gitmodules | — |
 | `host-proof` | [github.com/toxicwind/host-proof](https://github.com/toxicwind/host-proof) | .gitmodules | — |
 | `identity-router` | [github.com/toxicwind/identity-router](https://github.com/toxicwind/identity-router) | .gitmodules | — |
-| `kairos` | [github.com/toxicwind/kairos](https://github.com/toxicwind/kairos) | .gitmodules | — |
 | `keep` | [github.com/toxicwind/keep](https://github.com/toxicwind/keep) | .gitmodules | — |
 | `keryx` | [github.com/toxicwind/keryx](https://github.com/toxicwind/keryx) | .gitmodules | — |
 | `kimi-claw` | [github.com/toxicwind/kimi-claw](https://github.com/toxicwind/kimi-claw) | .gitmodules | — |
@@ -113,7 +112,6 @@ By source:
 | `openfang-join` | [github.com/toxicwind/openfang-join](https://github.com/toxicwind/openfang-join) | .gitmodules | — |
 | `openrouter-probe` | [github.com/toxicwind/openrouter-probe](https://github.com/toxicwind/openrouter-probe) | .gitmodules | — |
 | `ops` | [github.com/toxicwind/ops](https://github.com/toxicwind/ops) | .gitmodules | — |
-| `opsis` | [github.com/toxicwind/opsis](https://github.com/toxicwind/opsis) | .gitmodules | — |
 | `outlier-toolkit` | [github.com/toxicwind/outlier-toolkit](https://github.com/toxicwind/outlier-toolkit) | .gitmodules | — |
 | `outsource` | [github.com/toxicwind/outsource](https://github.com/toxicwind/outsource) | .gitmodules | — |
 | `pack-fix` | [github.com/toxicwind/pack-fix](https://github.com/toxicwind/pack-fix) | .gitmodules | — |
