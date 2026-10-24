@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-24T08:10:33.293Z",
-  "total": 206,
-  "withUpstream": 141,
+  "generated": "2026-10-24T09:08:25.424Z",
+  "total": 204,
+  "withUpstream": 139,
   "infos": [
     {
       "name": "AgentForensics",
@@ -976,18 +976,6 @@
       "signalTotal": 0
     },
     {
-      "name": "kairos",
-      "upstream": "https://github.com/toxicwind/kairos",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": true,
-      "sizeBytes": 0,
-      "fileCount": 0,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
       "name": "kappa",
       "upstream": null,
       "upstreamSource": null,
@@ -1476,18 +1464,6 @@
       "isSubmodule": true,
       "sizeBytes": 429879,
       "fileCount": 64,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "opsis",
-      "upstream": "https://github.com/toxicwind/opsis",
-      "upstreamSource": ".gitmodules",
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": true,
-      "sizeBytes": 19683,
-      "fileCount": 4,
       "signals": [],
       "signalTotal": 0
     },
