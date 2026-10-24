@@ -445,8 +445,6 @@ general:
   "openfang-join":
     repo: https://github.com/toxicwind/openfang-join.git
   "opsis":
-    repo: https://github.com/toxicwind/opsis.git
-  "pearlctl":
     repo: https://github.com/toxicwind/pearlctl.git
   "phone-lane":
     repo: https://github.com/toxicwind/phone-lane.git
