@@ -364,6 +364,12 @@ RALPH_MODEL_CANDIDATES = [
     # by 120b on every axis) and nemotron-3-ultra REMOVED (failed codegen,
     # 67s length burn). kimi-k2/deepseek-v4/qwen3-coder/llama-3.3 are all
     # 410-EOL on NVIDIA now.
+    # 2026-10-23 (scout, verified live): gpt-oss-120b unserved by every
+    # provider (cuttinggate 502 no_provider_serves); nemotron-3-super 404s
+    # and glm-5.3-flash hangs on hodos :25193. nemotron-3-ultra-550b-a55b
+    # verified 200 + non-empty via hodos direct. Leads until the catalog
+    # recovers; the resolver promotes whatever actually answers.
+    "nvidia/nemotron-3-ultra-550b-a55b",
     "openai/gpt-oss-120b",
     "nvidia/nemotron-3-super-120b-a12b",
     "z-ai/glm-5.3-flash",
