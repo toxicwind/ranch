@@ -354,9 +354,6 @@
 	path = zed-android-port
 	url = https://github.com/toxicwind/zed-android-port.git
 
-[submodule "kairos"]
-	path = kairos
-	url = https://github.com/toxicwind/kairos.git
 [submodule "agent-customization-style-guide"]
 	path = agent-customization-style-guide
 	url = https://github.com/toxicwind/agent-customization-style-guide.git
