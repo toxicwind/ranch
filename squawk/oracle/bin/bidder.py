@@ -407,9 +407,13 @@ def _resolve_ralph_model(base_url, timeout=15):
         live_ids = {m.get("id") for m in mdata.get("data", []) if m.get("id")}
         phantoms = [c for c in candidates if c not in live_ids]
         if phantoms:
-            print(f"_resolve_ralph_model: PHANTOM model IDs not on router: {phantoms} "
-                  f"(not in /v1/models; refusing silent substitution)", flush=True)
-        candidates = [c for c in candidates if c in live_ids]
+            # 2026-10-23 (scout): advisory only, NOT a filter. hodos :25193
+            # flaps: its /v1/models list omits models that serve 200
+            # (nemotron-3-ultra verified) and lists models that 404.
+            # The non-empty probe below is the real gate; a wrong-model
+            # substitution still has to produce the exact probe reply.
+            print(f"_resolve_ralph_model: model IDs not in /v1/models: {phantoms} "
+                  f"(probing anyway; list is unreliable)", flush=True)
     except Exception as e:
         # If /v1/models is unreachable, proceed to probe (which will fail
         # loudly on connection error rather than silently substituting).
