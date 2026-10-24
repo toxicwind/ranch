@@ -85,6 +85,7 @@ __pycache__/
 /kitty-mcp-server/
 /wezterm/
 /wezterm-agent-mcp/
+/vision-kit/
 
 # Runtime session state & scratch dumps
 yote/sessions/

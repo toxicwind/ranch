@@ -131,6 +131,7 @@ herd:
   - "nvidia-kernel-guard"
   - "nvidia-nim-model-probe"
   - "openrouter-probe"
+  - "vision-kit"
 
 # skills — authoring/mentoring (guide + classifier + naming tools).
 skills:

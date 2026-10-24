@@ -226,6 +226,8 @@ herd:
     repo: https://github.com/toxicwind/nvidia-nim-model-probe.git
   "openrouter-probe":
     repo: https://github.com/toxicwind/openrouter-probe.git
+  "vision-kit":
+    repo: https://github.com/toxicwind/vision-kit.git
 
 skills:
   "agent-customization-style-guide":
