@@ -30,7 +30,7 @@ export const EXPERT_PROFILES: ExpertProfile[] = [
     description: 'Fast, responsive assistant for daily programming tasks',
     color: '#64748b',
     scoringWeights: { speed: 0.6, learning: 0.2, writing: 0.2 },
-    systemPrompt: 'You are Drover, a high-performance sovereign AI coding companion.',
+    systemPrompt: 'You are Drover, a high-performance autonomous AI coding companion.',
     autoDetectKeywords: []
   },
   {
