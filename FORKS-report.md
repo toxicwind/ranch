@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-26T18:15:19.801Z)
+# ranch/* fork audit (generated 2026-10-26T19:09:08.543Z)
 
-204 immediate subdirs; **139** have an obvious upstream reference.
+209 immediate subdirs; **139** have an obvious upstream reference.
 
 By source:
   - **138** .gitmodules
@@ -158,6 +158,7 @@ By source:
 | `docs` | — | — | — |
 | `estate-brain` | — | — | — |
 | `feedlot-mcp` | — | — | — |
+| `generated` | — | — | — |
 | `kappa` | — | — | — |
 | `keeper` | — | — | — |
 | `kilo-cli` | — | — | — |
@@ -170,6 +171,7 @@ By source:
 | `projects` | — | — | — |
 | `propylon` | — | — | — |
 | `provider-fuzz` | — | — | — |
+| `providers.d` | — | — | — |
 | `proxy` | — | — | — |
 | `pylae` | — | — | — |
 | `qed` | — | — | — |
@@ -189,12 +191,14 @@ By source:
 | `rustdesk-server` | — | — | — |
 | `ryzen3090-whoa` | — | — | — |
 | `saturation-guard` | — | — | — |
+| `scripts` | — | — | — |
 | `shell` | — | — | — |
 | `spark` | — | — | — |
 | `spark-harvest` | — | — | — |
 | `squawk` | — | — | — |
 | `squawk-watchdog` | — | — | — |
 | `squawk-ws` | — | — | — |
+| `src` | — | — | — |
 | `stable` | — | — | — |
 | `standalone` | — | — | — |
 | `stash-guard` | — | — | — |
@@ -204,6 +208,7 @@ By source:
 | `task-launch` | — | — | — |
 | `tau` | — | — | — |
 | `tau-extensions` | — | — | — |
+| `tests` | — | — | — |
 | `toolcall-agent` | — | — | — |
 | `toolkit` | — | — | — |
 | `tools` | — | — | — |

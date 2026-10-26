@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-26T18:15:19.801Z",
-  "total": 204,
+  "generated": "2026-10-26T19:09:08.543Z",
+  "total": 209,
   "withUpstream": 139,
   "infos": [
     {
@@ -178,8 +178,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 30748,
-      "fileCount": 6,
+      "sizeBytes": 34416,
+      "fileCount": 7,
       "signals": [],
       "signalTotal": 0
     },
@@ -430,8 +430,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 4806,
-      "fileCount": 2,
+      "sizeBytes": 45316,
+      "fileCount": 19,
       "signals": [],
       "signalTotal": 0
     },
@@ -466,7 +466,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": true,
-      "sizeBytes": 4942193,
+      "sizeBytes": 4942194,
       "fileCount": 76,
       "signals": [],
       "signalTotal": 0
@@ -840,6 +840,18 @@
       "isSubmodule": true,
       "sizeBytes": 38212,
       "fileCount": 23,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "generated",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 455510,
+      "fileCount": 7,
       "signals": [],
       "signalTotal": 0
     },
@@ -1672,6 +1684,18 @@
       "signalTotal": 0
     },
     {
+      "name": "providers.d",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 723,
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "proxy",
       "upstream": null,
       "upstreamSource": null,
@@ -1798,8 +1822,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 21244,
-      "fileCount": 4,
+      "sizeBytes": 33221,
+      "fileCount": 6,
       "signals": [],
       "signalTotal": 0
     },
@@ -1822,8 +1846,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 3722901,
-      "fileCount": 128,
+      "sizeBytes": 3726989,
+      "fileCount": 129,
       "signals": [],
       "signalTotal": 0
     },
@@ -1984,6 +2008,18 @@
       "signalTotal": 0
     },
     {
+      "name": "scripts",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 17372,
+      "fileCount": 4,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "secretsmith",
       "upstream": "https://github.com/toxicwind/secretsmith",
       "upstreamSource": ".gitmodules",
@@ -2092,14 +2128,26 @@
       "signalTotal": 0
     },
     {
+      "name": "src",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 119794,
+      "fileCount": 8,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "stable",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 215510,
-      "fileCount": 34,
+      "sizeBytes": 2748178,
+      "fileCount": 257,
       "signals": [],
       "signalTotal": 0
     },
@@ -2256,6 +2304,18 @@
       "isSubmodule": true,
       "sizeBytes": 0,
       "fileCount": 0,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "tests",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 49164,
+      "fileCount": 10,
       "signals": [],
       "signalTotal": 0
     },
