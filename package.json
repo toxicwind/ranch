@@ -8,7 +8,8 @@
     "ci": "mise exec -- moon ci",
     "lint": "mise exec -- moon run :lint",
     "test": "mise exec -- moon run :test",
-    "typecheck": "bun run --filter '*' typecheck"
+    "typecheck": "bun run --filter '*' typecheck",
+    "readme": "bun ./bin/readme-gen.ts"
   },
   "version": "1.0.0",
   "workspaces": {
