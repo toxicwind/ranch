@@ -23,8 +23,18 @@ done
 qs_detect_env
 
 if [ "$SYSTEMD" = "1" ]; then
+  if ! qs_wayland_alive "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"; then
+    qs_log "systemd mode: wayland display $WAYLAND_DISPLAY not connectable; exiting 0 (no crash loop, unit Restart=on-failure stays quiet)"
+    echo "quickshell: no live wayland display ($WAYLAND_DISPLAY); not starting under systemd" >&2
+    exit 0
+  fi
   qs_log "systemd mode: exec quickshell -c $CONFIG (display=$WAYLAND_DISPLAY his=${HYPRLAND_INSTANCE_SIGNATURE:-unset})"
   exec /usr/bin/quickshell "${ARGS[@]}"
+fi
+
+if ! qs_wayland_alive "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"; then
+  echo "quickshell: no live wayland display ($WAYLAND_DISPLAY); refusing to launch detached (check the compositor)" >&2
+  exit 1
 fi
 
 if [ -n "$(qs_pids)" ]; then
