@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-27T17:06:44.339Z",
-  "total": 125,
+  "generated": "2026-10-27T18:08:28.179Z",
+  "total": 127,
   "withUpstream": 4,
   "infos": [
     {
@@ -36,6 +36,18 @@
       "isSubmodule": false,
       "sizeBytes": 2433,
       "fileCount": 2,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "ast-tools",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 3394,
+      "fileCount": 1,
       "signals": [],
       "signalTotal": 0
     },
@@ -298,8 +310,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 45316,
-      "fileCount": 19,
+      "sizeBytes": 57147,
+      "fileCount": 25,
       "signals": [],
       "signalTotal": 0
     },
@@ -832,6 +844,18 @@
       "signalTotal": 0
     },
     {
+      "name": "nightly-canary",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 10811,
+      "fileCount": 3,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "null-g-proxy",
       "upstream": null,
       "upstreamSource": null,
@@ -886,8 +910,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 429879,
-      "fileCount": 64,
+      "sizeBytes": 448750,
+      "fileCount": 67,
       "signals": [],
       "signalTotal": 0
     },
