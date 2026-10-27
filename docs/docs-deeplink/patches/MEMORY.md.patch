@@ -1,0 +1,12 @@
+# Proposed deeplink section for ~/MEMORY.md — for Raccoon to apply
+
+Insert this block at the top of ~/MEMORY.md, directly under the title
+line, before the first section. Do not alter any existing line.
+
+> Deeplinks — what this is: curated long-term memory, standing directives,
+> and estate facts.
+> What links here: [estate docs index](workspace/docs-deeplink/INDEX.md).
+> What this links to: [SOUL.md](./SOUL.md) (doctrine),
+> [IDENTITY.md](./IDENTITY.md) (who Kite is and the estate map),
+> [thresher runbook](workspace/docs-deeplink/thresher-runbook.md),
+> [PR-review skill](workspace/custom-skills/local-pr-review/SKILL.md).
