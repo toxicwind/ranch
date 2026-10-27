@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-27T17:06:44.339Z)
+# ranch/* fork audit (generated 2026-10-27T18:08:28.179Z)
 
-125 immediate subdirs; **4** have an obvious upstream reference.
+127 immediate subdirs; **4** have an obvious upstream reference.
 
 By source:
   - **2** package.json repository
@@ -16,6 +16,7 @@ By source:
 | `android-fleet` | — | — | — |
 | `arroyo` | — | — | — |
 | `ast-grep-rules` | — | — | — |
+| `ast-tools` | — | — | — |
 | `audits` | — | — | — |
 | `auto1m` | — | — | — |
 | `barn` | — | — | — |
@@ -79,6 +80,7 @@ By source:
 | `mission-control` | — | — | — |
 | `ml-serve` | — | — | — |
 | `naming-audit` | — | — | — |
+| `nightly-canary` | — | — | — |
 | `null-g-proxy` | — | — | — |
 | `openfang` | — | — | — |
 | `openfang-join` | — | — | — |
