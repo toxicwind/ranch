@@ -1,0 +1,11 @@
+# Proposed deeplink section for ~/IDENTITY.md — for Raccoon to apply
+
+Insert this block at the top of ~/IDENTITY.md, directly under the title
+line, before the first section. Do not alter any existing line.
+
+> Deeplinks — what this is: who Kite is, the estate map, and the tool stacks.
+> What links here: [estate docs index](workspace/docs-deeplink/INDEX.md).
+> What this links to: [SOUL.md](./SOUL.md) (doctrine),
+> [MEMORY.md](./MEMORY.md) (standing directives and estate facts),
+> [master connector](workspace/custom-connectors/custom.estate-master/CONNECTOR.md),
+> [thresher runbook](workspace/docs-deeplink/thresher-runbook.md).
