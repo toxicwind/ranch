@@ -73,11 +73,16 @@ WORK = os.environ.get("ORACLE_WORK", "/home/toxic/estate/ranch/squawk/oracle/wor
 # herd.yaml, and oracle-judge-local was a local beellama model -- banned
 # by the 2026-10-13 corrective from Chris (local herd models not ready).
 DEFAULT_JUDGES = [
-    "estate/auto",  # -> qwen3.6-35b on freeinference (verified 200)
-    "estate/code",  # -> deepseek-v4-flash on freeinference (verified 200)
-    "estate/reasoning",  # -> qwen3.6-35b reasoning lane
+    # Priority: FREE > FAST > instruction-following (2026-10-27 architect
+    # order). The free lanes answer on the free tier (zero credit burn);
+    # auto/code route through providers whose keys may be credit-exhausted,
+    # which is a 402 + a failover hop. Verified live: estate/free 200 in
+    # 0.38s; estate/reasoning 402 (openrouter credits) when last probed.
+    "estate/free",  # -> openrouter/nemotron free + freeinference/diffusiongemma
+    "estate/auto",  # -> qwen3.6-35b on freeinference
+    "estate/code",  # -> deepseek-v4-flash on freeinference
 ]
-FALLBACK_JUDGE = "estate/auto"
+FALLBACK_JUDGE = "estate/free"
 
 JUDGE_PROMPT = """You are judge {idx} (anonymous) on the OpenFang Oracle panel.
 Question: {question}
