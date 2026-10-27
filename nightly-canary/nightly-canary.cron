@@ -1,0 +1,7 @@
+# nightly-canary.cron — NOT INSTALLED. Do not install until Raccoon reviews
+# the verification gates in PLAN.md (checkpoint). Installing = copying this
+# file into the estate's cron surface and verifying the job is listed.
+# Window: 05:00–07:00 America/Denver daily; no upgrade starts after 06:30
+# (enforced inside canary-runner.sh by the nightly window rule).
+TZ=America/Denver
+0 5 * * * /home/hatch/workspace/nightly-canary/canary-runner.sh
