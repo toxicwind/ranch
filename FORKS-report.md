@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-27T18:08:28.179Z)
+# ranch/* fork audit (generated 2026-10-27T20:08:22.822Z)
 
-127 immediate subdirs; **4** have an obvious upstream reference.
+128 immediate subdirs; **4** have an obvious upstream reference.
 
 By source:
   - **2** package.json repository
@@ -31,6 +31,7 @@ By source:
 | `classifier` | — | — | — |
 | `classifier-preflight` | — | — | — |
 | `codebase-memory` | — | — | — |
+| `connectors` | — | — | — |
 | `cookie-vault` | — | — | — |
 | `cron-trust` | — | — | — |
 | `dashboard` | — | — | — |
