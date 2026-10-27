@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-27T15:10:39.463Z)
+# ranch/* fork audit (generated 2026-10-27T16:09:09.330Z)
 
-126 immediate subdirs; **4** have an obvious upstream reference.
+125 immediate subdirs; **4** have an obvious upstream reference.
 
 By source:
   - **2** package.json repository
@@ -115,7 +115,6 @@ By source:
 | `shell` | — | — | — |
 | `spark` | — | — | — |
 | `spark-harvest` | — | — | — |
-| `squawk` | — | — | — |
 | `squawk-watchdog` | — | — | — |
 | `squawk-ws` | — | — | — |
 | `src` | — | — | — |
