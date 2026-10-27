@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-27T15:10:39.463Z",
-  "total": 126,
+  "generated": "2026-10-27T16:09:09.330Z",
+  "total": 125,
   "withUpstream": 4,
   "infos": [
     {
@@ -1186,8 +1186,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 19693539,
-      "fileCount": 10,
+      "sizeBytes": 19640139,
+      "fileCount": 8,
       "signals": [],
       "signalTotal": 0
     },
@@ -1264,18 +1264,6 @@
       "signalTotal": 0
     },
     {
-      "name": "squawk",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 2177243,
-      "fileCount": 276,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
       "name": "squawk-watchdog",
       "upstream": null,
       "upstreamSource": null,
@@ -1318,7 +1306,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 2748178,
+      "sizeBytes": 2748622,
       "fileCount": 257,
       "signals": [],
       "signalTotal": 0
