@@ -45,6 +45,15 @@ import {
 } from "./request-gates.ts";
 import { isProxyableV1Path, proxyV1Path } from "./v1paths.ts";
 import { rebuildRateLimiter } from "./router_strategy.ts";
+import {
+  interceptStream,
+  observeFingerprint,
+  fingerprintFirstChunk,
+  seedCapability,
+  observeLiveCapability,
+  reportDrift,
+} from "./router_emergent.ts";
+import { errorQueue } from "./router_error_queue.ts";
 
 // ---------------------------------------------------------------------------
 // Optional client auth (absorbed from the retired :8000 key-proxy).
@@ -253,7 +262,62 @@ async function handleStream(
       );
       // Pipe the winner with the stream_idle stall cutoff; heartbeats stop
       // at the first chunk.
-      const reader = winner.stream.getReader();
+      // Emergent anti-flail interception (router_emergent.ts, 2026-10-27):
+      // score every SSE frame in flight; on narrative surrender / structural
+      // collapse, sever the upstream and surface a code 800 frame so the
+      // client (kappa/tau) can redispatch instead of receiving a silent
+      // truncation. ESTATE_NO_FLAIL=1 disables (operator bypass).
+      const flailEnabled = process.env.ESTATE_NO_FLAIL !== "1";
+      const intercepted = flailEnabled && winner.stream
+        ? interceptStream(winner.stream, {
+            provider: winner.provider || "",
+            model: winner.model || String(body.model || "auto"),
+            onFingerprint(delta) {
+              observeFingerprint(
+                winner.provider || "",
+                winner.model || String(body.model || "auto"),
+                fingerprintFirstChunk(
+                  delta as { content?: unknown; reasoning_content?: unknown; tool_calls?: unknown },
+                ),
+              );
+            },
+            onSever(score) {
+              flockMetrics.recordRequest(
+                winner.provider || "none",
+                (winner.model || String(body.model || "auto")) + "/flail",
+                "/v1/chat/completions",
+                800,
+              );
+              // Emergent breaker replacement (2026-10-27): a flailed model
+              // is a FAILED outcome fed straight into the belief engine —
+              // its p_ok / Elo drops, so getRankedArms/costOf demote it on
+              // the next dispatch. This is how flail becomes benching
+              // without a hardcoded strike table: adaptive belief, not a
+              // static breaker rule.
+              if (winner.provider && winner.model) {
+                BELIEF.observe(
+                  `${winner.provider}/${winner.model}/${getTaskPath(promptText)}`,
+                  false,
+                  0,
+                  0,
+                );
+                BELIEF.observeBucket(winner.provider, "default", {}, false);
+              }
+              send(
+                `data: ${JSON.stringify({
+                  error: {
+                    message: "narrative_surrender_detected",
+                    type: "proxy_error",
+                    code: 800,
+                    confidence: Math.round(score.confidence * 1000) / 1000,
+                    reasons: score.reasons,
+                  },
+                })}\n\n`,
+              );
+            },
+          })
+        : winner.stream;
+      const reader = intercepted.getReader();
       let idleTimer: ReturnType<typeof setTimeout> | undefined;
       const armIdle = () => {
         if (idleTimer) clearTimeout(idleTimer);
@@ -1146,6 +1210,43 @@ import("./model_rechecker.ts").then((m) => m.startRechecker()).catch((e) => cons
 
 // Live model discovery: curated list + every model each key can serve.
 startLiveDiscovery();
+
+ // Dynamic error router (2026-10-27): register each SSOT provider's
+ // concurrency cap (mimetite maxConcurrency, e.g. freeinference = 2) so
+ // 429/529s can wait zero-transport for a real slot instead of burning
+ // blind retries against a saturated lane.
+ for (const d of EFFECTIVE_DEFS) {
+   if (typeof d.maxConcurrency === "number" && d.maxConcurrency > 0) {
+     errorQueue.setConcurrency(d.name, d.maxConcurrency);
+   }
+ }
+
+ // Emergent capability matrix seed (router_emergent.ts, 2026-10-27):
+ // overlay every observed live model's supported_sampling_parameters into
+ // the fused matrix so the dispatch gate (callOne) and the first-chunk
+ // fingerprint have a real baseline, and report catalog-vs-live drift.
+ // Runs once at startup + on the periodic live refresh (the refresh
+ // mutates LIVE_MODEL_META in place, so a periodic re-seed is not needed
+ // here; hot reload re-seeds via /admin/reload below).
+ {
+   for (const p of Object.keys(LIVE_MODEL_META)) {
+     for (const [mid, meta] of Object.entries((LIVE_MODEL_META[p] || {}) as Record<string, Record<string, unknown>>)) {
+       const params = Array.isArray(meta.supported_sampling_parameters)
+         ? (meta.supported_sampling_parameters as string[])
+         : undefined;
+       observeLiveCapability(
+         p,
+         mid,
+         params,
+         typeof meta.context_length === "number" ? (meta.context_length as number) : undefined,
+       );
+       if (params) reportDrift(p, mid, undefined, params);
+     }
+   }
+   if (process.env.ESTATE_EMERGENT_LOG === "1") {
+     log(`emergent capability seed: observed ${Object.keys(LIVE_MODEL_META).length} providers`);
+   }
+ }
 
 const keyed = Object.keys(PROVIDERS).filter(keyOk);
 
