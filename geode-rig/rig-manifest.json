@@ -1,0 +1,54 @@
+{
+ "rigs": [
+  {
+   "name": "skopos",
+   "place": "pens/olympus",
+   "lane": "olympus-overwatch",
+   "keyLabel": "RIG-SKOPOS",
+   "sigil": "👁"
+  },
+  {
+   "name": "muse",
+   "place": "pens/olympus",
+   "lane": "olympus-muse",
+   "keyLabel": "RIG-MUSE",
+   "sigil": "🎐"
+  },
+  {
+   "name": "keryx",
+   "place": "pens/olympus",
+   "lane": "olympus-herald",
+   "keyLabel": "RIG-KERYX",
+   "sigil": "📯"
+  },
+  {
+   "name": "kryptos",
+   "place": "pens/olympus",
+   "lane": "olympus-secrets",
+   "keyLabel": "RIG-KRYPTOS",
+   "sigil": "🗝"
+  },
+  {
+   "name": "kairos",
+   "place": "pens/olympus",
+   "lane": "olympus-latency",
+   "keyLabel": "RIG-KAIROS",
+   "sigil": "⏱"
+  },
+  {
+   "name": "ergane",
+   "place": "pens/ergasterion",
+   "lane": "ergasterion-workshop",
+   "keyLabel": "RIG-ERGANE",
+   "sigil": "🪡"
+  },
+  {
+   "name": "hestia",
+   "place": "pens/ergasterion",
+   "lane": "ergasterion-hearth",
+   "keyLabel": "RIG-HESTIA",
+   "sigil": "🔥"
+  }
+ ],
+ "store": "/home/toxic/.rhodochrosite-data/config.json"
+}
