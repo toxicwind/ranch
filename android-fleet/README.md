@@ -21,6 +21,26 @@ The fleet's reach ends where ADB begins — unless someone holds the sessions op
 | Google TV "SmartTV 4K FFM" (bedroom) | 10.0.0.225:5555 | ADB authorized 2026-09-18 | Kodi host .225 — direct file deploys, no more JSON-RPC-only limit |
 | LG webOS TV | developer mode / Homebrew Channel | webOS `ares` CLI over SSH | not ADB — see [`nuvio/`](nuvio/README.md) |
 
+## The headless route (verified 2026-10-28)
+
+The complete zero-hands path from "agent on the box" to "acting on the phone":
+
+1. **Transport** — wireless-debug ADB; `estate/pixel-adb-keepalive` (pitchfork)
+   re-scans 30000-50000 every 60s so `adb devices` is normally already live.
+   Rescue: mDNS (`adb mdns services`) → nmap fallback.
+2. **Firewall** — the box drops LAN input by policy (`/etc/nftables.conf`,
+   `inet awrawr_filter`). Any port the phone must hit (e.g. taas 25243) goes in
+   the `10.0.0.0/24` tcp set. **Box-side curls never traverse this path** —
+   probe from the phone (`adb shell nc -z <box> <port>`).
+3. **Routing** — http VIEW intents resolve to Firefox (org.mozilla.fenix,
+   `IntentReceiverActivity`) as the SOLE default: `am start -d <url>` is
+   headless, no chooser ever appears.
+4. **Tools** — `flotilla/mcp/server.ts` (`:25245`, thresher-federated as
+   `flotilla:*`): screenshot/tap/text/ui/headless-open with the focus covenant
+   (every input tool returns the focused window). CLI sibling:
+   `estate-ops/bin/pixel` (`pixel openshot <url>` = open + poll + shot).
+   Full registration walkthrough: `estate/docs/mcp-guide-thresher.md`.
+
 ```mermaid
 flowchart TB
     subgraph lan[LAN 10.0.0.0/24]
