@@ -238,6 +238,37 @@ const tools = [
 			return { pkg, androidData: dataTree.slice(0, 8000) || "(empty / not present)", matches: findOut.trim().split("\n").filter(Boolean).slice(0, 40) };
 		},
 	},
+	{
+		name: "pixel_clipboard",
+		description: "Set or get Pixel clipboard safely with parcel size guard (caps at 800KB to prevent Android Binder TransactionTooLargeException crashes in apps like Termius).",
+		inputSchema: {
+			type: "object",
+			properties: {
+				action: { type: "string", enum: ["get", "set"], description: "get or set clipboard" },
+				text: { type: "string", description: "text to set (guarded to <800KB)" }
+			},
+			required: ["action"]
+		},
+		run: async (args: Record<string, unknown>) => {
+			const action = String(args.action);
+			if (action === "set") {
+				const text = String(args.text ?? "");
+				const bytes = Buffer.byteLength(text, "utf8");
+				const MAX_PARCEL_BYTES = 800 * 1024; // 800KB safety ceiling well under ~1MB Binder transaction limit
+				if (bytes > MAX_PARCEL_BYTES) {
+					throw new Error(`Clipboard text too large (${bytes} bytes > 800KB cap) — rejected to prevent TransactionTooLargeException`);
+				}
+				const dev = await ensureDevice();
+				const b64 = Buffer.from(text, "utf8").toString("base64");
+				await $`adb -s ${dev} shell "echo -n ${b64} | base64 -d | cmd clipboard set-text"`.quiet().nothrow();
+				return { ok: true, action: "set", bytes, focus: await currentFocus() };
+			} else {
+				const dev = await ensureDevice();
+				const clip = await $`adb -s ${dev} shell cmd clipboard get-text`.quiet().nothrow().text();
+				return { ok: true, action: "get", text: clip.trim().slice(0, 10000), bytes: clip.length, focus: await currentFocus() };
+			}
+		}
+	},
 ];
 
 // ── streamable-HTTP JSON-RPC surface (taas.ts shape) ────────────────────
