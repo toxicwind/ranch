@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-28T11:06:45.487Z)
+# ranch/* fork audit (generated 2026-10-28T12:10:12.888Z)
 
-131 immediate subdirs; **4** have an obvious upstream reference.
+132 immediate subdirs; **4** have an obvious upstream reference.
 
 By source:
   - **2** package.json repository
@@ -136,6 +136,7 @@ By source:
 | `toolkit` | — | — | — |
 | `tools` | — | — | — |
 | `vendor` | — | — | — |
+| `vendored` | — | — | — |
 | `village-irc` | — | — | — |
 | `windmill` | — | — | — |
 | `yote-maximal` | — | — | — |
