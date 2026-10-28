@@ -34,6 +34,7 @@ flowchart LR
 | [`omp-kafka`](packages/omp-kafka) | Integration | Consume Kafka topics into an `omp` session; auto (push) and pull modes with `/kafka-*` slash commands and a `kafka_consume` LLM tool. |
 | [`omp-edit-committer`](packages/omp-edit-committer) | Workflow | Auto-commit every Edit/Write with a Conventional-Commits message (Intent / Trade-offs / Diagram sections); renders a commit badge under the tool result for use with `modem-dev/hunk`. |
 | [`tau-kimi-auto`](packages/tau-kimi-auto) | Model | Registers the `kimi-auto` virtual model — a herd-side alias that resolves to the best healthy Kimi model per request (Kimi-only; 503 instead of silent fallback). |
+| [`lambda-bridge`](/home/toxic/pens/olympus/products/lambda) | Delegation | `lambda` (λ) — the kimi-code (MoonshotAI) agent runtime living **between kappa (κ) and tau (τ)**: headless one-shot worker runs via `helpers/lambda-delegate.sh`, tau tool `lambda_run` (product-owned extension), kappa MCP tool `lambda_run` (`products/kappa/extensions/lambda-bridge`), ACP host, and the `estate/lambda` web daemon on :25126. This repo holds the helper + pointer only — product code owns the rest. |
 
 ## Quick start
 
