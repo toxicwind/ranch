@@ -1,0 +1,9 @@
+{
+  "name": "swarm-coord",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "coordinator": "bun run bin/coordinator.ts",
+    "agent": "bun run bin/swarm.ts"
+  }
+}

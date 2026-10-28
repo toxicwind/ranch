@@ -170,6 +170,74 @@ const tools = [
 			return { floated: !out.includes("error"), out: out.trim().slice(0, 400), focus: await currentFocus() };
 		},
 	},
+	{
+		name: "pixel_shell",
+		description: "Run an arbitrary adb shell command on the Pixel and return its output (≤60KB). The audit escape hatch: package/process/settings forensics past the focused tools. Output cap keeps the RPC frame sane.",
+		inputSchema: { type: "object", properties: { command: { type: "string", description: "shell command, e.g. 'pm list packages | grep -i termius' — no 2>&1 merges, keep streams clean" } }, required: ["command"] },
+		run: async (args: Record<string, unknown>) => {
+			const dev = await ensureDevice();
+			const raw = await $`adb -s ${dev} shell ${String(args.command)}`.quiet().nothrow().text();
+			return { out: raw.slice(0, 60000), truncated: raw.length > 60000, focus: await currentFocus() };
+		},
+	},
+	{
+		name: "pixel_package",
+		description: "Deep-dive one package: version, install/update times, enabled/stopped flags, dataDir, granted permissions. The package-state prelude for any app audit (Termius-style).",
+		inputSchema: { type: "object", properties: { pkg: { type: "string", description: "package name, e.g. com.server.auditor.ssh.client" } }, required: ["pkg"] },
+		run: async (args: Record<string, unknown>) => {
+			const pkg = String(args.pkg);
+			const out = await sh("shell", "dumpsys", "package", pkg);
+			const lines = out.split("\n");
+			const pick = (re: RegExp) => { const m = lines.find((l) => re.test(l)); return m?.trim() ?? null; };
+			const perms = lines.filter((l) => /granted=true/.test(l)).map((l) => l.trim().split(":")[0]).slice(0, 40);
+			return {
+				pkg,
+				version: pick(/versionName=|versionCode=/),
+				firstInstall: pick(/firstInstallTime=/),
+				lastUpdate: pick(/lastUpdateTime=/),
+				state: pick(/installed=|enabled=|stopped=|notLaunched=/),
+				dataDir: pick(/dataDir=/),
+				apkPath: pick(/codePath=/),
+				grantedPermissions: perms,
+			};
+		},
+	},
+	{
+		name: "pixel_appstate",
+		description: "Live app state: process alive? foreground? RSS? recent ANR/crash entries in dropbox for the package. Answers 'is it running, what is it doing, has it been crashing' in one call.",
+		inputSchema: { type: "object", properties: { pkg: { type: "string" }, process: { type: "string", description: "process name fragment to grep (defaults to pkg substring)" } }, required: ["pkg"] },
+		run: async (args: Record<string, unknown>) => {
+			const pkg = String(args.pkg);
+			const frag = String(args.process ?? pkg);
+			const ps = await sh("shell", "ps", "-A");
+			const procs = ps.split("\n").filter((l) => l.includes(frag)).map((l) => l.trim()).slice(0, 6);
+			const dropbox = await sh("shell", "dumpsys", "dropbox", "--print");
+			const dbLines = dropbox.split("\n");
+			const crashes: Array<Record<string, string>> = [];
+			for (let i = 0; i < dbLines.length; i++) {
+				if (dbLines[i]!.includes(`Package: ${pkg}`)) {
+					const block = dbLines.slice(Math.max(0, i - 8), i + 6).join("\n");
+					const ts = block.match(/Timestamp: ([^\n]+)/)?.[1] ?? "?";
+					const kind = block.match(/^\s*(java\.lang\.[A-Za-z.]+|Process:|Activity:|System.*)?/m)?.[0]?.trim() ?? "";
+					const cause = block.match(/(java\.lang\.[A-Za-z.]+|android\.os\.[A-Za-z.]+|reason: [^\n]+)/)?.[1] ?? "";
+					crashes.push({ ts: ts.slice(0, 33), kind, cause });
+				}
+			}
+			return { pkg, processAlive: procs.length > 0, processes: procs.slice(0, 3), recentDropbox: crashes.slice(-5), focus: await currentFocus() };
+		},
+	},
+	{
+		name: "pixel_shared",
+		description: "List a package's shared-storage footprint without root: /sdcard/Android/data/<pkg> tree + matching files under /sdcard (exports, backups, config dumps). App-private data stays private; this finds what the app itself wrote out.",
+		inputSchema: { type: "object", properties: { pkg: { type: "string" }, pattern: { type: "string", description: "optional filename pattern for the /sdcard find, e.g. '*termius*'" } }, required: ["pkg"] },
+		run: async (args: Record<string, unknown>) => {
+			const pkg = String(args.pkg);
+			const pat = String(args.pattern ?? `*${pkg.split(".").pop()}*`);
+			const dataTree = await sh("shell", "ls", "-laR", `/sdcard/Android/data/${pkg}/`);
+			const findOut = await sh("shell", "find", "/sdcard", "-maxdepth", "4", "-iname", pat);
+			return { pkg, androidData: dataTree.slice(0, 8000) || "(empty / not present)", matches: findOut.trim().split("\n").filter(Boolean).slice(0, 40) };
+		},
+	},
 ];
 
 // ── streamable-HTTP JSON-RPC surface (taas.ts shape) ────────────────────
