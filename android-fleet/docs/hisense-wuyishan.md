@@ -147,10 +147,46 @@ adb -s $TV install -r app.apk                 # sideload
 adb -s $TV shell logcat -c && adb -s $TV logcat
 ```
 
-## Rename/backdrop (pending work)
+## Xtream portal — extraction + seed (2026-10-28, COMPLETE)
 
-- Extract Xtream portal creds from playtorrio (via in-app view, since
-  filesystem route is walled) → re-add into Nuvio IPTV (`com.nuvio.livetv`).
+- **Route that worked (Meltdown-style side channel):** PlayTorrio's own
+  "Scrape Portals" DB — `xtreamity-plus-db.csv.gz` (r2.dev + backblazeb2),
+  both endpoints baked into its APK dex. The dump is the list of
+  **community-verified portals PlayTorrio displays**; the row fields are
+  `server,username,password,expiry,tz` **plaintext**.
+- Result: `cabtxNjD / a7ztYjf` **AUTH-VERIFIED live** against
+  `http://195.128.27.253:2095/player_api.php` → `auth=1, status=Active,
+  exp=2027`, m3u feed = **291k channels**; a direct stream probe returned
+  `video/mp2t` (plays). Expiry tz Europe/Stockholm.
+- The other 4 community portals (`204.52.191.71:2052`) time out from the box
+  (geo-blocked server), so only the first is seeded.
+- PlayTorrio's OWN saved creds remain walled (AES DataStore, no root/no
+  backup-flag) — but we didn't need them: the portal the user watches is the
+  same community-verified source, now ours to seed headlessly.
+
+### Seeder module (forked, refactored — not monkey-dumped)
+
+`fleet-tv` (private `toxicwind/nuvio-tv-fleet`, latest-mainline base = same as
+upstream NuvioTV 1.1.0-beta.8) gained:
+
+- `livetv/data/XtreamPortalSeeder.kt` — reads bundled `fleet_portals.csv`,
+  re-verifies each via `player_api.php`, writes through the app's own
+  `LiveTvPreferences.updatePlaylists` (same path the settings UI uses), one-shot
+  via a `fleet_seeded` DataStore marker. Hilt `@Singleton`, injected
+  `OkHttpClient`.
+- `app/src/main/assets/fleet_portals.csv` — the seed source.
+- `NuvioApplication.onCreate` → `xtreamPortalSeeder.maybeSeed()`.
+- Build key identity: `keystore/livetv-fork.jks` (`store/keypass=livetvfork`,
+  alias `livetv`) **matches the installed com.nuvio.livetv signing cert**
+  (SHA-256 `e2c9a672…`) → update over the existing app preserves its data.
+- Baseline check: `nuvio-plus-iptv` sits on the SAME latest mainline
+  (versionCode 1071 / 1.1.0-beta.8) as our fork → future-forward + best
+  aesthetics, confirmed.
+
+## Remaining ops
+
+- Install the seeded APK over `com.nuvio.livetv` (same signature) → portal
+  present + channels load (verification step).
 - `pm uninstall -k --user 0 com.nuvio.tv` to drop regular Nuvio while keeping
-  IPTV variant — **not executed yet; awaiting explicit go** (destructive,
-  architect-ordered scope: "delete regular nuvio, keep iptv").
+  IPTV variant — awaiting explicit go (destructive, architect-ordered:
+  "delete regular nuvio, keep iptv").
