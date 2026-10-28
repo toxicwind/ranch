@@ -22,6 +22,10 @@ import { serve } from "bun";
 
 const PORT = Number(process.env.VANS_TAAS_PORT ?? 25243);
 const BOTFATHER = "botfather"; // lowercase username for GramJS
+// Telegram's OFFICIAL BotFather user id. driveBotFather trusts ONLY
+// token replies from this sender — squatter lookalikes ("migrate to our
+// channel" scams) must never yield estate credentials. 2026-10-28.
+const OFFICIAL_BOTFATHER_ID = 93372553;
 
 // --- keyring (env emitter; stdin-path set) — NO pipes into secretsmith ---
 function keyring(): Record<string, string> {
@@ -107,6 +111,13 @@ async function driveBotFather(req: NewBotRequest): Promise<{ ok: boolean; token?
 	// Read the reply (last message from BotFather).
 	const msgs = await client.getMessages("botfather", { limit: 1 });
 	const reply = msgs[0]?.message ?? "";
+	// Anti-squatter: only the OFFICIAL BotFather's reply carries credential
+	// material. Impostors (id mismatch, or no sender) return a structured
+	// refusal — the token regex never runs on untrusted text.
+	const senderId = msgs[0]?.senderId ? Number(msgs[0].senderId.toString()) : 0;
+	if (senderId !== OFFICIAL_BOTFATHER_ID) {
+		return { ok: false, error: `botfather reply sender id ${senderId} != official ${OFFICIAL_BOTFATHER_ID} — refusing (squatter/phishing guard)` };
+	}
 	const tokenMatch = reply.match(/\b(\d{8,12}:[A-Za-z0-9_-]{30,})\b/);
 	if (!tokenMatch) {
 		return { ok: false, error: `botfather did not return a token: ${reply.slice(0, 200)}` };
