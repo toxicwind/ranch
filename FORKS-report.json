@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-28T11:06:45.487Z",
-  "total": 131,
+  "generated": "2026-10-28T12:10:12.888Z",
+  "total": 132,
   "withUpstream": 4,
   "infos": [
     {
@@ -10,7 +10,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 87431,
+      "sizeBytes": 98827,
       "fileCount": 21,
       "signals": [],
       "signalTotal": 0
@@ -562,7 +562,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 11031744,
+      "sizeBytes": 11031764,
       "fileCount": 643,
       "signals": [],
       "signalTotal": 0
@@ -874,7 +874,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 10811,
+      "sizeBytes": 13073,
       "fileCount": 3,
       "signals": [],
       "signalTotal": 0
@@ -1512,6 +1512,18 @@
       "isSubmodule": false,
       "sizeBytes": 8564796,
       "fileCount": 484,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "vendored",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 37150,
+      "fileCount": 9,
       "signals": [],
       "signalTotal": 0
     },
