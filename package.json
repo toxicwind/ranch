@@ -26,7 +26,6 @@
       "task-launch",
       "metaaivm-profile",
       "pinax",
-      "kryptos/keypool",
       "forge/router/cuttinggate",
       "forge/router/herd"
     ],
