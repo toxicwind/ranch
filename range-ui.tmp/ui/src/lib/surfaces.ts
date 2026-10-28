@@ -86,6 +86,15 @@ export const SURFACES: readonly Surface[] = [
 		description: "llama.cpp server front end — full llama-server chat UI.",
 	},
 	{
+		id: "farm",
+		label: "Farm",
+		group: "Village",
+		origin: loopback(25156),
+		kind: "ui",
+		pagePath: "/farm",
+		description: "AI Harvest Moon living map: villagers = rigs, buildings = daemons, speech bubbles = squawk, day/night = poll cadence.",
+	},
+	{
 		id: "model-guard",
 		label: "Model Guard",
 		group: "Models",
