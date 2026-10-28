@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-28T03:08:11.781Z",
-  "total": 130,
+  "generated": "2026-10-28T04:08:24.573Z",
+  "total": 131,
   "withUpstream": 4,
   "infos": [
     {
@@ -22,8 +22,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 1827,
-      "fileCount": 7,
+      "sizeBytes": 12286,
+      "fileCount": 8,
       "signals": [],
       "signalTotal": 0
     },
@@ -82,8 +82,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 61320187,
-      "fileCount": 2410,
+      "sizeBytes": 61321378,
+      "fileCount": 2411,
       "signals": [],
       "signalTotal": 0
     },
@@ -514,8 +514,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 406531549,
-      "fileCount": 4086,
+      "sizeBytes": 406588598,
+      "fileCount": 4091,
       "signals": [],
       "signalTotal": 0
     },
@@ -550,8 +550,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 25840,
-      "fileCount": 9,
+      "sizeBytes": 32233,
+      "fileCount": 11,
       "signals": [],
       "signalTotal": 0
     },
@@ -970,7 +970,7 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 703732,
+      "sizeBytes": 703735,
       "fileCount": 69,
       "signals": [],
       "signalTotal": 0
@@ -1108,14 +1108,26 @@
       "signalTotal": 0
     },
     {
+      "name": "range",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 140013227,
+      "fileCount": 26353,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
       "name": "range-ui.tmp",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 185579607,
-      "fileCount": 333,
+      "sizeBytes": 185587381,
+      "fileCount": 334,
       "signals": [],
       "signalTotal": 0
     },
