@@ -10,7 +10,7 @@
  * - Unroutable messages route to bus/dead-letter.jsonl with structured error receipt.
  */
 
-import { watch } from "node:fs/promises";
+import { watch } from "node:fs";
 import { join } from "node:path";
 import type { SwarmFrame } from "../src/protocol.ts";
 import {
@@ -162,6 +162,9 @@ async function main(): Promise<void> {
 		}
 	}
 
+	// Periodic poll fallback to guarantee low latency in headless/containerized environments
+	const pollInterval = setInterval(scheduleDrain, 300);
+	cleanupFns.push(() => clearInterval(pollInterval));
 	const onShutdown = (): void => {
 		console.log(`[coordinator] Shutting down.`);
 		for (const close of cleanupFns) close();
