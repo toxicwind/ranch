@@ -34,7 +34,7 @@ function keyring(): Record<string, string> {
 function cleanEnv(): Record<string, string> {
 	const e: Record<string, string> = {};
 	for (const [k, v] of Object.entries(process.env)) {
-		if ("KAIROS" in k.toUpperCase() || k === "BASH_ENV" || k === "ENV") continue;
+		if (k.toUpperCase().includes("KAIROS") || k === "BASH_ENV" || k === "ENV") continue;
 		e[k] = v as string;
 	}
 	return e;
@@ -156,6 +156,32 @@ const server = serve({
 				});
 			}
 			return Response.json(result, { status: 502 });
+		}
+		if (url.pathname === "/telegram/login" && request.method === "GET") {
+			// One-time interactive: sends the Telegram code to the architect's phone.
+			const ok = await client.connect();
+			if (!client.authorizationState) {
+				return Response.json({ ok: false, error: "connect failed" }, { status: 502 });
+			}
+			const result = await client.sendCode({ phoneNumber: PHONE }).catch((e: Error) => ({ error: e.message }));
+			if ("error" in result) return Response.json({ ok: false, error: result.error }, { status: 502 });
+			return Response.json({ ok: true, hint: "code sent to phone; POST /telegram/login {code}" });
+		}
+		if (url.pathname === "/telegram/login" && request.method === "POST") {
+			const body = (await request.json()) as { code: string };
+			if (!body.code) return Response.json({ ok: false, error: "code required" }, { status: 400 });
+			try {
+				await client.signInUser(
+					{ apiId: API_ID, apiHash: API_HASH },
+					{ phoneNumber: PHONE, phoneCode: async () => body.code, password: async () => { const p = KR["TELEGRAM_PASSWORD"] ?? ""; return p; }, onError: (e: Error) => console.error("signin:", e.message) },
+				);
+				const sess = client.session.save() as unknown as string;
+				keyringSet("TELEGRAM_USER_SESSION", sess);
+				sessionAlive = true;
+				return Response.json({ ok: true, session: "stored (keyring TELEGRAM_USER_SESSION)" });
+			} catch (err) {
+				return Response.json({ ok: false, error: err instanceof Error ? err.message : String(err) }, { status: 502 });
+			}
 		}
 		return Response.json({ ok: false, error: "not found" }, { status: 404 });
 	},
