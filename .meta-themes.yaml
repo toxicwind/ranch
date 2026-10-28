@@ -81,6 +81,7 @@ oracle:
 # corral — orchestration & fleet control.
 corral:
   - "android-fleet"
+  - "apk-autopsy"
   - "dots-client"
   - "drover"
   - "extensions/drover"
