@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-28T03:08:11.781Z)
+# ranch/* fork audit (generated 2026-10-28T04:08:24.573Z)
 
-130 immediate subdirs; **4** have an obvious upstream reference.
+131 immediate subdirs; **4** have an obvious upstream reference.
 
 By source:
   - **2** package.json repository
@@ -102,6 +102,7 @@ By source:
 | `pylae` | — | — | — |
 | `qed` | — | — | — |
 | `ranch-analyze` | — | — | — |
+| `range` | — | — | — |
 | `range-ui.tmp` | — | — | — |
 | `rankings` | — | — | — |
 | `rawhide` | — | — | — |
