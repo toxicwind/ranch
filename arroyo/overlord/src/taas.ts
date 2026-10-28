@@ -208,12 +208,17 @@ const server = serve({
 		}
 		if (url.pathname === "/telegram/login" && request.method === "GET") {
 			// One-time interactive: sends the Telegram code to the architect's phone.
-			const ok = await client.connect();
-			// gramJS exposes liveness as `connected` (authorizationState is not a
-			// client property — checking it made every login GET a permanent 502).
-			// connect() itself resolves void (throws on failure) — only `connected` tells truth.
-			if (ok === false || !client.connected) {
-				return Response.json({ ok: false, error: "connect failed" }, { status: 502 });
+			// Surface the REAL connect error — a bare "connect failed" hid a
+			// transient-vs-permanent distinction for a whole session (2026-10-28).
+			let ok: unknown;
+			try {
+				ok = await client.connect();
+			} catch (err) {
+				return Response.json({ ok: false, error: `connect threw: ${err instanceof Error ? err.message : String(err)}` }, { status: 502 });
+			}
+			// connect() resolves void (throws on failure); `connected` tells truth.
+			if (!client.connected) {
+				return Response.json({ ok: false, error: `connect failed (connected=false, resolve=${String(ok)})` }, { status: 502 });
 			}
 			// High-level sendCode helper shape-drifts across gramJS versions —
 			// raw TL invoke is stable. Code lands in the phone's Telegram app.
