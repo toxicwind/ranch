@@ -49,9 +49,28 @@ async function squawk(from: string, body: string): Promise<void> {
 // env emits shell-quoted KEY='value' lines; strip quotes, no pipes, no cuts).
 function resolveKeys(): Record<string, string> {
   const { execSync } = require("node:child_process") as typeof import("node:child_process");
-  const out = execSync("secretsmith env", { encoding: "utf8", timeout: 30_000 });
+  let out = "";
+  try {
+    out = execSync("secretsmith env", { encoding: "utf8", timeout: 15_000 });
+  } catch {
+    return {};
+  }
   const keys: Record<string, string> = {};
-  for (const m of out.matchAll(/^([A-Z_0-9]+)='(.*)'$/gm)) keys[m[1]!] = m[2]!;
+  for (const line of out.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const clean = trimmed.startsWith("export ") ? trimmed.slice(7) : trimmed;
+    const eqIdx = clean.indexOf("=");
+    if (eqIdx === -1) continue;
+    const key = clean.slice(0, eqIdx).trim();
+    let val = clean.slice(eqIdx + 1).trim();
+    if ((val.startsWith("'") && val.endsWith("'")) || (val.startsWith('"') && val.endsWith('"'))) {
+      val = val.slice(1, -1);
+    }
+    if (key) {
+      keys[key] = val;
+    }
+  }
   return keys;
 }
 
