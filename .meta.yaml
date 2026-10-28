@@ -134,6 +134,8 @@ oracle:
 corral:
   "android-fleet":
     repo: https://github.com/toxicwind/android-fleet.git
+  "apk-autopsy":
+    repo: https://github.com/toxicwind/apk-autopsy.git
   "dots-client":
     repo: https://github.com/toxicwind/dots-client.git
   "drover":

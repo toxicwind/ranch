@@ -1,5 +1,5 @@
 {
-  "description": "Ranch monorepo \u2014 herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), corral (TS), drover (TS), roost (TS), and shared Bun/TS packages. Estate owns the mise build cache.",
+  "description": "Ranch monorepo — herd (Go), flock (Rust), squawk (Python), lasso (Python), rig (Rust/OpenFang), corral (TS), drover (TS), roost (TS), and shared Bun/TS packages. Estate owns the mise build cache.",
   "name": "ranch",
   "private": true,
   "scripts": {
@@ -9,7 +9,8 @@
     "lint": "mise exec -- moon run :lint",
     "test": "mise exec -- moon run :test",
     "typecheck": "bun run --filter '*' typecheck",
-    "readme": "bun ./bin/readme-gen.ts"
+    "readme": "bun ./bin/readme-gen.ts",
+    "facts": "bun scripts/gen-facts.ts"
   },
   "version": "1.0.0",
   "workspaces": {
@@ -98,6 +99,7 @@
   },
   "dependencies": {
     "preact": "^11.0.0",
-    "svelte": "5"
+    "svelte": "5",
+    "yaml": "^2.9.1"
   }
 }
