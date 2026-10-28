@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-28T02:09:40.545Z",
-  "total": 128,
+  "generated": "2026-10-28T03:08:11.781Z",
+  "total": 130,
   "withUpstream": 4,
   "infos": [
     {
@@ -540,6 +540,18 @@
       "isSubmodule": false,
       "sizeBytes": 455510,
       "fileCount": 7,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "geode-rig",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 25840,
+      "fileCount": 9,
       "signals": [],
       "signalTotal": 0
     },
@@ -1488,6 +1500,18 @@
       "isSubmodule": false,
       "sizeBytes": 8564796,
       "fileCount": 484,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "village-irc",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 54166,
+      "fileCount": 1,
       "signals": [],
       "signalTotal": 0
     },
