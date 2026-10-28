@@ -10,13 +10,21 @@
 
 # 🤠 ranch
 
-**The whole self-hosted AI estate in one monorepo.** Local model serving (**herd**), cloud provider routing (**hodos**), the canonical router (**cuttinggate**), the coding agent (**tau**), the MCP gateway (**gatehouse**), the build-job system (**forge**), fleet chat (**keryx**), and the provider catalog (**roost**) they all share — one directory per component, the full mesh on one box, everything OpenAI-compatible.
+**The estate's service catalog.** Fleet chat (**squawk** :25120), the MCP gateway (**thresher** :25127 — mcpproxy-go fork, one audited door), evals (**roundup**), android-fleet + flotilla (the Pixel), the telegram lane (**arroyo/coyote**), and dozens of single-purpose services — one directory per service, everything OpenAI-compatible. The cloud routers live next door in **geode** (rhodochrosite :25193 canonical); the coding agent is **tau** (own repo, olympus); build ops live in **barn**.
 
 [Explore the docs »](docs/) · [Report Bug](https://github.com/toxicwind/ranch/issues/new?labels=bug&template=bug_report.md) · [Request Feature](https://github.com/toxicwind/ranch/issues/new?labels=enhancement&template=feature_request.md)
 
 <img src="docs/images/ranch-demo.svg" alt="ranch 30-second proof: 52 local models behind one OpenAI-compatible door, every core service answering 200" width="720">
 
 </div>
+
+## Facts (generated — do not hand-edit)
+
+<!-- FACTS:START -->
+| service dirs | 298 |
+| squawk bus port | 25120 (ports.env ESTATE_CHAT_PORT) |
+| thresher MCP gateway port | 25127 (ports.env THRESHER_PORT) |
+<!-- FACTS:END -->
 
 <details>
 <summary><b>Table of Contents</b></summary>
@@ -48,14 +56,14 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 
 ### The agent this estate serves
 
-**tau** is the coding agent — a terminal coding agent (fork of [oh-my-pi](https://github.com/can1357/oh-my-pi)) with an interactive CLI + SDK, 30+ tools, subagents, LSP-aware editing, and a native Rust hot path. It speaks to dozens of providers through a compiled model catalog sourced from **roost**, the ranch's single provider-data authority. Tau lives in its own repo ([toxicwind/tau](https://github.com/toxicwind/tau)) and nests into the ranch at `tau/` (gitignored — an independent repo with its own remote, absent in a fresh clone); on a live estate, **chute** exposes its stdio ACP engine as a TCP daemon on `:25111`, and its model traffic flows through herd and hodos. If you only learn one animal, learn tau — the rest of the ranch exists so the agent can work.
+**tau** is the coding agent (fork of [oh-my-pi](https://github.com/can1357/oh-my-pi)) — terminal CLI + SDK, 30+ tools, subagents, native Rust hot path. It lives in its own repo ([toxicwind/tau](https://github.com/toxicwind/tau), nested under olympus on disk) and resolves every model through **mimetite** (geode's provider catalog) routed via **rhodochrosite** :25193. If you only learn one animal, learn tau — the rest of the catalog exists so the village can run.
 
 ## 🛠️ Built with
 
-- [Go](https://go.dev) — herd (local front door), forge (build jobs), gatehouse (MCP gateway)
-- [Rust](https://www.rust-lang.org) — hodos (provider router), rig (OpenFang kernel), tau's native hot path
-- [Bun](https://bun.sh) + [TypeScript](https://www.typescriptlang.org) — workspaces, cuttinggate, fleet-ui, windmill, stream-broker, roost, tau's agent brain
-- [Python](https://www.python.org) — keryx (fleet chat), squawk-ws, lasso (desktop control)
+- [Go](https://go.dev) — thresher (the MCP gateway, mcpproxy-go fork)
+- [Rust](https://www.rust-lang.org) — rig (the agent OS kernel, [toxicwind/rig](https://github.com/toxicwind/rig)), tau's native hot path, geode's rhodochrosite router
+- [Bun](https://bun.sh) + [TypeScript](https://www.typescriptlang.org) — squawk, fleet-ui, roundup, eidolon, mimetite's catalog codegen
+- [Python](https://www.python.org) — arroyo/coyote (telegram MTProto), loggy-bridge, lasso (desktop control)
 - [mise](https://mise.jdx.dev) — toolchains and build tasks; estate owns the shared build cache
 - **pitchfork** — the daemon supervisor: supervised services on the live estate
 
