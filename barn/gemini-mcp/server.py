@@ -50,6 +50,13 @@ def _load_keys():
     Values stay in memory only; this function never prints them.
     """
     meta = {}
+    # Keyring SSOT first (2026-10-28): GEMINI_API_KEY_N / _NAME / _PROJECT /
+    # _EAP come from secretsmith env (exported by serve.sh with set -a).
+    # ~/.secrets is the retired fallback record.
+    for k, v in os.environ.items():
+        m = re.match(r"^(GEMINI_API_KEY_\d+(?:_NAME|_PROJECT|_EAP)?)$", k)
+        if m and v:
+            meta[m.group(1)] = v
     try:
         with open(SECRETS_FILE) as f:
             for line in f:
