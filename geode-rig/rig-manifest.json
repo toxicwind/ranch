@@ -1,54 +1,89 @@
 {
- "rigs": [
-  {
-   "name": "skopos",
-   "place": "pens/olympus",
-   "lane": "olympus-overwatch",
-   "keyLabel": "RIG-SKOPOS",
-   "sigil": "👁"
-  },
-  {
-   "name": "muse",
-   "place": "pens/olympus",
-   "lane": "olympus-muse",
-   "keyLabel": "RIG-MUSE",
-   "sigil": "🎐"
-  },
-  {
-   "name": "keryx",
-   "place": "pens/olympus",
-   "lane": "olympus-herald",
-   "keyLabel": "RIG-KERYX",
-   "sigil": "📯"
-  },
-  {
-   "name": "kryptos",
-   "place": "pens/olympus",
-   "lane": "olympus-secrets",
-   "keyLabel": "RIG-KRYPTOS",
-   "sigil": "🗝"
-  },
-  {
-   "name": "kairos",
-   "place": "pens/olympus",
-   "lane": "olympus-latency",
-   "keyLabel": "RIG-KAIROS",
-   "sigil": "⏱"
-  },
-  {
-   "name": "ergane",
-   "place": "pens/ergasterion",
-   "lane": "ergasterion-workshop",
-   "keyLabel": "RIG-ERGANE",
-   "sigil": "🪡"
-  },
-  {
-   "name": "hestia",
-   "place": "pens/ergasterion",
-   "lane": "ergasterion-hearth",
-   "keyLabel": "RIG-HESTIA",
-   "sigil": "🔥"
-  }
- ],
- "store": "/home/toxic/.rhodochrosite-data/config.json"
+  "$schema": "estate-rig-manifest/v1",
+  "version": "1.1.0",
+  "updated": "2026-10-28T12:45:00Z",
+  "store": "/home/toxic/.rhodochrosite-data/config.json",
+  "rigs": [
+    {
+      "name": "geode",
+      "place": "pens/geode",
+      "lane": "geode-router",
+      "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "keyLabel": "RIG-GEODE",
+      "cadence": "300s",
+      "sigil": "💎"
+    },
+    {
+      "name": "hephaistos",
+      "place": "pens/ergasterion",
+      "lane": "ergasterion-forge",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "keyLabel": "RIG-HEPHAISTOS",
+      "cadence": "300s",
+      "sigil": "⚒️"
+    },
+    {
+      "name": "skopos",
+      "place": "pens/olympus",
+      "lane": "olympus-overwatch",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "keyLabel": "RIG-SKOPOS",
+      "cadence": "300s",
+      "sigil": "👁"
+    },
+    {
+      "name": "muse",
+      "place": "pens/olympus",
+      "lane": "olympus-muse",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "keyLabel": "RIG-MUSE",
+      "cadence": "300s",
+      "sigil": "🎐"
+    },
+    {
+      "name": "keryx",
+      "place": "pens/olympus",
+      "lane": "olympus-herald",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "keyLabel": "RIG-KERYX",
+      "cadence": "300s",
+      "sigil": "📯"
+    },
+    {
+      "name": "kryptos",
+      "place": "pens/olympus",
+      "lane": "olympus-secrets",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "keyLabel": "RIG-KRYPTOS",
+      "cadence": "300s",
+      "sigil": "🗝"
+    },
+    {
+      "name": "kairos",
+      "place": "pens/olympus",
+      "lane": "olympus-latency",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "keyLabel": "RIG-KAIROS",
+      "cadence": "300s",
+      "sigil": "⏱"
+    },
+    {
+      "name": "ergane",
+      "place": "pens/ergasterion",
+      "lane": "ergasterion-workshop",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "keyLabel": "RIG-ERGANE",
+      "cadence": "300s",
+      "sigil": "🪡"
+    },
+    {
+      "name": "hestia",
+      "place": "pens/ergasterion",
+      "lane": "ergasterion-hearth",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "keyLabel": "RIG-HESTIA",
+      "cadence": "300s",
+      "sigil": "🔥"
+    }
+  ]
 }
