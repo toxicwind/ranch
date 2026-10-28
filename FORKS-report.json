@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-28T21:06:43.895Z",
-  "total": 132,
+  "generated": "2026-10-28T22:07:04.789Z",
+  "total": 131,
   "withUpstream": 4,
   "infos": [
     {
@@ -696,18 +696,6 @@
       "isSubmodule": false,
       "sizeBytes": 82195,
       "fileCount": 8,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "kryptos",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 130195,
-      "fileCount": 22,
       "signals": [],
       "signalTotal": 0
     },

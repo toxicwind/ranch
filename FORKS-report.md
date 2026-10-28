@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-28T21:06:43.895Z)
+# ranch/* fork audit (generated 2026-10-28T22:07:04.789Z)
 
-132 immediate subdirs; **4** have an obvious upstream reference.
+131 immediate subdirs; **4** have an obvious upstream reference.
 
 By source:
   - **2** package.json repository
@@ -69,7 +69,6 @@ By source:
 | `keryx` | — | — | — |
 | `kimi-claw` | — | — | — |
 | `kodi-fleet` | — | — | — |
-| `kryptos` | — | — | — |
 | `leakfix-src` | — | — | — |
 | `ledger` | — | — | — |
 | `lib` | — | — | — |
