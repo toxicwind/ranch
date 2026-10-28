@@ -78,6 +78,17 @@ const client = new TelegramClient(
 
 let sessionAlive = false;
 
+// Login code flood guard: each sendCode burns the number's rate budget (a
+// 2026-10-28 session sent ~6 codes in minutes and hit a 3370s Telegram
+// flood-wait, hanging every subsequent POST). One code per 60s, forever.
+let lastSendCodeAt = 0;
+const SEND_CODE_MIN_INTERVAL_MS = 60_000;
+
+function sendCodeAllowed(): { ok: boolean; waitS: number } {
+	const waitS = Math.ceil((lastSendCodeAt + SEND_CODE_MIN_INTERVAL_MS - Date.now()) / 1000);
+	return waitS > 0 ? { ok: false, waitS } : { ok: true, waitS: 0 };
+}
+
 async function ensureConnected(): Promise<boolean> {
 	if (sessionAlive) return true;
 	try {
@@ -208,6 +219,10 @@ const server = serve({
 		}
 		if (url.pathname === "/telegram/login" && request.method === "GET") {
 			// One-time interactive: sends the Telegram code to the architect's phone.
+			const gate = sendCodeAllowed();
+			if (!gate.ok) {
+				return Response.json({ ok: false, error: `code send rate-limited (retry in ${gate.waitS}s)` }, { status: 429 });
+			}
 			// Surface the REAL connect error — a bare "connect failed" hid a
 			// transient-vs-permanent distinction for a whole session (2026-10-28).
 			let ok: unknown;
@@ -229,6 +244,7 @@ const server = serve({
 				settings: new Api.CodeSettings({}),
 			})).catch((e: Error) => ({ error: e.message }));
 			if ("error" in result) return Response.json({ ok: false, error: result.error }, { status: 502 });
+			lastSendCodeAt = Date.now();
 			return Response.json({ ok: true, hint: "code sent to phone; POST /telegram/login {code}" });
 		}
 		if (url.pathname === "/telegram/login" && request.method === "POST") {
