@@ -73,6 +73,14 @@ The complete **zero-hands** path from "agent on the box" to "acting on the phone
    `flotilla:*`): screenshot / tap / text / ui-dump / headless-open with the
    **focus covenant** — every input tool returns the focused window.
 
+
+### 🔑 Phone Auth SSOT & Fast Headless Editing Doctrine (2026-10-28)
+
+1. **Max Use Phone for Auth**: The Architect's Pixel 9 Pro XL is the estate's primary auth vault holding Bitwarden (`com.x8bit.bitwarden`), Authy (`com.authy.authy`), and authenticators/keys.
+   - For 2FA, OTP, portal sign-ins, or vault lookups: query the phone headlessly via flotilla MCP (`:25245`) or wireless ADB (`10.0.0.77:<port>`).
+2. **Fast Headless Dequeue & Edit (`Alt+Up` / `Shift+Up`)**:
+   - In headless TUI / CLI agent sessions, `Alt+Up` and `Shift+Up` (`app.message.dequeue`) dequeue a queued message back into the editor for instant, fast iteration without re-typing.
+   - In remote ADB / termius headless navigation, use keychords to drive inputs at high speed.
 ```mermaid
 flowchart TB
     subgraph lan[LAN 10.0.0.0/24]
