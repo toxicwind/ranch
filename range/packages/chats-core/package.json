@@ -1,0 +1,21 @@
+{
+  "name": "@ranch/chats-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Truthful unified agent-chat aggregation for Tau, Kappa and Kimi — every port and URL comes from the generated surface registry",
+  "exports": {
+    ".": "./src/index.ts",
+    "./node": "./src/node.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "TMPDIR=.vitest-tmp vitest run",
+    "sample": "node --experimental-strip-types src/sample.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2",
+    "vitest": "^4.0.18"
+  }
+}
