@@ -153,7 +153,7 @@ const kappaInstalled = buildInstalledKappaJson(
 );
 for (const p of [
   "/home/toxic/.config/kappa/kappa-models.json",
-  "/home/toxic/estate/config/kappa/kappa-models.json",
+  "/home/toxic/pens/olympus/ssot/kappa/kappa-models.json",
 ]) {
   try {
     await Bun.write(p, kappaInstalled);
@@ -162,5 +162,5 @@ for (const p of [
   }
 }
 console.log(
-  "synced installed slice to ~/.config/kappa/kappa-models.json and estate/config/kappa/kappa-models.json",
+  "synced installed slice to ~/.config/kappa/kappa-models.json and olympus/ssot/kappa/kappa-models.json",
 );
