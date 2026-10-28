@@ -126,7 +126,7 @@ async function driveBotFather(req: NewBotRequest): Promise<{ ok: boolean; token?
 }
 
 const server = serve({
-	hostname: "127.0.0.1",
+	hostname: "0.0.0.0",
 	port: PORT,
 	async fetch(request) {
 		const url = new URL(request.url);
@@ -209,10 +209,20 @@ const server = serve({
 		if (url.pathname === "/telegram/login" && request.method === "GET") {
 			// One-time interactive: sends the Telegram code to the architect's phone.
 			const ok = await client.connect();
-			if (!client.authorizationState) {
+			// gramJS exposes liveness as `connected` (authorizationState is not a
+			// client property — checking it made every login GET a permanent 502).
+			// connect() itself resolves void (throws on failure) — only `connected` tells truth.
+			if (ok === false || !client.connected) {
 				return Response.json({ ok: false, error: "connect failed" }, { status: 502 });
 			}
-			const result = await client.sendCode({ phoneNumber: PHONE }).catch((e: Error) => ({ error: e.message }));
+			// High-level sendCode helper shape-drifts across gramJS versions —
+			// raw TL invoke is stable. Code lands in the phone's Telegram app.
+			const result = await client.invoke(new Api.auth.SendCode({
+				phoneNumber: PHONE,
+				apiId: API_ID,
+				apiHash: API_HASH,
+				settings: new Api.CodeSettings({}),
+			})).catch((e: Error) => ({ error: e.message }));
 			if ("error" in result) return Response.json({ ok: false, error: result.error }, { status: 502 });
 			return Response.json({ ok: true, hint: "code sent to phone; POST /telegram/login {code}" });
 		}
@@ -236,4 +246,4 @@ const server = serve({
 	},
 });
 
-console.log(`taas: listening on 127.0.0.1:${PORT}`);
+console.log(`taas: listening on 0.0.0.0:${PORT} (LAN-reachable)`);
