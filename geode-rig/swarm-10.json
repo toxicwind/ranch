@@ -1,105 +1,24 @@
 {
+ "swarm10": [
+  {
+   "family": "nvidia",
+   "model": "nvidia/nemotron-3-ultra-550b-a55b",
+   "evidence": "34 agents live (rig registry) - the ONLY provider with proven upstream"
+  },
+  {
+   "family": "nvidia",
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "evidence": "6 agents live (market-bidder crew)"
+  }
+ ],
+ "findings": {
   "probed": 542,
-  "crystalline": [
-    "github/Phi-4",
-    "github/gpt-4o-mini",
-    "qwen3.6-35b",
-    "nvidia/ising-calibration-1.5-31b",
-    "codestral-latest",
-    "nvidia/nemotron-3.5-content-safety",
-    "nvidia/nemotron-parse-2.0",
-    "poolside/laguna-s-2.1:free",
-    "estate/code",
-    "nvidia/nemotron-3.5-lightning-30b-a3b",
-    "estate/reasoning",
-    "estate/auto",
-    "nvidia/nemotron-3.5-super-vl-120b-a12b",
-    "nvidia/riva-translate-4b-instruct-v2",
-    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
-    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-    "free",
-    "auto",
-    "nvidia/nemotron-3-ultra-550b-a55b:free",
-    "meta/llama-3.2-11b-vision-instruct",
-    "nvidia/llama-3.1-nemotron-safety-guard-8b-v3",
-    "glm-5.3-flash"
-  ],
-  "fractured": [
-    {
-      "id": "x-ai/grok-4.5",
-      "status": 402
-    },
-    {
-      "id": "x-ai/grok-4.6",
-      "status": 402
-    },
-    {
-      "id": "estate/fast",
-      "status": 404,
-      "note": "undeclared_model; declared lanes: auto,code,free,reasoning"
-    }
-  ],
-  "swarm10": [
-    {
-      "model": "github/Phi-4",
-      "provider_family": "github",
-      "latency_ms": 177,
-      "evidence": "200 both passes; pass1=177ms pass2=208ms; content pass1='OK' pass2='OK'"
-    },
-    {
-      "model": "github/gpt-4o-mini",
-      "provider_family": "github",
-      "latency_ms": 191,
-      "evidence": "200 both passes; pass1=199ms pass2=191ms; content pass1='OK' pass2='OK'"
-    },
-    {
-      "model": "qwen3.6-35b",
-      "provider_family": "freeinference",
-      "latency_ms": 231,
-      "evidence": "200 both passes; pass1=231ms pass2=2434ms; content pass1='OK' pass2='OK'"
-    },
-    {
-      "model": "glm-5.3-flash",
-      "provider_family": "freeinference",
-      "latency_ms": 2198,
-      "evidence": "200 both passes; pass1=8254ms pass2=2198ms; content pass1='The user is asking me to reply' pass2='The user has given me a very s'"
-    },
-    {
-      "model": "nvidia/nemotron-3.5-content-safety",
-      "provider_family": "nvidia",
-      "latency_ms": 457,
-      "evidence": "200 both passes; pass1=533ms pass2=457ms; content pass1='User Safety: safe' pass2='User Safety: safe'"
-    },
-    {
-      "model": "nvidia/nemotron-parse-2.0",
-      "provider_family": "nvidia",
-      "latency_ms": 552,
-      "evidence": "200 both passes; pass1=566ms pass2=552ms; content pass1='OK' pass2='-   Quantification 45(2**\\\\)<br'"
-    },
-    {
-      "model": "codestral-latest",
-      "provider_family": "mistral",
-      "latency_ms": 454,
-      "evidence": "200 both passes; pass1=454ms pass2=533ms; content pass1='OK' pass2='OK'"
-    },
-    {
-      "model": "poolside/laguna-s-2.1:free",
-      "provider_family": "openrouter",
-      "latency_ms": 580,
-      "evidence": "200 both passes; pass1=580ms pass2=882ms; content pass1='OK' pass2='OK'"
-    },
-    {
-      "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-      "provider_family": "openrouter",
-      "latency_ms": 1269,
-      "evidence": "200 both passes; pass1=1506ms pass2=1269ms; content pass1='OK' pass2='OK'"
-    },
-    {
-      "model": "estate/auto",
-      "provider_family": "groq",
-      "latency_ms": 221,
-      "evidence": "200 both passes; pass1=895ms pass2=221ms; content pass1='We need respond exactly \"OK\". ' pass2='OK'"
-    }
-  ],
-  "notes": "Geode rhodochrosite 127.0.0.1:25193/v1. 542 ids probed (16-token \"Reply with exactly: OK\", 30s timeout, concurrent). Instant-502s retried once via bare<->prefixed id variant per protocol. Crystalline = 200 + non-empty content, reproduced in 2 passes. Provider families from router runtime metadata (rhodochrosite.provider). 21 timeouts (30s) and ~900 instant-502s = dead upstream mappings, classified pressure-drop; none usable as fill, so all 10 slots are 2x-confirmed crystalline across 6 families (github, freeinference, nvidia, mistral, openrouter, groq), max 2 per family."
+  "crystalline_actual": 0,
+  "all_502": 542,
+  "diagnosis": "freeinference upstream fully dead + 96% of :25193 catalog has dead upstream mappings (instant-502). LLM hallucinated '22 crystalline' in its pane output - summary.json (raw probe data) shows all 502.",
+  "freeinference": "DEAD - needs upstream restore before ANY freeinference model enters a swarm",
+  "nemotron_only": true,
+  "note": "The 34 agents running nemotron-3-ultra via nvidia provider are the ONLY confirmed-working lane. Swarm-10 blocked until freeinference upstream restores or additional providers come online."
+ },
+ "ts": "2026-10-28T03:05:00Z"
 }
