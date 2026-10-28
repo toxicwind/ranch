@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-28T02:09:40.545Z)
+# ranch/* fork audit (generated 2026-10-28T03:08:11.781Z)
 
-128 immediate subdirs; **4** have an obvious upstream reference.
+130 immediate subdirs; **4** have an obvious upstream reference.
 
 By source:
   - **2** package.json repository
@@ -56,6 +56,7 @@ By source:
 | `forge` | — | — | — |
 | `gayxxx-estate` | — | — | — |
 | `generated` | — | — | — |
+| `geode-rig` | — | — | — |
 | `github-search` | — | — | — |
 | `hatch` | — | — | — |
 | `hatch-decode` | — | — | — |
@@ -134,6 +135,7 @@ By source:
 | `toolkit` | — | — | — |
 | `tools` | — | — | — |
 | `vendor` | — | — | — |
+| `village-irc` | — | — | — |
 | `windmill` | — | — | — |
 | `yote-maximal` | — | — | — |
 | `zero-transport` | — | — | — |
