@@ -81,6 +81,8 @@ oracle:
 # corral — orchestration & fleet control.
 corral:
   - "android-fleet"
+  - "android-fleet/fleet-tv"
+  - "m3u-toolkit"
   - "apk-autopsy"
   - "dots-client"
   - "drover"

@@ -134,6 +134,8 @@ oracle:
 corral:
   "android-fleet":
     repo: https://github.com/toxicwind/android-fleet.git
+  "android-fleet/fleet-tv":
+    repo: https://github.com/toxicwind/nuvio-tv-fleet.git
   "apk-autopsy":
     repo: https://github.com/toxicwind/apk-autopsy.git
   "dots-client":
@@ -152,6 +154,8 @@ corral:
     repo: https://github.com/toxicwind/fleetd.git
   "kodi-fleet":
     repo: https://github.com/toxicwind/kodi-fleet.git
+  "m3u-toolkit":
+    repo: https://github.com/toxicwind/m3u-toolkit.git
   "mission-control":
     repo: https://github.com/toxicwind/mission-control.git
   "super-board":
