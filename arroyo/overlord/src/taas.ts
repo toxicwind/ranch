@@ -119,6 +119,44 @@ const server = serve({
 	port: PORT,
 	async fetch(request) {
 		const url = new URL(request.url);
+		// ── MCP streamable-HTTP surface (JSON-RPC 2.0, POST /mcp) ──────────
+		// Federated via thresher (:25127) so ANY agent gets telegram_newbot /
+		// telegram_status as first-class MCP tools — no HTTP curl needed.
+		if (url.pathname === "/mcp" && request.method === "POST") {
+			const rpc = (await request.json()) as { id?: unknown; method?: string; params?: { name?: string; arguments?: Record<string, unknown> } };
+			const reply = (result: unknown) => Response.json({ jsonrpc: "2.0", id: rpc.id ?? null, result });
+			if (rpc.method === "initialize")
+				return reply({ protocolVersion: "2025-03-26", capabilities: { tools: {} }, serverInfo: { name: "taas", version: "1.0.0" } });
+			if (rpc.method === "notifications/initialized") return new Response(null, { status: 202 });
+			if (rpc.method === "tools/list")
+				return reply({
+					tools: [
+						{ name: "telegram_newbot", description: "Create a Telegram bot AUTONOMOUSLY via @BotFather (MTProto user session). Returns bot_username; token is stored in the keyring as TELEGRAM_BOT_TOKEN_<agent> and never echoed in full.", inputSchema: { type: "object", properties: { name: { type: "string", description: "Bot display name" }, username: { type: "string", description: "Bot username (must end in 'bot' or one is appended)" }, agent: { type: "string", description: "Requesting agent name — the keyring label becomes TELEGRAM_BOT_TOKEN_<agent>" } }, required: ["name", "username", "agent"] } },
+						{ name: "telegram_status", description: "TaaS session status: alive, phone hint, bots created by this service.", inputSchema: { type: "object", properties: {} } },
+					],
+				});
+			if (rpc.method === "tools/call") {
+				const name = rpc.params?.name ?? "";
+				const args = rpc.params?.arguments ?? {};
+				if (name === "telegram_status") {
+					const alive = await ensureConnected();
+					return reply({ content: [{ type: "text", text: JSON.stringify({ ok: alive, phone: PHONE ? `${PHONE.slice(0, 4)}***` : "unset" }) }] });
+				}
+				if (name === "telegram_newbot") {
+					const agent = String(args.agent ?? "unknown-agent");
+					const req: NewBotRequest = { name: String(args.name ?? ""), username: String(args.username ?? "") };
+					const res = await driveBotFather(req);
+					if (res.ok && res.token) {
+						const label = `TELEGRAM_BOT_TOKEN_${agent}`.toUpperCase();
+						keyringSet(label, res.token);
+						return reply({ content: [{ type: "text", text: JSON.stringify({ ok: true, bot_username: res.botUsername, keyring_label: label, token_hint: `${res.token.slice(0, 8)}...${res.token.slice(-4)}` }) }] });
+					}
+					return reply({ content: [{ type: "text", text: JSON.stringify(res) }], isError: true });
+				}
+				return Response.json({ jsonrpc: "2.0", id: rpc.id ?? null, error: { code: -32602, message: `unknown tool ${name}` } }, { status: 400 });
+			}
+			return Response.json({ jsonrpc: "2.0", id: rpc.id ?? null, error: { code: -32601, message: `unknown method ${rpc.method}` } }, { status: 400 });
+		}
 		if (url.pathname === "/health") {
 			return Response.json({ ok: true, service: "taas", session: sessionAlive });
 		}
