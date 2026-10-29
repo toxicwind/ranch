@@ -17,6 +17,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      # de6a9e19 converted vendored peer clones to submodules; the bun
+      # workspaces drover, drover/sidecar, metaaivm-profile and
+      # forge/router/{cuttinggate,herd} are gitlinks now, and checkout
+      # does not init submodules by default -- bun install then fails
+      # with "Workspace not found". Init only the workspace submodules
+      # (all public), not the full 54-submodule tree. (Carries forward
+      # open PR #4's init step; that PR alone still failed, see below.)
+      # lasso is also a gitlink since de6a9e19 and the later Setup Python
+      # step runs pip install -e ./lasso, which fails without it.
+      - name: Init workspace submodules
+        run: git submodule update --init --depth 1 drover metaaivm-profile forge lasso
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -39,7 +51,14 @@ jobs:
           jj --version
 
       - name: Install JS workspaces
-        run: bun install
+        # --ignore-scripts: with the submodules present, bun install runs
+        # drover's "install" script (code-insiders --install-extension),
+        # which fails 127 on runners (no code-insiders; PR #4's run
+        # 40832829494 died exactly there). Installing a VS Code extension
+        # is not a CI build step, and no other workspace -- tracked or
+        # submodule -- defines a lifecycle install script, so skipping
+        # scripts loses nothing the moon build/test steps need.
+        run: bun install --ignore-scripts
         env:
           PUPPETEER_SKIP_DOWNLOAD: "true"
       - name: Install tau-marketplace deps
