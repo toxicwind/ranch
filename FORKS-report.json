@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-29T05:07:27.786Z",
-  "total": 130,
+  "generated": "2026-10-29T06:11:50.723Z",
+  "total": 131,
   "withUpstream": 4,
   "infos": [
     {
@@ -983,6 +983,18 @@
       "hasGit": false,
       "isSubmodule": false,
       "sizeBytes": 10449,
+      "fileCount": 1,
+      "signals": [],
+      "signalTotal": 0
+    },
+    {
+      "name": "products",
+      "upstream": null,
+      "upstreamSource": null,
+      "remoteOrigin": null,
+      "hasGit": false,
+      "isSubmodule": false,
+      "sizeBytes": 0,
       "fileCount": 1,
       "signals": [],
       "signalTotal": 0

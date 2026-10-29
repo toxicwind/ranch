@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-29T05:07:27.786Z)
+# ranch/* fork audit (generated 2026-10-29T06:11:50.723Z)
 
-130 immediate subdirs; **4** have an obvious upstream reference.
+131 immediate subdirs; **4** have an obvious upstream reference.
 
 By source:
   - **2** package.json repository
@@ -92,6 +92,7 @@ By source:
 | `plugin-ecosystem` | — | — | — |
 | `plugins` | — | — | — |
 | `pollinations-proxy` | — | — | — |
+| `products` | — | — | — |
 | `projects` | — | — | — |
 | `propylon` | — | — | — |
 | `provider-fuzz` | — | — | — |
