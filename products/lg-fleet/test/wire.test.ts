@@ -41,6 +41,27 @@ describe("slate wire (bridge → UI data contract)", () => {
 		await expect(fetchLiveChannelsFromCatalog(async () => ({}), "http://b/c")).rejects.toThrow();
 	});
 
+	test("pickHero selects only items with backdrops and rotates", async () => {
+		const { pickHero } = mod;
+		const metas = [
+			{ id: "a", name: "NoArt", poster: "p" },
+			{ id: "b", name: "HasArt", poster: "p2", background: "http://bg/2.jpg" },
+			{ id: "c", name: "AlsoArt", poster: "p3", background: "http://bg/3.jpg" },
+		];
+		const h1 = pickHero(metas, 0);
+		expect(h1!.id).toBe("b");
+		expect(h1!.backdrop).toBe("http://bg/2.jpg");
+		const h2 = pickHero(metas, 1);
+		expect(h2!.id).toBe("c");
+		// wraps
+		expect(pickHero(metas, 2)!.id).toBe("b");
+	});
+
+	test("pickHero returns null when no backdrops exist", async () => {
+		const { pickHero } = mod;
+		expect(pickHero([{ id: "x", name: "n" }], 0)).toBeUndefined();
+	});
+
 	test("toEpgItems maps channels+epg into rail render shape", async () => {
 		const { toEpgItems } = mod;
 		const chans = [{ id: "c1", name: "KRON", streamUrl: "u", logo: "l" }];

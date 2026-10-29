@@ -51,6 +51,22 @@ export async function fetchLiveChannelsFromCatalog(
 	});
 }
 
+/**
+ * Hero rotation — metas carrying a `background` (TMDB/xtream backdrop) become
+ * hero-eligible; index wraps. Placeholder art is only a fallback, never a hero.
+ */
+export interface HeroPick { id: string; name: string; backdrop: string }
+export function pickHero(
+	metas: readonly Record<string, unknown>[],
+	index: number,
+): HeroPick | undefined {
+	const eligible = metas
+		.map(m => ({ id: String(m.id ?? ""), name: String(m.name ?? ""), backdrop: m.background === undefined ? "" : String(m.background) }))
+		.filter(m => m.backdrop.length > 0);
+	if (eligible.length === 0) return undefined;
+	return eligible[index % eligible.length];
+}
+
 /** Map channels + an EPG map into EPG-rail render items (now-airing per channel). */
 export function toEpgItems(
 	channels: readonly LiveChannel[],
