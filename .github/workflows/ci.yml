@@ -24,8 +24,10 @@ jobs:
       # with "Workspace not found". Init only the workspace submodules
       # (all public), not the full 54-submodule tree. (Carries forward
       # open PR #4's init step; that PR alone still failed, see below.)
+      # lasso is also a gitlink since de6a9e19 and the later Setup Python
+      # step runs pip install -e ./lasso, which fails without it.
       - name: Init workspace submodules
-        run: git submodule update --init --depth 1 drover metaaivm-profile forge
+        run: git submodule update --init --depth 1 drover metaaivm-profile forge lasso
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
