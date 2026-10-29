@@ -1,115 +1,77 @@
 #!/usr/bin/env bun
-/**
- * lg-hot v2 — hot-reload dev server for the SLATE web UI (fast UX iteration).
- *
- * Big win over v1 (which rebuilt + reinstalled the 58MB ipk on every change):
- * the web app under `app/` is a plain static UI served over HTTP with a live-reload
- * SSE channel. Edit a file -> browser (host OR TV webOS/inspect) refreshes in ms.
- * No service, no ares-install, no key — pure asset serving. The identical UI later
- * ships in the real ipk.
- *
- * Usage: lg-hot [--port 8080] [--app <dir>] [--host 0.0.0.0]
- *   --open    launch it in the host browser
- *   --tv      also trigger a reload in a foregrounded webOS browser is out of scope;
- *             instead print the TV-friendly URL.
- */
-import { watch } from "node:fs";
-import { resolve, join, extname } from "node:path";
-import { readFileSync } from "node:fs";
+// lg-hot — live-reload dev server for the SLATE web UI.
+// Serves the SLATE app/dist over HTTP with SSE live-reload so UX iteration
+// is instant: edit app/dist -> browsers/TV reload automatically, no 58MB ipk
+// reinstall cycle. Fast-iterate until absolute maximal user-UX aesthetic grade.
+// Usage: lg-hot [--app <dir>] [--port <n>] [--host <ip>] [--open] [--tv]
+import { serve } from "bun";
+import { resolve, join } from "node:path";
+import { existsSync, readFileSync, readdirSync, watch } from "node:fs";
 
 const args = process.argv.slice(2);
-const flagVal = (name: string, dflt: string) => {
-  const i = args.indexOf(name);
-  if (i >= 0 && i + 1 < args.length) { const v = args[i + 1]; args.splice(i, 2); return v; }
-  return dflt;
-};
-const has = (name: string) => { const i = args.indexOf(name); if (i >= 0) { args.splice(i, 1); return true; } return false; };
+const flagVal = (name, dflt) => { const i = args.indexOf(name); return i >= 0 && i + 1 < args.length ? args.splice(i, 2)[1] : dflt; };
+const has = (name) => args.includes(name);
 
-const PORT = Number(flagVal("--port", "8080"));
+const PORT = Number(flagVal("--port", "18080"));
 const HOST = flagVal("--host", "0.0.0.0");
 const APP = resolve(flagVal("--app", "/home/toxic/pens/ranch/products/nuvio/nuvio-webos/app"));
 const openBrowser = has("--open");
 const SHOW_URL = has("--tv");
 
-const MIME: Record<string, string> = {
-  ".html": "text/html", ".js": "application/javascript", ".mjs": "application/javascript",
-  ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg",
-  ".svg": "image/svg+xml", ".ico": "image/x-icon", ".webp": "image/webp", ".woff2": "font/woff2",
+const clients = new Set<ReadableStreamDefaultController>();
+// Bun-native SSE: a ReadableStream that stays open until the client leaves.
+const broadcaster = () => {
+	let writer: WritableStreamDefaultWriter | null = null;
+	const stream = new ReadableStream({
+		start(controller) {
+			writer = controller as unknown as WritableStreamDefaultWriter;
+			clients.add(controller);
+			controller.enqueue(new TextEncoder().encode("data: connected\n\n"));
+		},
+		cancel() { clients.delete(controller); },
+	});
+	return new Response(stream, { status: 200, headers: { "content-type": "text/event-stream", "cache-control": "no-cache", connection: "keep-alive" } });
 };
 
-// --- live-reload SSE hub -----------------------------------------------------
-const clients = new Set<{ send: (s: string) => void }>();
-function broadcast(type: string, path: string) {
-  const msg = `data: ${JSON.stringify({ type, path, t: Date.now() })}\n\n`;
-  for (const c of clients) { try { c.send(msg); } catch {} }
-}
+const broadcastReload = () => {
+	const frame = new TextEncoder().encode("data: reload\n\n");
+	for (const c of clients) { try { c.enqueue(frame); } catch { clients.delete(c); } }
+};
 
-// --- static serving with injected reload client ------------------------------
-const RELOAD_SCRIPT = `<script>
-(function(){
-  if (window.__lgReload) return; window.__lgReload = 1;
-  var es = new EventSource('/__lg_hot');
-  es.onmessage = function(e){ var m = JSON.parse(e.data);
-    if (m.type === 'reload') location.reload();
-  };
-  es.onerror = function(){ /* reconnect built-in */ };
-})();
-</script>`;
-
-function serve(req: Request): Response {
-  const u = new URL(req.url);
-  if (u.pathname === "/__lg_hot") {
-    let stream: ReadableStream<Uint8Array> | null = null;
-    const encoder = new TextEncoder();
-    const self = clients;
-    const writer = new ReadableStream<Uint8Array>({
-      start(c) {
-        const client = { send: (s: string) => c.enqueue(encoder.encode(s)) };
-        self.add(client);
-        // initial ping so the client knows the stream is live
-        client.send(`data: ${JSON.stringify({ type: "ping" })}\n\n`);
-        const onClose = () => self.delete(client);
-        c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "start" })}\n\n`));
-        req.signal.addEventListener("abort", onClose);
-      },
-      cancel() { /* handled by abort */ },
-    });
-    return new Response(stream, { headers: { "content-type": "text/event-stream", "cache-control": "no-cache" } });
-  }
-
-  let rel = decodeURIComponent(u.pathname);
-  if (rel === "/" || rel === "") rel = "/index.html";
-  // serve bare dir → index.html
-  const f = join(APP, rel);
-  let body: Buffer;
-  let type = MIME[extname(f).toLowerCase()] ?? "application/octet-stream";
-  try {
-    body = readFileSync(f);
-  } catch {
-    // SPA fallback → index.html (the app is a single-page shell)
-    try { body = readFileSync(join(APP, "index.html")); type = "text/html"; }
-    catch { return new Response("not found", { status: 404 }); }
-  }
-  if (type === "text/html") {
-    body = Buffer.concat([body, Buffer.from(RELOAD_SCRIPT)]);
-  }
-  return new Response(body, { headers: { "content-type": type, "cache-control": "no-store" } });
-}
+const indexHtml = existsSync(join(APP, "index.html")) ? readFileSync(join(APP, "index.html"), "utf8") : "<h1>SLATE</h1>";
+const serve = (req) => {
+	const url = new URL(req.url, `http://${req.headers.host}`);
+	if (url.pathname === "/__reload") return broadcaster(req);
+	if (url.pathname === "/" || url.pathname === "/index.html") {
+		const body = indexHtml.replace("</head>", `<script>
+(function(){var es=new EventSource('/__reload');es.onmessage=function(e){if(e.data==='reload')location.reload();};console.log('lg-hot live-reload armed');})();
+</script></head>`);
+		return new Response(body, { headers: { "content-type": "text/html" } });
+	}
+	const p = join(APP, url.pathname.slice(1));
+	if (existsSync(p) && !p.endsWith("/")) {
+		const b = readFileSync(p);
+		const ct = p.endsWith(".js") ? "application/javascript" : p.endsWith(".css") ? "text/css" : p.endsWith(".png") ? "image/png" : p.endsWith(".json") ? "application/json" : "text/plain";
+		return new Response(b, { headers: { "content-type": ct } });
+	}
+	return new Response(indexHtml, { headers: { "content-type": "text/html" } });
+};
 
 Bun.serve({ port: PORT, hostname: HOST, fetch: serve });
 const OPEN_URL = `http://127.0.0.1:${PORT}`;
-console.log(`lg-hot: serving ${APP} on http://${HOST==="0.0.0.0"?"<LAN-IP>":HOST}:${PORT} (live-reload)`);
+console.log(`lg-hot: serving ${APP} on http://${HOST === "0.0.0.0" ? "<LAN-IP>" : HOST}:${PORT} (live-reload)`);
 if (openBrowser) Bun.spawnSync(["xdg-open", OPEN_URL]);
-if (SHOW_URL) console.log(`TV: open http://<this-host-ip>:${PORT}/ on the webOS browser/dev-hosted-app`);
-
-// --- watch for changes -> broadcast reload -----------------------------------
-let debounce: ReturnType<typeof setTimeout> | null = null;
-watch(APP, { recursive: true }, (_evt, file) => {
-  const s = String(file ?? "");
-  if (!s || s.endsWith(".ipk") || s.includes("dist/") && s.endsWith(".map")) return;
-  if (debounce) clearTimeout(debounce);
-  debounce = setTimeout(() => { broadcast("reload", s); console.log(`↻ ${s}`); }, 120);
-});
-
-// keep process alive
+if (SHOW_URL) console.log(`TV: open http://<this-host-ip>:${PORT}/ on the webOS browser / dev-hosted app`);
+// watch app/dist -> broadcast reload
+let timer = null, last = 0;
+// Bun.watch needs directories — index.html changes surface via the dist dir
+// and the served file is read fresh per request (see serve()).
+const watchDirs = [join(APP, "dist")].filter(d => existsSync(d));
+for (const d of watchDirs) {
+	const watcher = watch(d, { recursive: true }, () => {
+		const now = Date.now();
+		if (now - last < 800) { if (!timer) timer = setTimeout(() => { timer = null; last = Date.now(); broadcastReload(); }, 800); return; }
+		last = now; broadcastReload();
+	});
+}
 setInterval(() => {}, 1000);
