@@ -14,8 +14,10 @@ const PASS = process.env.LG_PASS ?? "";
 
 function sshOk(): boolean {
 	try {
+		// traditional-format key preferred (ares can't parse PKCS#8); fall back to clear
+		const key = existsSync(`${KEYDIR}/lg-tv_webos_trad`) ? `${KEYDIR}/lg-tv_webos_trad` : CLEAR;
 		const r = spawnSync("ssh", [
-			"-i", CLEAR, "-o", "IdentitiesOnly=yes", "-o", "StrictHostKeyChecking=no",
+			"-i", key, "-o", "IdentitiesOnly=yes", "-o", "StrictHostKeyChecking=no",
 			"-o", "HostKeyAlgorithms=+ssh-rsa", "-o", "PubkeyAcceptedAlgorithms=+ssh-rsa",
 			"-o", "ConnectTimeout=6", "-p", "9922", `prisoner@${TV}`, "echo LG_SSH_OK",
 		], { timeout: 15000, encoding: "utf8" });
@@ -51,8 +53,15 @@ if (dec.status !== 0) {
 chmodSync(CLEAR, 0o600);
 console.log("key decrypted");
 
-// provision ares device entry
-execSync(`python3 - ${TV} ${CLEAR} ${process.env.HOME}/.webos/tv/novacom-devices.json <<'PY'
+// ares/node can't parse PKCS#8 ("BEGIN PRIVATE KEY") — webOS tooling needs
+// traditional "BEGIN RSA PRIVATE KEY". Convert in place (idempotent).
+const TRAD = `${KEYDIR}/lg-tv_webos_trad`;
+const conv = spawnSync("openssl", ["rsa", "-in", CLEAR, "-traditional", "-out", TRAD], { timeout: 15000 });
+if (conv.status === 0) chmodSync(TRAD, 0o600);
+
+// provision ares device entry (traditional-format key — ares requirement)
+const ARES_KEY = existsSync(TRAD) ? TRAD : CLEAR;
+execSync(`python3 - ${TV} ${ARES_KEY} ${process.env.HOME}/.webos/tv/novacom-devices.json <<'PY'
 import json, os, sys
 tv, key, store = sys.argv[1], sys.argv[2], sys.argv[3]
 os.makedirs(os.path.dirname(store), exist_ok=True)
