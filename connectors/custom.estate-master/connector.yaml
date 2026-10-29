@@ -1,7 +1,0 @@
-id: custom.estate-master
-title: custom.estate-master
-description: Master estate connector for Kite's crew — one place for the yote bridge, thresher gateway, squawk fleet, gatehouse MCP, oracle market, and pitchfork services. Routes, not credentials: keys stay in their approved stores and never enter files, logs, or chat.
-include_in_prompt: true
-require_auth: false
-availability:
-  confidential_vm: false

@@ -1,6 +1,0 @@
-version = "0.4.0.dev578"
-build_type = "dev"
-build_iteration = "578"
-git_commit = "051b28f982c81a8eff2261a659c364ff1e05722a"
-git_branch = "main"
-git_last_tag = "v0.3.2"
