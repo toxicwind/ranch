@@ -1,0 +1,24 @@
+{
+  "agents": [
+    {"id": "scout.pens.local", "model": "meta/llama-3.2-11b-vision-instruct", "owned_by": "nim", "status": "upstream-fail"},
+    {"id": "muse.pens.local", "model": "meta/muse-glimmer-30b", "owned_by": "nim", "status": "upstream-fail"},
+    {"id": "minimax.pens.local", "model": "minimaxai/minimax-m3.1-flash", "owned_by": "nim", "status": "upstream-fail"},
+    {"id": "ultra.pens.local", "model": "nvidia/nemotron-3-ultra-550b-a55b", "owned_by": "nim", "status": "upstream-fail"},
+    {"id": "bolt.pens.local", "model": "nvidia/nemotron-3.5-bolt-e4b", "owned_by": "nim", "status": "upstream-fail"},
+    {"id": "lightning.pens.local", "model": "nvidia/nemotron-3.5-lightning-30b-a3b", "owned_by": "nim", "status": "upstream-fail"},
+    {"id": "super-vl.pens.local", "model": "nvidia/nemotron-3.5-super-vl-120b-a12b", "owned_by": "nim", "status": "upstream-fail"},
+    {"id": "laguna.pens.local", "model": "poolside/laguna-xs-2.1", "owned_by": "nim", "status": "upstream-fail"},
+    {"id": "echo.pens.local", "model": "local-echo", "owned_by": "pens-local", "status": "working"},
+    {"id": "wtf.pens.local", "model": "local-wtf", "owned_by": "pens-local", "status": "working"}
+  ],
+  "notes": {
+    "upstream": "rhodochrosite NIM proxy (4 lanes, free tier 40rpm)",
+    "upstream_status": "404/timeout on most models — free tier account restrictions",
+    "working": "echo and wtf (local canaries, no upstream needed)",
+    "upstream_fix": "needs RHODOCHROSITE_API_KEY + working NIM lanes or dashboard config update",
+    "timeout": "10s upstream timeout (reduced from 180s to prevent server hangs)",
+    "server": "http://127.0.0.1:25252",
+    "repo": "pens/geode/products/pens-completions",
+    "commit": "0886b9a"
+  }
+}
