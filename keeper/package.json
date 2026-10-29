@@ -11,6 +11,8 @@
   },
   "description": "One persistent headed Chromium for the whole mesh (CDP 127.0.0.1:9223) plus the keeper-first MCP server (persistent_* tools) that drives it. Registered in Gatehouse as the `browserless` upstream.",
   "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "bun-types": "^1.4.4",
     "@types/node": "^20.0.0",
     "@types/ws": "^8.5.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

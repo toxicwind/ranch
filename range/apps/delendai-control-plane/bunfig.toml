@@ -1,6 +1,0 @@
-[map]
-"@/*" = "./src/*"
-"@" = "./src/index.ts"
-
-[test]
-coverage = true

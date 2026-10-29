@@ -1,4 +1,8 @@
 {
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "bun-types": "^1.4.4"
+  },
   "description": "First-class classifier/task-launch repair: persistent autonomy directive enforced at the pre-agent layer, yote-side event-driven execution that bypasses the platform scheduled-task safety review.",
   "name": "task-launch",
   "scripts": {

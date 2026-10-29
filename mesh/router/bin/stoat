@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-exec /usr/bin/env bun /home/toxic/estate/ranch/mesh/router/stoat/estate-scripts-router-ts/router.ts "$@"

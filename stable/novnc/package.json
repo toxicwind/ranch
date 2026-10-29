@@ -32,6 +32,8 @@
   },
   "homepage": "https://github.com/novnc/noVNC",
   "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "bun-types": "^1.4.4",
     "@babel/core": "latest",
     "@babel/preset-env": "latest",
     "babel-plugin-import-redirect": "latest",

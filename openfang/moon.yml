@@ -1,8 +1,0 @@
-$schema: 'https://moonrepo.dev/schemas/project.json'
-
-# openfang — ranch component (Greek-named where descriptive).
-language: 'typescript'
-stack: 'backend'
-tags:
-  - 'ranch'
-  - 'component'

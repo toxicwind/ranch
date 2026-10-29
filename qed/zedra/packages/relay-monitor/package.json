@@ -10,6 +10,8 @@
     "build:monitor": "bun build --compile --target=bun-linux-arm64 monitor.ts --outfile dist/monitor"
   },
   "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "bun-types": "^1.4.4",
     "bun-types": "latest"
   }
 }
