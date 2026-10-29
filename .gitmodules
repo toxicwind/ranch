@@ -1,0 +1,24 @@
+[submodule "IPTV-BRIDGE"]
+	path = IPTV-BRIDGE
+	url = https://github.com/jozphe/IPTV-BRIDGE
+[submodule "NuvioTVSmart"]
+	path = NuvioTVSmart
+	url = https://github.com/toxicwind/NuvioTVSmart.git
+[submodule "NuvioTVWebOS"]
+	path = NuvioTVWebOS
+	url = https://github.com/toxicwind/NuvioTVWebOS
+[submodule "homelessbrian-NuvioTV"]
+	path = homelessbrian-NuvioTV
+	url = https://github.com/homelessbrian/NuvioTV
+[submodule "kerloys-iptv-webos"]
+	path = kerloys-iptv-webos
+	url = https://github.com/toxicwind/kerloys-iptv-webos.git
+[submodule "nuviotv-bun"]
+	path = nuviotv-bun
+	url = https://github.com/toxicwind/nuviotv-bun.git
+[submodule "nuvioweb"]
+	path = nuvioweb
+	url = https://github.com/toxicwind/nuvioweb.git
+[submodule "thresher-backup-20261029"]
+	path = thresher-backup-20261029
+	url = https://github.com/toxicwind/gatehouse-go.git
