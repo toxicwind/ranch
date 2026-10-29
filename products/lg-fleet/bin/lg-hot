@@ -1,42 +1,115 @@
 #!/usr/bin/env bun
-// lg-hot — watch an app dir and redeploy on change (dev loop).
-// Usage: lg-hot [app-dir] [--device lg-tv] [--interval 1500]
+/**
+ * lg-hot v2 — hot-reload dev server for the SLATE web UI (fast UX iteration).
+ *
+ * Big win over v1 (which rebuilt + reinstalled the 58MB ipk on every change):
+ * the web app under `app/` is a plain static UI served over HTTP with a live-reload
+ * SSE channel. Edit a file -> browser (host OR TV webOS/inspect) refreshes in ms.
+ * No service, no ares-install, no key — pure asset serving. The identical UI later
+ * ships in the real ipk.
+ *
+ * Usage: lg-hot [--port 8080] [--app <dir>] [--host 0.0.0.0]
+ *   --open    launch it in the host browser
+ *   --tv      also trigger a reload in a foregrounded webOS browser is out of scope;
+ *             instead print the TV-friendly URL.
+ */
 import { watch } from "node:fs";
-import { resolve, join } from "node:path";
+import { resolve, join, extname } from "node:path";
+import { readFileSync } from "node:fs";
 
 const args = process.argv.slice(2);
 const flagVal = (name: string, dflt: string) => {
-	const i = args.indexOf(name);
-	if (i >= 0 && i + 1 < args.length) {
-		const v = args[i + 1];
-		args.splice(i, 2);
-		return v;
-	}
-	return dflt;
+  const i = args.indexOf(name);
+  if (i >= 0 && i + 1 < args.length) { const v = args[i + 1]; args.splice(i, 2); return v; }
+  return dflt;
 };
-const appDir = resolve(args[0] ?? "/home/toxic/pens/ranch/products/nuvio/nuvio-webos/app");
-const intervalMs = Number(flagVal("--interval", "1500"));
+const has = (name: string) => { const i = args.indexOf(name); if (i >= 0) { args.splice(i, 1); return true; } return false; };
 
-console.log(`lg-hot: watching ${appDir} (debounce ${intervalMs}ms) — Ctrl-C to stop`);
+const PORT = Number(flagVal("--port", "8080"));
+const HOST = flagVal("--host", "0.0.0.0");
+const APP = resolve(flagVal("--app", "/home/toxic/pens/ranch/products/nuvio/nuvio-webos/app"));
+const openBrowser = has("--open");
+const SHOW_URL = has("--tv");
 
-let last = 0;
-let timer: ReturnType<typeof setTimeout> | null = null;
-
-const deploy = () => {
-	const proc = Bun.spawnSync(["/home/toxic/pens/ranch/products/lg-fleet/bin/lg-deploy", appDir], {
-		stdout: "inherit",
-		stderr: "inherit",
-	});
-	if (proc.exitCode !== 0) console.error("lg-hot: deploy failed (keep watching)");
+const MIME: Record<string, string> = {
+  ".html": "text/html", ".js": "application/javascript", ".mjs": "application/javascript",
+  ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg",
+  ".svg": "image/svg+xml", ".ico": "image/x-icon", ".webp": "image/webp", ".woff2": "font/woff2",
 };
 
-watch(appDir, { recursive: true }, (_evt, file) => {
-	if (!file || String(file).includes(".ipk")) return;
-	const now = Date.now();
-	if (now - last < intervalMs) {
-		if (!timer) timer = setTimeout(() => { timer = null; last = Date.now(); deploy(); }, intervalMs);
-		return;
-	}
-	last = now;
-	deploy();
+// --- live-reload SSE hub -----------------------------------------------------
+const clients = new Set<{ send: (s: string) => void }>();
+function broadcast(type: string, path: string) {
+  const msg = `data: ${JSON.stringify({ type, path, t: Date.now() })}\n\n`;
+  for (const c of clients) { try { c.send(msg); } catch {} }
+}
+
+// --- static serving with injected reload client ------------------------------
+const RELOAD_SCRIPT = `<script>
+(function(){
+  if (window.__lgReload) return; window.__lgReload = 1;
+  var es = new EventSource('/__lg_hot');
+  es.onmessage = function(e){ var m = JSON.parse(e.data);
+    if (m.type === 'reload') location.reload();
+  };
+  es.onerror = function(){ /* reconnect built-in */ };
+})();
+</script>`;
+
+function serve(req: Request): Response {
+  const u = new URL(req.url);
+  if (u.pathname === "/__lg_hot") {
+    let stream: ReadableStream<Uint8Array> | null = null;
+    const encoder = new TextEncoder();
+    const self = clients;
+    const writer = new ReadableStream<Uint8Array>({
+      start(c) {
+        const client = { send: (s: string) => c.enqueue(encoder.encode(s)) };
+        self.add(client);
+        // initial ping so the client knows the stream is live
+        client.send(`data: ${JSON.stringify({ type: "ping" })}\n\n`);
+        const onClose = () => self.delete(client);
+        c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "start" })}\n\n`));
+        req.signal.addEventListener("abort", onClose);
+      },
+      cancel() { /* handled by abort */ },
+    });
+    return new Response(stream, { headers: { "content-type": "text/event-stream", "cache-control": "no-cache" } });
+  }
+
+  let rel = decodeURIComponent(u.pathname);
+  if (rel === "/" || rel === "") rel = "/index.html";
+  // serve bare dir → index.html
+  const f = join(APP, rel);
+  let body: Buffer;
+  let type = MIME[extname(f).toLowerCase()] ?? "application/octet-stream";
+  try {
+    body = readFileSync(f);
+  } catch {
+    // SPA fallback → index.html (the app is a single-page shell)
+    try { body = readFileSync(join(APP, "index.html")); type = "text/html"; }
+    catch { return new Response("not found", { status: 404 }); }
+  }
+  if (type === "text/html") {
+    body = Buffer.concat([body, Buffer.from(RELOAD_SCRIPT)]);
+  }
+  return new Response(body, { headers: { "content-type": type, "cache-control": "no-store" } });
+}
+
+Bun.serve({ port: PORT, hostname: HOST, fetch: serve });
+const OPEN_URL = `http://127.0.0.1:${PORT}`;
+console.log(`lg-hot: serving ${APP} on http://${HOST==="0.0.0.0"?"<LAN-IP>":HOST}:${PORT} (live-reload)`);
+if (openBrowser) Bun.spawnSync(["xdg-open", OPEN_URL]);
+if (SHOW_URL) console.log(`TV: open http://<this-host-ip>:${PORT}/ on the webOS browser/dev-hosted-app`);
+
+// --- watch for changes -> broadcast reload -----------------------------------
+let debounce: ReturnType<typeof setTimeout> | null = null;
+watch(APP, { recursive: true }, (_evt, file) => {
+  const s = String(file ?? "");
+  if (!s || s.endsWith(".ipk") || s.includes("dist/") && s.endsWith(".map")) return;
+  if (debounce) clearTimeout(debounce);
+  debounce = setTimeout(() => { broadcast("reload", s); console.log(`↻ ${s}`); }, 120);
 });
+
+// keep process alive
+setInterval(() => {}, 1000);

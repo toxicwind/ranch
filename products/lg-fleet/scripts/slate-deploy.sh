@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # slate-deploy.sh — LG webOS SLATE deploy lane (single command, self-healing).
+# Two-lane: ares-install (app) + hbchannel.service/exec (service bus start).
 # Fixes the "dead lane": auto-refresh key -> provision ares -> build combined
-# ipk (app+service, single package id) -> install -> launch -> diag.
+# ipk (app+service, single package id) -> install -> launch -> lg-diag-v2.
 #
 # Usage: LG_PASS=<tv-screen-passphrase> ./slate-deploy.sh [--force-key]
 #   LG_PASS required once per key rotation; omit to reuse a healthy key.
@@ -45,5 +46,5 @@ NOVACOM="${NOVACOM:-/home/toxic/.npm-global/bin/ares-novacom}"
 "$NOVACOM" -d "$TV" --run "luna-send -n 1 -f luna://org.webosbrew.hbchannel.service/exec '{\"command\":\"/media/developer/apps/usr/palm/services/com.toxicwind.slate.server/launch.js\"}'" 2>&1 | grep -vE "post-quantum|store now" || true
 
 echo "== 5/5 diag =="
-"$ROOT/bin/lg-diag" 2>&1 | grep -vE "post-quantum|store now|upgraded" || true
+"$ROOT/bin/lg-diag-v2" 2>&1 | grep -vE "post-quantum|store now|upgraded" || true
 echo "lane: done (see 5/5 for health)"
