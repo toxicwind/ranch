@@ -59,28 +59,91 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 - [mise](https://mise.jdx.dev) — toolchains and build tasks; estate owns the shared build cache
 - **pitchfork** — the daemon supervisor: supervised services on the live estate
 
-## 📊 Monorepo Statistics (generated 10/29/2026, 6:11:50 AM)
+## 📊 Monorepo Statistics (generated 10/29/2026, 8:11:44 AM)
 
 | Metric | Value |
 |---|---|
-| Total directories | 131 |
-| Directories with obvious upstream | 4 / 131 (3.1%) |
-| Git-tracked directories | 0 |
-| Components (peer repos) | 0 |
-| Total size | 1.08 GB |
-| Total tracked files | 0 |
+| Total directories | 138 |
+| Directories with obvious upstream | 62 / 138 (44.9%) |
+| Git-tracked directories | 59 |
+| Components (peer repos) | 61 |
+| Total size | 0.54 GB |
+| Total tracked files | 59 |
 
-## 🗂️ Components
+## 🗂️ Components (61)
 
-*(.gitmodules not readable)*
+The full map — every animal's pen, with its repo and description (from README heads). From `.gitmodules` + `FORKS-report.json`; regenerate with the README.
+
+| Path | Stack / Lang | Repo | Description |
+|---|---|---|---|
+| `android-fleet` | 📁 `Workspace` | [toxicwind/android-fleet](https://github.com/toxicwind/android-fleet.git) | — |
+| `arroyo` | 📁 `Workspace` | [toxicwind/arroyo](https://github.com/toxicwind/arroyo.git) | — |
+| `ast-grep-rules` | 📁 `Workspace` | [toxicwind/ast-grep-rules](https://github.com/toxicwind/ast-grep-rules.git) | — |
+| `auto1m` | 📁 `Workspace` | [toxicwind/auto1m](https://github.com/toxicwind/auto1m.git) | — |
+| `bench-radar` | 📁 `Workspace` | [toxicwind/bench-radar](https://github.com/toxicwind/bench-radar.git) | — |
+| `bridge` | 📁 `Workspace` | [toxicwind/bridge](https://github.com/toxicwind/bridge.git) | — |
+| `bugbounty` | 📁 `Workspace` | [toxicwind/bugbounty](https://github.com/toxicwind/bugbounty.git) | — |
+| `classifier` | 📁 `Workspace` | [toxicwind/classifier](https://github.com/toxicwind/classifier.git) | — |
+| `classifier-preflight` | 📁 `Workspace` | [toxicwind/classifier-preflight](https://github.com/toxicwind/classifier-preflight.git) | — |
+| `codebase-memory` | 📁 `Workspace` | [toxicwind/codebase-memory](https://github.com/toxicwind/codebase-memory.git) | — |
+| `cron-trust` | 📁 `Workspace` | [toxicwind/cron-trust](https://github.com/toxicwind/cron-trust.git) | — |
+| `dashboard` | 📁 `Workspace` | [toxicwind/dashboard](https://github.com/toxicwind/dashboard.git) | — |
+| `disparate-latent-experiment` | 📁 `Workspace` | [toxicwind/disparate-latent-experiment](https://github.com/toxicwind/disparate-latent-experiment.git) | — |
+| `dots-client` | 📁 `Workspace` | [toxicwind/dots-client](https://github.com/toxicwind/dots-client.git) | — |
+| `drover` | 📁 `Workspace` | [toxicwind/drover](https://github.com/toxicwind/drover.git) | — |
+| `emergent` | 📁 `Workspace` | [toxicwind/emergent](https://github.com/toxicwind/emergent.git) | — |
+| `examples` | 📁 `Workspace` | [toxicwind/examples](https://github.com/toxicwind/examples.git) | — |
+| `extensions` | 📁 `Workspace` | [toxicwind/extensions](https://github.com/toxicwind/extensions.git) | — |
+| `fanout` | 📁 `Workspace` | [toxicwind/fanout](https://github.com/toxicwind/fanout.git) | — |
+| `fast-race` | 📁 `Workspace` | [toxicwind/fast-race](https://github.com/toxicwind/fast-race.git) | — |
+| `fleet` | 📁 `Workspace` | [toxicwind/fleet](https://github.com/toxicwind/fleet.git) | — |
+| `fleet-ops` | 📁 `Workspace` | [toxicwind/fleet-ops](https://github.com/toxicwind/fleet-ops.git) | — |
+| `forge` | 📁 `Workspace` | [toxicwind/forge](https://github.com/toxicwind/forge.git) | — |
+| `github-search` | 📁 `Workspace` | [toxicwind/github-search](https://github.com/toxicwind/github-search.git) | — |
+| `hatch-decode` | 📁 `Workspace` | [toxicwind/hatch-decode](https://github.com/toxicwind/hatch-decode.git) | — |
+| `herdproof-bun` | 📁 `Workspace` | [toxicwind/herdproof-bun](https://github.com/toxicwind/herdproof-bun.git) | — |
+| `hf-model-sync` | 📁 `Workspace` | [toxicwind/hf-model-sync](https://github.com/toxicwind/hf-model-sync.git) | — |
+| `homelessbrian-NuvioTV` | 📁 `Workspace` | [homelessbrian/NuvioTV](https://github.com/homelessbrian/NuvioTV) | — |
+| `host-proof` | 📁 `Workspace` | [toxicwind/host-proof](https://github.com/toxicwind/host-proof.git) | — |
+| `IPTV-BRIDGE` | 📁 `Workspace` | [jozphe/IPTV-BRIDGE](https://github.com/jozphe/IPTV-BRIDGE) | — |
+| `keep` | 📁 `Workspace` | [toxicwind/keep](https://github.com/toxicwind/keep.git) | — |
+| `kerloys-iptv-webos` | 📁 `Workspace` | [toxicwind/kerloys-iptv-webos](https://github.com/toxicwind/kerloys-iptv-webos.git) | — |
+| `kimi-claw` | 📁 `Workspace` | [toxicwind/kimi-claw](https://github.com/toxicwind/kimi-claw.git) | — |
+| `kodi-fleet` | 📁 `Workspace` | [toxicwind/kodi-fleet](https://github.com/toxicwind/kodi-fleet.git) | — |
+| `lasso` | 📁 `Workspace` | [toxicwind/lasso](https://github.com/toxicwind/lasso.git) | — |
+| `leakfix-src` | 📁 `Workspace` | [toxicwind/leakfix-src](https://github.com/toxicwind/leakfix-src.git) | — |
+| `ledger` | 📁 `Workspace` | [toxicwind/ledger](https://github.com/toxicwind/ledger.git) | — |
+| `lib` | 📁 `Workspace` | [toxicwind/lib](https://github.com/toxicwind/lib.git) | — |
+| `matter-server` | 📁 `Workspace` | [toxicwind/matter-server](https://github.com/toxicwind/matter-server.git) | — |
+| `mcp` | 📁 `Workspace` | [toxicwind/mcp](https://github.com/toxicwind/mcp.git) | — |
+| `mesh` | 📁 `Workspace` | [toxicwind/mesh](https://github.com/toxicwind/mesh.git) | — |
+| `meta-research-toolkit` | 📁 `Workspace` | [toxicwind/meta-research-toolkit](https://github.com/toxicwind/meta-research-toolkit.git) | — |
+| `metaaivm` | 📁 `Workspace` | [toxicwind/metaaivm](https://github.com/toxicwind/metaaivm.git) | — |
+| `metaaivm-profile` | 📁 `Workspace` | [toxicwind/metaaivm-profile](https://github.com/toxicwind/metaaivm-profile.git) | — |
+| `mission-control` | 📁 `Workspace` | [toxicwind/mission-control](https://github.com/toxicwind/mission-control.git) | — |
+| `ml-serve` | 📁 `Workspace` | [toxicwind/ml-serve](https://github.com/toxicwind/ml-serve.git) | — |
+| `naming-audit` | 📁 `Workspace` | [toxicwind/naming-audit](https://github.com/toxicwind/naming-audit.git) | — |
+| `null-g-proxy` | 📁 `Workspace` | [toxicwind/null-g-proxy](https://github.com/toxicwind/null-g-proxy.git) | — |
+| `nuviotv-bun` | 📁 `Workspace` | [toxicwind/nuviotv-bun](https://github.com/toxicwind/nuviotv-bun.git) | — |
+| `NuvioTVSmart` | 📁 `Workspace` | [toxicwind/NuvioTVSmart](https://github.com/toxicwind/NuvioTVSmart.git) | — |
+| `NuvioTVWebOS` | 📁 `Workspace` | [toxicwind/NuvioTVWebOS](https://github.com/toxicwind/NuvioTVWebOS) | — |
+| `nuvioweb` | 📁 `Workspace` | [toxicwind/nuvioweb](https://github.com/toxicwind/nuvioweb.git) | — |
+| `openfang` | 📁 `Workspace` | [toxicwind/openfang](https://github.com/toxicwind/openfang.git) | — |
+| `openfang-join` | 📁 `Workspace` | [toxicwind/openfang-join](https://github.com/toxicwind/openfang-join.git) | — |
+| `openrouter-probe` | 📁 `Workspace` | [toxicwind/openrouter-probe](https://github.com/toxicwind/openrouter-probe.git) | — |
+| `ops` | 📁 `Workspace` | [toxicwind/ops](https://github.com/toxicwind/ops.git) | — |
+| `pack-fix` | 📁 `Workspace` | [toxicwind/pack-fix](https://github.com/toxicwind/pack-fix.git) | — |
+| `phone-ocr-sweep` | 📁 `Workspace` | [toxicwind/phone-ocr-sweep](https://github.com/toxicwind/phone-ocr-sweep.git) | — |
+| `plugin-ecosystem` | 📁 `Workspace` | [toxicwind/plugin-ecosystem](https://github.com/toxicwind/plugin-ecosystem.git) | — |
+| `range` | 📁 `Workspace` | [toxicwind/range](https://github.com/toxicwind/range.git) | — |
+| `thresher-backup-20261029` | 📁 `Workspace` | [toxicwind/gatehouse-go](https://github.com/toxicwind/gatehouse-go.git) | — |
 
 ## 🔭 Upstream Sources
 
 | Source | Count |
 |---|---|
-| package.json repository | 2 |
-| README 'Forked from' | 1 |
-| Cargo.toml repository | 1 |
+| .gitmodules | 61 |
+| package.json repository | 1 |
 
 ## 🌐 Languages (by tracked files)
 
@@ -91,25 +154,31 @@ The ranch is a **real monorepo**, not a folder of checkouts: [Bun workspaces](ht
 
 | Directory | Size | Files | Upstream |
 |---|---|---|---|
-| `forge` | 387.8 MB | 4,091 | — |
 | `range-ui.tmp` | 177.0 MB | 334 | — |
-| `range` | 133.5 MB | 26,435 | — |
 | `qed` | 122.4 MB | 4,522 | — |
 | `propylon` | 113.7 MB | 7 | — |
 | `barn` | 58.5 MB | 2,411 | — |
 | `herd` | 22.7 MB | 2 | — |
 | `rustdesk-server` | 18.7 MB | 8 | — |
-| `github-search` | 10.5 MB | 643 | — |
-| `roundup` | 8.4 MB | 644 | — |
+| `roundup` | 8.5 MB | 650 | — |
+| `vendor` | 8.2 MB | 484 | — |
+| `rust-algo-web` | 4.5 MB | 161 | — |
+| `research` | 3.6 MB | 129 | — |
 
 ## 🔮 Top Upstreams by Fork Count
 
 | Upstream | Forks |
 |---|---|
-| [github.com/roninjin10/super-ralph](https://github.com/roninjin10/super-ralph.git) | 1 |
-| [github.com/A-man-Sharma-04/modelpilot](https://github.com/A-man-Sharma-04/modelpilot) | 1 |
-| [github.com/IlyasKhallouki/hypruse](https://github.com/IlyasKhallouki/hypruse) | 1 |
-| [github.com/toxicwind/yote](https://github.com/toxicwind/yote) | 1 |
+| [github.com/jozphe/IPTV-BRIDGE](https://github.com/jozphe/IPTV-BRIDGE) | 1 |
+| [github.com/toxicwind/NuvioTVSmart](https://github.com/toxicwind/NuvioTVSmart) | 1 |
+| [github.com/toxicwind/NuvioTVWebOS](https://github.com/toxicwind/NuvioTVWebOS) | 1 |
+| [github.com/toxicwind/android-fleet](https://github.com/toxicwind/android-fleet) | 1 |
+| [github.com/toxicwind/arroyo](https://github.com/toxicwind/arroyo) | 1 |
+| [github.com/toxicwind/ast-grep-rules](https://github.com/toxicwind/ast-grep-rules) | 1 |
+| [github.com/toxicwind/auto1m](https://github.com/toxicwind/auto1m) | 1 |
+| [github.com/toxicwind/bench-radar](https://github.com/toxicwind/bench-radar) | 1 |
+| [github.com/toxicwind/bridge](https://github.com/toxicwind/bridge) | 1 |
+| [github.com/toxicwind/bugbounty](https://github.com/toxicwind/bugbounty) | 1 |
 
 ## 🔲 Similarity Clusters (README-based)
 
@@ -123,13 +192,16 @@ Directories with similar README content (Jaccard on first 500 chars):
 
 | Type | Count |
 |---|---|
-| Vendored (snapshot) | 68 |
-| Experimental | 62 |
-| Stub/Empty | 1 |
+| Submodule | 61 |
+| Fork (ours) | 57 |
+| Upstream mirror | 2 |
+| Vendored (snapshot) | 42 |
+| Experimental | 34 |
+| Stub/Empty | 3 |
 
 ---
 
-*Generated by `bun toolkit/generate-readme.ts` at 2026-10-29T06:11:50.746Z*
+*Generated by `bun toolkit/generate-readme.ts` at 2026-10-29T08:11:44.046Z*
 
 ---
 
