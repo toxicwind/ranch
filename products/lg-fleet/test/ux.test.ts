@@ -96,6 +96,24 @@ describe("slate-epg-rail", () => {
 });
 
 // ── OSD channel switcher ─────────────────────────────────────────────────────
+describe("slate-loom-adapter (pageWindow)", () => {
+	test("window scrolls per page when focus exits view", async () => {
+		const { pageWindow, visibleIndexes } = await import("../src/ux/loom.ts");
+		let w = { start: 0, page: 5, total: 30 };
+		w = pageWindow(w, 4); expect(w.start).toBe(0); // inside
+		w = pageWindow(w, 5); expect(w.start).toBe(5); // crossed → next page (not per-cell)
+		w = pageWindow(w, 3); expect(w.start).toBe(0); // jumped back → prior page block
+		expect(visibleIndexes({ start: 5, page: 5, total: 30 })).toEqual([5, 6, 7, 8, 9]);
+		expect(visibleIndexes({ start: 28, page: 5, total: 30 })).toEqual([28, 29]); // tail clamp
+	});
+
+	test("pageWindow clamps degenerate inputs", async () => {
+		const { pageWindow } = await import("../src/ux/loom.ts");
+		expect(pageWindow({ start: 0, page: 0, total: 10 }, 5).page).toBe(1);
+		expect(pageWindow({ start: 0, page: 5, total: 0 }, 0).start).toBe(0);
+	});
+});
+
 describe("slate-osd", () => {
 	test("digit buffer accumulates and times out", async () => {
 		const { createOsd } = await import("../src/ux/osd.ts");
