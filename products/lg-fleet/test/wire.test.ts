@@ -26,6 +26,21 @@ describe("slate wire (bridge → UI data contract)", () => {
 		await expect(fetchLiveChannels(async () => ({ channels: "no" } as never), "http://b/m")).rejects.toThrow();
 	});
 
+	test("fetchLiveChannelsFromCatalog maps stremio metas to channels", async () => {
+		const { fetchLiveChannelsFromCatalog } = mod;
+		const fake = { metas: [{ id: "m1", name: "CBS", poster: "http://p/1.jpg", stream: "http://s/1.m3u8" }] };
+		const got = await fetchLiveChannelsFromCatalog(async () => fake, "http://bridge:9/catalog/live/tv.json");
+		expect(got.length).toBe(1);
+		expect(got[0]!.name).toBe("CBS");
+		expect(got[0]!.logo).toBe("http://p/1.jpg");
+		expect(got[0]!.streamUrl).toBe("http://s/1.m3u8");
+	});
+
+	test("fetchLiveChannelsFromCatalog throws on malformed catalog", async () => {
+		const { fetchLiveChannelsFromCatalog } = mod;
+		await expect(fetchLiveChannelsFromCatalog(async () => ({}), "http://b/c")).rejects.toThrow();
+	});
+
 	test("toEpgItems maps channels+epg into rail render shape", async () => {
 		const { toEpgItems } = mod;
 		const chans = [{ id: "c1", name: "KRON", streamUrl: "u", logo: "l" }];

@@ -27,6 +27,30 @@ export async function fetchLiveChannels(
 	});
 }
 
+/**
+ * Bridge catalog adapter — IPTV-BRIDGE serves the Stremio contract:
+ * GET {bridge}/catalog/{type}/{id}.json → { metas: [{id, name, poster, ...}] }.
+ * Maps metas into LiveChannel for the rails (poster→logo).
+ */
+export async function fetchLiveChannelsFromCatalog(
+	fetchJson: (url: string) => Promise<unknown>,
+	catalogUrl: string,
+): Promise<LiveChannel[]> {
+	const raw = await fetchJson(catalogUrl);
+	const isObj = raw !== null && typeof raw === "object";
+	const metas = isObj ? (raw as { metas?: unknown }).metas : undefined;
+	if (!Array.isArray(metas)) throw new Error(`bridge catalog malformed: ${catalogUrl}`);
+	return metas.map(m => {
+		const o = m as Record<string, unknown>;
+		return {
+			id: String(o.id ?? ""),
+			name: String(o.name ?? ""),
+			streamUrl: String(o.stream ?? o.url ?? ""),
+			logo: o.poster === undefined ? undefined : String(o.poster),
+		};
+	});
+}
+
 /** Map channels + an EPG map into EPG-rail render items (now-airing per channel). */
 export function toEpgItems(
 	channels: readonly LiveChannel[],
