@@ -264,3 +264,7 @@ cs3-velvet/
 gayxxx-estate/
 cs3-velvet/
 yote/ranch.git
+
+# submoduleless doctrine: peer product checkouts + archives, referenced not owned
+/products/
+/archive/
