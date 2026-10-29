@@ -1,0 +1,72 @@
+#!/usr/bin/env bun
+// lg-deploy — package + install + launch a webOS app dir on the LG TV.
+// Usage: lg-deploy [app-dir] [--device lg-tv] [--no-launch]
+// Defaults to the SLATE app (nuvio/nuvio-webos/app). Uses the vendored ares
+// CLI at /tmp/ares-cli (provisioned by lg-key).
+import { resolve } from "node:path";
+
+const args = process.argv.slice(2);
+const flag = (name: string) => {
+	const i = args.indexOf(name);
+	if (i >= 0) {
+		args.splice(i, 1);
+		return true;
+	}
+	return false;
+};
+const flagVal = (name: string) => {
+	const i = args.indexOf(name);
+	if (i >= 0 && i + 1 < args.length) {
+		const v = args[i + 1];
+		args.splice(i, 2);
+		return v;
+	}
+	return undefined;
+};
+
+const noLaunch = flag("--no-launch");
+const device = flagVal("--device") ?? "lg-tv";
+const appDir = resolve(args[0] ?? "/home/toxic/pens/ranch/products/nuvio/nuvio-webos/app");
+const ARES = "/tmp/ares-cli/node_modules/.bin";
+
+// ares-package is local-only (no -d); install/launch target the device.
+function ares(cmd: string, a: string[], deviceScoped = true): { out: string; code: number } {
+	const argv = [`${ARES}/${cmd}`, ...a, ...(deviceScoped ? ["-d", device] : [])];
+	const proc = Bun.spawnSync(argv, {
+		stdout: "pipe",
+		stderr: "pipe",
+	});
+	return {
+		out: `${proc.stdout.toString()}${proc.stderr.toString()}`.trim(),
+		code: proc.exitCode ?? 1,
+	};
+}
+
+const pkg = JSON.parse(await Bun.file(`${appDir}/appinfo.json`).text());
+console.log(`deploy: ${pkg.id} v${pkg.version} from ${appDir}`);
+
+// 1. package (ares-package writes <id>_<version>_all.ipk into appDir)
+const packed = ares("ares-package", [appDir], false);
+console.log(packed.out);
+if (packed.code !== 0) process.exit(1);
+
+const ipk = `${appDir}/${pkg.id}_${pkg.version}_all.ipk`;
+const ipkFile = Bun.file(ipk);
+if (!(await ipkFile.exists())) {
+	console.error(`FAIL: expected ipk missing: ${ipk}`);
+	process.exit(1);
+}
+
+// 2. install
+const installed = ares("ares-install", [ipk]);
+console.log(installed.out);
+if (installed.code !== 0) process.exit(1);
+
+// 3. launch
+if (!noLaunch) {
+	const launched = ares("ares-launch", [pkg.id]);
+	console.log(launched.out);
+	if (launched.code !== 0) process.exit(1);
+}
+
+console.log(`OK: ${pkg.id} deployed${noLaunch ? " (not launched)" : " and launched"}`);

@@ -1,0 +1,42 @@
+#!/usr/bin/env bun
+// lg-hot — watch an app dir and redeploy on change (dev loop).
+// Usage: lg-hot [app-dir] [--device lg-tv] [--interval 1500]
+import { watch } from "node:fs";
+import { resolve, join } from "node:path";
+
+const args = process.argv.slice(2);
+const flagVal = (name: string, dflt: string) => {
+	const i = args.indexOf(name);
+	if (i >= 0 && i + 1 < args.length) {
+		const v = args[i + 1];
+		args.splice(i, 2);
+		return v;
+	}
+	return dflt;
+};
+const appDir = resolve(args[0] ?? "/home/toxic/pens/ranch/products/nuvio/nuvio-webos/app");
+const intervalMs = Number(flagVal("--interval", "1500"));
+
+console.log(`lg-hot: watching ${appDir} (debounce ${intervalMs}ms) — Ctrl-C to stop`);
+
+let last = 0;
+let timer: ReturnType<typeof setTimeout> | null = null;
+
+const deploy = () => {
+	const proc = Bun.spawnSync(["/home/toxic/pens/ranch/products/lg-fleet/bin/lg-deploy", appDir], {
+		stdout: "inherit",
+		stderr: "inherit",
+	});
+	if (proc.exitCode !== 0) console.error("lg-hot: deploy failed (keep watching)");
+};
+
+watch(appDir, { recursive: true }, (_evt, file) => {
+	if (!file || String(file).includes(".ipk")) return;
+	const now = Date.now();
+	if (now - last < intervalMs) {
+		if (!timer) timer = setTimeout(() => { timer = null; last = Date.now(); deploy(); }, intervalMs);
+		return;
+	}
+	last = now;
+	deploy();
+});
