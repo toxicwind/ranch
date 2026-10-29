@@ -1,3 +1,0 @@
-[run]
-# null-g is Bun-native; prefer --hot under pitchfork
-hot = true

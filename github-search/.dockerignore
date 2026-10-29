@@ -1,9 +1,0 @@
-.git
-.gitignore
-target/
-node_modules/
-.env
-.venv
-dist/
-build/
-*.log

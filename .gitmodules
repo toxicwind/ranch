@@ -22,3 +22,162 @@
 [submodule "thresher-backup-20261029"]
 	path = thresher-backup-20261029
 	url = https://github.com/toxicwind/gatehouse-go.git
+[submodule "drover"]
+	path = drover
+	url = https://github.com/toxicwind/drover.git
+[submodule "lasso"]
+	path = lasso
+	url = https://github.com/toxicwind/lasso.git
+[submodule "ledger"]
+	path = ledger
+	url = https://github.com/toxicwind/ledger.git
+[submodule "metaaivm-profile"]
+	path = metaaivm-profile
+	url = https://github.com/toxicwind/metaaivm-profile.git
+[submodule "metaaivm"]
+	path = metaaivm
+	url = https://github.com/toxicwind/metaaivm.git
+[submodule "classifier"]
+	path = classifier
+	url = https://github.com/toxicwind/classifier.git
+[submodule "classifier-preflight"]
+	path = classifier-preflight
+	url = https://github.com/toxicwind/classifier-preflight.git
+[submodule "mission-control"]
+	path = mission-control
+	url = https://github.com/toxicwind/mission-control.git
+[submodule "mesh"]
+	path = mesh
+	url = https://github.com/toxicwind/mesh.git
+[submodule "android-fleet"]
+	path = android-fleet
+	url = https://github.com/toxicwind/android-fleet.git
+[submodule "auto1m"]
+	path = auto1m
+	url = https://github.com/toxicwind/auto1m.git
+[submodule "bridge"]
+	path = bridge
+	url = https://github.com/toxicwind/bridge.git
+[submodule "disparate-latent-experiment"]
+	path = disparate-latent-experiment
+	url = https://github.com/toxicwind/disparate-latent-experiment.git
+[submodule "meta-research-toolkit"]
+	path = meta-research-toolkit
+	url = https://github.com/toxicwind/meta-research-toolkit.git
+[submodule "openrouter-probe"]
+	path = openrouter-probe
+	url = https://github.com/toxicwind/openrouter-probe.git
+[submodule "ops"]
+	path = ops
+	url = https://github.com/toxicwind/ops.git
+[submodule "github-search"]
+	path = github-search
+	url = https://github.com/toxicwind/github-search.git
+[submodule "examples"]
+	path = examples
+	url = https://github.com/toxicwind/examples.git
+[submodule "hatch-decode"]
+	path = hatch-decode
+	url = https://github.com/toxicwind/hatch-decode.git
+[submodule "naming-audit"]
+	path = naming-audit
+	url = https://github.com/toxicwind/naming-audit.git
+[submodule "pack-fix"]
+	path = pack-fix
+	url = https://github.com/toxicwind/pack-fix.git
+[submodule "emergent"]
+	path = emergent
+	url = https://github.com/toxicwind/emergent.git
+[submodule "arroyo"]
+	path = arroyo
+	url = https://github.com/toxicwind/arroyo.git
+[submodule "ast-grep-rules"]
+	path = ast-grep-rules
+	url = https://github.com/toxicwind/ast-grep-rules.git
+[submodule "bench-radar"]
+	path = bench-radar
+	url = https://github.com/toxicwind/bench-radar.git
+[submodule "bugbounty"]
+	path = bugbounty
+	url = https://github.com/toxicwind/bugbounty.git
+[submodule "codebase-memory"]
+	path = codebase-memory
+	url = https://github.com/toxicwind/codebase-memory.git
+[submodule "cron-trust"]
+	path = cron-trust
+	url = https://github.com/toxicwind/cron-trust.git
+[submodule "dashboard"]
+	path = dashboard
+	url = https://github.com/toxicwind/dashboard.git
+[submodule "fanout"]
+	path = fanout
+	url = https://github.com/toxicwind/fanout.git
+[submodule "fast-race"]
+	path = fast-race
+	url = https://github.com/toxicwind/fast-race.git
+[submodule "fleet"]
+	path = fleet
+	url = https://github.com/toxicwind/fleet.git
+[submodule "fleet-ops"]
+	path = fleet-ops
+	url = https://github.com/toxicwind/fleet-ops.git
+[submodule "hf-model-sync"]
+	path = hf-model-sync
+	url = https://github.com/toxicwind/hf-model-sync.git
+[submodule "host-proof"]
+	path = host-proof
+	url = https://github.com/toxicwind/host-proof.git
+[submodule "keep"]
+	path = keep
+	url = https://github.com/toxicwind/keep.git
+[submodule "kimi-claw"]
+	path = kimi-claw
+	url = https://github.com/toxicwind/kimi-claw.git
+[submodule "leakfix-src"]
+	path = leakfix-src
+	url = https://github.com/toxicwind/leakfix-src.git
+[submodule "lib"]
+	path = lib
+	url = https://github.com/toxicwind/lib.git
+[submodule "matter-server"]
+	path = matter-server
+	url = https://github.com/toxicwind/matter-server.git
+[submodule "ml-serve"]
+	path = ml-serve
+	url = https://github.com/toxicwind/ml-serve.git
+[submodule "null-g-proxy"]
+	path = null-g-proxy
+	url = https://github.com/toxicwind/null-g-proxy.git
+[submodule "openfang-join"]
+	path = openfang-join
+	url = https://github.com/toxicwind/openfang-join.git
+[submodule "phone-ocr-sweep"]
+	path = phone-ocr-sweep
+	url = https://github.com/toxicwind/phone-ocr-sweep.git
+[submodule "forge"]
+	path = forge
+	url = https://github.com/toxicwind/forge.git
+[submodule "herdproof-bun"]
+	path = herdproof-bun
+	url = https://github.com/toxicwind/herdproof-bun.git
+[submodule "extensions"]
+	path = extensions
+	url = https://github.com/toxicwind/extensions.git
+[submodule "dots-client"]
+	path = dots-client
+	url = https://github.com/toxicwind/dots-client.git
+[submodule "plugin-ecosystem"]
+	path = plugin-ecosystem
+	url = https://github.com/toxicwind/plugin-ecosystem.git
+[submodule "mcp"]
+	path = mcp
+	url = https://github.com/toxicwind/mcp.git
+[submodule "kodi-fleet"]
+	path = kodi-fleet
+	url = https://github.com/toxicwind/kodi-fleet.git
+[submodule "openfang"]
+	path = openfang
+	url = https://github.com/toxicwind/openfang.git
+[submodule "range"]
+	path = range
+	url = https://github.com/toxicwind/range.git

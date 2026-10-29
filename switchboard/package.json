@@ -1,4 +1,8 @@
 {
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "bun-types": "^1.4.4"
+  },
   "description": "Bun MCP server — skill_search/skill_get over the estate's SKILL.md index + infra_deploy/containers/logs",
   "main": "server.ts",
   "name": "@toxicwind/switchboard",

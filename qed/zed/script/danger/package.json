@@ -7,6 +7,8 @@
     "danger": "danger"
   },
   "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "bun-types": "^1.4.4",
     "danger": "13.0.8",
     "danger-plugin-pr-hygiene": "0.7.1"
   }

@@ -1,3 +1,0 @@
-Starting Server on port 9966...
-Test 1 (Health): PASS
-Test 2 (Search q=): PASS

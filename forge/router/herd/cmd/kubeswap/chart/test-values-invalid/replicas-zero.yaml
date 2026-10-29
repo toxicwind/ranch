@@ -1,2 +1,0 @@
-# replicas must be exactly 1: zero runs no head-end at all.
-replicas: 0

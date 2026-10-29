@@ -1,4 +1,8 @@
 {
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "bun-types": "^1.4.4"
+  },
   "name": "@estate/cookie-vault",
   "version": "1.0.0",
   "description": "Full-session (cookies + per-origin localStorage) grab/restore between Firefox and the keeper Chromium, with continuous auto-sync.",

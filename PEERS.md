@@ -20,7 +20,7 @@ Generated 2026-10-27 during the ranch unsubmodule pass.
 | `barn/rosec` | `pens/ranch/barn/rosec` |
 | `barn/weave` | `pens/barn/weave` |
 | `barn/weave-sub` | `pens/ranch/barn/weave-sub` |
-| `borrowed/delendai` | `pens/ranch/delendai` |
+| `borrowed/delendai` | `pens/ranch/range/apps/delendai-control-plane` (2026-10-28: corral monorepo dissolved; the control-plane app is the live delendai surface) |
 | `estate-dispersal` | retired (absorbed into squawk) |
 | `estate-end4` | retired (absorbed into squawk) |
 | `fleetd` | `pens/ranch/.retired-squawk-20261024/fleetd` |
