@@ -255,3 +255,11 @@ bin/readme-gen.ts
 ssot/
 ranch-analyze/code/
 kairos
+
+# cloudstream peers (standalone clones, meta-managed — anomaly-#18 untrack)
+gayxxx-estate/
+cs3-velvet/
+
+# peer roots (meta-managed standalone clones, not tracked snapshots)
+gayxxx-estate/
+cs3-velvet/

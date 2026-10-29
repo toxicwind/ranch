@@ -280,6 +280,8 @@ research:
     repo: https://github.com/toxicwind/bench-radar.git
   "bugbounty":
     repo: https://github.com/toxicwind/bugbounty.git
+  "cs3-velvet":
+    repo: https://github.com/toxicwind/cs3-velvet
   "disparate-latent-experiment":
     repo: https://github.com/toxicwind/disparate-latent-experiment.git
   "dualspace-ast-bm25-hybrid":
