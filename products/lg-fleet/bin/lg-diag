@@ -1,0 +1,67 @@
+#!/usr/bin/env bun
+// lg-diag — one-shot SLATE/webOS TV diagnosis. Root cause of every TV flail
+// session: wrong paths (cryptofs vs developer), no service logs, no luna access.
+// This tool answers ALL of it in one call, pattern-borrowed from
+// Alexesmm/stremcompat-lg-webos (launch.log) + kieranbrown (services.json shape).
+//
+// Usage: lg-diag [--json] — exits 0 iff the TV lane is fully healthy.
+import { spawnSync } from "node:child_process";
+
+const TV = process.env.LG_TV ?? "10.0.0.176";
+const SSH = ["ssh", "-i", `${process.env.HOME}/.ssh/lg-tv_webos_trad`,
+	"-o", "IdentitiesOnly=yes", "-o", "StrictHostKeyChecking=no",
+	"-o", "HostKeyAlgorithms=+ssh-rsa", "-o", "PubkeyAcceptedAlgorithms=+ssh-rsa",
+	"-o", "ConnectTimeout=8", "-p", "9922", `prisoner@${TV}`];
+
+export function tv(cmd: string, timeout = 20000): { out: string; code: number } {
+	const r = spawnSync(SSH[0]!, SSH.slice(1).concat([cmd]), { timeout, encoding: "utf8" });
+	return { out: (r.stdout ?? "").trim(), code: r.status ?? 1 };
+}
+
+const APP_ID = process.env.LG_APP_ID ?? "com.toxicwind.slate";
+const SVC_ID = `${APP_ID}.server`;
+// dev-mode installs land under /media/developer/apps — NOT /media/cryptofs (RO system image)
+const PALM = "/media/developer/apps/usr/palm";
+
+const checks: Array<{ name: string; ok: boolean; detail: string }> = [];
+
+function check(name: string, ok: boolean, detail: string) {
+	checks.push({ name, ok, detail });
+	console.log(`${ok ? "✅" : "❌"} ${name}${detail ? ` — ${detail}` : ""}`);
+}
+
+// 1. SSH lane
+const who = tv("id -un");
+check("ssh lane", who.out.includes("prisoner"), who.out.split("\n")[0] ?? "no output");
+
+// 2. app + package + service installed (developer partition)
+const app = tv(`ls ${PALM}/applications/${APP_ID}/appinfo.json 2>/dev/null && cat ${PALM}/applications/${APP_ID}/appinfo.json 2>/dev/null | head -c 200`);
+check("app installed", app.out.includes('"id"'), app.out.slice(0, 120));
+const svc = tv(`ls ${PALM}/services/${SVC_ID}/launch.js 2>/dev/null`);
+check("service installed", svc.code === 0 && svc.out.includes("launch.js"), svc.out.split("\n")[0] ?? "");
+
+// 3. service manifest shape (kieranbrown contract)
+const manifest = tv(`cat ${PALM}/services/${SVC_ID}/services.json 2>/dev/null`);
+check("service manifest", manifest.out.includes(`"${SVC_ID}"`), manifest.out.slice(0, 100));
+
+// 4. service RUNNING + ports (the actual "Loading Stremio..." killer)
+const ports = tv("netstat -tln 2>/dev/null");
+const portHit = [8080, 11470].filter(p => ports.out.includes(`:${p}`));
+check("server ports (8080/11470)", portHit.length > 0, portHit.length ? `listening: ${portHit.join(",")}` : "NOT listening — service did not start");
+
+// 5. serverinfo from the streaming server (definitive ready proof)
+const info = tv("curl -s -m 3 http://127.0.0.1:11470/serverinfo 2>/dev/null");
+check("stremio serverinfo", info.out.includes('"Server"') || info.out.includes("serverinfo"), info.out.slice(0, 120));
+
+// 6. launch.log (Alexesmm pattern — our launch.js should write one; absence = old bundle)
+const log = tv(`tail -5 ${PALM}/services/${SVC_ID}/launch.log 2>/dev/null`);
+check("launch.log exists", log.out.length > 0, log.out ? log.out.split("\n").slice(-2).join(" | ").slice(0, 140) : "missing — launch.js predates logging (repackage needed)");
+
+// 7. webOS jail logs (where service spawn errors land)
+const jerr = tv(`ls /var/log/PMLOG 2>/dev/null | wc -l; find /tmp /var/log -name "*slate*" -o -name "*server*.log" 2>/dev/null | head -3`);
+check("jail logs reachable", jerr.code === 0, jerr.out.split("\n")[0] ?? "");
+
+const fail = checks.filter(c => !c.ok);
+if (fail.length === 0) console.log(`\nLG DIAG: ALL HEALTHY (${checks.length}/${checks.length})`);
+else console.log(`\nLG DIAG: ${fail.length}/${checks.length} failing: ${fail.map(f => f.name).join(", ")}`);
+process.exit(fail.length === 0 ? 0 : 1);
