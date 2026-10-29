@@ -1,6 +1,6 @@
-# ranch/* fork audit (generated 2026-10-29T01:07:18.861Z)
+# ranch/* fork audit (generated 2026-10-29T02:09:49.391Z)
 
-131 immediate subdirs; **4** have an obvious upstream reference.
+130 immediate subdirs; **4** have an obvious upstream reference.
 
 By source:
   - **2** package.json repository
@@ -54,7 +54,6 @@ By source:
 | `fleet-chat` | — | — | — |
 | `fleet-ops` | — | — | — |
 | `forge` | — | — | — |
-| `gayxxx-estate` | — | — | — |
 | `generated` | — | — | — |
 | `geode-rig` | — | — | — |
 | `github-search` | — | — | — |

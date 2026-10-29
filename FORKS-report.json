@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-29T01:07:18.861Z",
-  "total": 131,
+  "generated": "2026-10-29T02:09:49.391Z",
+  "total": 130,
   "withUpstream": 4,
   "infos": [
     {
@@ -516,18 +516,6 @@
       "isSubmodule": false,
       "sizeBytes": 406588598,
       "fileCount": 4091,
-      "signals": [],
-      "signalTotal": 0
-    },
-    {
-      "name": "gayxxx-estate",
-      "upstream": null,
-      "upstreamSource": null,
-      "remoteOrigin": null,
-      "hasGit": false,
-      "isSubmodule": false,
-      "sizeBytes": 38212,
-      "fileCount": 23,
       "signals": [],
       "signalTotal": 0
     },
@@ -1102,8 +1090,8 @@
       "remoteOrigin": null,
       "hasGit": false,
       "isSubmodule": false,
-      "sizeBytes": 140013227,
-      "fileCount": 26353,
+      "sizeBytes": 140021551,
+      "fileCount": 26435,
       "signals": [],
       "signalTotal": 0
     },
