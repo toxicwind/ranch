@@ -52,6 +52,18 @@ export async function fetchLiveChannelsFromCatalog(
 }
 
 /**
+ * Playback loop — digit OSD commit ("15") → channel streamUrl. Numeric compare
+ * matches the OSD's numeric() contract (channel ids carry "ch" prefixes).
+ */
+export function resolveStream(
+	channels: readonly LiveChannel[],
+	digits: string,
+): string | undefined {
+	const num = (c: string) => c.replace(/[^0-9]/g, "");
+	return channels.find(c => num(c.id) === digits)?.streamUrl;
+}
+
+/**
  * Hero rotation — metas carrying a `background` (TMDB/xtream backdrop) become
  * hero-eligible; index wraps. Placeholder art is only a fallback, never a hero.
  */
