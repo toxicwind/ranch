@@ -62,6 +62,13 @@ describe("slate wire (bridge → UI data contract)", () => {
 		expect(pickHero([{ id: "x", name: "n" }], 0)).toBeUndefined();
 	});
 
+	test("resolveStream returns channel streamUrl", async () => {
+		const { resolveStream } = mod;
+		const chans = [{ id: "c1", name: "KRON", streamUrl: "http://s/1.m3u8" }];
+		expect(resolveStream(chans, "1")).toBe("http://s/1.m3u8");
+		expect(resolveStream(chans, "99")).toBeUndefined();
+	});
+
 	test("toEpgItems maps channels+epg into rail render shape", async () => {
 		const { toEpgItems } = mod;
 		const chans = [{ id: "c1", name: "KRON", streamUrl: "u", logo: "l" }];
