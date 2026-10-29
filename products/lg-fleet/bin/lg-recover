@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# lg-recover — production recovery for the LS2/privilege layer (rooted TV).
+#
+# v2 (fixed route, 2026-10-29): v1 used novacom + luna-send (privileged bus) which
+# DENIES on non-root roles (rc=126 "Permission denied"). The external webos record
+# proves the working route: SSH-as-prisoner + luna-send-pub (PUBLIC bus, no role).
+# Multi-line patch scripts go to a /tmp file ON THE TV first (heredoc-in-JSON mangles).
+#
+# Fixes:
+#   1. patch com.palm.lunasend-pub.json role: add app's service to allowedNames
+#   2. bind /var/lib/webosbrew into the jail (persistent logs across reboot)
+#   3. restart sam (appinfo.json is cached at boot)
+#   4. stop a stale service holding the bus name
+#
+# Usage: lg-recover [app-id] [service-id]
+set -uo pipefail
+
+TV_IP="${TV_IP:-10.0.0.176}"
+SSH_KEY="${SSH_KEY:-$HOME/.ssh/lg-tv_webos_trad}"
+APPID="${1:-com.toxicwind.slate}"
+SVC="${2:-${APPID}.server}"
+
+SSH_OPTS=(-i "$SSH_KEY" -o IdentitiesOnly=yes -o StrictHostKeyChecking=no
+  -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa
+  -o ConnectTimeout=6 -p 9922 "prisoner@$TV_IP")
+
+step() { printf "\n== %s ==\n" "$1"; }
+tv() { ssh "${SSH_OPTS[@]}" "$*" 2>&1 | grep -vE "post-quantum|store now|upgraded"; }
+
+step "1/5 write node patch script to TV /tmp (heredoc survives file, not JSON; TV has node not python)"
+cat > /tmp/lg-role-patch.js <<'JS'
+const fs=require('fs'), os=require('os');
+const SVC=process.env.LG_SVC;
+const paths=['/usr/share/ls2/roles/prv/com.palm.lunasend-pub.json',
+  '/var/palm/ls2/roles/prv/com.palm.lunasend-pub.json',
+  '/usr/share/ls2/roles/regular/com.webos.lunasendpub.json'];
+let done=false;
+for(const p of paths){
+  try{
+    if(!fs.existsSync(p)) continue;
+    const role=JSON.parse(fs.readFileSync(p,'utf8'));
+    const names=role.role&&role.role.allowedNames||[];
+    let changed=false;
+    if(!names.includes(SVC)){names.push(SVC);changed=true;}
+    const perms=role.permissions||[];
+    if(!perms.some(pm=>pm.service===SVC)){perms.push({service:SVC,inbound:['*'],outbound:['*']});changed=true;}
+    role.role.allowedNames=names; role.permissions=perms;
+    fs.writeFileSync(p,JSON.stringify(role,null,2));
+    console.log((changed?'patched':'already')+': '+p); done=true;
+  }catch(e){console.log('skip',p,e.message);}
+}
+process.exit(done?0:2);
+JS
+tv "cat > /var/tmp/lg-role-patch.js << 'JSEOF'
+$(cat /tmp/lg-role-patch.js)
+JSEOF
+LG_SVC='${SVC}' node /var/tmp/lg-role-patch.js; rm -f /var/tmp/lg-role-patch.js"
+
+step "3/5 jail mount: persist service logs across reboot"
+tv "grep -q '/var/lib/webosbrew' /media/developer/jail_app.conf 2>/dev/null || echo 'mount rw /var/lib/webosbrew' >> /media/developer/jail_app.conf; grep webosbrew /media/developer/jail_app.conf | head -1"
+
+step "4/5 stale bus: close previous holder of the service name"
+tv "luna-send-pub -n 1 luna://com.webos.applicationManager/close '{\"id\":\"${APPID}\"}' ; echo closed"
+
+step "5/5 restart sam (re-reads appinfo.json)"
+tv "restart sam 2>/dev/null || true; echo 'sam restarted (role changes need full reboot for ls-hubd)'"
+
+echo
+echo "lg-recover: done — reboot the TV once for ls-hubd to reload role files:"
+echo "  ssh -i ~/.ssh/lg-tv_webos_trad -p 9922 prisoner@$TV_IP 'reboot'"
