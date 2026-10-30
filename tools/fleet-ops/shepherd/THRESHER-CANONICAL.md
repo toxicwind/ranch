@@ -3,7 +3,7 @@
 estate/gatehouse is RETIRED. estate/thresher is the MCP gateway on :25127
 (pid 3107910, also bound on tailnet 100.72.199.93:25127).
 
-- Management API key: line 10 of /home/toxic/estate/ranch/thresher/mcp_config.json
+- Management API key: line 10 of /home/toxic/pens/estate/ranch/thresher/mcp_config.json
   (read on yote; NEVER paste into chat/files/memory).
 - Verified live 2026-10-23: /api/v1/status 200, /api/v1/servers 200,
   /api/v1/tools 200 (e.g. vram_status via vram-mcp).

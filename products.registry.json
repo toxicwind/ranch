@@ -1,0 +1,823 @@
+{
+  "products": {
+    ".agent-orchestration": {
+      "enabled": true,
+      "aliases": []
+    },
+    ".claude": {
+      "enabled": true,
+      "aliases": []
+    },
+    ".codex": {
+      "enabled": true,
+      "aliases": []
+    },
+    ".github": {
+      "enabled": true,
+      "aliases": []
+    },
+    ".jj": {
+      "enabled": true,
+      "aliases": []
+    },
+    ".vscode": {
+      "enabled": true,
+      "aliases": []
+    },
+    "AgentForensics": {
+      "enabled": true,
+      "aliases": []
+    },
+    "IPTV-BRIDGE": {
+      "enabled": true,
+      "aliases": []
+    },
+    "NuvioTVSmart": {
+      "enabled": true,
+      "aliases": []
+    },
+    "NuvioTVWebOS": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ai-merge-resolve": {
+      "enabled": true,
+      "aliases": []
+    },
+    "apk-autopsy": {
+      "enabled": true,
+      "aliases": []
+    },
+    "arroyo": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ast-grep-rules": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ast-tools": {
+      "enabled": true,
+      "aliases": []
+    },
+    "audits": {
+      "enabled": true,
+      "aliases": []
+    },
+    "auto1m": {
+      "enabled": true,
+      "aliases": []
+    },
+    "awesome-free-ai-coding": {
+      "enabled": true,
+      "aliases": []
+    },
+    "barn": {
+      "enabled": true,
+      "aliases": []
+    },
+    "bench-radar": {
+      "enabled": true,
+      "aliases": []
+    },
+    "borrowed": {
+      "enabled": true,
+      "aliases": []
+    },
+    "bridge": {
+      "enabled": true,
+      "aliases": []
+    },
+    "bugbounty": {
+      "enabled": true,
+      "aliases": []
+    },
+    "campfire": {
+      "enabled": true,
+      "aliases": []
+    },
+    "cell-mirror": {
+      "enabled": true,
+      "aliases": []
+    },
+    "classifier": {
+      "enabled": true,
+      "aliases": []
+    },
+    "classifier-preflight": {
+      "enabled": true,
+      "aliases": []
+    },
+    "codebase-memory": {
+      "enabled": true,
+      "aliases": []
+    },
+    "computer-use-linux": {
+      "enabled": true,
+      "aliases": []
+    },
+    "connectors": {
+      "enabled": true,
+      "aliases": []
+    },
+    "cookie-vault": {
+      "enabled": true,
+      "aliases": []
+    },
+    "corral": {
+      "enabled": true,
+      "aliases": []
+    },
+    "cron-trust": {
+      "enabled": true,
+      "aliases": []
+    },
+    "cs3-velvet": {
+      "enabled": true,
+      "aliases": []
+    },
+    "dashboard": {
+      "enabled": true,
+      "aliases": []
+    },
+    "data": {
+      "enabled": true,
+      "aliases": []
+    },
+    "disparate-latent-experiment": {
+      "enabled": true,
+      "aliases": []
+    },
+    "doorbell": {
+      "enabled": true,
+      "aliases": []
+    },
+    "dots-client": {
+      "enabled": true,
+      "aliases": []
+    },
+    "drover": {
+      "enabled": true,
+      "aliases": []
+    },
+    "dualspace-ast-bm25-hybrid": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ego-lite": {
+      "enabled": true,
+      "aliases": []
+    },
+    "emergent": {
+      "enabled": true,
+      "aliases": []
+    },
+    "estate-brain": {
+      "enabled": true,
+      "aliases": []
+    },
+    "estate-chat": {
+      "enabled": true,
+      "aliases": []
+    },
+    "estate-dispersal-monolith": {
+      "enabled": true,
+      "aliases": []
+    },
+    "estate-monitor": {
+      "enabled": true,
+      "aliases": []
+    },
+    "estate-whoa-breakthrough": {
+      "enabled": true,
+      "aliases": []
+    },
+    "examples": {
+      "enabled": true,
+      "aliases": []
+    },
+    "extensions": {
+      "enabled": true,
+      "aliases": []
+    },
+    "fast-race": {
+      "enabled": true,
+      "aliases": []
+    },
+    "feedlot-mcp": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ferret-den": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ffs-diff": {
+      "enabled": true,
+      "aliases": []
+    },
+    "fleet": {
+      "enabled": true,
+      "aliases": []
+    },
+    "flicker": {
+      "enabled": true,
+      "aliases": []
+    },
+    "forge-mcp": {
+      "enabled": true,
+      "aliases": []
+    },
+    "freebuffet": {
+      "enabled": true,
+      "aliases": []
+    },
+    "gavel": {
+      "enabled": true,
+      "aliases": []
+    },
+    "gayxxx-estate": {
+      "enabled": true,
+      "aliases": []
+    },
+    "geode-rig": {
+      "enabled": true,
+      "aliases": []
+    },
+    "gguf-read": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ghq": {
+      "enabled": true,
+      "aliases": []
+    },
+    "github-search": {
+      "enabled": true,
+      "aliases": []
+    },
+    "gito": {
+      "enabled": true,
+      "aliases": []
+    },
+    "godzilla-llama.cpp": {
+      "enabled": true,
+      "aliases": []
+    },
+    "hatch": {
+      "enabled": true,
+      "aliases": []
+    },
+    "hatch-decode": {
+      "enabled": true,
+      "aliases": []
+    },
+    "herd": {
+      "enabled": true,
+      "aliases": []
+    },
+    "herdproof-bun": {
+      "enabled": true,
+      "aliases": []
+    },
+    "hf-model-sync": {
+      "enabled": true,
+      "aliases": []
+    },
+    "homelessbrian-NuvioTV": {
+      "enabled": true,
+      "aliases": []
+    },
+    "host-proof": {
+      "enabled": true,
+      "aliases": []
+    },
+    "identity-router": {
+      "enabled": true,
+      "aliases": []
+    },
+    "keep": {
+      "enabled": true,
+      "aliases": []
+    },
+    "keeper": {
+      "enabled": true,
+      "aliases": []
+    },
+    "kerloys-iptv-webos": {
+      "enabled": true,
+      "aliases": []
+    },
+    "kimi-auto": {
+      "enabled": true,
+      "aliases": []
+    },
+    "kimi-claw": {
+      "enabled": true,
+      "aliases": []
+    },
+    "lasso": {
+      "enabled": true,
+      "aliases": []
+    },
+    "leakfix-src": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ledger": {
+      "enabled": true,
+      "aliases": []
+    },
+    "loom": {
+      "enabled": true,
+      "aliases": []
+    },
+    "m3u-toolkit": {
+      "enabled": true,
+      "aliases": []
+    },
+    "matter-server": {
+      "enabled": true,
+      "aliases": []
+    },
+    "maw": {
+      "enabled": true,
+      "aliases": []
+    },
+    "mcp": {
+      "enabled": true,
+      "aliases": []
+    },
+    "mesh": {
+      "enabled": true,
+      "aliases": []
+    },
+    "meta-research-toolkit": {
+      "enabled": true,
+      "aliases": []
+    },
+    "metaaivm": {
+      "enabled": true,
+      "aliases": []
+    },
+    "metaaivm-profile": {
+      "enabled": true,
+      "aliases": []
+    },
+    "metaclaw-runtime": {
+      "enabled": true,
+      "aliases": []
+    },
+    "mission-control": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ml-serve": {
+      "enabled": true,
+      "aliases": []
+    },
+    "model-max": {
+      "enabled": true,
+      "aliases": []
+    },
+    "models": {
+      "enabled": true,
+      "aliases": []
+    },
+    "monad-forge": {
+      "enabled": true,
+      "aliases": []
+    },
+    "muse-web-bundle-decode": {
+      "enabled": true,
+      "aliases": []
+    },
+    "namespace-concealment-explorer": {
+      "enabled": true,
+      "aliases": []
+    },
+    "naming-audit": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nightly-canary": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nim-inkling-api-research": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nim-omnibus": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nim-repos": {
+      "enabled": true,
+      "aliases": []
+    },
+    "null-g-proxy": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nuvio": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nuviotv-bun": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nuviotv-webos": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nuvioweb": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nvidia-alive": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nvidia-kernel-guard": {
+      "enabled": true,
+      "aliases": []
+    },
+    "nvidia-nim-model-probe": {
+      "enabled": true,
+      "aliases": []
+    },
+    "oh-my-pi": {
+      "enabled": true,
+      "aliases": []
+    },
+    "omp-test-runner-watchdog-OzX7V0": {
+      "enabled": true,
+      "aliases": []
+    },
+    "openbox": {
+      "enabled": true,
+      "aliases": []
+    },
+    "openfang": {
+      "enabled": true,
+      "aliases": []
+    },
+    "openfang-join": {
+      "enabled": true,
+      "aliases": []
+    },
+    "openrouter-probe": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ops": {
+      "enabled": true,
+      "aliases": []
+    },
+    "outlier-toolkit": {
+      "enabled": true,
+      "aliases": []
+    },
+    "outsource": {
+      "enabled": true,
+      "aliases": []
+    },
+    "pack-fix": {
+      "enabled": true,
+      "aliases": []
+    },
+    "paper-poller": {
+      "enabled": true,
+      "aliases": []
+    },
+    "pdfshield": {
+      "enabled": true,
+      "aliases": []
+    },
+    "pearlctl": {
+      "enabled": true,
+      "aliases": []
+    },
+    "phone-lane": {
+      "enabled": true,
+      "aliases": []
+    },
+    "phone-ocr-sweep": {
+      "enabled": true,
+      "aliases": []
+    },
+    "phone-sentinel": {
+      "enabled": true,
+      "aliases": []
+    },
+    "pj-fast": {
+      "enabled": true,
+      "aliases": []
+    },
+    "plugin-ecosystem": {
+      "enabled": true,
+      "aliases": []
+    },
+    "plugins": {
+      "enabled": true,
+      "aliases": []
+    },
+    "pollinations-proxy": {
+      "enabled": true,
+      "aliases": []
+    },
+    "projects": {
+      "enabled": true,
+      "aliases": []
+    },
+    "provider-fuzz": {
+      "enabled": true,
+      "aliases": []
+    },
+    "providers.d": {
+      "enabled": true,
+      "aliases": []
+    },
+    "proxy": {
+      "enabled": true,
+      "aliases": []
+    },
+    "qed": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ralph-dashboard": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ranch-analyze": {
+      "enabled": true,
+      "aliases": []
+    },
+    "range": {
+      "enabled": true,
+      "aliases": []
+    },
+    "rankings": {
+      "enabled": true,
+      "aliases": []
+    },
+    "rawhide": {
+      "enabled": true,
+      "aliases": []
+    },
+    "refusal-hunt": {
+      "enabled": true,
+      "aliases": []
+    },
+    "rename-roundup": {
+      "enabled": true,
+      "aliases": []
+    },
+    "repo-first-class": {
+      "enabled": true,
+      "aliases": []
+    },
+    "research": {
+      "enabled": true,
+      "aliases": []
+    },
+    "rig": {
+      "enabled": true,
+      "aliases": []
+    },
+    "rodeo": {
+      "enabled": true,
+      "aliases": []
+    },
+    "roundup": {
+      "enabled": true,
+      "aliases": []
+    },
+    "roundup-site": {
+      "enabled": true,
+      "aliases": []
+    },
+    "routing": {
+      "enabled": true,
+      "aliases": []
+    },
+    "routing-score": {
+      "enabled": true,
+      "aliases": []
+    },
+    "rust-algo-web": {
+      "enabled": true,
+      "aliases": []
+    },
+    "rust-wrappers": {
+      "enabled": true,
+      "aliases": []
+    },
+    "rustdesk-server": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ryzen3090-whoa": {
+      "enabled": true,
+      "aliases": []
+    },
+    "safety-review-gate": {
+      "enabled": true,
+      "aliases": []
+    },
+    "saturation-guard": {
+      "enabled": true,
+      "aliases": []
+    },
+    "shell": {
+      "enabled": true,
+      "aliases": []
+    },
+    "skillforge": {
+      "enabled": true,
+      "aliases": []
+    },
+    "spark": {
+      "enabled": true,
+      "aliases": []
+    },
+    "spark-harvest": {
+      "enabled": true,
+      "aliases": []
+    },
+    "squawk": {
+      "enabled": true,
+      "aliases": []
+    },
+    "squawk-watchdog": {
+      "enabled": true,
+      "aliases": []
+    },
+    "squawk-ws": {
+      "enabled": true,
+      "aliases": []
+    },
+    "stable": {
+      "enabled": true,
+      "aliases": []
+    },
+    "standalone": {
+      "enabled": true,
+      "aliases": []
+    },
+    "stash-guard": {
+      "enabled": true,
+      "aliases": []
+    },
+    "stealthprint": {
+      "enabled": true,
+      "aliases": []
+    },
+    "stream-broker": {
+      "enabled": true,
+      "aliases": []
+    },
+    "strudel-dev-vite": {
+      "enabled": true,
+      "aliases": []
+    },
+    "strudel-sampler-server-vite": {
+      "enabled": true,
+      "aliases": []
+    },
+    "submodules": {
+      "enabled": true,
+      "aliases": []
+    },
+    "super-board": {
+      "enabled": true,
+      "aliases": []
+    },
+    "switchboard": {
+      "enabled": true,
+      "aliases": []
+    },
+    "task-launch": {
+      "enabled": true,
+      "aliases": []
+    },
+    "tau-extensions": {
+      "enabled": true,
+      "aliases": []
+    },
+    "tau-verify": {
+      "enabled": true,
+      "aliases": []
+    },
+    "tok": {
+      "enabled": true,
+      "aliases": []
+    },
+    "toolcall-agent": {
+      "enabled": true,
+      "aliases": []
+    },
+    "toolkit": {
+      "enabled": true,
+      "aliases": []
+    },
+    "toxicwind-repos": {
+      "enabled": true,
+      "aliases": []
+    },
+    "trading-post": {
+      "enabled": true,
+      "aliases": []
+    },
+    "universal-keypool-bun": {
+      "enabled": true,
+      "aliases": []
+    },
+    "universal-keypool-gateway": {
+      "enabled": true,
+      "aliases": []
+    },
+    "village-irc": {
+      "enabled": true,
+      "aliases": []
+    },
+    "vision-kit": {
+      "enabled": true,
+      "aliases": []
+    },
+    "websites": {
+      "enabled": true,
+      "aliases": []
+    },
+    "wezterm-agent-mcp": {
+      "enabled": true,
+      "aliases": []
+    },
+    "windmill": {
+      "enabled": true,
+      "aliases": []
+    },
+    "workmux": {
+      "enabled": true,
+      "aliases": []
+    },
+    "wtf-filetrace": {
+      "enabled": true,
+      "aliases": []
+    },
+    "wtf-orch": {
+      "enabled": true,
+      "aliases": []
+    },
+    "wtf-orthogonal-seed": {
+      "enabled": true,
+      "aliases": []
+    },
+    "yote": {
+      "enabled": true,
+      "aliases": []
+    },
+    "yote-maximal": {
+      "enabled": true,
+      "aliases": []
+    },
+    "zed-android-port": {
+      "enabled": true,
+      "aliases": []
+    },
+    "zero-transport": {
+      "enabled": true,
+      "aliases": []
+    },
+    "gibber-mcp": {
+      "enabled": true,
+      "aliases": []
+    },
+    "mr-boxington-cache": {
+      "enabled": true,
+      "aliases": []
+    },
+    "typo-kit": {
+      "enabled": true,
+      "aliases": []
+    },
+    "android-fleet": {
+      "enabled": true,
+      "aliases": []
+    },
+    "kvm-bun": {
+      "enabled": true,
+      "aliases": []
+    },
+    "dedicated-server-ops": {
+      "enabled": false,
+      "aliases": [
+        "dediops",
+        "dedicated"
+      ]
+    }
+  }
+}

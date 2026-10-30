@@ -11,7 +11,7 @@
 
 - **thresher** is the :25127 MCP gateway on yote (mcpproxy-go). It replaced
   gatehouse. Daemon pid 1899641 at last check (started 2026-10-27 03:57 MDT),
-  launched with `--config=/home/toxic/estate/ranch/thresher/mcp_config.json`.
+  launched with `--config=/home/toxic/pens/estate/ranch/thresher/mcp_config.json`.
 - Management API (read-only calls, from yote):
   `curl -H "Authorization: Bearer $KEY" http://127.0.0.1:25127/api/v1/status`
   (also `/api/v1/servers`, `/api/v1/tools`). `$KEY` comes from secretsmith
@@ -22,7 +22,7 @@
 - **One source: kryptos secretsmith, service `mcpproxy-api-key`
   (`MCPPROXY_API_KEY` via `thresher-serve.ts`).** That is the only key the
   running daemon trusts.
-- The `api_key` field in `/home/toxic/estate/ranch/thresher/mcp_config.json`
+- The `api_key` field in `/home/toxic/pens/estate/ranch/thresher/mcp_config.json`
   is STALE and 401s (Bearer, `X-API-Key`, and `?apikey=` alike). Do not use
   it, do not "fix" it by minting a new one, do not rotate anything. The fix
   direction is: make the config file's key field point at / be replaced by
@@ -43,7 +43,7 @@
 ## The 10 error servers — fix notes
 
 1. **github** — config command is the doubled path
-   `/home/toxic/estate//home/toxic/pens/ranch/barn/thresher/bin/github-mcp.sh`.
+   `/home/toxic/pens/estate//home/toxic/pens/ranch/barn/thresher/bin/github-mcp.sh`.
    Fix the config command prefix, and fix the launcher's token source: it
    parses `~/.config/gh/hosts.yml` for `oauth_token`, but yote gh auth is
    keyring-based (no `oauth_token` in hosts.yml). Use `gh auth token`
@@ -59,9 +59,9 @@
    Restore the file or prune the entry (prune needs a call — see below).
 5. **tpc-thought-ledger** — `mcp-server.js` missing under the same vendored
    tree. Same call: restore or prune.
-6. **grasp-hub** — `/home/toxic/estate/grasp-hub/mcp/server.ts` missing.
+6. **grasp-hub** — `/home/toxic/pens/estate/grasp-hub/mcp/server.ts` missing.
    Restore or prune.
-7. **herd-test** — `/home/toxic/estate/src/mcp/herd.ts` missing. Restore
+7. **herd-test** — `/home/toxic/pens/estate/src/mcp/herd.ts` missing. Restore
    or prune.
 8. **den** — ferret-den startup fails on missing pd-mcp. Restore pd-mcp
    or prune the dependency.

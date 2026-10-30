@@ -6,7 +6,7 @@ import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const README = join(import.meta.dir, "..", "README.md");
-const PORTS_ENV = "/home/toxic/estate/config/ports.env";
+const PORTS_ENV = "/home/toxic/pens/estate/config/ports.env";
 
 export function portOf(envKey: string): string {
 	const m = readFileSync(PORTS_ENV, "utf8").match(new RegExp(`^${envKey}=(\\d+)`, "m"));
