@@ -16,7 +16,7 @@ interface TargetPackage {
   cwd: string;
 }
 
-// Post-pens-split homes (2026-10-29): /home/toxic/estate/ranch/* is a GHOST
+// Post-pens-split homes (2026-10-29): /home/toxic/pens/estate/ranch/* is a GHOST
 // mirror path — the real trees are /home/toxic/pens/*. browserless is parked
 // in wip (tmp-browserless) until it lands a real pen home.
 const TARGETS: TargetPackage[] = [
