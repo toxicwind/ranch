@@ -151,9 +151,6 @@
 [submodule "phone-ocr-sweep"]
 	path = phone-ocr-sweep
 	url = https://github.com/toxicwind/phone-ocr-sweep.git
-[submodule "forge"]
-	path = forge
-	url = https://github.com/toxicwind/forge.git
 [submodule "herdproof-bun"]
 	path = herdproof-bun
 	url = https://github.com/toxicwind/herdproof-bun.git

@@ -19,15 +19,19 @@ jobs:
 
       # de6a9e19 converted vendored peer clones to submodules; the bun
       # workspaces drover, drover/sidecar, metaaivm-profile and
-      # forge/router/{cuttinggate,herd} are gitlinks now, and checkout
+      # forge/router/{cuttinggate,herd} were gitlinks, and checkout
       # does not init submodules by default -- bun install then fails
       # with "Workspace not found". Init only the workspace submodules
       # (all public), not the full 54-submodule tree. (Carries forward
       # open PR #4's init step; that PR alone still failed, see below.)
       # lasso is also a gitlink since de6a9e19 and the later Setup Python
       # step runs pip install -e ./lasso, which fails without it.
+      # forge was unsubmoduled by 01c1343 (gitlink dropped, no retained
+      # consumer: forge router pkgs have no phantom deps per the
+      # 2026-10-30 forward-fix note) -- it is no longer inited here,
+      # and its workspace entries were pruned from package.json.
       - name: Init workspace submodules
-        run: git submodule update --init --depth 1 drover metaaivm-profile forge lasso
+        run: git submodule update --init --depth 1 drover metaaivm-profile lasso
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2

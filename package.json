@@ -23,9 +23,7 @@
       "drover/sidecar",
       "task-launch",
       "metaaivm-profile",
-      "pinax",
-      "forge/router/cuttinggate",
-      "forge/router/herd"
+      "pinax"
     ],
     "catalog": {
       "@babel/generator": "^7.29.8",

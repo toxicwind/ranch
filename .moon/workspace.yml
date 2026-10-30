@@ -8,13 +8,12 @@ $schema: 'https://moonrepo.dev/schemas/workspace.json'
 projects:
   # Top-level component projects.
   - '*/moon.yml'
-  # Nested sub-project graphs (mesh, flock, barn, forge, squawk, tau, campfire).
+  # Nested sub-project graphs (mesh, flock, barn, squawk, tau, campfire).
+  # forge was unsubmoduled by 01c1343, so its globs are gone too.
   - 'barn/*/moon.yml'
   - 'flock/*/moon.yml'
   - 'mesh/*/moon.yml'
   - 'mesh/*/*/moon.yml'
-  - 'forge/*/moon.yml'
-  - 'forge/*/*/moon.yml'
   - 'squawk/*/moon.yml'
   - 'tau/*/moon.yml'
   - 'campfire/*/moon.yml'
