@@ -16,11 +16,14 @@ interface TargetPackage {
   cwd: string;
 }
 
+// Post-pens-split homes (2026-10-29): /home/toxic/estate/ranch/* is a GHOST
+// mirror path — the real trees are /home/toxic/pens/*. browserless is parked
+// in wip (tmp-browserless) until it lands a real pen home.
 const TARGETS: TargetPackage[] = [
-  { name: "@tau/browserless", cwd: "/home/toxic/estate/ranch/barn/browserless" },
-  { name: "@estate/scripts", cwd: "/home/toxic/estate/ranch/estate-scripts" },
-  { name: "@tau/catalog", cwd: "/home/toxic/estate/ranch/tau/packages/catalog" },
-  { name: "@tau/ai", cwd: "/home/toxic/estate/ranch/tau/packages/ai" },
+  { name: "@tau/browserless", cwd: "/home/toxic/pens/wip/products/tmp-browserless" },
+  { name: "@estate/scripts", cwd: "/home/toxic/pens/estate/estate-scripts" },
+  { name: "@tau/catalog", cwd: "/home/toxic/pens/olympus/products/tau/packages/catalog" },
+  { name: "@tau/ai", cwd: "/home/toxic/pens/olympus/products/tau/packages/ai" },
 ];
 
 async function runCoverage(target: TargetPackage): Promise<{ name: string; exitCode: number; output: string }> {
