@@ -19,14 +19,8 @@
   "version": "1.0.0",
   "workspaces": {
     "packages": [
-      "keeper",
-      "campfire",
-      "corral",
       "drover",
       "drover/sidecar",
-      "stream-broker",
-      "switchboard",
-      "windmill",
       "task-launch",
       "metaaivm-profile",
       "pinax",
