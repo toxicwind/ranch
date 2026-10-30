@@ -49,9 +49,6 @@
 [submodule "mesh"]
 	path = mesh
 	url = https://github.com/toxicwind/mesh.git
-[submodule "android-fleet"]
-	path = android-fleet
-	url = https://github.com/toxicwind/android-fleet.git
 [submodule "auto1m"]
 	path = auto1m
 	url = https://github.com/toxicwind/auto1m.git
