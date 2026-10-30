@@ -45,8 +45,8 @@ function ares(cmd: string, a: string[], deviceScoped = true): { out: string; cod
 const pkg = JSON.parse(await Bun.file(`${appDir}/appinfo.json`).text());
 console.log(`deploy: ${pkg.id} v${pkg.version} from ${appDir}`);
 
-// 1. package (ares-package writes <id>_<version>_all.ipk into appDir)
-const packed = ares("ares-package", [appDir], false);
+// 1. package (ares-package writes <id>_<version>_all.ipk into appDir via -o)
+const packed = ares("ares-package", [appDir, "-o", appDir, "-e", "archive", "-e", "mock"], false);
 console.log(packed.out);
 if (packed.code !== 0) process.exit(1);
 

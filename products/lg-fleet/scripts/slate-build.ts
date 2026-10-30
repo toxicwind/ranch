@@ -27,9 +27,9 @@ const ARES_LAUNCH = "/tmp/ares-cli/node_modules/.bin/ares-launch";
 
 const args = new Set(Bun.argv.slice(2));
 
-// strip nest-hazards from a copied tree
+// strip nest-hazards from a copied tree (preserve dist/slate-ux.js vendored bundle)
 function cleanTree(root: string) {
-  for (const p of ["dist", "archive", "packageinfo.json", "node_modules/.cache"]) {
+  for (const p of ["archive", "packageinfo.json", "node_modules/.cache", "mock"]) {
     try { rmSyncSafe(join(root, p)); } catch {}
   }
 }

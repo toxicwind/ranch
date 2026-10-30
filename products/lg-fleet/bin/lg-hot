@@ -51,7 +51,7 @@ const serve = (req) => {
 	const p = join(APP, url.pathname.slice(1));
 	if (existsSync(p) && !p.endsWith("/")) {
 		const b = readFileSync(p);
-		const ct = p.endsWith(".js") ? "application/javascript" : p.endsWith(".css") ? "text/css" : p.endsWith(".png") ? "image/png" : p.endsWith(".json") ? "application/json" : "text/plain";
+		const ct = p.endsWith(".html") ? "text/html" : p.endsWith(".js") ? "application/javascript" : p.endsWith(".css") ? "text/css" : p.endsWith(".png") ? "image/png" : p.endsWith(".json") ? "application/json" : p.endsWith(".svg") ? "image/svg+xml" : "text/plain";
 		return new Response(b, { headers: { "content-type": ct } });
 	}
 	return new Response(indexHtml, { headers: { "content-type": "text/html" } });
