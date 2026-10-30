@@ -38,10 +38,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       # Same workspace-submodule init as ci.yml: root bun install reads
-      # drover, metaaivm-profile and forge/router/* workspaces, which
+      # drover and metaaivm-profile workspaces, which
       # are gitlinks since de6a9e19 and empty without this step.
+      # forge was unsubmoduled by 01c1343 and is no longer inited here.
       - name: Init workspace submodules
-        run: git submodule update --init --depth 1 drover metaaivm-profile forge
+        run: git submodule update --init --depth 1 drover metaaivm-profile
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.4.2"
