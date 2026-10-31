@@ -818,6 +818,18 @@
         "dediops",
         "dedicated"
       ]
+    },
+    "claude-night-market": {
+      "enabled": true,
+      "aliases": []
+    },
+    "devloop": {
+      "enabled": true,
+      "aliases": []
+    },
+    "ring": {
+      "enabled": true,
+      "aliases": []
     }
   }
 }
