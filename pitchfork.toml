@@ -243,7 +243,6 @@ auto = ["start"]
 retry = true
 ready_http = "http://127.0.0.1:25112/health"
 port = 25112
-depends = ["thresher"]
 dir = "/home/toxic/pens/ranch/products/github-search"
 mise = true
 
