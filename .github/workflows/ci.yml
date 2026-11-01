@@ -30,8 +30,16 @@ jobs:
       # consumer: forge router pkgs have no phantom deps per the
       # 2026-10-30 forward-fix note) -- it is no longer inited here,
       # and its workspace entries were pruned from package.json.
+      # NOTE: do NOT add --depth 1 here. Moon expands a changed gitlink
+      # into the submodule's own diff (its changed-files query diffs
+      # HEAD~1..HEAD), so a shallow checkout lacks the old commit and
+      # moon dies at startup with "fatal: bad object <old-sha>".
+      # That is exactly what 049f01a hit: the lasso bump 157e792->e04ecb
+      # failed CI in 47s with bad object 157e792, because the depth-1
+      # lasso checkout has no parent object. Full submodule clones
+      # keep the old commit reachable, so any future gitlink bump works.
       - name: Init workspace submodules
-        run: git submodule update --init --depth 1 drover metaaivm-profile lasso
+        run: git submodule update --init drover metaaivm-profile lasso
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
