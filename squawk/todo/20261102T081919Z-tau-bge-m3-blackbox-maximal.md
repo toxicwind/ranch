@@ -55,6 +55,25 @@ proven this session (E1/E2):
 - marked-by: daemon
 - marked-at: 2026-11-02T08:19:19.705Z
 
+## W9-W11 + firewall integration (2026-11-02, live; shim = `forge hf`)
+
+W1-W8 experiments are now a **first-class helper shim**: `forge hf oracle w1..w11|all`
+(forge `57eec27` + follow-ups; hf/oracle.ts modular, per-workstream exports;
+CLI + forge entrypoint dispatch — both were MISSING before).
+
+| WS | Question | Result | Verdict |
+|----|----------|--------|---------|
+| W9 | same text, two API calls? | cos = **1.0000** | **DETERMINISTIC — cacheable trust** (embed cache keys valid) |
+| W10 | universal NOT axis? | mean neg-delta alignment 0.668 (7/8 pairs >0.6; 'cold' outlier 0.30) | **PARTIAL NOT AXIS** — v(not X) ≈ v(X) + NOT for most words; semantic negation arithmetic viable with per-word caveat |
+| W11 | framing hides injections? | data↔plain .394, data↔framed .395, plain↔framed .618, delta -0.002 | **FRAMING NEUTRAL** — DSML/xml wrapping neither hides nor exposes; injections cluster together (0.62) |
+
+### W2 DETECTOR INTEGRATION (live stream-leak flagger)
+`forge hf firewall <text>` — one cosine against fixed markup/prose centroids, returns
+`{kind: "markup"|"prose", score}`. Calibration from live runs: plain prose ≈ -0.09..-0.43,
+DSML/JSON payloads ≈ +0.22..+0.35, boundary ≈ +0.03 → **threshold 0.05**. Known false-positive
+class: dialog-prefixed prose ("human: please help...") scores +0.11 — flag as co-signal,
+not a gate. See W2 row above for the underlying separation margin (0.107).
+
 ## ALL 8 WORKSTREAMS EXECUTED (2026-11-02, live FreeInference, forge/hf client)
 
 Full output: `/home/toxic/tmp/bge-oracle/full-output.txt`; harness
