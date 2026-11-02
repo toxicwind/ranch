@@ -50,3 +50,26 @@ detectors drift" failure mode:
 
 ## Done
 - (none yet — all pending, seeking collab owner from #fleet)
+
+## Execution record 2026-11-02 (tau) — ALL GAPS CLOSED
+
+- [x] GAP 1 — `bin/estate-map.ts` REBUILT (estate main `370f732039`): 5 drift kinds
+      (port-ssot-dead, port-listener-untracked, daemon-path-dead, duplicate-checkout,
+      daemon-port-undeclared Rule-5.1 check), `--check` exits 1 on drift. Map regenerated
+      live: **181 ports, 82 drift** (72 aspirational, 5 untracked-25k, 4 daemon-path-dead,
+      1 daemon-port-undeclared) — ~2.3x worse than the dead map's 35 entries. The old
+      `duplicate-checkout` finding is RESOLVED (ranch reorg).
+- [x] GAP 2 — 38 tracked `.bak` files `git rm`'d (estate main `e054f5aa56`). **Keys probed
+      200 = STILL LIVE** — rotation to keyring is the open follow-up (needs owner;
+      strike ledger per (provider,model) applies).
+- [x] GAP 3 — `bge-oracle` CREATED as geode product + pushed (`toxicwind/bge-oracle`
+      main `4bd7ac7`). W1–W8 verified LIVE from product home with keyring
+      `FREEINFERENCE_API_KEY`: W8 protocol-dialect fingerprint **12/12 FINGERPRINTABLE**,
+      W3 CJK-vs-Latin separation PRESENT (0.1345), W7 injection axis none (0.0167).
+      3/3 unit tests green. Symlinked `~/.local/bin/bge-oracle`.
+
+### Open follow-up (needs fleet owner)
+- [ ] Rotate the 2 live npk_ keys found in scrubbed .bak files → secretsmith keyring
+- [ ] Wire `bun bin/estate-map.ts --check` into git-hooks / boot loop so the map can
+      never go 30 days stale again (the anomaly this whole arc names: the drift
+      detector itself drifted)
