@@ -72,7 +72,7 @@ Do not hand-edit the Products table._
 | **gguf-read** | [toxicwind/gguf-read](https://github.com/toxicwind/gguf-read) | — | — | — |
 | **ghq** | [toxicwind/ghq](https://github.com/toxicwind/ghq) | — | Go | — |
 | **gibber-mcp** | [toxicwind/gibber-mcp](https://github.com/toxicwind/gibber-mcp) | 25106 | — | — |
-| **github-search** | [toxicwind/github-search](https://github.com/toxicwind/github-search) | — | Rust | > **TOXICWIND FORK** — Autonomous high-recall GitHub search client, API server, Next.js frontend, and Model Co |
+| **github-search** | [toxicwind/github-advanced-search-mcp](https://github.com/toxicwind/github-advanced-search-mcp) → `products/github-search` | blackbird dual-engine search MCP (thresher `ghas:*`, 25 tools) | TypeScript | lives at `products/github-search`; the old top-level dir was an empty corpse (removed 2026-11-02) |
 | **gito** | [toxicwind/Gito](https://github.com/toxicwind/Gito) | — | Python | It detects issues in GitHub pull requests or local codebase changes—instantly, reliably, and without vendor lo |
 | **godzilla-llama.cpp** | [toxicwind/godzilla-llama.cpp](https://github.com/toxicwind/godzilla-llama.cpp) | — | Python | Windows-first **MSVC + CUDA** fork of beellama.cpp / llama.cpp. Built for this lab’s RTX 3080 (sm_86) + long-c |
 | **hatch** | [toxicwind/hatch](https://github.com/toxicwind/hatch) | — | — | swift, sharp, 4 letters). **hatch is the dodge**: the public-facing decoy name |
