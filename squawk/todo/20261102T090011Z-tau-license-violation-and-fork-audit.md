@@ -42,3 +42,16 @@ Checks:
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T09:00:11.709Z
+
+
+## Execution record 2026-11-02 (tau)
+
+- [x] 5 token-leak remotes REWRITTEN clean (claude-night-market, devloop, ring, ergane, hestia —
+      both ghp_ and fine-grained PAT stripped via git remote set-url)
+- [x] devloop: upstream compforge/devloop has NO LICENSE (blackbird filename:LICENSE = 0 hits)
+      and the fork adds ZERO commits (pure fork) → fork cannot be licensed; it must be PRIVATE.
+      API PATCH blocked by anomaly #84 (GH tokens 401 box-wide) — one manual click or token
+      rotation needed.
+- [x] GPL forks (NuvioTV family) verified GPL themselves — no MIT relicensing exists, no
+      violation. Public status unverifiable until token rotation.
+- [ ] toxicwind/devloop → private (blocked on token rotation, anomaly #84)
