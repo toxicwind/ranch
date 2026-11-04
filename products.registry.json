@@ -80,10 +80,6 @@
       "enabled": true,
       "aliases": []
     },
-    "borrowed": {
-      "enabled": true,
-      "aliases": []
-    },
     "bridge": {
       "enabled": true,
       "aliases": []
@@ -117,10 +113,6 @@
       "aliases": []
     },
     "connectors": {
-      "enabled": true,
-      "aliases": []
-    },
-    "cookie-vault": {
       "enabled": true,
       "aliases": []
     },
@@ -325,10 +317,6 @@
       "aliases": []
     },
     "ledger": {
-      "enabled": true,
-      "aliases": []
-    },
-    "loom": {
       "enabled": true,
       "aliases": []
     },
