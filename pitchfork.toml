@@ -60,6 +60,10 @@ dir = "/home/toxic/pens/ranch/products/doorbell"
 
 [daemons.doorbell-oauth-edge]
 run = "exec /home/toxic/.local/share/mise/installs/bun/1.4.4/bin/bun run ./src/oauth-edge.ts"
+retry = true
+ready_http = "http://127.0.0.1:25217/health"
+port = 25217
+dir = "/home/toxic/pens/ranch/products/doorbell"
 
 [daemons.estate-chat]
 run = "exec /home/toxic/.bun/bin/bun /home/toxic/pens/ranch/products/squawk/bun/index.ts"
