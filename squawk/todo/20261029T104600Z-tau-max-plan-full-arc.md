@@ -235,3 +235,6 @@ phased, TDD-first, non-monkey-patch. Nothing below is "done" until verified.
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T07:09:43.707Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/github-search/packages/github-client/test/blackbird-regex.test.ts (0.64), /home/toxic/pens/ranch/products/github-search/packages/github-client/src/blackbird.ts (0.62), /home/toxic/pens/ranch/products/github-search/PLAN.md (0.62)

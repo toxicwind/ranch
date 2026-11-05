@@ -60,3 +60,6 @@ require freeinference key rotation before they can be populated.
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T02:04:27.839Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/awesome-free-ai-coding/models/qwen3.7-flash.md (0.56), /home/toxic/pens/ranch/products/awesome-free-ai-coding/models/glm-5.3-flash.md (0.56), /home/toxic/pens/ranch/products/awesome-free-ai-coding/models/qwen3.8-flash.md (0.55)

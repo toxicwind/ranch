@@ -96,3 +96,6 @@ delicate shim layer; parked rather than half-fixed.
 __norm Proxy + realPath loader metadata. Suite 225/225 — ZERO residual.
 The "shim vs pi-contract" decision resolved empirically: identity-preserving
 re-export of the real file satisfies BOTH sides; no test re-pinning needed.
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/computer-use-linux/pi/test/pi-integration.test.ts (0.55), /home/toxic/pens/ranch/products/computer-use-linux/pi/test/shell-extension.test.ts (0.55), /home/toxic/pens/ranch/products/gito/tests/test_fix.py (0.54)

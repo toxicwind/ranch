@@ -101,3 +101,6 @@ Full output: `/home/toxic/tmp/bge-oracle/full-output.txt`; harness
 5. W7 is the weakest axis (.069 margin) — flag only as a co-signal, not a standalone detector.
 6. Harness bug found+fixed mid-run: token-sum must be element-wise 1024-dim (first attempt summed 3 tokens → dim-3).
    This is exactly the "probe resolving from wrong base" class — the anchored result is the corrected run.
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/awesome-free-ai-coding/models/hy3.md (0.56), /home/toxic/pens/ranch/products/awesome-free-ai-coding/models/qwen3-max.md (0.55), /home/toxic/pens/ranch/products/awesome-free-ai-coding/models/kimi-k3.md (0.54)

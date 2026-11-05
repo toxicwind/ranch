@@ -43,3 +43,6 @@ Every step is a committed, pushable change; revert = `git revert` the step commi
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T01:55:52.326Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/flicker/server/forge/refresh_test.go (0.62), /home/toxic/pens/ranch/products/flicker/server/forge/refresh.go (0.62), /home/toxic/pens/ranch/products/flicker/server/forge/common/status_test.go (0.59)

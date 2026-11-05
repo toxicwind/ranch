@@ -27,3 +27,6 @@ means correcting the query BEFORE racing sources.
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T02:55:38.043Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/awesome-free-ai-coding/providers/huggingface-inference.md (0.57), /home/toxic/pens/ranch/products/github-search/docs/history/QUICK_FIX.md (0.54), /home/toxic/pens/ranch/products/github-search/tests/verify_fix.py (0.53)

@@ -55,3 +55,6 @@ Checks:
 - [x] GPL forks (NuvioTV family) verified GPL themselves — no MIT relicensing exists, no
       violation. Public status unverifiable until token rotation.
 - [ ] toxicwind/devloop → private (blocked on token rotation, anomaly #84)
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/github-search/duplication_report.md (0.59), /home/toxic/pens/ranch/products/github-search/scripts/audit_mcp_release.sh (0.58), /home/toxic/pens/ranch/products/github-search/docs/history/duplication_report.md (0.57)

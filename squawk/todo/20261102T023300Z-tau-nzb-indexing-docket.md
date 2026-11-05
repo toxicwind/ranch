@@ -33,3 +33,6 @@ the actual NZB ingestion lane is not verified end-to-end.
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T02:53:57.460Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/awesome-free-ai-coding/tests/test_indexnow.py (0.52), /home/toxic/pens/ranch/products/godzilla-llama.cpp/docs/benchmarks/prefill-cache-tail-2026-07-16.md (0.52), /home/toxic/pens/ranch/docs/docs-deeplink/INDEX.md (0.51)

@@ -442,3 +442,37 @@ ready_http = "http://127.0.0.1:25245/health"
 dir = "/home/toxic/pens/fleet/devices/android-fleet"
 
 
+
+[daemons.taas-telegram]
+# taas.ts — Telegram-as-a-Service (Overlord GramJS, arroyo/overlord). Died with
+# its session on 2026-10-28: thresher registration shipped without a supervisor
+# entry. Deps resolve from yote node_modules (gramjs); creds via secretsmith
+# env --app yote. Port SSOT: config/ports.env TAAS_PORT=25243.
+run = "exec /home/toxic/.bun/bin/bun /home/toxic/pens/ranch/products/arroyo/overlord/src/taas.ts"
+dir = "/home/toxic/pens/ranch/products/arroyo/overlord"
+auto = ["start"]
+retry = true
+port = 25243
+ready_http = "http://127.0.0.1:25243/telegram/status"
+health_http = { url = "http://127.0.0.1:25243/telegram/status", interval = "60s", timeout = "5s", retries = 3 }
+
+[daemons.paper-poller-watchdog]
+run = "exec /usr/bin/python3 /home/toxic/pens/ranch/products/paper-poller/bin/watchdog.py"
+auto = ["start"]
+retry = true
+ready_http = "http://127.0.0.1:25150/health"
+port = 25150
+boot_start = true
+dir = "/home/toxic/pens/ranch/products/paper-poller"
+mise = true
+
+[daemons.paper-poller]
+run = "exec /usr/bin/python3 /home/toxic/pens/ranch/products/paper-poller/bin/poller.py"
+auto = ["start"]
+retry = true
+ready_http = "http://127.0.0.1:25149/ready"
+port = 25149
+boot_start = true
+dir = "/home/toxic/pens/ranch/products/paper-poller"
+mise = true
+
