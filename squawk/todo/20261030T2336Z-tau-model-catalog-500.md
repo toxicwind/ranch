@@ -28,3 +28,6 @@ unique-id: 20261030T2336Z-tau-model-catalog-500
 ## Done
 - marked-by: daemon
 - marked-at: 2026-10-31T09:39:51.520Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/gito/documentation/troubleshooting.md (0.57), /home/toxic/pens/ranch/products/estate-monitor/repo-radar.ts (0.56), /home/toxic/pens/ranch/products/estate-monitor/repo-radar.test.ts (0.55)

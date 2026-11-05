@@ -19,11 +19,7 @@
   "version": "1.0.0",
   "workspaces": {
     "packages": [
-      "drover",
-      "drover/sidecar",
       "task-launch",
-      "metaaivm-profile",
-      "pinax"
     ],
     "catalog": {
       "@babel/generator": "^7.29.8",

@@ -50,3 +50,6 @@ urgency: normal
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T08:13:58.398Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/awesome-free-ai-coding/providers/vlm-run-gateway.md (0.55), /home/toxic/pens/ranch/products/godzilla-llama.cpp/examples/eval-callback/README.md (0.54), /home/toxic/pens/ranch/products/doorbell/spark/README.md (0.54)

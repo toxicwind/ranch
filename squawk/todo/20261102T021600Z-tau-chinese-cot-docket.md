@@ -46,3 +46,6 @@ needs an architect-defined eval before it becomes a work item.
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T05:57:41.853Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/awesome-free-ai-coding/models/qwen3.7-max.md (0.53), /home/toxic/pens/ranch/products/godzilla-llama.cpp/docs/speculative.md (0.53), /home/toxic/pens/ranch/products/awesome-free-ai-coding/models/qwen3.6-max.md (0.52)

@@ -36,3 +36,6 @@ Until decided: server stays `error`, harmless (enabled but non-connecting; no tr
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T01:57:50.254Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/github-search/docs/history/MCP_DIAGNOSIS.md (0.57), /home/toxic/pens/ranch/tools/mcp-background-job/docs/reviews/001_mcp-background-job-server.md (0.57), /home/toxic/pens/ranch/tools/mcp-background-job/src/mcp_background_job/models.py (0.57)

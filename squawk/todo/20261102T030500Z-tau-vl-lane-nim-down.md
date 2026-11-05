@@ -55,3 +55,6 @@ no longer the chosen VL path.
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T06:07:57.385Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/awesome-free-ai-coding/providers/nvidia-nim.md (0.58), /home/toxic/pens/ranch/products/awesome-free-ai-coding/providers/vlm-run-gateway.md (0.55), /home/toxic/pens/ranch/products/flicker/pipeline/backend/types/network.go (0.53)

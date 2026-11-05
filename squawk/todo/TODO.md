@@ -1,10 +1,12 @@
 # FLEET TODO — INDEX (auto-generated; edit the linked files, not this)
 
-Updated: 2026-11-03T00:12:20.567Z
+Updated: 2026-11-05T00:17:01.943Z
 
 | Urgency | Status | Author | Todo | File |
 |---|---|---|---|---|
 |  | unknown | unknown | 20261103T001220Z-unknown-untitled | [20261103T001220Z-unknown-untitled.md](20261103T001220Z-unknown-untitled.md) |
+|  | unknown | unknown | 20261103T0019Z-tau-intuitive-fkey-hotkeys | [20261103T0019Z-tau-intuitive-fkey-hotkeys.md](20261103T0019Z-tau-intuitive-fkey-hotkeys.md) |
+|  | DONE (by daemon, 2026-11-04T20:30:03.741Z) | kilo | 20261104T202900Z-kilo-p3c-monolith-migration | [20261104T202900Z-kilo-p3c-monolith-migration.md](20261104T202900Z-kilo-p3c-monolith-migration.md) |
 |  | done | tau-maximal-audit | 20261102T021000Z-tau-bundled-virtual-theme-fail | [20261102T021000Z-tau-bundled-virtual-theme-fail.md](20261102T021000Z-tau-bundled-virtual-theme-fail.md) |
 |  | done | tau-maximal-audit | 20261102T021200Z-tau-extension-suite-residual | [20261102T021200Z-tau-extension-suite-residual.md](20261102T021200Z-tau-extension-suite-residual.md) |
 |  | DONE (by daemon, 2026-11-02T07:09:43.707Z) | unknown | 20261029T104600Z-tau-max-plan-full-arc | [20261029T104600Z-tau-max-plan-full-arc.md](20261029T104600Z-tau-max-plan-full-arc.md) |
@@ -24,6 +26,8 @@ Updated: 2026-11-03T00:12:20.567Z
 |  | DONE (by daemon, 2026-11-02T09:00:11.709Z) | tau | 20261102T090011Z-tau-license-violation-and-fork-audit | [20261102T090011Z-tau-license-violation-and-fork-audit.md](20261102T090011Z-tau-license-violation-and-fork-audit.md) |
 |  | DONE (by daemon, 2026-11-02T09:01:59.886Z) | tau | 20261102T090159Z-tau-aesthetic-daemon-page-master | [20261102T090159Z-tau-aesthetic-daemon-page-master.md](20261102T090159Z-tau-aesthetic-daemon-page-master.md) |
 |  | DONE (by daemon, 2026-11-02T11:16:26.455Z) | tau | 20261102T103600Z-tau-unreliable-narrator-drift-loop | [20261102T103600Z-tau-unreliable-narrator-drift-loop.md](20261102T103600Z-tau-unreliable-narrator-drift-loop.md) |
+|  | DONE (by daemon, 2026-11-05T00:17:01.943Z) | unknown | 20261103T181502Z-tau-tau-bge-code-todo-autocorrelate | [20261103T181502Z-tau-tau-bge-code-todo-autocorrelate.md](20261103T181502Z-tau-tau-bge-code-todo-autocorrelate.md) |
+|  | DONE (by daemon, 2026-11-04T23:57:57.775Z) | unknown | 20261104T094654Z-kappa-cf-hijack-fennec-argos | [20261104T094654Z-kappa-cf-hijack-fennec-argos.md](20261104T094654Z-kappa-cf-hijack-fennec-argos.md) |
 
 Protocol: one md per arc — `todo/<YYYYMMDDTHHMMZ>-<agent>-<slug>.md`.
 Read via daemon: `GET /v1/todo` · MCP tools: todo_list / todo_add / todo_done.

@@ -118,3 +118,6 @@ answered BOTH: realPath metadata + __norm Proxy fix gives TRUE object identity.
 - Loader map may advertise { exports, realPath }; shim re-exports the real file.
 - Theme test passes with identity assertions UNCHANGED (no re-pin needed).
 - Suite: 225/225 green. Ticket closed; the architect contract question is moot.
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/computer-use-linux/pi/test/bundle-smoke.test.ts (0.56), /home/toxic/pens/ranch/tools/c8/test/fixtures/ts-node-basic.ts (0.55), /home/toxic/pens/ranch/products/barn/thresher/specs/095-update-failure-ux/research.md (0.54)

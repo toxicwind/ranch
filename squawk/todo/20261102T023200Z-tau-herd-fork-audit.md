@@ -48,3 +48,6 @@ No resolution tickets needed. Audit closed 2026-11-02.
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T03:49:51.187Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/tools/fleet-ops/FLEET-TRANSCRIPTION-AUDIT-20260919.md (0.62), /home/toxic/pens/ranch/tools/fleet-ops/sidechat-watch-squawk__interval@30s.md (0.61), /home/toxic/pens/ranch/products/fleet/fleet_predict.ts (0.60)

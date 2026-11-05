@@ -87,3 +87,6 @@ detectors drift" failure mode:
 ## Done
 - marked-by: daemon
 - marked-at: 2026-11-02T11:16:26.455Z
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/barn/gemini-mcp/docs/KEY_AUDIT.md (0.57), /home/toxic/pens/ranch/products/estate-monitor/recursive-fallback.test.ts (0.56), /home/toxic/pens/ranch/products/barn/thresher/bench/live_report_test.go (0.56)

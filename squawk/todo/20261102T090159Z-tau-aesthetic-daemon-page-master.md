@@ -56,3 +56,6 @@ New pen: `pens/mosaic/` (aesthetic surfaces pen) — receives:
       5 TOKEN-LEAK flags (claude-night-market, devloop, ring, ergane, hestia), :25222
 - [ ] funnel front (tailscale) — needs estate config touch
 - [ ] master skill consolidation (10 skills) — next
+---
+### bge-xref (2026-11-05T00:16Z)
+touches: /home/toxic/pens/ranch/products/awesome-free-ai-coding/tests/test_page_recovery.py (0.52), /home/toxic/pens/ranch/products/doorbell/src/surfaces.ts (0.52), /home/toxic/pens/ranch/products/barn/thresher/specs/039-connect-and-dashboard/autonomous_summary.md (0.51)

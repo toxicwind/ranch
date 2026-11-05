@@ -19,6 +19,7 @@ Do not hand-edit the Products table._
 | **android-fleet** | [toxicwind/android-fleet](https://github.com/toxicwind/android-fleet) | — | — | — |
 | **apk-autopsy** | [toxicwind/apk-autopsy](https://github.com/toxicwind/apk-autopsy) | — | TypeScript | > Bun-first polyglot toolkit for **dex / APK autopsy**: string mining, schema |
 | **arroyo** | [toxicwind/arroyo](https://github.com/toxicwind/arroyo) | — | — | Umbrella for overlord · coyote · discord · mcp under ranch. |
+| **arxiv-mcp-vendored** | [toxicwind/arxiv-mcp-vendored](https://github.com/toxicwind/arxiv-mcp-vendored) | — | Python | — |
 | **ast-grep-rules** | [toxicwind/ast-grep-rules](https://github.com/toxicwind/ast-grep-rules) | — | — | — |
 | **ast-tools** | [toxicwind/ast-tools](https://github.com/toxicwind/ast-tools) | — | — | — |
 | **audits** | [toxicwind/audits](https://github.com/toxicwind/audits) | — | — | — |
@@ -26,7 +27,7 @@ Do not hand-edit the Products table._
 | **awesome-free-ai-coding** | [toxicwind/awesome-free-ai-coding](https://github.com/toxicwind/awesome-free-ai-coding) | — | Python | > Live probes check every row against the vendor's API or pricing page twice a week. Ended offers move to the  |
 | **barn** | [toxicwind/barn](https://github.com/toxicwind/barn) | — | — | Small single-purpose utilities that keep the ranch running. Each sub-component |
 | **bench-radar** | [toxicwind/bench-radar](https://github.com/toxicwind/bench-radar) | 25181 | TypeScript | Nobody reads the nightly benchmark log — so this service does, and **pages |
-| **borrowed** | [toxicwind/borrowed](https://github.com/toxicwind/borrowed) | — | — | — |
+| **botfather-lib** | [toxicwind/botfather-lib](https://github.com/toxicwind/botfather-lib) | — | TypeScript | Clean, generic BotFather client for Telegram bot creation. Drives the official |
 | **bridge** | [toxicwind/bridge](https://github.com/toxicwind/bridge) | — | — | The bridge is the control plane between **hatch** (this cell) and **yote** (the heavy box). This project holds |
 | **bugbounty** | [toxicwind/bugbounty](https://github.com/toxicwind/bugbounty) | — | TypeScript | Headed Playwright helpers that open the **real paid bounty programs** for |
 | **campfire** | [toxicwind/campfire](https://github.com/toxicwind/campfire) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
@@ -34,10 +35,9 @@ Do not hand-edit the Products table._
 | **classifier** | [toxicwind/classifier](https://github.com/toxicwind/classifier) | — | TypeScript | — |
 | **classifier-preflight** | [toxicwind/classifier-preflight](https://github.com/toxicwind/classifier-preflight) | — | TypeScript | Internal meta tool: preflight any text that goes into a scheduled task body, |
 | **claude-night-market** | [athola/claude-night-market](https://github.com/athola/claude-night-market) | — | Python | plugins you need to run git workflows, code review, |
-| **codebase-memory** | [toxicwind/codebase-memory](https://github.com/toxicwind/codebase-memory) | 25195 | — | — |
+| **codebase-memory** | [toxicwind/codebase-memory](https://github.com/toxicwind/codebase-memory) | — | — | — |
 | **computer-use-linux** | [toxicwind/computer-use-linux](https://github.com/toxicwind/computer-use-linux) | — | Rust | > ⚡ Running this agent 24/7? **tiyuvta inference** — hosted LLM inference built for always-on agents, OpenAI/A |
 | **connectors** | [toxicwind/connectors](https://github.com/toxicwind/connectors) | — | — | — |
-| **cookie-vault** | [toxicwind/cookie-vault](https://github.com/toxicwind/cookie-vault) | — | TypeScript | Full-session (cookies + per-origin localStorage) grab and restore between the |
 | **corral** | [toxicwind/corral](https://github.com/toxicwind/corral) | — | TypeScript | > **Ticket-driven development & speculative merge queue — evolved from super-ralph lineage** |
 | **cron-trust** | [toxicwind/cron-trust](https://github.com/toxicwind/cron-trust) | — | — | — |
 | **cs3-velvet** | [toxicwind/cs3-velvet](https://github.com/toxicwind/cs3-velvet) | — | Python | > A curated CS3 extension repository — **20 plugins**, 19 repacked from validated DEX, 1 placeholder pending v |
@@ -52,7 +52,7 @@ Do not hand-edit the Products table._
 | **ego-lite** | [toxicwind/ego-lite](https://github.com/toxicwind/ego-lite) | — | — | ego (lite) is a browser where you and your AI agents work in parallel. Your agents run their browser tasks in  |
 | **emergent** | [toxicwind/emergent](https://github.com/toxicwind/emergent) | — | TypeScript | One research question in → ranked code patterns out. Built 2026-10-03 (tansy lane). |
 | **estate-brain** | [toxicwind/estate-brain](https://github.com/toxicwind/estate-brain) | — | — | — |
-| **estate-chat** | [toxicwind/estate-chat](https://github.com/toxicwind/estate-chat) | 25120 | TypeScript | The fleet's first-class coordination plane on awrawr-pc. Presence, live |
+| **estate-chat** | [toxicwind/estate-chat](https://github.com/toxicwind/estate-chat) | — | TypeScript | The fleet's first-class coordination plane on awrawr-pc. Presence, live |
 | **estate-dispersal-monolith** | [toxicwind/estate-dispersal-monolith](https://github.com/toxicwind/estate-dispersal-monolith) | — | — | — |
 | **estate-monitor** | [toxicwind/estate-monitor](https://github.com/toxicwind/estate-monitor) | — | TypeScript | — |
 | **estate-whoa-breakthrough** | [toxicwind/estate-whoa-breakthrough](https://github.com/toxicwind/estate-whoa-breakthrough) | — | TypeScript | — |
@@ -72,12 +72,12 @@ Do not hand-edit the Products table._
 | **gguf-read** | [toxicwind/gguf-read](https://github.com/toxicwind/gguf-read) | — | — | — |
 | **ghq** | [toxicwind/ghq](https://github.com/toxicwind/ghq) | — | Go | — |
 | **gibber-mcp** | [toxicwind/gibber-mcp](https://github.com/toxicwind/gibber-mcp) | 25106 | — | — |
-| **github-search** | [toxicwind/github-advanced-search-mcp](https://github.com/toxicwind/github-advanced-search-mcp) → `products/github-search` | blackbird dual-engine search MCP (thresher `ghas:*`, 25 tools) | TypeScript | lives at `products/github-search`; the old top-level dir was an empty corpse (removed 2026-11-02) |
+| **github-search** | [toxicwind/github-search](https://github.com/toxicwind/github-search) | — | Rust | > **TOXICWIND FORK** — Autonomous high-recall GitHub search client, API server, Next.js frontend, and Model Co |
 | **gito** | [toxicwind/Gito](https://github.com/toxicwind/Gito) | — | Python | It detects issues in GitHub pull requests or local codebase changes—instantly, reliably, and without vendor lo |
 | **godzilla-llama.cpp** | [toxicwind/godzilla-llama.cpp](https://github.com/toxicwind/godzilla-llama.cpp) | — | Python | Windows-first **MSVC + CUDA** fork of beellama.cpp / llama.cpp. Built for this lab’s RTX 3080 (sm_86) + long-c |
 | **hatch** | [toxicwind/hatch](https://github.com/toxicwind/hatch) | — | — | swift, sharp, 4 letters). **hatch is the dodge**: the public-facing decoy name |
 | **hatch-decode** | [toxicwind/hatch-decode](https://github.com/toxicwind/hatch-decode) | — | — | > **Why should you care?** The runtime daemon that owns your cell has 158 environment |
-| **herd** | [toxicwind/herd](https://github.com/toxicwind/herd) | 25100 | — | — |
+| **herd** | [toxicwind/herd](https://github.com/toxicwind/herd) | — | — | — |
 | **herdproof-bun** | [toxicwind/herdproof-bun](https://github.com/toxicwind/herdproof-bun) | — | — | — |
 | **hf-model-sync** | [toxicwind/hf-model-sync](https://github.com/toxicwind/hf-model-sync) | — | TypeScript | — |
 | **homelessbrian-NuvioTV** | [homelessbrian/NuvioTV](https://github.com/homelessbrian/NuvioTV) | — | — | Sports in the side menu shows scores and schedules, and works out **which of your own channels are showing eac |
@@ -85,7 +85,7 @@ Do not hand-edit the Products table._
 | **identity-router** | [toxicwind/identity-router](https://github.com/toxicwind/identity-router) | — | Python | > **The universal knowledge router for durable agent memory — lessons, preferences, rules, corrections, and ex |
 | **IPTV-BRIDGE** | [toxicwind/IPTV-BRIDGE](https://github.com/toxicwind/IPTV-BRIDGE) | — | TypeScript | Connect your own Xtream Codes account or M3U playlist and turn it into organized catalogs, global search, and  |
 | **keep** | [toxicwind/keep](https://github.com/toxicwind/keep) | — | Rust | env files, or repo history again — every service, agent, and daemon |
-| **keeper** | [toxicwind/keeper](https://github.com/toxicwind/keeper) | — | TypeScript | One persistent headed Chromium for the whole mesh, plus the keeper-first MCP |
+| **keeper** | [toxicwind/keeper](https://github.com/toxicwind/keeper) | — | — | — |
 | **kerloys-iptv-webos** | [toxicwind/kerloys-iptv-webos](https://github.com/toxicwind/kerloys-iptv-webos) | — | TypeScript | A cinema-grade IPTV application built for **LG webOS Smart TVs (2020 / webOS 5.x through webOS 24/25)** suppor |
 | **kimi-auto** | [toxicwind/kimi-auto](https://github.com/toxicwind/kimi-auto) | — | — | — |
 | **kimi-claw** | [toxicwind/kimi-claw](https://github.com/toxicwind/kimi-claw) | — | TypeScript | — |
@@ -95,6 +95,7 @@ Do not hand-edit the Products table._
 | **ledger** | [toxicwind/ledger](https://github.com/toxicwind/ledger) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
 | **loom** | [toxicwind/loom](https://github.com/toxicwind/loom) | — | Rust | Loom spawns AI agents that claim issues, implement features, review PRs, and merge code -- all coordinated thr |
 | **m3u-toolkit** | [toxicwind/m3u-toolkit](https://github.com/toxicwind/m3u-toolkit) | — | Python | The **Sovereign M3U Live Engine** is an RFC 8216-compliant streaming media pipeline engineered to ingest, audi |
+| **marquee** | [toxicwind/marquee](https://github.com/toxicwind/marquee) | — | TypeScript | — |
 | **matter-server** | [toxicwind/matter-server](https://github.com/toxicwind/matter-server) | 25209 | TypeScript | The live Matter app runs from /home/toxic/.matter-server/app — outside |
 | **maw** | [toxicwind/maw](https://github.com/toxicwind/maw) | — | Rust | maw is a coordination layer for teams running many coding agents in parallel on one repo. |
 | **mcp** | [toxicwind/mcp](https://github.com/toxicwind/mcp) | — | — | — |
@@ -161,7 +162,7 @@ Do not hand-edit the Products table._
 | **rename-roundup** | [toxicwind/rename-roundup](https://github.com/toxicwind/rename-roundup) | — | TypeScript | Bun-native, safe, ordered rebranding across a repository's tracked files **and** |
 | **repo-first-class** | [toxicwind/repo-first-class](https://github.com/toxicwind/repo-first-class) | — | Python | > **Make any GitHub repo first-class: a canonical, current checkout — maximally polished, committed, pushed, r |
 | **research** | [toxicwind/research](https://github.com/toxicwind/research) | — | Python | — |
-| **rig** | [toxicwind/rig](https://github.com/toxicwind/rig) | 25103 | Rust | > **Fork note:** this repo is a fork of Rig (upstream: RightNow-AI/rig). Repo home: toxicwind/rig. Binary, cra |
+| **rig** | [toxicwind/rig](https://github.com/toxicwind/rig) | — | Rust | > **Fork note:** this repo is a fork of Rig (upstream: RightNow-AI/rig). Repo home: toxicwind/rig. Binary, cra |
 | **ring** | [LerianStudio/ring](https://github.com/LerianStudio/ring) | — | — | Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants app |
 | **rodeo** | [toxicwind/rodeo](https://github.com/toxicwind/rodeo) | — | Python | Self-observing, self-hosting agentic orchestration testbed. |
 | **roundup** | [toxicwind/roundup](https://github.com/toxicwind/roundup) | — | — | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
@@ -171,10 +172,11 @@ Do not hand-edit the Products table._
 | **rust-algo-web** | [toxicwind/rust-algo-web](https://github.com/toxicwind/rust-algo-web) | — | Rust | — |
 | **rust-wrappers** | [toxicwind/rust-wrappers](https://github.com/toxicwind/rust-wrappers) | — | — | — |
 | **rustdesk-server** | [toxicwind/rustdesk-server](https://github.com/toxicwind/rustdesk-server) | — | — | Self-hosted RustDesk ID/rendezvous + relay server. ranch/ is gitignored in the |
+| **ryzen-sm86-hybrid** | [toxicwind/ryzen-sm86-hybrid](https://github.com/toxicwind/ryzen-sm86-hybrid) | — | — | Research into the unconventional Ryzen CPU + NVIDIA Ampere (SM86/GA102) CUDA |
 | **ryzen3090-whoa** | [toxicwind/ryzen3090-whoa](https://github.com/toxicwind/ryzen3090-whoa) | — | TypeScript | — |
 | **safety-review-gate** | [toxicwind/safety-review-gate](https://github.com/toxicwind/safety-review-gate) | — | — | > **The evidence locker for the safety-review gate investigation — run-ID backfill artifacts, checksummed and  |
 | **saturation-guard** | [toxicwind/saturation-guard](https://github.com/toxicwind/saturation-guard) | — | Python | First-class patch for debate **2c7ca733** (hatch cell saturation, |
-| **shell** | [toxicwind/shell](https://github.com/toxicwind/shell) | — | — | > **The canonical home of the Architect's ii quickshell setup: the estate-end4 fork plus the operations layer  |
+| **shell** | [toxicwind/shell](https://github.com/toxicwind/shell) | — | — | — |
 | **skillforge** | [toxicwind/skillforge](https://github.com/toxicwind/skillforge) | — | — | > This repository is a fresh scaffold — the packaging tooling it describes does not exist in the tree yet. |
 | **spark** | [toxicwind/spark](https://github.com/toxicwind/spark) | — | — | Google-Spark-themed ranch component. the Architect's order (2026-09-30): our Dropbox |
 | **spark-harvest** | [toxicwind/spark-harvest](https://github.com/toxicwind/spark-harvest) | — | TypeScript | Incremental GitHub harvest + first-class agent profile for the **Muse Spark** model family. |
@@ -211,7 +213,7 @@ Do not hand-edit the Products table._
 | **wtf-filetrace** | [toxicwind/wtf-filetrace](https://github.com/toxicwind/wtf-filetrace) | — | — | — |
 | **wtf-orch** | [toxicwind/wtf-orch](https://github.com/toxicwind/wtf-orch) | — | — | — |
 | **wtf-orthogonal-seed** | [toxicwind/wtf-orthogonal-seed](https://github.com/toxicwind/wtf-orthogonal-seed) | — | — | — |
-| **yote** | [toxicwind/yote](https://github.com/toxicwind/yote) | 25102 | Rust | > Extracted from OpenFang crates/openfang-channels. |
+| **yote** | [toxicwind/yote](https://github.com/toxicwind/yote) | — | Rust | > Extracted from OpenFang crates/openfang-channels. |
 | **yote-maximal** | [toxicwind/yote-maximal](https://github.com/toxicwind/yote-maximal) | — | — | — |
 | **zed-android-port** | [toxicwind/zed-android-port](https://github.com/toxicwind/zed-android-port) | — | Rust | Started as a joke. Rust on aarch64, sounded portable. Laughed about it. Kept going. Couldn't stop. There's an  |
 | **zero-transport** | [toxicwind/zero-transport](https://github.com/toxicwind/zero-transport) | — | — | — |
