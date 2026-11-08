@@ -38,11 +38,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       # Same workspace-submodule init as ci.yml: root bun install reads
-      # drover and metaaivm-profile workspaces, which
-      # are gitlinks since de6a9e19 and empty without this step.
+      # the metaaivm-profile workspace, which
+      # is a gitlink since de6a9e19 and empty without this step.
       # forge was unsubmoduled by 01c1343 and is no longer inited here.
       - name: Init workspace submodules
-        run: git submodule update --init --depth 1 drover metaaivm-profile
+        run: git submodule update --init --depth 1 metaaivm-profile
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.4.2"
@@ -59,8 +59,7 @@ jobs:
       # lockfile, so bun walks up here anyway. Explicit beats implicit.
       - name: Install
         timeout-minutes: 15
-        # --ignore-scripts: see ci.yml -- drover's "install" script needs
-        # code-insiders, absent on runners; no other workspace uses a
+        # --ignore-scripts: see ci.yml -- no workspace uses a
         # lifecycle install script.
         run: bun install --ignore-scripts  # plain (not --frozen-lockfile): the frozen flag hung silent on GH runners; monorepo CI uses plain install
       - name: Typecheck
