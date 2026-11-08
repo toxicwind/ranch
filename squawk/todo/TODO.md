@@ -1,6 +1,6 @@
 # FLEET TODO — INDEX (auto-generated; edit the linked files, not this)
 
-Updated: 2026-11-05T00:17:01.943Z
+Updated: 2026-11-06T20:23:17.726Z
 
 | Urgency | Status | Author | Todo | File |
 |---|---|---|---|---|
@@ -28,6 +28,7 @@ Updated: 2026-11-05T00:17:01.943Z
 |  | DONE (by daemon, 2026-11-02T11:16:26.455Z) | tau | 20261102T103600Z-tau-unreliable-narrator-drift-loop | [20261102T103600Z-tau-unreliable-narrator-drift-loop.md](20261102T103600Z-tau-unreliable-narrator-drift-loop.md) |
 |  | DONE (by daemon, 2026-11-05T00:17:01.943Z) | unknown | 20261103T181502Z-tau-tau-bge-code-todo-autocorrelate | [20261103T181502Z-tau-tau-bge-code-todo-autocorrelate.md](20261103T181502Z-tau-tau-bge-code-todo-autocorrelate.md) |
 |  | DONE (by daemon, 2026-11-04T23:57:57.775Z) | unknown | 20261104T094654Z-kappa-cf-hijack-fennec-argos | [20261104T094654Z-kappa-cf-hijack-fennec-argos.md](20261104T094654Z-kappa-cf-hijack-fennec-argos.md) |
+|  | DONE (by daemon, 2026-11-06T20:23:17.726Z) | unknown | 20261106T1912Z-assistant-argos-engine-fork-rename | [20261106T1912Z-assistant-argos-engine-fork-rename.md](20261106T1912Z-assistant-argos-engine-fork-rename.md) |
 
 Protocol: one md per arc — `todo/<YYYYMMDDTHHMMZ>-<agent>-<slug>.md`.
 Read via daemon: `GET /v1/todo` · MCP tools: todo_list / todo_add / todo_done.
