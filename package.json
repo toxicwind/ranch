@@ -19,7 +19,9 @@
   "version": "1.0.0",
   "workspaces": {
     "packages": [
-      "task-launch",
+      "drover",
+      "drover/sidecar",
+      "task-launch"
     ],
     "catalog": {
       "@babel/generator": "^7.29.8",
