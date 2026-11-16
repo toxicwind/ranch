@@ -1,7 +1,7 @@
 /**
  * task-launch/src/profile.ts
  *
- * Agent profile for the MetaAIVM estate. Applies to agents carrying the
+ * Agent profile for the MetaAIVM pens. Applies to agents carrying the
  * Hatch autoloaded identifier or the `ipnext` identifier.
  *
  * Observed identifiers (2026-09-30):
@@ -17,7 +17,7 @@
 
 import { launch, type LaunchSurface } from "./launcher";
 
-export interface EstateIdentity {
+export interface pensIdentity {
   /** e.g. "f4f307f9-74e5-4df4-af81-4cab07043424.metaaivm.com" */
   vmFqdn: string | null;
   /** e.g. "ipnext/avocado-5.16-v4" */
@@ -26,8 +26,8 @@ export interface EstateIdentity {
   hatchAutoloaded: boolean;
 }
 
-/** Read the estate identity from the runtime environment. */
-export function readEstateIdentity(env: NodeJS.ProcessEnv = process.env): EstateIdentity {
+/** Read the pens identity from the runtime environment. */
+export function readpensIdentity(env: NodeJS.ProcessEnv = process.env): pensIdentity {
   const hostname = env.HOSTNAME ?? env.HOST ?? null;
   const vmFqdn =
     hostname && hostname.endsWith(".metaaivm.com") ? hostname : null;
@@ -39,7 +39,7 @@ export function readEstateIdentity(env: NodeJS.ProcessEnv = process.env): Estate
 }
 
 /** True when this agent carries the Hatch autoloaded identifier or ipnext. */
-export function matchesProfile(id: EstateIdentity): boolean {
+export function matchesProfile(id: pensIdentity): boolean {
   if (id.hatchAutoloaded) return true;
   if (id.vmFqdn !== null) return true;
   if (id.modelIdentifier !== null && id.modelIdentifier.startsWith("ipnext/"))
@@ -49,12 +49,12 @@ export function matchesProfile(id: EstateIdentity): boolean {
 
 export interface ProfiledLaunch {
   profileMatched: boolean;
-  identity: EstateIdentity;
+  identity: pensIdentity;
   effectiveBody: string;
 }
 
 /**
- * Pre-agent profile path: when the estate identity matches, the task is
+ * Pre-agent profile path: when the pens identity matches, the task is
  * launched through launcher.launch (directive injected); otherwise the
  * body passes through unchanged.
  */
@@ -64,7 +64,7 @@ export function launchWithProfile(
   originRef: string,
   env: NodeJS.ProcessEnv = process.env
 ): ProfiledLaunch {
-  const identity = readEstateIdentity(env);
+  const identity = readpensIdentity(env);
   if (!matchesProfile(identity)) {
     return { profileMatched: false, identity, effectiveBody: body };
   }

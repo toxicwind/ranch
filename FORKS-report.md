@@ -83,11 +83,11 @@ By source:
 | `data` | — | — | — |
 | `didymos` | — | — | — |
 | `docs` | — | — | — |
-| `estate-brain` | — | — | — |
-| `estate-chat` | — | — | — |
-| `estate-dispersal-monolith` | — | — | — |
-| `estate-monitor` | — | — | — |
-| `estate-whoa-breakthrough` | — | — | — |
+| `pens-brain` | — | — | — |
+| `pens-chat` | — | — | — |
+| `pens-dispersal-monolith` | — | — | — |
+| `pens-monitor` | — | — | — |
+| `pens-whoa-breakthrough` | — | — | — |
 | `fleet-chat` | — | — | — |
 | `generated` | — | — | — |
 | `geode-rig` | — | — | — |

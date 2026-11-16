@@ -3,7 +3,7 @@
 ## Local vs external
 
 - **herd is LOCAL.** On-box models (GGUFs via llama.cpp engines), served at
-  `:25100`. Lives in the monorepo: `estate-scripts-projects/projects/herd`.
+  `:25100`. Lives in the monorepo: `pens-scripts-projects/projects/herd`.
 - **flock is EXTERNAL.** Cloud providers — NVIDIA NIM, OpenRouter, Groq,
   Cerebras, … — routed at `:25193`. Own repo `toxicwind/flock`, checked out at
   `/home/toxic/projects/flock`.
@@ -27,11 +27,11 @@ flock :25193 ── Strategy::Free ──▶ NIM → OpenRouter-free → …
 
 | Port  | Service                                                               | Home                                         |
 | ----- | --------------------------------------------------------------------- | -------------------------------------------- |
-| 25100 | herd (herd fork, Go)                                                  | estate-scripts-projects/projects/herd        |
+| 25100 | herd (herd fork, Go)                                                  | pens-scripts-projects/projects/herd        |
 | 25193 | flock router (Rust)                                                   | toxicwind/flock → /home/toxic/projects/flock |
-| 25104 | estate-scripts TS router (bench/Elo layer)                            | estate-scripts-projects                      |
-| 25109 | keypool sidecar                                                       | estate-scripts-projects                      |
-| 25154 | skopos — persistent browser/watcher (headed Chromium CDP; was keeper) | toxicwind/skopos / estate/ranch/keeper       |
+| 25104 | pens-scripts TS router (bench/Elo layer)                            | pens-scripts-projects                      |
+| 25109 | keypool sidecar                                                       | pens-scripts-projects                      |
+| 25154 | skopos — persistent browser/watcher (headed Chromium CDP; was keeper) | toxicwind/skopos / pens/ranch/keeper       |
 
 ## Rules
 

@@ -6,7 +6,7 @@ def sh(c):
     return subprocess.run(c, shell=True, capture_output=True, text=True, timeout=15).stdout
 pf = {}
 for line in sh("pitchfork list 2>/dev/null").splitlines():
-    m = re.match(r'\s*estate/(\S+)\s+(running|stopped|errored|available)', line)
+    m = re.match(r'\s*Pens/(\S+)\s+(running|stopped|errored|available)', line)
     if m: pf[m.group(1)] = m.group(2)
 ps = sh("ps aux | grep -v grep")
 ports_raw = sh("ss -tlnp 2>/dev/null")
@@ -48,5 +48,5 @@ for name, pat, port, path in checks:
     else: v=f"REVIEW pf={pfv} alive={alive}"
     rows.append((name,pfv,alive,listening,h,v))
     print(f"{name:<20} {pfv:<10} {str(alive):<5} {str(listening):<6} {h:<22} {v}")
-print("\nTotal pitchfork estate entries:", len(pf))
+print("\nTotal pitchfork Pens entries:", len(pf))
 print("Errored in pitchfork:", [k for k,v in pf.items() if v=='errored'])

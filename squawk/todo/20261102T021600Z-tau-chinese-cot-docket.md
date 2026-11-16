@@ -15,7 +15,7 @@ IGNORED."
 ## Status (2026-11-02)
 
 **Not implemented by design** — this is a speculative prompting technique, not
-a code contract. The estate's reasoning/CoT infrastructure serves the intent
+a code contract. The pens's reasoning/CoT infrastructure serves the intent
 already and is TDD-green:
 
 - `auto-thinking/classifier.ts` — structured reasoning-effort classification.

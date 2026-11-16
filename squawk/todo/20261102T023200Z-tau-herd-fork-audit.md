@@ -25,10 +25,10 @@ to surface any un-reconciled split.
 
 ## Findings (2026-11-02, tau) — ALL peer-coordination, no un-reconciled divergence
 
-Scanned: fleet /v1/state (presence+activity, 568 agents), estate + tau + barn
+Scanned: fleet /v1/state (presence+activity, 568 agents), pens + tau + barn
 git logs since 2026-08-01 for `herd|flock|fork` (case-insensitive).
 
-1. **loom fork** (estate 6d4fe94cc3/5e47515662): rjwalters/loom fork = the
+1. **loom fork** (pens 6d4fe94cc3/5e47515662): rjwalters/loom fork = the
    visor-lane product — PEER COORDINATION (product mapping, Loom docs/visor-lane).
 2. **tau broker fork storm** (tau 30dca32d1c, 2026-10-30): auto-join broker
    respawned full TUI copies (90+ procs/min) — was a REAL divergence, FIXED at
@@ -39,8 +39,8 @@ git logs since 2026-08-01 for `herd|flock|fork` (case-insensitive).
    forward — procedure, not divergence.
 4. **fork-storm recovery skill** (tau fork-storm-recovery.md): operational
    guard (ps/restart watches), not a defect.
-5. **lease-guard / ghost-path** (estate 41494224fc): `/home/toxic/estate` lease
-   guard — estate singletruth, not herd conflict.
+5. **lease-guard / ghost-path** (pens 41494224fc): `/home/toxic/pens/pens` lease
+   guard — pens singletruth, not herd conflict.
 
 VERDICT: 0 unresolved herd/fork divergences. All instances are either product
 forks (loom), fixed-at-root storms (tau broker), or coordination procedure.

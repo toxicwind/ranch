@@ -10,7 +10,7 @@ unique-id: 20261102T020500Z-tau-bge-embed-lane-blocked
 ## Verified state
 - Qdrant **live** :25133 (pitchfork, ports [25133,25134]), healthz ok.
 - Collections ready at **1024-dim cosine** (bge-m3 contract, anomaly #79):
-  `cosmic_disclosure`, `default_collection`, `estate_sweep`, `fleet_orb`,
+  `cosmic_disclosure`, `default_collection`, `pens_sweep`, `fleet_orb`,
   `test_freeinference`, `trakt_descriptions`.
 - `test_freeinference` holds **1 point** → the embed→upsert path ran once.
 - freeinference.org `/v1/embeddings?model=bge-m3` endpoint **lives** (401 w/o key).
@@ -42,7 +42,7 @@ SUBSTANTIVE UNBLOCK + caveat. Probed all four embed lanes live:
 - OpenRouter `/v1/embeddings` → **402** (no credits on key).
 - DeepSeek `/v1/embeddings` → no route.
 
-LANDED local lane (ops `e1fc150`): `estate-ops/bin/cosmic-local-ingest.py`
+LANDED local lane (ops `e1fc150`): `pens-ops/bin/cosmic-local-ingest.py`
 embeds with the locally cached `sentence-transformers/all-MiniLM-L6-v2`
 (384-dim, HF cache, torch mean-pool, zero external keys), upserts to a new
 384-dim cosine collection `cosmic_local_384`, and searches. Verified live:
@@ -50,7 +50,7 @@ embeds with the locally cached `sentence-transformers/all-MiniLM-L6-v2`
 score 0.6247, `points_count=5`. `probe` mode = single-query dim check.
 
 Status: **done with caveat** — the local lane makes ingest usable today; the
-1024-dim bge-m3 collections (`cosmic_disclosure`, `estate_sweep`, …) still
+1024-dim bge-m3 collections (`cosmic_disclosure`, `pens_sweep`, …) still
 require freeinference key rotation before they can be populated.
 
 ## Related

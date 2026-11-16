@@ -5,7 +5,7 @@ import subprocess, json, urllib.request, re
 def sh(c): return subprocess.run(c, shell=True, capture_output=True, text=True, timeout=15).stdout
 pf = {}
 for line in sh("pitchfork list 2>/dev/null").splitlines():
-    m = re.match(r'\s*estate/(\S+)\s+(running|stopped|errored|available)', line)
+    m = re.match(r'\s*Pens/(\S+)\s+(running|stopped|errored|available)', line)
     if m: pf[m.group(1)] = m.group(2)
 ps = sh("ps aux")
 ports_raw = sh("ss -tlnp 2>/dev/null")

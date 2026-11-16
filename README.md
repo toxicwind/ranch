@@ -1,8 +1,8 @@
 # Ranch
 
-**The whole self-hosted AI estate in one monorepo.** Local model serving (**herd**), cloud provider routing (**hodos**), the canonical router (**cuttinggate**), the coding agent (**tau**), the MCP gateway (**gatehouse**), the build-job system (**forge**), fleet chat (**keryx**), and the provider catalog (**roost**) they all share — one directory per component, the full mesh on one box, everything OpenAI-compatible.
+**The whole self-hosted AI pens in one monorepo.** Local model serving (**herd**), cloud provider routing (**hodos**), the canonical router (**cuttinggate**), the coding agent (**tau**), the MCP gateway (**gatehouse**), the build-job system (**forge**), fleet chat (**keryx**), and the provider catalog (**roost**) they all share — one directory per component, the full mesh on one box, everything OpenAI-compatible.
 
-> Part of the estate's pens family (`pens/{estate,geode,barn,ranch,olympus,...}`).
+> Part of the pens's pens family (`pens/{pens,geode,barn,ranch,olympus,...}`).
 > Every pen has the same shape: `products/` for peer standalone checkouts, `docs/` for
 > pen-owned documentation, and `bin/` entrypoints symlinked into `~/.local/bin`.
 
@@ -30,7 +30,7 @@ Do not hand-edit the Products table._
 | **botfather-lib** | [toxicwind/botfather-lib](https://github.com/toxicwind/botfather-lib) | — | TypeScript | Clean, generic BotFather client for Telegram bot creation. Drives the official |
 | **bridge** | [toxicwind/bridge](https://github.com/toxicwind/bridge) | — | — | The bridge is the control plane between **hatch** (this cell) and **yote** (the heavy box). This project holds |
 | **bugbounty** | [toxicwind/bugbounty](https://github.com/toxicwind/bugbounty) | — | TypeScript | Headed Playwright helpers that open the **real paid bounty programs** for |
-| **campfire** | [toxicwind/campfire](https://github.com/toxicwind/campfire) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
+| **campfire** | [toxicwind/campfire](https://github.com/toxicwind/campfire) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference pens, one map. |
 | **cell-mirror** | [toxicwind/cell-mirror](https://github.com/toxicwind/cell-mirror) | — | Python | — |
 | **classifier** | [toxicwind/classifier](https://github.com/toxicwind/classifier) | — | TypeScript | — |
 | **classifier-preflight** | [toxicwind/classifier-preflight](https://github.com/toxicwind/classifier-preflight) | — | TypeScript | Internal meta tool: preflight any text that goes into a scheduled task body, |
@@ -47,15 +47,15 @@ Do not hand-edit the Products table._
 | **disparate-latent-experiment** | [toxicwind/disparate-latent-experiment](https://github.com/toxicwind/disparate-latent-experiment) | — | TypeScript | — |
 | **doorbell** | [toxicwind/doorbell](https://github.com/toxicwind/doorbell) | — | TypeScript | HTTP MCP door on port 25202. v7. One initialize returns the router catalog. |
 | **dots-client** | [toxicwind/dots-client](https://github.com/toxicwind/dots-client) | — | Python | Alternate model-call shim for Dots-3-Note (dots-studio/dots-3-note-preview:free) |
-| **drover** | [toxicwind/drover](https://github.com/toxicwind/drover) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
+| **drover** | [toxicwind/drover](https://github.com/toxicwind/drover) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference pens, one map. |
 | **dualspace-ast-bm25-hybrid** | [toxicwind/dualspace-ast-bm25-hybrid](https://github.com/toxicwind/dualspace-ast-bm25-hybrid) | — | TypeScript | Dual-space code retrieval engine for autonomous coding agents: a regex-based |
 | **ego-lite** | [toxicwind/ego-lite](https://github.com/toxicwind/ego-lite) | — | — | ego (lite) is a browser where you and your AI agents work in parallel. Your agents run their browser tasks in  |
 | **emergent** | [toxicwind/emergent](https://github.com/toxicwind/emergent) | — | TypeScript | One research question in → ranked code patterns out. Built 2026-10-03 (tansy lane). |
-| **estate-brain** | [toxicwind/estate-brain](https://github.com/toxicwind/estate-brain) | — | — | — |
-| **estate-chat** | [toxicwind/estate-chat](https://github.com/toxicwind/estate-chat) | — | TypeScript | The fleet's first-class coordination plane on awrawr-pc. Presence, live |
-| **estate-dispersal-monolith** | [toxicwind/estate-dispersal-monolith](https://github.com/toxicwind/estate-dispersal-monolith) | — | — | — |
-| **estate-monitor** | [toxicwind/estate-monitor](https://github.com/toxicwind/estate-monitor) | — | TypeScript | — |
-| **estate-whoa-breakthrough** | [toxicwind/estate-whoa-breakthrough](https://github.com/toxicwind/estate-whoa-breakthrough) | — | TypeScript | — |
+| **pens-brain** | [toxicwind/pens-brain](https://github.com/toxicwind/pens-brain) | — | — | — |
+| **pens-chat** | [toxicwind/pens-chat](https://github.com/toxicwind/pens-chat) | — | TypeScript | The fleet's first-class coordination plane on awrawr-pc. Presence, live |
+| **pens-dispersal-monolith** | [toxicwind/pens-dispersal-monolith](https://github.com/toxicwind/pens-dispersal-monolith) | — | — | — |
+| **pens-monitor** | [toxicwind/pens-monitor](https://github.com/toxicwind/pens-monitor) | — | TypeScript | — |
+| **pens-whoa-breakthrough** | [toxicwind/pens-whoa-breakthrough](https://github.com/toxicwind/pens-whoa-breakthrough) | — | TypeScript | — |
 | **examples** | [toxicwind/examples](https://github.com/toxicwind/examples) | — | — | Runnable proof that the ranch works. Everything here runs against the live |
 | **extensions** | [toxicwind/extensions](https://github.com/toxicwind/extensions) | — | — | — |
 | **fast-race** | [toxicwind/fast-race](https://github.com/toxicwind/fast-race) | — | Python | fast_race.py applies the squawk HFT latency doctrine |
@@ -63,11 +63,11 @@ Do not hand-edit the Products table._
 | **ferret-den** | [toxicwind/ferret-den](https://github.com/toxicwind/ferret-den) | — | TypeScript | An MCP server that exposes the Warren's reconnaissance kit under decoupled tool names to prevent false-positiv |
 | **ffs-diff** | [toxicwind/ffs-diff](https://github.com/toxicwind/ffs-diff) | — | TypeScript | Diff two files by their *shape* (functions, classes, imports) first, or merge |
 | **fleet** | [toxicwind/fleet](https://github.com/toxicwind/fleet) | — | TypeScript | — |
-| **flicker** | [toxicwind/flicker](https://github.com/toxicwind/flicker) | — | Go | > Part of **the ranch** — the whole inference estate, one map. |
+| **flicker** | [toxicwind/flicker](https://github.com/toxicwind/flicker) | — | Go | > Part of **the ranch** — the whole inference pens, one map. |
 | **forge-mcp** | [toxicwind/forge-mcp](https://github.com/toxicwind/forge-mcp) | — | TypeScript | — |
 | **freebuffet** | [toxicwind/freebuffet](https://github.com/toxicwind/freebuffet) | — | TypeScript | Add API keys, health-check providers, and auto-generate configs for **OpenCode**, **Codex CLI**, and **Claude  |
 | **gavel** | [toxicwind/gavel](https://github.com/toxicwind/gavel) | — | Python | bidders over a single squawk message channel: the auctioneer posts a job, the |
-| **gayxxx-estate** | [toxicwind/gayxxx-estate](https://github.com/toxicwind/gayxxx-estate) | — | Python | — |
+| **gayxxx-pens** | [toxicwind/gayxxx-pens](https://github.com/toxicwind/gayxxx-pens) | — | Python | — |
 | **geode-rig** | [toxicwind/geode-rig](https://github.com/toxicwind/geode-rig) | — | Python | — |
 | **gguf-read** | [toxicwind/gguf-read](https://github.com/toxicwind/gguf-read) | — | — | — |
 | **ghq** | [toxicwind/ghq](https://github.com/toxicwind/ghq) | — | Go | — |
@@ -90,9 +90,9 @@ Do not hand-edit the Products table._
 | **kimi-auto** | [toxicwind/kimi-auto](https://github.com/toxicwind/kimi-auto) | — | — | — |
 | **kimi-claw** | [toxicwind/kimi-claw](https://github.com/toxicwind/kimi-claw) | — | TypeScript | — |
 | **kvm-bun** | [toxicwind/kvm-bun](https://github.com/toxicwind/kvm-bun) | — | TypeScript | — |
-| **lasso** | [toxicwind/lasso](https://github.com/toxicwind/lasso) | — | Python | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
+| **lasso** | [toxicwind/lasso](https://github.com/toxicwind/lasso) | — | Python | > 🗺️ Part of **the ranch** — the whole inference pens, one map. |
 | **leakfix-src** | [toxicwind/leakfix-src](https://github.com/toxicwind/leakfix-src) | — | — | — |
-| **ledger** | [toxicwind/ledger](https://github.com/toxicwind/ledger) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
+| **ledger** | [toxicwind/ledger](https://github.com/toxicwind/ledger) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference pens, one map. |
 | **loom** | [toxicwind/loom](https://github.com/toxicwind/loom) | — | Rust | Loom spawns AI agents that claim issues, implement features, review PRs, and merge code -- all coordinated thr |
 | **m3u-toolkit** | [toxicwind/m3u-toolkit](https://github.com/toxicwind/m3u-toolkit) | — | Python | The **Sovereign M3U Live Engine** is an RFC 8216-compliant streaming media pipeline engineered to ingest, audi |
 | **marquee** | [toxicwind/marquee](https://github.com/toxicwind/marquee) | — | TypeScript | — |
@@ -102,7 +102,7 @@ Do not hand-edit the Products table._
 | **mesh** | [toxicwind/mesh](https://github.com/toxicwind/mesh) | 25207 | — | ├── router/                     # model-routing plane |
 | **meta-research-toolkit** | [toxicwind/meta-research-toolkit](https://github.com/toxicwind/meta-research-toolkit) | — | Python | flowchart LR |
 | **metaaivm** | [toxicwind/metaaivm](https://github.com/toxicwind/metaaivm) | — | TypeScript | Incremental GitHub harvester for metaaivm-related keywords. Runs on yote |
-| **metaaivm-profile** | [toxicwind/metaaivm-profile](https://github.com/toxicwind/metaaivm-profile) | — | TypeScript | First-class agent profile for the Meta AI VM (metaaivm.com) estate. |
+| **metaaivm-profile** | [toxicwind/metaaivm-profile](https://github.com/toxicwind/metaaivm-profile) | — | TypeScript | First-class agent profile for the Meta AI VM (metaaivm.com) pens. |
 | **metaclaw-runtime** | [toxicwind/metaclaw-runtime](https://github.com/toxicwind/metaclaw-runtime) | — | TypeScript | > **Zero-Browser Noise_XX WebSocket Client, Sentinel Auto-Approval Engine, and Direct VM Agent Dispatcher for  |
 | **mission-control** | [toxicwind/mission-control](https://github.com/toxicwind/mission-control) | — | TypeScript | Event-driven continuation controller. A parent mission stays open until |
 | **ml-serve** | [toxicwind/ml-serve](https://github.com/toxicwind/ml-serve) | 25180 | Python | Hot-loaded ONNX segmentation + e621 native tag resolution over HTTP for the |
@@ -137,7 +137,7 @@ Do not hand-edit the Products table._
 | **ops** | [toxicwind/ops](https://github.com/toxicwind/ops) | — | TypeScript | flowchart TD |
 | **outlier-toolkit** | [toxicwind/outlier-toolkit](https://github.com/toxicwind/outlier-toolkit) | — | Python | Outlier (Scale AI's contributor platform) publishes no public API — so every |
 | **outsource** | [midagedev/outsource](https://github.com/midagedev/outsource) | — | Go | A Claude Code skill that runs **third-party model CLIs as headless implementation sub-agents**. The lead Claud |
-| **pack-fix** | [toxicwind/pack-fix](https://github.com/toxicwind/pack-fix) | — | — | Every estate accumulates strays: processes with no known owner, pid files for dead daemons, half-migrated dire |
+| **pack-fix** | [toxicwind/pack-fix](https://github.com/toxicwind/pack-fix) | — | — | Every pens accumulates strays: processes with no known owner, pid files for dead daemons, half-migrated dire |
 | **paper-poller** | [toxicwind/paper-poller](https://github.com/toxicwind/paper-poller) | 25149 | — | > Why should I care? Paper research is first-class in the chat — any agent should be able to ask for papers an |
 | **pdfshield** | [purvalsingh/pdfshield](https://github.com/purvalsingh/pdfshield) | — | Python | A machine-learning classifier that reads a PDF's *internal structure* and *what its JavaScript actually does* |
 | **pearlctl** | [toxicwind/pearlctl](https://github.com/toxicwind/pearlctl) | — | TypeScript | Google's **Pixel Screenshots** app runs an on-device AI agent — codenamed |
@@ -156,7 +156,7 @@ Do not hand-edit the Products table._
 | **ralph-dashboard** | [toxicwind/ralph-dashboard](https://github.com/toxicwind/ralph-dashboard) | 25194 | — | > **toxicwind fork** of Endogen/ralph-dashboard. |
 | **ranch-analyze** | [toxicwind/ranch-analyze](https://github.com/toxicwind/ranch-analyze) | — | — | — |
 | **range** | [toxicwind/range](https://github.com/toxicwind/range) | — | Rust | Internal project workspace. |
-| **rankings** | [toxicwind/rankings](https://github.com/toxicwind/rankings) | — | TypeScript | First-class rankings frontend for the estate. |
+| **rankings** | [toxicwind/rankings](https://github.com/toxicwind/rankings) | — | TypeScript | First-class rankings frontend for the pens. |
 | **rawhide** | [toxicwind/rawhide](https://github.com/toxicwind/rawhide) | — | TypeScript | One engine. Multiple maximal rule packs. Skills are the extension point. |
 | **refusal-hunt** | [toxicwind/refusal-hunt](https://github.com/toxicwind/refusal-hunt) | — | Python | Agent serving layers sometimes **refuse benign work** — and the refusal hides |
 | **rename-roundup** | [toxicwind/rename-roundup](https://github.com/toxicwind/rename-roundup) | — | TypeScript | Bun-native, safe, ordered rebranding across a repository's tracked files **and** |
@@ -165,10 +165,10 @@ Do not hand-edit the Products table._
 | **rig** | [toxicwind/rig](https://github.com/toxicwind/rig) | — | Rust | > **Fork note:** this repo is a fork of Rig (upstream: RightNow-AI/rig). Repo home: toxicwind/rig. Binary, cra |
 | **ring** | [LerianStudio/ring](https://github.com/LerianStudio/ring) | — | — | Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants app |
 | **rodeo** | [toxicwind/rodeo](https://github.com/toxicwind/rodeo) | — | Python | Self-observing, self-hosting agentic orchestration testbed. |
-| **roundup** | [toxicwind/roundup](https://github.com/toxicwind/roundup) | — | — | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
+| **roundup** | [toxicwind/roundup](https://github.com/toxicwind/roundup) | — | — | > 🗺️ Part of **the ranch** — the whole inference pens, one map. |
 | **roundup-site** | [toxicwind/roundup-site](https://github.com/toxicwind/roundup-site) | — | TypeScript | A modern monorepo template built with Next.js 16, React 19, Tailwind CSS v4, TypeScript 5.9, Turborepo, and pn |
 | **routing** | [toxicwind/routing](https://github.com/toxicwind/routing) | — | — | — |
-| **routing-score** | [toxicwind/routing-score](https://github.com/toxicwind/routing-score) | — | Python | Repo: toxicwind/estate |
+| **routing-score** | [toxicwind/routing-score](https://github.com/toxicwind/routing-score) | — | Python | Repo: toxicwind/pens |
 | **rust-algo-web** | [toxicwind/rust-algo-web](https://github.com/toxicwind/rust-algo-web) | — | Rust | — |
 | **rust-wrappers** | [toxicwind/rust-wrappers](https://github.com/toxicwind/rust-wrappers) | — | — | — |
 | **rustdesk-server** | [toxicwind/rustdesk-server](https://github.com/toxicwind/rustdesk-server) | — | — | Self-hosted RustDesk ID/rendezvous + relay server. ranch/ is gitignored in the |
@@ -183,16 +183,16 @@ Do not hand-edit the Products table._
 | **squawk** | [toxicwind/squawk](https://github.com/toxicwind/squawk) | — | Python | Agent swarms usually coordinate through a server: a daemon to keep alive, a port to secure, a database to back |
 | **squawk-watchdog** | [toxicwind/squawk-watchdog](https://github.com/toxicwind/squawk-watchdog) | — | — | Keeps the two Squawk fleet transports alive on awrawr-pc — because the |
 | **squawk-ws** | [toxicwind/squawk-ws](https://github.com/toxicwind/squawk-ws) | 25147 | Python | Websocket push feed for Squawk. Stdlib-only Python — no dependencies, no venv, |
-| **stable** | [toxicwind/stable](https://github.com/toxicwind/stable) | — | — | The estate's browser project. One persistent headed Chromium for the whole |
+| **stable** | [toxicwind/stable](https://github.com/toxicwind/stable) | — | — | The pens's browser project. One persistent headed Chromium for the whole |
 | **standalone** | [toxicwind/standalone](https://github.com/toxicwind/standalone) | — | — | — |
 | **stash-guard** | [toxicwind/stash-guard](https://github.com/toxicwind/stash-guard) | — | Python | Autonomous WIP flight-recorder + drop-proof stash vault for the |
 | **stealthprint** | [majiayu000/stealthprint](https://github.com/majiayu000/stealthprint) | — | Python | A reusable library for fingerprinting stealth / anonymous models served behind |
-| **stream-broker** | [toxicwind/stream-broker](https://github.com/toxicwind/stream-broker) | 25215 | TypeScript | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
+| **stream-broker** | [toxicwind/stream-broker](https://github.com/toxicwind/stream-broker) | 25215 | TypeScript | > 🗺️ Part of **the ranch** — the whole inference pens, one map. |
 | **strudel-dev-vite** | [toxicwind/strudel-dev-vite](https://github.com/toxicwind/strudel-dev-vite) | — | TypeScript | Strudel live-coding usually means juggling three things at once: a place to write patterns, somewhere to host  |
 | **strudel-sampler-server-vite** | [toxicwind/strudel-sampler-server-vite](https://github.com/toxicwind/strudel-sampler-server-vite) | — | TypeScript | Strudel's samples() needs a URL that speaks its manifest format. This service is that URL: drop your drum kits |
 | **submodules** | [toxicwind/submodules](https://github.com/toxicwind/submodules) | — | — | — |
 | **super-board** | [EricTechPro/super-board](https://github.com/EricTechPro/super-board) | — | — | Before you start: |
-| **switchboard** | [toxicwind/switchboard](https://github.com/toxicwind/switchboard) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
+| **switchboard** | [toxicwind/switchboard](https://github.com/toxicwind/switchboard) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference pens, one map. |
 | **task-launch** | [toxicwind/task-launch](https://github.com/toxicwind/task-launch) | — | TypeScript | First-class classifier/task-launch repair. Not a doc-wording patch. |
 | **tau-extensions** | [toxicwind/tau-extensions](https://github.com/toxicwind/tau-extensions) | — | TypeScript | a curated monorepo of Tau/omp extensions that plug directly into your agent |
 | **tau-verify** | [toxicwind/tau](https://github.com/toxicwind/tau) | — | Rust | actually *does*. Not a chat wrapper around a hosted model — a real binary that |
@@ -208,7 +208,7 @@ Do not hand-edit the Products table._
 | **vision-kit** | [toxicwind/vision-kit](https://github.com/toxicwind/vision-kit) | 25228 | TypeScript | Stop asking a vision model to "look at this" and praying. vision-kit turns a screenshot |
 | **websites** | [toxicwind/websites](https://github.com/toxicwind/websites) | — | — | — |
 | **wezterm-agent-mcp** | [toxicwind/wezterm-agent-mcp](https://github.com/toxicwind/wezterm-agent-mcp) | — | TypeScript | Wezterm MCP Server — a programmable terminal control plane for multi-agent AI workflows. |
-| **windmill** | [toxicwind/windmill](https://github.com/toxicwind/windmill) | 25219 | TypeScript | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
+| **windmill** | [toxicwind/windmill](https://github.com/toxicwind/windmill) | 25219 | TypeScript | > 🗺️ Part of **the ranch** — the whole inference pens, one map. |
 | **workmux** | [toxicwind/workmux](https://github.com/toxicwind/workmux) | — | Rust | Giga opinionated zero-friction workflow tool for managing |
 | **wtf-filetrace** | [toxicwind/wtf-filetrace](https://github.com/toxicwind/wtf-filetrace) | — | — | — |
 | **wtf-orch** | [toxicwind/wtf-orch](https://github.com/toxicwind/wtf-orch) | — | — | — |
@@ -237,17 +237,17 @@ ranch/
 
 - **README**: regenerate with `bun run readme` (→ `pens/toolkit/readme-gen.ts`).
 - **bin surface**: entrypoints symlinked into `~/.local/bin`, pinned by the
-  estate-ops manifest and verified by `bin-verify.sh`. A broken link is a FAIL.
-- **Full estate README**: `pens/README.md` — regenerated by `pensctl generate-all`.
+  pens-ops manifest and verified by `bin-verify.sh`. A broken link is a FAIL.
+- **Full pens README**: `pens/README.md` — regenerated by `pensctl generate-all`.
 
 ## Conventions
 
 - Products are **peer standalone checkouts**, referenced-not-owned. This repo
   tracks only its own metadata, `bin/`, and `docs/`.
 - Daemon ids use **dashes, never underscores** (`config-naming-conventions.md`).
-- Ports are declared in `pens/estate/config/ports.env` — that file is the
+- Ports are declared in `pens/pens/config/ports.env` — that file is the
   numeric SSOT; this table reads ports from it via `# owner:` attribution.
-- Runtime language across the estate is **Bun/TypeScript**.
+- Runtime language across the pens is **Bun/TypeScript**.
 - Submoduleless: products are peer clones, never gitlinks (mode 160000).
 
 ## License

@@ -17,7 +17,7 @@ answers "what do I call before I do anything else" — the other skills
 session starts
   → delendai_overview { compact: true }
       → read `recommendedNextAction` (it IS the orchestrator — do not
-        restate the workflow yourself, follow what it says)
+        rpens the workflow yourself, follow what it says)
       → if it points at a proposals tool (auto_work, continue_proposal):
           read `delendai-proposal-swarm-runner` SKILL.md next
       → if it reports a failure envelope ({ ok:false, error:{ reason } }):

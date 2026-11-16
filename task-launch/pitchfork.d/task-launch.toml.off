@@ -2,8 +2,8 @@
 # Owned by the ranch/task-launch project; the parent only composes it.
 
 [daemons.task-launch]
-run = "exec /home/toxic/.bun/bin/bun /home/toxic/estate/ranch/task-launch/src/daemon.ts"
-dir = "/home/toxic/estate/ranch/task-launch"
+run = "exec /home/toxic/.bun/bin/bun /home/toxic/pens/pens/ranch/task-launch/src/daemon.ts"
+dir = "/home/toxic/pens/pens/ranch/task-launch"
 mise = false
 retry = true
 auto = ["start"]

@@ -1,4 +1,4 @@
-# estate-scripts standard sensitive & ephemeral patterns added by auditor
+# pens-scripts standard sensitive & ephemeral patterns added by auditor
 .secrets
 *.key
 *.pat
@@ -42,7 +42,7 @@ dist/*
 #
 # Compiled gateway binaries. These are in-tree `make build` products; the
 # deployed build is projects/range/bin/gatehouse, owned and ignored by the
-# estate-scripts monorepo. mcpproxy-go alone was 49.5 MiB of build output.
+# pens-scripts monorepo. mcpproxy-go alone was 49.5 MiB of build output.
 /barn/gatehouse/mcpproxy-go
 /barn/gatehouse/mcpproxy
 /barn/gatehouse/mcpproxy-tray
@@ -64,8 +64,8 @@ __pycache__/
 
 # Smithers agent scratch output: per-run `*.html` reports and logs. Generated
 # on every agent sweep, never hand-edited. The sibling rule in
-# estate/.gitignore:1252 does NOT cover these -- ranch is its own git root
-# (/home/toxic/estate/ranch/.git), and an ignore rule only applies within the
+# pens/.gitignore:1252 does NOT cover these -- ranch is its own git root
+# (/home/toxic/pens/pens/ranch/.git), and an ignore rule only applies within the
 # root that declares it. Without this, agent scratch reports get staged.
 .smithers/
 
@@ -117,7 +117,7 @@ yote/sessions/
 /android-fleet/nuvio/nuvio-platform/*.tar.gz
 
 # shell/ii is a nested standalone checkout (ex-submodule; its gitdir
-# ranch/.git/modules/shell/estate-scripts-end4 is gone and .gitmodules no
+# ranch/.git/modules/shell/pens-scripts-end4 is gone and .gitmodules no
 # longer declares it). Not ranch content - keep it out of the tree.
 shell/ii/
 
@@ -257,11 +257,11 @@ ranch-analyze/code/
 kairos
 
 # cloudstream peers (standalone clones, meta-managed — anomaly-#18 untrack)
-gayxxx-estate/
+gayxxx-pens/
 cs3-velvet/
 
 # peer roots (meta-managed standalone clones, not tracked snapshots)
-gayxxx-estate/
+gayxxx-pens/
 cs3-velvet/
 yote/ranch.git
 

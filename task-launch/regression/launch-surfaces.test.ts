@@ -23,7 +23,7 @@ import {
   type RunRecord,
 } from "../src/launcher";
 import {
-  readEstateIdentity,
+  readpensIdentity,
   matchesProfile,
   launchWithProfile,
 } from "../src/profile";
@@ -173,7 +173,7 @@ describe("relaunch planning", () => {
 
 describe("agent profile (Hatch autoloaded / ipnext)", () => {
   test("matches on metaaivm.com VM FQDN", () => {
-    const id = readEstateIdentity({
+    const id = readpensIdentity({
       HOSTNAME: "f4f307f9-74e5-4df4-af81-4cab07043424.metaaivm.com",
     } as NodeJS.ProcessEnv);
     expect(id.vmFqdn).not.toBeNull();
@@ -181,19 +181,19 @@ describe("agent profile (Hatch autoloaded / ipnext)", () => {
   });
 
   test("matches on ipnext model identifier", () => {
-    const id = readEstateIdentity({
+    const id = readpensIdentity({
       IPNEXT_MODEL: "ipnext/avocado-5.16-v4",
     } as NodeJS.ProcessEnv);
     expect(matchesProfile(id)).toBe(true);
   });
 
   test("matches on Hatch autoload marker", () => {
-    const id = readEstateIdentity({ HATCH_AUTOLOADED: "1" } as NodeJS.ProcessEnv);
+    const id = readpensIdentity({ HATCH_AUTOLOADED: "1" } as NodeJS.ProcessEnv);
     expect(matchesProfile(id)).toBe(true);
   });
 
   test("does not match an unrelated environment", () => {
-    const id = readEstateIdentity({} as NodeJS.ProcessEnv);
+    const id = readpensIdentity({} as NodeJS.ProcessEnv);
     expect(matchesProfile(id)).toBe(false);
   });
 

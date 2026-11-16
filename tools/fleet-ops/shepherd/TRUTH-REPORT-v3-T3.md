@@ -30,14 +30,14 @@ MODEL vars.
 
 ## Herd closure
 - :25100 FREE (ss clean), nothing listens. llama-swap gone.
-- ffs sweep of ranch+estate: no LIVE config references :25100. Remaining refs:
+- ffs sweep of ranch+Pens: no LIVE config references :25100. Remaining refs:
   ranch/dashboard/index.html (dashboard cosmetic config), barn/archguard
   seedEstate.ts (already marks svc-herd 'retired'), docs/ARCHITECTURE.md
   (historical). No live consumer anywhere.
-- estate/herd pitchfork unit: was `errored unknown exit code` → DISABLED
+- Pens/herd pitchfork unit: was `errored unknown exit code` → DISABLED
   (config preserved, noise stopped). Matches the awrawr-mcp pattern.
-- Gatehouse: estate/gatehouse stopped, :25127 intentionally reassigned to
-  estate/thresher (its own config listen=127.0.0.1:25127). Not a squat.
+- Gatehouse: Pens/gatehouse stopped, :25127 intentionally reassigned to
+  Pens/thresher (its own config listen=127.0.0.1:25127). Not a squat.
   Review item: confirm gatehouse MCP retirement or relaunch on new port.
 
 ## T2 matrix row (probe task-1792812234324, 2026-10-23)

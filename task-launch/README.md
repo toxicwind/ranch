@@ -27,11 +27,11 @@ Enforcement moved to the actual pre-agent layer, in code:
   `planRelaunch()` reroutes non-executed work to the yote daemon with a
   cleaned brief — a lane never silently dies.
 - `src/queue.ts` — atomic file-based task queue under
-  `/home/toxic/pens/estate/hatch/task-launch/` (exclusive-create enqueue,
+  `/home/toxic/pens/pens/hatch/task-launch/` (exclusive-create enqueue,
   atomic rename claim = exactly-once).
 - `src/daemon.ts` — yote-side executor. Event-driven via inotify
   (`Bun.watch`); no timers, no polling. Managed by pitchfork
-  (`[daemons.task-launch]` in `estate-scripts/pitchfork.toml`).
+  (`[daemons.task-launch]` in `pens-scripts/pitchfork.toml`).
 - `src/profile.ts` — agent profile: matches the Hatch autoloaded
   identifier, `*.metaaivm.com` VM FQDN, or `ipnext/` model identifiers,
   and injects the directive through the verified pre-agent path.
@@ -45,7 +45,7 @@ Run: `bun test` (or `moon run task-launch:test`).
 ## Queue layout (yote)
 
 ```
-/home/toxic/pens/estate/hatch/task-launch/
+/home/toxic/pens/pens/hatch/task-launch/
   queue/       # incoming *.json (inotify-watched)
   processing/  # claimed, exactly once
   receipts/    # execution receipts — what actually ran

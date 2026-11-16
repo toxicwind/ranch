@@ -7,7 +7,7 @@ unique-id: 20261031T051100Z-tau-chaos-master-prompt
 
 # Master prompt — chaos-forward autonomous engineer
 
-Build a single master system prompt from the estate's chaos + prompt-engineering
+Build a single master system prompt from the pens's chaos + prompt-engineering
 skills, then save the plan + todo to the squawk todo board. Typo-audit page
 closeout runs as a PRE-STEP (it was left unfinished in the prior session).
 

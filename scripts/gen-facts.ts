@@ -6,7 +6,7 @@ import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const README = join(import.meta.dir, "..", "README.md");
-const PORTS_ENV = "/home/toxic/pens/estate/config/ports.env";
+const PORTS_ENV = "/home/toxic/pens/pens/config/ports.env";
 
 export function portOf(envKey: string): string {
 	const m = readFileSync(PORTS_ENV, "utf8").match(new RegExp(`^${envKey}=(\\d+)`, "m"));
@@ -17,7 +17,7 @@ export function portOf(envKey: string): string {
 export function compute(): string {
 	const lines: string[] = [];
 		lines.push(`| service dirs | ${readdirSync("/home/toxic/pens/ranch").filter(d => !d.startsWith(".")).length} |`);
-	lines.push(`| squawk bus port | ${portOf("ESTATE_CHAT_PORT")} (ports.env ESTATE_CHAT_PORT) |`);
+	lines.push(`| squawk bus port | ${portOf("pens_CHAT_PORT")} (ports.env pens_CHAT_PORT) |`);
 	lines.push(`| thresher MCP gateway port | ${portOf("THRESHER_PORT")} (ports.env THRESHER_PORT) |`);
 	return lines.join("\n");
 }

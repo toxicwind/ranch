@@ -9,13 +9,13 @@ urgency: normal
 # NZB indexing — most-important phase-2 tail (max-plan 5.30)
 
 **Source:** max-plan Phase 2 (indexer stack) + 5.30 (write todos, nzb most
-important). The custom_indexers matrix is keyring-SSOT (estate 42b0e3fbc8) but
+important). The custom_indexers matrix is keyring-SSOT (pens 42b0e3fbc8) but
 the actual NZB ingestion lane is not verified end-to-end.
 
 ## Evidence (2026-11-02 probe artifacts)
-- `pens/estate/archive/2026-11-02-tau-nzb-probe/` — probe-results.tsv +
+- `pens/pens/archive/2026-11-02-tau-nzb-probe/` — probe-results.tsv +
   candidates.txt (12 indexer/NZB candidates probed with 2s timeout).
-- Tracked config: `pens/estate/config/custom_indexers.env` (+
+- Tracked config: `pens/pens/config/custom_indexers.env` (+
   `custom_indexers.env.example`).
 
 ## Tasks

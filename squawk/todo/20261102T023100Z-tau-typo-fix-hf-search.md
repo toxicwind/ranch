@@ -8,7 +8,7 @@ urgency: normal
 
 # Typo-fix HF search (mobile) — embedded repo search
 
-**Context:** the estate's HF/repo search surfaces (freeinference-orthogonal-probe
+**Context:** the pens's HF/repo search surfaces (freeinference-orthogonal-probe
 skill, xerj-class engines) do not tolerate typos/transposed letters; a
 misspelled model/repo name returns zero. Mobile (Pixel) typo-fix embedding
 means correcting the query BEFORE racing sources.

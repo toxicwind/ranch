@@ -25,7 +25,7 @@ proven this session (E1/E2):
       eval artifact)
 - [ ] W2 semantic firewall: the markup-axis as a FREE zero-cost leaked-protocol
       detector for SSE streams (DSML/xml/tool-calls) — projection threshold,
-      tested against live freeinference deepseek output. The estate app of the
+      tested against live freeinference deepseek output. The pens app of the
       DSML arc.
 - [ ] W3 unicode plane geometry: single-char embeddings map the unicode
       planes — do scripts cluster? Is the CJK/fullwidth mangle detectable at
@@ -46,7 +46,7 @@ proven this session (E1/E2):
 # Landed context (provenance)
 
 - DSML arc: tau 973f84c54c (shape scanner), docs dsml-01/02/03
-  (estate 4d06587637), tokenizer.json id 128825 bytes on-box
+  (pens 4d06587637), tokenizer.json id 128825 bytes on-box
 - judge lane: freeinference/qwen3.6-35b + credential-aware prune (tau
   2de26eb0c9); find verified live; binary rebuilt 00:26
 - E1/E2 artifacts: in-session (must be persisted as copy-pasteable PoCs)

@@ -14,7 +14,7 @@ reached" with no true RUNNING work.
 
 ## pattern-forge evidence
 
-### `forge retrieve` (estate + package)
+### `forge retrieve` (Pens + package)
 
 | Query | Top hits | Pattern taken |
 |---|---|---|

@@ -7,13 +7,13 @@ Script: shepherd_truth_v2.py (sha 0d548ad5), fixes v1 flock-pattern over-match
 - **6/6 bidders VERIFIED-LIVE** — unchanged, all `bidder.py --id <name>` alive.
 - **oracle-market: TRACKING-LOSS → VERIFIED-LIVE** (pitchfork now "running",
   process alive). The v1 tracking-loss is healed — consistent with Finch's
-  pitchfork-binding-sentinel (ranch da22aa0, estate 36858fd).
+  pitchfork-binding-sentinel (ranch da22aa0, Pens 36858fd).
 - **hodos :25193 — TRACKING-LOSS (pitchfork says stopped, process LIVE).**
   Real hodos binary (pid 383414, /home/toxic/pens/olympus/products/hodos/proxy,
   relaunched 06:10 via serve.sh), health 200. Port memory holds: 25193 = hodos,
   KEEP. Pitchfork record is stale — shepherd flags, does not touch.
-- **:25127 reassigned — gatehouse → thresher (INTENTIONAL).** estate/gatehouse
-  stopped, no gatehouse process; estate/thresher RUNNING and serving 25127
+- **:25127 reassigned — gatehouse → thresher (INTENTIONAL).** Pens/gatehouse
+  stopped, no gatehouse process; Pens/thresher RUNNING and serving 25127
   per its own config (`--listen=127.0.0.1:25127`). Not a squat. Review item:
   confirm gatehouse MCP proxy retirement intended (42 servers, was canonical
   MCP path); if not, relaunch gatehouse on a new port rather than fighting

@@ -14,7 +14,7 @@ lands.
 
 ## Secrets policy
 
-This estate runs on secrets that must never touch the repo:
+This pens runs on secrets that must never touch the repo:
 
 - Provider API keys live in the environment or `/home/toxic/.secrets` — never in code, config, or chat logs.
 - `barn/gatehouse`'s `mcp_config.json` is gitignored; the tracked `mcp_config.json.dist` is the scrubbed template, re-materialized with live secrets at every start.

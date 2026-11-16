@@ -7,20 +7,20 @@ GOAL: rename forge → stencil (brand semantics: "emergency prototype seam" →
 
 | Surface | Evidence | Cutover |
 |---|---|---|
-| daemon `forge` | `estate/pitchfork.d/forge.toml` | rename key `[daemons.stencil]`, restart (next-reboot window) |
-| daemon `forge-agent` | `estate/pitchfork.d/forge-agent.toml` | same |
-| daemon `bidder-forge` | `estate/pitchfork.d/bidder-forge.toml` | same |
+| daemon `forge` | `pens/pitchfork.d/forge.toml` | rename key `[daemons.stencil]`, restart (next-reboot window) |
+| daemon `forge-agent` | `pens/pitchfork.d/forge-agent.toml` | same |
+| daemon `bidder-forge` | `pens/pitchfork.d/bidder-forge.toml` | same |
 | systemd user unit | `~/.config/systemd/user/forge-server.service` | rename unit file + `daemon-reload` |
 | bin `pattern-forge` | `~/.local/bin/pattern-forge → barn/products/forge/bin/forge.ts` | new link `pattern-stencil → bin/stencil.ts` (keep old as alias 1 cycle) |
 | bin `forge-router` | `~/.local/bin/forge-router → /home/toxic/pens/forge/products/router` — **GHOST path (dual checkout)** | repoint to barn canonical or drop; fix in rename |
-| bin `delend-forge-audit` | `~/.local/bin/delend-forge-audit → estate-ops/delend-forge-audit` | rename to `delend-stencil-audit`, update gateway plugin ref |
+| bin `delend-forge-audit` | `~/.local/bin/delend-forge-audit → pens-ops/delend-forge-audit` | rename to `delend-stencil-audit`, update gateway plugin ref |
 | ops scripts | `looper-forge.sh`, `ops/*forge*`, `maximal-host-pack.sh` | string sweep `forge`→`stencil` in non-live scripts; live ones next reboot |
 | thresher gateway plugin | hephaistos `forge-audit` plugin (mcp_config + hodos) | repoint plugin path/name + gateway restart |
 | dual checkout | `/home/toxic/pens/forge` (root dir) vs `barn/products/forge` | topology defect (#74 class): archive `pens/forge`, canonical stays barn |
 
 ## Execution order (restart-window, forward-only)
 
-1. `pens/forge` ghost checkout → archive `pens/estate/archive/2026-11-02-tau-forge-ghost-checkout/`
+1. `pens/forge` ghost checkout → archive `pens/pens/archive/2026-11-02-tau-forge-ghost-checkout/`
 2. barn `forge` repo: `git mv` dirs + string sweep (README/package/moon.yml/WEAVE.md/releases) via `rename-roundup` pairs; keep repo remote `toxicwind/forge` (renaming remote = re-auth + page churn; note in README)
 3. `bin/forge.ts` → `bin/stencil.ts`; `pattern-stencil` + `stencil` links; keep `pattern-forge` alias 1 cycle
 4. pitchfork: rename 3 daemon keys + repoint `run`/`dir`; `pitchfork reload`
@@ -32,7 +32,7 @@ GOAL: rename forge → stencil (brand semantics: "emergency prototype seam" →
 
 - `ranch/products/forge-mcp`: fold MCP server into stencil `mcp/` dir, delete orphan (no symlink)
 - `corral/src/cli/index.ts` (taskforge link): keep — corral owns taskforge lane
-- `router/stoat`: stays (estate-router-ts, separate line; already var/state-correct)
+- `router/stoat`: stays (pens-router-ts, separate line; already var/state-correct)
 
 ## Revert
 

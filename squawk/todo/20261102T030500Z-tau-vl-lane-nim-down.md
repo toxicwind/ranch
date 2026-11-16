@@ -21,7 +21,7 @@ urgency: normal
 - freeinference lane through rhodochrosite WORKS (200): deepseek-v4-flash,
   qwen3.6-35b, glm-5.3-flash.
 
-## Fixed now (committed f00961e783 + fcb78beee9, estate + ~/.tau mirror)
+## Fixed now (committed f00961e783 + fcb78beee9, pens + ~/.tau mirror)
 - model-router profiles cheap/fast/balanced/backup → verified freeinference lanes
   (dead `rhodochrosite/openai/gpt-oss-20b` prefixed route removed).
 
@@ -41,7 +41,7 @@ urgency: normal
   `qwen3.6-35b`) route through the freeinference lane and return 200.
 - **VL lane proven live**: `glm-5.3-flash` answers an image probe
   ("red pixel") through rhodochrosite with the bare id, 0.58s, no auth.
-- **Fixed (estate 7460a7d2d2, pushed)**: model-router profiles cheap/fast/
+- **Fixed (pens 7460a7d2d2, pushed)**: model-router profiles cheap/fast/
   balanced/backup selectors now bare ids; NEW `vl` profile = glm-5.3-flash
   (freeinference multimodal). 0 prefixed `rhodochrosite/*` refs remain.
 

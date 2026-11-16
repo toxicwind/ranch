@@ -8,7 +8,7 @@ urgency: normal
 
 # byte-vision-llamacpp MCP down — ModelPath missing
 
-**Source:** Phase 1.5 OSINT of all estate MCP servers (gateway :25127 live inventory, 2026-11-02).
+**Source:** Phase 1.5 OSINT of all pens MCP servers (gateway :25127 live inventory, 2026-11-02).
 
 ## Evidence
 

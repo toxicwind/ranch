@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * tmux-swarm — Universal multi-agent terminal orchestrator for the estate-scripts Estate.
+ * tmux-swarm — Universal multi-agent terminal orchestrator for the pens-scripts pens.
  *
  * Consolidates tau-tmux.sh, tmux-mcp, and swarm grid layouts into a single
  * high-performance CLI with live tok telemetry and multi-socket discovery.
@@ -18,7 +18,7 @@
 import { execSync } from "node:child_process";
 import { parseArgs } from "node:util";
 
-const SOCKETS = ["", "-L tauhyperfix", "-L swarm", "-L estate"];
+const SOCKETS = ["", "-L tauhyperfix", "-L swarm", "-L pens"];
 
 export function sh(cmd: string, timeoutMs = 15000): string {
   try {

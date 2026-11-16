@@ -15,7 +15,7 @@ phased, TDD-first, non-monkey-patch. Nothing below is "done" until verified.
   (blackbird-regex.test.ts: 8 pass, 0 fail).
 - Phase 1.3 DONE: 12 indexer/NZB candidates curl-probed (2s timeout, timed):
   9x200, 2x403 (drunkenslug, nzb.su — bot-blocked), 1x000 (newz69 — dead).
-  Permanent artifacts: pens/estate/archive/2026-11-02-tau-nzb-probe/
+  Permanent artifacts: pens/pens/archive/2026-11-02-tau-nzb-probe/
   (probe-results.tsv, candidates.txt).
 - Phase 1.4 DONE: 10+ October 2026 Blu-ray/4K releases verified via web search
   (Godzilla Minus One, Harold and Maude, Bruiser, Little Shop of Horrors,
@@ -23,23 +23,23 @@ phased, TDD-first, non-monkey-patch. Nothing below is "done" until verified.
   Christiane F., Kubrick box set) — sources: OrbitDVD, blu-ray.com,
   HD Movie Source, High-Def Digest. Artifact:
   archive/2026-11-02-tau-nzb-probe/phase1-4-bluray-oct2026.txt.
-- Phase 1.5 DONE: OSINT all estate MCP servers — 81 in config (mcpServers
+- Phase 1.5 DONE: OSINT all pens MCP servers — 81 in config (mcpServers
   array), 81 live at thresher gateway :25127 (auth bearer): 68 ready, 11 idle,
   2 error (byte-vision-llamacpp, markitdown). markitdown fixed (py3.12 pin,
   thresher 364366e); byte-vision root-caused (model path missing) → ticket
   20261102T015500Z-tau-byte-vision-model-gap. Full server inventory (81 TSV
-  rows) archived to pens/estate/archive/2026-11-02-tau-nzb-probe/.
-- Phase 2.6 DONE: indexer matrix = secretsmith keyring SSOT (NNTP_TORBOX_HOST/
-  USER/PASS verified materializing via `secretsmith env`, service=app attrs) +
+  rows) archived to pens/pens/archive/2026-11-02-tau-nzb-probe/.
+- Phase 2.6 DONE: indexer matrix = kryptos keyring SSOT (NNTP_TORBOX_HOST/
+  USER/PASS verified materializing via `kryptos env`, service=app attrs) +
   12 probed indexers; consumer template landed:
-  pens/estate/config/custom_indexers.env.example (estate 42b0e3fbc8).
+  pens/pens/config/custom_indexers.env.example (pens 42b0e3fbc8).
 - Phase 2.7 BLOCKED (ticket 20261102T020500Z-tau-bge-embed-lane-blocked):
   qdrant :25133 live, 1024-dim collections ready, path proven (1 test point),
   but freeinference embed key invalid (401) — external rotation required.
 - Phase 3.12 DONE: ghas→kryptos credential connect fixed at root — keyring
   GITHUB_TOKEN label (dup 353) held a dead token (anomaly #84); re-stored the
-  live gh token (verified: secretsmith env GITHUB_TOKEN → http 200, len 40).
-  NOTE: secretsmith delete takes a label FILTER (path prefix unsupported) —
+  live gh token (verified: kryptos env GITHUB_TOKEN → http 200, len 40).
+  NOTE: kryptos delete takes a label FILTER (path prefix unsupported) —
   never use it without inspection (aborted capture: would have deleted all
   182 secrets; --yes gate saved it). Dead 353 left inert.
 - Phase 4.13 DONE: todo tool hardened (tau 6d5a6d0bcf) — (1) JSON-string
@@ -52,13 +52,13 @@ phased, TDD-first, non-monkey-patch. Nothing below is "done" until verified.
   CRLF raw-vs-norm, skip dirs, determinism, missing-manifest). TDD caught a
   real crash: verify on missing manifest = uncaught parse traceback; parse()
   now yields empty → graceful error. Wiring = direct xd:// device
-  (estate-ops/hashline), no thresher gap.
+  (pens-ops/hashline), no thresher gap.
 - Phase 4.15 VERIFIED: xd map healthy — gateway :25127 SSE live
   (notifications/prompts/list_changed), authed /servers success:true, mcp.json
   transport=http (anomaly #68), xdev:true compiles catalog, xdevInlineDevices
   [] = sane default. Arc premise (blank map) stale.
 - Phase 4.16 DONE: eval key RACE (tau 25a63fb0ae) — keyring env provider:
-  allowlisted secretsmith keys ride the managed kernel env (explicit caller
+  allowlisted kryptos keys ride the managed kernel env (explicit caller
   values win); cache-keyed per allowlist (TDD caught cache-poisoning +
   merge-leak defects); 7 tests green + eval prelude 8 green. Pre-existing
   unrelated rot noted: packages/agent compaction suite fails (expects older
@@ -80,10 +80,10 @@ phased, TDD-first, non-monkey-patch. Nothing below is "done" until verified.
   Lane healthy; key is chat-valid (embed lane 401 is separate, ticket 2.7).
 
 - Phase 4.20 DONE: session-audit alias verified live in regenerated manifest
-  (manifest.yaml L549-551 → estate/products/estate-ops/bin/session-audit,
+  (manifest.yaml L549-551 → pens/products/pens-ops/bin/session-audit,
   healthy). ANOMALY 91: bin-contract swept 103 FAIL → 0 FAIL (bin-verify
   EXIT=0) — root: portable manifest stale across reorg; repointed 18 links,
-  archived 3 dead. Pushed barn d9efda1, estate 262058e4e2; root mirrored.
+  archived 3 dead. Pushed barn d9efda1, pens 262058e4e2; root mirrored.
 - Phase 4.21 VERIFIED: skillful/CSK-typed tool-calling already TDD-sound —
   /skillful toggle (status/on/off, session override), frozen skillHintVisible
   snapshot across prompt rebuilds (byte-stable tool prefix), next-turn
@@ -113,9 +113,9 @@ phased, TDD-first, non-monkey-patch. Nothing below is "done" until verified.
 - Phase 5.28 DONE: docs-mcp fixed at root — async Bun.write deadlocked behind
   the readSync(0) pump (every response silently lost; anomaly #79 class);
   writeSync(1) + 4-test TDD suite green (docs-mcp f84abb8, d764635). Gateway
-  path repointed to live toolkit home (estate 527f29d738, dead-path anomaly).
+  path repointed to live toolkit home (pens 527f29d738, dead-path anomaly).
 - Phase 5.32 DONE: kryptos anomaly-63 contract pinned (kryptos a4cca12) —
-  `secretsmith get <missing>` MUST error (stderr "no item matches", empty
+  `kryptos get <missing>` MUST error (stderr "no item matches", empty
   stdout, exit!=0); label-echo on exact get; 7 tests green, verified live
   against the keyring (label never leaked in error text).
 - Phase 5.30 DONE (OSINT sub-batch): (1) most-emergent 3090 GGUF = Gemma 4
@@ -142,9 +142,9 @@ phased, TDD-first, non-monkey-patch. Nothing below is "done" until verified.
   (taas-telegram:telegram_status).
 - Phase 5.33 DONE: NNTP creds already keyring-SSOT (re-verified 2026-11-02) —
   no custom_indexers.env exists on disk (nothing to migrate); keyring holds
-  NNTP_TORBOX_HOST/USER/PASS with service=app attrs; `secretsmith env`
+  NNTP_TORBOX_HOST/USER/PASS with service=app attrs; `kryptos env`
   materializes all three. Consumer template landed at
-  pens/estate/config/custom_indexers.env.example (estate 42b0e3fbc8).
+  pens/pens/config/custom_indexers.env.example (pens 42b0e3fbc8).
 - Phase 5.25 DONE: max-merge audit — canonical nuvio-default ALREADY
   consumes all fork surfaces (addonRepository/renderAddonRemotePage Stremio
   manifest, homeCatalogs ordering, pluginStreamMapping addon name/logo
@@ -166,16 +166,16 @@ phased, TDD-first, non-monkey-patch. Nothing below is "done" until verified.
 2. Maximal regex `/pattern/` code-search: test real regex support on github.com/search semantics; write regex-helper "find all" lib; TEST it. — [x] VERIFIED 2026-11-02 (blackbird regex branches, 8 tests)
 3. Global 2-term searches, 10+ indexer/NZB candidates: gists, github blackbird regex, curl-probe each (timeout 2s), permanent probe artifacts. — [x] DONE 2026-11-02 (12 probed, artifacts archived)
 4. Blu-ray October 2026 releases (>= 3) via search. — [x] DONE 2026-11-02 (10+, 5 sources)
-5. OSINT all MCP servers in the estate once search works. — [x] DONE 2026-11-02 (81 servers; byte-vision + markitdown triaged)
+5. OSINT all MCP servers in the pens once search works. — [x] DONE 2026-11-02 (81 servers; byte-vision + markitdown triaged)
 
 ## Phase 2 — Indexer stack (usenet/nzb)
-6. Wire indexer matrix (custom_indexers.env) — no Prowlarr unless justified. — [x] DONE 2026-11-02 (keyring SSOT + template, estate 42b0e3fbc8)
+6. Wire indexer matrix (custom_indexers.env) — no Prowlarr unless justified. — [x] DONE 2026-11-02 (keyring SSOT + template, pens 42b0e3fbc8)
 7. bge-m3 streaming to qdrant: socket-fast embed stream, background ingest, decide home in pens products. — [x] PARTIAL: qdrant :25133 live, 1024 collections; freeinference embed key 401 → blocker ticket (rotation external). Local MiniLM lane landed (ops e1fc150) as interim ingest path
 8. TDD "cosmic disclosure as search" index path; fix index-didnt-work; audit with saved scripts; freeinference/bge-m3 as embedder. — [x] DONE 2026-11-02 (ops b3450a6, 4/4 TDD: semantic recall, 384-dim contract, points count, CLI probe)
 9. Embedded indexer default; fork + submodule -> lib -> push -> consume lib. — [x] DONE 2026-11-02 (ops 9f7fb4d: cosmic-search.py default consumer; ingest+search proven, doc 0.58 vs distractor 0.08)
 
 ## Phase 3 — Fleet & bots
-10. Autonomous botfather with mtproto: find code, maximize bun, multiple bots. — [x] DONE 2026-11-02 (arroyo 7bb0b18: botfather.ts bun lane, multi-bot discovery via keyring, @estate_coyote_bot verified polling)
+10. Autonomous botfather with mtproto: find code, maximize bun, multiple bots. — [x] DONE 2026-11-02 (arroyo 7bb0b18: botfather.ts bun lane, multi-bot discovery via keyring, @pens_coyote_bot verified polling)
 11. Flotilla production-grade: phone shows real time, web browser key, image-kit screenshot analysis, tailscale-magic + phone UI verify. — [x] LIVE-VERIFIED 2026-11-02 (Pixel 9 Pro XL Android 17 via wireless ADB: screenshot + 24-node UI tree incl. fleet notif; vision analysis lane degraded — anomaly)
 12. ghas -> kryptos credential connect (fix refs old workspace -> new). — [x] DONE 2026-11-02 (keyring GITHUB_TOKEN live, anomaly #84 closed)
 
@@ -183,9 +183,9 @@ phased, TDD-first, non-monkey-patch. Nothing below is "done" until verified.
 13. TODO tool: fix until it works (mv path broken, root-path weirdness); TDD 18+ complex cases. — [x] DONE 2026-11-02 (tau 6d5a6d0bcf; JSON-string + prefix resolution; flocks/herd pairs noted in loom-visor)
 14. Hashline read/edit first-class: fix hashline MCP/thresher wiring; TDD in test scaffolding. — [x] DONE 2026-11-02 (ops 456be98, 9 tests, crash fixed)
 15. xd map blank/wrong: fix mapping + mcp:// and xdev:// device wiring (config gap: no mcpServers block -> wire thresher). — [x] VERIFIED healthy 2026-11-02
-16. eval: kryptos + secretsmith keys auto-loaded dynamically, zero-transport techniques, RACE several, pick winner; first-class bun notebook in BOTH tau and kappa. — [x] DONE 2026-11-02 (tau 25a63fb0ae, keyring env provider); kappa notebook mirror = kappa arc
+16. eval: kryptos + kryptos keys auto-loaded dynamically, zero-transport techniques, RACE several, pick winner; first-class bun notebook in BOTH tau and kappa. — [x] DONE 2026-11-02 (tau 25a63fb0ae, keyring env provider); kappa notebook mirror = kappa arc
 17. Extensions: TDD max, rewrite fully, bun 1.4.4-canary AST node-modules aware. — [x] PASS 2026-11-02 (304/305; 3 plugin-discovery fixed tau 7602cfc347, theme __norm freeze parked w/ architect)
-18. Reactive-refactoring doctrine: update AGENTS.md (byte/AST/module-graph/process-truth thinking, super-fast-route standard). — [x] VERIFIED present 2026-11-02 (root+estate 332 lines each, in sync)
+18. Reactive-refactoring doctrine: update AGENTS.md (byte/AST/module-graph/process-truth thinking, super-fast-route standard). — [x] VERIFIED present 2026-11-02 (root+pens 332 lines each, in sync)
 19. Deepseek-v4-flash max config (live max-target): completions + effort wire + catalog AST audit; saved audit scripts. — [x] DONE 2026-11-02 (live probe PROBE_OK + reasoning_content; catalog compat 25+ rules verified; artifacts archived)
 20. Session audit: deep .ts script DONE (commit 5c6f5d4) — add kleio alias "session-audit" + manifest aliases; tool-failure + will-use-then-stop surfaced (48 found).
 21. Tool-calling mode max refactor (AST-level); skillful not working — audit why. — [x] VERIFIED 2026-11-02 (skillshare+tool-call-guard 74/74; loop-guard suites green)
@@ -193,16 +193,16 @@ phased, TDD-first, non-monkey-patch. Nothing below is "done" until verified.
 
 ## Phase 5 — LG fleet / nuvio (rename + merge)
 23. Identify which nuvio fork ipk built, parent lineage; pick WORKING fork as main head. — [x] DONE 2026-11-02 (main head = nuvio-default, TV-alive + appinfo match; LINEAGE.md in nuviotv-webos)
-24. Rename: full product rename skill + pairs ("streamers" is a shit name; ask tool with 10 distinct name options). — [x] DONE 2026-11-02 (SLATE selected by architect; name-fix pairs committed estate/docs/name-fix-streamers-to-slate.pairs; no live streamers refs; lineage docs in nuviotv-webos 511ba2eb)
+24. Rename: full product rename skill + pairs ("streamers" is a shit name; ask tool with 10 distinct name options). — [x] DONE 2026-11-02 (SLATE selected by architect; name-fix pairs committed pens/docs/name-fix-streamers-to-slate.pairs; no live streamers refs; lineage docs in nuviotv-webos 511ba2eb)
 25. Merge ALL iptv fork features + xtream + prior work: weave/suture (find in forge), max merge, lose nothing. — [x] DONE 2026-11-02 (main = superset: 66 player + 5 xtream engine modules; kerloys UI superseded, IPTV-BRIDGE separate backend)
-26. Root-cause all funcs via MCP decode-max using estate bins; TDD mcp that helps LG root. — [x] DONE 2026-11-02 (lg-luna-mcp TDD 7 tests, lg-fleet 9911358; byte-vision/markitdown triaged; docs-mcp fixed f84abb8; via MCP decode-max estate bins)
+26. Root-cause all funcs via MCP decode-max using pens bins; TDD mcp that helps LG root. — [x] DONE 2026-11-02 (lg-luna-mcp TDD 7 tests, lg-fleet 9911358; byte-vision/markitdown triaged; docs-mcp fixed f84abb8; via MCP decode-max pens bins)
 27. Image-gen API: find image gen in pens (names/readmes), regenerate top-class assets, make MCP. — [x] DONE 2026-11-02 (vision-kit-mcp vk_generate live + federated; rig:image_generate + browserless PDF lanes)
 28. Docs-mcp usage discipline; fast browser + skill audit of web app; endpoints in MCP, fix fast. — [x] DONE 2026-11-02 (docs-mcp writeSync(1) fix + 4 tests; gateway repointed to live toolkit home; usage-doc discipline)
 29. 8 subgoals self-chosen on lg next; UI on tailscale magic, phone verify. — [ ] OPEN (LG alive — ssh `lg-tv` 10.0.0.176:9922 user prisoner, webOS 4.4.84; verified 2026-11-02 via ssh config host alias, NOT 192.168.1.x)
 30. Squawk todo: write ALL todos separate+verbose (nzb most important), fix-todo-until-works, embed typo-fix hf search (mobile), most-emergent 3090 gguf, herd-fork mentions last 3 months.
 31. taas-telegram phone re-auth (architect Pixel = auth SSOT): refresh TELEGRAM_USER_SESSION StringSession via flotilla MCP / wireless ADB; contract = /telegram/status ok:true. — [x] DONE 2026-11-02 (ok:false → ok:true live; code read from Nagram service chat 777000 via pixel ADB; helper arroyo/overlord/src/taas-reauth.sh + managed skill)
 32. kryptos upstream fix: `get <missing-label>` must error (not return arbitrary item); add label-echo contract test to kryptos repo. — [x] DONE 2026-11-02 (label-echo 5/5 pre-existing; cookie-vault ghost path fixed kryptos 60bf67b; full suite 14/14)
-33. NNTP creds → keyring: migrate TorBox NNTP_HOST/USER/PASS out of plaintext custom_indexers.env into secretsmith (service=app attrs); env file reads via secretsmith env. — [x] DONE 2026-11-02 (creds already keyring-SSOT; template lands via secretsmith env)
+33. NNTP creds → keyring: migrate TorBox NNTP_HOST/USER/PASS out of plaintext custom_indexers.env into kryptos (service=app attrs); env file reads via kryptos env. — [x] DONE 2026-11-02 (creds already keyring-SSOT; template lands via kryptos env)
 34. SLATE max-merge: all iptv/xtream fork features via weave/suture into nuvio-webos; sources: kerloys-iptv-webos (xtream engine port), nuviotv-bun (Live TV multi-M3U/EPG TiviMate guide), IPTV-BRIDGE addon. — [x] DONE 2026-11-02 (steps 1-3: xtream parity 10/10, xmltv+m3u 26/26, addon-manifest live in canonical; steps 4-5 = install, device-gated)
 35. SLATE phone UI verify: install ipk on LG OLED65CXPUA via ares-cli, verify UI from Pixel (tailscale magic hostname), screenshot evidence. — [ ] IN-PROGRESS (TV ALIVE: ssh alias `lg-tv` → 10.0.0.176:9922 user prisoner, webOS 4.4.84, hbchannel + space.nuvio.webos + com.pirate.refresh installed; the "offline" probe was a WRONG REF (192.168.1.10) — real lane is in ~/.ssh/config. build-leg DONE EXIT=0 dist/app.bundle.js 6.9MB)
 

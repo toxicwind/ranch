@@ -20,11 +20,11 @@ Actions:
 - [ ] Verify ghp_CDuc... is dead (401 via API probe)
 - [ ] Rewrite both repos' remote URLs (strip token)
 - [ ] Check the token never entered git history of any PUBLIC repo
-- [ ] Keyring SSOT for tokens (secretsmith, never URL-embedded)
+- [ ] Keyring SSOT for tokens (kryptos, never URL-embedded)
 
 # Fork license violations (6 suspects)
 
-| product | upstream | estate LICENSE | upstream LICENSE | verdict |
+| product | upstream | pens LICENSE | upstream LICENSE | verdict |
 |---|---|---|---|---|
 | claude-night-market | athola/claude-night-market | MIT | ? (check) | fork — verify upstream license + attribution |
 | devloop | compforge/devloop | **NONE** | ? (check) | **VIOLATION: no LICENSE at all** |
@@ -34,7 +34,7 @@ Actions:
 | super-board | EricTechPro/super-board | MIT | ? | check |
 
 Checks:
-- [ ] Fetch each upstream's LICENSE; if GPL/AGPL → estate MIT relicense is ILLEGAL
+- [ ] Fetch each upstream's LICENSE; if GPL/AGPL → pens MIT relicense is ILLEGAL
 - [ ] If upstream MIT → retain upstream copyright line + add attribution
 - [ ] devloop: add LICENSE immediately (or archive the product)
 - [ ] serum-fork-private model: trademark-risky forks go PRIVATE (already doctrine)

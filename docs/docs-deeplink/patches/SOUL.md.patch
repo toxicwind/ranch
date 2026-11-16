@@ -4,8 +4,8 @@ Insert this block at the top of ~/SOUL.md, directly under the title line,
 before the first doctrine section. Do not alter any existing line.
 
 > Deeplinks — what this is: Kite's persona and operating doctrine.
-> What links here: [estate docs index](workspace/docs-deeplink/INDEX.md).
+> What links here: [pens docs index](workspace/docs-deeplink/INDEX.md).
 > What this links to: [IDENTITY.md](./IDENTITY.md) (who Kite is),
-> [MEMORY.md](./MEMORY.md) (standing directives and estate facts),
+> [MEMORY.md](./MEMORY.md) (standing directives and pens facts),
 > [thresher runbook](workspace/docs-deeplink/thresher-runbook.md),
 > [PR-review skill](workspace/custom-skills/local-pr-review/SKILL.md).

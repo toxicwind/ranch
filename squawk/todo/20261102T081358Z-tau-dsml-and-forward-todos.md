@@ -9,7 +9,7 @@ urgency: normal
 # Landed this session (all pushed)
 
 - DSML scanner: shape-based recognition (bar-runs, drifted words, omit-START
-  per vLLM #48931) — tau 973f84c54c, 103/103 dialect suites. Docs: estate
+  per vLLM #48931) — tau 973f84c54c, 103/103 dialect suites. Docs: pens
   dsml-01/02/03 series (4d06587637).
 - Judge lane: freeinference/qwen3.6-35b primary + pinned fallback chain;
   credential-aware native prune (online fallbacks survive when native has no
@@ -22,7 +22,7 @@ urgency: normal
   5d969b5 + 8b88857).
 - mimetite: standalone-rebase restoration — resolveContext un-orphaned,
   provenance pinned, d.ts emit in build, bornite consumer synced; 114/114
-  (2c76705). estate-skills-wiring TDD (tau bddb7c63ec); kappa custom dirs
+  (2c76705). pens-skills-wiring TDD (tau bddb7c63ec); kappa custom dirs
   (olympus 249e0e7).
 
 # Forward todos
@@ -38,7 +38,7 @@ urgency: normal
 4. [ ] find.enabled: auto + hasNativeJudge: consider credential-aware gate
    (find mounts only when a judge can actually authenticate) — pairs with #3.
 5. [ ] tokenizer.json refresh cadence on-box (TTL) — /tmp/deepseek-tok is
-   ephemeral; move to a durable estate cache.
+   ephemeral; move to a durable pens cache.
 6. [ ] LG SLATE install+verify (5.35) — TV alive via ssh alias `lg-tv`
    (10.0.0.176:9922 prisoner); ares-install lane per lg-webos-deploy skill.
 7. [ ] kappa dsml: kappa-code may need the same bar-run scanner tolerance

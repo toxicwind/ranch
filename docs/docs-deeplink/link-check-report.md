@@ -10,11 +10,11 @@ workspace layout (`~/workspace/docs-deeplink/` as the index home).
 - **Total links checked: 36**
 - **Resolving: 32** (after this report file itself exists)
 - **PENDING (parallel-lane artifacts, not yet landed): 4**
-  - `custom-connectors/custom.estate-master/CONNECTOR.md` — the master
+  - `custom-connectors/custom.pens-master/CONNECTOR.md` — the master
     connector doc, built by the parallel connector lane. Linked in INDEX.md,
     thresher-runbook.md, and patches/IDENTITY.md.patch. Re-verify when it
     lands; the link target path follows the custom-connector layout
-    (`~/workspace/custom-connectors/custom.estate-master/CONNECTOR.md`).
+    (`~/workspace/custom-connectors/custom.pens-master/CONNECTOR.md`).
   - `custom-skills/local-hibug-playbook/SKILL.md` — the hibug workaround
     playbook, built by the parallel lane. Linked in INDEX.md. Re-verify
     when it lands. The existing softpaw skill
@@ -38,4 +38,4 @@ workspace layout (`~/workspace/docs-deeplink/` as the index home).
 
 Links extracted from the four sources, resolved with `normpath`, tested
 with existence checks. External (http) links excluded — they are upstream
-references, not estate navigation.
+references, not pens navigation.

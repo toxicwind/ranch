@@ -4,29 +4,29 @@
 > (:25127) on yote: current state, the one-source key rule, per-server fix
 > notes, and the restart rule.
 > What links here: [docs index](./INDEX.md).
-> What this links to: [master connector](../custom-connectors/custom.estate-master/CONNECTOR.md)
-> (pending parallel lane), [estate docs index](./INDEX.md).
+> What this links to: [master connector](../custom-connectors/custom.pens-master/CONNECTOR.md)
+> (pending parallel lane), [pens docs index](./INDEX.md).
 
 ## Identity
 
 - **thresher** is the :25127 MCP gateway on yote (mcpproxy-go). It replaced
   gatehouse. Daemon pid 1899641 at last check (started 2026-10-27 03:57 MDT),
-  launched with `--config=/home/toxic/pens/estate/ranch/thresher/mcp_config.json`.
+  launched with `--config=/home/toxic/pens/pens/ranch/thresher/mcp_config.json`.
 - Management API (read-only calls, from yote):
   `curl -H "Authorization: Bearer $KEY" http://127.0.0.1:25127/api/v1/status`
-  (also `/api/v1/servers`, `/api/v1/tools`). `$KEY` comes from secretsmith
+  (also `/api/v1/servers`, `/api/v1/tools`). `$KEY` comes from kryptos
   only — see below. Never print it.
 
 ## The one-source key rule (SSOT, Chris 2026-10-27)
 
-- **One source: kryptos secretsmith, service `mcpproxy-api-key`
+- **One source: kryptos kryptos, service `mcpproxy-api-key`
   (`MCPPROXY_API_KEY` via `thresher-serve.ts`).** That is the only key the
   running daemon trusts.
-- The `api_key` field in `/home/toxic/pens/estate/ranch/thresher/mcp_config.json`
+- The `api_key` field in `/home/toxic/pens/pens/ranch/thresher/mcp_config.json`
   is STALE and 401s (Bearer, `X-API-Key`, and `?apikey=` alike). Do not use
   it, do not "fix" it by minting a new one, do not rotate anything. The fix
   direction is: make the config file's key field point at / be replaced by
-  the secretsmith value at deploy time, or drop the field and let
+  the kryptos value at deploy time, or drop the field and let
   `thresher-serve.ts` inject it. One source, no second copy.
 - Never print, paste, or log any key value. Verify auth by HTTP status only.
 
@@ -37,13 +37,13 @@
   it; the server set changed.
 - Intentionally disabled (NOT failures): agent-mcp-gateway, ast-grep-nnunley,
   ast-grep-xray, awrawr, huggingface, mise-mcp-server, pd, websearch-skill.
-- Gone from the config — do not chase: estate-brain, kleio, kappa-serve
+- Gone from the config — do not chase: pens-brain, kleio, kappa-serve
   (all zero entries in the current 57-server config).
 
 ## The 10 error servers — fix notes
 
 1. **github** — config command is the doubled path
-   `/home/toxic/pens/estate//home/toxic/pens/ranch/barn/thresher/bin/github-mcp.sh`.
+   `/home/toxic/pens/pens//home/toxic/pens/ranch/barn/thresher/bin/github-mcp.sh`.
    Fix the config command prefix, and fix the launcher's token source: it
    parses `~/.config/gh/hosts.yml` for `oauth_token`, but yote gh auth is
    keyring-based (no `oauth_token` in hosts.yml). Use `gh auth token`
@@ -59,9 +59,9 @@
    Restore the file or prune the entry (prune needs a call — see below).
 5. **tpc-thought-ledger** — `mcp-server.js` missing under the same vendored
    tree. Same call: restore or prune.
-6. **grasp-hub** — `/home/toxic/pens/estate/grasp-hub/mcp/server.ts` missing.
+6. **grasp-hub** — `/home/toxic/pens/pens/grasp-hub/mcp/server.ts` missing.
    Restore or prune.
-7. **herd-test** — `/home/toxic/pens/estate/src/mcp/herd.ts` missing. Restore
+7. **herd-test** — `/home/toxic/pens/pens/src/mcp/herd.ts` missing. Restore
    or prune.
 8. **den** — ferret-den startup fails on missing pd-mcp. Restore pd-mcp
    or prune the dependency.
@@ -94,4 +94,4 @@
 - 2026-10-23 ~22:14 MDT: 46/55 connected, 773 tools (gatehouse-era tally,
   stale). The Oct 23 eight failures are superseded by the 2026-10-27 ten.
 - 2026-10-27 ~04:01 MDT: 39/49 enabled-connected; key source reconciled to
-  secretsmith SSOT by Chris's order.
+  kryptos SSOT by Chris's order.

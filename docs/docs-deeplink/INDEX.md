@@ -1,6 +1,6 @@
-# Estate docs index — deeplinked
+# pens docs index — deeplinked
 
-> Deeplinks — what this is: the single navigation hub for the estate's
+> Deeplinks — what this is: the single navigation hub for the pens's
 > doctrine, connectors, runbooks, and skills, so any agent can move from
 > any doc to the doc it needs without guessing paths.
 > What links here: [thresher runbook](./thresher-runbook.md),
@@ -17,24 +17,24 @@ applies them. The files themselves are read-only for lane agents.
 
 - [SOUL.md](../../SOUL.md) — main agent persona, doctrines, hibug doctrine,
   oracle rules. Proposed deeplink section: [patches/SOUL.md.patch](./patches/SOUL.md.patch)
-- [IDENTITY.md](../../IDENTITY.md) — who Kite is, estate map, tool stacks.
+- [IDENTITY.md](../../IDENTITY.md) — who Kite is, pens map, tool stacks.
   Proposed deeplink section: [patches/IDENTITY.md.patch](./patches/IDENTITY.md.patch)
 - [MEMORY.md](../../MEMORY.md) — curated long-term memory, standing
-  directives, estate facts. Proposed deeplink section:
+  directives, pens facts. Proposed deeplink section:
   [patches/MEMORY.md.patch](./patches/MEMORY.md.patch)
 
 ## Connectors
 
-- [Master estate connector](../custom-connectors/custom.estate-master/CONNECTOR.md)
+- [Master pens connector](../custom-connectors/custom.pens-master/CONNECTOR.md)
   — the master custom connector (parallel lane; link verified on landing —
-  see link-check report). SSOT for estate service access.
+  see link-check report). SSOT for pens service access.
 - [Legacy GitHub connector](../custom-connectors/custom.legacy-github/CONNECTOR.md)
   — GitHub API access (`gh.py`); the API is truth for PR work.
 
 ## Runbooks
 
 - [Thresher gateway runbook](./thresher-runbook.md) — :25127 gateway state,
-  secretsmith SSOT key rule, per-server fix notes, restart-via-pitchfork rule.
+  kryptos SSOT key rule, per-server fix notes, restart-via-pitchfork rule.
 
 ## Skills (playbooks)
 

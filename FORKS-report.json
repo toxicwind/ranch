@@ -400,7 +400,7 @@
       "signalTotal": 0
     },
     {
-      "name": "estate-brain",
+      "name": "pens-brain",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
@@ -412,7 +412,7 @@
       "signalTotal": 0
     },
     {
-      "name": "estate-chat",
+      "name": "pens-chat",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
@@ -424,7 +424,7 @@
       "signalTotal": 0
     },
     {
-      "name": "estate-dispersal-monolith",
+      "name": "pens-dispersal-monolith",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
@@ -436,7 +436,7 @@
       "signalTotal": 0
     },
     {
-      "name": "estate-monitor",
+      "name": "pens-monitor",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
@@ -448,7 +448,7 @@
       "signalTotal": 0
     },
     {
-      "name": "estate-whoa-breakthrough",
+      "name": "pens-whoa-breakthrough",
       "upstream": null,
       "upstreamSource": null,
       "remoteOrigin": null,
