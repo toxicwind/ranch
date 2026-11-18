@@ -16,9 +16,6 @@
 [submodule "thresher-backup-20261029"]
 	path = thresher-backup-20261029
 	url = https://github.com/toxicwind/gatehouse-go.git
-[submodule "drover"]
-	path = drover
-	url = https://github.com/toxicwind/drover.git
 [submodule "lasso"]
 	path = lasso
 	url = https://github.com/toxicwind/lasso.git

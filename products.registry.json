@@ -148,10 +148,6 @@
       "enabled": true,
       "aliases": []
     },
-    "drover": {
-      "enabled": true,
-      "aliases": []
-    },
     "dualspace-ast-bm25-hybrid": {
       "enabled": true,
       "aliases": []

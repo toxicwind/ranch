@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
 
       # de6a9e19 converted vendored peer clones to submodules; the bun
-      # workspaces drover, drover/sidecar, metaaivm-profile and
+      # workspaces metaaivm-profile and
       # forge/router/{cuttinggate,herd} were gitlinks, and checkout
       # does not init submodules by default -- bun install then fails
       # with "Workspace not found". Init only the workspace submodules
@@ -39,7 +39,7 @@ jobs:
       # lasso checkout has no parent object. Full submodule clones
       # keep the old commit reachable, so any future gitlink bump works.
       - name: Init workspace submodules
-        run: git submodule update --init drover metaaivm-profile lasso
+        run: git submodule update --init metaaivm-profile lasso
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -63,13 +63,9 @@ jobs:
           jj --version
 
       - name: Install JS workspaces
-        # --ignore-scripts: with the submodules present, bun install runs
-        # drover's "install" script (code-insiders --install-extension),
-        # which fails 127 on runners (no code-insiders; PR #4's run
-        # 40832829494 died exactly there). Installing a VS Code extension
-        # is not a CI build step, and no other workspace -- tracked or
-        # submodule -- defines a lifecycle install script, so skipping
-        # scripts loses nothing the moon build/test steps need.
+        # --ignore-scripts: no workspace defines a lifecycle install
+        # script, so skipping scripts loses nothing the
+        # moon build/test steps need.
         run: bun install --ignore-scripts
         env:
           PUPPETEER_SKIP_DOWNLOAD: "true"

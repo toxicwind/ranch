@@ -47,7 +47,6 @@ Do not hand-edit the Products table._
 | **disparate-latent-experiment** | [toxicwind/disparate-latent-experiment](https://github.com/toxicwind/disparate-latent-experiment) | — | TypeScript | — |
 | **doorbell** | [toxicwind/doorbell](https://github.com/toxicwind/doorbell) | — | TypeScript | HTTP MCP door on port 25202. v7. One initialize returns the router catalog. |
 | **dots-client** | [toxicwind/dots-client](https://github.com/toxicwind/dots-client) | — | Python | Alternate model-call shim for Dots-3-Note (dots-studio/dots-3-note-preview:free) |
-| **drover** | [toxicwind/drover](https://github.com/toxicwind/drover) | — | TypeScript | > 🗺️ Part of **the ranch** — the whole inference estate, one map. |
 | **dualspace-ast-bm25-hybrid** | [toxicwind/dualspace-ast-bm25-hybrid](https://github.com/toxicwind/dualspace-ast-bm25-hybrid) | — | TypeScript | Dual-space code retrieval engine for autonomous coding agents: a regex-based |
 | **ego-lite** | [toxicwind/ego-lite](https://github.com/toxicwind/ego-lite) | — | — | ego (lite) is a browser where you and your AI agents work in parallel. Your agents run their browser tasks in  |
 | **emergent** | [toxicwind/emergent](https://github.com/toxicwind/emergent) | — | TypeScript | One research question in → ranked code patterns out. Built 2026-10-03 (tansy lane). |
